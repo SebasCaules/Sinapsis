@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="pergamino">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sinapsis</title>
+    <meta name="description" content="Sinapsis · plataforma de estudio multi-materia" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%237c2230'/><circle cx='50' cy='50' r='40' fill='none' stroke='%239c7a2d' stroke-width='3'/><text x='50' y='70' font-size='52' text-anchor='middle' fill='%23f6efde' font-family='Georgia' font-style='italic'>S</text></svg>" />
+    <script>
+      // Tema antes del primer paint (misma técnica que el baseline): sin parpadeo.
+      (function () {
+        var THEMES = ["pergamino", "laurel", "claustro"];
+        var t = null;
+        try { t = JSON.parse(localStorage.getItem("sinapsis.theme")); } catch (e) {}
+        if (THEMES.indexOf(t) < 0) {
+          try { t = matchMedia("(prefers-color-scheme: dark)").matches ? "claustro" : "pergamino"; } catch (e) { t = "pergamino"; }
+        }
+        document.documentElement.setAttribute("data-theme", t);
+        try { if (JSON.parse(localStorage.getItem("sinapsis.sbCompact")) === true) document.documentElement.classList.add("sb-compact"); } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

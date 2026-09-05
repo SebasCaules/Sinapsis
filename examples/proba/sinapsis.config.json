@@ -1,0 +1,61 @@
+{
+  "contract": 1,
+  "slug": "proba",
+  "name": "Probabilidad y Estadística",
+  "code": "93.24",
+  "institution": "ITBA",
+  "color": "--u9",
+  "semester": "2026-1C",
+  "division": { "singular": "Unidad", "abbr": "U", "plural": "Unidades" },
+  "divisions": [
+    { "key": "1", "name": "Estadística Descriptiva" },
+    { "key": "2", "name": "Introducción a la Probabilidad" },
+    { "key": "3", "name": "Variables Aleatorias Discretas" },
+    { "key": "4", "name": "Variables Aleatorias Continuas" },
+    { "key": "5", "name": "Función de V.A. y Bidimensionales" },
+    { "key": "6", "name": "Procesos Estocásticos" },
+    { "key": "7", "name": "Suma de Variables Aleatorias" },
+    { "key": "8", "name": "Inferencia Estadística" },
+    { "key": "9", "name": "Pruebas de Hipótesis" },
+    { "key": "0", "name": "Complementos Matemáticos", "kind": "extra" },
+    { "key": "eval", "name": "Evaluaciones", "kind": "extra", "color": "--ueval" }
+  ],
+  "pageTypes": [
+    { "key": "concepto", "label": "Concepto", "plural": "Conceptos", "folder": "conceptos" },
+    { "key": "distribucion", "label": "Distribución", "plural": "Distribuciones", "folder": "distribuciones" },
+    { "key": "teorema", "label": "Teorema", "plural": "Teoremas", "folder": "teoremas" },
+    { "key": "tecnica", "label": "Técnica", "plural": "Técnicas", "folder": "tecnicas" },
+    { "key": "formulario", "label": "Formulario", "plural": "Formularios", "folder": "formularios" },
+    { "key": "fuente", "label": "Fuente", "plural": "Fuentes", "folder": "fuentes", "countsAsContent": false, "collapsedByDefault": true }
+  ],
+  "rail": [
+    {
+      "id": "resolver",
+      "label": "Resolver",
+      "color": "--accent",
+      "items": [
+        { "id": "explorador", "label": "Explorador de distribuciones", "icon": "chart", "kind": "tool", "target": "explorador" },
+        { "id": "taller", "label": "Taller de resolución", "icon": "function", "kind": "tool", "target": "taller" },
+        { "id": "calc", "label": "Calculadoras", "icon": "calc", "kind": "tool", "target": "calc" },
+        { "id": "lab", "label": "Laboratorio Monte Carlo", "icon": "flask", "kind": "tool", "target": "lab" }
+      ]
+    },
+    {
+      "id": "material",
+      "label": "Material",
+      "color": "--u6",
+      "items": [
+        { "id": "formularios", "label": "Formulario general", "icon": "sigma", "kind": "page", "target": "formulario-maestro" },
+        { "id": "catedra", "label": "Campus de la cátedra", "icon": "link", "kind": "link", "target": "https://campus.itba.edu.ar" }
+      ]
+    }
+  ],
+  "fab": null,
+  "wiki": {
+    "root": "wiki",
+    "index": "index.md",
+    "log": "log.md",
+    "ignore": [],
+    "divisionField": "unidad"
+  }
+}

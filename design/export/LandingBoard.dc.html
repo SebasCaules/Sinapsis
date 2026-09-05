@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/estudio-93-24-5c948167-906c-4e55-9f11-f206b017eb22/fonts/fonts.css">
+<link rel="stylesheet" href="_ds/estudio-93-24-5c948167-906c-4e55-9f11-f206b017eb22/_ds_bundle.css">
+<link rel="stylesheet" href="_ds/estudio-93-24-5c948167-906c-4e55-9f11-f206b017eb22/styles.css">
+<script src="_ds/estudio-93-24-5c948167-906c-4e55-9f11-f206b017eb22/_ds_bundle.js"></script>
+<style>
+[data-grain]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='gn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23gn)' opacity='.05'/%3E%3C/svg%3E");background-size:140px 140px}
+[data-theme="claustro"] [data-grain]{background-blend-mode:screen}
+a{color:var(--primary);text-decoration:underline}
+</style>
+</helmet>
+
+<div style="display:flex;align-items:stretch;font-family:var(--font-ui)">
+
+<div style="width:{{ gut }};position:relative;flex:none">
+  <sc-for list="{{ leftNotes }}" as="n" hint-placeholder-count="0">
+    <div style="position:absolute;right:0;display:flex;align-items:center;gap:6px;white-space:nowrap;top:{{ n.top }}">
+      <span style="font:600 9.5px var(--font-ui);letter-spacing:.06em;color:{{ n.color }};background:#fff;border:1px solid {{ n.color }};border-radius:4px;padding:2px 5px">{{ n.text }}</span>
+      <span style="width:18px;height:18px;flex:none;border-radius:50%;background:{{ n.color }};color:#fff;font:600 10px var(--font-mono);display:grid;place-items:center">{{ n.num }}</span>
+      <span style="width:14px;height:1px;background:{{ n.color }}"></span>
+    </div>
+  </sc-for>
+</div>
+
+<div data-theme="{{ theme }}" data-grain style="position:relative;width:1440px;flex:none;min-height:{{ minH }};background:var(--bg);overflow:hidden;display:flex;flex-direction:column">
+
+  <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+    <div style="height:40px;flex:none;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--border);position:relative;z-index:3">
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--primary);display:grid;place-items:center;box-shadow:var(--relief),var(--shadow-ctrl)">
+        <div style="width:26px;height:26px;border-radius:50%;border:1.5px solid var(--accent);display:grid;place-items:center"><span style="font:italic 600 15px/1 var(--font-display);color:{{ sealInk }}">S</span></div>
+      </div>
+      <span style="font:600 15px var(--font-display);color:var(--text)">Sinapsis</span>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:8px;width:300px;height:26px;padding:0 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);box-shadow:var(--relief)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/></svg>
+        <span style="font:500 12.5px var(--font-ui);color:var(--text-3);flex:1">Buscar materias, páginas…</span>
+        <span style="font:600 10px var(--font-mono);color:var(--text-3);background:var(--surface-3);border:1px solid var(--border);border-radius:5px;padding:1px 4px">⌘K</span>
+      </div>
+      <div style="width:26px;height:26px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);display:grid;place-items:center;box-shadow:var(--relief)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg>
+      </div>
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--primary);border:1px solid var(--accent);display:grid;place-items:center"><span style="font:600 9.5px var(--font-mono);color:{{ sealInk }}">NA</span></div>
+      <sc-if value="{{ avatarMenu }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;right:12px;top:44px;width:214px;background:var(--elevated);border:1px solid var(--border);border-radius:12px;box-shadow:var(--relief),var(--shadow-lg);padding:10px 0;display:flex;flex-direction:column">
+          <div style="padding:2px 13px 9px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--border)">
+            <span style="font:600 12.5px var(--font-ui);color:var(--text)">Nombre Apellido</span>
+            <span style="font:500 11px var(--font-mono);color:var(--text-3)">correo@dominio.com</span>
+          </div>
+          <div style="padding:9px 13px 0;font:500 12.5px var(--font-ui);color:var(--text-2)">Cerrar sesión</div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ manage }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:none;height:36px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--accent-soft);border-bottom:1px solid var(--border-2)">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--accent)"></span>
+      <span style="font:600 11px var(--font-ui);letter-spacing:.06em;color:var(--accent-ink,var(--text-2))">EDITANDO · ARRASTRE PARA REORDENAR</span>
+      <div style="flex:1"></div>
+      <button style="height:26px;padding:0 12px;border:1px solid var(--primary);border-radius:9px;background:var(--primary);color:var(--on-primary);font:600 12px var(--font-ui);box-shadow:var(--relief);cursor:default">Guardar</button>
+      <button style="height:26px;padding:0 12px;border:1px solid var(--border-2);border-radius:9px;background:var(--surface);color:var(--text-2);font:600 12px var(--font-ui);box-shadow:var(--relief);cursor:default">Cancelar</button>
+    </div>
+  </sc-if>
+
+  <div style="flex:1;padding:34px 0 40px">
+    <div style="width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:26px">
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <span style="width:26px;height:1px;background:var(--border-2)"></span>
+            <span style="font:600 10.5px var(--font-ui);letter-spacing:.06em;color:var(--primary)">MIS MATERIAS</span>
+            <span style="width:26px;height:1px;background:var(--border-2)"></span>
+          </div>
+          <h1 style="margin:0;font:600 40px/1.06 var(--font-display);color:var(--text);letter-spacing:-.01em">Materias</h1>
+          <span style="font:500 12.5px var(--font-mono);color:var(--text-3)">{{ subtitle }}</span>
+        </div>
+        <sc-if value="{{ actions }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px">
+            <button style="height:34px;padding:0 14px;border:1px solid var(--primary);border-radius:9px;background:var(--primary);color:var(--on-primary);font:600 12.5px var(--font-ui);box-shadow:var(--relief),var(--shadow-ctrl);display:flex;align-items:center;gap:7px;cursor:default">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>Agregar materia</button>
+            <button style="height:34px;padding:0 14px;border-radius:9px;font:600 12.5px var(--font-ui);box-shadow:var(--relief),var(--shadow-ctrl);display:flex;align-items:center;gap:7px;cursor:default;border:1px solid {{ manageBorder }};background:{{ manageBg }};color:{{ manageInk }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Gestionar</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:10px;border:1.5px dashed var(--border-2);border-radius:16px;background:var(--surface);box-shadow:var(--relief);padding:52px;display:flex;flex-direction:column;align-items:center;gap:14px">
+          <div style="width:46px;height:46px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);display:grid;place-items:center;box-shadow:var(--relief)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5"><path d="M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5z"/><path d="M16 13v6M13 16h6"/></svg>
+          </div>
+          <span style="font:600 22px var(--font-display);color:var(--text)">Todavía no hay materias</span>
+          <span style="font:400 13px var(--font-ui);color:var(--text-3)">Cada materia trae su temario, sus herramientas y su color.</span>
+          <button style="margin-top:4px;height:34px;padding:0 16px;border:1px solid var(--primary);border-radius:9px;background:var(--primary);color:var(--on-primary);font:600 12.5px var(--font-ui);box-shadow:var(--relief),var(--shadow-ctrl);cursor:default">Agregar la primera materia</button>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ semesters }}" as="s" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:14px;padding-top:8px">
+          <div style="display:flex;align-items:center;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--border)">
+            <sc-if value="{{ s.handle }}" hint-placeholder-val="{{ false }}">
+              <span style="font:600 12px var(--font-mono);color:var(--text-3);letter-spacing:-.1em;cursor:default">⋮⋮</span>
+            </sc-if>
+            <span style="width:3px;height:26px;border-radius:2px;background:var(--accent)"></span>
+            <span style="font:600 10.5px var(--font-mono);color:var(--text-2);background:var(--accent-soft);border:1px solid var(--border);border-radius:6px;padding:3px 7px">{{ s.chip }}</span>
+            <span style="font:600 22px var(--font-display);color:var(--text)">{{ s.title }}</span>
+            <div style="flex:1"></div>
+            <span style="font:500 11.5px var(--font-mono);color:var(--text-3)">{{ s.count }}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5" style="transform:{{ s.chev }}"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <sc-if value="{{ s.open }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+              <sc-for list="{{ s.cards }}" as="c" hint-placeholder-count="3">
+                <div style="position:relative;background:var(--surface);border:1px solid var(--border);border-left:3px solid {{ c.color }};border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:11px;transform:{{ c.tf }};box-shadow:{{ c.sh }};z-index:{{ c.z }}">
+                  <div style="display:flex;align-items:flex-start;gap:11px">
+                    <sc-if value="{{ c.handle }}" hint-placeholder-val="{{ false }}">
+                      <span style="font:600 12px var(--font-mono);color:var(--text-3);letter-spacing:-.1em;margin-top:6px">⋮⋮</span>
+                    </sc-if>
+                    <div style="width:28px;height:28px;flex:none;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:center;box-shadow:var(--relief)"><span style="font:600 13px var(--font-display);color:{{ c.color }}">M</span></div>
+                    <div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                      <span style="font:500 11px var(--font-mono);color:var(--text-3)">{{ c.code }}</span>
+                      <span style="font:600 15px var(--font-ui);color:var(--text)">{{ c.name }}</span>
+                      <span style="font:500 11px var(--font-ui);color:var(--text-3)">Institución</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="height:4px;border-radius:2px;background:var(--track);overflow:hidden"><div style="height:100%;border-radius:2px;background:{{ c.color }};width:{{ c.pct }}%"></div></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                      <span style="font:500 11px var(--font-mono);color:var(--text-3)">{{ c.prog }}</span>
+                      <span style="font:600 10px var(--font-ui);letter-spacing:.05em;color:{{ c.stateColor }}">{{ c.state }}</span>
+                    </div>
+                  </div>
+                  <div style="border-top:1px solid var(--border);padding-top:9px;display:flex;align-items:center;gap:8px">
+                    <span style="font:500 11px var(--font-mono);color:var(--text-3)">{{ c.meta }}</span>
+                    <div style="flex:1"></div>
+                    <sc-if value="{{ c.remove }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:7px">
+                        <span style="font:600 11px var(--font-ui);color:var(--bad);border:1px solid var(--bad-soft,var(--border));background:var(--bad-soft,var(--surface-2));border-radius:8px;padding:3px 8px">Quitar</span>
+                        <span style="font:600 11px var(--font-mono);color:var(--text-2);border:1px solid var(--border-2);background:var(--surface-2);border-radius:8px;padding:3px 8px">Cuatrimestre N ▾</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ s.drop }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1.5px dashed var(--accent);background:var(--accent-soft);border-radius:12px;min-height:132px;display:grid;place-items:center">
+                  <span style="font:600 10.5px var(--font-ui);letter-spacing:.06em;color:var(--accent-ink,var(--text-2))">HUECO DE DESTINO</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ s.ghost }}" hint-placeholder-val="{{ false }}">
+                <div style="border:1.5px dashed var(--border-2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:132px;color:var(--text-3)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                  <span style="font:600 12.5px var(--font-ui)">Agregar materia</span>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ manage }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:6px;border:1.5px dashed var(--border-2);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text-3)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+          <span style="font:600 12.5px var(--font-ui)">Agregar cuatrimestre</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ chrome }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);font:500 11px var(--font-mono);color:var(--text-3)">Sinapsis · v0.0</div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ dialog }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(35,28,18,.42);display:grid;place-items:center;z-index:6">
+      <div style="width:520px;background:var(--elevated);border:1px solid var(--border-2);border-radius:16px;box-shadow:var(--relief),var(--shadow-lg);overflow:hidden">
+        <div style="padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px">
+          <span style="font:600 10.5px var(--font-ui);letter-spacing:.06em;color:var(--primary)">CONTRATO DE MATERIA</span>
+          <span style="font:600 22px var(--font-display);color:var(--text)">Agregar materia</span>
+        </div>
+        <div style="padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="grid-column:span 2"><x-import component-from-global-scope="EstudioDS.Field" label="Nombre" placeholder="Materia" hint-size="100%,58px"></x-import></div>
+          <x-import component-from-global-scope="EstudioDS.Field" label="Código" placeholder="00.00" hint-size="100%,58px"></x-import>
+          <x-import component-from-global-scope="EstudioDS.Field" label="Institución" placeholder="Institución" hint-size="100%,58px"></x-import>
+          <x-import component-from-global-scope="EstudioDS.SelectField" label="Cuatrimestre" options="{{ semesterOptions }}" hint-size="100%,58px"></x-import>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font:600 10.5px var(--font-ui);letter-spacing:.06em;color:var(--text-3)">COLOR</span>
+            <div style="display:flex;gap:7px;align-items:center;height:36px">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--u1);box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--u1)"></span>
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--u2)"></span>
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--u4)"></span>
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--u6)"></span>
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--u8)"></span>
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--u0)"></span>
+            </div>
+          </div>
+          <div style="grid-column:span 2;border-top:1px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:9px">
+            <span style="font:600 10.5px var(--font-ui);letter-spacing:.06em;color:var(--text-3)">RÓTULO DE DIVISIÓN</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+              <x-import component-from-global-scope="EstudioDS.Field" label="Singular" placeholder="División" hint-size="100%,58px"></x-import>
+              <x-import component-from-global-scope="EstudioDS.Field" label="Abreviatura" placeholder="D" hint-size="100%,58px"></x-import>
+              <x-import component-from-global-scope="EstudioDS.Field" label="Plural" placeholder="Divisiones" hint-size="100%,58px"></x-import>
+            </div>
+          </div>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--surface-2);display:flex;justify-content:flex-end;gap:10px">
+          <button style="height:34px;padding:0 14px;border:1px solid var(--border-2);border-radius:9px;background:var(--surface);color:var(--text-2);font:600 12.5px var(--font-ui);box-shadow:var(--relief);cursor:default">Cancelar</button>
+          <button style="height:34px;padding:0 14px;border:1px solid var(--primary);border-radius:9px;background:var(--primary);color:var(--on-primary);font:600 12.5px var(--font-ui);box-shadow:var(--relief),var(--shadow-ctrl);cursor:default">Agregar materia</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+<div style="width:{{ gut }};position:relative;flex:none">
+  <sc-for list="{{ rightNotes }}" as="n" hint-placeholder-count="0">
+    <div style="position:absolute;left:0;display:flex;align-items:center;gap:6px;white-space:nowrap;top:{{ n.top }}">
+      <span style="width:14px;height:1px;background:{{ n.color }}"></span>
+      <span style="width:18px;height:18px;flex:none;border-radius:50%;background:{{ n.color }};color:#fff;font:600 10px var(--font-mono);display:grid;place-items:center">{{ n.num }}</span>
+      <span style="font:600 9.5px var(--font-ui);letter-spacing:.06em;color:{{ n.color }};background:#fff;border:1px solid {{ n.color }};border-radius:4px;padding:2px 5px">{{ n.text }}</span>
+    </div>
+  </sc-for>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pergamino&quot;,&quot;laurel&quot;,&quot;claustro&quot;],&quot;default&quot;:&quot;pergamino&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;manage&quot;,&quot;empty&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;avatarMenu&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showAnnotations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  card(i, color, pct, extra) {
+    const state = pct === 0 ? "SIN COMENZAR" : pct >= 100 ? "COMPLETA" : "EN CURSO";
+    const stateColor = pct === 0 ? "var(--text-3)" : pct >= 100 ? "var(--good)" : "var(--warn)";
+    const prog = pct === 0 ? "0/00 páginas" : pct >= 100 ? "00/00 páginas" : "N/00 páginas";
+    return Object.assign({
+      code: "00.0" + i, name: "Materia " + i, color, pct, prog, state, stateColor,
+      meta: "N divisiones · N páginas", tf: "none", z: "1",
+      sh: "var(--relief), var(--shadow)", handle: false, remove: false
+    }, extra || {});
+  }
+  renderVals() {
+    const mode = this.props.mode ?? "normal";
+    const manage = mode === "manage", empty = mode === "empty";
+    const u = i => `var(--u${i})`;
+    let semesters = [];
+    if (!empty) {
+      semesters = [
+        { chip: "C3", title: "Cuatrimestre 3 · 20XX", count: "3 materias", open: true, ghost: true, chev: "none", handle: manage,
+          cards: [
+            this.card(1, u(2), 0, { handle: manage }),
+            this.card(2, u(4), 45, { handle: manage, remove: manage }),
+            this.card(3, u(1), 12, { handle: manage })
+          ] },
+        { chip: "C2", title: "Cuatrimestre 2 · 20XX", count: "4 materias", open: true, ghost: false, chev: "none", handle: manage, drop: manage,
+          cards: [
+            this.card(4, u(3), 0, { handle: manage }),
+            this.card(5, u(6), 68, { handle: manage }),
+            this.card(6, u(8), 100, { handle: manage }),
+            manage
+              ? this.card(7, u(5), 30, { handle: true, tf: "rotate(1deg) translate(14px,-10px)", z: "5", sh: "var(--relief), 0 14px 34px rgba(60,45,20,.22)" })
+              : this.card(7, u(5), 30)
+          ] },
+        { chip: "C1", title: "Cuatrimestre 1 · 20XX", count: "3 materias", open: false, ghost: false, chev: "rotate(-90deg)", handle: manage, cards: [] }
+      ];
+    }
+    const B = "#1668c7", O = "#d2620a";
+    let leftNotes = [], rightNotes = [];
+    if (mode === "normal") {
+      leftNotes = [
+        { num: "1", color: B, text: "FIJO · SELLO «S» IDÉNTICO AL DEL RAIL", top: "12px" },
+        { num: "5", color: O, text: "SLOT · CADA TARJETA ES EL CONTRATO DE MATERIA", top: "300px" }
+      ];
+      rightNotes = [
+        { num: "7", color: B, text: "FIJO · ⌘K · TEMA · AVATAR NA", top: "12px" },
+        { num: "9", color: B, text: "FIJO · VISTA ANCHA 1120", top: "160px" }
+      ];
+    } else if (manage) {
+      leftNotes = [
+        { num: "5", color: O, text: "QUITAR PIDE CONFIRMACIÓN Y CONSERVA EL PROGRESO", top: "300px" },
+        { num: "5", color: O, text: "ASA ⋮⋮ EN TARJETAS Y EN CABECERAS DE CUATRIMESTRE", top: "120px" }
+      ];
+      rightNotes = [
+        { num: "5", color: O, text: "SLOT · LOS CAMPOS DEL DIÁLOGO SON EL CONTRATO DE MATERIA", top: "400px" },
+        { num: "7", color: B, text: "FIJO · BARRA «EDITANDO» BAJO LA CABECERA", top: "50px" }
+      ];
+    } else if (empty) {
+      leftNotes = [{ num: "9", color: B, text: "FIJO · VISTA ANCHA 1120", top: "60px" }];
+    }
+    return {
+      theme: this.props.theme ?? "pergamino",
+      sealInk: (this.props.theme ?? "pergamino") === "claustro" ? "#1a1408" : "#f6efde",
+      minH: empty ? "560px" : "1024px",
+      chrome: !empty, actions: !empty, manage, empty,
+      dialog: manage, avatarMenu: this.props.avatarMenu ?? false,
+      manageBg: manage ? "var(--primary-soft)" : "var(--surface)",
+      manageBorder: manage ? "var(--primary)" : "var(--border-2)",
+      manageInk: manage ? "var(--primary)" : "var(--text-2)",
+      subtitle: empty ? "0 materias · 0 cuatrimestres" : "N materias · M cuatrimestres",
+      semesters, leftNotes, rightNotes,
+      gut: (this.props.showAnnotations ?? true) ? "400px" : "0px",
+      semesterOptions: [
+        { value: "c3", label: "Cuatrimestre 3 · 20XX" },
+        { value: "c2", label: "Cuatrimestre 2 · 20XX" },
+        { value: "c1", label: "Cuatrimestre 1 · 20XX" }
+      ],
+      ann: this.props.showAnnotations ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "sinapsis",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Plataforma multi-materia para estudiar wikis markdown",
+  "packageManager": "pnpm@10.33.1",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter ./apps/* run dev",
+    "dev:api": "pnpm --filter @sinapsis/api run dev",
+    "dev:web": "pnpm --filter @sinapsis/web run dev",
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "e2e": "pnpm --filter @sinapsis/web run e2e",
+    "db:migrate": "pnpm --filter @sinapsis/api run db:migrate",
+    "sinapsis": "pnpm --filter @sinapsis/cli run start --"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
+    "@types/node": "^22.10.2"
+  }
+}

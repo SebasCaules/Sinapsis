@@ -1,0 +1,261 @@
+/* ============================================================
+   Sinapsis · tokens del design system EstudioDS ("university press").
+   Portado 1:1 del baseline estudio/styles.css (Proba 93.24) el 2026-09-05.
+   Tres temas que redefinen los MISMOS nombres de token: pergamino (claro,
+   por defecto), laurel (claro), claustro (oscuro). Nunca colores literales
+   en los componentes: siempre var(--token).
+   ============================================================ */
+
+/* ---------- Fuentes vendorizadas (offline) ---------- */
+@font-face { font-family:"Fraunces"; src:url("/fonts/fraunces-400.woff2") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Fraunces"; src:url("/fonts/fraunces-500.woff2") format("woff2"); font-weight:500; font-display:swap; }
+@font-face { font-family:"Fraunces"; src:url("/fonts/fraunces-600.woff2") format("woff2"); font-weight:600; font-display:swap; }
+@font-face { font-family:"Spectral"; src:url("/fonts/spectral-400.woff2") format("woff2"); font-weight:400; font-display:swap; }
+@font-face { font-family:"Spectral"; src:url("/fonts/spectral-600.woff2") format("woff2"); font-weight:600; font-display:swap; }
+@font-face { font-family:"Spectral"; src:url("/fonts/spectral-400i.woff2") format("woff2"); font-weight:400; font-style:italic; font-display:swap; }
+@font-face { font-family:"Hanken"; src:url("/fonts/hanken-500.woff2") format("woff2"); font-weight:500; font-display:swap; }
+@font-face { font-family:"Hanken"; src:url("/fonts/hanken-600.woff2") format("woff2"); font-weight:600; font-display:swap; }
+@font-face { font-family:"Hanken"; src:url("/fonts/hanken-700.woff2") format("woff2"); font-weight:700; font-display:swap; }
+@font-face { font-family:"JBMono"; src:url("/fonts/jbmono-500.woff2") format("woff2"); font-weight:500; font-display:swap; }
+@font-face { font-family:"JBMono"; src:url("/fonts/jbmono-600.woff2") format("woff2"); font-weight:600; font-display:swap; }
+/* Latin Modern Roman — piel «documento LaTeX» (ver latex.css). Formato WOFF. */
+@font-face { font-family:"LMRoman"; src:url("/fonts/lmroman-400.woff") format("woff"); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:"LMRoman"; src:url("/fonts/lmroman-700.woff") format("woff"); font-weight:700; font-style:normal; font-display:swap; }
+@font-face { font-family:"LMRoman"; src:url("/fonts/lmroman-400i.woff") format("woff"); font-weight:400; font-style:italic; font-display:swap; }
+@font-face { font-family:"LMRoman"; src:url("/fonts/lmroman-700i.woff") format("woff"); font-weight:700; font-style:italic; font-display:swap; }
+
+/* ---------- Tokens ---------- */
+:root {
+  --font-ui: "Hanken", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-read: "Spectral", Georgia, "Times New Roman", serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "JBMono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-tex: "LMRoman", "Latin Modern Roman", Georgia, "Times New Roman", serif;
+
+  --r-sm: 8px; --r: 12px; --r-lg: 16px; --r-xl: 22px; --r-ctrl: 9px;
+  /* escala de títulos de nivel 1: --h1-hero para las portadas (panel de inicio),
+     --h1 para el resto de las vistas (herramientas, formularios, kits). El H1 de
+     lectura (.doc h1) conserva su propio clamp porque vive en otra tipografía. */
+  --h1-hero: clamp(30px, 4vw, 40px);
+  --h1: clamp(26px, 3.4vw, 34px);
+  --maxw: 840px;          /* ancho de lectura (hoja .sheet incluida) */
+  --maxw-wide: 1120px;    /* ancho de vistas anchas */
+  --sidebar-w: 286px;
+  --rail-w: 248px;
+  --header-h: 60px;
+  --t: 160ms cubic-bezier(.4,0,.2,1);
+  --t-slow: 280ms cubic-bezier(.4,0,.2,1);
+
+  /* colores categóricos por unidad — paleta heráldica (apagada, señorial) */
+  --u1:#3f7a6e; --u2:#2f5a8f; --u3:#6a4a8c; --u4:#b6532f;
+  --u5:#9c3a5f; --u6:#bd7327; --u7:#5f4a11; --u8:#4a7a3a;
+  --u9:#9c3a30; --u0:#7a7158; --ueval:#9a7320; --umeta:#3a3244;
+  /* --umeta se aparta del gris cálido para no chocar con --u7, que también
+     se oscureció: ΔE normal u7↔umeta 6.7 → 13.6 y u0↔umeta 17.1 → 22.7
+     (validate_palette.js --mode light --surface #faf5ea --pairs all), con
+     contraste sobre la hoja por encima de 3:1 y 15.9 frente a --u3. */
+
+  /* escala tipográfica de la matemática (KaTeX) */
+  --math-scale: 1.10;
+
+  /* grano de papel sutil (textura de imprenta) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   THEME · PERGAMINO  (claro, por defecto) — university press:
+   papel marfil, óxido de sangre (oxblood) y oro viejo.
+   "light" es alias de pergamino.
+   ============================================================ */
+:root, [data-theme="pergamino"], [data-theme="light"] {
+  --bg:#ece3d2; --bg-2:#e4d9c4;
+  --surface:#faf5ea; --surface-2:#f2ebdb; --surface-3:#eae0cd; --elevated:#fdfaf1;
+  --text:#231c12; --text-2:#574b37; --text-3:#6a6150;
+  --border:#ddd2bb; --border-2:#c9bca0;
+  --track:#c9bca0;   /* pista de las barras de progreso: tiene que verse al 0 % */
+  --ink-mix:68%;     /* cuánto color de unidad sobrevive en la TINTA (ver --uink) */
+  --accent-ink:#755c24; --ueval-ink:#74571c; --umeta-ink:#6a6152; --warn-ink:#75521b; --good-ink:#365c33;
+  --primary:#7c2230; --primary-2:#641a26; --primary-soft:#f1e0db; --primary-ring:rgba(124,34,48,.26);
+  --accent:#9c7a2d; --accent-soft:#f1e7cf;
+  --link:#7c2230; --link-soft:#f1e0db;
+  --good:#3f7a43; --good-soft:#e6efdd; --good-text:#356237;
+  --warn:#9c6b1f; --warn-soft:#f3e7cf; --warn-text:#7d5413;
+  --bad:#a3322b; --bad-soft:#f3ddd7; --bad-text:#882a23;
+  --shadow:0 1px 2px rgba(60,45,20,.06), 0 5px 16px rgba(60,45,20,.07);
+  --shadow-ctrl:0 1px 2px rgba(60,45,20,.12);
+  --shadow-lg:0 22px 54px rgba(50,38,18,.20);
+  --kbd-bg:#efe6d4;
+  --plot-grid:#e6dcc8; --plot-axis:#c2b496;
+  /* ---- tokens de gráfico (ola 14) ------------------------------------------
+     Paleta categórica de SERIE: seis ranuras independientes de --primary /
+     --accent / --good / --warn / --bad. El ORDEN de la ranura es el mecanismo
+     de seguridad para daltonismo y no cambia entre temas: oro, vino, azul,
+     óxido, violeta, verde. Se leen con App.Fig.series(i).
+     Validado con:
+       node scripts/validate_palette.js "#9d7a2a,#9c3a5f,#2b5991,#b6522d,#6b4a8d,#497a39" --mode light --surface "#faf5ea"
+     Resultado: ALL CHECKS PASS (banda de luminosidad, piso de croma,
+     separación CVD, piso de visión normal y contraste ≥ 3:1 contra --surface). */
+  --s1:#9d7a2a; --s2:#9c3a5f; --s3:#2b5991;
+  --s4:#b6522d; --s5:#6b4a8d; --s6:#497a39;
+  /* rampa secuencial de un solo tono (magnitud continua), claro → oscuro */
+  --seq-100:#ffdfe0; --seq-200:#f5c5c6; --seq-300:#eaabad; --seq-400:#df9095;
+  --seq-500:#d0757b; --seq-600:#b9545e; --seq-700:#973240;
+  /* par divergente con neutro al medio (residuos, errores con signo) */
+  --div-n3:#1a5aa4; --div-n2:#6196d9; --div-n1:#9dc1ee; --div-0:#eae0cd;
+  --div-p1:#eaad9d; --div-p2:#d07862; --div-p3:#97371f;
+  /* opacidades compartidas por el dibujo y por el recuadro de la leyenda */
+  --plot-fill-a:.28; --plot-band-a:.14;
+  --scrim:rgba(40,30,14,.40);
+  --hl:#f5e6b0;
+  --grain-blend:multiply; --grain-opacity:.5;
+  /* tintas sobre fondos sólidos de color (chips, marcas, botón primario) */
+  --on-primary:#fff; --on-good:#fff; --on-bad:#fff;
+  /* relieve (bisel de imprenta): luz arriba, sombra abajo */
+  --edge-light:rgba(255,255,255,.75); --edge-dark:rgba(60,45,20,.10);
+  --relief: inset 0 1px 0 var(--edge-light), inset 0 -1px 0 var(--edge-dark);
+  /* tinta de la matemática — medio punto más contrastada que --text */
+  --math-ink:#1a1409;
+}
+
+/* ============================================================
+   THEME · LAUREL  (claro) — verde inglés profundo sobre piedra,
+   con oro. Hiedra / jardín botánico universitario.
+   ============================================================ */
+[data-theme="laurel"] {
+  --bg:#e7e6d6; --bg-2:#dedcc8;
+  --surface:#f8f6ec; --surface-2:#eff0df; --surface-3:#e6e6d1; --elevated:#fbf9f0;
+  --text:#1b2117; --text-2:#3f4a38; --text-3:#606751;
+  --border:#d8dac1; --border-2:#c2c5a5;
+  --track:#c2c5a5;
+  --ink-mix:68%;
+  --accent-ink:#735e26; --ueval-ink:#66531d; --umeta-ink:#5f5f4d; --warn-ink:#73531c; --good-ink:#335e35;
+  --primary:#1f4d39; --primary-2:#163b2c; --primary-soft:#dde9df; --primary-ring:rgba(31,77,57,.24);
+  --accent:#9c7a2d; --accent-soft:#ece5cb;
+  --link:#1f4d39; --link-soft:#dde9df;
+  --good:#3f7a43; --good-soft:#e3efdc; --good-text:#2f6234;
+  --warn:#9c6b1f; --warn-soft:#f1e8cf; --warn-text:#785312;
+  --bad:#a3322b; --bad-soft:#f1ddd6; --bad-text:#882a23;
+  --shadow:0 1px 2px rgba(30,45,25,.06), 0 5px 16px rgba(30,45,25,.08);
+  --shadow-ctrl:0 1px 2px rgba(30,45,25,.12);
+  --shadow-lg:0 22px 54px rgba(24,40,22,.20);
+  --kbd-bg:#e8e8d2;
+  --plot-grid:#e0e0cb; --plot-axis:#b9bb9c;
+  /* ---- tokens de gráfico (ola 14) ------------------------------------------
+     Paleta categórica de SERIE: seis ranuras independientes de --primary /
+     --accent / --good / --warn / --bad. El ORDEN de la ranura es el mecanismo
+     de seguridad para daltonismo y no cambia entre temas: oro, vino, azul,
+     óxido, violeta, verde. Se leen con App.Fig.series(i).
+     Validado con:
+       node scripts/validate_palette.js "#9d7a2a,#8b3656,#255287,#aa4e2d,#5e4582,#407037" --mode light --surface "#f8f6ec"
+     Resultado: ALL CHECKS PASS (banda de luminosidad, piso de croma,
+     separación CVD, piso de visión normal y contraste ≥ 3:1 contra --surface). */
+  --s1:#9d7a2a; --s2:#8b3656; --s3:#255287;
+  --s4:#aa4e2d; --s5:#5e4582; --s6:#407037;
+  /* rampa secuencial de un solo tono (magnitud continua), claro → oscuro */
+  --seq-100:#d7efdd; --seq-200:#b8dec2; --seq-300:#99cca7; --seq-400:#79bb8d;
+  --seq-500:#56a871; --seq-600:#298e52; --seq-700:#036d38;
+  /* par divergente con neutro al medio (residuos, errores con signo) */
+  --div-n3:#1a5aa4; --div-n2:#6196d9; --div-n1:#9dc1ee; --div-0:#e6e6d1;
+  --div-p1:#eaad9d; --div-p2:#d07862; --div-p3:#97371f;
+  /* opacidades compartidas por el dibujo y por el recuadro de la leyenda */
+  --plot-fill-a:.28; --plot-band-a:.14;
+  --scrim:rgba(20,32,16,.40);
+  --hl:#e7e4a8;
+  --grain-blend:multiply; --grain-opacity:.5;
+  --on-primary:#fff; --on-good:#fff; --on-bad:#fff;
+  --edge-light:rgba(255,255,255,.72); --edge-dark:rgba(30,45,25,.10);
+  --relief: inset 0 1px 0 var(--edge-light), inset 0 -1px 0 var(--edge-dark);
+  --math-ink:#131a10;
+  /* unidades viran a un registro más botánico/profundo */
+  --u1:#2f6f64; --u2:#2b5280; --u3:#5e4682; --u4:#a84e2e;
+  --u5:#8f3a5a; --u6:#a96b24; --u7:#8a7224; --u8:#3f6f36; --u9:#923a32;
+  --u0:#6f6a54; --ueval:#8a6a20; --umeta:#7f7c66;
+}
+
+/* ============================================================
+   THEME · CLAUSTRO  (oscuro) — biblioteca a la luz de las velas:
+   tinta de nogal, oro viejo y terracota. "dark" es alias.
+   ============================================================ */
+[data-theme="claustro"], [data-theme="dark"] {
+  --bg:#15120c; --bg-2:#100e08;
+  --surface:#1e1910; --surface-2:#251f14; --surface-3:#2d2618; --elevated:#332b1b;
+  --text:#ece2cd; --text-2:#bcae93; --text-3:#a1957b;
+  --border:#322a1a; --border-2:#443a25;
+  --track:#443a25;
+  /* en el tema oscuro los colores de unidad ya contrastan: la tinta es casi el
+     mismo color (el 8 % de --text solo levanta el azul y el rosa) */
+  --ink-mix:92%;
+  --accent-ink:#c77963; --ueval-ink:#d1a653; --umeta-ink:#a1977f; --warn-ink:#ddab53; --good-ink:#76b267;
+  --primary:#c79a4e; --primary-2:#d8ac5e; --primary-soft:#2c2313; --primary-ring:rgba(199,154,78,.32);
+  --accent:#c4705a; --accent-soft:#2e1c15;
+  --link:#d2a85c; --link-soft:#2c2313;
+  --good:#6cae5e; --good-soft:#1b2614; --good-text:#88c279;
+  --warn:#dca648; --warn-soft:#2a2110; --warn-text:#e6b863;
+  --bad:#d77a6a; --bad-soft:#2c1813; --bad-text:#e3917f;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 12px 32px rgba(0,0,0,.55);
+  --shadow-ctrl:0 1px 2px rgba(0,0,0,.45);
+  --shadow-lg:0 24px 62px rgba(0,0,0,.68);
+  --kbd-bg:#2a2316;
+  --plot-grid:#2a2316; --plot-axis:#473a24;
+  /* ---- tokens de gráfico (ola 14) ------------------------------------------
+     Paleta categórica de SERIE: seis ranuras independientes de --primary /
+     --accent / --good / --warn / --bad. El ORDEN de la ranura es el mecanismo
+     de seguridad para daltonismo y no cambia entre temas: oro, vino, azul,
+     óxido, violeta, verde. Se leen con App.Fig.series(i).
+     Validado con:
+       node scripts/validate_palette.js "#b78f1b,#ce6088,#5b86c3,#d9764e,#9a7bc3,#70a65c" --mode dark --surface "#1e1910"
+     Resultado: ALL CHECKS PASS (banda de luminosidad, piso de croma,
+     separación CVD, piso de visión normal y contraste ≥ 3:1 contra --surface). */
+  --s1:#b78f1b; --s2:#ce6088; --s3:#5b86c3;
+  --s4:#d9764e; --s5:#9a7bc3; --s6:#70a65c;
+  /* rampa secuencial de un solo tono (magnitud continua), claro → oscuro */
+  --seq-100:#382c11; --seq-200:#513e12; --seq-300:#6b5110; --seq-400:#846305;
+  --seq-500:#9c7500; --seq-600:#b48810; --seq-700:#cb9d2a;
+  /* par divergente con neutro al medio (residuos, errores con signo) */
+  --div-n3:#63a2f2; --div-n2:#477dc1; --div-n1:#335784; --div-0:#2d2618;
+  --div-p1:#7d4234; --div-p2:#b75f49; --div-p3:#e77e64;
+  /* opacidades compartidas por el dibujo y por el recuadro de la leyenda */
+  --plot-fill-a:.28; --plot-band-a:.14;
+  --scrim:rgba(0,0,0,.64);
+  --hl:#4a3d12;
+  /* pedido P-34: el grano de claustro vuelve al original previo al rework (tesela de 140 px
+     sin atenuar y overlay .35), que aclara y texturiza más el fondo oscuro. */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-size:140px;
+  /* «screen» al 22 %: el grano ACLARA de verdad el fondo oscuro (medido: luminancia
+     18 → 37 en la zona libre) y se ve la textura; con overlay quedaba imperceptible. */
+  --grain-blend:screen; --grain-opacity:.22;
+  /* tintas oscuras sobre los colores sólidos claros del tema (patrón de .logo) */
+  --on-primary:#1a1408; --on-good:#12200c; --on-bad:#2a120c;
+  --edge-light:rgba(236,226,205,.06); --edge-dark:rgba(0,0,0,.55);
+  --relief: inset 0 1px 0 var(--edge-light), inset 0 -1px 0 var(--edge-dark);
+  --math-ink:#f5ecd8;
+  /* unidades aclaradas para fondo oscuro cálido */
+  --u1:#56a394; --u2:#5a86c4; --u3:#9a7bc4; --u4:#dd7a52;
+  --u5:#cf6088; --u6:#e09642; --u7:#8f7024; --u8:#6fa85a;
+  --u9:#d96a5c; --u0:#9a907a; --ueval:#cfa148; --umeta:#cfc4ab;
+}
+
+/* ============================================================
+   TINTA DE UNIDAD  (--uink / --tmi)
+   El color de una unidad es para MANCHAS: puntos, filetes, barras, series de una
+   figura. Como TEXTO no alcanza 4.5:1 sobre los fondos claros (el oro de U7 y el
+   naranja de U6 se quedan en 2.9–4.0), así que el texto usa --uink: el mismo
+   color corrido hacia la tinta del tema en la proporción --ink-mix (en claustro
+   es 92 %, es decir prácticamente el color propio).
+   Se declara sobre los elementos que fijan --ucol/--tm en su style inline, que es
+   donde var(--ucol) se resuelve: cualquier módulo que ya publique --ucol hereda
+   --uink sin tocar su JS.
+   Uso:  color: var(--uink, var(--ucol));
+   ============================================================ */
+[style*="--ucol"] { --uink: color-mix(in srgb, var(--ucol) var(--ink-mix), var(--text)); }
+[style*="--tm"]   { --tmi:  color-mix(in srgb, var(--tm)   var(--ink-mix), var(--text)); }
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing:border-box; }
+/* Sin esto, los controles nativos heredan `buttontext` (negro) y los títulos
+   dentro de <button> se ven oscuros en el tema claustro. */
+button, input, select, textarea { color:inherit; }
+/* Esquema nativo por tema: scrollbars, controles y colores de sistema coherentes. */
+:root, [data-theme="pergamino"], [data-theme="light"], [data-theme="laurel"] { color-scheme: light; }
+[data-theme="claustro"], [data-theme="dark"] { color-scheme: dark; }

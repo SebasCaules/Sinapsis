@@ -1,0 +1,13 @@
+/* Reset mínimo y piel global. Los componentes traen su propio CSS Module. */
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; }
+body {
+  margin: 0; min-height: 100%;
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-ui); font-size: 14px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+#root { min-height: 100vh; }
+a { color: var(--link); }
+button { font: inherit; color: inherit; }
+::selection { background: var(--hl); }
