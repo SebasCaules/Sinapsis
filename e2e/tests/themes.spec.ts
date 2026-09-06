@@ -3,6 +3,11 @@
  * recarga (localStorage + perfil) y se guardan las capturas del smoke visual en
  * `e2e/shots/<vista>-<tema>.png` a 1440×1024.
  *
+ * Son ocho vistas × tres temas: landing, inicio de materia, lector, grafo,
+ * flashcards, sesión de repaso, plan y kits. Todas salen deterministas salvo el
+ * grafo, cuyo lienzo parte de posiciones al azar (la simulación de fuerzas): la
+ * captura sirve para mirar los colores del tema, no para comparar píxeles.
+ *
  * Corre al final de la suite (orden alfabético) porque escribe el tema del
  * perfil; `afterAll` lo devuelve a pergamino.
  */
@@ -16,6 +21,9 @@ const subject = seed.subject;
 
 const CICLO = ["pergamino", "laurel", "claustro"] as const;
 type Tema = (typeof CICLO)[number];
+
+/** Mazo de la captura de sesión: el autoral más corto de Proba. */
+const SESION_DECK = "procesos-estocasticos";
 
 const shot = (vista: string, tema: string) => path.join(SHOTS_DIR, `${vista}-${tema}.png`);
 
@@ -56,7 +64,7 @@ test("la tecla T cicla los tres temas y el elegido persiste tras recargar", asyn
   expect(await currentTheme(page)).toBe("laurel");
 });
 
-test("capturas de la landing, el inicio de la materia y el lector en los tres temas", async ({ page, request }) => {
+test("capturas de las ocho vistas en los tres temas", async ({ page, request }) => {
   const vistas: Array<{ nombre: string; abrir: () => Promise<void> }> = [
     {
       nombre: "landing",
@@ -80,6 +88,52 @@ test("capturas de la landing, el inicio de la materia y el lector en los tres te
         await waitForSubjectShell(page);
         await expect(page.getByRole("heading", { level: 1, name: seed.readerPage.title })).toBeVisible();
         await expect(page.locator("article .katex").first()).toBeVisible();
+      },
+    },
+    {
+      nombre: "grafo",
+      abrir: async () => {
+        await page.goto(`/m/${subject.slug}/graph`);
+        await waitForSubjectShell(page);
+        await expect(page.getByRole("heading", { name: "Grafo de conexiones", level: 1 })).toBeVisible();
+        await expect(page.getByTestId("graph-meta")).toHaveText(/\d+ de \d+ páginas/);
+        // El lienzo se dibuja con una simulación de fuerzas: se la deja asentar.
+        await page.waitForTimeout(900);
+      },
+    },
+    {
+      nombre: "flashcards",
+      abrir: async () => {
+        await page.goto(`/m/${subject.slug}/flashcards`);
+        await waitForSubjectShell(page);
+        await expect(page.getByRole("heading", { name: "Flashcards", level: 1 })).toBeVisible();
+        await expect(page.getByTestId("deck-card").first()).toBeVisible();
+      },
+    },
+    {
+      nombre: "sesion",
+      abrir: async () => {
+        await page.goto(`/m/${subject.slug}/flashcards/${SESION_DECK}?modo=todo`);
+        await waitForSubjectShell(page);
+        await expect(page.getByTestId("session-counter")).toBeVisible();
+        await expect(page.getByRole("button", { name: "Ver la respuesta" })).toBeVisible();
+      },
+    },
+    {
+      nombre: "plan",
+      abrir: async () => {
+        await page.goto(`/m/${subject.slug}/plan`);
+        await waitForSubjectShell(page);
+        await expect(page.getByTestId("plan-phase").first()).toBeVisible();
+      },
+    },
+    {
+      nombre: "kits",
+      abrir: async () => {
+        await page.goto(`/m/${subject.slug}/kits`);
+        await waitForSubjectShell(page);
+        await expect(page.getByRole("heading", { name: "Kits de estudio", level: 1 })).toBeVisible();
+        await expect(page.getByTestId("kit-card").first()).toBeVisible();
       },
     },
   ];

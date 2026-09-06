@@ -16,6 +16,10 @@
  *      · si no existe, sube tal cual `fixtures/mini-payload.json` (materia
  *        "Materia Demo", 3 semanas, 8 páginas) a PUT /api/subjects/demo/sync.
  *      El sync se autentica con `Authorization: Bearer e2e-token` (SYNC_TOKEN).
+ *      El payload lleva además el MATERIAL DE ESTUDIO del Sprint 2
+ *      (`payload.study`: mazos, quiz, plan y kits de `examples/proba/estudio/`).
+ *      Con el vault real se exige que llegue: sin él, las specs de estudio
+ *      pasarían probando estados vacíos.
  *   c) POST /api/subjects para poner la materia sincronizada en la landing del
  *      usuario dev (el sync NO la agrega: es global, ver N0-6) y para crear la
  *      materia placeholder "Materia Demo B" (slug demo-b, 2025-2C).
@@ -39,6 +43,17 @@ import {
   type CreateSubjectBody,
   type SeedManifest,
 } from "./support/seed";
+
+/**
+ * Lo que se sube en `PUT /api/subjects/:slug/sync`, con lo poco que la siembra
+ * mira de adentro. `study` es del Sprint 2 y viaja SIEMPRE (aunque esté vacío):
+ * ver §7 del contrato.
+ */
+interface SyncPayloadLike {
+  config: Record<string, unknown>;
+  pages: unknown[];
+  study?: { decks: unknown[]; quizzes: unknown[]; plan: unknown; kits: unknown[] };
+}
 
 interface SyncResultDto {
   subject: string;
@@ -127,15 +142,23 @@ function toStorageCookie(raw: string): {
   };
 }
 
-/** Compila el vault real de Proba con el config del repo apuntado al vault. */
-async function compileProba(): Promise<{ payload: { config: Record<string, unknown>; pages: unknown[] }; warnings: string[] }> {
+/**
+ * Compila el vault real de Proba con el config del repo apuntado al vault.
+ *
+ * El payload que devuelve trae también `study` (mazos, quiz, plan y kits): el
+ * compilador lee `wiki.study`, que es relativa al CONFIG y no al vault (N0-27),
+ * así que sale de `examples/proba/estudio/` aunque `wikiRoot` apunte a otro
+ * lado. Acá no hay que hacer nada especial para que viaje: `PUT .../sync` sube
+ * el payload entero.
+ */
+async function compileProba(): Promise<{ payload: SyncPayloadLike; warnings: string[] }> {
   const { compileWiki } = (await import("../packages/markdown/src/index.js")) as {
     compileWiki: (opts: {
       config: unknown;
       rootDir: string;
       wikiRoot?: string;
       generator?: string;
-    }) => Promise<{ payload: { config: Record<string, unknown>; pages: unknown[] }; warnings: string[] }>;
+    }) => Promise<{ payload: SyncPayloadLike; warnings: string[] }>;
   };
 
   const configPath = path.join(REPO_ROOT, "examples/proba/sinapsis.config.json");
@@ -168,7 +191,7 @@ export default async function globalSetup(): Promise<void> {
 
   // --- (b) materia con contenido real ---------------------------------------
   const useProba = existsSync(PROBA_VAULT);
-  let payload: { config: Record<string, unknown>; pages: unknown[] };
+  let payload: SyncPayloadLike;
   let warnings: string[] = [];
 
   if (useProba) {
@@ -178,7 +201,18 @@ export default async function globalSetup(): Promise<void> {
   } else {
     payload = JSON.parse(
       readFileSync(path.join(E2E_DIR, "fixtures/mini-payload.json"), "utf8"),
-    ) as { config: Record<string, unknown>; pages: unknown[] };
+    ) as SyncPayloadLike;
+  }
+
+  /* El material de estudio del Sprint 2 viaja en el MISMO payload. Si dejara de
+     llegar, las specs de estudio no fallarían: probarían una materia sin mazos
+     ni plan y pasarían por los estados vacíos. Se corta acá, con un mensaje que
+     dice qué se rompió. */
+  if (useProba && !payload.study?.decks.length) {
+    throw new Error(
+      "Siembra E2E — el payload compilado no trae material de estudio (payload.study). " +
+        "Revisá `wiki.study` del config y `examples/proba/estudio/`.",
+    );
   }
 
   const config = payload.config;
@@ -296,6 +330,17 @@ export default async function globalSetup(): Promise<void> {
     `[e2e] siembra: ${label} → ${slug} con ${synced.pages} páginas ` +
       `(creadas ${synced.created}, borradas ${synced.deleted}); landing: ${cards.length} materias.`,
   );
+  const study = payload.study;
+  if (study) {
+    /* Los mazos son los AUTORALES del wiki: los automáticos por división los
+       agrega el API al leer, no viajan en el sync (N0-27). */
+    const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+    console.log(
+      `[e2e] material de estudio: ${n(study.decks.length, "mazo autoral", "mazos autorales")}, ` +
+        `${n(study.quizzes.length, "quiz", "quizzes")}, ${study.plan ? "plan" : "sin plan"}, ` +
+        `${n(study.kits.length, "kit", "kits")}.`,
+    );
+  }
   if (warnings.length) console.log(`[e2e] avisos del compilador: ${warnings.length}`);
   if (synced.warnings.length) console.log(`[e2e] avisos del sync: ${synced.warnings.length}`);
 }

@@ -225,7 +225,7 @@ export function SessionView() {
           <span className={css.eyebrow}>{MODE_LABEL[mode]}</span>
           <h1 className={css.title}>{target.title}</h1>
         </div>
-        <span className={css.counter}>
+        <span className={css.counter} data-testid="session-counter">
           {position} / {total}
         </span>
       </header>

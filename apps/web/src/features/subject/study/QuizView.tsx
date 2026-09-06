@@ -160,7 +160,7 @@ export function QuizView() {
           <span className={css.eyebrow}>QUIZ</span>
           <h1 className={css.title}>{stat.quiz.title}</h1>
         </div>
-        <span className={css.counter}>
+        <span className={css.counter} data-testid="quiz-counter">
           {Math.min(run.at + 1, total)} / {total}
         </span>
       </header>

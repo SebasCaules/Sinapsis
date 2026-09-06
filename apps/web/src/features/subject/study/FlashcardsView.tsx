@@ -96,7 +96,7 @@ export function FlashcardsView() {
           const { deck } = stat;
           const division = deck.division ? model.division(deck.division) : null;
           return (
-            <article key={deck.id} className={css.card}>
+            <article key={deck.id} className={css.card} data-testid="deck-card" data-deck={deck.id}>
               <div className={css.cardHead}>
                 {division ? <DivisionChip division={division} /> : null}
                 {deck.source === "auto" ? (

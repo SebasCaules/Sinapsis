@@ -412,7 +412,7 @@ export function GraphView() {
         <div className={css.headText}>
           <span className={css.ribbon}>— CONEXIONES —</span>
           <h1 className={css.h1}>Grafo de conexiones</h1>
-          <p className={css.sub}>
+          <p className={css.sub} data-testid="graph-meta">
             {graph
               ? `${graph.nodes.length} de ${graph.total} ${plural(graph.total, "página", "páginas")} · ${graph.edges.length} ${plural(graph.edges.length, "enlace", "enlaces")}`
               : "Cargando el grafo…"}

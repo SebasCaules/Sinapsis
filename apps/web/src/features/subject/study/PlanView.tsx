@@ -174,7 +174,7 @@ export function PlanView() {
         aside={
           <>
             <div className={css.totalText}>
-              <span className={css.totalValue}>
+              <span className={css.totalValue} data-testid="plan-total">
                 {total.done}
                 <span className={css.totalOf}>/{total.total}</span>
               </span>
@@ -226,7 +226,12 @@ function Phase({
   const exists = useCallback((s: string) => model.bySlug.has(s), [model]);
 
   return (
-    <section className={css.phase} data-current={current ? "true" : undefined}>
+    <section
+      className={css.phase}
+      data-current={current ? "true" : undefined}
+      data-testid="plan-phase"
+      data-phase={phase.id}
+    >
       <header className={css.phaseHead}>
         <div className={css.phaseMain}>
           <span className={css.phaseEyebrow}>

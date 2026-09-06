@@ -68,7 +68,13 @@ export function KitsView() {
              después dibuja el detalle del kit. */
           const tools = kit.tools.filter((id) => model.railItem(id));
           return (
-            <Link key={kit.id} className={css.card} to={routes.kit(slug, kit.id)}>
+            <Link
+              key={kit.id}
+              className={css.card}
+              to={routes.kit(slug, kit.id)}
+              data-testid="kit-card"
+              data-kit={kit.id}
+            >
               <div className={css.cardHead}>
                 <DivisionChips model={model} keys={kit.divisions} />
                 {stat.due > 0 ? <span className={css.due}>{stat.due} por repasar</span> : null}
