@@ -22,8 +22,13 @@ export function railItemActive(pathname: string, item: RailItemView, slug: strin
   if (!to) return false;
   if (to === routes.subject(slug)) return pathname === to;
   if (to === routes.wiki(slug)) {
-    // leer una página o una división es "consultar el wiki"
-    return pathname === to || pathname.startsWith(`/m/${slug}/p/`) || pathname.startsWith(`/m/${slug}/d/`);
+    // leer una página o una división es "consultar el wiki"; los prefijos salen
+    // de las mismas rutas del contrato, no de un literal repetido acá
+    return (
+      pathname === to ||
+      pathname.startsWith(routes.page(slug, "")) ||
+      pathname.startsWith(routes.division(slug, ""))
+    );
   }
   return pathname === to || pathname.startsWith(`${to}/`);
 }

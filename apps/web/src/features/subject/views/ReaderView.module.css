@@ -1,11 +1,15 @@
 /* Lector: hoja 840 + columna 248, separadas por 34. El color de la división
-   entra por --ucol (y con él --uink, la versión legible como texto). */
+   entra por --ucol (y con él --uink, la versión legible como texto).
+
+   La cuenta a 1440 con el índice abierto: 1440 - 52 (rail) - 250 (índice) = 1138
+   de ancho útil, y 8 + 840 + 34 + 248 + 8 = 1138. El relleno lateral es de 8: si
+   fuera de 24, la hoja se quedaría en 808 y perdería la medida de lectura. */
 
 .layout {
   position: relative;
   display: flex;
   gap: 34px;
-  padding: 4px 24px 60px;
+  padding: 4px 8px 60px;
   align-items: flex-start;
 }
 
@@ -18,11 +22,24 @@
 }
 
 /* ---------- chips sobre la hoja ---------- */
+/* Las acciones acompañan la lectura: quedan a la vista mientras se baja. */
 .chips {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   width: min(840px, 100%);
   display: flex;
   gap: 10px;
   padding: 4px 0 12px;
+  background: var(--bg);
+}
+
+/* La copia del pie va dentro de la hoja: ni se pega ni pinta fondo propio. */
+.chipsFoot {
+  position: static;
+  width: 100%;
+  padding: 0;
+  background: transparent;
 }
 
 .chipButton,
@@ -48,28 +65,15 @@
   border-color: var(--good);
   color: var(--good-text);
 }
-.chipButton:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
-
-.chipDisabled { color: var(--text-3); cursor: not-allowed; }
-
-.tip {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 30;
-  padding: 5px 9px;
-  border-radius: var(--r-sm);
-  background: var(--elevated);
-  border: 1px solid var(--border-2);
-  box-shadow: var(--relief), var(--shadow);
-  font: 500 11.5px var(--font-ui);
-  color: var(--text-2);
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--t);
+.chipButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
 }
-.chipDisabled:hover .tip { opacity: 1; }
+
+/* Favoritos llega en el Sprint 2: el hueco se ve, pero el control está apagado
+   de verdad (`disabled`) y lo explica su `title`. */
+.chipDisabled { color: var(--text-3); cursor: not-allowed; opacity: 0.6; }
 
 /* ---------- la hoja ---------- */
 .sheet {
@@ -190,17 +194,34 @@
 
 .segmentsRow { display: flex; gap: 4px; align-items: center; }
 
+/* El enlace mide 20 de alto (objetivo señalable); la barra de 5 la pinta ::after. */
 .segment {
+  position: relative;
   flex: 1;
+  height: 20px;
+  display: block;
+  border-radius: 3px;
+}
+.segment::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
   height: 5px;
   border-radius: 3px;
   background: var(--track);
+  transform: translateY(-50%);
   transition: transform var(--t), background var(--t);
 }
-.segment[data-state="studied"] { background: var(--ucol); opacity: 0.45; }
-.segment[data-state="current"] { background: var(--ucol); }
-.segment:hover { transform: scaleY(1.8); }
-.segment:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+.segment[data-state="studied"]::after { background: var(--ucol); opacity: 0.45; }
+.segment[data-state="current"]::after { background: var(--ucol); }
+.segment:hover::after { transform: translateY(-50%) scaleY(1.8); }
+.segment:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
 
 /* ---------- anterior / siguiente ---------- */
 .prevNext {
@@ -212,12 +233,30 @@
   font: 500 11.5px var(--font-ui);
 }
 
+/* La copia del pie invierte el filete: cierra la lectura en vez de abrirla. */
+.prevNextFoot {
+  padding: 14px 0 0;
+  border-bottom: 0;
+  border-top: 1px solid var(--border);
+}
+
 .prev,
 .next { color: var(--text-2); text-decoration: none; }
 .prev:hover,
 .next:hover { color: var(--primary); }
+.prev:focus-visible,
+.next:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .next { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prevOff { color: var(--text-3); opacity: 0.65; }
+/* Sin `opacity`: --text-3 ya es el gris más claro que la paleta admite como texto. */
+.prevOff { color: var(--text-3); }
+
+/* ---------- pie de la hoja ---------- */
+.foot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
 
 .title {
   margin: 6px 0 0;
@@ -299,7 +338,7 @@
   position: absolute;
   right: 0;
   top: 16px;
-  padding: 12px 5px;
+  padding: 12px 7px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-right: 0;
@@ -320,5 +359,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .segment, .chipButton, .divisionChip { transition: none; }
+  .segment::after, .chipButton, .divisionChip { transition: none; }
 }

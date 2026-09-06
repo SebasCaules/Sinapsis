@@ -9,19 +9,23 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import {
   DIVISION_NONE,
+  META_PAGES,
+  PAGE_TYPE_META,
   Page,
   SubjectConfig,
   SyncPayload,
+  fold,
+  isValidDivisionKey,
+  isValidSlug,
+  normalizeDivisionKey,
+  normalizeSlug,
   type Page as PageType,
   type SubjectConfig as SubjectConfigType,
   type SyncPayload as SyncPayloadType,
 } from "@sinapsis/contract";
 import { parseFrontmatter } from "./frontmatter.js";
-import { countWords, extractHeadings, extractLinks, firstH1 } from "./inline.js";
+import { countWords, extractHeadings, extractLinks, firstH1Line } from "./inline.js";
 import { PACKAGE_VERSION } from "./version.js";
-
-const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
-const DIVISION_KEY_RE = /^[a-z0-9_-]+$/i;
 
 /** Motivo por el que el compilador levantó una advertencia. */
 export type IssueKind =
@@ -58,35 +62,6 @@ export interface CompilePageInput {
    * Sirve para que las advertencias de wikilinks rotos nombren el texto original.
    */
   linkOriginals?: Map<string, string>;
-}
-
-// ---------------------------------------------------------------------------
-// Normalizadores
-// ---------------------------------------------------------------------------
-
-/** Convierte cualquier texto en un `Slug` válido (o cadena vacía si no queda nada). */
-export function normalizeSlug(raw: string): string {
-  return raw
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/-{2,}/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 120)
-    .replace(/-+$/, "");
-}
-
-/** Convierte cualquier texto en una `DivisionKey` válida. */
-export function normalizeDivisionKey(raw: string): string {
-  return raw
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_-]+/g, "-")
-    .replace(/-{2,}/g, "-")
-    .replace(/^[-_]+|[-_]+$/g, "")
-    .slice(0, 24)
-    .toLowerCase();
 }
 
 // ---------------------------------------------------------------------------
@@ -135,11 +110,11 @@ function typeForFolder(config: SubjectConfigType, folder: string): string | unde
 export function compilePage(input: CompilePageInput): PageType {
   const { config, folder, text } = input;
   const issues = input.issues ?? [];
-  const { meta, body } = parseFrontmatter(text);
+  const { meta, body: rawBody } = parseFrontmatter(text);
 
   // --- slug -----------------------------------------------------------------
   let slug = input.slug;
-  if (!SLUG_RE.test(slug)) {
+  if (!isValidSlug(slug)) {
     const normalized = normalizeSlug(slug);
     issues.push({
       kind: "slug-normalized",
@@ -154,7 +129,7 @@ export function compilePage(input: CompilePageInput): PageType {
   let type = declaredType || input.defaultType || typeForFolder(config, folder) || folder || "pagina";
   type = type.slice(0, 32);
   // `meta` está reservado para las páginas índice/registro: la plataforma las conoce.
-  if (type !== DIVISION_NONE && !config.pageTypes.some((t) => t.key === type)) {
+  if (type !== PAGE_TYPE_META && !config.pageTypes.some((t) => t.key === type)) {
     issues.push({ kind: "unknown-type", page: slug, detail: `tipo "${type}"` });
   }
 
@@ -166,7 +141,7 @@ export function compilePage(input: CompilePageInput): PageType {
     const raw = scalar(meta, config.wiki.divisionField);
     if (raw === "") {
       division = DIVISION_NONE;
-    } else if (DIVISION_KEY_RE.test(raw) && raw.length <= 24) {
+    } else if (isValidDivisionKey(raw)) {
       division = raw;
     } else {
       const normalized = normalizeDivisionKey(raw);
@@ -183,7 +158,13 @@ export function compilePage(input: CompilePageInput): PageType {
   }
 
   // --- título ---------------------------------------------------------------
-  const title = scalar(meta, "titulo", "title") || firstH1(body) || capitalize(slug.replace(/-/g, " "));
+  const h1 = firstH1Line(rawBody);
+  const title = scalar(meta, "titulo", "title") || h1?.text || capitalize(slug.replace(/-/g, " "));
+
+  // El shell ya dibuja el título de la página: un H1 que solo lo repite sería un
+  // segundo encabezado idéntico. Se recorta del cuerpo (y del índice de
+  // encabezados) tanto si el título salió de ese H1 como si lo iguala.
+  const body = h1 && sameHeading(h1.text, title) ? dropLine(rawBody, h1.line) : rawBody;
 
   // --- orden ----------------------------------------------------------------
   let order: number | undefined;
@@ -199,7 +180,7 @@ export function compilePage(input: CompilePageInput): PageType {
 
   // --- resto del frontmatter ------------------------------------------------
   const summary = scalar(meta, "resumen", "summary").slice(0, 1200);
-  if (summary === "" && type !== DIVISION_NONE) {
+  if (summary === "" && type !== PAGE_TYPE_META) {
     issues.push({ kind: "missing-summary", page: slug, detail: "" });
   }
 
@@ -254,7 +235,7 @@ function resolveLinks(
     let slug = link.slug;
     if (slug === "") {
       slug = ownSlug;
-    } else if (!SLUG_RE.test(slug)) {
+    } else if (!isValidSlug(slug)) {
       slug = normalizeSlug(slug) || ownSlug;
       if (originals && !originals.has(slug)) originals.set(slug, link.slug);
     }
@@ -273,6 +254,39 @@ function resolveLinks(
 function capitalize(text: string): string {
   if (!text) return text;
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// ---------------------------------------------------------------------------
+// Recorte del H1 que repite el título
+// ---------------------------------------------------------------------------
+
+/**
+ * ¿Son el mismo encabezado? Se comparan plegando acentos y mayúsculas (`fold`)
+ * y sin las marcas de énfasis de markdown, así `# **Título**` iguala a `Título`.
+ */
+function sameHeading(a: string, b: string): boolean {
+  const strip = (t: string) => fold(t).replace(/[*_`]/g, "").trim();
+  const left = strip(a);
+  return left !== "" && left === strip(b);
+}
+
+/** Separadores de línea de `splitLines`, como grupo de captura para `String.split`. */
+const LINE_BREAK = /(\r\n|[\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029])/;
+
+/**
+ * Devuelve el texto sin la línea `index` (y sin la línea en blanco que le siga).
+ * Trabaja sobre los separadores originales para no reescribir los saltos de
+ * línea del resto del cuerpo.
+ */
+function dropLine(text: string, index: number): string {
+  // `split` con grupo de captura intercala línea, separador, línea, separador…
+  const parts = text.split(LINE_BREAK);
+  const at = index * 2;
+  if (parts[at] === undefined) return text;
+  const drop = new Set([at, at + 1]);
+  const next = at + 2;
+  if ((parts[next] ?? "x").trim() === "") drop.add(next).add(next + 1);
+  return parts.filter((_, i) => !drop.has(i)).join("");
 }
 
 // ---------------------------------------------------------------------------
@@ -349,15 +363,27 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
   };
 
   // --- carpetas de contenido ------------------------------------------------
+  // La E/S de cada carpeta va en paralelo; la compilación, después y en orden,
+  // para que `pages` e `issues` no dependan de qué lectura terminó primero.
   const ignore = new Set(config.wiki.ignore);
-  for (const folder of await listFolders(wikiRoot, ignore, config)) {
-    const dir = path.join(wikiRoot, folder);
-    const entries = await readdir(dir, { withFileTypes: true });
-    const files = entries
-      .filter((e) => e.isFile() && e.name.endsWith(".md"))
-      .map((e) => e.name)
-      .sort((a, b) => a.localeCompare(b, "en"));
-    const nested = entries.filter((e) => e.isDirectory() && !e.name.startsWith(".")).map((e) => e.name);
+  const folders = await listFolders(wikiRoot, ignore, config);
+  const folderContents = await Promise.all(
+    folders.map(async (folder) => {
+      const dir = path.join(wikiRoot, folder);
+      const entries = await readdir(dir, { withFileTypes: true });
+      const names = entries
+        .filter((e) => e.isFile() && e.name.endsWith(".md"))
+        .map((e) => e.name)
+        .sort((a, b) => a.localeCompare(b, "en"));
+      const nested = entries.filter((e) => e.isDirectory() && !e.name.startsWith(".")).map((e) => e.name);
+      const files = await Promise.all(
+        names.map(async (name) => ({ name, text: await readFile(path.join(dir, name), "utf8") })),
+      );
+      return { folder, nested, files };
+    }),
+  );
+
+  for (const { folder, nested, files } of folderContents) {
     for (const sub of nested) {
       issues.push({
         kind: "nested-folder",
@@ -366,46 +392,50 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
       });
     }
 
-    for (const file of files) {
-      const text = await readFile(path.join(dir, file), "utf8");
+    for (const { name, text } of files) {
       const page = compilePage({
-        slug: file.slice(0, -3),
+        slug: name.slice(0, -3),
         folder,
         text,
         config,
         issues,
         linkOriginals,
       });
-      push(page, `${folder}/${file}`);
+      push(page, `${folder}/${name}`);
     }
   }
 
   // --- páginas meta de la raíz ---------------------------------------------
-  const rootPages: Array<[file: string | undefined, slug: string]> = [
-    [config.wiki.index, "indice"],
-    [config.wiki.log, "log"],
+  const rootPages: Array<[file: string | undefined, slug: string, field: string]> = [
+    [config.wiki.index, META_PAGES.index, "index"],
+    [config.wiki.log, META_PAGES.log, "log"],
   ];
-  for (const [file, slug] of rootPages) {
-    if (!file) continue;
-    const full = path.resolve(wikiRoot, file);
-    // Defensa en profundidad además del esquema: nunca leer fuera del wiki.
-    if (!isInside(wikiRoot, full)) {
-      throw new Error(`wiki.${slug === "indice" ? "index" : "log"}: la ruta "${file}" queda fuera de la carpeta del wiki`);
-    }
-    const text = await readFileOrNull(full);
-    if (text === null) continue;
+  const rootTexts = await Promise.all(
+    rootPages.map(async ([file, , field]) => {
+      if (!file) return null;
+      const full = path.resolve(wikiRoot, file);
+      // Defensa en profundidad además del esquema: nunca leer fuera del wiki.
+      if (!isInside(wikiRoot, full)) {
+        throw new Error(`wiki.${field}: la ruta "${file}" queda fuera de la carpeta del wiki`);
+      }
+      return readFileOrNull(full);
+    }),
+  );
+  rootPages.forEach(([file, slug], i) => {
+    const text = rootTexts[i];
+    if (!file || text === null || text === undefined) return;
     const page = compilePage({
       slug,
-      folder: DIVISION_NONE,
+      folder: PAGE_TYPE_META,
       text,
       config,
-      defaultType: DIVISION_NONE,
+      defaultType: PAGE_TYPE_META,
       division: DIVISION_NONE,
       issues,
       linkOriginals,
     });
     push(page, file);
-  }
+  });
 
   // --- wikilinks rotos ------------------------------------------------------
   const known = new Set(pages.map((p) => p.slug));
@@ -439,15 +469,16 @@ async function listFolders(
   config: SubjectConfigType,
 ): Promise<string[]> {
   const entries = await readdir(wikiRoot, { withFileTypes: true });
-  const candidates: string[] = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    if (entry.name.startsWith(".")) continue;
-    if (ignore.has(entry.name)) continue;
-    const inner = await readdir(path.join(wikiRoot, entry.name), { withFileTypes: true });
-    if (!inner.some((f) => f.isFile() && f.name.endsWith(".md"))) continue;
-    candidates.push(entry.name);
-  }
+  const names = entries
+    .filter((e) => e.isDirectory() && !e.name.startsWith(".") && !ignore.has(e.name))
+    .map((e) => e.name);
+  const withMarkdown = await Promise.all(
+    names.map(async (name) => {
+      const inner = await readdir(path.join(wikiRoot, name), { withFileTypes: true });
+      return inner.some((f) => f.isFile() && f.name.endsWith(".md"));
+    }),
+  );
+  const candidates = names.filter((_, i) => withMarkdown[i]);
 
   const declared = config.pageTypes.map((t) => t.folder).filter((f): f is string => Boolean(f));
   const ordered: string[] = [];

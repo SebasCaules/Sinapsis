@@ -1,10 +1,9 @@
-import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
 import { devBypassEnabled } from "../env.js";
 import type { AppBindings, AppDeps } from "../types.js";
 import { httpError, notFound, unauthorized } from "../lib/errors.js";
-import { zodMessage } from "../lib/validate.js";
+import { jsonBody } from "../lib/validate.js";
 import { toUserDto, upsertDevUser, upsertGoogleUser } from "../auth/users.js";
 import {
   clearSessionCookie,
@@ -22,12 +21,7 @@ export function authRoutes(deps: AppDeps): Hono<AppBindings> {
 
   app.post(
     "/auth/google",
-    zValidator("json", GoogleBody, (result, c) => {
-      if (!result.success) {
-        return c.json({ error: `Cuerpo inválido — ${zodMessage(result.error)}` }, 400);
-      }
-      return undefined;
-    }),
+    jsonBody(GoogleBody, "Cuerpo inválido"),
     async (c) => {
       const env = c.var.env;
       const verifier = deps.googleVerifier;

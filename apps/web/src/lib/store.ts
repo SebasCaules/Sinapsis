@@ -9,7 +9,8 @@ import { api } from "./api";
 
 const THEME_CYCLE: ThemeId[] = ["pergamino", "laurel", "claustro"];
 
-function readJson<T>(key: string): T | null {
+/** Lee una clave de `localStorage` como JSON; null si falta, no es JSON o no hay almacenamiento. */
+export function readJson<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as T) : null;
@@ -18,7 +19,8 @@ function readJson<T>(key: string): T | null {
   }
 }
 
-function writeJson(key: string, value: unknown): void {
+/** Escribe una preferencia en `localStorage`. Si no se puede, la app sigue igual. */
+export function writeJson(key: string, value: unknown): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {

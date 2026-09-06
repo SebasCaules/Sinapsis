@@ -34,8 +34,8 @@ SINAPSIS_HOME="${SINAPSIS_HOME:-$HOME/Desktop/Projects/Sinapsis}"
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- <comando> [opciones]
 ```
 
-Las rutas relativas que le pases (`--config`, `--wiki`, `--out`) se resuelven **contra el
-directorio desde el que invocás**, no contra el del CLI. Es decir: parado en el repo de la
+Las rutas relativas que se le pasen (`--config`, `--wiki`, `--out`) se resuelven **contra el
+directorio desde el que invoca**, no contra el del CLI (también puede fijarse explícitamente con `--cwd <dir>`). Es decir: situado en el repo de la
 materia, `--config sinapsis.config.json` apunta al de la materia.
 
 Comandos:
@@ -162,7 +162,7 @@ vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
 
 ### `/sinapsis init` — primera vez
 
-1. **Ubicar el wiki.** Confirmá cuál es la carpeta raíz (normalmente `wiki/`). Si el vault
+1. **Ubicar el wiki.** Confirme cuál es la carpeta raíz (normalmente `wiki/`). Si el vault
    tiene material crudo (`raw/`, PDFs, adjuntos), no es parte del wiki: irá a `wiki.ignore`
    o simplemente no tendrá `.md`.
 
@@ -187,7 +187,7 @@ vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
    divisiones: Unidad/U/Unidades, Semana/S/Semanas, Módulo/M/Módulos, Capítulo/C/Capítulos.
    Una sola nomenclatura por materia.
 
-6. **Proponer un `rail`.** Mirá qué herramientas ya tiene la materia y armá **1 o 2 grupos
+6. **Proponer un `rail`.** Revise qué herramientas ya tiene la materia y arme **1 o 2 grupos
    slot** con lo que exista de verdad:
 
    - Una página que ya funciona como índice o formulario general → `kind: "page"`,
@@ -225,7 +225,7 @@ vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
    pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json --dry-run
    ```
 
-   Revisá el resumen: páginas por tipo, páginas por división, divisiones sin páginas, y la
+   Revise el resumen: páginas por tipo, páginas por división, divisiones sin páginas, y la
    lista de advertencias. Las que importan:
 
    | Advertencia | Qué significa | Arreglo |

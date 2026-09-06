@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
 import type { ZodIssue } from "zod";
 import { CreateSubjectInput } from "@sinapsis/contract";
 import { Button, Dialog, Field, SelectField } from "@/components/platform";
@@ -6,8 +6,15 @@ import { slugify } from "@/lib/slug";
 import { nextSemesterSuggestion, semesterLabel } from "@/lib/semesters";
 import css from "./AddSubjectDialog.module.css";
 
-/** Los seis colores que ofrece el diálogo (los del mockup). */
-export const SWATCHES = ["--u1", "--u2", "--u4", "--u6", "--u8", "--u0"] as const;
+/** Los seis colores que ofrece el diálogo (los del mockup), con su nombre. */
+export const SWATCHES = [
+  { token: "--u1", name: "Verde jade" },
+  { token: "--u2", name: "Azul" },
+  { token: "--u4", name: "Óxido" },
+  { token: "--u6", name: "Ámbar" },
+  { token: "--u8", name: "Verde" },
+  { token: "--u0", name: "Gris" },
+] as const;
 
 const NEW_SEMESTER = "__new__";
 
@@ -61,6 +68,7 @@ export function AddSubjectDialog({
   const [semester, setSemester] = useState(defaultSemester ?? semesters[0] ?? "");
   const [newSemester, setNewSemester] = useState("");
   const [errors, setErrors] = useState<Errors>({});
+  const swatchRef = useRef<HTMLDivElement>(null);
 
   /* Cada apertura arranca de cero. */
   useEffect(() => {
@@ -73,6 +81,21 @@ export function AddSubjectDialog({
   }, [open, defaultSemester, semesters]);
 
   const set = (patch: Partial<typeof EMPTY>) => setForm((f) => ({ ...f, ...patch }));
+
+  /* Un radiogroup se recorre con las flechas, no con el tabulador. */
+  function onSwatchKey(e: KeyboardEvent<HTMLDivElement>) {
+    const delta = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    if (delta === 0) return;
+    e.preventDefault();
+    /* El punto de partida es el que tiene el foco, no el del estado: con la
+       tecla repetida el foco ya se movió antes de que React confirme el color. */
+    const focused = (document.activeElement as HTMLElement | null)?.dataset.token;
+    const at = SWATCHES.findIndex((sw) => sw.token === (focused ?? form.color));
+    const next = SWATCHES[(at + delta + SWATCHES.length) % SWATCHES.length];
+    if (!next) return;
+    set({ color: next.token });
+    swatchRef.current?.querySelector<HTMLButtonElement>(`[data-token="${next.token}"]`)?.focus();
+  }
   const slug = slugTouched ? form.slug : slugify(form.name);
 
   const semesterOptions = useMemo(
@@ -130,7 +153,13 @@ export function AddSubjectDialog({
           <Button onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button variant="primary" form="add-subject" type="submit" disabled={submitting}>
+          <Button
+            variant="primary"
+            form="add-subject"
+            type="submit"
+            disabled={submitting}
+            aria-busy={submitting || undefined}
+          >
             {submitting ? "Agregando…" : "Agregar materia"}
           </Button>
         </>
@@ -196,15 +225,24 @@ export function AddSubjectDialog({
 
         <div className={css.swatches}>
           <span className={css.swatchLabel}>Color</span>
-          <div className={css.swatchRow} role="group" aria-label="Color de la materia">
-            {SWATCHES.map((token) => (
+          <div
+            className={css.swatchRow}
+            role="radiogroup"
+            aria-label="Color de la materia"
+            ref={swatchRef}
+            onKeyDown={onSwatchKey}
+          >
+            {SWATCHES.map(({ token, name }) => (
               <button
                 key={token}
                 type="button"
+                role="radio"
+                data-token={token}
                 className={css.swatch}
                 style={{ "--sw": `var(${token})` } as CSSProperties}
-                aria-label={`Color ${token}`}
-                aria-pressed={form.color === token}
+                aria-label={name}
+                aria-checked={form.color === token}
+                tabIndex={form.color === token ? 0 : -1}
                 onClick={() => set({ color: token })}
               />
             ))}

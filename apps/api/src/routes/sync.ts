@@ -1,9 +1,8 @@
-import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { SyncPayload } from "@sinapsis/contract";
 import { secretEquals } from "../lib/compare.js";
 import { unauthorized } from "../lib/errors.js";
-import { zodMessage } from "../lib/validate.js";
+import { jsonBody } from "../lib/validate.js";
 import { syncSubject } from "../services/sync.js";
 import type { AppBindings } from "../types.js";
 
@@ -28,15 +27,10 @@ export function syncRoutes(): Hono<AppBindings> {
 
   app.put(
     "/subjects/:slug/sync",
-    zValidator("json", SyncPayload, (result, c) => {
-      if (!result.success) {
-        return c.json({ error: `Payload de sync inválido — ${zodMessage(result.error)}` }, 400);
-      }
-      return undefined;
-    }),
+    jsonBody(SyncPayload, "Payload de sync inválido"),
     async (c) => {
       const payload = c.req.valid("json");
-      const result = await syncSubject(c.var.db, c.req.param("slug"), payload);
+      const result = await syncSubject(c.var.db, c.req.param("slug") ?? "", payload);
       return c.json(result);
     },
   );

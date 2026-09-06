@@ -2,11 +2,17 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import pc from "picocolors";
-import { routes } from "@sinapsis/contract";
 import { compileWiki } from "@sinapsis/markdown";
-import { ApiError, putSync } from "../api.js";
+import { putSync } from "../api.js";
 import { resolveUserPath, type Ctx } from "../context.js";
-import { countsByDivision, countsByType, heading, warnings as printWarnings } from "../report.js";
+import {
+  countsByDivision,
+  countsByType,
+  heading,
+  reportApiError,
+  warnings as printWarnings,
+  webUrl,
+} from "../report.js";
 import { GENERATOR } from "../version.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
 
@@ -22,7 +28,6 @@ export interface SyncOptions {
 }
 
 export const DEFAULT_API = "http://localhost:3000";
-export const DEFAULT_WEB = "http://localhost:5173";
 
 export function resolveApi(ctx: Ctx, flag?: string): string {
   return flag ?? ctx.env["SINAPSIS_API"] ?? DEFAULT_API;
@@ -96,21 +101,13 @@ export async function runSync(opts: SyncOptions, ctx: Ctx): Promise<number> {
       ctx.out(pc.bold(pc.yellow(`  el API devolvió ${result.warnings.length} advertencia(s):`)));
       for (const line of result.warnings) ctx.out(pc.yellow(`    ${line}`));
     }
-    const web = opts.web ?? ctx.env["SINAPSIS_WEB"] ?? DEFAULT_WEB;
-    ctx.out(`  ${web.replace(/\/+$/, "")}${routes.subject(loaded.config.slug)}`);
+    ctx.out(`  ${webUrl(ctx, opts.web, loaded.config.slug)}`);
     return 0;
   } catch (cause) {
-    if (cause instanceof ApiError) {
-      ctx.err(pc.red(`Falló el sync contra ${api}: ${cause.message}`));
-      if (cause.status === 401 || cause.status === 403) {
-        ctx.err(pc.dim("Revisá el token: tiene que coincidir con SYNC_TOKEN del .env del API."));
-      }
-      if (cause.status === undefined) {
-        ctx.err(pc.dim("¿Está corriendo el API? `pnpm dev:api` en el repo de Sinapsis."));
-      }
-      return 1;
-    }
-    ctx.err(pc.red(cause instanceof Error ? cause.message : String(cause)));
-    return 1;
+    const badToken = { hints: ["Revise el token: tiene que coincidir con SYNC_TOKEN del .env del API."] };
+    return reportApiError(ctx, api, cause, {
+      headline: (base, message) => `Falló el sync contra ${base}: ${message}`,
+      byStatus: { 401: badToken, 403: badToken },
+    });
   }
 }

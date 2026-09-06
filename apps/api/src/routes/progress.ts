@@ -4,20 +4,19 @@ import { requireSession } from "../auth/middleware.js";
 import { pages, progress } from "../db/schema.js";
 import { notFound } from "../lib/errors.js";
 import { nowIso } from "../lib/ids.js";
-import { findSubjectBySlug } from "../services/subjects.js";
+import { loadSubject } from "../middleware/subject.js";
 import type { AppBindings } from "../types.js";
 
 export function progressRoutes(): Hono<AppBindings> {
   const app = new Hono<AppBindings>();
 
-  app.use("/subjects/:slug/progress/:page", requireSession);
+  app.use("/subjects/:slug/progress/:page", requireSession, loadSubject);
 
   app.put("/subjects/:slug/progress/:page", async (c) => {
     const db = c.var.db;
-    const subject = await findSubjectBySlug(db, c.req.param("slug"));
-    if (!subject) throw notFound("La materia no existe");
+    const subject = c.var.subject;
 
-    const pageSlug = c.req.param("page");
+    const pageSlug = c.req.param("page") ?? "";
     const exists = (
       await db
         .select({ id: pages.id })
@@ -40,8 +39,7 @@ export function progressRoutes(): Hono<AppBindings> {
 
   app.delete("/subjects/:slug/progress/:page", async (c) => {
     const db = c.var.db;
-    const subject = await findSubjectBySlug(db, c.req.param("slug"));
-    if (!subject) throw notFound("La materia no existe");
+    const subject = c.var.subject;
 
     await db
       .delete(progress)
@@ -49,7 +47,7 @@ export function progressRoutes(): Hono<AppBindings> {
         and(
           eq(progress.userId, c.var.user.id),
           eq(progress.subjectId, subject.id),
-          eq(progress.pageSlug, c.req.param("page")),
+          eq(progress.pageSlug, c.req.param("page") ?? ""),
         ),
       );
 

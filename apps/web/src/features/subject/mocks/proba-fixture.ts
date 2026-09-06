@@ -3,12 +3,14 @@
  * REAL de Proba (`examples/proba/sinapsis.config.json`, validada con zod) y doce
  * páginas sintéticas repartidas en tres divisiones y tres tipos, dos estudiadas.
  *
- * En producción no se importa nunca: `useSubject` solo lo carga (import dinámico)
- * cuando `isMockMode()` es verdadero, y ese guardia ya exige `import.meta.env.DEV`.
+ * En producción no se importa nunca: el único que lo trae es `mocks/api.ts`, que
+ * `main.tsx` carga con un `import()` dinámico bajo `import.meta.env.DEV`.
  */
+import { ApiError } from "@/lib/api";
 import { mockParam } from "@/mocks/dev-fixtures";
 import {
   SubjectConfig,
+  headingId,
   type Page,
   type PageDetail,
   type PageMeta,
@@ -154,29 +156,25 @@ enlace interno a [[distribucion-normal|la Normal]].
 $$ \\operatorname{Var}(X) = E[X^2] - E[X]^2 $$
 `;
 
+/* Los ids salen de `headingId` del contrato, igual que en el compilador y en el
+   plugin de rehype del lector: si acá se inventara otro criterio, el índice de la
+   página del smoke apuntaría a anclas que no existen. */
 function headingsOf(body: string): Page["headings"] {
   const out: Page["headings"] = [];
   for (const line of body.split("\n")) {
     const m = /^(#{2,3})\s+(.+)$/.exec(line);
     if (!m || !m[1] || !m[2]) continue;
     const text = m[2].trim();
-    out.push({
-      level: m[1].length,
-      text,
-      id: text
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, ""),
-    });
+    out.push({ level: m[1].length, text, id: headingId(text) });
   }
   return out;
 }
 
 export function mockPageDetail(_slug: string, pageSlug: string): PageDetail {
   const found = mockPages.find((p) => p.slug === pageSlug);
-  if (!found) throw Object.assign(new Error("Esta página no existe en la materia"), { status: 404 });
+  /* El mismo error que tira el cliente real: así el lector muestra su 404 y la
+     consulta no lo reintenta. */
+  if (!found) throw new ApiError(404, "Esta página no existe en la materia");
   const body = pageSlug === "distribucion-normal" ? NORMAL_BODY : GENERIC_BODY(found.title);
   const page: Page = {
     ...found,

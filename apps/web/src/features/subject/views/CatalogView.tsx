@@ -5,7 +5,7 @@
  */
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { routes, type PageMeta } from "@sinapsis/contract";
+import { plural, routes, type PageMeta } from "@sinapsis/contract";
 import { UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
 import { useSubjectCtx } from "../context";
@@ -23,8 +23,10 @@ export function CatalogView() {
   const [params, setParams] = useSearchParams();
 
   const q = params.get("q") ?? "";
-  const divisions = parseList(params.get("d"));
-  const types = parseList(params.get("t"));
+  /* `parseList` devuelve un array nuevo en cada render: memorizarlo a partir de
+     la cadena cruda evita que el filtrado entero se rehaga sin motivo. */
+  const divisions = useMemo(() => parseList(params.get("d")), [params]);
+  const types = useMemo(() => parseList(params.get("t")), [params]);
 
   const update = (key: string, value: string[] | string) => {
     const next = new URLSearchParams(params);
@@ -63,14 +65,18 @@ export function CatalogView() {
   }, [model]);
 
   const contentTotal = model.allSequence.length;
+  const entries = model.pages.length;
 
   return (
     <div className={css.view}>
       <header className={css.head}>
         <span className={css.ribbon}>— CATÁLOGO —</span>
         <h1 className={css.h1}>Todo el wiki</h1>
+        {/* «Entradas», no «páginas»: acá se listan también las fuentes, y
+            «página» tiene que significar lo mismo que en el progreso. */}
         <p className={css.sub}>
-          {contentTotal} páginas de contenido · {model.sourcesCount} fuentes
+          {entries} {plural(entries, "entrada", "entradas")} ({contentTotal} de contenido · {model.sourcesCount}{" "}
+          {plural(model.sourcesCount, "fuente", "fuentes")})
         </p>
       </header>
 
@@ -141,7 +147,7 @@ export function CatalogView() {
       </div>
 
       <p className={css.resultCount}>
-        {filtered.length} {filtered.length === 1 ? "página" : "páginas"}
+        {filtered.length} {plural(filtered.length, "entrada", "entradas")}
       </p>
 
       {grouped.map(({ division, pages }) => (

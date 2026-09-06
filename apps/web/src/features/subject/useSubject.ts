@@ -12,35 +12,11 @@ import {
 } from "@tanstack/react-query";
 import type { PageDetail, SearchHit, SubjectDetail } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
-import { isMockMode } from "@/mocks/dev-fixtures";
 import { buildSubjectModel, type SubjectModel } from "./model";
 import { useIsDark } from "./store";
 
-/* El `import.meta.env.DEV &&` no es redundante: es literal `false` en la compilación
-   de producción, así que el bundler poda el import dinámico y las fixtures no viajan. */
-async function fetchSubject(slug: string): Promise<SubjectDetail> {
-  if (import.meta.env.DEV && isMockMode()) {
-    const { mockSubjectDetail } = await import("./mocks/proba-fixture");
-    return mockSubjectDetail(slug);
-  }
-  return api.subject.detail(slug);
-}
-
-async function fetchPage(slug: string, page: string): Promise<PageDetail> {
-  if (import.meta.env.DEV && isMockMode()) {
-    const { mockPageDetail } = await import("./mocks/proba-fixture");
-    return mockPageDetail(slug, page);
-  }
-  return api.subject.page(slug, page);
-}
-
-async function fetchSearch(slug: string, q: string): Promise<SearchHit[]> {
-  if (import.meta.env.DEV && isMockMode()) {
-    const { mockSearch } = await import("./mocks/proba-fixture");
-    return mockSearch(slug, q);
-  }
-  return api.subject.search(slug, q);
-}
+/* El modo de mentira (`?mock=1`) vive en UNA costura, dentro de `lib/api`: acá
+   no hay ramas de desarrollo, solo llamadas al API. */
 
 export interface UseSubjectResult {
   query: UseQueryResult<SubjectDetail>;
@@ -50,7 +26,7 @@ export interface UseSubjectResult {
 
 /** La materia entera + su modelo derivado (memorizado por respuesta y tema). */
 export function useSubject(slug: string): UseSubjectResult {
-  const query = useQuery({ queryKey: qk.subject(slug), queryFn: () => fetchSubject(slug) });
+  const query = useQuery({ queryKey: qk.subject(slug), queryFn: () => api.subject.detail(slug) });
   const dark = useIsDark();
   const data = query.data;
   const model = useMemo(() => (data ? buildSubjectModel(data, dark) : null), [data, dark]);
@@ -59,14 +35,14 @@ export function useSubject(slug: string): UseSubjectResult {
 
 /** Una página del wiki (cuerpo markdown, backlinks, estudiada). */
 export function usePage(slug: string, page: string): UseQueryResult<PageDetail> {
-  return useQuery({ queryKey: qk.page(slug, page), queryFn: () => fetchPage(slug, page) });
+  return useQuery({ queryKey: qk.page(slug, page), queryFn: () => api.subject.page(slug, page) });
 }
 
 /** Búsqueda de la paleta. `q` ya viene con el rebote aplicado. */
 export function useSearch(slug: string, q: string, enabled: boolean): UseQueryResult<SearchHit[]> {
   return useQuery({
     queryKey: qk.search(slug, q),
-    queryFn: () => fetchSearch(slug, q),
+    queryFn: () => api.subject.search(slug, q),
     enabled: enabled && q.trim().length > 0,
     staleTime: 60_000,
   });
@@ -80,7 +56,6 @@ export function useToggleStudied(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ page, studied }: { page: string; studied: boolean }) => {
-      if (import.meta.env.DEV && isMockMode()) return;
       if (studied) await api.subject.markStudied(slug, page);
       else await api.subject.unmarkStudied(slug, page);
     },

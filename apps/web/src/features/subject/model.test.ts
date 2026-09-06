@@ -4,9 +4,15 @@
  * Se usa la config REAL de Proba y ocho páginas sintéticas.
  */
 import { describe, expect, it } from "vitest";
-import { SubjectConfig, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
+import {
+  DIVISION_NONE,
+  DIVISION_OTHER,
+  SubjectConfig,
+  type PageMeta,
+  type SubjectDetail,
+} from "@sinapsis/contract";
 import rawProbaConfig from "../../../../../examples/proba/sinapsis.config.json";
-import { buildSubjectModel, OTHER_DIVISION } from "./model";
+import { buildSubjectModel } from "./model";
 
 const config = SubjectConfig.parse(rawProbaConfig);
 
@@ -65,27 +71,44 @@ describe("secuencia pedagógica", () => {
 describe("divisiones", () => {
   it("manda las divisiones desconocidas al grupo «Otras»", () => {
     const m = model();
-    const otras = m.division(OTHER_DIVISION);
+    const otras = m.division(DIVISION_OTHER);
     expect(otras).toBeDefined();
     expect(otras?.name).toBe("Otras");
     expect(otras?.color).toBe("var(--u0)");
-    expect(slugs(m.pagesByDivision(OTHER_DIVISION))).toEqual(["p-g"]);
-    expect(m.divisionOf(pages[6] as PageMeta)).toBe(OTHER_DIVISION);
+    expect(slugs(m.pagesByDivision(DIVISION_OTHER))).toEqual(["p-g"]);
+    expect(m.divisionOf(pages[6] as PageMeta)).toBe(DIVISION_OTHER);
   });
 
   it("crea la división transversal para las páginas sin división", () => {
     const m = model();
-    expect(m.division("meta")?.short).toBe("Transv.");
-    expect(slugs(m.pagesByDivision("meta"))).toEqual(["p-h"]);
+    expect(m.division(DIVISION_NONE)?.short).toBe("Transv.");
+    expect(m.division(DIVISION_NONE)?.color).toBe("var(--umeta)");
+    expect(slugs(m.pagesByDivision(DIVISION_NONE))).toEqual(["p-h"]);
+  });
+
+  it("marca como sintéticas solo las que no declara la materia", () => {
+    const m = model();
+    expect(m.division(DIVISION_NONE)?.synthetic).toBe(true);
+    expect(m.division(DIVISION_OTHER)?.synthetic).toBe(true);
+    expect(m.division("1")?.synthetic).toBe(false);
+  });
+
+  it("cuenta como unidades solo las divisiones declaradas (paridad con la landing)", () => {
+    expect(model().divisionsCount).toBe(config.divisions.length);
+    expect(model().divisions.filter((d) => d.synthetic)).toHaveLength(2);
   });
 
   it("solo muestra las divisiones con páginas y respeta el orden del config", () => {
-    expect(model().visibleDivisions.map((d) => d.key)).toEqual(["1", "2", "meta", OTHER_DIVISION]);
+    expect(model().visibleDivisions.map((d) => d.key)).toEqual(["1", "2", DIVISION_NONE, DIVISION_OTHER]);
   });
 
   it("usa el rótulo corto del contrato", () => {
     expect(model().division("1")?.label).toBe("U1 · Estadística Descriptiva");
     expect(model().division("eval")?.color).toBe("var(--ueval)");
+  });
+
+  it("las sintéticas no corren la numeración de las declaradas", () => {
+    expect(model().division("2")?.short).toBe("U2");
   });
 });
 

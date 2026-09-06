@@ -2,7 +2,16 @@
  * Cliente HTTP del API de Sinapsis (ver `docs/CONTRACT.md` §4 y §5).
  * Sin dependencias: usa el `fetch` de Node.
  */
-import { API_PREFIX, SubjectDetail, SyncResult, type SubjectDetail as SubjectDetailType, type SyncPayload, type SyncResult as SyncResultType } from "@sinapsis/contract";
+import {
+  API_PREFIX,
+  SubjectDetail,
+  SyncResult,
+  errorMessageFromBody,
+  type SubjectDetail as SubjectDetailType,
+  type SyncPayload,
+  type SyncResult as SyncResultType,
+} from "@sinapsis/contract";
+import type { z } from "zod";
 
 export class ApiError extends Error {
   readonly status: number | undefined;
@@ -45,7 +54,7 @@ async function request(target: string, init: RequestInit): Promise<Response> {
   }
 }
 
-/** Lee el cuerpo como JSON; si no lo es, devuelve `null`. */
+/** Lee el cuerpo como JSON; si no lo es, lo envuelve como `{ error }`. */
 async function readJson(response: Response): Promise<unknown> {
   const text = await response.text();
   if (text.trim() === "") return null;
@@ -56,35 +65,53 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-/** Extrae el mensaje de error del cuerpo (`{ error }`) o arma uno con el status. */
-function errorMessage(body: unknown, response: Response): string {
-  if (body && typeof body === "object" && "error" in body) {
-    const value = (body as { error?: unknown }).error;
-    if (typeof value === "string" && value.trim() !== "") return value;
+/** Cuerpo y nombre del esquema (solo para el mensaje de error). */
+export interface RequestJsonOptions {
+  /** Se envía como JSON; si falta, el pedido va sin cuerpo. */
+  body?: unknown;
+  /** Nombre del DTO esperado, para el mensaje si la respuesta no valida. */
+  name?: string;
+}
+
+/**
+ * Un pedido al API: arma la URL y los encabezados, valida el status y parsea la
+ * respuesta contra el esquema del contrato. Cualquier desvío es un `ApiError`
+ * con el mensaje que devolvió el API (`{ error }`) o el status.
+ */
+export async function requestJson<S extends z.ZodTypeAny>(
+  opts: ApiOptions,
+  method: string,
+  pathname: string,
+  schema: S,
+  { body, name = "cuerpo" }: RequestJsonOptions = {},
+): Promise<z.infer<S>> {
+  const target = url(opts, pathname);
+  const response = await request(target, {
+    method,
+    headers: headers(opts, body === undefined ? {} : { "Content-Type": "application/json" }),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+
+  const payload = await readJson(response);
+  if (!response.ok) {
+    throw new ApiError(errorMessageFromBody(payload, response.status, response.statusText), target, response.status);
   }
-  return `HTTP ${response.status} ${response.statusText}`.trim();
+
+  const parsed = schema.safeParse(payload);
+  if (!parsed.success) {
+    throw new ApiError(`el API respondió con un ${name} inesperado`, target, response.status);
+  }
+  return parsed.data as z.infer<S>;
 }
 
 /** `PUT /api/subjects/:slug/sync` con `Authorization: Bearer <SYNC_TOKEN>`. */
-export async function putSync(
-  opts: ApiOptions,
-  slug: string,
-  payload: SyncPayload,
-): Promise<SyncResultType> {
-  const target = url(opts, `/subjects/${slug}/sync`);
-  const response = await request(target, {
-    method: "PUT",
-    headers: headers(opts, { "Content-Type": "application/json" }),
-    body: JSON.stringify(payload),
-  });
-  const body = await readJson(response);
-  if (!response.ok) throw new ApiError(errorMessage(body, response), target, response.status);
+export async function putSync(opts: ApiOptions, slug: string, payload: SyncPayload): Promise<SyncResultType> {
+  return requestJson(opts, "PUT", `/subjects/${slug}/sync`, SyncResult, { body: payload, name: "SyncResult" });
+}
 
-  const parsed = SyncResult.safeParse(body);
-  if (!parsed.success) {
-    throw new ApiError("el API respondió con un SyncResult inesperado", target, response.status);
-  }
-  return parsed.data;
+/** `GET /api/subjects/:slug` — requiere sesión. */
+export async function getSubject(opts: ApiOptions, slug: string): Promise<SubjectDetailType> {
+  return requestJson(opts, "GET", `/subjects/${slug}`, SubjectDetail, { name: "SubjectDetail" });
 }
 
 /** `POST /api/auth/dev` — sesión local con `AUTH_DEV_BYPASS=1`. Devuelve la cookie o `null`. */
@@ -105,18 +132,4 @@ export async function devLogin(opts: ApiOptions): Promise<string | null> {
     return single.split(";")[0] ?? null;
   }
   return cookies.join("; ");
-}
-
-/** `GET /api/subjects/:slug` — requiere sesión. */
-export async function getSubject(opts: ApiOptions, slug: string): Promise<SubjectDetailType> {
-  const target = url(opts, `/subjects/${slug}`);
-  const response = await request(target, { method: "GET", headers: headers(opts) });
-  const body = await readJson(response);
-  if (!response.ok) throw new ApiError(errorMessage(body, response), target, response.status);
-
-  const parsed = SubjectDetail.safeParse(body);
-  if (!parsed.success) {
-    throw new ApiError("el API respondió con un SubjectDetail inesperado", target, response.status);
-  }
-  return parsed.data;
 }

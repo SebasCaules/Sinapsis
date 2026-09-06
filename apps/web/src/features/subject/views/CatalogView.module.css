@@ -84,7 +84,11 @@
   color: var(--primary);
   font-weight: 600;
 }
-.chip:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+.chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--primary-ring);
+}
 
 .chipDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
 
@@ -145,7 +149,11 @@
   transition: transform var(--t), box-shadow var(--t);
 }
 .card:hover { transform: translateY(-1px); box-shadow: var(--relief), var(--shadow); }
-.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+.card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
+}
 
 .cardType { font: 500 10.5px var(--font-mono); color: var(--text-3); letter-spacing: 0.04em; }
 

@@ -1,7 +1,7 @@
 /** Migas de 28 px (región 08): casita · materia · división · página. */
 import { Link } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
-import { UiIcon } from "@/components/platform";
+import { Icon } from "@/components/platform";
 import css from "./Crumbs.module.css";
 
 export interface Crumb {
@@ -12,8 +12,9 @@ export interface Crumb {
 export function Crumbs({ items }: { items: Crumb[] }) {
   return (
     <nav className={css.crumbs} aria-label="Migas de pan">
-      <Link to={routes.landing()} className={css.home} aria-label="Mis materias">
-        <UiIcon name="folder" size={13} />
+      {/* Casita, no carpeta: el destino es el inicio de la plataforma. */}
+      <Link to={routes.landing()} className={css.home} aria-label="Mis materias" title="Mis materias">
+        <Icon name="home" size={13} />
       </Link>
       {items.map((item, i) => {
         const last = i === items.length - 1;

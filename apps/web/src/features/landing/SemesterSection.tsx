@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
-import type { SubjectCard as SubjectCardData } from "@sinapsis/contract";
+import { plural, type SubjectCard as SubjectCardData } from "@sinapsis/contract";
 import { UiIcon } from "@/components/platform";
 import type { SemesterGroup } from "@/lib/semesters";
 import { SortableSubjectCard, SubjectCard } from "./SubjectCard";
@@ -46,17 +46,12 @@ export function SemesterSection({
   return (
     <section className={css.section} aria-label={group.label}>
       <div className={css.head}>
-        {manage ? (
-          <span className={css.handle} title="El orden de los cuatrimestres se deriva del rótulo" aria-hidden="true">
-            ⋮⋮
-          </span>
-        ) : null}
         <span className={css.bar} aria-hidden="true" />
         <button type="button" className={css.toggle} onClick={onToggle} aria-expanded={!collapsed}>
           <span className={css.chip}>{group.chip}</span>
           <span className={css.title}>{group.label}</span>
           <span className={css.spacer} />
-          <span className={css.count}>{n === 1 ? "1 materia" : `${n} materias`}</span>
+          <span className={css.count}>{`${n} ${plural(n, "materia", "materias")}`}</span>
           <UiIcon name="chevronDown" size={16} className={css.chev} data-collapsed={collapsed} />
         </button>
       </div>

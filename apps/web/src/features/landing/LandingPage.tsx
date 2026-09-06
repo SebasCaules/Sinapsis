@@ -8,13 +8,23 @@ import {
   closestCorners,
   useSensor,
   useSensors,
+  type Announcements,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
+  type ScreenReaderInstructions,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import type { CreateSubjectInput, LandingLayoutInput, SubjectCard as SubjectCardData } from "@sinapsis/contract";
-import { qk } from "@/lib/api";
+import {
+  LS_KEYS,
+  fold,
+  plural,
+  type CreateSubjectInput,
+  type LandingLayoutInput,
+  type SubjectCard as SubjectCardData,
+} from "@sinapsis/contract";
+import { api, qk } from "@/lib/api";
+import { readJson, writeJson } from "@/lib/store";
 import {
   compareSemestersDesc,
   groupBySemester,
@@ -31,63 +41,63 @@ import {
   UiIcon,
   useToast,
 } from "@/components/platform";
-import { landingData } from "./data";
 import { SemesterSection, isGroupId, semesterOfGroupId } from "./SemesterSection";
 import { GhostCard, SubjectCard } from "./SubjectCard";
 import { AddSubjectDialog } from "./AddSubjectDialog";
 import css from "./LandingPage.module.css";
-
-/** Cuatrimestres plegados. Clave local: el contrato aún no la declara (ver reporte). */
-const LS_COLLAPSED = "sinapsis.landing.collapsed";
 
 interface DraftGroup {
   semester: string;
   slugs: string[];
 }
 
-function readCollapsed(): string[] {
-  try {
-    const raw = JSON.parse(localStorage.getItem(LS_COLLAPSED) ?? "[]");
-    return Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
+/** Diálogo de "+ Agregar cuatrimestre": rótulo a medio escribir y su reparo. */
+interface SemesterDialog {
+  draft: string;
+  error?: string;
 }
 
-/** Comparación de búsqueda sin acentos ni mayúsculas. */
-function fold(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+function readCollapsed(): string[] {
+  const raw = readJson<unknown>(LS_KEYS.landingCollapsed);
+  return Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
 }
+
+/** Cómo se anuncia el arrastre con lector de pantalla (dnd-kit habla inglés por defecto). */
+const screenReaderInstructions: ScreenReaderInstructions = {
+  draggable:
+    "Para tomar una materia, pulse la barra espaciadora. Mientras la arrastra, use las flechas para moverla " +
+    "dentro del cuatrimestre o hacia otro. Pulse otra vez la barra espaciadora para soltarla, o Escape para cancelar.",
+};
 
 export function LandingPage() {
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const landing = useQuery({ queryKey: qk.landing, queryFn: landingData.list });
+  const landing = useQuery({ queryKey: qk.landing, queryFn: () => api.landing.list() });
   const cards = useMemo(() => landing.data ?? [], [landing.data]);
 
-  const [manage, setManage] = useState(false);
-  const [draft, setDraft] = useState<DraftGroup[]>([]);
+  /* Un solo estado para el modo gestión: null = no se está gestionando. */
+  const [draft, setDraft] = useState<DraftGroup[] | null>(null);
+  const manage = draft !== null;
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<string[]>(readCollapsed);
   const [addOpen, setAddOpen] = useState(false);
-  const [semesterOpen, setSemesterOpen] = useState(false);
-  const [semesterDraft, setSemesterDraft] = useState("");
-  const [semesterError, setSemesterError] = useState<string | undefined>();
+  const [semesterDialog, setSemesterDialog] = useState<SemesterDialog | null>(null);
   const [removing, setRemoving] = useState<SubjectCardData | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    document.title = "Materias · Sinapsis";
+  }, []);
 
   const serverGroups = useMemo(() => groupBySemester(cards), [cards]);
   const byId = useMemo(() => new Map(cards.map((c) => [c.slug, c])), [cards]);
 
   /* Modo normal: lo que dice el servidor. Modo gestión: el borrador local. */
   const groups: SemesterGroup[] = useMemo(() => {
-    if (!manage) return serverGroups;
+    if (!draft) return serverGroups;
     return draft.map((g) => ({
       semester: g.semester,
       label: semesterLabel(g.semester),
@@ -97,7 +107,7 @@ export function LandingPage() {
         .filter((c): c is SubjectCardData => Boolean(c))
         .map((c) => ({ ...c, semester: g.semester })),
     }));
-  }, [manage, draft, serverGroups, byId]);
+  }, [draft, serverGroups, byId]);
 
   const semesters = useMemo(() => groups.map((g) => g.semester), [groups]);
 
@@ -111,20 +121,20 @@ export function LandingPage() {
 
   const matchCount = visibleGroups.reduce((n, g) => n + g.cards.length, 0);
   const subtitle = q
-    ? `${matchCount} ${matchCount === 1 ? "coincidencia" : "coincidencias"} de ${cards.length}`
-    : `${cards.length} ${cards.length === 1 ? "materia" : "materias"} · ${groups.length} ${
-        groups.length === 1 ? "cuatrimestre" : "cuatrimestres"
-      }`;
+    ? `${matchCount} ${plural(matchCount, "coincidencia", "coincidencias")} de ${cards.length}`
+    : `${cards.length} ${plural(cards.length, "materia", "materias")} · ` +
+      `${groups.length} ${plural(groups.length, "cuatrimestre", "cuatrimestres")}`;
+
+  const clearSearch = useCallback(() => {
+    setQuery("");
+    searchRef.current?.focus();
+  }, []);
 
   /* --- plegado (persistido) --- */
   const toggleCollapsed = useCallback((semester: string) => {
     setCollapsed((prev) => {
       const next = prev.includes(semester) ? prev.filter((s) => s !== semester) : [...prev, semester];
-      try {
-        localStorage.setItem(LS_COLLAPSED, JSON.stringify(next));
-      } catch {
-        /* sin almacenamiento: el plegado dura la sesión */
-      }
+      writeJson(LS_KEYS.landingCollapsed, next);
       return next;
     });
   }, []);
@@ -134,7 +144,7 @@ export function LandingPage() {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
-        setManage(false);
+        setDraft(null);
         setSearchOpen(true);
         searchRef.current?.focus();
         searchRef.current?.select();
@@ -153,21 +163,18 @@ export function LandingPage() {
     setQuery("");
     setSearchOpen(false);
     setDraft(serverGroups.map((g) => ({ semester: g.semester, slugs: g.cards.map((c) => c.slug) })));
-    setManage(true);
   }, [serverGroups]);
 
   const cancelManage = useCallback(() => {
-    setManage(false);
-    setDraft([]);
+    setDraft(null);
     setActiveSlug(null);
   }, []);
 
   const saveLayout = useMutation({
-    mutationFn: (input: LandingLayoutInput) => landingData.saveLayout(input),
+    mutationFn: (input: LandingLayoutInput) => api.landing.saveLayout(input),
     onSuccess: (data) => {
       qc.setQueryData(qk.landing, data);
-      setManage(false);
-      setDraft([]);
+      setDraft(null);
       toast("Landing guardada.", "good");
     },
     onError: () => {
@@ -178,18 +185,33 @@ export function LandingPage() {
   });
 
   const createSubject = useMutation({
-    mutationFn: (input: CreateSubjectInput) => landingData.createSubject(input),
+    mutationFn: (input: CreateSubjectInput) => api.landing.createSubject(input),
     onSuccess: async (card) => {
       setAddOpen(false);
+      /* Si se está gestionando, la materia nueva entra en el borrador: si no,
+         al guardar el orden desaparecería de la landing recién creada. */
+      setDraft((prev) => {
+        if (!prev) return prev;
+        if (prev.some((g) => g.semester === card.semester)) {
+          return prev.map((g) =>
+            g.semester === card.semester && !g.slugs.includes(card.slug)
+              ? { ...g, slugs: [...g.slugs, card.slug] }
+              : g,
+          );
+        }
+        return [...prev, { semester: card.semester, slugs: [card.slug] }].sort((a, b) =>
+          compareSemestersDesc(a.semester, b.semester),
+        );
+      });
       await qc.invalidateQueries({ queryKey: qk.landing });
       toast(`«${card.name}» se agregó a su landing.`, "good");
     },
   });
 
   const removeSubject = useMutation({
-    mutationFn: (slug: string) => landingData.removeFromLanding(slug),
+    mutationFn: (slug: string) => api.landing.removeFromLanding(slug),
     onSuccess: async (_data, slug) => {
-      setDraft((prev) => prev.map((g) => ({ ...g, slugs: g.slugs.filter((s) => s !== slug) })));
+      setDraft((prev) => prev && prev.map((g) => ({ ...g, slugs: g.slugs.filter((s) => s !== slug) })));
       setRemoving(null);
       await qc.invalidateQueries({ queryKey: qk.landing });
       toast("La materia se quitó de su landing. El progreso se conserva.", "good");
@@ -201,13 +223,13 @@ export function LandingPage() {
   });
 
   function handleSave() {
-    const items = draft.flatMap((g) => g.slugs.map((slug, position) => ({ slug, semester: g.semester, position })));
+    const items = (draft ?? []).flatMap((g) => g.slugs.map((slug, position) => ({ slug, semester: g.semester, position })));
     saveLayout.mutate({ items });
   }
 
   function moveToSemester(card: SubjectCardData, semester: string) {
     setDraft((prev) => {
-      if (!prev.some((g) => g.semester === semester)) return prev;
+      if (!prev || !prev.some((g) => g.semester === semester)) return prev;
       return prev.map((g) => {
         if (g.semester === semester) {
           return g.slugs.includes(card.slug) ? g : { ...g, slugs: [...g.slugs, card.slug] };
@@ -218,19 +240,19 @@ export function LandingPage() {
   }
 
   function addSemester() {
-    const label = semesterDraft.trim();
+    const label = (semesterDialog?.draft ?? "").trim();
     if (!label) {
-      setSemesterError("Escriba un rótulo.");
+      setSemesterDialog((prev) => prev && { ...prev, error: "Escriba un rótulo." });
       return;
     }
-    if (draft.some((g) => g.semester === label)) {
-      setSemesterError("Ese cuatrimestre ya existe.");
+    if ((draft ?? []).some((g) => g.semester === label)) {
+      setSemesterDialog((prev) => prev && { ...prev, error: "Ese cuatrimestre ya existe." });
       return;
     }
-    setDraft((prev) => [...prev, { semester: label, slugs: [] }].sort((a, b) => compareSemestersDesc(a.semester, b.semester)));
-    setSemesterOpen(false);
-    setSemesterDraft("");
-    setSemesterError(undefined);
+    setDraft((prev) =>
+      (prev ?? []).concat({ semester: label, slugs: [] }).sort((a, b) => compareSemestersDesc(a.semester, b.semester)),
+    );
+    setSemesterDialog(null);
   }
 
   /* --- arrastrar y soltar --- */
@@ -238,6 +260,29 @@ export function LandingPage() {
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+
+  const announcements: Announcements = useMemo(() => {
+    const nameOf = (id: string | number) => byId.get(String(id))?.name ?? String(id);
+    const placeOf = (id: string | number) => {
+      const raw = String(id);
+      return isGroupId(raw) ? semesterLabel(semesterOfGroupId(raw)) : nameOf(raw);
+    };
+    return {
+      onDragStart: ({ active }) => `Tomó la materia ${nameOf(active.id)}.`,
+      /* Al tomarla, dnd-kit avisa que está «sobre sí misma»: eso no se dice. */
+      onDragOver: ({ active, over }) =>
+        !over
+          ? `La materia ${nameOf(active.id)} no está sobre ningún destino.`
+          : over.id === active.id
+            ? undefined
+            : `La materia ${nameOf(active.id)} está sobre ${placeOf(over.id)}.`,
+      onDragEnd: ({ active, over }) =>
+        over
+          ? `Soltó la materia ${nameOf(active.id)} sobre ${placeOf(over.id)}.`
+          : `Soltó la materia ${nameOf(active.id)} fuera de un destino: vuelve a su lugar.`,
+      onDragCancel: ({ active }) => `Se canceló el movimiento: la materia ${nameOf(active.id)} vuelve a su lugar.`,
+    };
+  }, [byId]);
 
   const containerOf = (list: DraftGroup[], id: string): number =>
     isGroupId(id)
@@ -254,6 +299,7 @@ export function LandingPage() {
     const activeId = String(e.active.id);
     const overId = String(over.id);
     setDraft((prev) => {
+      if (!prev) return prev;
       const from = containerOf(prev, activeId);
       const to = containerOf(prev, overId);
       if (from === -1 || to === -1 || from === to) return prev;
@@ -277,6 +323,7 @@ export function LandingPage() {
     const overId = String(over.id);
     if (activeId === overId) return;
     setDraft((prev) => {
+      if (!prev) return prev;
       const from = containerOf(prev, activeId);
       const to = containerOf(prev, overId);
       if (from === -1 || to === -1 || from !== to) return prev;
@@ -320,7 +367,7 @@ export function LandingPage() {
     <div className={css.page}>
       <PlatformHeader
         search={{
-          placeholder: "Buscar materias, páginas…",
+          placeholder: "Filtrar materias…",
           onClick: () => setSearchOpen(true),
           width: 300,
           inline: searchOpen
@@ -340,9 +387,17 @@ export function LandingPage() {
       {manage ? (
         <div className={css.manageBar}>
           <span className={css.dot} aria-hidden="true" />
-          <span className={css.manageText}>EDITANDO · ARRASTRE PARA REORDENAR</span>
+          <span className={css.manageText}>
+            EDITANDO · ARRASTRE PARA REORDENAR · LOS CUATRIMESTRES SE ORDENAN POR SU RÓTULO
+          </span>
           <span className={css.manageSpacer} />
-          <Button size="sm" variant="primary" onClick={handleSave} disabled={saveLayout.isPending}>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleSave}
+            disabled={saveLayout.isPending}
+            aria-busy={saveLayout.isPending || undefined}
+          >
             {saveLayout.isPending ? "Guardando…" : "Guardar"}
           </Button>
           <Button size="sm" onClick={cancelManage} disabled={saveLayout.isPending}>
@@ -396,13 +451,19 @@ export function LandingPage() {
           ) : null}
 
           {q && matchCount === 0 && cards.length > 0 ? (
-            <div className={css.notice}>Ninguna materia coincide con «{query.trim()}»</div>
+            <div className={css.noMatch}>
+              <span className={css.notice}>Ninguna materia coincide con «{query.trim()}»</span>
+              <Button size="sm" onClick={clearSearch}>
+                Limpiar la búsqueda
+              </Button>
+            </div>
           ) : null}
 
           {manage ? (
             <DndContext
               sensors={sensors}
               collisionDetection={closestCorners}
+              accessibility={{ screenReaderInstructions, announcements }}
               onDragStart={onDragStart}
               onDragOver={onDragOver}
               onDragEnd={onDragEnd}
@@ -419,11 +480,7 @@ export function LandingPage() {
             <button
               type="button"
               className={css.addSemester}
-              onClick={() => {
-                setSemesterDraft(nextSemesterSuggestion(semesters));
-                setSemesterError(undefined);
-                setSemesterOpen(true);
-              }}
+              onClick={() => setSemesterDialog({ draft: nextSemesterSuggestion(semesters) })}
             >
               <UiIcon name="plus" size={16} />
               Agregar cuatrimestre
@@ -446,13 +503,13 @@ export function LandingPage() {
       />
 
       <Dialog
-        open={semesterOpen}
-        onClose={() => setSemesterOpen(false)}
+        open={semesterDialog !== null}
+        onClose={() => setSemesterDialog(null)}
         eyebrow="LANDING"
         title="Agregar cuatrimestre"
         footer={
           <>
-            <Button onClick={() => setSemesterOpen(false)}>Cancelar</Button>
+            <Button onClick={() => setSemesterDialog(null)}>Cancelar</Button>
             <Button variant="primary" onClick={addSemester}>
               Agregar
             </Button>
@@ -462,14 +519,11 @@ export function LandingPage() {
         <Field
           label="Rótulo"
           mono
-          value={semesterDraft}
-          error={semesterError}
+          value={semesterDialog?.draft ?? ""}
+          error={semesterDialog?.error}
           hint="Formato sugerido: AAAA-1C o AAAA-2C."
           placeholder="2026-1C"
-          onChange={(e) => {
-            setSemesterDraft(e.target.value);
-            setSemesterError(undefined);
-          }}
+          onChange={(e) => setSemesterDialog({ draft: e.target.value })}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -490,9 +544,10 @@ export function LandingPage() {
               Cancelar
             </Button>
             <Button
-              variant="primary"
+              variant="danger"
               onClick={() => removing && removeSubject.mutate(removing.slug)}
               disabled={removeSubject.isPending}
+              aria-busy={removeSubject.isPending || undefined}
             >
               {removeSubject.isPending ? "Quitando…" : "Quitar materia"}
             </Button>

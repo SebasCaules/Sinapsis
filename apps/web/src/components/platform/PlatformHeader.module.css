@@ -20,7 +20,7 @@
   color: inherit;
   border-radius: var(--r-ctrl);
 }
-.brand:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+.brand:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; box-shadow: 0 0 0 6px var(--primary-ring); }
 .wordmark {
   font: 600 15px var(--font-display);
   color: var(--text);

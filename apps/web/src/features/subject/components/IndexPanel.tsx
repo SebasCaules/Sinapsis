@@ -6,7 +6,7 @@
  * el rótulo sale de `division.plural`, los bloques de `pageTypes` y el color de
  * cada división de la escala paramétrica del contrato.
  */
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
 import { UiIcon } from "@/components/platform";
@@ -25,7 +25,6 @@ export interface IndexPanelProps {
 export function IndexPanel({ model, activePage, activeDivision }: IndexPanelProps) {
   const { config, placeholder } = model;
   const open = useOpenDivisions(model.slug);
-  const toggleDivision = useSubjectUiStore((s) => s.toggleDivision);
   const openDivision = useSubjectUiStore((s) => s.openDivision);
 
   /* Al navegar a una página, su división se abre sola. */
@@ -61,10 +60,8 @@ export function IndexPanel({ model, activePage, activeDivision }: IndexPanelProp
             model={model}
             division={division}
             expanded={open.includes(division.key)}
-            onToggle={() => toggleDivision(model.slug, division.key)}
             active={activeDivision === division.key}
             activePage={activePage}
-            dimmed={placeholder && !model.pagesByDivision(division.key).length}
           />
         ))}
         {!divisions.length ? <p className={css.empty}>Todavía no hay páginas sincronizadas.</p> : null}
@@ -77,25 +74,40 @@ interface DivisionRowProps {
   model: SubjectModel;
   division: DivisionNode;
   expanded: boolean;
-  onToggle: () => void;
   active: boolean;
   activePage: string | null;
-  dimmed: boolean;
 }
 
-function DivisionRow({ model, division, expanded, onToggle, active, activePage, dimmed }: DivisionRowProps) {
+/* `memo` de verdad: todas las props son estables (el modelo y la división viven
+   lo que la respuesta del API; el resto son primitivas) y la acción del store la
+   toma la propia fila, así no llega una lambda nueva en cada render del panel. */
+const DivisionRow = memo(function DivisionRow({
+  model,
+  division,
+  expanded,
+  active,
+  activePage,
+}: DivisionRowProps) {
+  const toggleDivision = useSubjectUiStore((s) => s.toggleDivision);
   const count = model.contentPages(division.key).length;
   const blocks = expanded ? model.typeBlocks(division.key) : [];
-  const sequence = model.sequence(division.key);
-  const position = new Map(sequence.map((p, i) => [p.slug, i + 1]));
+  /* El mapa de posiciones lo memoriza el modelo: una vez por división, no por render. */
+  const position = model.positions(division.key);
+  /* Una división sin páginas no se puede desplegar: el control no se atenúa, se apaga. */
+  const empty = model.pagesByDivision(division.key).length === 0;
 
   return (
-    <div className={css.division} style={{ ["--ucol" as string]: division.color }} data-dimmed={dimmed || undefined}>
+    <div
+      className={css.division}
+      style={{ ["--ucol" as string]: division.color }}
+      data-dimmed={empty || undefined}
+    >
       <button
         type="button"
         className={css.divisionRow}
-        onClick={onToggle}
-        aria-expanded={expanded}
+        onClick={() => toggleDivision(model.slug, division.key)}
+        disabled={empty}
+        aria-expanded={empty ? undefined : expanded}
         data-active={active ? "true" : undefined}
         data-testid="division-row"
         data-division={division.key}
@@ -112,7 +124,7 @@ function DivisionRow({ model, division, expanded, onToggle, active, activePage, 
         <div className={css.body}>
           <Link className={css.wholeDivision} to={routes.division(model.slug, division.key)}>
             <UiIcon name="menu" size={13} />
-            Ver la división completa
+            Ver la {model.config.division.singular.toLowerCase()} completa
           </Link>
           {blocks.map((block) => (
             <TypeBlockRows
@@ -128,7 +140,7 @@ function DivisionRow({ model, division, expanded, onToggle, active, activePage, 
       ) : null}
     </div>
   );
-}
+});
 
 function TypeBlockRows({
   model,
@@ -140,7 +152,7 @@ function TypeBlockRows({
   model: SubjectModel;
   divisionKey: string;
   block: ReturnType<SubjectModel["typeBlocks"]>[number];
-  position: Map<string, number>;
+  position: ReadonlyMap<string, number>;
   activePage: string | null;
 }) {
   const collapsed = useTypeCollapsed(model.slug, divisionKey, block.type.key, block.type.collapsedByDefault);
@@ -175,7 +187,7 @@ function TypeBlockRows({
   );
 }
 
-function PageRow({
+const PageRow = memo(function PageRow({
   to,
   num,
   title,
@@ -207,4 +219,4 @@ function PageRow({
       {studied ? <UiIcon name="check" size={12} className={css.check} title="Estudiada" /> : null}
     </Link>
   );
-}
+});

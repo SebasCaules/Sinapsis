@@ -1,7 +1,13 @@
 /** `sinapsis validate` — valida el `sinapsis.config.json` contra el contrato. */
 import { readFile } from "node:fs/promises";
 import pc from "picocolors";
-import { BUILTIN_VIEWS, SubjectConfig, type SubjectConfig as SubjectConfigType } from "@sinapsis/contract";
+import {
+  BUILTIN_VIEWS,
+  DIVISION_NONE,
+  SubjectConfig,
+  isExternalUrl,
+  type SubjectConfig as SubjectConfigType,
+} from "@sinapsis/contract";
 import { resolveUserPath, type Ctx } from "../context.js";
 
 export interface ValidateOptions {
@@ -95,11 +101,11 @@ export function extraChecks(config: SubjectConfigType): Problem[] {
     }
   }
 
-  if (config.divisions.some((d) => d.key === "meta")) {
+  if (config.divisions.some((d) => d.key === DIVISION_NONE)) {
     problems.push({
       level: "error",
       field: "divisions",
-      message: '"meta" está reservada para las páginas transversales',
+      message: `"${DIVISION_NONE}" está reservada para las páginas transversales`,
     });
   }
 
@@ -133,8 +139,12 @@ export function extraChecks(config: SubjectConfigType): Problem[] {
         message: `vista builtin desconocida "${item.target}" (válidas: ${BUILTIN_VIEWS.join(", ")})`,
       });
     }
-    if (item.kind === "link" && !/^https?:\/\//i.test(item.target)) {
-      problems.push({ level: "error", field: where, message: `un ítem "link" necesita una URL absoluta` });
+    if (item.kind === "link" && !isExternalUrl(item.target)) {
+      problems.push({
+        level: "error",
+        field: where,
+        message: `un ítem "link" necesita una URL http(s) o mailto`,
+      });
     }
     if (item.kind === "tool") {
       problems.push({

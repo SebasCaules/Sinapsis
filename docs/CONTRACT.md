@@ -97,7 +97,15 @@ callout `[!figura]` muestra su epígrafe (las figuras interactivas son Sprint 2+
 ```
 
 Idéntico al contrato de `build.py` de la app de Proba con `unidad→division`,
-`tipo→type`, `resumen→summary`, `fuentes→sources`, `actualizado→updatedAt`.
+`tipo→type`, `resumen→summary`, `fuentes→sources`, `actualizado→updatedAt`, con una
+divergencia deliberada (N0-21): si el cuerpo empieza con un `# H1` que repite el título, el
+compilador lo quita de `body` y no lo incluye en `headings` (el lector ya muestra el título).
+Los ids de `headings` los calcula `headingId()` del contrato y el lector aplica el mismo
+algoritmo al renderizar, así `[[pagina#ancla]]` resuelve siempre igual (N0-22).
+
+Divisiones sintéticas (N0-23): las páginas sin división caen en `meta` («Transversales») y las
+que declaran una división que no está en el config caen en `otras` («Otras»); ambas las
+calcula `effectiveDivisions()` del contrato y no cuentan como divisiones declaradas.
 
 ## 4. Sync
 
@@ -110,7 +118,11 @@ Authorization: Bearer <SYNC_TOKEN>
 
 El sync es idempotente y reemplaza el conjunto de páginas de la materia: las páginas que
 ya no existen en el wiki se borran (el progreso del usuario sobre slugs borrados se
-conserva por si vuelven). El CLI lo ejecuta:
+conserva por si vuelven); solo se reindexan en la búsqueda las páginas que cambiaron. Las
+rutas del config (`wiki.root`, `wiki.index`, `wiki.log`) deben ser relativas y quedar dentro
+de la carpeta del config; los `link` del rail solo admiten `http(s)` o `mailto`. El CLI lo
+ejecuta (acepta `--wiki <dir>` para apuntar a otra carpeta y `--cwd <dir>` para resolver rutas
+relativas):
 
 ```bash
 pnpm sinapsis sync --config /ruta/a/sinapsis.config.json --api http://localhost:3000

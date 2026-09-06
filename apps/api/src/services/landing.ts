@@ -6,7 +6,7 @@
  * usuario (N0-6).
  */
 import { and, eq, inArray, sql } from "drizzle-orm";
-import type { SubjectCard } from "@sinapsis/contract";
+import { compareSemestersDesc, type SubjectCard } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
 import { pages, progress, subjects, userSubjects, type SubjectRow } from "../db/schema.js";
 import { contentTypePredicate, resolveConfig } from "./subjects.js";
@@ -16,10 +16,7 @@ export const DEFAULT_SUBJECT_COLOR = "--u1";
 
 /** Cuatrimestre descendente ("2026-2C" antes que "2026-1C"), posición ascendente. */
 export function compareCards(a: SubjectCard, b: SubjectCard): number {
-  const bySemester = b.semester.localeCompare(a.semester, "es", {
-    numeric: true,
-    sensitivity: "base",
-  });
+  const bySemester = compareSemestersDesc(a.semester, b.semester);
   if (bySemester !== 0) return bySemester;
   if (a.position !== b.position) return a.position - b.position;
   return a.name.localeCompare(b.name, "es");
@@ -77,6 +74,30 @@ function groupCounts(rows: { subjectId: string; type: string; n: number }[]): Co
   return out;
 }
 
+/** Conteos por tipo (totales y estudiados) de un conjunto acotado de materias. */
+async function countsFor(
+  db: Db,
+  userId: string,
+  ids: readonly string[],
+): Promise<{ pageCounts: CountsBySubject; studiedCounts: CountsBySubject }> {
+  const scope = inArray(pages.subjectId, [...ids]);
+
+  const pageRows = await db
+    .select({ subjectId: pages.subjectId, type: pages.type, n: sql<number>`count(*)` })
+    .from(pages)
+    .where(scope)
+    .groupBy(pages.subjectId, pages.type);
+
+  const studiedRows = await db
+    .select({ subjectId: pages.subjectId, type: pages.type, n: sql<number>`count(*)` })
+    .from(progress)
+    .innerJoin(pages, and(eq(pages.subjectId, progress.subjectId), eq(pages.slug, progress.pageSlug)))
+    .where(and(eq(progress.userId, userId), inArray(progress.subjectId, [...ids])))
+    .groupBy(pages.subjectId, pages.type);
+
+  return { pageCounts: groupCounts(pageRows), studiedCounts: groupCounts(studiedRows) };
+}
+
 export async function landingCards(db: Db, userId: string): Promise<SubjectCard[]> {
   const rows = await db
     .select({ subject: subjects, semester: userSubjects.semester, position: userSubjects.position })
@@ -85,33 +106,30 @@ export async function landingCards(db: Db, userId: string): Promise<SubjectCard[
     .where(eq(userSubjects.userId, userId));
 
   if (rows.length === 0) return [];
-  const ids = rows.map((r) => r.subject.id);
-
-  const pageRows = await db
-    .select({ subjectId: pages.subjectId, type: pages.type, n: sql<number>`count(*)` })
-    .from(pages)
-    .where(inArray(pages.subjectId, ids))
-    .groupBy(pages.subjectId, pages.type);
-
-  const studiedRows = await db
-    .select({ subjectId: pages.subjectId, type: pages.type, n: sql<number>`count(*)` })
-    .from(progress)
-    .innerJoin(pages, and(eq(pages.subjectId, progress.subjectId), eq(pages.slug, progress.pageSlug)))
-    .where(and(eq(progress.userId, userId), inArray(progress.subjectId, ids)))
-    .groupBy(pages.subjectId, pages.type);
-
-  const pageCounts = groupCounts(pageRows);
-  const studiedCounts = groupCounts(studiedRows);
+  const { pageCounts, studiedCounts } = await countsFor(db, userId, rows.map((r) => r.subject.id));
 
   return rows
     .map((r) => buildCard(r.subject, r.semester, r.position, pageCounts, studiedCounts))
     .sort(compareCards);
 }
 
-/** Tarjeta de una sola materia de la landing del usuario (null si no está). */
+/**
+ * Tarjeta de una sola materia de la landing del usuario (null si no está).
+ * Consulta acotada a esa materia: no arma la landing entera para descartarla.
+ */
 export async function landingCard(db: Db, userId: string, slug: string): Promise<SubjectCard | null> {
-  const all = await landingCards(db, userId);
-  return all.find((card) => card.slug === slug) ?? null;
+  const row = (
+    await db
+      .select({ subject: subjects, semester: userSubjects.semester, position: userSubjects.position })
+      .from(userSubjects)
+      .innerJoin(subjects, eq(subjects.id, userSubjects.subjectId))
+      .where(and(eq(userSubjects.userId, userId), eq(subjects.slug, slug)))
+      .limit(1)
+  )[0];
+  if (!row) return null;
+
+  const { pageCounts, studiedCounts } = await countsFor(db, userId, [row.subject.id]);
+  return buildCard(row.subject, row.semester, row.position, pageCounts, studiedCounts);
 }
 
 /** Siguiente posición libre dentro de un cuatrimestre. */

@@ -4,41 +4,35 @@
  * Reemplaza el conjunto entero de páginas: las que ya no vienen se borran. El
  * progreso del usuario se guarda por slug y en su propia tabla, así que
  * sobrevive a los borrados (si la página vuelve, la marca sigue ahí).
+ *
+ * Un sync que no cambia nada no escribe nada: ni `pages` ni el índice FTS. Y
+ * cuando sí hay cambios, solo se reindexan las páginas creadas, modificadas o
+ * borradas — no las 200 de la materia.
  */
 import { createHash } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
-import { DIVISION_NONE, type Page, type SubjectConfig, type SyncResult } from "@sinapsis/contract";
+import {
+  DIVISION_NONE,
+  PAGE_TYPE_META,
+  type Page,
+  type SubjectConfig,
+  type SyncResult,
+} from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
 import { withTransaction } from "../db/client.js";
 import { pages, subjects, type SubjectRow } from "../db/schema.js";
 import { newId, nowIso } from "../lib/ids.js";
 import { badRequest } from "../lib/errors.js";
-import { clearSubjectFts, indexPage } from "./search.js";
+import { chunks, indexPages, removeFromFts, type IndexablePage } from "./search.js";
 
 /** Tope de warnings devueltos; el resto se resume en una línea final. */
 const MAX_WARNINGS = 120;
 
-/** Huella del contenido de una página: distingue "modificada" de "igual". */
-export function pageFingerprint(page: Page): string {
-  const canonical = JSON.stringify([
-    page.slug,
-    page.title,
-    page.type,
-    page.folder,
-    page.division,
-    page.order ?? null,
-    page.summary,
-    page.format ?? null,
-    page.tags,
-    page.sources,
-    page.updatedAt ?? null,
-    page.links,
-    page.headings,
-    page.body,
-    page.words,
-  ]);
-  return createHash("sha1").update(canonical).digest("hex");
-}
+/** Filas por sentencia en los `INSERT` masivos. */
+const INSERT_BATCH = 100;
+
+/** Filas por sentencia en los `DELETE ... IN (…)`. */
+const DELETE_BATCH = 200;
 
 function collectWarnings(config: SubjectConfig, list: Page[]): string[] {
   const divisions = new Set(config.divisions.map((d) => d.key));
@@ -54,7 +48,7 @@ function collectWarnings(config: SubjectConfig, list: Page[]): string[] {
       push(`página "${page.slug}": la división "${page.division}" no está declarada en el config`);
     }
     // "meta" es el tipo reservado de las páginas índice/registro: nunca se declara en pageTypes.
-    if (page.type !== "meta" && !types.has(page.type)) {
+    if (page.type !== PAGE_TYPE_META && !types.has(page.type)) {
       push(`página "${page.slug}": el tipo "${page.type}" no está declarado en pageTypes`);
     }
   }
@@ -91,6 +85,36 @@ async function upsertSubject(db: Db, config: SubjectConfig, now: string): Promis
   return row;
 }
 
+/** Columnas de `pages` que se escriben por página (sin id ni subjectId). */
+function pageValues(page: Page) {
+  return {
+    slug: page.slug,
+    title: page.title,
+    type: page.type,
+    folder: page.folder,
+    division: page.division,
+    order: page.order ?? null,
+    summary: page.summary,
+    format: page.format ?? null,
+    tagsJson: page.tags,
+    sourcesJson: page.sources,
+    updatedAtSrc: page.updatedAt ?? null,
+    linksJson: page.links,
+    headingsJson: page.headings,
+    body: page.body,
+    words: page.words,
+  };
+}
+
+/**
+ * Huella del contenido de una página: distingue "modificada" de "igual". Se
+ * calcula sobre lo mismo que se guarda (`pageValues`), así no hay una segunda
+ * lista de campos que se pueda desincronizar de la tabla.
+ */
+export function pageHash(values: ReturnType<typeof pageValues>): string {
+  return createHash("sha1").update(JSON.stringify(values)).digest("hex");
+}
+
 export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike): Promise<SyncResult> {
   const { config, pages: incoming } = payload;
 
@@ -120,53 +144,45 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
       .where(eq(pages.subjectId, subject.id));
     const currentBySlug = new Map(current.map((row) => [row.slug, row]));
 
-    let created = 0;
+    /** Altas y modificaciones: son las que hay que volver a indexar. */
+    const reindex: IndexablePage[] = [];
+    const inserts: Array<
+      { id: string; subjectId: string; contentHash: string } & ReturnType<typeof pageValues>
+    > = [];
     let updated = 0;
 
     for (const page of incoming) {
-      const hash = pageFingerprint(page);
-      const values = {
-        slug: page.slug,
-        title: page.title,
-        type: page.type,
-        folder: page.folder,
-        division: page.division,
-        order: page.order ?? null,
-        summary: page.summary,
-        format: page.format ?? null,
-        tagsJson: page.tags,
-        sourcesJson: page.sources,
-        updatedAtSrc: page.updatedAt ?? null,
-        linksJson: page.links,
-        headingsJson: page.headings,
-        body: page.body,
-        words: page.words,
-        contentHash: hash,
-      };
+      const values = pageValues(page);
+      const hash = pageHash(values);
       const existing = currentBySlug.get(page.slug);
       if (!existing) {
-        await db.insert(pages).values({ id: newId(), subjectId: subject.id, ...values });
-        created += 1;
+        inserts.push({ id: newId(), subjectId: subject.id, ...values, contentHash: hash });
       } else if (existing.contentHash !== hash) {
-        await db.update(pages).set(values).where(eq(pages.id, existing.id));
+        await db.update(pages).set({ ...values, contentHash: hash }).where(eq(pages.id, existing.id));
         updated += 1;
+      } else {
+        continue;
       }
+      reindex.push({ slug: page.slug, title: page.title, body: page.body, summary: page.summary });
     }
 
-    const staleIds = current.filter((row) => !seen.has(row.slug)).map((row) => row.id);
-    for (let i = 0; i < staleIds.length; i += 200) {
-      await db.delete(pages).where(inArray(pages.id, staleIds.slice(i, i + 200)));
+    for (const batch of chunks(inserts, INSERT_BATCH)) {
+      await db.insert(pages).values(batch);
     }
 
-    // Reconstrucción del índice FTS de esta materia.
-    await clearSubjectFts(db, subject.id);
-    for (const page of incoming) {
-      await indexPage(db, subject.id, {
-        slug: page.slug,
-        title: page.title,
-        body: page.body,
-        summary: page.summary,
-      });
+    const stale = current.filter((row) => !seen.has(row.slug));
+    for (const batch of chunks(stale, DELETE_BATCH)) {
+      await db.delete(pages).where(inArray(pages.id, batch.map((row) => row.id)));
+    }
+
+    const created = inserts.length;
+    const deleted = stale.length;
+
+    // Índice FTS: nada que hacer si el sync no movió una sola página.
+    if (created + updated + deleted > 0) {
+      const touched = [...reindex.map((p) => p.slug), ...stale.map((row) => row.slug)];
+      await removeFromFts(db, subject.id, touched);
+      await indexPages(db, subject.id, reindex);
     }
 
     return {
@@ -174,7 +190,7 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
       pages: incoming.length,
       created,
       updated,
-      deleted: staleIds.length,
+      deleted,
       warnings,
     } satisfies SyncResult;
   });

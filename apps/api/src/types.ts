@@ -1,7 +1,7 @@
 import type { Db } from "./db/client.js";
 import type { AppEnv } from "./env.js";
 import type { GoogleVerifier } from "./auth/google.js";
-import type { UserRow } from "./db/schema.js";
+import type { SubjectRow, UserRow } from "./db/schema.js";
 
 /** Dependencias que recibe `createApp` (inyectadas para poder testear). */
 export interface AppDeps {
@@ -20,5 +20,7 @@ export interface AppBindings {
     env: AppEnv;
     user: UserRow;
     sessionId: string;
+    /** La materia del `:slug` de la URL; la carga el middleware `loadSubject`. */
+    subject: SubjectRow;
   };
 }

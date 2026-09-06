@@ -12,9 +12,12 @@ describe("loadEnv", () => {
     expect(devBypassEnabled(env)).toBe(true);
     expect(cookieSecure(env)).toBe(false);
     expect(cookieSecure(loadEnv({ ...base, COOKIE_SECURE: "1" }))).toBe(true);
-    expect(allowedOrigins(env).has("http://localhost:5173")).toBe(true);
   });
-  it("en producción la cookie es Secure y no se admiten los orígenes de desarrollo", () => {
+  it("los orígenes admitidos son solo los de ALLOWED_ORIGINS, en cualquier entorno", () => {
+    // Ni siquiera en desarrollo se abren los puertos de Vite: el proxy manda el
+    // Host de la web, así que el guard ya los acepta por `originHost === host`.
+    expect([...allowedOrigins(loadEnv({ ...base, AUTH_DEV_BYPASS: "1" }))]).toEqual([]);
+
     const env = loadEnv({ ...base, NODE_ENV: "production", ALLOWED_ORIGINS: "https://sinapsis.example, https://app.example" });
     expect(devBypassEnabled(env)).toBe(false);
     expect(cookieSecure(env)).toBe(true);

@@ -64,6 +64,22 @@
   gap: 2px;
 }
 
+/* La `listbox` de verdad: solo filas, sin los avisos de estado. */
+.list { display: flex; flex-direction: column; gap: 2px; }
+
+/* Lo que solo se escucha (el recuento de resultados). */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .hint {
   margin: 0;
   padding: 18px 10px;
@@ -84,6 +100,14 @@
   cursor: pointer;
 }
 .row[data-active="true"] { background: var(--surface-2); }
+.row:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 6px var(--primary-ring);
+}
+
+/* El campo no dibuja anillo propio: el foco se ve en toda la fila del buscador. */
+.field:focus-within { box-shadow: inset 0 0 0 2px var(--primary); }
 
 .rowIcon {
   flex: none;

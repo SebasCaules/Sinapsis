@@ -3,7 +3,7 @@
  * Es la vista ancha (1120) del contrato; no inventa datos: todo sale del modelo.
  */
 import { Link } from "react-router-dom";
-import { routes } from "@sinapsis/contract";
+import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { pad2 } from "../model";
@@ -16,6 +16,11 @@ export function HomeView() {
   const started = progressTotal.done > 0;
   const nextDivision = next ? model.division(model.divisionOf(next)) : null;
   const review = model.reviewPages();
+  /* El mismo par de números que muestra la tarjeta de la landing: las páginas
+     que cuentan como contenido y las divisiones DECLARADAS (Transversales y
+     Otras se ven en el índice, pero no son unidades del programa). */
+  const units = model.divisionsCount;
+  const unitLabel = plural(units, model.config.division.singular, model.config.division.plural).toLowerCase();
 
   if (model.placeholder || !model.pages.length) {
     return <EmptySubject name={model.config.name} slug={slug} />;
@@ -37,8 +42,8 @@ export function HomeView() {
               : "Todavía no ha leído ninguna página"}
           </h2>
           <p className={css.startText}>
-            Las {progressTotal.total} páginas de contenido están ordenadas para leerse en secuencia. El progreso de
-            abajo se llena a medida que las marca como leídas.
+            Las {progressTotal.total} páginas de contenido de {units} {unitLabel} están ordenadas para leerse en
+            secuencia. El progreso de abajo se llena a medida que las marca como leídas.
           </p>
         </div>
         <div className={css.startActions}>
@@ -66,7 +71,7 @@ export function HomeView() {
             Progreso
           </h1>
           <span className={css.progressCount}>
-            {progressTotal.done} / {progressTotal.total} páginas
+            {progressTotal.done} / {progressTotal.total} {plural(progressTotal.total, "página", "páginas")}
           </span>
         </div>
         <div className={css.totalTrack}>

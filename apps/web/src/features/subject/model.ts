@@ -6,22 +6,26 @@
  * API y se memoriza. Las vistas solo leen de acá; ninguna vuelve a recorrer las
  * páginas por su cuenta.
  *
- * Reglas del contrato que implementa:
- *  - Orden de divisiones: `order` explícito, si falta el orden del array.
- *  - División sintética `meta` («Transversales») si hay páginas sin división.
- *  - Divisiones desconocidas (en páginas, no en el config) → grupo «Otras».
+ * Reglas del contrato que implementa (ninguna se reescribe acá):
+ *  - Divisiones efectivas y sintéticas: `effectiveDivisions` + `divisionOf`.
+ *  - Rótulos y color: `divisionShort` / `divisionLong` / `divisionColor`.
  *  - Secuencia pedagógica: `order` asc → orden del tipo en `pageTypes` → título.
  *  - Progreso: solo tipos con `countsAsContent !== false` (las fuentes no cuentan).
  *  - Rail: FIXED_RAIL + rail del config (SLOT) + FIXED_RAIL_TAIL, sin ítems rotos.
  */
 import {
-  DIVISION_NONE,
   FIXED_RAIL,
   FIXED_RAIL_TAIL,
+  countsAsContent,
+  cssColor,
   divisionColor,
   divisionLong,
+  divisionOf as divisionOfContract,
   divisionShort,
+  effectiveDivisions,
+  isExternalUrl,
   routes,
+  type DivisionDef,
   type DivisionKey,
   type PageMeta,
   type PageTypeDef,
@@ -31,13 +35,14 @@ import {
   type SubjectDetail,
 } from "@sinapsis/contract";
 
-/** Clave de la división sintética que recoge las divisiones no declaradas. */
-export const OTHER_DIVISION = "otras";
-
+/**
+ * Una división lista para dibujar: la `DivisionDef` del contrato (declarada o
+ * sintética) con sus rótulos y su color ya resueltos.
+ */
 export interface DivisionNode {
-  key: string;
+  key: DivisionKey;
   name: string;
-  kind: "numbered" | "extra";
+  kind: DivisionDef["kind"];
   /** Rótulo corto: "U3", "Transv.", "Eval." */
   short: string;
   /** Rótulo largo: "Unidad 3 · Variables Aleatorias Discretas". */
@@ -46,8 +51,8 @@ export interface DivisionNode {
   label: string;
   /** Valor CSS listo para usar (var(--u3) o un hex del config). */
   color: string;
-  /** null si viene del config; "meta"/"unknown" si la derivó la plataforma. */
-  synthetic: "meta" | "unknown" | null;
+  /** true si la derivó la plataforma (Transversales / Otras): no cuenta como unidad. */
+  synthetic: boolean;
 }
 
 export interface TypeBlock {
@@ -92,16 +97,27 @@ export interface SubjectModel {
   studied: Set<string>;
   /** Slugs estudiados en el orden que devolvió el API (el más viejo primero). */
   studiedOrder: string[];
-  /** Todas las divisiones, en orden (incluye las que no tienen páginas). */
+  /** Todas las divisiones, en orden (declaradas + sintéticas, con o sin páginas). */
   divisions: DivisionNode[];
   /** Solo las divisiones con páginas: es lo que dibuja el índice. */
   visibleDivisions: DivisionNode[];
+  /**
+   * Cuántas divisiones DECLARA la materia. Es el número que muestra la landing
+   * (`SubjectCard.divisionsCount`): las sintéticas se ven, pero no se cuentan.
+   */
+  divisionsCount: number;
   divisionOf: (page: PageMeta) => string;
   division: (key: string) => DivisionNode | undefined;
   pagesByDivision: (key: string) => PageMeta[];
   contentPages: (key: string) => PageMeta[];
+  /** Las páginas de la división que NO cuentan como contenido (las fuentes). */
+  sources: (key: string) => PageMeta[];
+  /** ¿Esta página cuenta como contenido (progreso, numeración de lectura)? */
+  isContent: (page: PageMeta) => boolean;
   /** Páginas de contenido de la división en orden pedagógico. */
   sequence: (key: string) => PageMeta[];
+  /** slug → posición 1..N dentro de la secuencia de la división (mapa memorizado). */
+  positions: (key: string) => ReadonlyMap<string, number>;
   /** Bloques por tipo (en el orden de `pageTypes`) dentro de una división. */
   typeBlocks: (key: string) => TypeBlock[];
   progress: (key: string) => Progress;
@@ -116,9 +132,12 @@ export interface SubjectModel {
   prevNext: (pageSlug: string) => { prev: PageMeta | null; next: PageMeta | null };
   /** Las tres para repasar: estudiadas hace más tiempo, o las tres primeras sin leer. */
   reviewPages: () => PageMeta[];
-  type: (key: string) => PageTypeDef | undefined;
   typeLabel: (key: string) => string;
   railGroups: RailGroupView[];
+  /** El ítem del rail de una herramienta (`/t/:tool`) o de una vista builtin. */
+  railItem: (key: string) => RailItemView | null;
+  /** El botón flotante ya resuelto, o null si la materia no lo declara o está roto. */
+  fab: RailItemView | null;
 }
 
 const UNKNOWN_TYPE_ORDER = 9_999;
@@ -145,56 +164,32 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
   const studiedOrder = detail.studied.slice();
   const studied = new Set(studiedOrder);
 
-  const declared = new Set(cfg.divisions.map((d) => d.key));
   const typeIndex = new Map(cfg.pageTypes.map((t, i) => [t.key, i]));
   const typeByKey = new Map(cfg.pageTypes.map((t) => [t.key, t]));
 
-  const divisionOf = (page: PageMeta): string => {
-    if (declared.has(page.division)) return page.division;
-    if (page.division === DIVISION_NONE || !page.division) return DIVISION_NONE;
-    return OTHER_DIVISION;
-  };
+  const divisionOf = (page: PageMeta): string => divisionOfContract(cfg, page);
 
   // --- divisiones -----------------------------------------------------------
-  const nodes: DivisionNode[] = orderedDivisions(cfg).map((d) => {
-    const short = divisionShort(cfg, d.key);
+  /* Las sintéticas («Transversales», «Otras») las decide el contrato: acá solo
+     se les pegan los rótulos y el color, con la lista efectiva como índice para
+     que la numeración U1…UN siga saliendo de las declaradas. */
+  const effective = effectiveDivisions(cfg, pages);
+  const labelCfg = { ...cfg, divisions: effective };
+  const declaredKeys = new Set(cfg.divisions.map((d) => d.key));
+
+  const nodes: DivisionNode[] = effective.map((d) => {
+    const short = divisionShort(labelCfg, d.key);
     return {
       key: d.key,
       name: d.name,
       kind: d.kind,
       short,
-      long: divisionLong(cfg, d.key),
+      long: divisionLong(labelCfg, d.key),
       label: labelOf(short, d.name),
-      color: divisionColor(cfg, d.key, dark),
-      synthetic: null,
+      color: divisionColor(labelCfg, d.key, dark),
+      synthetic: !declaredKeys.has(d.key),
     };
   });
-
-  const usedKeys = new Set(pages.map(divisionOf));
-  if (usedKeys.has(DIVISION_NONE) && !declared.has(DIVISION_NONE)) {
-    nodes.push({
-      key: DIVISION_NONE,
-      name: "Transversales",
-      kind: "extra",
-      short: "Transv.",
-      long: "Transversales (toda la materia)",
-      label: "Transv. · Transversales",
-      color: "var(--umeta)",
-      synthetic: "meta",
-    });
-  }
-  if (usedKeys.has(OTHER_DIVISION)) {
-    nodes.push({
-      key: OTHER_DIVISION,
-      name: "Otras",
-      kind: "extra",
-      short: "Otras",
-      long: "Otras (fuera del programa declarado)",
-      label: "Otras",
-      color: "var(--u0)",
-      synthetic: "unknown",
-    });
-  }
   const nodeByKey = new Map(nodes.map((n) => [n.key, n]));
 
   // --- índices por división -------------------------------------------------
@@ -206,14 +201,26 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     else byDivision.set(key, [page]);
   }
 
-  const isContent = (page: PageMeta): boolean => typeByKey.get(page.type)?.countsAsContent !== false;
+  /* `countsAsContent` es del contrato; acá solo se memoriza por tipo. */
+  const contentByType = new Map<string, boolean>();
+  const isContent = (page: PageMeta): boolean => {
+    let flag = contentByType.get(page.type);
+    if (flag === undefined) {
+      flag = countsAsContent(cfg, page.type);
+      contentByType.set(page.type, flag);
+    }
+    return flag;
+  };
+
   const orderOf = (page: PageMeta): number => page.order ?? Number.MAX_SAFE_INTEGER;
   const typePos = (page: PageMeta): number => typeIndex.get(page.type) ?? UNKNOWN_TYPE_ORDER;
   const compare = (a: PageMeta, b: PageMeta): number =>
     orderOf(a) - orderOf(b) || typePos(a) - typePos(b) || a.title.localeCompare(b.title, "es");
 
   const contentCache = new Map<string, PageMeta[]>();
+  const sourcesCache = new Map<string, PageMeta[]>();
   const sequenceCache = new Map<string, PageMeta[]>();
+  const positionsCache = new Map<string, Map<string, number>>();
   const blocksCache = new Map<string, TypeBlock[]>();
 
   const pagesByDivision = (key: string): PageMeta[] => byDivision.get(key) ?? [];
@@ -227,11 +234,31 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     return out;
   };
 
+  const sources = (key: string): PageMeta[] => {
+    let out = sourcesCache.get(key);
+    if (!out) {
+      out = pagesByDivision(key).filter((p) => !isContent(p));
+      sourcesCache.set(key, out);
+    }
+    return out;
+  };
+
   const sequence = (key: string): PageMeta[] => {
     let out = sequenceCache.get(key);
     if (!out) {
       out = contentPages(key).slice().sort(compare);
       sequenceCache.set(key, out);
+    }
+    return out;
+  };
+
+  /* El mapa de posiciones se arma UNA vez por división: el índice lo usa en cada
+     fila y el lector en cada render. */
+  const positions = (key: string): ReadonlyMap<string, number> => {
+    let out = positionsCache.get(key);
+    if (!out) {
+      out = new Map(sequence(key).map((p, i) => [p.slug, i + 1]));
+      positionsCache.set(key, out);
     }
     return out;
   };
@@ -276,7 +303,7 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
   const positionOf = (pageSlug: string): number => {
     const page = bySlug.get(pageSlug);
     if (!page) return 0;
-    return sequence(divisionOf(page)).findIndex((p) => p.slug === pageSlug) + 1;
+    return positions(divisionOf(page)).get(pageSlug) ?? 0;
   };
 
   const nextUnread = (): PageMeta | null => allSequence.find((p) => !studied.has(p.slug)) ?? null;
@@ -284,10 +311,11 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
   const prevNext = (pageSlug: string): { prev: PageMeta | null; next: PageMeta | null } => {
     const page = bySlug.get(pageSlug);
     if (!page) return { prev: null, next: null };
-    const seq = sequence(divisionOf(page));
-    const i = seq.findIndex((p) => p.slug === pageSlug);
-    if (i === -1) return { prev: null, next: null };
-    return { prev: seq[i - 1] ?? null, next: seq[i + 1] ?? null };
+    const key = divisionOf(page);
+    const at = positions(key).get(pageSlug);
+    if (at === undefined) return { prev: null, next: null };
+    const seq = sequence(key);
+    return { prev: seq[at - 2] ?? null, next: seq[at] ?? null };
   };
 
   const reviewPages = (): PageMeta[] => {
@@ -307,7 +335,7 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     }
     if (item.kind === "link") {
       // Defensa en profundidad (el contrato ya lo exige): solo http(s)/mailto.
-      if (!isSafeExternalUrl(item.target)) return null;
+      if (!isExternalUrl(item.target)) return null;
       return { item, to: null, href: item.target, external: true };
     }
     if (item.kind === "tool") {
@@ -323,12 +351,7 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
   const toGroup = (group: RailGroup, slot: boolean): RailGroupView | null => {
     const items = group.items.map(resolveItem).filter((x): x is RailItemView => x !== null);
     if (!items.length) return null;
-    const color = group.color
-      ? group.color.startsWith("--")
-        ? `var(${group.color})`
-        : group.color
-      : "var(--primary)";
-    return { id: group.id, label: group.label, color, slot, items };
+    return { id: group.id, label: group.label, color: cssColor(group.color, "var(--primary)"), slot, items };
   };
 
   const railGroups: RailGroupView[] = [
@@ -336,6 +359,30 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     ...cfg.rail.map((g) => toGroup(g, true)),
     ...FIXED_RAIL_TAIL.map((g) => toGroup(g, false)),
   ].filter((g): g is RailGroupView => g !== null);
+
+  const railItem = (key: string): RailItemView | null => {
+    for (const group of railGroups) {
+      for (const view of group.items) {
+        const { item } = view;
+        if (item.kind === "tool" && item.target === key) return view;
+        if (item.kind === "builtin" && item.id === key) return view;
+      }
+    }
+    return null;
+  };
+
+  /* El fab pasa por el MISMO resolutor que el rail: una página inexistente o un
+     enlace que no sea http(s)/mailto lo dejan en null y no se dibuja. */
+  const fabDef = cfg.fab;
+  const fab = fabDef
+    ? resolveItem({
+        id: "fab",
+        label: fabDef.label,
+        icon: fabDef.icon,
+        kind: fabDef.kind,
+        target: fabDef.target,
+      })
+    : null;
 
   return {
     slug: cfg.slug,
@@ -348,11 +395,15 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     studiedOrder,
     divisions: nodes,
     visibleDivisions: nodes.filter((n) => pagesByDivision(n.key).length > 0),
+    divisionsCount: cfg.divisions.length,
     divisionOf,
     division: (key: string) => nodeByKey.get(key),
     pagesByDivision,
     contentPages,
+    sources,
+    isContent,
     sequence,
+    positions,
     typeBlocks,
     progress,
     progressTotal,
@@ -362,23 +413,14 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     nextUnread,
     prevNext,
     reviewPages,
-    type: (key: string) => typeByKey.get(key),
     typeLabel: (key: string) => typeByKey.get(key)?.label ?? key,
     railGroups,
+    railItem,
+    fab,
   };
 }
 
 /** Número de dos cifras del índice ("01", "02", …, "12"). */
 export function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n);
-}
-
-/** Clave de división que usa la URL para una página (normaliza las desconocidas). */
-export function divisionKeyForUrl(model: SubjectModel, page: PageMeta): DivisionKey {
-  return model.divisionOf(page);
-}
-
-/** true si la URL es http(s) o mailto (ningún otro esquema llega a un href). */
-export function isSafeExternalUrl(url: string): boolean {
-  return /^(https?:\/\/[^\s]+|mailto:[^\s]+)$/i.test(url);
 }

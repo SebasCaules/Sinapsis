@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type {
   PageDetail,
@@ -204,5 +205,80 @@ describe("sync de una materia", () => {
     const detail = (await (await h.request("/api/subjects/algebra")).json()) as SubjectDetail;
     expect(detail.placeholder).toBe(false);
     expect(detail.config.name).toBe("Álgebra II");
+  });
+});
+
+describe("el sync solo reindexa lo que cambió", () => {
+  let h: Harness;
+
+  beforeAll(async () => {
+    h = await createHarness();
+    await h.login();
+  });
+
+  afterAll(() => h.close());
+
+  const sync = (pages = [pageIntro, pageTeorema, pageApunte]) =>
+    h.json("PUT", "/api/subjects/demo/sync", demoPayload(pages), {
+      authorization: `Bearer ${h.env.SYNC_TOKEN}`,
+    });
+
+  /**
+   * Huella del índice FTS: slug + rowid. Un `INSERT` en `pages_fts` siempre
+   * estrena rowid, así que si una fila conserva el suyo es que nadie la tocó.
+   */
+  const ftsRows = () =>
+    h.db.all<{ rowid: number; slug: string }>(
+      sql`SELECT rowid AS rowid, slug AS slug FROM pages_fts ORDER BY slug`,
+    );
+
+  const buscar = async (q: string): Promise<string[]> => {
+    const hits = (await (await h.request(`/api/subjects/demo/search?q=${q}`)).json()) as SearchHit[];
+    return hits.map((hit) => hit.slug);
+  };
+
+  it("el primer sync indexa las tres páginas", async () => {
+    expect((await sync()).status).toBe(200);
+    expect((await ftsRows()).map((r) => r.slug)).toEqual(["apunte-clase", "intro", "teorema-central"]);
+    expect(await buscar("campana")).toContain("teorema-central");
+  });
+
+  it("un segundo sync idéntico no toca el índice", async () => {
+    const antes = await ftsRows();
+    const result = (await (await sync()).json()) as SyncResult;
+    expect(result).toMatchObject({ created: 0, updated: 0, deleted: 0 });
+    // Mismos rowids: no hubo ni un DELETE ni un INSERT sobre pages_fts.
+    expect(await ftsRows()).toEqual(antes);
+  });
+
+  it("un sync incremental reindexa solo la página modificada y deja buscable el resto", async () => {
+    const antes = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
+
+    const modificada = { ...pageTeorema, body: "Ahora habla de convergencia en distribución." };
+    const result = (await (await sync([pageIntro, modificada, pageApunte])).json()) as SyncResult;
+    expect(result).toMatchObject({ created: 0, updated: 1, deleted: 0 });
+
+    const despues = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
+    expect(despues.get("intro")).toBe(antes.get("intro"));
+    expect(despues.get("apunte-clase")).toBe(antes.get("apunte-clase"));
+    expect(despues.get("teorema-central")).not.toBe(antes.get("teorema-central"));
+
+    // El índice quedó coherente: el cuerpo viejo ya no está y el nuevo sí.
+    expect(await buscar("campana")).not.toContain("teorema-central");
+    expect(await buscar("convergencia")).toContain("teorema-central");
+    // Y las páginas que no se tocaron siguen buscándose.
+    expect(await buscar("muestreo")).toContain("intro");
+  });
+
+  it("una página borrada sale del índice sin reconstruir las demás", async () => {
+    const antes = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
+
+    const result = (await (await sync([pageIntro, pageApunte])).json()) as SyncResult;
+    expect(result).toMatchObject({ created: 0, updated: 0, deleted: 1 });
+
+    const despues = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
+    expect([...despues.keys()].sort()).toEqual(["apunte-clase", "intro"]);
+    expect(despues.get("intro")).toBe(antes.get("intro"));
+    expect(await buscar("convergencia")).not.toContain("teorema-central");
   });
 });

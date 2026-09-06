@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { ThemeId } from "@sinapsis/contract";
+import { isTypingTarget } from "@/lib/keyboard";
 import { THEME_LABEL, useUiStore } from "@/lib/store";
 import { UiIcon, type UiIconName } from "./Icon";
 import { IconButton } from "./Button";
@@ -11,14 +12,6 @@ const ICON: Record<ThemeId, UiIconName> = {
   claustro: "moon",
 };
 
-/** true si el foco está en un campo de texto: ahí la tecla T se escribe, no cicla. */
-function typingInField(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  if (!el || !el.tagName) return false;
-  const tag = el.tagName.toLowerCase();
-  return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable === true;
-}
-
 /** Botón que cicla pergamino → laurel → claustro. Atajo: T. */
 export function ThemeToggle() {
   const theme = useUiStore((s) => s.theme);
@@ -28,7 +21,7 @@ export function ThemeToggle() {
     function onKey(e: KeyboardEvent) {
       if (e.key !== "t" && e.key !== "T") return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (typingInField(e.target)) return;
+      if (isTypingTarget(e.target)) return;
       e.preventDefault();
       cycleTheme();
     }
@@ -37,13 +30,18 @@ export function ThemeToggle() {
   }, [cycleTheme]);
 
   return (
-    <IconButton
-      label={`Tema: ${THEME_LABEL[theme]} · T para ciclar`}
-      className={css.toggle}
-      onClick={cycleTheme}
-      data-theme-toggle={theme}
-    >
-      <UiIcon name={ICON[theme]} size={16} />
-    </IconButton>
+    <>
+      <IconButton
+        label={`Tema: ${THEME_LABEL[theme]} · T para ciclar`}
+        aria-keyshortcuts="t"
+        className={css.toggle}
+        onClick={cycleTheme}
+        data-theme-toggle={theme}
+      >
+        <UiIcon name={ICON[theme]} size={16} />
+      </IconButton>
+      {/* El cambio de tema no se ve con un lector de pantalla: hay que decirlo. */}
+      <span className={css.live} role="status">{`Tema: ${THEME_LABEL[theme]}`}</span>
+    </>
   );
 }

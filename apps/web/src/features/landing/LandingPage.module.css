@@ -99,6 +99,10 @@
 }
 .retry { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 0; }
 
+/* Búsqueda sin resultados: el aviso viene con la salida al lado. */
+.noMatch { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.noMatch .notice { padding: 26px 0 0; }
+
 .addSemester {
   margin-top: 6px;
   border: 1.5px dashed var(--border-2);

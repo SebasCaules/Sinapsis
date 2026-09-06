@@ -4,10 +4,14 @@
  * Busca páginas en el API (con 150 ms de rebote) y, además, ofrece los ítems del
  * rail que coincidan por rótulo: dentro de una materia, «ir a» y «buscar» son la
  * misma pregunta.
+ *
+ * Semántica: el campo es un `combobox` que gobierna una `listbox`; el foco no se
+ * mueve de la entrada y la fila activa se señala con `aria-activedescendant`.
+ * El Tab queda atrapado dentro del diálogo, como en `platform/Dialog`.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { routes, type SearchHit } from "@sinapsis/contract";
+import { plural, routes, type SearchHit } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import type { SubjectModel } from "../model";
 import { useSearch } from "../useSubject";
@@ -30,9 +34,23 @@ interface Row {
   icon: React.ReactNode;
 }
 
-/** Quita los marcadores del snippet del API: acá el resaltado lo hacemos nosotros. */
+/* Las filas de resultado no se tabulan: se recorren con las flechas. */
+const FOCUSABLE = 'input:not([disabled]), button:not([disabled]):not([tabindex="-1"]), [href]';
+
+/**
+ * Deja el snippet del API en prosa legible: fuera los marcadores del resaltado
+ * (acá lo hacemos nosotros), fuera la sintaxis del wiki —un `[[slug|texto]]` se
+ * lee por su texto— y la matemática se resume en «…», que es más honesto que
+ * mostrar el LaTeX crudo en una lista.
+ */
 export function plainSnippet(raw: string): string {
-  return raw.replace(/<\/?(?:b|mark|em|strong)>/gi, "").trim();
+  return (raw ?? "")
+    .replace(/<\/?(?:b|mark|em|strong)>/gi, "")
+    .replace(/\$\$[^$]*\$\$/g, "…")
+    .replace(/\$[^$\n]+\$/g, "…")
+    .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_m, target: string, alias?: string) => alias ?? target)
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Parte un texto por el término buscado (sin distinguir mayúsculas). */
@@ -60,15 +78,46 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
   const [debounced, setDebounced] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+  const listId = useId();
+  const optionId = useCallback((i: number) => `${listId}-opt-${i}`, [listId]);
 
   useEffect(() => {
     if (!open) return;
     setTerm("");
     setDebounced("");
     setCursor(0);
+    restoreRef.current = document.activeElement as HTMLElement | null;
     const id = window.setTimeout(() => inputRef.current?.focus(), 0);
-    return () => window.clearTimeout(id);
+    const restore = restoreRef.current;
+    return () => {
+      window.clearTimeout(id);
+      restore?.focus?.();
+    };
+  }, [open]);
+
+  /* Trampa de Tab: mientras la paleta está abierta, el foco no se va del diálogo. */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const nodes = [...(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])].filter(
+        (n) => n.offsetParent !== null || n === document.activeElement,
+      );
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (!first || !last) return;
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
   }, [open]);
 
   useEffect(() => {
@@ -119,6 +168,12 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
     setCursor((c) => (c < rows.length ? c : 0));
   }, [rows.length]);
 
+  /* La fila activa se mantiene a la vista aunque el foco no se mueva de la entrada. */
+  useEffect(() => {
+    if (!open) return;
+    document.getElementById(optionId(cursor))?.scrollIntoView({ block: "nearest" });
+  }, [cursor, open, optionId]);
+
   if (!open) return null;
 
   const go = (row: Row | undefined) => {
@@ -150,10 +205,13 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
     }
   };
 
+  const searched = debounced.trim();
+
   return (
     <div className={css.scrim} onMouseDown={onClose} role="presentation">
       <div
         className={css.palette}
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Buscar en la materia"
@@ -166,6 +224,11 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
             ref={inputRef}
             className={css.input}
             type="text"
+            role="combobox"
+            aria-expanded={rows.length > 0}
+            aria-controls={listId}
+            aria-activedescendant={rows.length ? optionId(cursor) : undefined}
+            aria-autocomplete="list"
             value={term}
             placeholder="Buscar páginas…"
             aria-label="Buscar páginas"
@@ -176,18 +239,29 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
           <kbd className={css.kbd}>Esc</kbd>
         </div>
 
-        <div className={css.results} ref={listRef}>
-          {!debounced.trim() ? (
+        {/* Lo que un lector de pantalla necesita saber sin ver la lista. */}
+        <p className={css.srOnly} role="status" aria-live="polite">
+          {searched ? `${rows.length} ${plural(rows.length, "resultado", "resultados")}` : ""}
+        </p>
+
+        <div className={css.results}>
+          {!searched ? (
             <p className={css.hint}>Escriba para buscar páginas, fórmulas o herramientas de la materia.</p>
           ) : search.isFetching && !rows.length ? (
             <p className={css.hint}>Buscando…</p>
           ) : !rows.length ? (
-            <p className={css.hint}>Sin resultados para «{debounced.trim()}».</p>
-          ) : (
-            rows.map((row, i) => (
+            <p className={css.hint}>Sin resultados para «{searched}».</p>
+          ) : null}
+
+          <div className={css.list} id={listId} role="listbox" aria-label="Resultados de la búsqueda">
+            {rows.map((row, i) => (
               <button
                 key={row.key}
+                id={optionId(i)}
                 type="button"
+                role="option"
+                tabIndex={-1}
+                aria-selected={i === cursor}
                 className={css.row}
                 data-active={i === cursor ? "true" : undefined}
                 onMouseEnter={() => setCursor(i)}
@@ -210,8 +284,8 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
                 </span>
                 <span className={css.rowMeta}>{row.meta}</span>
               </button>
-            ))
-          )}
+            ))}
+          </div>
         </div>
 
         <div className={css.foot}>

@@ -93,16 +93,14 @@ export function cookieSecure(env: AppEnv): boolean {
 }
 
 /**
- * Orígenes admitidos por el guard CSRF además del propio host: los de
- * ALLOWED_ORIGINS y, fuera de producción, el dev server de Vite y el de E2E.
+ * Orígenes admitidos por el guard CSRF además del propio host: exactamente los
+ * de ALLOWED_ORIGINS, en todos los entornos.
+ *
+ * En desarrollo y en E2E no hace falta agregar los puertos de Vite: el proxy
+ * (`changeOrigin: false`) reenvía el `Host` del navegador, así que el `Origin`
+ * de la web coincide con el `Host` del request y el guard lo acepta por esa
+ * vía. Abrir puertos fijos "por las dudas" solo ensanchaba la superficie.
  */
 export function allowedOrigins(env: AppEnv): Set<string> {
-  const set = new Set<string>(env.ALLOWED_ORIGINS);
-  if (!isProduction(env)) {
-    for (const p of ["5173", "5174"]) {
-      set.add(`http://localhost:${p}`);
-      set.add(`http://127.0.0.1:${p}`);
-    }
-  }
-  return set;
+  return new Set<string>(env.ALLOWED_ORIGINS);
 }

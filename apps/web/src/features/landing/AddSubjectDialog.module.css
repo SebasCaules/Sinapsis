@@ -18,13 +18,13 @@
 }
 .swatchRow {
   display: flex;
-  gap: 7px;
+  gap: 10px;
   align-items: center;
   height: 36px;
 }
 .swatch {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -32,8 +32,8 @@
   background: var(--sw);
   transition: box-shadow var(--t);
 }
-.swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--elevated), 0 0 0 3px var(--sw); }
-.swatch:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 4px; }
+.swatch[aria-checked="true"] { box-shadow: 0 0 0 2px var(--elevated), 0 0 0 3px var(--sw); }
+.swatch:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 
 .division {
   grid-column: 1 / -1;

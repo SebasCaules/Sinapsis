@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { routes } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
 import { useMe } from "@/lib/auth";
-import { isMockMode } from "@/mocks/dev-fixtures";
 import { Button, Seal, ThemeToggle } from "@/components/platform";
 import css from "./LoginPage.module.css";
 
@@ -42,9 +41,13 @@ export function LoginPage() {
 
   const from = (location.state as { from?: string } | null)?.from ?? routes.landing();
 
+  useEffect(() => {
+    document.title = "Entrar · Sinapsis";
+  }, []);
+
   const config = useQuery({
     queryKey: qk.config,
-    queryFn: () => (isMockMode() ? { googleClientId: null, devBypass: true } : api.config()),
+    queryFn: () => api.config(),
     retry: false,
     staleTime: Infinity,
   });

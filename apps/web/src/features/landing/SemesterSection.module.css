@@ -8,14 +8,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-.handle {
-  flex: none;
-  font: 600 12px var(--font-mono);
-  letter-spacing: -.1em;
-  color: var(--text-3);
-  cursor: default;
-}
-
 .bar { flex: none; width: 3px; height: 26px; border-radius: 2px; background: var(--accent); }
 
 .toggle {
@@ -31,7 +23,12 @@
   text-align: left;
   color: inherit;
 }
-.toggle:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; border-radius: 6px; }
+.toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 6px var(--primary-ring);
+}
 
 .chip {
   flex: none;

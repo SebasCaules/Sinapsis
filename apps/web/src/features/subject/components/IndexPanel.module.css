@@ -73,7 +73,9 @@
 }
 
 .division { display: flex; flex-direction: column; }
-.division[data-dimmed] { opacity: 0.5; }
+/* Una división sin páginas NO se atenúa entera: el rótulo conserva su contraste
+   y solo el contador se apaga; el control se apaga de verdad con `disabled`. */
+.division[data-dimmed] .count { opacity: 0.55; }
 
 .divisionRow {
   height: 32px;
@@ -89,9 +91,16 @@
   text-align: left;
   transition: background var(--t);
 }
-.divisionRow:hover { background: var(--surface-2); }
+.divisionRow:hover:not(:disabled) { background: var(--surface-2); }
 .divisionRow[data-active="true"] { background: var(--surface-2); }
-.divisionRow:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: -2px; }
+.divisionRow:disabled { cursor: default; }
+.divisionRow:disabled .chev,
+.divisionRow:disabled .chevOpen { visibility: hidden; }
+.divisionRow:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 6px var(--primary-ring);
+}
 
 .dot {
   width: 8px;
@@ -176,7 +185,11 @@
   cursor: pointer;
 }
 .blockLabel:hover { color: var(--text-2); }
-.blockLabel:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: -2px; }
+.blockLabel:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 6px var(--primary-ring);
+}
 
 .page {
   height: 26px;
@@ -193,7 +206,11 @@
 .page:hover { background: var(--surface-2); }
 .page[data-active="true"] { background: var(--primary-soft); color: var(--primary); }
 .page[data-active="true"] .pageTitle { font-weight: 600; }
-.page:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: -2px; }
+.page:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 6px var(--primary-ring);
+}
 
 .num {
   flex: none;
@@ -217,4 +234,15 @@
   margin-left: auto;
   color: var(--good);
   stroke-width: 2;
+}
+
+/* Por debajo de 900 px el índice deja de robarle ancho a la prosa: se despega
+   del flujo y se posa sobre el contenido, que pasa a ocupar todo el hueco. */
+@media (max-width: 900px) {
+  .panel {
+    position: fixed;
+    inset: 40px auto 0 52px;
+    z-index: 20;
+    box-shadow: var(--shadow-lg);
+  }
 }

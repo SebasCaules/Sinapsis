@@ -2,7 +2,8 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import css from "./Button.module.css";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost";
+  /** `danger` es para la acción destructiva de una confirmación (quitar, borrar). */
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md";
   /** Estado "encendido" de un botón de conmutación (p. ej. "Gestionar"). */
   active?: boolean;

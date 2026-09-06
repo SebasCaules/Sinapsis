@@ -1,4 +1,5 @@
-/* Cabecera 40 · pestaña 30 con filete superior de 2 · controles de 26. */
+/* Cabecera 40 · pestaña 30 con filete superior de 2 · controles de 24 (objetivo
+   táctil mínimo del contrato). */
 
 .header {
   height: 40px;
@@ -12,8 +13,8 @@
 }
 
 .back {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   flex: none;
   display: grid;
   place-items: center;
@@ -25,6 +26,11 @@
   transition: background var(--t), color var(--t);
 }
 .back:hover { background: var(--surface-2); color: var(--text-2); }
+.back:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
 
 .tab {
   height: 30px;
@@ -66,12 +72,31 @@
   white-space: nowrap;
 }
 
-.tabClose { flex: none; color: var(--text-3); opacity: 0.6; }
+/* La ✕ de la pestaña única: cierra = volver al inicio de la materia. El icono
+   sigue midiendo 13, pero el objetivo táctil llega a 25 con el relleno. */
+.tabClose {
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  margin: -6px -4px -6px -2px;
+  border-radius: 6px;
+  color: var(--text-3);
+  opacity: 0.6;
+  transition: opacity var(--t), background var(--t);
+}
+.tabClose:hover { opacity: 1; background: var(--surface); }
+.tabClose:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+  box-shadow: inset 0 0 0 5px var(--primary-ring);
+  opacity: 1;
+}
 
 .addTab {
   position: relative;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   flex: none;
   display: grid;
   place-items: center;

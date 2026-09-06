@@ -68,6 +68,12 @@ export function createApp(deps: AppDeps): Hono<AppBindings> {
   app.notFound((c) => c.json({ error: "Ruta no encontrada" }, 404));
 
   app.onError((error, c) => {
+    // Cuerpo que dice ser JSON pero no lo es: lo detecta `c.req.json()` (el
+    // validador zod de cada ruta) o el propio runtime. Se traduce acá para que
+    // el cliente reciba `{ error }` en español como el resto del API.
+    if (isMalformedJson(error)) {
+      return c.json({ error: "El cuerpo no es JSON válido" }, 400);
+    }
     if (error instanceof HTTPException) {
       const res = error.getResponse();
       // Las HTTPException que arma `lib/errors.ts` ya traen `{ error }`.
@@ -82,9 +88,22 @@ export function createApp(deps: AppDeps): Hono<AppBindings> {
 }
 
 /**
+ * ¿El error viene de un cuerpo que se declaró `application/json` y no lo era?
+ * Hono lo envuelve en una HTTPException 400 «Malformed JSON in request body»;
+ * un `c.req.json()` directo deja escapar el `SyntaxError` del runtime.
+ */
+function isMalformedJson(error: unknown): boolean {
+  if (error instanceof SyntaxError) return true;
+  return (
+    error instanceof HTTPException && error.status === 400 && /malformed json/i.test(error.message)
+  );
+}
+
+/**
  * Fallback estático: si WEB_DIST existe, sirve sus archivos y devuelve
  * `index.html` para cualquier ruta que no empiece por `/api` (SPA con rutas de
- * navegador, N0-9).
+ * navegador, N0-9). El `index.html` se lee una sola vez al montar: es el mismo
+ * build durante toda la vida del proceso.
  */
 function mountWebDist(app: Hono<AppBindings>, webDist: string | null): void {
   if (!webDist) return;
@@ -92,6 +111,7 @@ function mountWebDist(app: Hono<AppBindings>, webDist: string | null): void {
   if (!existsSync(absolute)) return;
 
   const indexPath = join(absolute, "index.html");
+  const indexHtml = existsSync(indexPath) ? readFileSync(indexPath, "utf8") : null;
   // serveStatic resuelve `root` contra el cwd del proceso.
   const root = relative(process.cwd(), absolute) || ".";
 
@@ -101,7 +121,7 @@ function mountWebDist(app: Hono<AppBindings>, webDist: string | null): void {
     if (c.req.path.startsWith(`${API_PREFIX}/`) || c.req.path === API_PREFIX) {
       return c.json({ error: "Ruta no encontrada" }, 404);
     }
-    if (!existsSync(indexPath)) return c.json({ error: "La SPA no está compilada" }, 404);
-    return c.html(readFileSync(indexPath, "utf8"));
+    if (indexHtml === null) return c.json({ error: "La SPA no está compilada" }, 404);
+    return c.html(indexHtml);
   });
 }

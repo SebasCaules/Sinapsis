@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { CreateSubjectInput, type SubjectDetail } from "@sinapsis/contract";
@@ -7,7 +6,8 @@ import { withTransaction } from "../db/client.js";
 import { pages, progress, subjects, userSubjects } from "../db/schema.js";
 import { conflict, notFound } from "../lib/errors.js";
 import { newId, nowIso } from "../lib/ids.js";
-import { zodMessage } from "../lib/validate.js";
+import { jsonBody } from "../lib/validate.js";
+import { loadSubject } from "../middleware/subject.js";
 import { landingCard, nextPosition } from "../services/landing.js";
 import { findSubjectBySlug, pageMetaColumns, resolveConfig, rowToPageMeta } from "../services/subjects.js";
 import type { AppBindings } from "../types.js";
@@ -16,8 +16,8 @@ export function subjectRoutes(): Hono<AppBindings> {
   const app = new Hono<AppBindings>();
 
   app.use("/subjects", requireSession);
-  app.use("/subjects/:slug", requireSession);
-  app.use("/subjects/:slug/landing", requireSession);
+  app.use("/subjects/:slug", requireSession, loadSubject);
+  app.use("/subjects/:slug/landing", requireSession, loadSubject);
 
   /**
    * Agregar materia desde la landing. Si el slug no existe se crea una materia
@@ -26,12 +26,7 @@ export function subjectRoutes(): Hono<AppBindings> {
    */
   app.post(
     "/subjects",
-    zValidator("json", CreateSubjectInput, (result, c) => {
-      if (!result.success) {
-        return c.json({ error: `Materia inválida — ${zodMessage(result.error)}` }, 400);
-      }
-      return undefined;
-    }),
+    jsonBody(CreateSubjectInput, "Materia inválida"),
     async (c) => {
       const db = c.var.db;
       const userId = c.var.user.id;
@@ -91,8 +86,7 @@ export function subjectRoutes(): Hono<AppBindings> {
   /** Quitar de la landing: no borra la materia (es global) ni el progreso. */
   app.delete("/subjects/:slug/landing", async (c) => {
     const db = c.var.db;
-    const subject = await findSubjectBySlug(db, c.req.param("slug"));
-    if (!subject) throw notFound("La materia no existe");
+    const subject = c.var.subject;
     await db
       .delete(userSubjects)
       .where(and(eq(userSubjects.userId, c.var.user.id), eq(userSubjects.subjectId, subject.id)));
@@ -105,8 +99,7 @@ export function subjectRoutes(): Hono<AppBindings> {
    */
   app.get("/subjects/:slug", async (c) => {
     const db = c.var.db;
-    const subject = await findSubjectBySlug(db, c.req.param("slug"));
-    if (!subject) throw notFound("La materia no existe");
+    const subject = c.var.subject;
 
     const metas = await db
       .select(pageMetaColumns)

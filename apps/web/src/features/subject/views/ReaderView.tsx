@@ -2,8 +2,12 @@
  * Lector de una página del wiki (regiones 09 y 10): hoja de 840 con la barra de
  * la división, la prosa y la columna de 248 (índice de la página, fuentes y
  * backlinks). Es la vista más pesada del shell: se carga en diferido.
+ *
+ * Los ids de los encabezados los pone el compilador (`Page.headings[].id`, con
+ * `headingId` del contrato) y el plugin de rehype los repite tal cual: el índice
+ * de la página no necesita leer el DOM para saber a dónde apunta.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
 import { UiIcon } from "@/components/platform";
@@ -21,7 +25,6 @@ export function ReaderView() {
   const toggleStudied = useToggleStudied(slug);
   const [sideOpen, setSideOpen] = useState(true);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
-  const [domHeadings, setDomHeadings] = useState<PageHeading[]>([]);
   const sourcesRef = useRef<HTMLElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 
@@ -34,42 +37,25 @@ export function ReaderView() {
   const position = model.positionOf(pageSlug);
   const { prev, next } = model.prevNext(pageSlug);
   const upcoming = position ? sequence.slice(position, position + 3) : [];
-  const slugs = useMemo(() => new Set(model.bySlug.keys()), [model]);
-  const metaHeadings = useMemo(
+  /* Callback estable: el pipeline de markdown se rearma solo si cambia la materia. */
+  const exists = useCallback((target: string) => model.bySlug.has(target), [model]);
+  const headings = useMemo(
     () => (page?.headings ?? []).filter((h) => h.level === 2 || h.level === 3),
     [page?.headings],
   );
-  /* Los ids de verdad son los que puso rehype-slug en el DOM: el índice de la
-     página se arma con ellos, no con los del compilador, para que un criterio
-     distinto de slug (acentos, puntuación) no rompa las anclas. */
-  const headings = domHeadings.length ? domHeadings : metaHeadings;
-
-  useEffect(() => {
-    if (!detail) return;
-    const found = sheetRef.current?.querySelectorAll<HTMLElement>("h2[id], h3[id]");
-    setDomHeadings(
-      [...(found ?? [])].map((el) => ({
-        level: el.tagName === "H3" ? 3 : 2,
-        text: el.textContent ?? "",
-        id: el.id,
-      })),
-    );
-  }, [detail, pageSlug]);
 
   /* Al cambiar de página: arriba de todo, salvo que la URL traiga un ancla. */
   useEffect(() => {
     if (!detail) return;
     const scroller = document.querySelector<HTMLElement>("main[data-subject-main]");
     const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
-    if (hash) {
-      const target = findAnchor(sheetRef.current, hash);
-      if (target) {
-        target.scrollIntoView({ block: "start" });
-        return;
-      }
+    const target = hash ? document.getElementById(hash) : null;
+    if (target) {
+      target.scrollIntoView({ block: "start" });
+      return;
     }
     scroller?.scrollTo({ top: 0 });
-  }, [detail, pageSlug, location.hash, domHeadings]);
+  }, [detail, pageSlug, location.hash]);
 
   /* Scroll-spy del índice de la página. */
   useEffect(() => {
@@ -93,37 +79,22 @@ export function ReaderView() {
     return () => observer.disconnect();
   }, [headings, detail]);
 
-  if (query.isPending) return <SheetSkeleton />;
-  if (query.isError || !detail || !page) {
+  /* El error manda sobre la carga: un 404 no puede quedarse en el esqueleto. */
+  if (query.isError || (!query.isPending && (!detail || !page))) {
     return <ErrorCard error={query.error} notFound="Esta página no existe en la materia" subject={slug} />;
   }
+  if (query.isPending || !detail || !page) return <SheetSkeleton />;
 
   const studied = detail.studied;
   const color = division?.color ?? "var(--primary)";
   const sources = page.sources.map((s) => ({ slug: s, page: model.bySlug.get(s) }));
+  const unit = model.config.division.singular.toLowerCase();
+  const onToggleStudied = () => toggleStudied.mutate({ page: pageSlug, studied: !studied });
 
   return (
     <div className={css.layout} style={{ ["--ucol" as string]: color }}>
       <div className={css.column}>
-        <div className={css.chips}>
-          <button
-            type="button"
-            className={css.chipButton}
-            data-on={studied ? "true" : undefined}
-            onClick={() => toggleStudied.mutate({ page: pageSlug, studied: !studied })}
-            aria-pressed={studied}
-          >
-            <UiIcon name="check" size={13} />
-            {studied ? "Estudiada" : "Marcar estudiado"}
-          </button>
-          <span className={css.chipDisabled}>
-            <UiIcon name="bookmark" size={13} />
-            Guardar
-            <span className={css.tip} role="tooltip">
-              Favoritos: próximamente
-            </span>
-          </span>
-        </div>
+        <StudyActions studied={studied} onToggle={onToggleStudied} />
 
         <article className={css.sheet} ref={sheetRef}>
           <header className={css.sheetHead}>
@@ -183,32 +154,25 @@ export function ReaderView() {
                     data-state={p.slug === pageSlug ? "current" : model.studied.has(p.slug) ? "studied" : "todo"}
                     title={p.title}
                     aria-label={p.title}
+                    aria-current={p.slug === pageSlug ? "page" : undefined}
                   />
                 ))}
               </div>
             </div>
           ) : null}
 
-          <nav className={css.prevNext} aria-label="Páginas vecinas">
-            {prev ? (
-              <Link className={css.prev} to={routes.page(slug, prev.slug)}>
-                ← Anterior
-              </Link>
-            ) : (
-              <span className={css.prevOff}>← Anterior</span>
-            )}
-            {next ? (
-              <Link className={css.next} to={routes.page(slug, next.slug)}>
-                Siguiente: {next.title} →
-              </Link>
-            ) : (
-              <span className={css.prevOff}>Última de la división</span>
-            )}
-          </nav>
+          <PrevNext slug={slug} prev={prev} next={next} unit={unit} />
 
           <h1 className={css.title}>{page.title}</h1>
 
-          <Markdown body={stripLeadingH1(page.body, page.title)} subject={slug} slugs={slugs} />
+          <Markdown body={page.body} subject={slug} exists={exists} />
+
+          {/* El mismo par de acciones al terminar de leer: nadie tiene que volver
+              arriba para marcar la página o pasar a la siguiente. */}
+          <footer className={css.foot}>
+            <PrevNext slug={slug} prev={prev} next={next} unit={unit} foot />
+            <StudyActions studied={studied} onToggle={onToggleStudied} foot />
+          </footer>
         </article>
       </div>
 
@@ -229,7 +193,7 @@ export function ReaderView() {
                     data-active={activeHeading === h.id ? "true" : undefined}
                     onClick={(e) => {
                       e.preventDefault();
-                      findAnchor(sheetRef.current, h.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
+                      document.getElementById(h.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
                       history.replaceState(null, "", `#${h.id}`);
                     }}
                   >
@@ -292,36 +256,75 @@ export function ReaderView() {
   );
 }
 
-/**
- * Busca el destino de un ancla. Primero por id exacto; si no, comparando sin
- * acentos: un wikilink escrito «#estandarizacion» tiene que abrir la sección
- * «Estandarización» aunque el id del DOM conserve la tilde.
- */
-function findAnchor(root: HTMLElement | null, hash: string): HTMLElement | null {
-  if (!hash) return null;
-  const direct = document.getElementById(hash);
-  if (direct) return direct;
-  const norm = (value: string) =>
-    value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const wanted = norm(hash);
-  for (const el of root?.querySelectorAll<HTMLElement>("[id]") ?? []) {
-    if (norm(el.id) === wanted) return el;
-  }
-  return null;
+/** «Marcar estudiado / Estudiada» + el hueco de Favoritos. Va arriba y al pie. */
+function StudyActions({
+  studied,
+  onToggle,
+  foot = false,
+}: {
+  studied: boolean;
+  onToggle: () => void;
+  foot?: boolean;
+}) {
+  return (
+    <div className={foot ? `${css.chips} ${css.chipsFoot}` : css.chips}>
+      <button
+        type="button"
+        className={css.chipButton}
+        data-on={studied ? "true" : undefined}
+        onClick={onToggle}
+        aria-pressed={studied}
+      >
+        <UiIcon name="check" size={13} />
+        {studied ? "Estudiada" : "Marcar estudiado"}
+      </button>
+      <button
+        type="button"
+        className={css.chipDisabled}
+        disabled
+        aria-disabled="true"
+        title="Favoritos: próximamente"
+      >
+        <UiIcon name="bookmark" size={13} />
+        Guardar
+      </button>
+    </div>
+  );
+}
+
+/** Anterior / Siguiente dentro de la secuencia de la división. */
+function PrevNext({
+  slug,
+  prev,
+  next,
+  unit,
+  foot = false,
+}: {
+  slug: string;
+  prev: PageMeta | null;
+  next: PageMeta | null;
+  /** Nombre de la división de la materia, en minúscula ("unidad", "semana"). */
+  unit: string;
+  foot?: boolean;
+}) {
+  return (
+    <nav className={foot ? `${css.prevNext} ${css.prevNextFoot}` : css.prevNext} aria-label="Páginas vecinas">
+      {prev ? (
+        <Link className={css.prev} to={routes.page(slug, prev.slug)}>
+          ← Anterior
+        </Link>
+      ) : (
+        <span className={css.prevOff}>← Anterior</span>
+      )}
+      {next ? (
+        <Link className={css.next} to={routes.page(slug, next.slug)}>
+          Siguiente: {next.title} →
+        </Link>
+      ) : (
+        <span className={css.prevOff}>Última de la {unit}</span>
+      )}
+    </nav>
+  );
 }
 
 export default ReaderView;
-
-/**
- * El lector ya muestra el título como h1: si el cuerpo empieza con su propio
- * `# Título` (convención del wiki), se quita para no duplicarlo. Solo se quita
- * el primer H1 y solo si es lo primero que hay en el cuerpo.
- */
-export function stripLeadingH1(body: string, title: string): string {
-  const m = /^\s*#\s+(.+?)\s*#*\s*(\r?\n|$)/.exec(body);
-  if (!m) return body;
-  const norm = (t: string) => t.replace(/[*_`]/g, "").trim().toLowerCase();
-  const h = norm(m[1] ?? "");
-  if (h !== norm(title) && h.length > 0 && !norm(title).startsWith(h)) return body;
-  return body.slice(m[0].length).replace(/^\s*\n/, "");
-}

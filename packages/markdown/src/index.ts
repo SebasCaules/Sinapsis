@@ -7,15 +7,16 @@
 export { parseFrontmatter, parseScalarOrList, splitTopCommas, cleanWikilink } from "./frontmatter.js";
 export type { Frontmatter } from "./frontmatter.js";
 
-export { extractLinks, extractHeadings, slugifyAnchor, countWords, firstH1, splitLines } from "./inline.js";
+export { extractLinks, extractHeadings, slugifyAnchor, countWords, firstH1, firstH1Line, splitLines } from "./inline.js";
 
-export {
-  compilePage,
-  compileWiki,
-  formatIssues,
-  normalizeSlug,
-  normalizeDivisionKey,
-} from "./compile.js";
+/**
+ * Normalizadores de texto: viven en `@sinapsis/contract` (una sola
+ * implementación para api, web, cli y compilador). Se reexportan acá para no
+ * romper a quien los importaba de este paquete.
+ */
+export { normalizeSlug, normalizeDivisionKey, fold } from "@sinapsis/contract";
+
+export { compilePage, compileWiki, formatIssues } from "./compile.js";
 export type {
   CompileIssue,
   IssueKind,

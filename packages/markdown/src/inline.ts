@@ -2,7 +2,14 @@
  * Extracción de wikilinks, encabezados y métricas del cuerpo markdown.
  * Todo replica el comportamiento de `build.py` (ver `docs/CONTRACT.md` §3).
  */
-import type { PageLink, PageHeading } from "@sinapsis/contract";
+import { headingId, type PageLink, type PageHeading } from "@sinapsis/contract";
+
+/**
+ * Id estable de un encabezado. Dueño único: `headingId` del contrato (lo usan
+ * también el API y el lector, así `[[pagina#ancla]]` resuelve siempre igual).
+ * Se reexporta con el nombre histórico del compilador.
+ */
+export { headingId as slugifyAnchor } from "@sinapsis/contract";
 
 const WIKILINK = /\[\[([^\]]+)\]\]/g;
 const HEADING = /^(#{1,4})\s+(.*?)\s*#*$/;
@@ -72,27 +79,10 @@ export function extractHeadings(body: string): PageHeading[] {
     if (!m) continue;
     const level = (m[1] ?? "").length;
     const text = (m[2] ?? "").trim();
-    headings.push({ level, text, id: slugifyAnchor(text) });
+    headings.push({ level, text, id: headingId(text) });
   }
 
   return headings;
-}
-
-/**
- * Id estable de un encabezado: quita `$math$`, resuelve wikilinks, borra
- * `*_\``, pasa a minúsculas y deja solo `[a-z0-9áéíóúñü]` y guiones.
- * Idéntico a `slugify_anchor` de `build.py`.
- */
-export function slugifyAnchor(text: string): string {
-  let t = text.replace(/\$[^$]*\$/g, "");
-  t = t.replace(/\[\[([^\]|]+)(\|[^\]]+)?\]\]/g, (_m, target: string, alias?: string) =>
-    alias ? alias.slice(1) : target,
-  );
-  t = t.replace(/[*_`]/g, "");
-  t = t.toLowerCase().trim();
-  t = t.replace(/[^a-z0-9áéíóúñü ]+/g, "");
-  t = t.replace(/\s+/g, "-").replace(/^-+|-+$/g, "");
-  return t || "h";
 }
 
 /** Palabras del cuerpo. Paridad con `len(re.findall(r"\w+", body))` de Python. */
@@ -100,11 +90,21 @@ export function countWords(body: string): number {
   return (body.match(WORD) ?? []).length;
 }
 
-/** Primer encabezado H1 del cuerpo, o `null`. */
-export function firstH1(body: string): string | null {
-  for (const line of splitLines(body)) {
-    const m = line.match(HEADING);
-    if (m && (m[1] ?? "").length === 1) return (m[2] ?? "").trim();
+/**
+ * Primer encabezado H1 del cuerpo: su texto y el índice de su línea (en la
+ * numeración de `splitLines`), o `null`. Lo usa el compilador tanto para
+ * deducir el título como para recortar el H1 que solo repite ese título.
+ */
+export function firstH1Line(body: string): { line: number; text: string } | null {
+  const lines = splitLines(body);
+  for (let i = 0; i < lines.length; i += 1) {
+    const m = (lines[i] ?? "").match(HEADING);
+    if (m && (m[1] ?? "").length === 1) return { line: i, text: (m[2] ?? "").trim() };
   }
   return null;
+}
+
+/** Primer encabezado H1 del cuerpo, o `null`. */
+export function firstH1(body: string): string | null {
+  return firstH1Line(body)?.text ?? null;
 }

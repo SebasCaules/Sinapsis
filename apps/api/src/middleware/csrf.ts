@@ -8,6 +8,9 @@
  *    content-type y pasan.
  *  - Si el request trae `Origin`, su host debe coincidir con el del request (o con
  *    `x-forwarded-host`), o el origen debe estar en ALLOWED_ORIGINS.
+ *
+ * El guard no toca el cuerpo: solo mira encabezados. El JSON roto lo atrapa
+ * `app.onError` (`app.ts`), donde ya se decide el formato de todos los errores.
  */
 import { createMiddleware } from "hono/factory";
 import type { AppBindings } from "../types.js";
@@ -54,16 +57,6 @@ export const csrfGuard = createMiddleware<AppBindings>(async (c, next) => {
   }
   if (declaresBody && contentType === null) {
     throw httpError(415, "Falta el encabezado content-type: application/json");
-  }
-
-  if (contentType === JSON_TYPE && (declaresBody || c.req.raw.body !== null)) {
-    // Se parsea acá (queda cacheado para el validador zod de cada ruta) para
-    // que un JSON roto devuelva `{ error }` como el resto del API.
-    try {
-      await c.req.json();
-    } catch {
-      throw httpError(400, "El cuerpo no es JSON válido");
-    }
   }
 
   await next();

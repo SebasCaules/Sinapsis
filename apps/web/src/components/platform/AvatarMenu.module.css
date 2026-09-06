@@ -15,7 +15,11 @@
   transition: box-shadow var(--t), filter var(--t);
 }
 .avatar:hover { filter: brightness(1.08); }
-.avatar:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+.avatar:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
+}
 .initials {
   font: 600 9.5px/1 var(--font-mono);
   color: var(--on-primary);
@@ -71,4 +75,4 @@
   gap: 8px;
 }
 .item:hover { background: var(--surface-2); color: var(--text); }
-.item:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: -2px; }
+.item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; box-shadow: inset 0 0 0 6px var(--primary-ring); }

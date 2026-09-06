@@ -11,6 +11,7 @@
  * También desescapa `\|` dentro del wikilink, que es como se escribe el separador
  * cuando el enlace vive en una celda de tabla.
  */
+import { headingId, routes } from "@sinapsis/contract";
 import { visit, SKIP } from "unist-util-visit";
 
 export interface WikilinkOptions {
@@ -45,7 +46,7 @@ export function parseWikilink(inner: string): { slug: string; anchor: string | n
 export function remarkWikilinks(options: WikilinkOptions) {
   const { subject, exists } = options;
 
-  return function transformer(tree: MdNode): void {
+  return function transformer(tree: unknown): undefined {
     visit(tree as never, "text", (node: unknown, index: unknown, parent: unknown) => {
       const text = node as MdNode;
       const holder = parent as MdNode | null;
@@ -71,7 +72,9 @@ export function remarkWikilinks(options: WikilinkOptions) {
         } else if (exists(slug)) {
           out.push({
             type: "link",
-            url: `/m/${subject}/p/${slug}${anchor ? `#${anchor}` : ""}`,
+            /* El ancla pasa por `headingId`: es el mismo id que el compilador
+               le puso al encabezado y que el lector pinta en el DOM. */
+            url: routes.page(subject, slug) + (anchor ? `#${headingId(anchor)}` : ""),
             data: { hProperties: { className: ["wikilink"], "data-slug": slug } },
             children: [{ type: "text", value: shown }],
           });
@@ -95,5 +98,6 @@ export function remarkWikilinks(options: WikilinkOptions) {
       holder.children?.splice(at, 1, ...out);
       return [SKIP, at + out.length];
     });
+    return undefined;
   };
 }

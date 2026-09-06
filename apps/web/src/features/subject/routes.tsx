@@ -18,13 +18,11 @@ const DivisionView = lazy(() => import("./views/DivisionView"));
 function ToolView() {
   const { model } = useSubjectCtx();
   const { tool = "" } = useParams();
-  for (const group of model.railGroups) {
-    for (const { item } of group.items) {
-      if (item.kind === "tool" && item.target === tool) return <ComingSoon title={item.label} sprint="Sprint 3" />;
-      if (item.kind === "builtin" && item.id === tool) return <ComingSoon title={item.label} sprint="Sprint 2" />;
-    }
-  }
-  return <ComingSoon title="Herramienta de la materia" sprint="Sprint 3" />;
+  /* El mismo buscador que usa el shell para la pestaña: una sola definición de
+     «qué ítem del rail corresponde a /t/:tool». */
+  const view = model.railItem(tool);
+  if (!view) return <ComingSoon title="Herramienta de la materia" sprint="Sprint 3" />;
+  return <ComingSoon title={view.item.label} sprint={view.item.kind === "builtin" ? "Sprint 2" : "Sprint 3"} />;
 }
 
 function SubjectNotFound() {

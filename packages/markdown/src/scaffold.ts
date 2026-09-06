@@ -6,9 +6,15 @@
  */
 import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
-import type { DivisionLabel, SubjectConfigInput } from "@sinapsis/contract";
+import {
+  fold,
+  isValidDivisionKey,
+  normalizeDivisionKey,
+  normalizeSlug,
+  type DivisionLabel,
+  type SubjectConfigInput,
+} from "@sinapsis/contract";
 import { parseFrontmatter } from "./frontmatter.js";
-import { normalizeDivisionKey, normalizeSlug } from "./compile.js";
 
 /** Marca de los campos que el usuario debe completar a mano tras `init`. */
 export const TODO = "COMPLETAR";
@@ -130,7 +136,7 @@ export async function inspectWiki(wikiDir: string): Promise<WikiSurvey> {
       raw,
       count,
       numeric: /^\d+$/.test(raw),
-      key: /^[a-z0-9_-]+$/i.test(raw) && raw.length <= 24 ? raw : normalizeDivisionKey(raw),
+      key: isValidDivisionKey(raw) ? raw : normalizeDivisionKey(raw),
     }))
     .filter((d) => d.key !== "")
     .sort((a, b) => {
@@ -234,11 +240,7 @@ export function pendingFields(config: SubjectConfigInput): string[] {
 // ---------------------------------------------------------------------------
 
 function divisionLabelFor(field: string): DivisionLabel {
-  const normalized = field
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-  return DIVISION_LABELS[normalized] ?? DIVISION_LABELS["division"]!;
+  return DIVISION_LABELS[fold(field)] ?? DIVISION_LABELS["division"]!;
 }
 
 function inferSlug(wikiRoot: string): string {
@@ -248,10 +250,7 @@ function inferSlug(wikiRoot: string): string {
 }
 
 function typeKey(singular: string): string {
-  const base = singular
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
+  const base = fold(singular)
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 32);

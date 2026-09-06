@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -7,7 +6,7 @@ import { requireSession } from "../auth/middleware.js";
 import { toUserDto } from "../auth/users.js";
 import { users } from "../db/schema.js";
 import { nowIso } from "../lib/ids.js";
-import { zodMessage } from "../lib/validate.js";
+import { jsonBody } from "../lib/validate.js";
 import type { AppBindings } from "../types.js";
 
 const PatchMeBody = z.object({ theme: ThemeId });
@@ -21,12 +20,7 @@ export function meRoutes(): Hono<AppBindings> {
 
   app.patch(
     "/me",
-    zValidator("json", PatchMeBody, (result, c) => {
-      if (!result.success) {
-        return c.json({ error: `Tema inválido — ${zodMessage(result.error)}` }, 400);
-      }
-      return undefined;
-    }),
+    jsonBody(PatchMeBody, "Tema inválido"),
     async (c) => {
       const { theme } = c.req.valid("json");
       const updated = await c.var.db

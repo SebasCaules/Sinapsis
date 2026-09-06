@@ -7,8 +7,21 @@ import type { SubjectCard, User } from "@sinapsis/contract";
 
 const FLAG = "sinapsis.devMock";
 
-/** ?mock=1 enciende el modo; ?mock=0 lo apaga. La elección dura la pestaña. */
+/** ¿Está encendido el modo mock en esta pestaña? Lectura pura: no escribe nada. */
 export function isMockMode(): boolean {
+  if (!import.meta.env.DEV || typeof window === "undefined") return false;
+  try {
+    return sessionStorage.getItem(FLAG) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Lee `?mock=1` / `?mock=0` y fija la elección para la pestaña. ÚNICO punto que
+ * escribe `sessionStorage`; lo llama `main.tsx` antes de renderizar.
+ */
+export function enableMockFromQuery(): boolean {
   if (!import.meta.env.DEV || typeof window === "undefined") return false;
   try {
     const q = new URLSearchParams(window.location.search).get("mock");
@@ -72,18 +85,21 @@ function card(
   };
 }
 
+/* Las llamadas van marcadas como puras: sin la anotación, Rollup no puede
+   probar que `card()` no tiene efectos y deja las fixtures en el bundle de
+   producción aunque nadie use `mockLanding`. */
 export const mockLanding: SubjectCard[] = [
-  card("proba", "Probabilidad y Estadística", "93.24", "--u9", "2026-2C", 0, 12, 207, 62),
-  card("analisis-ii", "Análisis Matemático II", "93.28", "--u2", "2026-2C", 1, 9, 118, 0),
-  card("algoritmos-iii", "Algoritmos y Estructuras de Datos III", "72.33", "--u1", "2026-2C", 2, 8, 96, 96, {
+  /*#__PURE__*/ card("proba", "Probabilidad y Estadística", "93.24", "--u9", "2026-2C", 0, 12, 207, 62),
+  /*#__PURE__*/ card("analisis-ii", "Análisis Matemático II", "93.28", "--u2", "2026-2C", 1, 9, 118, 0),
+  /*#__PURE__*/ card("algoritmos-iii", "Algoritmos y Estructuras de Datos III", "72.33", "--u1", "2026-2C", 2, 8, 96, 96, {
     division: modulo,
   }),
-  card("fisica-ii", "Física II", "93.26", "--u4", "2026-1C", 0, 10, 132, 44),
-  card("quimica", "Química General", "12.09", "--u6", "2026-1C", 1, 7, 71, 71),
-  card("ingles-tecnico", "Inglés Técnico", "94.02", "--u8", "2026-1C", 2, 14, 38, 5, {
+  /*#__PURE__*/ card("fisica-ii", "Física II", "93.26", "--u4", "2026-1C", 0, 10, 132, 44),
+  /*#__PURE__*/ card("quimica", "Química General", "12.09", "--u6", "2026-1C", 1, 7, 71, 71),
+  /*#__PURE__*/ card("ingles-tecnico", "Inglés Técnico", "94.02", "--u8", "2026-1C", 2, 14, 38, 5, {
     division: semana,
     placeholder: true,
     lastSyncAt: null,
   }),
-  card("algebra", "Álgebra I", "93.58", "--u3", "2025-2C", 0, 6, 84, 84),
+  /*#__PURE__*/ card("algebra", "Álgebra I", "93.58", "--u3", "2025-2C", 0, 6, 84, 84),
 ];

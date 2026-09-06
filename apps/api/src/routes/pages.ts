@@ -1,23 +1,30 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import type { PageDetail, PageLink } from "@sinapsis/contract";
 import { requireSession } from "../auth/middleware.js";
 import { pages, progress } from "../db/schema.js";
 import { notFound } from "../lib/errors.js";
-import { findSubjectBySlug, pageMetaColumns, rowToPage, rowToPageMeta } from "../services/subjects.js";
+import { loadSubject } from "../middleware/subject.js";
+import { pageMetaColumns, rowToPage, rowToPageMeta } from "../services/subjects.js";
 import type { AppBindings } from "../types.js";
+
+/** Comodín LIKE que solo pueden satisfacer los `links_json` que citan este slug. */
+function backlinkPattern(pageSlug: string): string {
+  // `links_json` se guarda con `JSON.stringify`, sin espacios: `{"slug":"x",…}`.
+  const escaped = pageSlug.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+  return `%"slug":"${escaped}"%`;
+}
 
 export function pageRoutes(): Hono<AppBindings> {
   const app = new Hono<AppBindings>();
 
-  app.use("/subjects/:slug/pages/:page", requireSession);
+  app.use("/subjects/:slug/pages/:page", requireSession, loadSubject);
 
   app.get("/subjects/:slug/pages/:page", async (c) => {
     const db = c.var.db;
-    const subject = await findSubjectBySlug(db, c.req.param("slug"));
-    if (!subject) throw notFound("La materia no existe");
+    const subject = c.var.subject;
 
-    const pageSlug = c.req.param("page");
+    const pageSlug = c.req.param("page") ?? "";
     const row = (
       await db
         .select()
@@ -27,11 +34,18 @@ export function pageRoutes(): Hono<AppBindings> {
     )[0];
     if (!row) throw notFound("La página no existe");
 
-    // Backlinks: las páginas de la materia cuyos wikilinks apuntan a esta.
+    // Backlinks: las páginas de la materia cuyos wikilinks apuntan a esta. El
+    // LIKE descarta en SQL casi todo el wiki; el `some` de abajo confirma sobre
+    // el JSON ya parseado (un slug puede aparecer como texto y no como destino).
     const candidates = await db
       .select({ ...pageMetaColumns, linksJson: pages.linksJson })
       .from(pages)
-      .where(eq(pages.subjectId, subject.id));
+      .where(
+        and(
+          eq(pages.subjectId, subject.id),
+          sql`${pages.linksJson} LIKE ${backlinkPattern(pageSlug)} ESCAPE '\\'`,
+        ),
+      );
 
     const backlinks = candidates
       .filter((candidate) => {

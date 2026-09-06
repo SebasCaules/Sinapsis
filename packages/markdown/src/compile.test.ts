@@ -2,8 +2,13 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { SubjectConfig, type SubjectConfig as Cfg } from "@sinapsis/contract";
-import { compilePage, compileWiki, normalizeDivisionKey, normalizeSlug } from "./compile.js";
+import {
+  SubjectConfig,
+  normalizeDivisionKey,
+  normalizeSlug,
+  type SubjectConfig as Cfg,
+} from "@sinapsis/contract";
+import { compilePage, compileWiki } from "./compile.js";
 
 const config: Cfg = SubjectConfig.parse({
   slug: "demo",
@@ -129,6 +134,47 @@ describe("compilePage", () => {
 
   it("normaliza un destino de wikilink que no es un slug", () => {
     expect(page("ver [[De Morgan]]").links).toEqual([{ slug: "de-morgan" }]);
+  });
+});
+
+describe("compilePage · H1 que repite el título", () => {
+  const page = (text: string) => compilePage({ slug: "x", folder: "conceptos", text, config });
+  const fm = (titulo: string) => `---\ntitulo: ${titulo}\nresumen: 'r'\n---\n`;
+
+  it("quita el H1 igual al título (y la línea en blanco que le sigue)", () => {
+    const p = page(`${fm("Media Muestral")}# Media Muestral\n\nCuerpo.\n`);
+    expect(p.body).toBe("Cuerpo.\n");
+    expect(p.headings).toEqual([]);
+    expect(p.words).toBe(1);
+  });
+
+  it("quita el H1 del que salió el título cuando no hay frontmatter", () => {
+    const p = page("# Desde el H1\n\nCuerpo.\n");
+    expect(p.title).toBe("Desde el H1");
+    expect(p.body).toBe("Cuerpo.\n");
+    expect(p.headings).toEqual([]);
+  });
+
+  it("iguala el título aunque el H1 lleve formato o acentos distintos", () => {
+    expect(page(`${fm("Distribución Normal")}# **Distribución Normal**\n\nCuerpo.\n`).body).toBe("Cuerpo.\n");
+    expect(page(`${fm("Distribución Normal")}# Distribucion Normal\n\nCuerpo.\n`).body).toBe("Cuerpo.\n");
+  });
+
+  it("conserva un H1 distinto del título", () => {
+    const p = page(`${fm("Media Muestral")}# Otra cosa\n\nCuerpo.\n`);
+    expect(p.body).toBe("# Otra cosa\n\nCuerpo.\n");
+    expect(p.headings).toEqual([{ level: 1, text: "Otra cosa", id: "otra-cosa" }]);
+  });
+
+  it("deja intacto el cuerpo sin H1", () => {
+    const p = page(`${fm("Media Muestral")}Cuerpo.\n\n## Sección\n`);
+    expect(p.body).toBe("Cuerpo.\n\n## Sección\n");
+    expect(p.headings).toEqual([{ level: 2, text: "Sección", id: "sección" }]);
+  });
+
+  it("solo recorta la línea en blanco inmediata, no el resto del cuerpo", () => {
+    const p = page(`${fm("Media")}# Media\nSin línea en blanco.\n`);
+    expect(p.body).toBe("Sin línea en blanco.\n");
   });
 });
 

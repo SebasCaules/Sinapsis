@@ -18,8 +18,16 @@
 }
 .btn:hover:not(:disabled) { background: var(--surface-2); }
 .btn:active:not(:disabled) { transform: translateY(1px); box-shadow: var(--relief); }
-.btn:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
-.btn:disabled { opacity: .55; cursor: not-allowed; }
+/* Anillo de foco: el trazo lo hace --primary (contraste ≥ 3:1); --primary-ring
+   es solo el halo suave alrededor, nunca el borde que hay que ver. */
+.btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
+}
+.btn:disabled { opacity: .75; cursor: not-allowed; }
+/* Un botón ocupado no está apagado: sigue legible y el cursor lo dice. */
+.btn[aria-busy="true"] { opacity: 1; cursor: progress; }
 
 .sm { height: 26px; padding: 0 12px; font-size: 12px; gap: 6px; }
 
@@ -29,6 +37,13 @@
   color: var(--on-primary);
 }
 .primary:hover:not(:disabled) { background: var(--primary-2); border-color: var(--primary-2); }
+
+.danger {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: var(--on-bad);
+}
+.danger:hover:not(:disabled) { filter: brightness(.94); }
 
 .secondary[data-active="true"] {
   border-color: var(--primary);
@@ -60,5 +75,9 @@
   transition: background var(--t), color var(--t), border-color var(--t);
 }
 .icon:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
-.icon:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+.icon:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
+}
 .icon[data-active="true"] { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }

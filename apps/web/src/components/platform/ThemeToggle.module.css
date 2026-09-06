@@ -1,2 +1,15 @@
 .toggle { color: var(--text-2); }
 .toggle svg { display: block; }
+
+/* Solo para lectores de pantalla: fuera de la vista, dentro del árbol. */
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}

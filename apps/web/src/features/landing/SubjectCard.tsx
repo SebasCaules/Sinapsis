@@ -2,9 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { routes, type SubjectCard as SubjectCardData } from "@sinapsis/contract";
+import { cssColor, plural, routes, type SubjectCard as SubjectCardData } from "@sinapsis/contract";
 import { UiIcon } from "@/components/platform";
-import { cssColor } from "@/lib/color";
 import { semesterShort } from "@/lib/semesters";
 import css from "./SubjectCard.module.css";
 
@@ -29,8 +28,8 @@ export function progressOf(card: Pick<SubjectCardData, "pagesCount" | "studiedCo
 /** "12 divisiones · 207 páginas", con el rótulo de división de la materia. */
 export function metaOf(card: SubjectCardData): string {
   const divisions = card.divisionsCount;
-  const unit = divisions === 1 ? card.division.singular.toLowerCase() : card.division.plural.toLowerCase();
-  const pages = card.pagesCount === 1 ? "página" : "páginas";
+  const unit = plural(divisions, card.division.singular, card.division.plural).toLowerCase();
+  const pages = plural(card.pagesCount, "página", "páginas");
   return `${divisions} ${unit} · ${card.pagesCount} ${pages}`;
 }
 
@@ -71,7 +70,10 @@ export function SubjectCard({
           {initial}
         </span>
         <span className={css.ident}>
-          <span className={css.code}>{card.code}</span>
+          <span className={css.identTop}>
+            <span className={css.code}>{card.code}</span>
+            {card.placeholder ? <span className={css.badge}>Sin sincronizar</span> : null}
+          </span>
           <span className={css.name}>{card.name}</span>
           <span className={css.institution}>{card.institution}</span>
         </span>
@@ -100,7 +102,6 @@ export function SubjectCard({
 
       <div className={css.foot}>
         <span className={css.meta}>{metaOf(card)}</span>
-        {card.placeholder ? <span className={css.badge}>Sin sincronizar</span> : null}
         {manage ? (
           <span className={css.manageTools}>
             <button type="button" className={css.remove} onClick={() => onRemove?.(card)}>
@@ -153,6 +154,7 @@ export function SortableSubjectCard(props: SubjectCardProps & { card: SubjectCar
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: props.card.slug,
     data: { type: "card", semester: props.card.semester },
+    attributes: { roleDescription: "ordenable" },
   });
 
   const style: CSSProperties = {

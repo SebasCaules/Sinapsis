@@ -51,7 +51,6 @@ export interface SubjectUiState {
   /** Abre la división (idempotente): la usa la navegación a una página. */
   openDivision: (slug: string, key: string) => void;
   toggleType: (slug: string, division: string, type: string, byDefault: boolean) => void;
-  setTypeCollapsed: (slug: string, division: string, type: string, collapsed: boolean) => void;
 }
 
 const typeId = (slug: string, division: string, type: string): string => `${slug}/${division}/${type}`;
@@ -81,11 +80,6 @@ export const useSubjectUiStore = create<SubjectUiState>((set, get) => ({
       const effective = s.collapsedTypes[id] ?? byDefault;
       return { collapsedTypes: { ...s.collapsedTypes, [id]: !effective } };
     });
-  },
-
-  setTypeCollapsed: (slug, division, type, collapsed) => {
-    const id = typeId(slug, division, type);
-    set((s) => ({ collapsedTypes: { ...s.collapsedTypes, [id]: collapsed } }));
   },
 }));
 

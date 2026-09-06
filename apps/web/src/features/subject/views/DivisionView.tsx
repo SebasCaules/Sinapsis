@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { routes } from "@sinapsis/contract";
+import { plural, routes } from "@sinapsis/contract";
 import { UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
 import { NotFoundInSubject } from "../components/States";
@@ -22,7 +22,10 @@ export function DivisionView() {
 
   const sequence = model.sequence(key);
   const progress = model.progress(key);
-  const sources = model.pagesByDivision(key).filter((p) => model.type(p.type)?.countsAsContent === false);
+  /* Qué cuenta como fuente lo decide el modelo (una sola vez, con la regla del
+     contrato): la vista no vuelve a mirar `countsAsContent`. */
+  const sources = model.sources(key);
+  const unit = model.config.division.singular.toLowerCase();
 
   return (
     <div className={css.view} style={{ ["--ucol" as string]: division.color }}>
@@ -40,7 +43,7 @@ export function DivisionView() {
             <span className={css.fill} style={{ width: `${Math.round(progress.ratio * 100)}%` }} />
           </span>
           <span className={css.count}>
-            {progress.done} / {progress.total} páginas leídas
+            {progress.done} / {progress.total} {plural(progress.total, "página leída", "páginas leídas")}
           </span>
         </div>
       </header>
@@ -63,7 +66,9 @@ export function DivisionView() {
             </Link>
           </li>
         ))}
-        {!sequence.length ? <li className={css.empty}>Esta división todavía no tiene páginas de contenido.</li> : null}
+        {!sequence.length ? (
+          <li className={css.empty}>Esta {unit} todavía no tiene páginas de contenido.</li>
+        ) : null}
       </ol>
 
       {sources.length ? (
@@ -75,7 +80,7 @@ export function DivisionView() {
             aria-expanded={showSources}
           >
             <UiIcon name="chevronDown" size={13} className={showSources ? css.chevOpen : css.chev} />
-            FUENTES · {sources.length}
+            {plural(sources.length, "FUENTE", "FUENTES")} · {sources.length}
           </button>
           {showSources ? (
             <div className={css.sourceList}>

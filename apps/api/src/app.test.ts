@@ -71,6 +71,54 @@ describe("sin WEB_DIST", () => {
   });
 });
 
+describe("cuerpo JSON roto", () => {
+  let h: Harness;
+
+  beforeAll(async () => {
+    h = await createHarness();
+    await h.login();
+  });
+
+  afterAll(() => h.close());
+
+  // El guard CSRF ya no pre-parsea el cuerpo: el JSON roto lo levanta el
+  // validador de la ruta y lo traduce `app.onError`. Cambia el camino, no el
+  // resultado.
+  const roto = (path: string, headers: Record<string, string> = {}) =>
+    h.request(path, {
+      method: "PATCH",
+      headers: { "content-type": "application/json", ...headers },
+      body: '{ "theme": ',
+    });
+
+  it("devuelve 400 con el mensaje del API", async () => {
+    const res = await roto("/api/me");
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "El cuerpo no es JSON válido" });
+  });
+
+  it("también en el sync, que se autentica con token", async () => {
+    const res = await h.request("/api/subjects/demo/sync", {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${h.env.SYNC_TOKEN}`,
+      },
+      body: "{ no es json",
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "El cuerpo no es JSON válido" });
+  });
+
+  it("un cuerpo JSON válido pero con el tema equivocado sigue dando su propio 400", async () => {
+    const res = await h.json("PATCH", "/api/me", { theme: "neon" });
+    expect(res.status).toBe(400);
+    expect((await res.json()) as { error: string }).toMatchObject({
+      error: expect.stringContaining("Tema inválido"),
+    });
+  });
+});
+
 describe("límite de cuerpo", () => {
   let h: Harness;
 

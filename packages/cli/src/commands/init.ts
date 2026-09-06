@@ -25,7 +25,7 @@ export async function runInit(opts: InitOptions, ctx: Ctx): Promise<number> {
   const outFile = resolveUserPath(ctx, opts.out ?? "sinapsis.config.json");
   if (existsSync(outFile) && !opts.force) {
     ctx.err(pc.red(`Ya existe ${outFile}.`));
-    ctx.err(pc.dim("Usá --force para sobreescribirlo o --out <file> para escribir en otro lado."));
+    ctx.err(pc.dim("Use --force para sobreescribirlo o --out <file> para escribir en otro lado."));
     return 1;
   }
 

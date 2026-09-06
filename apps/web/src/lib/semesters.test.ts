@@ -84,12 +84,6 @@ describe("groupBySemester", () => {
     const groups = groupBySemester(cards);
     expect(groups[1]?.cards.map((c) => c.slug)).toEqual(["a", "b"]);
   });
-
-  it("incluye cuatrimestres vacíos pedidos explícitamente", () => {
-    const groups = groupBySemester(cards, ["2027-1C"]);
-    expect(groups[0]?.semester).toBe("2027-1C");
-    expect(groups[0]?.cards).toEqual([]);
-  });
 });
 
 describe("nextSemesterSuggestion", () => {

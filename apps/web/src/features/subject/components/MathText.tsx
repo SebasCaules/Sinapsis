@@ -2,9 +2,14 @@
  * Texto corto con matemática en línea (`$…$`): resúmenes de las tarjetas del
  * catálogo y epígrafes. No es el pipeline del lector: acá solo hace falta KaTeX,
  * no markdown entero.
+ *
+ * El catálogo dibuja cientos de resúmenes y los vuelve a dibujar con cada tecla
+ * del filtro, así que el componente se memoriza y el HTML de cada fórmula se
+ * guarda en una caché de módulo: la misma fórmula no se compone dos veces.
  */
-import { Fragment, useMemo } from "react";
+import { Fragment, memo, useMemo } from "react";
 import katex from "katex";
+import "katex/dist/katex.min.css";
 
 interface Part {
   math: boolean;
@@ -26,7 +31,19 @@ export function splitMath(text: string): Part[] {
   return parts.length ? parts : [{ math: false, value: text }];
 }
 
-export function MathText({ text, className }: { text: string; className?: string }) {
+/** fórmula → HTML de KaTeX. Vive lo que la pestaña: las fórmulas de una materia se repiten. */
+const rendered = new Map<string, string>();
+
+function renderMath(tex: string): string {
+  let html = rendered.get(tex);
+  if (html === undefined) {
+    html = katex.renderToString(tex, { throwOnError: false, output: "html" });
+    rendered.set(tex, html);
+  }
+  return html;
+}
+
+export const MathText = memo(function MathText({ text, className }: { text: string; className?: string }) {
   const parts = useMemo(() => splitMath(text), [text]);
   return (
     <span className={className}>
@@ -37,7 +54,7 @@ export function MathText({ text, className }: { text: string; className?: string
             // KaTeX genera el HTML a partir del texto de la fórmula y escapa la
             // entrada: no hay HTML del usuario en este marcado.
             dangerouslySetInnerHTML={{
-              __html: katex.renderToString(part.value, { throwOnError: false, output: "html" }),
+              __html: renderMath(part.value),
             }}
           />
         ) : (
@@ -46,4 +63,4 @@ export function MathText({ text, className }: { text: string; className?: string
       )}
     </span>
   );
-}
+});

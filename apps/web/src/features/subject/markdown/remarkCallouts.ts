@@ -9,6 +9,7 @@
  * figuras interactivas, así que muestra el epígrafe con el rótulo «Figura · id»
  * y un marco discontinuo que anuncia el sprint en el que llegará.
  */
+import { fold } from "@sinapsis/contract";
 import { visit } from "unist-util-visit";
 
 interface MdNode {
@@ -46,10 +47,9 @@ const ALIASES: Record<string, string> = {
 const HEAD = /^\[!([\p{L}\p{N}_-]+)\]([+-]?)[ \t]*([^\n]*)(\n|$)/u;
 
 function normalizeType(raw: string): string {
-  const key = raw
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  /* «Intuición» y «intuicion» son el mismo aviso: el criterio de igualdad sin
+     acentos es uno solo en toda la plataforma (`fold` del contrato). */
+  const key = fold(raw);
   const aliased = ALIASES[key] ?? key;
   return CALLOUT_LABELS[aliased] ? aliased : "nota";
 }
@@ -66,7 +66,7 @@ function span(className: string, value: string): MdNode {
 }
 
 export function remarkCallouts() {
-  return function transformer(tree: MdNode): void {
+  return function transformer(tree: unknown): undefined {
     visit(tree as never, "blockquote", (node: unknown) => {
       const quote = node as MdNode;
       const first = quote.children?.[0];
@@ -105,6 +105,7 @@ export function remarkCallouts() {
       };
       quote.children = [...head, ...(quote.children ?? [])];
     });
+    return undefined;
   };
 }
 

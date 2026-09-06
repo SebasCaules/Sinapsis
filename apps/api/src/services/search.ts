@@ -1,9 +1,9 @@
 /**
  * Búsqueda de texto completo por materia (FTS5) con reordenamiento propio.
  *
- * El índice `pages_fts` se reconstruye entero para la materia en cada sync (ver
- * `services/sync.ts`), así que acá solo hay lectura, saneamiento de la consulta
- * y ranking.
+ * `services/sync.ts` mantiene el índice `pages_fts` (solo las páginas que
+ * cambiaron), así que acá hay lectura, saneamiento de la consulta y ranking,
+ * más las primitivas de escritura que usa el sync.
  *
  * Por qué no alcanza con BM25 solo: en un wiki de una materia el vocabulario es
  * muy repetitivo ("normal" aparece en casi todas las páginas de Proba), la IDF
@@ -12,8 +12,8 @@
  * decide `scoreHit`, que mira dónde cayó cada término (título, slug, resumen) y
  * si la página es material propio o una fuente citada.
  */
-import { sql } from "drizzle-orm";
-import type { SearchHit } from "@sinapsis/contract";
+import { sql, type SQL } from "drizzle-orm";
+import { fold, type SearchHit } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
 
 /** Máximo de resultados devueltos. */
@@ -21,10 +21,12 @@ export const SEARCH_LIMIT = 20;
 /** Candidatos que pide a FTS5 antes de reordenar. */
 const CANDIDATE_LIMIT = 120;
 
-/** Minúsculas sin acentos: "Distribución" y "distribucion" son lo mismo. */
-export function fold(text: string): string {
-  return text.normalize("NFD").replace(/\p{M}+/gu, "").toLowerCase();
-}
+/**
+ * Minúsculas sin acentos: "Distribución" y "distribucion" son lo mismo. Es el
+ * `fold` del contrato (mismo criterio que el compilador y la web); se reexporta
+ * porque el ranking de acá es su usuario más caliente.
+ */
+export { fold } from "@sinapsis/contract";
 
 /**
  * Traduce el texto del usuario a una consulta FTS5 segura: se descarta todo lo
@@ -57,10 +59,11 @@ interface HitRow {
 
 export interface SearchOptions {
   /**
-   * Tipos que el config marcó con `countsAsContent: false` (las fuentes): son
-   * material de referencia y pesan menos que las páginas propias del wiki.
+   * ¿El tipo es material de referencia (las "fuentes", `countsAsContent: false`)?
+   * Pesan menos que las páginas propias del wiki. Lo decide
+   * `contentTypePredicate` de `services/subjects.ts`.
    */
-  secondaryTypes?: ReadonlySet<string>;
+  isSecondary?: (type: string) => boolean;
 }
 
 /** Puntaje de una página frente a los términos buscados. Más alto es mejor. */
@@ -140,10 +143,10 @@ export async function searchPages(
     return [];
   }
 
-  const secondaryTypes = options.secondaryTypes ?? new Set<string>();
+  const isSecondary = options.isSecondary ?? (() => false);
 
   return rows
-    .map((row) => ({ row, score: scoreHit(row, terms, secondaryTypes.has(row.type)) }))
+    .map((row) => ({ row, score: scoreHit(row, terms, isSecondary(row.type)) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, SEARCH_LIMIT)
     .map(({ row }) => ({
@@ -155,19 +158,42 @@ export async function searchPages(
     }));
 }
 
-/** Borra del índice todas las páginas de una materia. */
-export async function clearSubjectFts(db: Db, subjectId: string): Promise<void> {
-  await db.run(sql`DELETE FROM pages_fts WHERE subject_id = ${subjectId}`);
+/** Filas del índice, en lotes: `pages_fts` no tiene índices, conviene tocarla poco. */
+const FTS_BATCH = 100;
+
+/** Página tal como entra al índice. */
+export interface IndexablePage {
+  slug: string;
+  title: string;
+  body: string;
+  summary: string;
 }
 
-/** Inserta una página en el índice. */
-export async function indexPage(
-  db: Db,
-  subjectId: string,
-  page: { slug: string; title: string; body: string; summary: string },
-): Promise<void> {
-  await db.run(sql`
-    INSERT INTO pages_fts (title, body, slug, subject_id)
-    VALUES (${page.title}, ${`${page.summary}\n${page.body}`}, ${page.slug}, ${subjectId})
-  `);
+/** Borra del índice solo los slugs indicados (los que cambiaron o se borraron). */
+export async function removeFromFts(db: Db, subjectId: string, slugs: readonly string[]): Promise<void> {
+  for (const batch of chunks(slugs, FTS_BATCH)) {
+    const list: SQL = sql.join(
+      batch.map((slug) => sql`${slug}`),
+      sql`, `,
+    );
+    await db.run(sql`DELETE FROM pages_fts WHERE subject_id = ${subjectId} AND slug IN (${list})`);
+  }
+}
+
+/** Inserta páginas en el índice, en lotes de a `FTS_BATCH`. */
+export async function indexPages(db: Db, subjectId: string, list: readonly IndexablePage[]): Promise<void> {
+  for (const batch of chunks(list, FTS_BATCH)) {
+    const rows: SQL = sql.join(
+      batch.map((p) => sql`(${p.title}, ${`${p.summary}\n${p.body}`}, ${p.slug}, ${subjectId})`),
+      sql`, `,
+    );
+    await db.run(sql`INSERT INTO pages_fts (title, body, slug, subject_id) VALUES ${rows}`);
+  }
+}
+
+/** Parte una lista en tandas de a `size` (la última puede ser más corta). */
+export function chunks<T>(list: readonly T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  return out;
 }

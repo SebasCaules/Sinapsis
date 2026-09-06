@@ -22,7 +22,11 @@ a.card:hover {
   border-color: var(--border-2);
   border-left-color: var(--ucol, var(--u0));
 }
-a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+a.card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  box-shadow: var(--relief), var(--shadow), 0 0 0 6px var(--primary-ring);
+}
 @media (prefers-reduced-motion: reduce) { a.card:hover { transform: none; } }
 
 /* Elemento arrastrado: la tarjeta se levanta de la mesa. */
@@ -43,12 +47,16 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
 .top { display: flex; align-items: flex-start; gap: 11px; }
 
 .handle {
-  margin-top: 6px;
+  margin: -2px -8px 0;
   flex: none;
   display: inline-grid;
   place-items: center;
-  padding: 0;
+  /* El glifo ⋮⋮ mide 7×16: el relleno es lo que hace el blanco de 26×32. */
+  min-width: 26px;
+  min-height: 32px;
+  padding: 8px;
   border: 0;
+  border-radius: 6px;
   background: none;
   font: 600 12px var(--font-mono);
   letter-spacing: -.1em;
@@ -56,8 +64,10 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
   cursor: grab;
   touch-action: none;
 }
-.handle:hover { color: var(--text); }
-.handle:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; border-radius: 4px; }
+.handle:hover { color: var(--text); background: var(--surface-2); }
+.handle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: 0 0 0 5px var(--primary-ring); }
+/* Con el dedo el blanco tiene que ser de dedo: 44×48. */
+@media (pointer: coarse) { .handle { padding: 14px; margin: -8px -14px 0; } }
 
 .mark {
   width: 28px;
@@ -74,6 +84,7 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
 }
 
 .ident { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.identTop { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .code { font: 500 11px var(--font-mono); color: var(--text-3); }
 .name {
   font: 600 15px/1.25 var(--font-ui);
@@ -87,7 +98,13 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
 .institution { font: 500 11px var(--font-ui); color: var(--text-3); }
 
 .progress { display: flex; flex-direction: column; gap: 6px; }
-.track { height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+.track {
+  height: 6px;
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
 .fill {
   height: 100%;
   border-radius: 2px;
@@ -98,7 +115,7 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
 .pages { font: 500 11px var(--font-mono); color: var(--text-3); }
 .state { font: 600 10px var(--font-ui); letter-spacing: .05em; }
 .state[data-state="none"] { color: var(--text-3); }
-.state[data-state="doing"] { color: var(--warn); }
+.state[data-state="doing"] { color: var(--warn-text, var(--warn)); }
 .state[data-state="done"] { color: var(--good); }
 
 .foot {
@@ -114,7 +131,6 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
 .meta { font: 500 11px var(--font-mono); color: var(--text-3); white-space: nowrap; }
 
 .badge {
-  margin-left: auto;
   font: 600 9.5px var(--font-ui);
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -126,7 +142,7 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
   white-space: nowrap;
 }
 
-.manageTools { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+.manageTools { display: flex; align-items: center; gap: 14px; margin-left: auto; }
 
 .remove {
   font: 600 11px var(--font-ui);
@@ -134,7 +150,7 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
   border: 1px solid var(--bad-soft);
   background: var(--bad-soft);
   border-radius: var(--r-sm);
-  padding: 3px 8px;
+  padding: 6px 10px;
   cursor: pointer;
 }
 .remove:hover { border-color: var(--bad); }
@@ -172,4 +188,4 @@ a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3
   transition: border-color var(--t), color var(--t), background var(--t);
 }
 .ghost:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
-.ghost:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+.ghost:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: 0 0 0 5px var(--primary-ring); }

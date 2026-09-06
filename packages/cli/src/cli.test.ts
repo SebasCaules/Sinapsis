@@ -7,9 +7,9 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SubjectConfig, SyncPayload } from "@sinapsis/contract";
-import { cleanArgv, main } from "./cli.js";
+import { cleanArgv, extractCwd, main } from "./cli.js";
 import { extraChecks } from "./commands/validate.js";
-import type { Ctx } from "./context.js";
+import { invocationCwd, type Ctx } from "./context.js";
 
 const run = promisify(execFile);
 
@@ -41,6 +41,34 @@ describe("cleanArgv", () => {
   it("descarta los `--` sueltos que agrega pnpm run", () => {
     expect(cleanArgv(["--", "--", "sync", "--dry-run"])).toEqual(["sync", "--dry-run"]);
     expect(cleanArgv(["sync"])).toEqual(["sync"]);
+  });
+});
+
+describe("extractCwd", () => {
+  it("saca --cwd de cualquier posición", () => {
+    expect(extractCwd(["--cwd", "/a", "sync"])).toEqual({ cwd: "/a", rest: ["sync"] });
+    expect(extractCwd(["sync", "--cwd", "/a", "--dry-run"])).toEqual({ cwd: "/a", rest: ["sync", "--dry-run"] });
+    expect(extractCwd(["sync", "--cwd=/a"])).toEqual({ cwd: "/a", rest: ["sync"] });
+  });
+
+  it("gana la última aparición y sin bandera no cambia nada", () => {
+    expect(extractCwd(["--cwd", "/a", "sync", "--cwd=/b"])).toEqual({ cwd: "/b", rest: ["sync"] });
+    expect(extractCwd(["status"])).toEqual({ rest: ["status"] });
+  });
+});
+
+describe("invocationCwd", () => {
+  const insidePackage = path.join(PKG_ROOT, "src");
+
+  it("usa INIT_CWD solo si pnpm reubicó el proceso dentro del paquete del CLI", () => {
+    expect(invocationCwd({ INIT_CWD: "/proyectos/materia" }, insidePackage)).toBe("/proyectos/materia");
+    expect(invocationCwd({ INIT_CWD: "/proyectos/materia" }, PKG_ROOT)).toBe("/proyectos/materia");
+  });
+
+  it("fuera del paquete manda process.cwd(), aunque haya INIT_CWD heredado", () => {
+    expect(invocationCwd({ INIT_CWD: "/otro/repo" }, "/proyectos/materia")).toBe("/proyectos/materia");
+    expect(invocationCwd({}, "/proyectos/materia")).toBe("/proyectos/materia");
+    expect(invocationCwd({ INIT_CWD: "   " }, insidePackage)).toBe(insidePackage);
   });
 });
 
@@ -147,6 +175,27 @@ describe("sinapsis validate", () => {
     expect(err).toContain("slug");
     expect(err).toContain("divisions");
     expect(err).toContain("pageTypes");
+  });
+
+  it("--cwd manda sobre el directorio del contexto, delante o detrás del comando", async () => {
+    await writeFile(
+      path.join(dir, "sinapsis.config.json"),
+      JSON.stringify({ slug: "Mal Slug", name: "X", code: "1", institution: "ITBA", divisions: [] }),
+    );
+
+    // Desde REPO_ROOT no habría config; con --cwd sí (y falla por el contrato, no por faltante).
+    const antes = testCtx(REPO_ROOT);
+    expect(await main(["--cwd", dir, "validate"], antes)).toBe(1);
+    expect(antes.stderr.join("\n")).toContain("no cumple el contrato");
+
+    const despues = testCtx(REPO_ROOT);
+    expect(await main(["validate", `--cwd=${dir}`], despues)).toBe(1);
+    expect(despues.stderr.join("\n")).toContain("no cumple el contrato");
+
+    // Sin la bandera, el mismo comando no encuentra nada.
+    const sinBandera = testCtx(path.join(dir, "no-existe"));
+    expect(await main(["validate"], sinBandera)).toBe(1);
+    expect(sinBandera.stderr.join("\n")).toContain("No encuentro el config");
   });
 
   it("sale 1 si el archivo no existe o no es JSON", async () => {
