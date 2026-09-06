@@ -86,8 +86,16 @@ export interface RuntimeHandle {
   clearCrumbs: () => void;
 }
 
-export function useRuntime(slug: string, model: SubjectModel | null): RuntimeHandle {
+/** Ganchos del shell que el runtime expone a los bundles (`App.paletteOpen()` / `App.openPalette()`). */
+export interface RuntimeHooks {
+  paletteOpen?: () => boolean;
+  openPalette?: () => void;
+}
+
+export function useRuntime(slug: string, model: SubjectModel | null, hooks?: RuntimeHooks): RuntimeHandle {
   const navigate = useNavigate();
+  const hooksRef = useRef(hooks);
+  hooksRef.current = hooks;
   const { toast } = useToast();
   const theme = useTheme();
 
@@ -149,6 +157,10 @@ export function useRuntime(slug: string, model: SubjectModel | null): RuntimeHan
       toast: (message, tone) => toastRef.current(message, tone === "bad" ? "bad" : "good"),
       setCrumbs: (items) => setCrumbs(items.length ? items : null),
       render: () => setRenderTick((n) => n + 1),
+      /* Se leen en el momento de la llamada: el estado de la paleta cambia sin
+         que el contexto se vuelva a instalar. */
+      paletteOpen: () => hooksRef.current?.paletteOpen?.() ?? false,
+      openPalette: () => hooksRef.current?.openPalette?.(),
     };
   };
   const contextRef = useRef(contextOf);

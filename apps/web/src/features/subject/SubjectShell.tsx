@@ -31,6 +31,7 @@ import type { SubjectCtx } from "./context";
 import { describePath, isSubjectPath, type StudyLabels } from "./route-info";
 import { splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
 import { useRuntime } from "./tools/useRuntime";
+import { PALETTE_EVENT } from "./tools/runtime";
 import { useStudy } from "./study/useStudy";
 import { useStudyState, useSubject } from "./useSubject";
 import css from "./SubjectShell.module.css";
@@ -42,6 +43,21 @@ export function SubjectShell() {
   const { compact, toggle } = useCompact();
   const [searchOpen, setSearchOpen] = useState(false);
   const openSearch = useCallback(() => setSearchOpen(true), []);
+  /* `App.openPalette()` del runtime fuera de una vista de herramienta (una figura
+     del lector, por ejemplo) llega como evento en `window` (`PALETTE_EVENT`);
+     `[data-palette-open]` es la marca que leen `App.paletteOpen()` y el
+     `lookup.js` del baseline en su guardia de Escape (N0-48). */
+  useEffect(() => {
+    const onPalette = () => setSearchOpen(true);
+    window.addEventListener(PALETTE_EVENT, onPalette);
+    return () => window.removeEventListener(PALETTE_EVENT, onPalette);
+  }, []);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (searchOpen) root.setAttribute("data-palette-open", "");
+    else root.removeAttribute("data-palette-open");
+    return () => root.removeAttribute("data-palette-open");
+  }, [searchOpen]);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
   /* El mapa de atajos (U19): se abre con «?» y es la única documentación que
      tiene el teclado del shell. */
@@ -67,7 +83,13 @@ export function SubjectShell() {
   const study = useStudy(subject);
   /* El runtime de la materia (N0-41): se instala al entrar, se desinstala al
      salir y es quien conoce los bundles de herramientas y de figuras. */
-  const runtime = useRuntime(subject, model);
+  const searchOpenRef = useRef(searchOpen);
+  searchOpenRef.current = searchOpen;
+  const runtimeHooks = useMemo(
+    () => ({ paletteOpen: () => searchOpenRef.current, openPalette: openSearch }),
+    [openSearch],
+  );
+  const runtime = useRuntime(subject, model, runtimeHooks);
   const { viewLabel } = runtime;
   const studyLabels = useMemo<StudyLabels>(
     () => ({

@@ -169,7 +169,14 @@ function orderedDivisions(cfg: SubjectConfig): SubjectConfig["divisions"] {
 }
 
 function labelOf(short: string, name: string): string {
-  return short && short !== name ? `${short} · ${name}` : name;
+  /* Una división `extra` no tiene rótulo corto propio: `divisionShort` devuelve
+     el nombre recortado, y componerlo con el nombre entero tartamudea
+     («Comple. · Complementos Matemáticos») y obliga a recortar en el panel de
+     250 px. Si el corto es un prefijo del nombre, no aporta nada. */
+  if (!short || short === name) return name;
+  const stem = short.replace(/\.$/, "");
+  if (name.startsWith(stem)) return name;
+  return `${short} · ${name}`;
 }
 
 /** Construye el modelo. `dark` solo afecta a la escala paramétrica (N > 9 divisiones). */
