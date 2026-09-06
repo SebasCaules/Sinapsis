@@ -10,7 +10,7 @@ import { memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
-import { pad2, type DivisionNode, type SubjectModel } from "../model";
+import { pad2, type DivisionNode, type ProgressGroup, type SubjectModel } from "../model";
 import { INDEX_PANEL_ID } from "./SubjectHeader";
 import { useOpenDivisions, useSubjectUiStore, useTypeCollapsed } from "../store";
 import css from "./IndexPanel.module.css";
@@ -118,9 +118,14 @@ const DivisionRow = memo(function DivisionRow({
   const count = model.contentPages(division.key).length;
   /* El tooltip del baseline (core.js:1916-1921): «U4 · … · 11 páginas · 0
      leídas». El progreso ya lo calcula el modelo; hasta ahora la fila no decía
-     cuánto se llevaba leído. */
-  const done = model.progress(division.key).done;
+     cuánto se llevaba leído. Son PÁGINAS: `progress()` suma también los pasos
+     de los bundles (N0-61), y acá el denominador son las páginas. */
+  const parts = model.progressParts(division.key);
+  const done = parts.pages.done;
   const blocks = expanded ? model.typeBlocks(division.key) : [];
+  /* Los ejercicios de la unidad, agrupados como los declara el bundle (N0-61):
+     un bloque más al final del árbol, con el mismo aire que los de tipo. */
+  const groups = expanded ? parts.groups : [];
   /* El mapa de posiciones lo memoriza el modelo: una vez por división, no por render. */
   const position = model.positions(division.key);
   /* Una división sin páginas no se puede desplegar: el control no se atenúa, se apaga. */
@@ -141,7 +146,14 @@ const DivisionRow = memo(function DivisionRow({
         data-active={active ? "true" : undefined}
         data-testid="division-row"
         data-division={division.key}
-        title={`${division.long} · ${count} ${plural(count, "página", "páginas")} · ${done} ${plural(done, "leída", "leídas")}`}
+        title={
+          `${division.long} · ${count} ${plural(count, "página", "páginas")} · ${done} ${plural(done, "leída", "leídas")}` +
+          /* Con ejercicios, el tooltip los nombra aparte: el badge numérico de
+             la fila sigue contando PÁGINAS y no puede decirlo por sí solo. */
+          (parts.extras.total
+            ? ` · ${parts.extras.total} ${plural(parts.extras.total, "ejercicio", "ejercicios")} · ${parts.extras.done} ${plural(parts.extras.done, "resuelto", "resueltos")}`
+            : "")
+        }
       >
         <span className={css.dot} aria-hidden="true" />
         <span className={css.divisionLabel}>{division.label}</span>
@@ -176,6 +188,7 @@ const DivisionRow = memo(function DivisionRow({
               bookmarks={bookmarks}
             />
           ))}
+          {groups.length ? <ExerciseBlock groups={groups} total={parts.extras.total} /> : null}
         </div>
       ) : null}
     </div>
@@ -227,6 +240,53 @@ function TypeBlockRows({
         />
       ))}
     </div>
+  );
+}
+
+/**
+ * El bloque de ejercicios de la división: una fila por grupo (Guía, Lutzio,
+ * Parciales, Finales) con su avance. A diferencia de los bloques de tipo NO se
+ * pliega: son cuatro filas como mucho, y plegarlas escondería justamente lo que
+ * la barra de la unidad ahora cuenta.
+ */
+function ExerciseBlock({ groups, total }: { groups: ProgressGroup[]; total: number }) {
+  return (
+    <div className={css.block}>
+      <div className={css.blockLabel} data-static="true">
+        <span title={`${total} ${plural(total, "ejercicio", "ejercicios")}`}>EJERCICIOS · {total}</span>
+      </div>
+      {groups.map((group) => (
+        <GroupRow key={group.id} group={group} />
+      ))}
+    </div>
+  );
+}
+
+function GroupRow({ group }: { group: ProgressGroup }) {
+  const complete = group.total > 0 && group.done === group.total;
+  const label = `${group.label} · ${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`;
+  const body = (
+    <>
+      <span className={css.num} aria-hidden="true">
+        ·
+      </span>
+      <span className={css.pageTitle}>{group.label}</span>
+      <span className={css.groupCount}>
+        {group.done}/{group.total}
+      </span>
+      {complete ? <UiIcon name="check" size={12} className={css.groupCheck} title="Completo" /> : null}
+    </>
+  );
+  /* El destino lo declara el bundle y es una ruta del SPA. Un valor que no lo
+     sea deja la fila sin enlace: la plataforma no navega a donde no sabe. */
+  return group.to && group.to.startsWith("/") ? (
+    <Link className={css.page} to={group.to} title={label} aria-label={label}>
+      {body}
+    </Link>
+  ) : (
+    <span className={css.page} title={label}>
+      {body}
+    </span>
   );
 }
 

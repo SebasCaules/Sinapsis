@@ -23,6 +23,10 @@ export function DivisionView() {
   if (!division) return <NotFoundInSubject subject={slug} />;
 
   const sequence = model.sequence(key);
+  /* La barra mide la unidad ENTERA: las páginas leídas más los pasos que
+     aportan los bundles de la materia (los ejercicios de la guía, de Lutzio y
+     de parcial). El texto los nombra por separado (N0-61). */
+  const parts = model.progressParts(key);
   const progress = model.progress(key);
   /* Qué cuenta como fuente lo decide el modelo (una sola vez, con la regla del
      contrato): la vista no vuelve a mirar `countsAsContent`. */
@@ -45,8 +49,11 @@ export function DivisionView() {
      El original siempre manda a la primera página; acá, con progreso, manda a la
      primera sin leer, que es lo que el lector espera de una portada de curso. */
   const pending = sequence.find((page) => !model.studied.has(page.slug));
-  const target = progress.done > 0 && pending ? pending : sequence[0];
-  const ctaLabel = progress.done > 0 && pending ? "Continuar leyendo" : "Empezar a leer";
+  /* La acción mira las PÁGINAS: con ejercicios resueltos y nada leído, la
+     portada sigue ofreciendo «Empezar a leer», que es lo que corresponde. */
+  const started = parts.pages.done > 0;
+  const target = started && pending ? pending : sequence[0];
+  const ctaLabel = started && pending ? "Continuar leyendo" : "Empezar a leer";
 
   return (
     <div className={css.view} style={{ ["--ucol" as string]: division.color }}>
@@ -67,7 +74,15 @@ export function DivisionView() {
               <span className={css.fill} style={{ width: `${pct}%` }} />
             </span>
             <span className={css.count}>
-              {progress.done} / {progress.total} {plural(progress.total, "página leída", "páginas leídas")}
+              {parts.pages.done} / {parts.pages.total}{" "}
+              {plural(parts.pages.total, "página leída", "páginas leídas")}
+              {parts.sources.map((source) => (
+                <span key={source.label} className={css.countExtra}>
+                  {" · "}
+                  {source.done} / {source.total} {source.label}{" "}
+                  {plural(source.total, "resuelto", "resueltos")}
+                </span>
+              ))}
             </span>
             <span className={css.pct}>{pct}%</span>
           </div>
@@ -133,6 +148,54 @@ export function DivisionView() {
           ) : null}
         </ol>
       </section>
+
+      {parts.groups.length ? (
+        <section className={css.block} aria-labelledby={`${headings}-ejercicios`}>
+          <h2 className={css.h2} id={`${headings}-ejercicios`}>
+            <Icon name="pencil" size={16} />
+            Ejercicios
+          </h2>
+          <div className={css.listLabel}>
+            <span>Cuentan para la barra de esta {unit}</span>
+            <span className={css.listN}>{parts.extras.total}</span>
+          </div>
+          <div className={css.groupGrid}>
+            {parts.groups.map((group) => {
+              const complete = group.total > 0 && group.done === group.total;
+              const body = (
+                <>
+                  <span className={css.groupTitle}>{group.label}</span>
+                  <span className={css.groupMeta}>
+                    {group.done > 0
+                      ? `${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`
+                      : `${group.total} ${plural(group.total, "ejercicio", "ejercicios")}`}
+                    {complete ? <span className={css.groupDone}>completo</span> : null}
+                  </span>
+                  <span className={css.groupTrack} aria-hidden="true">
+                    <span
+                      className={css.groupFill}
+                      style={{ width: `${group.total ? (group.done / group.total) * 100 : 0}%` }}
+                    />
+                  </span>
+                </>
+              );
+              /* El destino lo declara el bundle y es una ruta del SPA. Un valor
+                 que no lo sea deja la tarjeta sin enlace: la plataforma no
+                 navega a donde no sabe. */
+              return group.to && group.to.startsWith("/") ? (
+                <Link key={group.id} className={css.group} to={group.to}>
+                  {body}
+                  <UiIcon name="chevronRight" size={14} className={css.arrow} />
+                </Link>
+              ) : (
+                <div key={group.id} className={css.group}>
+                  {body}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {sources.length ? (
         <section className={css.sources} aria-labelledby={`${headings}-fuentes`}>

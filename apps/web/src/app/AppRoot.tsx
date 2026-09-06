@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import { Toaster } from "@/components/platform";
 import { ThemeId } from "@sinapsis/contract";
-import { useMe } from "@/lib/auth";
+import { useMe } from "@/lib/profile";
 import { useUiStore } from "@/lib/store";
 import { installRangeFill } from "@/lib/rangeFill";
 import { mockParam } from "@/mocks/dev-fixtures";
@@ -10,14 +10,13 @@ import css from "./AppRoot.module.css";
 
 /**
  * Raíz de la SPA: piel (grano de papel), sincronización del tema con el perfil
- * del usuario y capa de avisos. No decide rutas: eso es de router.tsx.
+ * LOCAL y capa de avisos. No decide rutas: eso es de router.tsx.
  */
 export function AppRoot() {
   const { data: me } = useMe();
   const theme = useUiStore((s) => s.theme);
   const sidebarCompact = useUiStore((s) => s.sidebarCompact);
   const setTheme = useUiStore((s) => s.setTheme);
-  const setSignedIn = useUiStore((s) => s.setSignedIn);
   const adopted = useRef(false);
 
   /* Deslizadores de toda la plataforma (bundles incluidos): base.css los pinta
@@ -41,18 +40,14 @@ export function AppRoot() {
     if (forced.success) setTheme(forced.data, { push: false });
   }, [setTheme]);
 
-  /* El tema del servidor manda UNA sola vez por sesión: después gana el usuario. */
+  /* El tema del perfil manda UNA sola vez por sesión: después gana lo que haga
+     el usuario en esta pestaña (el perfil ya quedó escrito). */
   useEffect(() => {
-    setSignedIn(Boolean(me));
-    if (!me) {
-      adopted.current = false;
-      return;
-    }
-    if (adopted.current) return;
+    if (!me || adopted.current) return;
     adopted.current = true;
     if (import.meta.env.DEV && ThemeId.safeParse(mockParam("theme")).success) return;
     setTheme(me.theme, { push: false });
-  }, [me, setTheme, setSignedIn]);
+  }, [me, setTheme]);
 
   return (
     <div className={css.shell}>

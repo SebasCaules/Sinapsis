@@ -9,14 +9,24 @@
    donde vive el botón «PANEL» (28 px + 8 de aire), y la de la izquierda la
    copia, así la hoja queda centrada entre el índice y el botón. Con la columna
    abierta, el botón queda a la derecha de la columna, en la misma canaleta. */
+/* Los 840 de N0-20 son el valor de FÁBRICA, no una constante: `--sheet-width` lo
+   fija el lector con las asas de la hoja (`views/sheetWidth.ts`) y se recuerda.
+   El `min(…, 100%)` de abajo es lo que garantiza que un ancho elegido en una
+   pantalla grande nunca desborde la columna en una chica. */
 .layout {
   --reader-gutter: 36px;
+  --sheet-width: 840px;
   position: relative;
   display: flex;
   gap: 34px;
   padding: 4px var(--reader-gutter) 60px;
   align-items: flex-start;
 }
+/* Con la columna abierta el botón «PANEL» ya no vive en la canaleta derecha
+   (va pegado a la columna), así que la columna se arrima al borde derecho
+   (pedido del usuario): solo un respiro de 8 px. Cerrada, vuelve la canaleta
+   donde se apoya el botón. */
+.layout[data-side="open"] { padding-right: 8px; }
 
 .column {
   flex: 1;
@@ -32,7 +42,7 @@
   /* Sin banda propia: pegajosa y con fondo pintaba un rectángulo de otro tono
      sobre el grano (pedido del usuario). Las acciones se repiten al pie. */
   position: static;
-  width: min(840px, 100%);
+  width: min(var(--sheet-width), 100%);
   display: flex;
   gap: 10px;
   padding: 4px 0 12px;
@@ -103,8 +113,11 @@
 }
 
 /* ---------- la hoja ---------- */
+/* `position: relative` para alojar las asas de ancho, que van pegadas a sus
+   bordes y ocupan toda la altura. */
 .sheet {
-  width: min(840px, 100%);
+  position: relative;
+  width: min(var(--sheet-width), 100%);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -114,6 +127,79 @@
   border-top: 2px solid var(--ucol);
   border-radius: var(--r-lg);
   box-shadow: var(--relief), var(--shadow-lg);
+}
+
+/* ---------- asas de ancho ---------- */
+/* Dos asas contra los bordes de la hoja, de toda su altura: el borde entero es
+   el objetivo, no un tirador de 16 px que hay que cazar. Los 12 px de área son
+   señalables; lo que se VE es un trazo de 3 px centrado, y solo cuando el
+   puntero está encima, mientras se arrastra o cuando el asa tiene el foco: en
+   reposo la hoja se lee como siempre. */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  z-index: 2;
+  cursor: col-resize;
+  /* El navegador no puede quedarse con el gesto: el arrastre es nuestro. */
+  touch-action: none;
+  border-radius: var(--r-sm);
+  /* Para que la agarradera (`::before`) se centre y pueda ser pegajosa. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.handleLeft { left: 0; }
+.handleRight { right: 0; }
+
+.handle::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: var(--border-2);
+  opacity: 0;
+  transition: opacity var(--t), background var(--t);
+}
+.handle:hover::after { opacity: 1; }
+.handle:focus-visible::after,
+.handle[data-dragging="true"]::after { opacity: 1; background: var(--primary); }
+.handle:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+/* Pista permanente de que la hoja se puede ensanchar (pedido del usuario): una
+   agarradera corta centrada en cada borde, siempre visible pero discreta; al
+   pasar el puntero, al enfocar y al arrastrar toma el color primario y la
+   acompaña la guía de toda la altura (`::after`). */
+.handle::before {
+  content: "";
+  /* Pegajosa entre el 40 % superior e inferior de la ventana: en una hoja
+     larga acompaña el desplazamiento y siempre queda a la vista; en una corta
+     se queda en el centro de la hoja. */
+  position: sticky;
+  top: 40vh;
+  bottom: 40vh;
+  flex: none;
+  width: 4px;
+  height: 38px;
+  border-radius: 4px;
+  background: var(--text-3);
+  opacity: 0.5;
+  transform-origin: center;
+  /* Se alarga con `transform`, no con `height`: no dispara un relayout. */
+  transition: opacity var(--t), background var(--t), transform var(--t);
+}
+.handle:hover::before,
+.handle:focus-visible::before,
+.handle[data-dragging="true"]::before {
+  opacity: 1;
+  transform: scaleY(1.5);
+  background: var(--primary);
 }
 
 .sheetHead {
@@ -226,6 +312,44 @@
   box-shadow: 0 0 0 4px var(--primary-ring);
 }
 
+/* Un grupo de ejercicios (N0-61): mismo alto y misma caja que un segmento de
+   página, pero el trazo es PUNTEADO —no es una página del wiki— y lo resuelto
+   se pinta como un relleno proporcional (`--fill`), porque un grupo de 16
+   ejercicios rara vez está entero hecho o entero sin hacer. */
+.segmentExtra {
+  position: relative;
+  flex: 1;
+  min-height: 24px;
+  height: 24px;
+  display: block;
+  border-radius: 3px;
+}
+.segmentExtra::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 5px;
+  border-radius: 3px;
+  border: 1px dashed color-mix(in srgb, var(--ucol) 55%, transparent);
+  background:
+    linear-gradient(to right, var(--ucol) 0 var(--fill, 0%), transparent var(--fill, 0%) 100%);
+  transform: translateY(-50%);
+  transition: transform var(--t);
+}
+/* Entero resuelto: se rellena y deja de puntearse, que es lo que dice «listo». */
+.segmentExtra[data-state="done"]::after {
+  border-style: solid;
+  border-color: var(--ucol);
+}
+.segmentExtra:hover::after { transform: translateY(-50%) scaleY(1.8); }
+.segmentExtra:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
+
 /* ---------- anterior / siguiente ---------- */
 .prevNext {
   display: flex;
@@ -318,9 +442,32 @@
 }
 
 /* ---------- columna derecha ---------- */
-.side {
+/* Dock pegajoso de la columna: se desplaza con la lectura y lleva pegado a su
+   borde izquierdo el botón «PANEL» (pedido del usuario). La columna de adentro
+   ya no es pegajosa por sí misma: lo es el dock, así el botón la acompaña. */
+.sideDock {
   position: sticky;
   top: 4px;
+  width: 248px;
+  flex: none;
+  align-self: flex-start;
+}
+/* Bajo 1280 px la columna es un panel fijo: el dock no ocupa lugar. */
+.sideDockFloating { display: contents; }
+
+/* Dock del botón con el panel CERRADO: no ocupa ancho (el `margin-left`
+   anula el `gap` de la fila para que la hoja no se descentre) y es pegajoso. */
+.tabDock {
+  position: sticky;
+  top: 16px;
+  flex: none;
+  width: 0;
+  align-self: flex-start;
+  margin-left: -34px;
+  z-index: 5;
+}
+
+.side {
   width: 248px;
   flex: none;
   display: flex;
@@ -575,6 +722,7 @@
   right: 0;
   top: 16px;
   padding: 12px 7px;
+  z-index: 5;
   background: var(--surface);
   border: 1px solid var(--border);
   border-right: 0;
@@ -587,6 +735,21 @@
   cursor: pointer;
 }
 .sideTab:hover { color: var(--text-2); }
+/* `:where` mantiene la especificidad de `.sideTab`: la regla `fixed` de la
+   media query de abajo sigue ganando por debajo de 1280 px. */
+:where(.sideDock) .sideTab {
+  top: 12px;
+  left: auto;
+  /* Pegado al borde izquierdo de la columna, sea cual sea el ancho del botón:
+     su borde derecho (el lado plano) coincide con el borde de la columna. */
+  right: 100%;
+}
+:where(.tabDock) .sideTab {
+  top: 0;
+  /* El dock queda en el borde interior del relleno: el botón se corre hasta el
+     borde exterior del área de lectura, donde estaba siempre. */
+  right: calc(-1 * var(--reader-gutter));
+}
 
 /* Por debajo de 1280 px la columna no cabe al lado de la hoja, pero tampoco
    desaparece (N0-36): se convierte en un panel deslizante que abre y cierra el
@@ -618,7 +781,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .segment::after, .chipButton, .chipSave, .noteArea, .divisionChip { transition: none; }
+  .segment::after, .segmentExtra::after, .chipButton, .chipSave, .noteArea, .divisionChip, .handle::after, .handle::before { transition: none; }
 }
 
 /* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */

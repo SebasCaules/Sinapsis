@@ -53,13 +53,6 @@
   border-bottom: 1px solid var(--border);
 }
 .name { font: 600 12.5px var(--font-ui); color: var(--text); }
-.email {
-  font: 500 11px var(--font-mono);
-  color: var(--text-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 .item {
   margin: 9px 0 0;
@@ -86,3 +79,63 @@
   background-size: 140px 140px;
   background-blend-mode: screen;
 }
+
+/* --- perfil local (Sprint 4) -------------------------------------------------
+   El menú ya no muestra un correo ni cierra sesión: muestra el nombre del
+   perfil (editable en línea) y lo que se puede hacer con el estado guardado en
+   este navegador. */
+
+.eyebrow {
+  font: 600 9px var(--font-ui);
+  letter-spacing: .12em;
+  color: var(--text-3);
+}
+
+.nameButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  text-align: left;
+}
+.nameButton:hover { color: var(--text-2); }
+.nameButton:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
+.nameInput {
+  width: 100%;
+  font: 600 12.5px var(--font-ui);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+}
+.nameInput:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+.danger { color: var(--bad-text); }
+.danger:hover { color: var(--bad-text); background: var(--bad-soft); }
+
+/* Un solo párrafo, al pie: dice dónde vive el progreso sin ocupar el lugar de
+   una acción. No se repite en ninguna otra pantalla. */
+.notice {
+  margin: 9px 13px 1px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  font: 500 10.5px/1.45 var(--font-ui);
+  color: var(--text-3);
+}
+
+/* El `<input type=file>` no se ve nunca: lo dispara «Restaurar copia…». */
+.file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dialogText { margin: 0; font: 500 12.5px/1.55 var(--font-ui); color: var(--text-2); }

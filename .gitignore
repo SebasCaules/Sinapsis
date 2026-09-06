@@ -5,16 +5,18 @@ build/
 .DS_Store
 .env
 .env.local
-*.db
-*.db-journal
-*.db-wal
-*.db-shm
-apps/api/data/
 coverage/
 playwright-report/
 test-results/
 .impeccable/
 .dist/
+# Sitio estático generado por `pnpm build:subjects` desde subjects/
+apps/web/public/subjects/
+# Salidas de construcción de los bundles de cada materia (la fuente sí se versiona)
+subjects/*/tools/*/dist/
+subjects/*/tools/*/.dist/
+# Materias compiladas para los tests end-to-end
+e2e/.site/
 # Capturas masivas de las revisiones del Sprint 3: solo se versionan las que citan los docs (git add -f)
 design/referencias/sprint3/
 design/referencias/sprint3-diseno/

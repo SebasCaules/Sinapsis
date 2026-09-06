@@ -1,5 +1,7 @@
 # Revisión de diseño — Sprint 3 (D5)
 
+> Histórico: describe la arquitectura anterior al Sprint 4 (sitio estático); ver HANDOFF-sprint4.md.
+
 Recorrido completo de la plataforma con Playwright headless sobre los servidores de
 desarrollo reales: web `:5173`, API `:3000` y la materia **Proba** con 209 entradas —97 de
 contenido y 112 fuentes—, 18 mazos / 141 tarjetas, un quiz de 15 preguntas, 8 kits, un plan

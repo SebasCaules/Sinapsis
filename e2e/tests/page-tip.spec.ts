@@ -11,8 +11,8 @@
  * fixture.
  */
 import { expect, test, type Page } from "@playwright/test";
-import { studyContent, waitForSubjectShell, withApi } from "../support/app";
-import { API_ORIGIN, readSeed } from "../support/seed";
+import { studyContent, subjectPages, waitForSubjectShell } from "../support/app";
+import { readSeed } from "../support/seed";
 
 const seed = readSeed();
 const subject = seed.subject;
@@ -55,17 +55,19 @@ function plainStart(summary: string): string {
   return head.slice(0, 40).trim();
 }
 
-/** `slug` → resumen, tal como los tiene el modelo de la materia. */
-async function summaries(page: Page): Promise<Map<string, string>> {
-  const res = await page.request.get(`${API_ORIGIN}/api/subjects/${subject.slug}`);
-  expect(res.ok()).toBe(true);
-  const detail = (await res.json()) as { pages: Array<{ slug: string; title: string; summary: string }> };
-  return new Map(detail.pages.map((p) => [p.slug, p.summary ?? ""]));
+/** `slug` → resumen, tal como los compiló la materia. */
+function summaries(): Map<string, string> {
+  return new Map(subjectPages(subject.slug).map((p) => [p.slug, p.summary ?? ""]));
+}
+
+/** `slug` → título, del mismo lugar. */
+function titles(): Map<string, string> {
+  return new Map(subjectPages(subject.slug).map((p) => [p.slug, p.title]));
 }
 
 test("un wikilink de la prosa muestra el título y el resumen de su destino", async ({ page }) => {
   await openReader(page);
-  const resumen = await summaries(page);
+  const resumen = summaries();
 
   const wikilinks = sheet(page).locator("a.wikilink");
   const hrefs = await wikilinks.evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
@@ -84,10 +86,8 @@ test("un wikilink de la prosa muestra el título y el resumen de su destino", as
   await expect(tip(page)).toHaveAttribute("role", "tooltip");
   await expect(link).toHaveAttribute("aria-describedby", "pageTip");
 
-  const titulo = await page.request
-    .get(`${API_ORIGIN}/api/subjects/${subject.slug}/pages/${destino}`)
-    .then((r) => r.json())
-    .then((d: { page: { title: string } }) => d.page.title);
+  const titulo = titles().get(destino) ?? "";
+  expect(titulo, `«${destino}» no está en la materia compilada`).not.toBe("");
   await expect(tip(page)).toContainText(titulo);
   await expect(tip(page)).toContainText(plainStart(resumen.get(destino) ?? ""));
   /* La tarjeta del baseline hereda el peso 500 del cuerpo (`tips.css` no
@@ -179,7 +179,7 @@ test("ningún enlace a una página conserva el tooltip nativo, en ninguna vista 
   page,
 }) => {
   /* El plan solo dibuja tareas si la materia sembrada lo declara. */
-  const conPlan = await withApi(async (api) => (await studyContent(api, subject.slug)).plan !== null);
+  const conPlan = (await studyContent(subject.slug)).plan !== null;
 
   const vistas: Array<{ nombre: string; url: string; listo?: () => Promise<unknown> }> = [
     { nombre: "inicio", url: `/m/${subject.slug}` },

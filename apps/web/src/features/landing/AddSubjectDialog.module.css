@@ -64,3 +64,57 @@
 @media (max-width: 560px) {
   .grid, .divisionGrid { grid-template-columns: 1fr; }
 }
+
+/* --- materias del catálogo (Sprint 4) ---------------------------------------
+   El sitio ya trae materias compiladas: agregarlas es elegirlas de una lista, no
+   volver a escribirlas. El formulario de abajo queda para las que el usuario
+   inventa (una materia sin wiki, a la espera de su primer `publish`). */
+
+.catalog { display: flex; flex-direction: column; gap: 7px; }
+.catalogLabel {
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.catalogList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  max-height: 208px;
+  overflow-y: auto;
+}
+.catalogRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+.catalogRow:last-child { border-bottom: 0; }
+.catalogRow:hover { background: var(--surface-2); }
+.catalogRow[aria-checked="true"] { background: var(--primary-soft); }
+.catalogRow:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+.dot { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--sw); }
+.dotPlus { display: grid; place-items: center; width: 10px; height: 10px; flex: none; color: var(--text-3); }
+
+.catalogName {
+  font: 600 12.5px var(--font-ui);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.catalogMeta {
+  margin-left: auto;
+  flex: none;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+}

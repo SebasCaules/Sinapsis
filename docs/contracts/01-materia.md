@@ -5,8 +5,9 @@ Todo lo que la plataforma sabe de una materia está en un solo archivo:
 declara, lo rellena la plataforma con sus valores fijos.
 
 El esquema ejecutable es `SubjectConfig` en `packages/contract/src/index.ts`. Se valida en
-tres momentos: `sinapsis validate` (antes de tocar nada), `sinapsis sync` (al compilar) y el
-API (al recibir el payload). Los tres usan el mismo esquema.
+tres momentos: `sinapsis validate` (antes de tocar nada), `sinapsis publish` (al compilar) y
+`sinapsis site build` (al construir el sitio desde `subjects/<slug>/`). Los tres usan el
+mismo esquema.
 
 ```
 <repositorio de la materia>/
@@ -23,7 +24,7 @@ API (al recibir el payload). Los tres usan el mismo esquema.
 | Campo | Tipo | Obligatorio | Default | Restricción | Descripción |
 |---|---|---|---|---|---|
 | `contract` | número | no | `1` | literal `1` | Versión del contrato que entiende la materia. Cualquier otro valor **falla**. |
-| `slug` | `Slug` | **sí** | — | `^[a-z0-9][a-z0-9-]*$`, 1–120 | Identidad de la materia. Es la URL (`/m/<slug>`) y la clave del sync. |
+| `slug` | `Slug` | **sí** | — | `^[a-z0-9][a-z0-9-]*$`, 1–120 | Identidad de la materia. Es la URL (`/m/<slug>`), la carpeta `subjects/<slug>/` y la clave del estado personal. |
 | `name` | texto | **sí** | — | 1–120 | Nombre completo, en el hero del índice. |
 | `code` | texto | **sí** | — | 1–24 | Código de la cátedra (`93.24`). |
 | `institution` | texto | **sí** | — | 1–80 | Institución (`ITBA`). |
@@ -220,7 +221,7 @@ Los mismos nombres valen para `RailItem.icon`, `Fab.icon`, `ToolView.icon`,
 
 ## 8. Ejemplo completo y comentado (Probabilidad y Estadística)
 
-Es `examples/proba/sinapsis.config.json` tal cual, con comentarios agregados. El archivo real
+Es `subjects/proba/sinapsis.config.json` tal cual, con comentarios agregados. El archivo real
 es JSON estricto: **sin comentarios y sin comas finales**.
 
 ```jsonc
@@ -228,7 +229,8 @@ es JSON estricto: **sin comentarios y sin comas finales**.
   // Versión del contrato. Se puede omitir: el default es 1.
   "contract": 1,
 
-  // Identidad. `slug` es la URL (/m/proba) y la clave del sync: no se cambia a la ligera.
+  // Identidad. `slug` es la URL (/m/proba), la carpeta de `subjects/` y la clave del
+  // estado personal: no se cambia a la ligera.
   "slug": "proba",
   "name": "Probabilidad y Estadística",
   "code": "93.24",
@@ -349,7 +351,7 @@ puede expresar, en `extraChecks` y `checkTools`.
 | `link: solo URLs http(s) o mailto` | Un `kind: "link"` con `//cdn…`, una ruta relativa o `javascript:`. | URL absoluta con esquema. |
 | `target inválido para kind «page»` | El `target` de un `page` no es un `Slug` (mayúsculas, acentos). | Usar el nombre del archivo `.md` sin extensión, ya normalizado. |
 | `vista builtin desconocida "estudio"` | Se inventó una vista builtin. | Elegir una de `BUILTIN_VIEWS`; recuerde que los builtin ya están en los grupos fijos. |
-| El rail muestra «Próximamente» | El ítem es `kind: "tool"` y ningún bundle registra esa vista, o el `target` es el id del bundle en vez del de la vista. | Publicar el bundle (`sinapsis tools push`) o corregir el `target`. |
+| El rail muestra «Próximamente» | El ítem es `kind: "tool"` y ningún bundle registra esa vista, o el `target` es el id del bundle en vez del de la vista. | Publicar el bundle (`sinapsis publish`) o corregir el `target`. |
 | Las divisiones salen en un orden raro | Se mezcló `order` en algunas divisiones y no en otras. | Poner `order` en todas o en ninguna. |
 | Todas las páginas caen en «Otras» | `wiki.divisionField` no coincide con el campo real del frontmatter. | Ajustar `divisionField` (Proba usa `unidad`). |
 | «Transversales» tiene todas las páginas | Las páginas no declaran el campo de división. | Completar el frontmatter, o aceptar que son transversales. |
@@ -368,13 +370,14 @@ puede expresar, en `extraChecks` y `checkTools`.
 - `packages/cli/src/commands/validate.ts` — `extraChecks`, `checkTools`, `loadConfig`.
 - `packages/cli/src/commands/init.ts` y `packages/markdown/src/scaffold.ts` — el config que
   propone `sinapsis init`.
-- `apps/api/src/services/subjects.ts` — `resolveConfig` (config sintético de una materia
-  placeholder, sin sync).
-- `examples/proba/sinapsis.config.json` — el ejemplo real.
+- `apps/web/src/local/subjects.ts` — `resolveConfig` (config sintético de una materia
+  placeholder, que el usuario creó desde la landing y no tiene fuente en `subjects/`).
+- `subjects/proba/sinapsis.config.json` — el ejemplo real.
 
 ## Decisiones relacionadas
 
 N0-6 (materias globales, landing por usuario) · N0-11 (rail fijo y slot) ·
 N0-12 (escala de color paramétrica) · N0-14 (Proba como primera materia) ·
 N0-23 (divisiones sintéticas) · N0-27 (`wiki.study` relativa al config) ·
-N0-32 (cuatrimestres canónicos) · N0-41 (ítems `tool` = vistas de un bundle).
+N0-32 (cuatrimestres canónicos) · N0-41 (ítems `tool` = vistas de un bundle) ·
+N0-57 (la materia publicada vive en `subjects/<slug>/`).

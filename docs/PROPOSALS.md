@@ -42,7 +42,7 @@ helper del runtime, un comportamiento del lector), su agente no lo parchea en su
      rama queda y la fila sigue en «Abiertas» con estado `cambios-pedidos`.
    - **Rechazar**: motivos en la propuesta, rama conservada 30 días, fila en «Cerradas».
 3. **Aplicar en las materias**: si el cambio afecta el contrato, la revisión anota qué debe
-   actualizar cada materia (`/sinapsis sync` suele bastar).
+   actualizar cada materia (`/sinapsis publish` suele bastar).
 
 ## Reglas
 

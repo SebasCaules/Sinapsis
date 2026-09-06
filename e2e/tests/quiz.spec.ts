@@ -3,25 +3,27 @@
  * la explicación, resultado final e intento registrado).
  *
  * Qué opción es la correcta no se escribe acá: se lee del propio material
- * (`GET /api/subjects/:slug/study`), así que la prueba sigue valiendo si el wiki
- * reordena las opciones.
+ * compilado (`e2e/.site/subjects/<materia>/subject.json`), así que la prueba
+ * sigue valiendo si el wiki reordena las opciones.
  *
  * Y qué pregunta está en pantalla tampoco se supone por su posición: la partida
  * MEZCLA las preguntas en cada entrada, así que la vista publica el id de la
  * pregunta actual (`[data-testid="quiz-card"][data-question]`) y la prueba busca
  * su material por ese id.
  *
- * Los intentos NO se pueden borrar (el contrato §5 no expone un DELETE), así que
- * la aserción sobre `state.attempts` es «al menos uno».
+ * Los intentos quedan en el documento local; `resetStudy` los limpia antes de
+ * cada prueba, y la aserción sigue siendo «al menos uno» para no depender del
+ * recorte de historial que hace el cliente.
  */
 import { expect, test, type Page } from "@playwright/test";
-import { studyContent, studyState, waitForSubjectShell } from "../support/app";
+import { resetStudy, studyContent, studyState, waitForSubjectShell } from "../support/app";
 import { readSeed } from "../support/seed";
 
 const seed = readSeed();
 const subject = seed.subject;
 const quizUrl = `/m/${subject.slug}/quiz`;
-const QUIZ = "quiz-general";
+const QUIZ = seed.study.quiz?.id ?? "";
+const PREGUNTAS = seed.study.quiz?.questions ?? 0;
 
 const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 
@@ -41,8 +43,12 @@ async function openQuiz(page: Page): Promise<void> {
   await expect(counter(page)).toBeVisible();
 }
 
-test("la lista muestra el quiz de la materia y lleva a la partida", async ({ page, request }) => {
-  const content = await studyContent(request, subject.slug);
+test.beforeEach(async ({ page }) => {
+  await resetStudy(page, subject.slug);
+});
+
+test("la lista muestra el quiz de la materia y lleva a la partida", async ({ page }) => {
+  const content = await studyContent(subject.slug);
   const quiz = content.quizzes.find((q) => q.id === QUIZ);
   if (!quiz) throw new Error(`La siembra no trajo el quiz «${QUIZ}»`);
 
@@ -60,8 +66,8 @@ test("la lista muestra el quiz de la materia y lleva a la partida", async ({ pag
   await expect(counter(page)).toHaveText(`1 / ${quiz.questions.length}`);
 });
 
-test("responder revela CORRECTO o INCORRECTO con su explicación", async ({ page, request }) => {
-  const content = await studyContent(request, subject.slug);
+test("responder revela CORRECTO o INCORRECTO con su explicación", async ({ page }) => {
+  const content = await studyContent(subject.slug);
   const preguntas = content.quizzes.find((q) => q.id === QUIZ)?.questions ?? [];
   expect(preguntas.length).toBeGreaterThanOrEqual(3);
 
@@ -96,11 +102,11 @@ test("responder revela CORRECTO o INCORRECTO con su explicación", async ({ page
   await expect(page.getByRole("heading", { name: "Quiz", level: 1 })).toBeVisible();
 });
 
-test("terminar el quiz entero muestra el resultado y registra el intento", async ({ page, request }) => {
-  const content = await studyContent(request, subject.slug);
+test("terminar el quiz entero muestra el resultado y registra el intento", async ({ page }) => {
+  const content = await studyContent(subject.slug);
   const preguntas = content.quizzes.find((q) => q.id === QUIZ)?.questions ?? [];
   const total = preguntas.length;
-  expect(total).toBe(15);
+  expect(total).toBe(PREGUNTAS);
   /* Siempre la primera opción: el puntaje esperado sale del material, no de un número escrito acá. */
   const esperado = preguntas.filter((q) => q.options[0]?.correct === true).length;
 
@@ -122,11 +128,11 @@ test("terminar el quiz entero muestra el resultado y registra el intento", async
 
   const attempts = await (async () => {
     await expect
-      .poll(async () => (await studyState(request, subject.slug)).attempts.length, {
-        message: "el API no registró el intento del quiz",
+      .poll(async () => (await studyState(page, subject.slug)).attempts.length, {
+        message: "el intento del quiz no quedó guardado",
       })
       .toBeGreaterThanOrEqual(1);
-    return (await studyState(request, subject.slug)).attempts;
+    return (await studyState(page, subject.slug)).attempts;
   })();
 
   const ultimo = attempts.filter((a) => a.quizId === QUIZ).at(-1);

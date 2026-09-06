@@ -220,6 +220,67 @@ describe("App.onTeardown y App.registerSearchProvider", () => {
   });
 });
 
+describe("App.registerProgressProvider y App.progressChanged", () => {
+  it("sin proveedores, la lista está vacía: el progreso son solo páginas", () => {
+    const rt = installRuntime(makeContext());
+    expect(rt.progressProviders()).toEqual([]);
+    uninstallRuntime();
+  });
+
+  it("el proveedor registrado queda a la vista del anfitrión", () => {
+    const rt = installRuntime(makeContext());
+    const provider = {
+      id: "ejercicios",
+      label: "ejercicios",
+      stepsOf: (u: string) => [{ id: u + "-1", label: "Ejercicio 1", done: true, group: "Guía" }],
+    };
+    rt.App.registerProgressProvider(provider);
+    expect(rt.progressProviders()).toEqual([provider]);
+    expect(rt.progressProviders()[0]!.stepsOf("3")).toEqual([
+      { id: "3-1", label: "Ejercicio 1", done: true, group: "Guía" },
+    ]);
+    uninstallRuntime();
+  });
+
+  it("progressChanged avisa a los suscriptores hasta que se sueltan", () => {
+    const rt = installRuntime(makeContext());
+    const avisos = vi.fn();
+    const off = rt.onProgressChange(avisos);
+    rt.App.progressChanged();
+    rt.App.progressChanged();
+    expect(avisos).toHaveBeenCalledTimes(2);
+    off();
+    rt.App.progressChanged();
+    expect(avisos).toHaveBeenCalledTimes(2);
+    uninstallRuntime();
+  });
+
+  it("un suscriptor que falla no le tapa el aviso a los demás", () => {
+    const rt = installRuntime(makeContext());
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const segundo = vi.fn();
+    rt.onProgressChange(() => {
+      throw new Error("ruidoso");
+    });
+    rt.onProgressChange(segundo);
+    rt.App.progressChanged();
+    expect(segundo).toHaveBeenCalledTimes(1);
+    uninstallRuntime();
+  });
+
+  it("desinstalar el runtime olvida proveedores y suscriptores", () => {
+    const rt = installRuntime(makeContext());
+    const avisos = vi.fn();
+    rt.onProgressChange(avisos);
+    rt.App.registerProgressProvider({ id: "x", label: "x", stepsOf: () => [] });
+    expect(rt.progressProviders()).toHaveLength(1);
+    uninstallRuntime();
+    expect(rt.progressProviders()).toEqual([]);
+    rt.App.progressChanged();
+    expect(avisos).not.toHaveBeenCalled();
+  });
+});
+
 describe("App.markActivity, App.setTitle y las fechas", () => {
   it("markActivity y setTitle le hablan al anfitrión", () => {
     const marks: number[] = [];

@@ -18,9 +18,10 @@ function sources(dir: string): string[] {
 function fakeClient(tag: string): ApiClient {
   const stub = (name: string) => async () => `${tag}:${name}` as never;
   return {
-    auth: { me: stub("me"), google: stub("google"), dev: stub("dev"), logout: stub("logout"), setTheme: stub("setTheme") },
+    auth: { me: stub("me"), setTheme: stub("setTheme"), setName: stub("setName") },
     landing: {
       list: stub("list"),
+      available: stub("available"),
       saveLayout: stub("saveLayout"),
       createSubject: stub("createSubject"),
       removeFromLanding: stub("removeFromLanding"),
@@ -51,7 +52,6 @@ function fakeClient(tag: string): ApiClient {
       resetPlanDates: stub("resetPlanDates"),
       recordAttempt: stub("recordAttempt"),
     },
-    config: stub("config"),
   };
 }
 
@@ -70,7 +70,7 @@ describe("costura del modo mock", () => {
 
     await expect(api.landing.list()).resolves.toBe("mock:list");
     await expect(api.subject.detail("proba")).resolves.toBe("mock:detail");
-    await expect(api.config()).resolves.toBe("mock:config");
+    await expect(api.study.state("proba")).resolves.toBe("mock:state");
 
     /* La costura es simétrica: se puede volver a la implementación real. */
     installMockApi(fakeClient("real"));

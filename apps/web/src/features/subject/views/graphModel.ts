@@ -2,7 +2,7 @@
  * Modelo del grafo de conexiones (N0-31): la parte con reglas, separada del
  * lienzo para poder probarla sin canvas ni simulación.
  *
- * `GET /api/subjects/:slug/graph` devuelve nodos y aristas crudos; acá se les
+ * `api.subject.graph(slug)` devuelve nodos y aristas crudos; acá se les
  * aplica el filtro (divisiones, tipos, «solo contenido», búsqueda) y se les pega
  * lo que el dibujo necesita: color de división, radio por grado, si es fuente
  * (se atenúa), si es troncal (hub) y si coincide con la búsqueda (se resalta).

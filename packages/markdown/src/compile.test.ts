@@ -8,7 +8,7 @@ import {
   normalizeSlug,
   type SubjectConfig as Cfg,
 } from "@sinapsis/contract";
-import { compilePage, compileWiki } from "./compile.js";
+import { compilePage, compileWiki, listWikiFiles } from "./compile.js";
 
 const config: Cfg = SubjectConfig.parse({
   slug: "demo",
@@ -251,5 +251,40 @@ describe("compileWiki", () => {
     const { payload } = await compileWiki({ config, rootDir: dir });
     const folders = payload.pages.map((p) => p.folder);
     expect(folders).toEqual(["conceptos", "conceptos", "fuentes", "borradores", "meta", "meta"]);
+  });
+
+  /**
+   * `listWikiFiles` es lo que copia `sinapsis publish` al repositorio de la
+   * plataforma: tiene que devolver EXACTAMENTE los archivos que el compilador
+   * lee, ni uno más.
+   */
+  describe("listWikiFiles", () => {
+    it("devuelve los mismos archivos que compila compileWiki", async () => {
+      const wiki = path.join(dir, "wiki");
+      // Adjuntos y carpetas que el compilador no mira: no se copian.
+      await writeFile(path.join(wiki, "conceptos", "diagrama.png"), Buffer.from([0x89, 0x50]));
+      await mkdir(path.join(wiki, ".obsidian"), { recursive: true });
+      await writeFile(path.join(wiki, ".obsidian", "app.json"), "{}\n");
+
+      expect(await listWikiFiles(wiki, config)).toEqual([
+        "conceptos/media.md",
+        "conceptos/varianza.md",
+        "fuentes/tp1.md",
+        "borradores/wip.md",
+        "index.md",
+        "log.md",
+      ]);
+    });
+
+    it("respeta wiki.ignore y omite el índice y el registro que no existen", async () => {
+      const wiki = path.join(dir, "wiki");
+      const ignored = { ...config, wiki: { ...config.wiki, ignore: ["borradores"], log: "no-existe.md" } };
+      expect(await listWikiFiles(wiki, ignored)).toEqual([
+        "conceptos/media.md",
+        "conceptos/varianza.md",
+        "fuentes/tp1.md",
+        "index.md",
+      ]);
+    });
   });
 });

@@ -7,16 +7,14 @@
  * ninguna ruta puede escapar de la carpeta del bundle ni traer una extensión que
  * el navegador interprete de forma inesperada.
  */
+import { sitePaths, siteToolBase } from "./site.js";
 import { describe, expect, it } from "vitest";
 import {
-  API_PREFIX,
   RUNTIME_VERSION,
   ToolFilePath,
   ToolInfo,
   ToolManifest,
   ToolPush,
-  toolFileUrl,
-  toolFilesBase,
   type ToolManifestInput,
 } from "./index.js";
 
@@ -53,6 +51,13 @@ describe("ToolManifest", () => {
   it("un manifiesto sin listas es válido: el bundle puede aportar solo figuras", () => {
     const parsed = ToolManifest.parse({ id: "figuras", title: "Figuras", version: "0.1.0", figures: true });
     expect(parsed).toMatchObject({ scripts: [], styles: [], views: [], data: [], figures: true });
+  });
+
+  it("`progress` es opcional y por omisión falso: solo lo declara quien suma pasos a la barra", () => {
+    expect(ToolManifest.parse(manifest).progress).toBe(false);
+    const declara = ToolManifest.parse({ ...manifest, progress: true });
+    expect(declara.progress).toBe(true);
+    expect(() => ToolManifest.parse({ ...manifest, progress: "sí" })).toThrow();
   });
 
   it("rechaza el id que no es un identificador de ruta y la versión de runtime ajena", () => {
@@ -150,30 +155,30 @@ describe("ToolPush y ToolInfo", () => {
       manifest,
       bytes: 12_345,
       updatedAt: "2026-09-06T12:00:00.000Z",
-      base: toolFilesBase("proba", "proba-tools"),
+      base: siteToolBase("proba", "proba-tools"),
     });
     expect(info.manifest.id).toBe("proba-tools");
     expect(info.bytes).toBe(12_345);
   });
 });
 
-describe("toolFilesBase y toolFileUrl", () => {
-  it("la base no lleva barra final: la web compone `${base}/${path}`", () => {
-    const base = toolFilesBase("proba", "proba-tools");
-    expect(base).toBe(`${API_PREFIX}/subjects/proba/tools/proba-tools/files`);
+describe("siteToolBase y sitePaths.toolFile", () => {
+  it("la base es relativa al sitio y sin barra final: la web compone `${BASE_URL}${base}/${path}`", () => {
+    const base = siteToolBase("proba", "proba-tools");
+    expect(base).toBe("subjects/proba/tools/proba-tools");
     expect(base.endsWith("/")).toBe(false);
-    expect(`${base}/views/explorador.js`).toBe(toolFileUrl("proba", "proba-tools", "views/explorador.js"));
+    expect(base.startsWith("/")).toBe(false);
   });
 
-  it("arma la URL del archivo bajo el prefijo del API", () => {
-    expect(toolFileUrl("proba", "proba-tools", "views/explorador.js")).toBe(
-      `${API_PREFIX}/subjects/proba/tools/proba-tools/files/views/explorador.js`,
+  it("sitePaths arma las URL bajo BASE_URL, con o sin barra final", () => {
+    expect(sitePaths.catalog("/")).toBe("/subjects/index.json");
+    expect(sitePaths.subject("/Sinapsis/", "proba")).toBe("/Sinapsis/subjects/proba/subject.json");
+    expect(sitePaths.pages("/Sinapsis", "proba")).toBe("/Sinapsis/subjects/proba/pages.json");
+    expect(sitePaths.tools("/", "proba")).toBe("/subjects/proba/tools.json");
+    expect(sitePaths.toolBase("/Sinapsis/", "proba", "proba-tools")).toBe("/Sinapsis/subjects/proba/tools/proba-tools");
+    expect(sitePaths.toolFile("/Sinapsis/", "proba", "proba-tools", "views/explorador.js")).toBe(
+      "/Sinapsis/subjects/proba/tools/proba-tools/views/explorador.js",
     );
-  });
-
-  it("escapa la materia y la herramienta, pero deja la ruta con sus barras", () => {
-    expect(toolFileUrl("mi materia", "mi/tool", "a/b.css")).toBe(
-      `${API_PREFIX}/subjects/mi%20materia/tools/mi%2Ftool/files/a/b.css`,
-    );
+    expect(`${sitePaths.toolBase("/", "proba", "proba-tools")}/a.js`).toBe(sitePaths.toolFile("/", "proba", "proba-tools", "a.js"));
   });
 });

@@ -13,7 +13,7 @@
  */
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { currentTheme, resetLanding, setUserTheme, waitForSubjectShell, withApi } from "../support/app";
+import { currentTheme, resetLanding, setUserTheme, waitForSubjectShell } from "../support/app";
 import { readSeed, SHOTS_DIR } from "../support/seed";
 
 const seed = readSeed();
@@ -22,18 +22,14 @@ const subject = seed.subject;
 const CICLO = ["pergamino", "laurel", "claustro"] as const;
 type Tema = (typeof CICLO)[number];
 
-/** Mazo de la captura de sesión: el autoral más corto de Proba. */
-const SESION_DECK = "procesos-estocasticos";
+/** Mazo de la captura de sesión: el autoral más corto de la materia sembrada. */
+const SESION_DECK = seed.study.deck?.id ?? "";
 
 const shot = (vista: string, tema: string) => path.join(SHOTS_DIR, `${vista}-${tema}.png`);
 
-test.beforeEach(async ({ request }) => {
-  await resetLanding(request);
-  await setUserTheme(request, "pergamino");
-});
-
-test.afterAll(async () => {
-  await withApi((api) => setUserTheme(api, "pergamino"));
+test.beforeEach(async ({ page }) => {
+  await resetLanding(page);
+  await setUserTheme(page, "pergamino");
 });
 
 /** Espera a que el `<html data-theme>` valga `tema`. */
@@ -64,7 +60,7 @@ test("la tecla T cicla los tres temas y el elegido persiste tras recargar", asyn
   expect(await currentTheme(page)).toBe("laurel");
 });
 
-test("capturas de las ocho vistas en los tres temas", async ({ page, request }) => {
+test("capturas de las ocho vistas en los tres temas", async ({ page }) => {
   const vistas: Array<{ nombre: string; abrir: () => Promise<void> }> = [
     {
       nombre: "landing",
@@ -149,9 +145,10 @@ test("capturas de las ocho vistas en los tres temas", async ({ page, request }) 
   );
 
   for (const tema of CICLO) {
-    // El tema es del PERFIL (N0-8: global, no por materia): la SPA lo adopta del
-    // servidor en cada carga, así que fijarlo por API es lo mismo que ciclarlo con T.
-    await setUserTheme(request, tema);
+    /* El tema es del PERFIL (N0-8: global, no por materia) y se guarda con el
+       resto del estado local, así que fijarlo con el gancho es lo mismo que
+       ciclarlo con la tecla T. */
+    await setUserTheme(page, tema);
     for (const vista of vistas) {
       await vista.abrir();
       await expectTheme(page, tema);

@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 import { SubjectConfig, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
-import { buildSubjectModel } from "../model";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
+import { buildSubjectModel, type ExtraStep } from "../model";
 import type { SubjectCtx } from "../context";
 import { DivisionView } from "./DivisionView";
 
@@ -31,11 +31,23 @@ const pages: PageMeta[] = [
   meta("axiomas", "Axiomas de Kolmogorov", "concepto", "2", { order: 1 }),
 ];
 
-function renderDivision(key: string, studied: string[] = []) {
+/**
+ * Proveedor de mentira de pasos de progreso (N0-61): dos ejercicios de la guía
+ * (uno hecho) y uno de parcial en la unidad 1, ninguno en el resto.
+ */
+const PASOS: Record<string, ExtraStep[]> = {
+  "1": [
+    { id: "ej:g1", label: "Ejercicio 1", done: true, group: "Guía", to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+    { id: "ej:g2", label: "Ejercicio 2", done: false, group: "Guía", to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+    { id: "ej:p1", label: "Parcial 2024", done: false, group: "Parciales", to: "/m/proba/t/ejercicios?arg=1%2Fparciales", source: "ejercicios" },
+  ],
+};
+
+function renderDivision(key: string, studied: string[] = [], pasos = false) {
   const detail: SubjectDetail = { config, pages, studied, placeholder: false, lastSyncAt: null };
   const ctx = {
     slug: "proba",
-    model: buildSubjectModel(detail),
+    model: buildSubjectModel(detail, false, pasos ? { extraSteps: (d) => PASOS[d] ?? [] } : {}),
     openSearch: () => {},
     runtime: { ready: false } as unknown as SubjectCtx["runtime"],
   } satisfies SubjectCtx;
@@ -77,6 +89,56 @@ describe("DivisionView", () => {
     renderDivision("1", ["media"]);
     expect(screen.getByText("1 / 3 páginas leídas")).toBeTruthy();
     expect(screen.getByText("33%")).toBeTruthy();
+  });
+
+  it("la barra suma los ejercicios de la unidad y el texto los nombra aparte", () => {
+    renderDivision("1", ["media"], true);
+    /* 1 de 3 páginas + 1 de 3 ejercicios = 2 de 6 → 33 %, y el texto conserva
+       el conteo de páginas tal como estaba. */
+    expect(screen.getByText(/1 \/ 3 páginas leídas/)).toBeTruthy();
+    expect(screen.getByText(/1 \/ 3 ejercicios resueltos/)).toBeTruthy();
+    expect(screen.getByText("33%")).toBeTruthy();
+  });
+
+  it("sin pasos de bundles el hero no menciona ejercicios", () => {
+    renderDivision("1", ["media"]);
+    expect(screen.queryByText(/ejercicios resueltos/)).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Ejercicios" })).toBeNull();
+  });
+
+  it("lista una tarjeta por grupo de ejercicios, con su destino y su estado", () => {
+    renderDivision("1", [], true);
+    const seccion = screen.getByRole("heading", { name: "Ejercicios" }).closest("section")!;
+    const guia = within(seccion).getByText("Guía").closest("a")!;
+    expect(guia.getAttribute("href")).toBe("/m/proba/t/ejercicios?arg=1%2Fguia");
+    expect(within(seccion).getByText("1 de 2 resueltos")).toBeTruthy();
+    /* El grupo sin nada resuelto dice cuántos hay, no «0 de N». */
+    expect(within(seccion).getByText("Parciales")).toBeTruthy();
+    expect(within(seccion).getByText("1 ejercicio")).toBeTruthy();
+  });
+
+  it("un grupo entero resuelto se marca como completo", () => {
+    const detail: SubjectDetail = { config, pages, studied: [], placeholder: false, lastSyncAt: null };
+    const ctx = {
+      slug: "proba",
+      model: buildSubjectModel(detail, false, {
+        extraSteps: (d) =>
+          d === "1" ? [{ id: "u", label: "Único", done: true, group: "Guía", source: "ejercicios" }] : [],
+      }),
+      openSearch: () => {},
+      runtime: { ready: false } as unknown as SubjectCtx["runtime"],
+    } satisfies SubjectCtx;
+    render(
+      <MemoryRouter initialEntries={["/m/proba/d/1"]}>
+        <Routes>
+          <Route path="/m/:slug" element={<Outlet context={ctx} />}>
+            <Route path="d/:division" element={<DivisionView />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("1 de 1 resuelto")).toBeTruthy();
+    expect(screen.getByText("completo")).toBeTruthy();
   });
 
   it("la acción primaria empieza la división y, con progreso, la retoma", () => {

@@ -19,7 +19,7 @@ import {
 import { RAIL_SLOT_ITEMS_RECOMMENDED, railSlotItemCount, typeColor } from "./index.js";
 
 const EXAMPLE = path.resolve(
-  fileURLToPath(new URL("../../../examples/proba/sinapsis.config.json", import.meta.url)),
+  fileURLToPath(new URL("../../../subjects/proba/sinapsis.config.json", import.meta.url)),
 );
 
 const proba: SubjectConfigType = SubjectConfig.parse(
@@ -43,7 +43,7 @@ const semanal: SubjectConfigType = SubjectConfig.parse({
   pageTypes: [{ key: "apunte", label: "Apunte", plural: "Apuntes", folder: "apuntes" }],
 });
 
-describe("examples/proba/sinapsis.config.json", () => {
+describe("subjects/proba/sinapsis.config.json", () => {
   it("valida contra SubjectConfig", () => {
     expect(proba.slug).toBe("proba");
     expect(proba.contract).toBe(1);

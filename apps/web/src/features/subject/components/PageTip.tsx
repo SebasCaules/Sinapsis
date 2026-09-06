@@ -16,7 +16,7 @@
  *
  * De dónde salen los datos:
  *   - Título, tipo, división, palabras y resumen: del MODELO, que ya está en
- *     memoria (`PageMeta` de `GET /api/subjects/:slug`). Con eso la tarjeta se
+ *     memoria (`PageMeta` de `api.subject.detail`). Con eso la tarjeta se
  *     dibuja sin pedir nada.
  *   - El cuerpo (`PageDetail.page.body` + `headings`) SOLO se pide cuando hace
  *     falta: hay un ancla que resolver, o la página no tiene `resumen` y hay que

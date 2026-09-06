@@ -4,10 +4,10 @@
  * clic en una pestaña navega y la marca activa, la ✕ la cierra, la barra
  * sobrevive a la recarga y ⌘⇧] pasa a la siguiente.
  *
- * El estado de las pestañas vive en `localStorage` (`sinapsis.<slug>.tabs`), y
- * cada prueba de Playwright arranca con un contexto limpio (el `storageState`
- * sembrado solo trae la cookie), así que el aislamiento es automático: cada
- * prueba empieza con una única pestaña «Inicio».
+ * El estado de las pestañas vive en `localStorage` (`sinapsis.<slug>.tabs`) y
+ * cada prueba de Playwright arranca con un contexto limpio, así que el
+ * aislamiento es automático: cada prueba empieza con una única pestaña
+ * «Inicio».
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { waitForSubjectShell } from "../support/app";

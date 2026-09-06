@@ -4,7 +4,7 @@
  * progreso del inicio y tras recargar) y navegación a la página siguiente.
  */
 import { expect, test, type Page } from "@playwright/test";
-import { resetProgress, waitForSubjectShell, withApi } from "../support/app";
+import { resetProgress, waitForSubjectShell } from "../support/app";
 import { readSeed } from "../support/seed";
 
 const seed = readSeed();
@@ -22,12 +22,8 @@ async function openReader(page: Page): Promise<void> {
   await expect(page.getByRole("heading", { level: 1, name: target.title })).toBeVisible();
 }
 
-test.beforeEach(async ({ request }) => {
-  await resetProgress(request, subject.slug);
-});
-
-test.afterAll(async () => {
-  await withApi((api) => resetProgress(api, subject.slug));
+test.beforeEach(async ({ page }) => {
+  await resetProgress(page, subject.slug);
 });
 
 test("dibuja el título y la matemática de la página", async ({ page }) => {

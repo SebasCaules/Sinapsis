@@ -1,5 +1,7 @@
 # Handoff — Sprint 2 («Estudio») de Sinapsis
 
+> Histórico: describe la arquitectura anterior al Sprint 4 (sitio estático); ver HANDOFF-sprint4.md.
+
 Fecha: 2026-09-06. Ejecución autónoma (autopilot) continuando el Sprint 1 sin intervención
 del usuario; todas las decisiones nuevas están numeradas en `docs/DECISIONS.md` (N0-26 … N0-39).
 

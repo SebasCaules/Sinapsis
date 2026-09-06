@@ -198,6 +198,10 @@
   cursor: pointer;
 }
 .blockLabel:hover { color: var(--text-2); }
+/* El rótulo del bloque de ejercicios no pliega nada: es un encabezado, no un
+   botón, y no tiene que responder al puntero como si lo fuera. */
+.blockLabel[data-static="true"] { cursor: default; }
+.blockLabel[data-static="true"]:hover { color: var(--text-3); }
 .blockLabel:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
@@ -254,6 +258,24 @@
 .star + .check { margin-left: 0; }
 
 .check {
+  flex: none;
+  margin-left: auto;
+  color: var(--good);
+  stroke-width: 2;
+}
+
+/* Una fila de grupo de ejercicios usa la misma caja que una página (`.page`):
+   el conteo ocupa el lugar de la ★ y el ✓ solo aparece con el grupo entero
+   resuelto. */
+.groupCount {
+  flex: none;
+  margin-left: auto;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+}
+.groupCount + .groupCheck { margin-left: 4px; }
+
+.groupCheck {
   flex: none;
   margin-left: auto;
   color: var(--good);

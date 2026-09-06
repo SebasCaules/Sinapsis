@@ -1,0 +1,98 @@
+# Gates de cada cambio: se corren en todo pull request y en cada push a una rama
+# que no sea `main` (a `main` solo se llega por PR, y ahí ya corrieron).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.1
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Compilar las materias
+        run: pnpm build:subjects
+
+      - name: Compilar la web
+        run: pnpm --filter @sinapsis/web build
+
+  # Un PR de materia toca UNA carpeta y nada más. El slug sale del nombre de la
+  # rama (`subject/<slug>-<AAAAMMDD>[-<n>]`), que es como la nombra
+  # `sinapsis publish`.
+  subject-pr:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref || github.ref_name, 'subject/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: El cambio vive solo en subjects/<slug>/
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          # `subject/proba-20260906-2` → `proba`: se quita el prefijo, la fecha y
+          # el sufijo de desempate.
+          name="${BRANCH#subject/}"
+          slug="$(printf '%s' "$name" | sed -E 's/-[0-9]{8}(-[0-9]+)?$//')"
+          if [ -z "$slug" ]; then
+            echo "No pude deducir el slug de la rama \"$BRANCH\"." >&2
+            echo "El nombre esperado es subject/<slug>-<AAAAMMDD>[-<n>]." >&2
+            exit 1
+          fi
+          echo "Materia: $slug"
+
+          git fetch --no-tags origin main
+          changed="$(git diff --name-only origin/main...HEAD)"
+          if [ -z "$changed" ]; then
+            echo "La rama no cambia nada respecto de main." >&2
+            exit 1
+          fi
+
+          echo "Archivos del PR:"
+          printf '%s\n' "$changed" | sed 's/^/  /'
+
+          outside="$(printf '%s\n' "$changed" | grep -v "^subjects/$slug/" || true)"
+          if [ -n "$outside" ]; then
+            echo "" >&2
+            echo "Un PR de materia solo puede tocar subjects/$slug/. Fuera de esa carpeta:" >&2
+            printf '%s\n' "$outside" | sed 's/^/  /' >&2
+            echo "" >&2
+            echo "Si el cambio es de la plataforma, propóngalo con \`sinapsis propose\`." >&2
+            exit 1
+          fi
+
+          echo ""
+          echo "OK: todo el cambio vive en subjects/$slug/."

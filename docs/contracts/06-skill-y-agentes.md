@@ -7,6 +7,11 @@ contrato de trabajo: qué comandos existen, qué sale de cada uno, qué puede to
 El orquestador tiene su propia skill, `/sinapsis-review`, y se invoca en el repositorio de la
 plataforma: ver `07-propuestas.md`.
 
+Desde el Sprint 4 el trabajo del agente de materia **termina en un pull request**, no en una
+llamada a un servidor: `sinapsis publish` deja la materia en `subjects/<slug>/` del
+repositorio de la plataforma, en su propia rama, y abre el PR que el orquestador adjudica
+(N0-57, N0-58).
+
 ---
 
 ## 1. Dónde está el CLI
@@ -34,10 +39,12 @@ Se admite `~` y `~/…` en las rutas del usuario.
 
 | Variable | Default | Qué es |
 |---|---|---|
-| `SINAPSIS_HOME` | `~/Desktop/Projects/Sinapsis` | Repositorio de la plataforma (para invocar el CLI y para `propose`). |
-| `SINAPSIS_API` | `http://localhost:3000` | Base del API. |
-| `SINAPSIS_TOKEN` (o `SYNC_TOKEN`) | — | Token de sync. `--token` gana sobre las dos. |
-| `SINAPSIS_WEB` | `http://localhost:5173` | Base de la web para el enlace final. |
+| `SINAPSIS_HOME` | `~/Desktop/Projects/Sinapsis` | Repositorio de la plataforma: para invocar el CLI, para `publish` y para `propose`. |
+| `SINAPSIS_WEB` | `https://sebascaules.github.io/Sinapsis` | Base del sitio, para el enlace final que imprime el CLI. |
+
+**No hay más.** `SINAPSIS_API`, `SINAPSIS_TOKEN` y `SYNC_TOKEN` desaparecieron con el API: no
+hay servidor al que apuntar ni token que presentar. Si una instrucción vieja las menciona,
+está desactualizada.
 
 ---
 
@@ -49,12 +56,16 @@ Banderas globales: `--cwd <dir>`, `-v` / `--version`, `--help`.
 |---|---|---|
 | `init` | `--wiki <dir>` (`wiki`) · `--out <file>` (`sinapsis.config.json`) · `--slug <slug>` · `--force` | Propone un `sinapsis.config.json` a partir del wiki y deja lista la carpeta del material de estudio. |
 | `validate` | `--config <file>` (`sinapsis.config.json`) | Valida el config contra el contrato y el **formato** del material de estudio. |
-| `sync` | `--config <file>` · `--wiki <dir>` · `--api <url>` · `--token <t>` · `--dry-run` · `--out <file>` · `--web <url>` · `--tools` · `--minify` | Compila el wiki y el estudio y los sincroniza. Con `--tools`, publica también los bundles. |
-| `status` | `--config <file>` · `--api <url>` · `--token <t>` · `--web <url>` | Estado de la materia en la plataforma. |
+| `publish` | `--config <file>` · `--wiki <dir>` · `--repo <dir>` · `--dry-run` · `--out <file>` · `--no-pr` · `--branch <nombre>` | Compila, valida y publica la materia: la copia a `subjects/<slug>/` en una rama `subject/*` del repositorio de la plataforma y abre el PR. |
+| `sync` | (las de `publish`) | **Alias oculto de `publish`**, por compatibilidad. Avisa y sigue. |
+| `site build` | `--subjects <dir>` (`subjects`) · `--out <dir>` (`apps/web/public/subjects`) · `--only <slug>` · `--strict` | Compila `subjects/**` a los archivos estáticos del sitio. Lo corre el build de la plataforma, no la materia. |
+| `status` | `--config <file>` · `--wiki <dir>` · `--repo <dir>` | Compara el vault local con lo que ya está en `subjects/<slug>/` y lista los PR de materia abiertos. |
 | `tools build` | `--config <file>` · `--dir <dir>` · `--minify` · `--out <file>` | Valida y empaqueta los bundles de `<config>/tools`. |
-| `tools push` | `--config <file>` · `--dir <dir>` · `--minify` · `--api <url>` · `--token <t>` · `--web <url>` | Construye y sube los bundles. |
-| `tools list` | `--config <file>` · `--api <url>` · `--token <t>` | Bundles publicados. |
+| `tools list` | `--config <file>` · `--repo <dir>` | Bundles que la materia tiene en `subjects/<slug>/tools`. |
 | `propose` | `--subject <slug>`* · `--title <texto>`* · `--body <texto>`* · `--files <a,b>` · `--compat <texto>` · `--skip-gates` · `--repo <dir>` | Propone un cambio a la **plataforma**. (\* obligatorias) |
+
+`tools push` **ya no existe**: los bundles viajan dentro del `publish`, como parte de
+`subjects/<slug>/tools/`.
 
 ### 2.1 `init`
 
@@ -95,13 +106,13 @@ regla de `extraChecks` falla · `wiki.study` queda fuera de la carpeta del confi
 avisos amarillos no cambian el código de salida.**
 
 `validate` **no compila el wiki**: no puede verificar las referencias a slugs de página. Eso
-sale en `sync --dry-run`, y el propio comando lo aclara.
+sale en `publish --dry-run`, y el propio comando lo aclara.
 
-### 2.3 `sync`
+### 2.3 `publish`
 
 ```bash
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json --dry-run
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json --dry-run
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json
 ```
 
 Estructura de la salida, en este orden:
@@ -126,29 +137,39 @@ Probabilidad y Estadística · 93.24 · ITBA [proba]
   Estudio: 6 mazos (46 tarjetas) · 1 quiz (15 preguntas) · plan: 6 fases · 8 kits
   /ruta/al/estudio
 
+  bundles: proba-tools (22 archivos, 913 KB) · proba-exercises (…)
+
   3 advertencia(s)
     …
 
-sync OK · proba: 209 página(s) — 0 creada(s), 4 actualizada(s), 0 borrada(s)
-  el API devolvió 1 advertencia(s):
-    …
-  http://localhost:5173/m/proba
+publish OK · proba — 209 página(s), 2 bundle(s)
+  rama: subject/proba-20260906
+  PR abierto: https://github.com/SebasCaules/Sinapsis/pull/12
 ```
 
-- Con `--dry-run` termina en `--dry-run: no se llamó al API.` y sale `0`.
-- Con `--out <file>` escribe el `SyncPayload` compilado (JSON indentado) antes de llamar al
-  API.
-- Con `--tools` construye los bundles **antes** de tocar el API: un bundle roto detiene el
-  sync entero en vez de dejar la materia a medio publicar. Los sube después del sync del
-  wiki. Una materia **sin** carpeta `tools/` (o con la carpeta y sin ningún
-  `sinapsis.tools.json`) no es un bundle roto: se avisa en amarillo y el wiki se sincroniza
-  igual. Con `tools build` / `tools push`, en cambio, la carpeta es el objeto del comando y
-  su ausencia sí sale `1`.
-- `--wiki <dir>` sobreescribe `wiki.root`. **No mueve `wiki.study`**, que cuelga del config.
+- **Con `--dry-run`** termina en `--dry-run: no se escribió nada.` y sale `0`. Es el modo de
+  revisión: compila el wiki y el material de estudio y muestra todas las advertencias.
+- **Con `--out <file>`** escribe el payload compilado (JSON indentado) antes de publicar.
+- **Qué copia y qué borra**: §1 de `05-publicacion-y-sitio.md`. En corto: el config reescrito
+  con `wiki.root: "wiki"` y `wiki.study: "estudio"`, el wiki, `estudio/` y los archivos de
+  cada bundle; **reemplazo completo** de `subjects/<slug>/`, y nunca `dist/`, `.dist/`,
+  `scripts/` ni `node_modules/`.
+- **Dónde trabaja**: en un worktree temporal creado desde `origin/main` (o `main` si no hay
+  remoto). **Nunca toca el árbol de trabajo del usuario ni cambia su rama**, ni en la materia
+  ni en la plataforma.
+- **El commit no lleva coautoría.** Ningún trailer `Co-Authored-By`, `Claude-Session` ni
+  equivalente: el mensaje termina en su última línea de contenido (N0-58).
+- **El PR** se abre si hay remoto en GitHub y `gh` autenticado. Con `--no-pr`, sin remoto o
+  sin `gh`, deja la rama local y lo dice: no falta nada, el orquestador puede mergear
+  localmente.
+- **Un bundle roto detiene la publicación entera** en vez de dejar la materia a medias. Una
+  materia **sin** carpeta `tools/` (o con la carpeta y sin ningún `sinapsis.tools.json`) no
+  es un bundle roto: se avisa en amarillo y se publica igual.
+- `--wiki <dir>` sobrescribe `wiki.root`. **No mueve `wiki.study`**, que cuelga del config.
 
 Salida `1` si: el config no carga o no valida · el wiki no compila (rutas fuera de la
-carpeta) · con `--tools`, algún bundle **no compila** (no tener bundles no cuenta) · falta el
-token · el API responde con error o no responde.
+carpeta) · algún bundle no compila (no tener bundles no cuenta) · el repositorio de la
+plataforma no existe o no es un repositorio git · falla la creación de la rama o el commit.
 
 ### 2.4 `status`
 
@@ -156,48 +177,45 @@ token · el API responde con error o no responde.
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- status --config sinapsis.config.json
 ```
 
-Muestra lo que tiene **la plataforma**: última sync, páginas, estudiadas, conteos por tipo y
-por división, material de estudio publicado, y un aviso si el config local difiere del
-publicado (`el config local difiere del que tiene la plataforma: ejecute \`sinapsis sync\`.`).
+Compara el vault local con lo que ya está publicado en `<repo>/subjects/<slug>/`: páginas
+**nuevas, cambiadas y borradas** por huella del contenido, más el material de estudio y los
+bundles. Si hay `gh`, lista además los PR abiertos `subject/<slug>-*`.
 
-`status` necesita **sesión**, no token: el CLI intenta primero `POST /api/auth/dev`, que
-funciona con el API levantado con `AUTH_DEV_BYPASS=1` (N0-5). Ante un `401` o `403` dice qué
-hacer; **no se rodea la autenticación**.
+No hay servidor, así que `status` no necesita sesión ni token, y **no depende de que el sitio
+esté desplegado**: mira el repositorio.
 
-Si la línea de estudio dice `API sin soporte de estudio (GET /study → 404)`, el API de esa
-instalación es anterior al Sprint 2: el sync sigue funcionando, pero el material no se ve.
-
-### 2.5 `tools build | push | list`
+### 2.5 `tools build | list`
 
 ```bash
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build            # valida y empaqueta
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build --minify   # minifica y empaqueta eso
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push             # construye y sube
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools list             # qué hay publicado
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools list             # qué hay publicado en subjects/
 ```
 
 `build` informa por bundle: carpeta, archivos y bytes (con el desglose scripts / estilos /
-datos), vistas registradas, si aporta figuras, el resultado del minificado y la ruta del
-`ToolPush` (`<bundle>/dist/tool-push.json`). Cierra con
+datos), vistas registradas, si aporta figuras y el resultado del minificado. Cierra con
 `N bundles listos · <bytes>`.
 
-`push` agrega, por bundle: `push OK · <id> <version> — N archivos, <bytes>`, los bytes y la
-fecha que devolvió el API, la `base` de los archivos y la ruta de cada vista
-(`/m/<materia>/t/<vista>`).
-
-`list` necesita **sesión**, como `status`.
+`list` lee `<repo>/subjects/<slug>/tools` y dice qué bundles están publicados, con sus vistas
+y la ruta de cada una (`/m/<materia>/t/<vista>`).
 
 Salida `1` si: el config no carga · no existe la carpeta de bundles · no hay ningún bundle ·
-se pasó `--out` con más de un bundle · algún bundle no valida · falta el token (en `push`) ·
-el API responde con error.
+se pasó `--out` con más de un bundle · algún bundle no valida.
 
-**Un bundle roto no se sube ni deja subir a los demás**: la materia no queda con la mitad
-publicada.
+**Un bundle roto no se empaqueta ni deja empaquetar a los demás**: la materia no se publica
+con la mitad de sus herramientas.
 
-### 2.6 `propose`
+### 2.6 `site build`
+
+Es un comando **de la plataforma**, no de la materia: lo corre `pnpm build:subjects` en local
+y en CI para convertir `subjects/**` en los archivos estáticos que la web lee. Un agente de
+materia normalmente no lo invoca; el orquestador sí, al revisar un PR. Contrato completo en
+`05-publicacion-y-sitio.md` §2.
+
+### 2.7 `propose`
 
 Ver `07-propuestas.md`. Resumen: crea una rama en el repositorio de la **plataforma**, escribe
-la propuesta, corre los gates y pide revisión.
+la propuesta, corre los gates, commitea **sin coautoría** y pide revisión.
 
 ---
 
@@ -206,7 +224,7 @@ la propuesta, corre los gates y pide revisión.
 | Código | Significado |
 |---|---|
 | `0` | El comando hizo lo que dijo. Las advertencias amarillas **no** lo cambian. |
-| `1` | Todo lo demás: config inválido, gates fallidos, error del API, falta de token, argumento faltante, error de uso de commander. |
+| `1` | Todo lo demás: config inválido, wiki que no compila, bundle roto, gates fallidos, argumento faltante, error de uso de commander. |
 
 `--help` y `--version` salen `0`.
 
@@ -224,36 +242,41 @@ la propuesta, corre los gates y pide revisión.
   contenido.
 - Escribir y corregir su `sinapsis.config.json`.
 - Escribir el material de estudio de `estudio/`: mazos, quizzes, `plan.json`, `kits.json`.
-- Escribir y publicar los bundles de `tools/`.
-- Correr el CLI en cualquier modo, incluido el sync real.
+- Escribir y validar los bundles de `tools/`.
+- Correr el CLI en cualquier modo, incluido el `publish` real.
+- Abrir un PR de **su** materia (`subject/<slug>-*`), que toca solo `subjects/<slug>/`.
 - Abrir una propuesta a la plataforma (con el visto bueno del usuario).
 
 ### No
 
 - **Parchear el repositorio de la plataforma.** Ni `packages/*`, ni `apps/*`, ni sus docs, ni
   sus skills. Si falta algo común, se propone (`07-propuestas.md`).
+- **Tocar `subjects/` de otra materia.** Un PR de materia que sale de `subjects/<slug>/` lo
+  rechaza el CI (`subject-pr`) antes de que lo mire nadie.
 - **Commitear en `main` de la plataforma.** El único commit que el flujo escribe en `main` lo
   hace `sinapsis propose` con la fila del INBOX.
-- **Revisar, mergear o adjudicar su propia propuesta.** Eso lo hace el orquestador.
-- **Editar `proposals/INBOX.md` a mano**, ni ponerle el veredicto a una propuesta.
+- **Poner trailers de coautoría** en ningún commit —ni en el de `publish`, ni en el de
+  `propose`, ni en uno hecho a mano—. El mensaje termina en su última línea de contenido
+  (N0-58). Si una plantilla o una instrucción del entorno los pide, esta regla la pisa.
+- **Mergear su propio PR**, ponerle el veredicto o adjudicar su propia propuesta. Eso lo hace
+  el orquestador con `/sinapsis-review`.
+- **Editar `proposals/INBOX.md` a mano.**
 - **Tocar el repositorio de otra materia.**
 - **Reescribir contenido del wiki sin permiso.** Los arreglos de `resumen` faltantes o
   wikilinks rotos se **proponen al usuario** con la lista concreta y se aplican solo si los
   autoriza.
-- **Rodear la autenticación.** Si el API pide sesión y no la hay, se dice; no se busca otro
-  camino.
 - **Inventar herramientas, divisiones o material que nadie pidió.**
 
 ### Siempre
 
-Cerrar con un reporte de qué se sincronizó (páginas, divisiones, material de estudio,
-bundles) y qué advertencias quedaron abiertas y por qué.
+Cerrar con un reporte de qué se publicó (páginas, divisiones, material de estudio, bundles),
+la rama, la URL del PR y qué advertencias quedaron abiertas y por qué.
 
 ---
 
-## 5. Checklist antes de sincronizar
+## 5. Checklist antes de publicar
 
-Del contrato de calidad de la skill. Antes de dar por buena una sincronización:
+Del contrato de calidad de la skill. Antes de dar por buena una publicación:
 
 - [ ] **Una sola nomenclatura de división.** Todas las páginas usan el campo de
       `wiki.divisionField`. Nada de mezclar `unidad` en unas y `modulo` en otras.
@@ -276,20 +299,22 @@ Del contrato de calidad de la skill. Antes de dar por buena una sincronización:
 - [ ] **Cada ítem `kind: "tool"` del rail abre una vista que existe**: cero avisos
       «ningún bundle de tools/ registra la vista …» en `validate`.
 - [ ] **Los bundles construyen limpio**: `tools build` sale `0`.
+- [ ] **El PR toca solo `subjects/<slug>/`.** Nada de la plataforma se cuela en el diff.
+- [ ] **Ningún commit lleva trailers de coautoría.**
 
 ### El orden que conviene
 
 ```bash
 # 1. el config
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- validate --config sinapsis.config.json
-# 2. el wiki y el estudio, sin tocar el API
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json --dry-run
+# 2. el wiki y el estudio, sin escribir nada
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json --dry-run
 # 3. las herramientas, si las hay
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build
 # 4. corregir lo que haya que corregir (con permiso del usuario)
-# 5. el sync real
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json --tools
-# 6. verificar
+# 5. publicar: rama, commit y PR
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json
+# 6. verificar qué quedó pendiente de merge
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- status --config sinapsis.config.json
 ```
 
@@ -310,8 +335,11 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- status --config sinapsis.config.json
 | `estudio · … no marca ninguna opción correcta` | Una pregunta del quiz no tiene `- [x]`. | Marcar la correcta (si no, la pregunta se descarta). |
 | `estudio · … no es JSON válido` / `phases.0.title: …` | `plan.json` o `kits.json` no cumplen el contrato. | Corregir el campo que nombra la advertencia. |
 | `aviso · rail.x.y: ningún bundle de tools/ registra la vista "z"` | El ítem `tool` no tiene vista detrás. | Publicar el bundle, o corregir el `target`. |
-| `N script/estilo que el manifiesto no declara (no se suben)` | Hay `.js`/`.css` en la carpeta del bundle que nadie carga. | Declararlos, o dejarlos si son de construcción. |
+| `N script/estilo que el manifiesto no declara (no se copian)` | Hay `.js`/`.css` en la carpeta del bundle que nadie carga. | Declararlos, o dejarlos si son de construcción. |
 | `N archivo(s) con extensión ajena al contrato` | `.ts`, `.html`, `.yaml`… | Convertirlos o sacarlos de la carpeta. |
+
+Las advertencias viajan al PR (en el cuerpo) y al sitio (`SiteSubject.warnings`): el
+orquestador espera que cada una esté razonada, no que sean cero.
 
 La línea `Estudio: …` dice qué material se va a publicar. Si dice **«sin material propio»**,
 la materia no tiene carpeta de estudio (o está vacía) y la plataforma va a autogenerar un
@@ -332,7 +360,7 @@ Regla de corte:
 | El `sinapsis.config.json` | No: es trabajo de la materia. |
 | Un bundle propio en `tools/` | No. |
 | Cambiar el wiki o el material de estudio | No. |
-| Algo de `packages/contract`, `packages/markdown`, `packages/runtime`, `packages/cli`, `apps/api` o `apps/web` | **Sí.** |
+| Algo de `packages/contract`, `packages/markdown`, `packages/runtime`, `packages/cli`, `apps/web` o `.github/` | **Sí.** |
 
 El flujo completo, desde los dos lados, está en `07-propuestas.md`. En una línea:
 
@@ -342,7 +370,8 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- propose \
 ```
 
 y después el usuario abre una sesión en el repositorio de la plataforma y ejecuta
-`/sinapsis-review`. **La materia no revisa ni mergea su propia propuesta.**
+`/sinapsis-review`. **La materia no revisa ni mergea su propia propuesta, ni su propio PR de
+materia.**
 
 ---
 
@@ -354,16 +383,16 @@ y después el usuario abre una sesión en el repositorio de la plataforma y ejec
 - `skills/sinapsis-review/SKILL.md` — la skill del orquestador.
 - `packages/cli/src/cli.ts` — comandos, banderas y defaults.
 - `packages/cli/src/context.ts` — resolución del directorio base y de `~`.
-- `packages/cli/src/commands/` — `init.ts`, `validate.ts`, `sync.ts`, `status.ts`,
-  `tools.ts`, `propose.ts`.
+- `packages/cli/src/commands/` — `init.ts`, `validate.ts`, `publish.ts`, `site.ts`,
+  `status.ts`, `tools.ts`, `propose.ts`.
 - `packages/cli/src/report.ts` — el formato de todas las salidas (`heading`, `countsByType`,
-  `countsByDivision`, `studyLine`, `warnings`, `webUrl`, `reportApiError`).
-- `packages/cli/src/api.ts` — el cliente HTTP.
+  `countsByDivision`, `studyLine`, `warnings`, `webUrl`).
+- `packages/cli/src/git.ts` — worktree, rama, commit y PR.
 - `packages/markdown/src/scaffold.ts` — lo que infiere `init`.
 
 ## Decisiones relacionadas
 
-N0-5 (bypass de desarrollo, que es lo que hace posible `status` y `tools list` en local) ·
-N0-7 (token de sync) · N0-13 (el compilador es un paquete propio) ·
-N0-27 (material de estudio en el repositorio de la materia) · N0-40 (alcance del Sprint 3) ·
-N0-41 y N0-42 (herramientas y figuras) · N0-44 (propuestas).
+N0-13 (el compilador es un paquete propio) · N0-27 (material de estudio en el repositorio de
+la materia) · N0-40 (herramientas por materia) · N0-41 y N0-42 (bundles y figuras) ·
+N0-44 (propuestas) · N0-56 (sitio estático sin API ni token) ·
+N0-57 (materias como fuente en `subjects/`) · N0-58 (integración por PR, sin coautoría).

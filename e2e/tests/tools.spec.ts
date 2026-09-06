@@ -8,13 +8,15 @@
  * y volver la vuelva a montar y que una vista que ningún bundle registra no
  * rompa nada.
  *
- * El bundle lo siembra `global-setup.ts`: el de verdad de Proba
- * (`examples/proba/tools/proba-tools`) o el mínimo `fixtures/mini-tools/`. Las
- * vistas y sus rótulos salen del manifiesto, por `.auth/seed.json`.
+ * Los bundles los compila la siembra junto con la materia
+ * (`sinapsis site build` escribe `subjects/<materia>/tools/<id>/…`): los de
+ * verdad de Proba o el mínimo `mini-demo` del fixture. El bundle con el que
+ * corren estas pruebas es el que registra figuras, y sus vistas y rótulos salen
+ * del manifiesto por `e2e/.seed.json`.
  */
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { setUserTheme, subjectTools, waitForSubjectShell, withApi } from "../support/app";
+import { subjectTools, waitForSubjectShell } from "../support/app";
 import { readSeed, SHOTS_DIR } from "../support/seed";
 
 const seed = readSeed();
@@ -70,15 +72,12 @@ async function expectMounted(page: Page, id: string): Promise<void> {
   await expect(drawing(page, id).first()).toBeVisible();
 }
 
-test.afterAll(async () => {
-  // La prueba del tema escribe el del perfil (es global, N0-8).
-  await withApi((api) => setUserTheme(api, "pergamino"));
-});
-
-test("el rail abre los slots de herramientas que declara la materia", async ({ page, request }) => {
-  const published = await subjectTools(request, subject.slug);
+/* El tema que escribe la prueba del cambio de tema no se repone: cada prueba
+   corre en su propio contexto, con el estado local vacío. */
+test("el rail abre los slots de herramientas que declara la materia", async ({ page }) => {
+  const published = subjectTools(subject.slug);
   const info = published.find((t) => t.manifest.id === tools.id);
-  expect(info, `la materia no publicó el bundle «${tools.id}»`).toBeDefined();
+  expect(info, `la materia no compiló el bundle «${tools.id}»`).toBeDefined();
   expect(info?.manifest.views.map((v) => v.id)).toEqual(tools.views.map((v) => v.id));
 
   await page.goto(`/m/${subject.slug}`);
@@ -233,9 +232,10 @@ test("una herramienta que la materia no reservó devuelve al inicio", async ({ p
 });
 
 test("un sitio reservado en el rail que ningún bundle registra dice «Próximamente»", async ({ page }) => {
-  /* Solo se puede probar si la materia sembrada reservó un ítem sin vista: con
-     el vault real de Proba, los cinco slots tienen bundle. */
-  const reservado = seed.railTools.find((item) => !tools.views.some((v) => v.id === item.target));
+  /* Solo se puede probar si la materia sembrada reservó un ítem que NINGÚN
+     bundle registra: con la materia real, los ocho slots del rail se reparten
+     entre `proba-tools` y `proba-exercises`, así que no queda ninguno libre. */
+  const reservado = seed.railTools.find((item) => !tools.allViews.includes(item.target));
   test.skip(!reservado, "la materia sembrada no tiene ningún slot de herramienta sin bundle");
 
   const errores = watchErrors(page);

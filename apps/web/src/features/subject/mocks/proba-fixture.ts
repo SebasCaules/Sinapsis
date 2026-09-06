@@ -1,6 +1,6 @@
 /**
  * Materia de mentira para el smoke visual (`?mock=1` en desarrollo): la config
- * REAL de Proba (`examples/proba/sinapsis.config.json`, validada con zod) y doce
+ * REAL de Proba (`subjects/proba/sinapsis.config.json`, validada con zod) y doce
  * páginas sintéticas repartidas en tres divisiones y tres tipos, dos estudiadas.
  *
  * En producción no se importa nunca: el único que lo trae es `mocks/api.ts`, que
@@ -17,7 +17,7 @@ import {
   type SearchHit,
   type SubjectDetail,
 } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 
 export const probaConfig: SubjectConfig = SubjectConfig.parse(rawProbaConfig);
 

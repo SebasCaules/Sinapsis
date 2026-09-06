@@ -1,30 +1,38 @@
 /**
- * `sinapsis tools build | push | list` — los bundles de herramientas y figuras
- * de la materia (decisiones N0-41 y N0-42).
+ * `sinapsis tools build | list` — los bundles de herramientas y figuras de la
+ * materia (decisiones N0-41 y N0-42).
  *
  * La carpeta por defecto es `<carpeta del config>/tools`: si tiene manifiesto es
  * un único bundle, y si no, cada subcarpeta con `sinapsis.tools.json` es uno
- * (`tools/explorador/`, `tools/figuras/`…). `sync --tools` usa exactamente el
- * mismo camino después de sincronizar el wiki.
+ * (`tools/explorador/`, `tools/figuras/`…). `publish` usa exactamente el mismo
+ * camino para decidir qué archivos de cada bundle viajan al repositorio de la
+ * plataforma.
+ *
+ * Desde el Sprint 4 no hay `tools push`: no hay API al que subir nada. Publicar
+ * un bundle es publicar la materia (`sinapsis publish`), y `tools list` mira lo
+ * que hay en `<repo>/subjects/<slug>/tools`, no lo que devolvía un servidor.
  */
+import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import pc from "picocolors";
-import { plural, routes, type ToolInfo as ToolInfoType } from "@sinapsis/contract";
-import { devLogin, getTools, putTool } from "../api.js";
+import { plural, routes, type ToolManifest as ToolManifestType } from "@sinapsis/contract";
 import { resolveUserPath, type Ctx } from "../context.js";
-import { heading, reportApiError, webUrl } from "../report.js";
+import { heading } from "../report.js";
 import {
   MANIFEST_FILE,
   buildBundle,
   findBundles,
   formatBytes,
+  readManifest,
   writePush,
   type BuildProblem,
   type BuiltBundle,
   type SkippedPath,
 } from "../tools/bundle.js";
+import { repoRoot } from "../git.js";
+import { SUBJECTS_DIR } from "./publish.js";
+import { resolveRepo } from "./propose.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
-import { resolveApi, resolveToken } from "./sync.js";
 
 export interface ToolsBuildOptions {
   config?: string;
@@ -34,16 +42,10 @@ export interface ToolsBuildOptions {
   out?: string;
 }
 
-export interface ToolsPushOptions extends ToolsBuildOptions {
-  api?: string;
-  token?: string;
-  web?: string;
-}
-
 export interface ToolsListOptions {
   config?: string;
-  api?: string;
-  token?: string;
+  /** Repositorio de la plataforma (o `SINAPSIS_HOME`). */
+  repo?: string;
 }
 
 /** Carpeta de herramientas: `--dir`, o `<carpeta del config>/tools`. */
@@ -59,10 +61,10 @@ export interface BuildAllOptions {
   out?: string | undefined;
   /**
    * `true` cuando las herramientas son un extra del comando y no su objeto:
-   * `sync --tools` sobre una materia SIN carpeta `tools/` (o sin manifiestos)
-   * avisa y sigue, porque lo que se le pidió es sincronizar el wiki. En
-   * `tools build`/`tools push` la carpeta es el objeto del comando y su
-   * ausencia es un error.
+   * publicar una materia SIN carpeta `tools/` (o sin manifiestos) avisa y
+   * sigue, porque lo que se pidió es publicar el wiki. En
+   * `tools build` la carpeta es el objeto del comando y su ausencia es un
+   * error.
    */
   optional?: boolean | undefined;
 }
@@ -74,7 +76,7 @@ export interface BuildAllOptions {
  *
  *   no hay carpeta / no hay manifiestos → no hay nada que construir. Con
  *     `optional`, es un aviso y la lista vacía;
- *   un bundle no compila → error: no se sube ninguno, para que la materia no
+ *   un bundle no compila → error: no se publica ninguno, para que la materia no
  *     quede con la mitad publicada.
  */
 export async function buildAll(ctx: Ctx, base: string, opts: BuildAllOptions): Promise<BuildAllOutcome> {
@@ -143,78 +145,7 @@ export async function runToolsBuild(opts: ToolsBuildOptions, ctx: Ctx): Promise<
       `${built.length} ${plural(built.length, "bundle listo", "bundles listos")} · ${formatBytes(built.reduce((n, b) => n + b.bytes, 0))}`,
     ),
   );
-  ctx.out(pc.dim("Súbalos con `sinapsis tools push` (o con `sinapsis sync --tools`)."));
-  return 0;
-}
-
-// ---------------------------------------------------------------------------
-// tools push
-// ---------------------------------------------------------------------------
-
-export async function runToolsPush(opts: ToolsPushOptions, ctx: Ctx): Promise<number> {
-  const loaded = await loadConfig(ctx, opts.config ?? DEFAULT_CONFIG);
-  if (!loaded) return 1;
-
-  heading(ctx, loaded.config);
-  const base = toolsDir(ctx, loaded.path, opts.dir);
-  const outcome = await buildAll(ctx, base, { minify: opts.minify, out: opts.out });
-  if (!outcome.ok) return 1;
-  const built = outcome.bundles;
-
-  const api = resolveApi(ctx, opts.api);
-  const token = resolveToken(ctx, opts.token);
-  if (!token) {
-    ctx.err(pc.red("Falta el token de sync."));
-    ctx.err(pc.dim("Páselo con --token, o exporte SINAPSIS_TOKEN (o SYNC_TOKEN)."));
-    return 1;
-  }
-
-  ctx.out("");
-  const code = await pushAll(ctx, built, { api, token }, loaded.config.slug);
-  if (code === 0) ctx.out(`  ${webUrl(ctx, opts.web, loaded.config.slug)}`);
-  return code;
-}
-
-/** Sube los bundles ya construidos e informa el `ToolInfo` de cada uno. */
-export async function pushAll(
-  ctx: Ctx,
-  bundles: readonly BuiltBundle[],
-  opts: { api: string; token: string },
-  slug: string,
-): Promise<number> {
-  for (const bundle of bundles) {
-    try {
-      const info = await putTool(opts, slug, bundle.manifest.id, bundle.push);
-      ctx.out(
-        pc.green(
-          `push OK · ${bundle.manifest.id} ${bundle.manifest.version} — ${bundle.push.files.length} ${plural(bundle.push.files.length, "archivo", "archivos")}, ${formatBytes(bundle.bytes)}`,
-        ),
-      );
-      if (info) {
-        ctx.out(`    ${pc.dim(`bytes: ${info.bytes} · actualizado: ${info.updatedAt}`)}`);
-        ctx.out(`    ${pc.dim(`base: ${info.base}`)}`);
-        for (const view of info.manifest.views) {
-          ctx.out(`    ${pc.dim(`${routes.tool(slug, view.id)} · ${view.label}`)}`);
-        }
-      } else {
-        ctx.out(pc.dim("    el API no devolvió un ToolInfo (¿API anterior al Sprint 3?)"));
-      }
-    } catch (cause) {
-      const badToken = { hints: ["Revise el token: tiene que coincidir con SYNC_TOKEN del .env del API."] };
-      return reportApiError(ctx, opts.api, cause, {
-        headline: (base, message) => `Falló el push de "${bundle.manifest.id}" contra ${base}: ${message}`,
-        byStatus: {
-          401: badToken,
-          403: badToken,
-          404: {
-            headline: `${opts.api} no conoce la materia "${slug}" o no tiene la ruta de herramientas.`,
-            hints: ["Corra `sinapsis sync` primero; la ruta de herramientas es del Sprint 3."],
-          },
-          413: { hints: ["El bundle supera el tope del API (20 MB)."] },
-        },
-      });
-    }
-  }
+  ctx.out(pc.dim("Publíquelos con `sinapsis publish`."));
   return 0;
 }
 
@@ -226,40 +157,50 @@ export async function runToolsList(opts: ToolsListOptions, ctx: Ctx): Promise<nu
   const loaded = await loadConfig(ctx, opts.config ?? DEFAULT_CONFIG);
   if (!loaded) return 1;
 
-  const api = resolveApi(ctx, opts.api);
-  const token = resolveToken(ctx, opts.token);
-  // Como `status`: la ruta de lectura pide sesión, así que se intenta primero el
-  // bypass de desarrollo (decisión N0-5).
-  const cookie = (await devLogin({ api, token })) ?? undefined;
+  const repoDir = resolveRepo(ctx, opts.repo);
+  const root = (await repoRoot(repoDir)) ?? repoDir;
+  const base = path.join(root, SUBJECTS_DIR, loaded.config.slug, "tools");
 
-  try {
-    const tools = await getTools({ api, token, cookie }, loaded.config.slug);
-    heading(ctx, loaded.config);
-    ctx.out(`  API: ${pc.dim(api)}`);
-    if (tools.length === 0) {
-      ctx.out(pc.yellow("  la materia no tiene ningún bundle publicado"));
-      ctx.out(pc.dim("  Súbalos con `sinapsis tools push`."));
-      return 0;
-    }
-    ctx.out(`  ${pc.bold(String(tools.length))} ${plural(tools.length, "bundle", "bundles")}`);
-    for (const info of tools) reportInfo(ctx, info, loaded.config.slug);
+  heading(ctx, loaded.config);
+  ctx.out(`  plataforma: ${pc.dim(base)}`);
+
+  const dirs = await findBundles(base);
+  if (dirs === null || dirs.length === 0) {
+    ctx.out(pc.yellow("  la materia no tiene ningún bundle publicado"));
+    ctx.out(pc.dim("  Publíquelos con `sinapsis publish`."));
     return 0;
-  } catch (cause) {
-    const noSession = {
-      headline: "`tools list` necesita una sesión y el API no la dio.",
-      hints: ["Levante el API con AUTH_DEV_BYPASS=1, o inicie sesión en la web."],
-    };
-    return reportApiError(ctx, api, cause, {
-      byStatus: {
-        401: noSession,
-        403: noSession,
-        404: {
-          headline: `${api} no conoce la materia "${loaded.config.slug}" o no tiene la ruta de herramientas.`,
-          hints: ["Ejecute `sinapsis sync` para crear la materia."],
-        },
-      },
-    });
   }
+
+  ctx.out(`  ${pc.bold(String(dirs.length))} ${plural(dirs.length, "bundle", "bundles")}`);
+  for (const dir of dirs) {
+    const manifest = await readManifest(dir);
+    if (manifest === null) {
+      ctx.out("");
+      ctx.out(pc.yellow(`  ${path.basename(dir)}: el ${MANIFEST_FILE} publicado no cumple el contrato`));
+      continue;
+    }
+    reportPublished(ctx, manifest, await treeBytes(dir), loaded.config.slug);
+  }
+  return 0;
+}
+
+/** Bytes de todos los archivos publicados del bundle. */
+async function treeBytes(dir: string): Promise<number> {
+  let total = 0;
+  const visit = async (current: string): Promise<void> => {
+    const entries = await readdir(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) await visit(full);
+      else if (entry.isFile()) total += (await stat(full)).size;
+    }
+  };
+  try {
+    await visit(dir);
+  } catch {
+    return total;
+  }
+  return total;
 }
 
 // ---------------------------------------------------------------------------
@@ -332,13 +273,13 @@ function reportProblems(ctx: Ctx, dir: string, problems: readonly BuildProblem[]
   for (const problem of problems) ctx.err(`  ${pc.bold(problem.where)}: ${problem.message}`);
 }
 
-function reportInfo(ctx: Ctx, info: ToolInfoType, slug: string): void {
+/** Una ficha de bundle publicado: manifiesto, peso en disco y sus vistas. */
+function reportPublished(ctx: Ctx, manifest: ToolManifestType, bytes: number, slug: string): void {
   ctx.out("");
-  ctx.out(`  ${pc.bold(info.manifest.title)} ${pc.dim(`· ${info.manifest.id} ${info.manifest.version}`)}`);
-  ctx.out(`    ${formatBytes(info.bytes)} · actualizado ${info.updatedAt}`);
-  ctx.out(`    ${pc.dim(info.base)}`);
-  for (const view of info.manifest.views) {
+  ctx.out(`  ${pc.bold(manifest.title)} ${pc.dim(`· ${manifest.id} ${manifest.version}`)}`);
+  ctx.out(`    ${formatBytes(bytes)}`);
+  for (const view of manifest.views) {
     ctx.out(`    ${view.label} ${pc.dim(routes.tool(slug, view.id))}`);
   }
-  if (info.manifest.figures) ctx.out(pc.dim("    registra figuras para los callouts [!figura]"));
+  if (manifest.figures) ctx.out(pc.dim("    registra figuras para los callouts [!figura]"));
 }

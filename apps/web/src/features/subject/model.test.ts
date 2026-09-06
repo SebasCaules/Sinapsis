@@ -14,8 +14,8 @@ import {
   type PageMeta,
   type SubjectDetail,
 } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../examples/proba/sinapsis.config.json";
-import { buildSubjectModel } from "./model";
+import rawProbaConfig from "../../../../../subjects/proba/sinapsis.config.json";
+import { buildSubjectModel, type ExtraStep } from "./model";
 
 const config = SubjectConfig.parse(rawProbaConfig);
 
@@ -140,6 +140,16 @@ describe("progreso", () => {
     expect(m.progress("1")).toMatchObject({ done: 1, total: 3 });
     expect(m.progressTotal).toMatchObject({ done: 1, total: 7 });
     expect(m.sourcesCount).toBe(1);
+  });
+
+  it("sin pasos de bundles, el desglose son solo páginas", () => {
+    const m = model(["p-b", "p-d"]);
+    const parts = m.progressParts("1");
+    expect(parts.pages).toMatchObject({ done: 1, total: 3 });
+    expect(parts.extras).toMatchObject({ done: 0, total: 0, ratio: 0 });
+    expect(parts.sources).toEqual([]);
+    expect(parts.groups).toEqual([]);
+    expect(m.progressPartsTotal.extras.total).toBe(0);
   });
 
   it("apunta a la primera página sin leer del orden global", () => {
@@ -424,5 +434,112 @@ describe("rail", () => {
       lastSyncAt: null,
     };
     expect(buildSubjectModel(detail).railItem("holodeck")?.to).toBe("/m/proba/t/holodeck");
+  });
+});
+
+
+/* ------------------------------------------------------------------ N0-61 */
+
+/**
+ * Los pasos que aportan los bundles de la materia (`progress: true`): cada
+ * ejercicio vale uno, igual que una página leída.
+ */
+describe("progreso con pasos de bundles", () => {
+  const steps: Record<string, ExtraStep[]> = {
+    "1": [
+      { id: "g1", label: "Ejercicio 1", done: true, group: "Guía", to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+      { id: "g2", label: "Ejercicio 2", done: false, group: "Guía", to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+      { id: "l1", label: "Propuesto 1", done: true, group: "Lutzio", to: "/m/proba/t/ejercicios?arg=1%2Flutzio", source: "ejercicios" },
+    ],
+    "2": [{ id: "p1", label: "Parcial 1", done: false, group: "Parciales", source: "ejercicios" }],
+  };
+  const conPasos = (studied: string[] = ["p-b", "p-d"]) =>
+    buildSubjectModel(
+      { config, pages, studied, placeholder: false, lastSyncAt: null },
+      false,
+      { extraSteps: (division) => steps[division] ?? [] },
+    );
+
+  it("la barra de la unidad suma páginas y pasos", () => {
+    const m = conPasos();
+    /* 1 de 3 páginas + 2 de 3 ejercicios = 3 de 6. */
+    expect(m.progress("1")).toMatchObject({ done: 3, total: 6, ratio: 0.5 });
+  });
+
+  it("el desglose separa páginas, pasos y proveedores", () => {
+    const parts = conPasos().progressParts("1");
+    expect(parts.pages).toMatchObject({ done: 1, total: 3 });
+    expect(parts.extras).toMatchObject({ done: 2, total: 3 });
+    expect(parts.sources).toEqual([{ label: "ejercicios", done: 2, total: 3 }]);
+  });
+
+  it("agrupa los pasos por grupo, en el orden en que llegaron, con su destino", () => {
+    expect(conPasos().progressParts("1").groups).toEqual([
+      { id: "Guía", label: "Guía", done: 1, total: 2, to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+      { id: "Lutzio", label: "Lutzio", done: 1, total: 1, to: "/m/proba/t/ejercicios?arg=1%2Flutzio", source: "ejercicios" },
+    ]);
+  });
+
+  it("una división sin pasos queda con el progreso de sus páginas", () => {
+    const m = conPasos(["p-g"]);
+    expect(m.progressParts("99").extras).toMatchObject({ done: 0, total: 0 });
+    expect(m.progress("99")).toEqual(m.progressParts("99").pages);
+  });
+
+  it("el total suma los pasos de todas las divisiones", () => {
+    const m = conPasos();
+    /* 1 de 7 páginas + 2 de 4 ejercicios = 3 de 11. */
+    expect(m.progressTotal).toMatchObject({ done: 3, total: 11 });
+    expect(m.progressPartsTotal.pages).toMatchObject({ done: 1, total: 7 });
+    expect(m.progressPartsTotal.extras).toMatchObject({ done: 2, total: 4 });
+    expect(m.progressPartsTotal.sources).toEqual([{ label: "ejercicios", done: 2, total: 4 }]);
+  });
+
+  it("la secuencia extendida pone los grupos de ejercicios después de las páginas", () => {
+    const steps = conPasos().unitSteps("1");
+    /* Tres páginas de contenido en la unidad 1 (p-d es fuente y no cuenta). */
+    expect(steps.slice(0, 3).map((s) => (s.kind === "page" ? s.page.slug : "?"))).toEqual(["p-b", "p-a", "p-c"]);
+    expect(steps.slice(3)).toEqual([
+      { kind: "extra", id: "Guía", label: "Guía", done: 1, total: 2, to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+      { kind: "extra", id: "Lutzio", label: "Lutzio", done: 1, total: 1, to: "/m/proba/t/ejercicios?arg=1%2Flutzio", source: "ejercicios" },
+    ]);
+  });
+
+  it("sin grupos, la secuencia extendida es la secuencia de páginas y nada más", () => {
+    const m = model();
+    expect(m.unitSteps("1")).toEqual(m.sequence("1").map((page) => ({ kind: "page", page })));
+    /* Y `prevNextSteps` se comporta igual que `prevNext`. */
+    const { prev, next } = m.prevNextSteps("p-a");
+    expect(prev).toEqual({ kind: "page", page: m.bySlug.get("p-b") });
+    expect(next).toEqual({ kind: "page", page: m.bySlug.get("p-c") });
+    expect(m.prevNextSteps("p-c").next).toBeNull();
+  });
+
+  it("la última página tiene como siguiente el primer grupo de ejercicios", () => {
+    const m = conPasos();
+    const { prev, next } = m.prevNextSteps("p-c");
+    expect(prev).toEqual({ kind: "page", page: m.bySlug.get("p-a") });
+    expect(next).toMatchObject({ kind: "extra", id: "Guía", done: 1, total: 2 });
+    /* Y la primera sigue sin tener anterior: los grupos van al FINAL. */
+    expect(m.prevNextSteps("p-b").prev).toBeNull();
+  });
+
+  it("una página que no está en la secuencia no tiene vecinos extendidos", () => {
+    expect(conPasos().prevNextSteps("p-d")).toEqual({ prev: null, next: null });
+    expect(conPasos().prevNextSteps("no-existe")).toEqual({ prev: null, next: null });
+  });
+
+  it("un proveedor que se rompe deja la división con sus páginas", () => {
+    const m = buildSubjectModel(
+      { config, pages, studied: ["p-b"], placeholder: false, lastSyncAt: null },
+      false,
+      {
+        extraSteps: () => {
+          throw new Error("bundle roto");
+        },
+      },
+    );
+    expect(m.progress("1")).toMatchObject({ done: 1, total: 3 });
+    expect(m.progressParts("1").groups).toEqual([]);
   });
 });

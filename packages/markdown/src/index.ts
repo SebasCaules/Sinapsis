@@ -16,7 +16,7 @@ export { extractLinks, extractHeadings, slugifyAnchor, countWords, firstH1, firs
  */
 export { normalizeSlug, normalizeDivisionKey, fold } from "@sinapsis/contract";
 
-export { compilePage, compileWiki, formatIssues, isInside } from "./compile.js";
+export { compilePage, compileWiki, formatIssues, isInside, listWikiFiles } from "./compile.js";
 export type {
   CompileIssue,
   IssueKind,

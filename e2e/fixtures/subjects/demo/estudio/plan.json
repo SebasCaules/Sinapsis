@@ -1,0 +1,86 @@
+{
+  "title": "Plan de la materia demo",
+  "phases": [
+    {
+      "id": "fase-cursada",
+      "title": "Cursada",
+      "subtitle": "Semanas 01 y 02",
+      "icon": "book",
+      "description": "Leer el wiki de las dos primeras semanas y fijar la fórmula clave.",
+      "milestones": [
+        {
+          "id": "fase-cursada-h1",
+          "title": "Semana 01 · Vocabulario y fórmula",
+          "divisions": ["1"],
+          "tasks": [
+            {
+              "id": "fase-cursada-h1-t1",
+              "label": "Leer la teoría de la Semana 01",
+              "kind": "read",
+              "target": "1"
+            },
+            {
+              "id": "fase-cursada-h1-t2",
+              "label": "Repasar el mazo «Nociones de la materia demo»",
+              "kind": "cards",
+              "target": "demo-basico"
+            }
+          ]
+        },
+        {
+          "id": "fase-cursada-h2",
+          "title": "Semana 02 · Ejemplos y técnica",
+          "divisions": ["2"],
+          "tasks": [
+            {
+              "id": "fase-cursada-h2-t1",
+              "label": "Leer la teoría de la Semana 02",
+              "kind": "read",
+              "target": "2"
+            },
+            {
+              "id": "fase-cursada-h2-t2",
+              "label": "Rehacer el Ejemplo B sin mirar",
+              "kind": "exercises",
+              "target": "demo-ejemplos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fase-cierre",
+      "title": "Cierre",
+      "subtitle": "Semana 03",
+      "icon": "timer",
+      "description": "Repasar las tres semanas y resolver el quiz.",
+      "milestones": [
+        {
+          "id": "fase-cierre-h1",
+          "title": "Semana 03 · Repaso y evaluación",
+          "divisions": ["3"],
+          "tasks": [
+            {
+              "id": "fase-cierre-h1-t1",
+              "label": "Leer la teoría de la Semana 03",
+              "kind": "read",
+              "target": "3"
+            },
+            {
+              "id": "fase-cierre-h1-t2",
+              "label": "Resolver el quiz de la materia demo",
+              "kind": "quiz",
+              "target": "quiz-demo"
+            },
+            {
+              "id": "fase-cierre-h1-t3",
+              "label": "Abrir la vista de demostración",
+              "kind": "tool",
+              "target": "demo"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

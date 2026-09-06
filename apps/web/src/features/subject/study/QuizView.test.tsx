@@ -2,7 +2,7 @@
  * La partida de quiz: mezcla, tanda corta, marcador en curso, el revelado que
  * dice cuál era la correcta y la partida que se reanuda al volver a la vista.
  *
- * El API se reemplaza por la MISMA costura que usa el modo mock (`lib/api` es
+ * El cliente de datos se reemplaza por la MISMA costura que usa el modo mock (`lib/api` es
  * un objeto mutable) y el azar se fija con `Math.random`: con 0,999 el
  * Fisher-Yates deja el orden del archivo, así que las aserciones sobre «la
  * primera pregunta» son deterministas.
@@ -18,7 +18,7 @@ import {
   type StudyState,
   type SubjectDetail,
 } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { api, type ApiClient } from "@/lib/api";
 import type { SubjectCtx } from "../context";
 import { buildSubjectModel } from "../model";

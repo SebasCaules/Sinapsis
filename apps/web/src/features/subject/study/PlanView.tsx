@@ -442,7 +442,7 @@ export function PlanView() {
         }
       >
         <p className={css.dialogText}>
-          {/* El API destilda TODAS las tareas de la materia, no solo las de la
+          {/* `resetTasks` destilda TODAS las tareas de la materia, no solo las de la
               modalidad que está a la vista: el texto no promete otra cosa. */}
           Se destildan todas las tareas del plan de esta materia, también las de la otra modalidad. Las fechas de las
           instancias, la modalidad elegida y el repaso de las flashcards no se tocan.

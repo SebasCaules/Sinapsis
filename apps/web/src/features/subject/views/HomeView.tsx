@@ -95,7 +95,6 @@ function StartCard({
   next: PageMeta | null;
   division: ReturnType<SubjectModel["division"]> | null;
 }) {
-  const { progressTotal } = model;
   return (
     <section className={css.startCard} aria-labelledby="home-start">
       <div className={css.startBody}>
@@ -110,8 +109,8 @@ function StartCard({
             TODAS las filas del progreso (incluidas las sintéticas), así que
             «de N unidades» se contradecía con la tabla (brecha inicio-13). */}
         <p className={css.startText}>
-          Las {progressTotal.total} páginas de contenido están ordenadas para leerse en secuencia. El progreso de
-          abajo se llena a medida que las marca como leídas.
+          Las {model.progressPartsTotal.pages.total} páginas de contenido están ordenadas para leerse en secuencia. El
+          progreso de abajo se llena a medida que las marca como leídas.
         </p>
       </div>
       <div className={css.startActions}>
@@ -139,7 +138,10 @@ function StartCard({
  * propio porcentaje.
  */
 function ProgressSection({ model, slug }: { model: SubjectModel; slug: string }) {
-  const { progressTotal } = model;
+  /* El carril y las filas miden la unidad ENTERA: páginas leídas más los pasos
+     que aportan los bundles de la materia (N0-61). La línea de la cabecera los
+     nombra por separado. */
+  const { progressTotal, progressPartsTotal: parts } = model;
   const pct = Math.round(progressTotal.ratio * 100);
   /* Doce «0 %» no informan nada: el baseline deja la columna vacía hasta que hay
      algo que medir. */
@@ -154,7 +156,13 @@ function ProgressSection({ model, slug }: { model: SubjectModel; slug: string })
         <span className={css.progressNum}>
           {showPct ? <b className={css.progressPct}>{pct}%</b> : null}
           <span className={css.progressCount}>
-            {progressTotal.done} / {progressTotal.total} {plural(progressTotal.total, "página", "páginas")}
+            {parts.pages.done} / {parts.pages.total} {plural(parts.pages.total, "página", "páginas")}
+            {parts.sources.map((source) => (
+              <span key={source.label} className={css.progressExtra}>
+                {" · "}
+                {source.done} / {source.total} {source.label}
+              </span>
+            ))}
           </span>
         </span>
       </div>
@@ -697,19 +705,19 @@ function EmptySubject({ name, slug }: { name: string; slug: string }) {
         <div className={css.startBody}>
           <span className={css.eyebrow}>
             <Icon name="clock" size={14} />
-            SIN SINCRONIZAR
+            SIN PUBLICAR
           </span>
           <h2 className={css.startTitle}>{name} todavía no tiene páginas</h2>
           <p className={css.startText}>
-            La materia existe en la plataforma, pero su wiki no se ha sincronizado. Desde la carpeta del repositorio,
-            con el API levantado:
+            La materia está en su inicio, pero su wiki todavía no se publicó en el sitio. Desde la carpeta del vault
+            de la materia:
           </p>
           <pre className={css.command}>
-            <code>pnpm sinapsis -- sync --config /ruta/a/{slug}/sinapsis.config.json</code>
+            <code>pnpm sinapsis -- publish --config /ruta/a/{slug}/sinapsis.config.json</code>
           </pre>
           <p className={css.startText}>
-            El comando compila el wiki markdown y lo sube; al volver a esta pantalla el índice ya muestra las
-            divisiones con sus páginas.
+            El comando compila el wiki markdown y abre el pedido de incorporación; cuando la materia entre en el
+            sitio, esta pantalla muestra las divisiones con sus páginas.
           </p>
         </div>
       </section>

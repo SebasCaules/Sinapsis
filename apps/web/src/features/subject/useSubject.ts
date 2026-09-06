@@ -1,5 +1,5 @@
 /**
- * Acceso a los datos de una materia: una sola consulta (`GET /api/subjects/:slug`)
+ * Acceso a los datos de una materia: una sola consulta (`api.subject.detail`)
  * alimenta el rail, el índice, el inicio, el catálogo y las divisiones; el lector
  * agrega la suya por página. Todo lo derivado se calcula en `model.ts`.
  */
@@ -13,7 +13,7 @@ import {
 import type { Note, PageDetail, SearchHit, StudyState, SubjectDetail } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
 import { useToast } from "@/components/platform";
-import { buildSubjectModel, type SubjectModel } from "./model";
+import { buildSubjectModel, type SubjectModel, type SubjectModelOpts } from "./model";
 import { useIsDark } from "./store";
 
 /**
@@ -32,12 +32,35 @@ export interface UseSubjectResult {
   model: SubjectModel | null;
 }
 
-/** La materia entera + su modelo derivado (memorizado por respuesta y tema). */
-export function useSubject(slug: string): UseSubjectResult {
-  const query = useQuery({ queryKey: qk.subject(slug), queryFn: () => api.subject.detail(slug) });
+/**
+ * Opciones del modelo más el pulso que obliga a rehacerlo. `tick` es lo que
+ * sube el runtime con cada `App.progressChanged()`: el modelo es inmutable, así
+ * que un ejercicio marcado se ve cuando se vuelve a construir (N0-61).
+ */
+export interface SubjectModelInput extends SubjectModelOpts {
+  tick?: number;
+}
+
+/** El modelo derivado de una respuesta del sitio, memorizado por tema y pulso. */
+export function useSubjectModel(
+  data: SubjectDetail | undefined,
+  opts?: SubjectModelInput,
+): SubjectModel | null {
   const dark = useIsDark();
-  const data = query.data;
-  const model = useMemo(() => (data ? buildSubjectModel(data, dark) : null), [data, dark]);
+  const extraSteps = opts?.extraSteps;
+  const tick = opts?.tick ?? 0;
+  /* `tick` no lo usa el constructor: es la SEÑAL de que los pasos de los
+     bundles cambiaron y hay que volver a pedirlos. */
+  return useMemo(
+    () => (data ? buildSubjectModel(data, dark, { extraSteps }) : null),
+    [data, dark, extraSteps, tick],
+  );
+}
+
+/** La materia entera + su modelo derivado (memorizado por respuesta y tema). */
+export function useSubject(slug: string, opts?: SubjectModelInput): UseSubjectResult {
+  const query = useQuery({ queryKey: qk.subject(slug), queryFn: () => api.subject.detail(slug) });
+  const model = useSubjectModel(query.data, opts);
   return { query, model };
 }
 
@@ -119,7 +142,7 @@ export interface UseStudyStateResult {
 }
 
 /**
- * `GET /api/subjects/:slug/study/state`, con los índices que usan el lector, el
+ * `api.study.state(slug)`, con los índices que usan el lector, el
  * índice, el catálogo y las vistas de «Lo mío». Es UNA consulta compartida: las
  * mutaciones de abajo la escriben en optimista y ninguna vista vuelve a pedirla.
  */

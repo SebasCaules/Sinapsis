@@ -1,0 +1,201 @@
+{
+  "contract": 1,
+  "slug": "proba",
+  "name": "Probabilidad y Estadística",
+  "code": "93.24",
+  "institution": "ITBA",
+  "color": "--u9",
+  "semester": "2026-1C",
+  "division": {
+    "singular": "Unidad",
+    "abbr": "U",
+    "plural": "Unidades"
+  },
+  "divisions": [
+    {
+      "key": "1",
+      "name": "Estadística Descriptiva",
+      "kind": "numbered"
+    },
+    {
+      "key": "2",
+      "name": "Introducción a la Probabilidad",
+      "kind": "numbered"
+    },
+    {
+      "key": "3",
+      "name": "Variables Aleatorias Discretas",
+      "kind": "numbered"
+    },
+    {
+      "key": "4",
+      "name": "Variables Aleatorias Continuas",
+      "kind": "numbered"
+    },
+    {
+      "key": "5",
+      "name": "Función de V.A. y Bidimensionales",
+      "kind": "numbered"
+    },
+    {
+      "key": "6",
+      "name": "Procesos Estocásticos",
+      "kind": "numbered"
+    },
+    {
+      "key": "7",
+      "name": "Suma de Variables Aleatorias",
+      "kind": "numbered"
+    },
+    {
+      "key": "8",
+      "name": "Inferencia Estadística",
+      "kind": "numbered"
+    },
+    {
+      "key": "9",
+      "name": "Pruebas de Hipótesis",
+      "kind": "numbered"
+    },
+    {
+      "key": "0",
+      "name": "Complementos Matemáticos",
+      "kind": "extra"
+    },
+    {
+      "key": "eval",
+      "name": "Evaluaciones",
+      "kind": "extra",
+      "color": "--ueval"
+    }
+  ],
+  "pageTypes": [
+    {
+      "key": "concepto",
+      "label": "Concepto",
+      "plural": "Conceptos",
+      "folder": "conceptos",
+      "countsAsContent": true,
+      "collapsedByDefault": false,
+      "color": "--u2"
+    },
+    {
+      "key": "distribucion",
+      "label": "Distribución",
+      "plural": "Distribuciones",
+      "folder": "distribuciones",
+      "countsAsContent": true,
+      "collapsedByDefault": false,
+      "color": "--u3"
+    },
+    {
+      "key": "teorema",
+      "label": "Teorema",
+      "plural": "Teoremas",
+      "folder": "teoremas",
+      "countsAsContent": true,
+      "collapsedByDefault": false,
+      "color": "--u5"
+    },
+    {
+      "key": "tecnica",
+      "label": "Técnica",
+      "plural": "Técnicas",
+      "folder": "tecnicas",
+      "countsAsContent": true,
+      "collapsedByDefault": false,
+      "color": "--u1"
+    },
+    {
+      "key": "formulario",
+      "label": "Formulario",
+      "plural": "Formularios",
+      "folder": "formularios",
+      "countsAsContent": true,
+      "collapsedByDefault": false,
+      "color": "--u6"
+    },
+    {
+      "key": "fuente",
+      "label": "Fuente",
+      "plural": "Fuentes",
+      "folder": "fuentes",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    }
+  ],
+  "rail": [
+    {
+      "id": "resolver",
+      "label": "Resolver",
+      "color": "--accent",
+      "items": [
+        {
+          "id": "formularios",
+          "label": "Formularios",
+          "icon": "sigma",
+          "kind": "tool",
+          "target": "formularios"
+        },
+        {
+          "id": "explorador",
+          "label": "Explorador de distribuciones",
+          "icon": "chart",
+          "kind": "tool",
+          "target": "explorador"
+        },
+        {
+          "id": "taller",
+          "label": "Taller de resolución",
+          "icon": "function",
+          "kind": "tool",
+          "target": "taller"
+        },
+        {
+          "id": "calc",
+          "label": "Calculadoras",
+          "icon": "calc",
+          "kind": "tool",
+          "target": "calc"
+        },
+        {
+          "id": "asistente",
+          "label": "¿Qué distribución o prueba?",
+          "icon": "compass",
+          "kind": "tool",
+          "target": "asistente"
+        },
+        {
+          "id": "lab",
+          "label": "Laboratorio Monte Carlo",
+          "icon": "flask",
+          "kind": "tool",
+          "target": "lab"
+        },
+        {
+          "id": "ejercicios",
+          "label": "Ejercicios",
+          "icon": "pencil",
+          "kind": "tool",
+          "target": "ejercicios"
+        },
+        {
+          "id": "parcial",
+          "label": "Simulador de parcial",
+          "icon": "timer",
+          "kind": "tool",
+          "target": "parcial"
+        }
+      ]
+    }
+  ],
+  "fab": null,
+  "wiki": {
+    "root": "wiki",
+    "index": "index.md",
+    "log": "log.md",
+    "ignore": [],
+    "divisionField": "unidad",
+    "study": "estudio"
+  }
+}

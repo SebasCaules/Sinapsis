@@ -73,6 +73,26 @@ revisión, y que Proba en Sinapsis se vea igual que su app original.
 | S3-09 | Auditoría (seguridad, corrección) + fixes | — | HECHO · 4 + 15 hallazgos corregidos; cero altas abiertas |
 | S3-10 | Contratos consolidados en `docs/contracts/`, handoff, decisiones | docs | HECHO · `docs/contracts/00-07`, `docs/HANDOFF-sprint3.md`, N0-40..49 |
 
-## Sprint 4 — Deploy (propuesto)
-Dockerfile, Turso/libSQL remoto, dominio, Google OAuth de producción, backups; tokens de sync por
-usuario; modo móvil completo; diferidos S-14, S-17 … S-26 de `EXEC_STATE.md`.
+## Sprint 4 — Sitio estático (en ejecución, 2026-09-06)
+
+Objetivo: sacar el servidor. La plataforma pasa a ser un sitio estático en GitHub Pages
+(`https://sebascaules.github.io/Sinapsis/`), sin API, sin base de datos y sin inicio de
+sesión: las materias son fuente en `subjects/<slug>/` del propio repositorio y se compilan en
+el build; todo lo personal vive en el navegador con copia de seguridad exportable; cada
+materia entra por un pull request que el orquestador revisa e integra, y el merge despliega
+solo. Decisiones N0-56 a N0-60; brief de ejecución en `docs/SPRINT4-BRIEF.md`.
+
+### Unidades de trabajo
+
+| # | Unidad | Paquete | Done-test |
+|---|---|---|---|
+| S4-A | **Web**: base URL y `404.html`, cliente local sobre `ApiClient` (perfil, landing, materia, estudio), estado en IndexedDB + espejo `localStorage` + `storage.persist()`, copia de seguridad (descargar, restaurar, borrar), búsqueda y grafo en el cliente con la heurística portada, gancho `window.__sinapsis` de pruebas | `apps/web`, `packages/runtime` | `pnpm typecheck`, `pnpm test` y `pnpm --filter @sinapsis/web build` verdes; la landing y una materia funcionan sin red después del primer `fetch`. |
+| S4-B | **CLI, materias y CI**: `publish` (worktree, rama `subject/*`, commit sin coautoría, PR), `site build`, `status` y `tools list` contra el repositorio, `tools push` eliminado; Proba migrada a `subjects/proba/`; `examples/` eliminado; scripts raíz; `.github/workflows/{ci,pages}.yml` | `packages/cli`, `packages/markdown`, `subjects/`, `.github/` | `pnpm build:subjects` compila Proba entera; `pnpm typecheck` y `pnpm test` verdes; el job `subject-pr` falla ante un diff fuera de `subjects/<slug>/`. |
+| S4-C | **Documentación y skills**: README del sitio estático, contrato 05 reescrito como «Publicación y sitio», 06 y 07 al día (comandos, variables, PR de materia, no coautoría), 00–04 sin referencias al servidor, `DECISIONS` N0-56..N0-60, `SPRINTS`, `HANDOFF-sprint4`, skills `/sinapsis` y `/sinapsis-review` | `README.md`, `docs/`, `skills/`, `proposals/` | Cero menciones vigentes a API, token, Google o `tools push`; un agente de materia publica siguiendo solo la skill. |
+| S4-D | **E2E**: un solo `webServer` (Vite en `:5174` con `VITE_E2E=1` y `SINAPSIS_PUBLIC_DIR`), sitio de prueba construido en `global-setup` con `site build`, materia «demo» como fuente en `e2e/fixtures/subjects/`, estado repuesto con `window.__sinapsis`, sin cookies ni `storageState` | `e2e/` | `pnpm e2e` verde contra el sitio estático. |
+
+### Fuera de alcance
+
+Service worker y modo sin conexión; sincronización del estado entre dispositivos;
+multiusuario (cuentas, permisos, materias privadas); dominio propio; modo móvil completo;
+diferidos S-14, S-17 … S-26 de `EXEC_STATE.md`.

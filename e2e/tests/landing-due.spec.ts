@@ -4,29 +4,26 @@
  * enlazado al repaso. Con cero no se dibuja nada.
  *
  * El contador es de tarjetas VENCIDAS (`due <= ahora`), y ahí está la vuelta:
- * calificar por HTTP corre el SM-2 del contrato, que nunca deja la próxima
- * revisión en el pasado —«Otra vez» la deja a diez minutos—, así que una sesión
- * de repaso, por sí sola, no puede hacer aparecer el contador. Las pruebas
- * hacen las dos mitades:
+ * calificar corre el SM-2 del contrato, que nunca deja la próxima revisión en el
+ * pasado —«Otra vez» la deja a diez minutos—, así que una sesión de repaso, por
+ * sí sola, no puede hacer aparecer el contador. Las pruebas hacen las dos
+ * mitades:
  *
  *   1. califican una tarjeta con «Otra vez» desde la sesión (teclado, como en
- *      `flashcards.spec.ts`) y comprueban lo que persistió el API y que la
+ *      `flashcards.spec.ts`) y comprueban lo que persistió el navegador y que la
  *      landing siga sin contador;
- *   2. adelantan el vencimiento de esa misma tarjeta (`expireSrsCards`, lo
- *      único de la suite que escribe en la base sin pasar por el API: ver el
- *      porqué en `support/app.ts`) y comprueban el contador, su cifra y su
- *      enlace.
+ *   2. adelantan el vencimiento de esa misma tarjeta (`expireSrsCards`, que
+ *      escribe el documento local con el gancho de pruebas: ver el porqué en
+ *      `support/app.ts`) y comprueban el contador, su cifra y su enlace.
  */
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   expireSrsCards,
   landingCards,
   resetLanding,
   resetStudy,
-  studyContent,
   studyState,
   waitForSubjectShell,
-  withApi,
 } from "../support/app";
 import { readSeed } from "../support/seed";
 
@@ -39,14 +36,10 @@ const OTRA_VEZ = "1";
 const card = (page: Page) => page.locator(`[data-testid="subject-card"][data-slug="${subject.slug}"]`);
 const dueLink = (page: Page) => card(page).getByRole("link", { name: /para repasar/ });
 
-/**
- * Abre el primer mazo con tarjetas y califica la primera con «Otra vez».
- * Devuelve el id del mazo, para los mensajes de error.
- */
-async function gradeOneAgain(page: Page, request: APIRequestContext): Promise<string> {
-  const content = await studyContent(request, subject.slug);
-  const deck = content.decks.find((d) => d.cards.length > 0);
-  expect(deck, "la materia sembrada no tiene ningún mazo con tarjetas").toBeDefined();
+/** Abre el mazo más corto de la materia y califica la primera tarjeta con «Otra vez». */
+async function gradeOneAgain(page: Page): Promise<string> {
+  const deck = seed.study.deck;
+  expect(deck, "la materia sembrada no tiene ningún mazo con tarjetas").toBeTruthy();
   const deckId = deck?.id ?? "";
 
   await page.goto(`/m/${subject.slug}/flashcards/${deckId}?modo=todo`);
@@ -58,30 +51,25 @@ async function gradeOneAgain(page: Page, request: APIRequestContext): Promise<st
   await page.keyboard.press(OTRA_VEZ);
 
   await expect
-    .poll(async () => (await studyState(request, subject.slug)).srs.length, {
-      message: `el API no registró la calificación del mazo «${deckId}»`,
+    .poll(async () => (await studyState(page, subject.slug)).srs.length, {
+      message: `la calificación del mazo «${deckId}» no quedó guardada`,
     })
     .toBe(1);
   return deckId;
 }
 
-test.beforeEach(async ({ request }) => {
-  await resetStudy(request, subject.slug);
-  await resetLanding(request);
-});
-
-test.afterAll(async () => {
-  await withApi((api) => resetStudy(api, subject.slug));
+test.beforeEach(async ({ page }) => {
+  await resetStudy(page, subject.slug);
+  await resetLanding(page);
 });
 
 test("«Otra vez» deja la tarjeta para dentro de diez minutos y la landing no la cuenta", async ({
   page,
-  request,
 }) => {
   const antes = Date.now();
-  await gradeOneAgain(page, request);
+  await gradeOneAgain(page);
 
-  const { srs } = await studyState(request, subject.slug);
+  const { srs } = await studyState(page, subject.slug);
   const tarjeta = srs[0];
   expect(tarjeta?.lastGrade).toBe(Number(OTRA_VEZ));
   expect(tarjeta?.interval).toBe(0);
@@ -90,7 +78,7 @@ test("«Otra vez» deja la tarjeta para dentro de diez minutos y la landing no l
   expect(espera).toBeGreaterThan(0);
   expect(espera).toBeLessThanOrEqual(11 * 60 * 1000);
 
-  const cards = await landingCards(request);
+  const cards = await landingCards(page);
   expect(cards.find((c) => c.slug === subject.slug)?.dueCount).toBe(0);
 
   await page.goto("/");
@@ -98,14 +86,11 @@ test("«Otra vez» deja la tarjeta para dentro de diez minutos y la landing no l
   await expect(dueLink(page)).toHaveCount(0);
 });
 
-test("con la tarjeta vencida, la landing muestra el contador y lleva al repaso", async ({
-  page,
-  request,
-}) => {
-  await gradeOneAgain(page, request);
-  expect(await expireSrsCards(subject.slug)).toBe(1);
+test("con la tarjeta vencida, la landing muestra el contador y lleva al repaso", async ({ page }) => {
+  await gradeOneAgain(page);
+  expect(await expireSrsCards(page, subject.slug)).toBe(1);
 
-  const cards = await landingCards(request);
+  const cards = await landingCards(page);
   const pendientes = cards.find((c) => c.slug === subject.slug)?.dueCount ?? 0;
   expect(pendientes).toBe(1);
 

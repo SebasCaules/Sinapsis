@@ -1,7 +1,8 @@
 /**
- * Estado de UI de la plataforma (zustand). Nada de datos del servidor: eso vive
- * en TanStack Query. Acá solo tema y estado del panel lateral, ambos persistidos
- * en localStorage con las claves del contrato (LS_KEYS).
+ * Estado de UI de la plataforma (zustand). Nada de datos de materia: eso vive en
+ * TanStack Query. Acá solo tema y estado del panel lateral, los dos persistidos
+ * en localStorage con las claves del contrato (LS_KEYS); el tema, además, en el
+ * perfil local (así viaja en la copia de seguridad).
  */
 import { create } from "zustand";
 import { LS_KEYS, ThemeId } from "@sinapsis/contract";
@@ -54,34 +55,32 @@ function applyCompact(compact: boolean): void {
 }
 
 export interface SetThemeOptions {
-  /** false cuando el tema viene del servidor: no hay que devolvérselo. */
+  /** false cuando el tema viene del propio perfil: no hay que volver a escribirlo. */
   push?: boolean;
 }
 
 export interface UiState {
   theme: ThemeId;
-  /** true cuando hay sesión: habilita persistir el tema en el perfil (PATCH /me). */
-  signedIn: boolean;
   sidebarCompact: boolean;
   setTheme: (theme: ThemeId, options?: SetThemeOptions) => void;
   cycleTheme: () => void;
-  setSignedIn: (signedIn: boolean) => void;
   setSidebarCompact: (compact: boolean) => void;
   toggleSidebarCompact: () => void;
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
   theme: initialTheme(),
-  signedIn: false,
   sidebarCompact: initialCompact(),
 
   setTheme: (theme, options) => {
     if (get().theme !== theme) set({ theme });
     applyTheme(theme);
     writeJson(LS_KEYS.theme, theme);
-    if (options?.push !== false && get().signedIn) {
+    /* El tema es parte del PERFIL local: además de la preferencia de esta
+       pestaña (`localStorage`), se guarda en la copia de seguridad. */
+    if (options?.push !== false) {
       void api.auth.setTheme(theme).catch(() => {
-        /* sin red o sin sesión: queda el tema local */
+        /* sin almacenamiento: queda el tema de esta pestaña */
       });
     }
   },
@@ -90,8 +89,6 @@ export const useUiStore = create<UiState>((set, get) => ({
     const next = THEME_CYCLE[(THEME_CYCLE.indexOf(get().theme) + 1) % THEME_CYCLE.length] ?? "pergamino";
     get().setTheme(next);
   },
-
-  setSignedIn: (signedIn) => set({ signedIn }),
 
   setSidebarCompact: (compact) => {
     set({ sidebarCompact: compact });

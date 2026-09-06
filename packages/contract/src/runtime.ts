@@ -213,6 +213,18 @@ export interface CompatApp {
    */
   registerSearchProvider(fn: SearchProvider): void;
   /**
+   * Registra un proveedor de pasos de progreso. El registro es del bundle y se
+   * olvida al descargarlo; la barra de cada división suma sus pasos a las
+   * páginas leídas. Para que la plataforma los tenga sin que nadie abra la
+   * vista, el manifiesto declara `progress: true`.
+   */
+  registerProgressProvider(provider: ProgressProvider): void;
+  /**
+   * Avisa de que el estado de los pasos cambió (se marcó un ejercicio). El
+   * anfitrión vuelve a consultar a los proveedores y redibuja las barras.
+   */
+  progressChanged(): void;
+  /**
    * URL de un archivo del bundle que está corriendo (`vendor/x.js.txt` →
    * `/api/subjects/<materia>/tools/<bundle>/files/vendor/x.js.txt`). Es lo que
    * necesita un bundle que carga algo PEREZOSAMENTE —una biblioteca pesada que
@@ -269,6 +281,45 @@ export interface SearchHit {
 /** Proveedor de resultados de la paleta: recibe lo tecleado y devuelve sus aciertos. */
 export type SearchProvider = (query: string) => SearchHit[];
 
+/**
+ * Un paso de progreso que un bundle suma a la barra de una división: un
+ * ejercicio de la guía, una tarjeta de un mazo propio, un simulacro. Cada paso
+ * vale UNO, igual que una página leída.
+ */
+export interface ProgressStep {
+  /** Identificador estable dentro del proveedor (no se muestra). */
+  id: string;
+  /** Rótulo del paso, por si el anfitrión lo lista. */
+  label: string;
+  /** ¿Está hecho? Lo decide el bundle con su propio criterio. */
+  done: boolean;
+  /**
+   * Grupo al que pertenece el paso dentro de la división («Guía», «Lutzio»,
+   * «Parciales»). El anfitrión dibuja una tarjeta por grupo.
+   */
+  group?: string;
+  /**
+   * Destino del grupo, en la gramática de rutas del SPA
+   * (`/m/<materia>/t/<vista>?arg=…`). Los pasos de un mismo grupo comparten
+   * destino: el anfitrión usa el del primero.
+   */
+  to?: string;
+}
+
+/**
+ * Proveedor de pasos de progreso. `stepsOf` se consulta CADA VEZ que la
+ * plataforma recalcula el progreso, así que devuelve el estado del momento; el
+ * bundle avisa de un cambio con `App.progressChanged()`.
+ */
+export interface ProgressProvider {
+  /** Identificador del proveedor dentro del bundle (`"ejercicios"`). */
+  id: string;
+  /** Rótulo en plural y minúsculas para el desglose («ejercicios»). */
+  label: string;
+  /** Pasos de esa división; arreglo vacío si el bundle no aporta nada ahí. */
+  stepsOf(division: string): ProgressStep[];
+}
+
 /** Lo que la plataforma instala en `window.SinapsisRuntime`. */
 export interface SinapsisRuntime {
   version: 1;
@@ -287,6 +338,17 @@ export interface SinapsisRuntime {
    * hay bundles, la lista está vacía.
    */
   searchProviders(): SearchProvider[];
+  /**
+   * Proveedores de progreso que registraron los bundles cargados
+   * (`App.registerProgressProvider`). La barra de cada división los consulta;
+   * si no hay ninguno, la lista está vacía y el progreso son solo páginas.
+   */
+  progressProviders(): ProgressProvider[];
+  /**
+   * Se suscribe a `App.progressChanged()`; devuelve el desuscriptor. El
+   * anfitrión vuelve a pedir los pasos y redibuja.
+   */
+  onProgressChange(fn: () => void): () => void;
   onThemeChange(fn: (theme: ThemeId) => void): () => void;
   /**
    * Ata el contenedor de la vista montada: ámbito de `$`/`$$` y delegación de los

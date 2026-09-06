@@ -3,7 +3,8 @@
 Una **herramienta** es una vista propia de la materia (un explorador, una calculadora, un
 laboratorio). Una **figura** es un dibujo interactivo que el lector monta dentro de una
 página del wiki. Las dos salen del mismo lugar: un **bundle** de scripts clásicos que el CLI
-empaqueta y el API sirve (N0-41 y N0-42).
+empaqueta, que viaja dentro de `subjects/<slug>/tools/` y que el sitio sirve como archivos
+estáticos (N0-41, N0-42 y N0-57).
 
 No hay React, ni módulos ES, ni paso de compilación obligatorio: son archivos `.js` que se
 cargan en orden y hablan con `window.App`. Es a propósito, para poder mudar herramientas ya
@@ -55,7 +56,8 @@ hagan falta en tiempo de ejecución**.
     { "id": "explorador", "label": "Explorador de distribuciones",
       "icon": "chart", "layout": "wide" }
   ],
-  "figures": true                   // true si registra figuras para los callouts [!figura]
+  "figures": true,                  // true si registra figuras para los callouts [!figura]
+  "progress": false                 // true si registra proveedores de progreso (§6.5)
 }
 ```
 
@@ -70,6 +72,7 @@ hagan falta en tiempo de ejecución**.
 | `styles` | `ToolFilePath[]` | no | `[]` | ≤ 32 | Se inyectan como `<link rel="stylesheet">` y se quitan al descargar el bundle. |
 | `views` | `ToolView[]` | no | `[]` | ≤ 32 | Vistas que el bundle promete registrar. |
 | `figures` | booleano | no | `false` | — | `true` si registra figuras para los callouts `[!figura]`. |
+| `progress` | booleano | no | `false` | — | `true` si registra proveedores de progreso (`App.registerProgressProvider`). Igual que `figures`, **el bundle se carga al entrar en la materia**: la barra de cada división tiene que poder contar sus pasos sin que nadie abra la herramienta. Ver §6.5. |
 | `data` | `ToolFilePath[]` | no | `[]` | ≤ 16 | JSON que el runtime pide **antes** de cargar los scripts y deja en `App.DATA`. |
 
 ### `ToolView`
@@ -94,9 +97,10 @@ Una ruta relativa a la carpeta del bundle. Cuatro reglas, todas obligatorias:
 js  mjs  css  json  svg  png  jpg  jpeg  webp  woff  woff2  txt  md  csv
 ```
 
-Cualquier otra extensión no se sube. Además del esquema, el API resuelve cada ruta contra la
-carpeta del bundle y comprueba que el resultado siga cayendo adentro: la primera regla es del
-contrato, la segunda es la que de verdad impide leer o escribir fuera.
+Cualquier otra extensión no se publica. Además del esquema, el CLI resuelve cada ruta contra
+la carpeta del bundle (siguiendo los enlaces simbólicos) y comprueba que el resultado siga
+cayendo adentro: la primera regla es del contrato, la segunda es la que de verdad impide leer
+o copiar fuera.
 
 ---
 
@@ -120,7 +124,7 @@ Codificación en el `ToolPush`: `utf8` para `.js .mjs .css .json .svg .txt .md .
 
 ## 4. `ToolPush`, `ToolFile` y `ToolInfo`
 
-Lo que el CLI envía y lo que el API devuelve.
+Lo que el CLI arma al empaquetar un bundle y lo que el sitio publica.
 
 ```ts
 ToolPush  = { manifest: ToolManifest, files: ToolFile[] }      // 1..400 archivos
@@ -128,37 +132,46 @@ ToolFile  = { path: ToolFilePath, encoding: "utf8" | "base64", content: string }
 ToolInfo  = { manifest: ToolManifest, bytes: number, updatedAt: string, base: string }
 ```
 
+`ToolPush` es el bundle **en memoria**: lo que `tools build` valida y lo que `publish` y
+`site build` copian a disco. Ya no viaja por la red: no hay servidor al que subirlo.
+`ToolInfo` es lo que queda escrito en `subjects/<slug>/tools.json` (`SiteTools`):
+
 | `ToolInfo` | Qué es |
 |---|---|
 | `manifest` | El manifiesto tal como se publicó. |
 | `bytes` | Suma de los bytes decodificados del bundle. |
-| `updatedAt` | ISO del último push. |
-| `base` | Base de las URLs de los archivos, **sin barra final**. La web compone `${base}/${path}`. |
+| `updatedAt` | ISO de la última compilación del bundle. |
+| `base` | Base de las rutas de los archivos, **relativa al sitio y sin barra final**. |
 
-`base` lo calcula el contrato con `toolFilesBase(subject, toolId)`:
+`base` lo calcula el contrato con `siteToolBase(slug, toolId)` (`packages/contract/src/site.ts`):
 
 ```
-/api/subjects/<slug>/tools/<id>/files
+subjects/<slug>/tools/<id>
 ```
 
-y una URL concreta es `toolFileUrl(subject, toolId, path)` = `${base}/${path}`. Las dos
+La web la prefija con `import.meta.env.BASE_URL` y compone `${base}/${path}`; el helper
+equivalente que ya trae el prefijo es `sitePaths.toolFile(base, slug, toolId, path)`. Las dos
 formas coinciden carácter por carácter: **no armes la URL a mano**.
 
 ---
 
 ## 5. Cómo se sirven los archivos
 
-`GET /api/subjects/:slug/tools/:id/files/*` — requiere **sesión** (no token).
+Como archivos estáticos: `site build` los copia bajo
+`apps/web/public/subjects/<slug>/tools/<id>/<path>` y el sitio los entrega igual que a
+cualquier otro asset (Vite en desarrollo, GitHub Pages en producción).
 
 | Aspecto | Comportamiento |
 |---|---|
-| `Content-Type` | Por extensión, de una tabla cerrada (ver §5.1). Una extensión desconocida se sirve como `application/octet-stream`: nunca como algo que el navegador pueda interpretar. |
-| `X-Content-Type-Options` | `nosniff`, siempre. |
-| `Cache-Control` | `private, max-age=0, must-revalidate`. Un push nuevo se ve en la recarga siguiente sin cachebustear las URLs. |
-| `ETag` | Fuerte: los 32 primeros hex del sha-256 del contenido. Un bundle que no cambió cuesta un `304`. |
-| Ruta inválida, fuera de la carpeta o inexistente | `404` con `{ "error": "El archivo no existe" }`. No se distingue «no existe» de «no te corresponde». |
+| `Content-Type` | Lo decide el servidor estático por extensión. La lista cerrada de `ToolFilePath` (§5.1) es lo que garantiza que nunca se publique una extensión que el navegador interprete de forma inesperada. |
+| Caché | La del host estático. GitHub Pages sirve los archivos con su propia política y un `ETag` derivado del contenido: un bundle que no cambió cuesta un `304`. |
+| Ruta inválida o fuera de la carpeta | No llega a publicarse: el CLI la rechaza al empaquetar. |
+| Archivo inexistente | `404` del host estático. |
 
-### 5.1 Tipos MIME
+### 5.1 Tipos MIME esperados
+
+Los que corresponden a la lista cerrada de extensiones. No los fija la plataforma —los pone el
+host estático—, pero son los que el runtime espera al cargar un bundle:
 
 | Extensión | `Content-Type` |
 |---|---|
@@ -177,16 +190,17 @@ formas coinciden carácter por carácter: **no armes la URL a mano**.
 
 ### 5.2 Dónde viven
 
-En disco, bajo `TOOLS_DIR/<subject_id>/<tool_id>/<path>`. Si `TOOLS_DIR` no está declarado,
-la carpeta `tools/` al lado del archivo SQLite de `DATABASE_URL` (con `file:./data/sinapsis.db`
-→ `./data/tools`); con una base remota o en memoria, `./data/tools`.
+En tres lugares, y conviene no confundirlos:
 
-El push es **atómico**: los archivos se escriben en una carpeta temporal hermana y recién al
-final se renombra sobre la definitiva (la anterior se aparta y se borra después). Un push a
-medio camino nunca deja el bundle mezclado entre dos versiones.
+| Lugar | Qué es |
+|---|---|
+| `<vault>/tools/<id>/` | La **fuente**, en el repositorio de la materia. Puede tener `dist/`, `.dist/` y scripts de construcción. |
+| `subjects/<slug>/tools/<id>/` | Lo **publicado**, en el repositorio de la plataforma: el manifiesto y los archivos que el runtime carga, nada más. Lo escribe `publish`. |
+| `apps/web/public/subjects/<slug>/tools/<id>/` | Lo **compilado**, generado por `site build` y no versionado. |
 
-**Un `sinapsis sync` no toca los bundles**: tienen su propio ciclo de vida y un sync del wiki
-no puede dejar a la materia sin sus herramientas.
+**Los bundles viajan con la materia**: `publish` reemplaza `subjects/<slug>/` entero, así que
+borrar un bundle del vault lo borra del sitio en la siguiente publicación. Es lo contrario de
+lo que pasaba antes del Sprint 4, cuando los bundles tenían su propio ciclo de vida.
 
 ---
 
@@ -274,7 +288,7 @@ baseline de Proba: lo marcado «compat» existe para no reescribir código ya es
 | `fmt(n, digits?)` | `(number, number) => string` |
 | `cssVar(name)` | `(string) => string` — token CSS resuelto (`--primary` → `#7c2230`) |
 | `withAlpha(color, alpha)` | `(string, number) => string` |
-| `quickLookup?(kind, params)` | Compat, **opcional**: burbuja de valores. Ver §6.5. |
+| `quickLookup?(kind, params)` | Compat, **opcional**: burbuja de valores. Ver §6.6. |
 
 **Dibujo y matemática**
 
@@ -327,7 +341,71 @@ La implementación (`packages/runtime`) publica en `window.App` algunos miembros
 lo anuncie. Si a una materia le hacen falta, el camino es proponer que entren en `CompatApp`
 (ver `07-propuestas.md`).
 
-### 6.5 `quickLookup` no lo provee el runtime
+### 6.5 Progreso: `registerProgressProvider` y `progressChanged`
+
+La barra de progreso de una división cuenta sus **páginas de contenido leídas** más los
+**pasos** que declaran los bundles con `"progress": true` en el manifiesto (N0-61). Cada
+paso vale uno, igual que una página: un ejercicio resuelto es tanto trabajo como una página
+leída.
+
+| Miembro | Firma | Semántica |
+|---|---|---|
+| `registerProgressProvider(p)` | `(ProgressProvider) => void` | Registra un proveedor. El registro es **del bundle**: se olvida al descargarlo (salir de la materia). |
+| `progressChanged()` | `() => void` | Avisa de que el estado de los pasos cambió. El anfitrión vuelve a pedirlos y redibuja las barras. |
+
+```ts
+interface ProgressProvider {
+  id: string;                                  // identidad dentro del bundle
+  label: string;                               // plural y en minúsculas: «ejercicios»
+  stepsOf(division: string): ProgressStep[];   // los pasos de esa división
+}
+
+interface ProgressStep {
+  id: string;        // estable dentro del proveedor (no se muestra)
+  label: string;     // rótulo del paso
+  done: boolean;     // el criterio lo pone el bundle
+  group?: string;    // «Guía», «Parciales»: el anfitrión dibuja una tarjeta por grupo
+  to?: string;       // destino del grupo, ruta del SPA: /m/<materia>/t/<vista>?arg=…
+}
+```
+
+`stepsOf` se consulta **cada vez** que la plataforma recalcula el progreso, así que devuelve
+el estado del momento; el bundle no cachea nada y avisa con `progressChanged()`.
+
+Dónde se ve: la barra y el porcentaje del hero de la división y las filas del inicio usan el
+total combinado; el texto lo desglosa («12 / 20 páginas leídas · 8 / 34 ejercicios
+resueltos», con el `label` del proveedor), y la portada de la división lista una tarjeta por
+`group` con su enlace `to`. El progreso del lector sigue hablando solo de páginas.
+
+Ejemplo mínimo:
+
+```js
+if (typeof A.registerProgressProvider === "function") {   // runtime viejo: no rompe
+  A.registerProgressProvider({
+    id: "ejercicios",
+    label: "ejercicios",
+    stepsOf: function (u) {
+      return itemsOf(u).map(function (it) {
+        return {
+          id: it.id,
+          label: "n.º " + it.numero,
+          done: getEstado(it.id) >= 1,
+          group: "Guía",
+          to: "/m/" + A.SUBJECT.slug + "/t/ejercicios?arg=" + encodeURIComponent(u + "/guia")
+        };
+      });
+    }
+  });
+}
+// y en el punto donde se guarda el estado:
+if (typeof A.progressChanged === "function") A.progressChanged();
+```
+
+Del lado del runtime, `SinapsisRuntime.progressProviders()` devuelve los proveedores de los
+bundles cargados y `SinapsisRuntime.onProgressChange(fn)` suscribe al aviso (devuelve el
+desuscriptor).
+
+### 6.6 `quickLookup` no lo provee el runtime
 
 `CompatApp.quickLookup` está declarado **opcional** en el contrato y el runtime **no lo
 implementa**: en Proba lo instala el propio bundle (`lookup.js` hace `A.quickLookup = api`) y
@@ -342,8 +420,8 @@ Lo que hace el host (`/m/:slug/t/:vista`):
 
 1. Busca el bundle cuyo manifiesto declara esa vista. Si no hay ninguno, muestra
    «Próximamente» con el nombre que la materia le dio en el rail.
-2. Carga el bundle (una sola vez por sesión): primero los `data` (por `fetch`, con
-   `credentials: same-origin`), después los `styles`, después los `scripts` **en orden y
+2. Carga el bundle (una sola vez por visita): primero los `data` (por `fetch` al propio
+   origen del sitio), después los `styles`, después los `scripts` **en orden y
    encadenados** — el siguiente se inserta recién cuando el anterior disparó `load`.
 3. Ata el contenedor con `bindView(main)` **antes de dibujar** —una vista puede llamar a
    `App.$` mientras se monta y tiene que ver su propio contenedor, no el documento entero— y
@@ -424,9 +502,9 @@ los demás bundles.
 
 ### Seguridad: el modelo de amenaza, dicho en voz alta (N0-41, S-14)
 
-El código de un bundle **corre en el origen de la plataforma, sin sandbox**. Tiene acceso al
-DOM del shell, a las cookies de sesión que el navegador mande y a las mismas rutas del API
-que la web.
+El código de un bundle **corre en el origen del sitio, sin sandbox**. Tiene acceso al DOM del
+shell y al almacenamiento local del sitio, que es donde vive todo el estado personal
+(IndexedDB y `localStorage`).
 
 Eso es aceptable hoy porque **los repositorios de materia son del propio usuario**: la
 plataforma es personal y publicar un bundle es equivalente a ejecutar código propio en el
@@ -437,13 +515,12 @@ Lo que sí hace la plataforma para contener el daño accidental:
 
 | Barrera | Dónde |
 |---|---|
-| Rutas validadas con `ToolFilePath` **y** resueltas contra la carpeta del bundle | CLI y API |
+| Rutas validadas con `ToolFilePath` **y** resueltas contra la carpeta del bundle | CLI (`tools build`, `publish`, `site build`) |
 | Enlaces simbólicos que salen de la carpeta, rechazados | CLI (`realpath` + `isInside`) |
-| Cada script parsea (`node --check`) antes de subirse | CLI |
-| Extensiones de la lista cerrada y `Content-Type` de una tabla cerrada, con `nosniff` | API |
-| Tope de 20 MB y 400 archivos | contrato y API |
-| Push atómico | API |
-| Publicación con `SYNC_TOKEN`, lectura con sesión | API |
+| Cada script parsea (`node --check`) antes de publicarse | CLI |
+| Extensiones de la lista cerrada: nada que el navegador interprete de forma inesperada | contrato |
+| Tope de 20 MB y 400 archivos | contrato y CLI |
+| El bundle entra por un PR revisado, con el diff a la vista | `/sinapsis-review` |
 | CSS acotado a `.sinapsis-tool` | convención + host |
 
 ---
@@ -566,15 +643,17 @@ SINAPSIS_HOME="${SINAPSIS_HOME:-$HOME/Desktop/Projects/Sinapsis}"
 
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build            # valida y empaqueta
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build --minify   # minifica en .dist/ y empaqueta eso
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push             # construye y sube (necesita token)
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools list             # qué tiene publicado (necesita sesión)
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --tools           # wiki + estudio + herramientas
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools list             # qué hay en subjects/<slug>/tools
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish                # wiki + estudio + herramientas
 ```
 
-Opciones comunes: `--config <file>`, `--dir <carpeta>`, `--api <url>`, `--token <t>`,
+`tools push` **ya no existe**: no hay servidor al que subir. Los bundles se publican con la
+materia y llegan al sitio con el merge del PR.
+
+Opciones comunes: `--config <file>`, `--dir <carpeta>`, `--repo <dir>`,
 `--out <file>` (solo con un bundle).
 
-### Qué revisa `tools build` (sale `1` sin subir nada)
+### Qué revisa `tools build` (sale `1` sin publicar nada)
 
 | Comprobación | Mensaje |
 |---|---|
@@ -591,18 +670,17 @@ extensión ajena al contrato, archivos sueltos que el manifiesto no declara (via
 
 `tools build` deja el `ToolPush` en `<bundle>/dist/tool-push.json` (o donde diga `--out`).
 
-### Errores del push
+### Errores al publicar el bundle
 
-| Código | Mensaje | Causa |
-|---|---|---|
-| `400` | `El id del manifiesto ("a") no coincide con el de la URL ("b")` | Se subió a otra URL. |
-| `400` | `El manifiesto declara archivos que no vienen en el bundle: …` | Falta un `scripts`/`styles`/`data`. |
-| `400` | `Archivo "<path>": <motivo>` | Ruta inadmisible o que sale de la carpeta. |
-| `400` | `El archivo "<path>" viene repetido en el bundle` | Dos entradas con el mismo `path`. |
-| `400` | `Archivo "<path>": el contenido no es base64 válido` | `encoding: "base64"` mal codificado. |
-| `401` | `Token de sincronización inválido` | Falta o no coincide `SYNC_TOKEN`. |
-| `404` | `La materia no existe` | Hay que sincronizar la materia primero. |
-| `413` | `El bundle supera el tope de 20 MB` | — |
+Todos hacen salir `1` y ninguno deja el bundle a medias.
+
+| Mensaje | Causa |
+|---|---|
+| `El id del manifiesto ("a") no coincide con el de la carpeta ("b")` | La carpeta del bundle y su `id` no coinciden. |
+| `El manifiesto declara archivos que no existen: …` | Falta un `scripts`/`styles`/`data`. |
+| `Archivo "<path>": <motivo>` | Ruta inadmisible o que sale de la carpeta. |
+| `El archivo "<path>" viene repetido en el bundle` | Dos entradas con el mismo `path`. |
+| `El bundle supera el tope de 20 MB` | — |
 
 ---
 
@@ -619,15 +697,17 @@ extensión ajena al contrato, archivos sueltos que el manifiesto no declara (via
 | El shell se descompone al abrir la herramienta | El CSS del bundle estiliza selectores globales. | Acotar todo a `.sinapsis-tool`. |
 | Al volver a la vista hay listeners duplicados | La vista no devolvió limpiador. | Devolver una función que desate lo que ató. |
 | Un dato del bundle llega `undefined` | La clave de `App.DATA` es el nombre del archivo **sin carpeta y sin extensión**. | `data/datos.json` → `App.DATA["datos"]`. |
-| El archivo se sirve como `application/octet-stream` | Extensión fuera de la tabla MIME. | Usar una de las admitidas. |
-| Un cambio no se ve tras el push | Caché del navegador con `ETag` viejo. | Recargar: la política es `must-revalidate`, basta una recarga. |
+| El archivo se sirve con un tipo inesperado | Extensión fuera de la tabla MIME del host. | Usar una de las admitidas. |
+| Un cambio del bundle no se ve | Falta `pnpm build:subjects` (en local) o falta mergear el PR (en el sitio). | Recompilar, o mirar `gh run list --workflow pages.yml`. |
 
 ---
 
 ## Fuente ejecutable
 
 - `packages/contract/src/index.ts` — `RUNTIME_VERSION`, `ToolFilePath`, `ToolView`,
-  `ToolManifest`, `ToolFile`, `ToolPush`, `ToolInfo`, `toolFilesBase`, `toolFileUrl`.
+  `ToolManifest`, `ToolFile`, `ToolPush`, `ToolInfo`.
+- `packages/contract/src/site.ts` — `siteToolBase`, `sitePaths.toolBase`,
+  `sitePaths.toolFile`, `SiteTools`.
 - `packages/contract/src/runtime.ts` — `CompatApp`, `SinapsisRuntime`, `ViewFn`,
   `FigureDraw`, `FigureMeta`, `FigureContext`, `KatexLike`.
 - `packages/runtime/src/index.ts` — `installRuntime`, `uninstallRuntime`.
@@ -637,18 +717,18 @@ extensión ajena al contrato, archivos sueltos que el manifiesto no declara (via
 - `packages/runtime/src/figures.ts` · `plot.ts` · `math.ts` · `markdown.ts` · `icons.ts`.
 - `packages/cli/src/tools/bundle.ts` — descubrimiento, validación, `node --check`,
   minificado, `MAX_BYTES`.
-- `packages/cli/src/commands/tools.ts` — `tools build | push | list`, informes.
-- `apps/api/src/routes/tools.ts` — las cuatro rutas, `ETag`, `Cache-Control`, `nosniff`.
-- `apps/api/src/services/tools.ts` — `toolsRoot`, `bundleDir`, `resolveInside`,
-  `checkToolPath`, `decodeToolFiles`, `writeBundle`, `readBundleFile`, `contentTypeFor`,
-  `etagOf`, `MAX_TOOL_BYTES`.
+- `packages/cli/src/commands/tools.ts` — `tools build | list`, informes.
+- `packages/cli/src/commands/publish.ts` — qué archivos del bundle se copian a
+  `subjects/<slug>/tools/`.
+- `packages/cli/src/commands/site.ts` — la copia al sitio y `tools.json`.
 - `apps/web/src/features/subject/tools/ToolHost.tsx` y `ToolHost.module.css` — ciclo de vida
   y `.sinapsis-tool`.
 - `skills/sinapsis/reference/herramientas.md` — la misma referencia para el agente de materia.
-- `examples/proba/tools/proba-tools/` — el bundle real (5 vistas, 93 figuras).
+- `subjects/proba/tools/proba-tools/` — el bundle real (5 vistas, 93 figuras).
 
 ## Decisiones relacionadas
 
 N0-41 (bundles de scripts clásicos contra `window.App`/`window.M`; sin sandbox, pendiente
 S-14) · N0-42 (las figuras también son bundles) · N0-11 (`kind: "tool"` en el rail) ·
-N0-40 (alcance del Sprint 3).
+N0-40 (alcance del Sprint 3) · N0-48 (ampliación de `CompatApp`) ·
+N0-57 (los bundles viajan en `subjects/<slug>/tools/` y se copian al sitio en el build).

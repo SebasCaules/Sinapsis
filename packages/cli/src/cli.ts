@@ -11,9 +11,10 @@ import { Command, CommanderError } from "commander";
 import pc from "picocolors";
 import { runInit } from "./commands/init.js";
 import { runPropose } from "./commands/propose.js";
+import { runPublish } from "./commands/publish.js";
+import { runSiteBuild } from "./commands/site.js";
 import { runStatus } from "./commands/status.js";
-import { runSync } from "./commands/sync.js";
-import { runToolsBuild, runToolsList, runToolsPush } from "./commands/tools.js";
+import { runToolsBuild, runToolsList } from "./commands/tools.js";
 import { runValidate } from "./commands/validate.js";
 import { defaultCtx, resolveUserPath, type Ctx } from "./context.js";
 import { VERSION } from "./version.js";
@@ -68,7 +69,7 @@ export async function main(argv: readonly string[], ctx: Ctx = defaultCtx()): Pr
   const program = new Command();
   program
     .name("sinapsis")
-    .description("Compila y sincroniza el wiki de una materia con la plataforma Sinapsis.")
+    .description("Compila el wiki de una materia y lo publica en la plataforma Sinapsis.")
     .version(VERSION, "-v, --version")
     .option(
       "--cwd <dir>",
@@ -101,19 +102,46 @@ export async function main(argv: readonly string[], ctx: Ctx = defaultCtx()): Pr
     });
 
   program
-    .command("sync")
-    .description("Compila el wiki y lo sincroniza con el API.")
+    .command("publish")
+    .description("Compila la materia y abre un PR con `subjects/<slug>/` en el repo de la plataforma.")
     .option("--config <file>", "ruta del config", "sinapsis.config.json")
     .option("--wiki <dir>", "sobreescribe wiki.root del config (ruta absoluta o relativa)")
-    .option("--api <url>", "base del API (o SINAPSIS_API)")
-    .option("--token <token>", "token de sync (o SINAPSIS_TOKEN / SYNC_TOKEN)")
-    .option("--dry-run", "compila y muestra el resumen sin llamar al API", false)
+    .option("--repo <dir>", "repositorio de la plataforma (o SINAPSIS_HOME)")
+    .option("--dry-run", "compila y muestra el resumen sin tocar el repositorio", false)
     .option("--out <file>", "escribe el SyncPayload compilado en un archivo")
-    .option("--web <url>", "base de la web para el enlace final (o SINAPSIS_WEB)")
-    .option("--tools", "construye y sube también los bundles de <config>/tools", false)
-    .option("--minify", "con --tools: minifica los scripts antes de subirlos", false)
-    .action(async (opts: Parameters<typeof runSync>[0]) => {
-      code = await runSync(opts, ctx);
+    .option("--no-pr", "deja la rama local: no empuja ni abre PR")
+    .option("--branch <nombre>", "nombre de la rama (por defecto subject/<slug>-<AAAAMMDD>)")
+    .action(async (opts: Parameters<typeof runPublish>[0]) => {
+      code = await runPublish(opts, ctx);
+    });
+
+  // Alias oculto de compatibilidad: `sync` era el nombre del comando mientras
+  // hubo API. Hace exactamente lo mismo que `publish` y lo avisa.
+  program
+    .command("sync", { hidden: true })
+    .description("Alias de `publish` (compatibilidad).")
+    .option("--config <file>", "ruta del config", "sinapsis.config.json")
+    .option("--wiki <dir>", "sobreescribe wiki.root del config (ruta absoluta o relativa)")
+    .option("--repo <dir>", "repositorio de la plataforma (o SINAPSIS_HOME)")
+    .option("--dry-run", "compila y muestra el resumen sin tocar el repositorio", false)
+    .option("--out <file>", "escribe el SyncPayload compilado en un archivo")
+    .option("--no-pr", "deja la rama local: no empuja ni abre PR")
+    .option("--branch <nombre>", "nombre de la rama (por defecto subject/<slug>-<AAAAMMDD>)")
+    .action(async (opts: Parameters<typeof runPublish>[0]) => {
+      code = await runPublish({ ...opts, legacy: true }, ctx);
+    });
+
+  const site = program.command("site").description("El sitio estático de la plataforma.");
+
+  site
+    .command("build")
+    .description("Compila las materias de `subjects/` a los archivos JSON que lee la web.")
+    .option("--subjects <dir>", "carpeta con las materias fuente", "subjects")
+    .option("--out <dir>", "carpeta de salida", "apps/web/public/subjects")
+    .option("--only <slug>", "compila una sola materia")
+    .option("--strict", "las advertencias también hacen fallar el build", false)
+    .action(async (opts: Parameters<typeof runSiteBuild>[0]) => {
+      code = await runSiteBuild(opts, ctx);
     });
 
   program
@@ -146,35 +174,20 @@ export async function main(argv: readonly string[], ctx: Ctx = defaultCtx()): Pr
     });
 
   tools
-    .command("push")
-    .description("Construye los bundles y los sube al API.")
-    .option("--config <file>", "ruta del config", "sinapsis.config.json")
-    .option("--dir <dir>", "carpeta del bundle o de los bundles (por defecto <config>/tools)")
-    .option("--minify", "minifica los scripts antes de subirlos", false)
-    .option("--api <url>", "base del API (o SINAPSIS_API)")
-    .option("--token <token>", "token de sync (o SINAPSIS_TOKEN / SYNC_TOKEN)")
-    .option("--web <url>", "base de la web para el enlace final (o SINAPSIS_WEB)")
-    .action(async (opts: Parameters<typeof runToolsPush>[0]) => {
-      code = await runToolsPush(opts, ctx);
-    });
-
-  tools
     .command("list")
-    .description("Muestra los bundles que la materia tiene publicados.")
+    .description("Muestra los bundles que la materia tiene publicados en el repo de la plataforma.")
     .option("--config <file>", "ruta del config", "sinapsis.config.json")
-    .option("--api <url>", "base del API (o SINAPSIS_API)")
-    .option("--token <token>", "token (o SINAPSIS_TOKEN / SYNC_TOKEN)")
+    .option("--repo <dir>", "repositorio de la plataforma (o SINAPSIS_HOME)")
     .action(async (opts: Parameters<typeof runToolsList>[0]) => {
       code = await runToolsList(opts, ctx);
     });
 
   program
     .command("status")
-    .description("Muestra el estado de la materia en la plataforma.")
+    .description("Compara el vault local con lo publicado en `<repo>/subjects/<slug>/`.")
     .option("--config <file>", "ruta del config", "sinapsis.config.json")
-    .option("--api <url>", "base del API (o SINAPSIS_API)")
-    .option("--token <token>", "token (o SINAPSIS_TOKEN / SYNC_TOKEN)")
-    .option("--web <url>", "base de la web para el enlace final (o SINAPSIS_WEB)")
+    .option("--wiki <dir>", "sobreescribe wiki.root del config (ruta absoluta o relativa)")
+    .option("--repo <dir>", "repositorio de la plataforma (o SINAPSIS_HOME)")
     .action(async (opts: Parameters<typeof runStatus>[0]) => {
       code = await runStatus(opts, ctx);
     });

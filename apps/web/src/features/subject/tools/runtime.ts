@@ -15,7 +15,8 @@
  * Los tipos SÍ son los del paquete (`Runtime`, `SubjectContext`): acá no se
  * reinventa el contrato, solo se difiere la carga.
  */
-import { toolFileUrl, type ToolInfo } from "@sinapsis/contract";
+import type { ToolInfo } from "@sinapsis/contract";
+import { siteToolBase } from "@sinapsis/contract/site";
 import type { BundleInfo, Crumb, Runtime, SubjectContext } from "@sinapsis/runtime";
 
 export type RuntimeApi = Runtime;
@@ -44,6 +45,19 @@ export interface RuntimeModule {
  */
 export const PALETTE_EVENT = "sinapsis:palette";
 
+/**
+ * `BASE_URL` + una ruta relativa del sitio, sin barras dobles ni barra final.
+ * Lo que ya es absoluto —una URL completa, un `blob:` del modo mock o una ruta
+ * que arranca con barra— pasa tal cual: prefijarlo lo rompería.
+ */
+export function withBase(path: string): string {
+  const clean = path.replace(/\/+$/, "");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(clean) || clean.startsWith("//") || clean.startsWith("/")) return clean;
+  const base = import.meta.env.BASE_URL || "/";
+  const left = base.endsWith("/") ? base : `${base}/`;
+  return `${left}${clean.replace(/^\/+/, "")}`;
+}
+
 let modulePromise: Promise<RuntimeModule | null> | null = null;
 
 /** Carga el paquete una sola vez; null si no se pudo. */
@@ -58,13 +72,17 @@ export function loadRuntimeModule(): Promise<RuntimeModule | null> {
 }
 
 /**
- * Argumentos de `runtime.loadBundle` para un bundle de la materia. `base` lo
- * manda el API; si viniera vacío se arma con `toolFileUrl` del contrato, que es
- * la MISMA ruta que sirve los archivos.
+ * Argumentos de `runtime.loadBundle` para un bundle de la materia.
+ *
+ * `tools.json` trae la `base` RELATIVA al sitio (`subjects/<slug>/tools/<id>`,
+ * lo que escribe `siteToolBase`) y acá —y solo acá— se le antepone
+ * `import.meta.env.BASE_URL`: en desarrollo queda `/subjects/…` y en GitHub
+ * Pages `/Sinapsis/subjects/…`. Si el archivo no trajera base, se arma con la
+ * misma función del contrato que la escribió.
  */
 export function bundleOf(subject: string, info: ToolInfo): BundleInfo {
   const id = info.manifest.id;
-  const base = info.base || toolFileUrl(subject, id, "").replace(/\/+$/, "");
+  const base = withBase(info.base || siteToolBase(subject, id));
   return {
     id,
     base,

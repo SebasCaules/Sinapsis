@@ -7,7 +7,7 @@
  * directo a la sesión de repaso, los anillos por fase del plan y la grilla de
  * herramientas.
  *
- * El API se reemplaza por la MISMA costura del modo mock (`lib/api` es un objeto
+ * El cliente de datos se reemplaza por la MISMA costura del modo mock (`lib/api` es un objeto
  * mutable): no hay red ni fixtures escondidas.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -21,11 +21,11 @@ import {
   type StudyState,
   type SubjectDetail,
 } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { api, type ApiClient } from "@/lib/api";
 import { recordActivity, setLastRead } from "../activity";
 import type { SubjectCtx } from "../context";
-import { buildSubjectModel } from "../model";
+import { buildSubjectModel, type ExtraStep } from "../model";
 import { resetPlanTracksForTests } from "../store";
 import { IDLE_RUNTIME } from "../tools/useRuntime";
 import { HomeView } from "./HomeView";
@@ -133,10 +133,22 @@ afterEach(() => {
   cleanup();
 });
 
-function renderHome(studied: string[] = ["u1-a"]) {
+/**
+ * Proveedor de mentira de pasos de progreso (N0-61): dos ejercicios en la
+ * unidad 1 (uno hecho) y uno sin hacer en la unidad 2.
+ */
+const PASOS: Record<string, ExtraStep[]> = {
+  "1": [
+    { id: "e1", label: "Ejercicio 1", done: true, group: "Guía", source: "ejercicios" },
+    { id: "e2", label: "Ejercicio 2", done: false, group: "Guía", source: "ejercicios" },
+  ],
+  "2": [{ id: "e3", label: "Ejercicio 3", done: false, group: "Guía", source: "ejercicios" }],
+};
+
+function renderHome(studied: string[] = ["u1-a"], pasos = false) {
   const ctx: SubjectCtx = {
     slug: "proba",
-    model: buildSubjectModel(detailWith(studied)),
+    model: buildSubjectModel(detailWith(studied), false, pasos ? { extraSteps: (d) => PASOS[d] ?? [] } : {}),
     openSearch: () => undefined,
     runtime: IDLE_RUNTIME,
   };
@@ -171,6 +183,26 @@ describe("<HomeView/> · progreso", () => {
     const fila = screen.getByRole("link", { name: "U1 Estadística Descriptiva 1/2 50%" });
     expect(within(fila).getByText("1/2")).toBeTruthy();
     expect(within(fila).getByText("50%")).toBeTruthy();
+  });
+
+  it("el carril y las filas suman los ejercicios; la cabecera los desglosa", async () => {
+    renderHome(["u1-a"], true);
+    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+
+    /* 1 de 4 páginas + 1 de 3 ejercicios = 2 de 7 → 29 %. */
+    expect(screen.getByText("29%")).toBeTruthy();
+    expect(screen.getByText(/1 \/ 4 páginas/)).toBeTruthy();
+    expect(screen.getByText(/1 \/ 3 ejercicios/)).toBeTruthy();
+
+    /* La fila de la unidad 1: 1 de 2 páginas + 1 de 2 ejercicios = 2 de 4. */
+    const fila = screen.getByRole("link", { name: "U1 Estadística Descriptiva 2/4 50%" });
+    expect(within(fila).getByText("2/4")).toBeTruthy();
+  });
+
+  it("sin pasos de bundles la cabecera solo habla de páginas", async () => {
+    renderHome(["u1-a"]);
+    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    expect(screen.queryByText(/ejercicios/)).toBeNull();
   });
 
   it("sin nada leído no repite una columna de ceros", async () => {

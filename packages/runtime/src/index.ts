@@ -22,7 +22,7 @@
        </figure>
    ============================================================ */
 import katex from "katex";
-import type { SearchProvider, SinapsisRuntime, ThemeId, ViewFn } from "@sinapsis/contract";
+import type { ProgressProvider, SearchProvider, SinapsisRuntime, ThemeId, ViewFn } from "@sinapsis/contract";
 import { createCompatApp, type CompatHandle, type RuntimeApp, type SubjectContext } from "./compat.js";
 import { createLoader, type BundleInfo, type BundleLoader } from "./loader.js";
 import { bindNav } from "./nav.js";
@@ -160,6 +160,14 @@ export function installRuntime(ctx: SubjectContext): Runtime {
       /* Los de los bundles cargados más los que se hayan registrado fuera de una
          carga (una materia que instale el runtime a mano). */
       return loader.searchProviders().concat(handle.searchProviders());
+    },
+    progressProviders(): ProgressProvider[] {
+      /* Como los de búsqueda: los de los bundles cargados más los que se hayan
+         registrado fuera de una carga. */
+      return loader.progressProviders().concat(handle.progressProviders());
+    },
+    onProgressChange(fn: () => void): () => void {
+      return handle.onProgressChange(fn);
     },
     onThemeChange(fn: (theme: ThemeId) => void): () => void {
       themeListeners.add(fn);

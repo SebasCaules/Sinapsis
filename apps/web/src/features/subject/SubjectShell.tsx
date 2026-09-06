@@ -34,7 +34,8 @@ import { MAX_TABS, splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs 
 import { useRuntime } from "./tools/useRuntime";
 import { PALETTE_EVENT } from "./tools/runtime";
 import { useStudy } from "./study/useStudy";
-import { useStudyState, useSubject } from "./useSubject";
+import { useStudyState, useSubject, useSubjectModel } from "./useSubject";
+import type { ExtraStep } from "./model";
 import css from "./SubjectShell.module.css";
 
 /**
@@ -62,7 +63,14 @@ function useNarrow(): boolean {
 
 export function SubjectShell() {
   const { subject = "" } = useParams();
-  const { query, model } = useSubject(subject);
+  /* Dos vueltas del mismo modelo, y por una razón: el runtime necesita la
+     materia derivada para instalarse (config, páginas, leídas), y el modelo que
+     ven las vistas necesita los pasos de progreso que aportan los bundles, que
+     solo existen una vez instalado (N0-61). El primero no lleva pasos y solo lo
+     usa el runtime; el segundo es el que viaja por el Outlet. Rehacerlo cuesta
+     un recorrido de las páginas y ocurre cuando cambia la respuesta, el tema o
+     el pulso del progreso. */
+  const { query, model: baseModel } = useSubject(subject);
   const { bookmarks } = useStudyState(subject);
   const { compact, toggle } = useCompact();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -130,8 +138,31 @@ export function SubjectShell() {
     () => ({ paletteOpen: () => searchOpenRef.current, openPalette: openSearch }),
     [openSearch],
   );
-  const runtime = useRuntime(subject, model, runtimeHooks);
-  const { viewLabel } = runtime;
+  const runtime = useRuntime(subject, baseModel, runtimeHooks);
+  const { viewLabel, progressProviders, progressTick } = runtime;
+
+  /* Los pasos de una división son los de TODOS los proveedores cargados, con el
+     id del proveedor por delante (dos bundles pueden numerar igual) y su rótulo
+     pegado, que es lo que el desglose lee («… · 8 / 34 ejercicios resueltos»). */
+  const extraSteps = useCallback(
+    (division: string): ExtraStep[] =>
+      progressProviders().flatMap((provider) => {
+        let steps;
+        try {
+          steps = provider.stepsOf(division) || [];
+        } catch {
+          /* Un proveedor que se rompe deja a la división con sus páginas. */
+          return [];
+        }
+        return steps.map((step) => ({
+          ...step,
+          id: `${provider.id}:${step.id}`,
+          source: provider.label,
+        }));
+      }),
+    [progressProviders],
+  );
+  const model = useSubjectModel(query.data, { extraSteps, tick: progressTick });
   const studyLabels = useMemo<StudyLabels>(
     () => ({
       deck: (id) => study.model.deck(id)?.deck.title,

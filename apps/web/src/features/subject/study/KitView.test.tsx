@@ -6,7 +6,7 @@
  *  - cada página se puede tildar como leída desde el kit, y hay un
  *    «Marcar todas como leídas» que usa la MISMA mutación que el lector.
  *
- * El API se reemplaza por la costura del modo mock (`lib/api` es un objeto
+ * El cliente de datos se reemplaza por la costura del modo mock (`lib/api` es un objeto
  * mutable): no hay red. El contexto de la materia se arma con `useSubject`, para
  * que el optimista del tilde llegue de verdad al modelo que dibuja la vista.
  */
@@ -21,7 +21,7 @@ import {
   type StudyState,
   type SubjectDetail,
 } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { api, type ApiClient } from "@/lib/api";
 import { Toaster } from "@/components/platform";
 import type { SubjectCtx } from "../context";

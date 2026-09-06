@@ -3,8 +3,8 @@
  * Dueño: agente C. El agente D solo los consume. Firmas estables:
  *
  *  <Seal size={34} />                      sello «S» (círculo primary, aro accent, S itálica)
- *  <ThemeToggle />                         botón que cicla pergamino → laurel → claustro (persiste en /me y localStorage)
- *  <AvatarMenu />                          avatar con iniciales + menú (nombre, correo, cerrar sesión)
+ *  <ThemeToggle />                         botón que cicla pergamino → laurel → claustro (persiste en el perfil local y en localStorage)
+ *  <AvatarMenu />                          avatar con iniciales + menú (nombre editable, copia de seguridad, borrar lo local)
  *  <SearchButton onClick label hint />     botón-buscador con chip ⌘K
  *  <Button variant="primary|secondary|ghost" size="sm|md" />
  *  <IconButton label> children </IconButton>

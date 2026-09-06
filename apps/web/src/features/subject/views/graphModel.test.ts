@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { SubjectConfig, type GraphData, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
 import { CONTENT_ONLY_DEFAULT, EMPTY_FILTERS, HUB_COUNT, buildGraphModel, nodeRadius, type GraphFilters } from "./graphModel";
 

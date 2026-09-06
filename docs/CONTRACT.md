@@ -14,18 +14,18 @@ un esquema discrepen, gana el esquema y el documento es un bug.
 
 | # | Contrato | Archivo | Fuente ejecutable | Decisiones | Última revisión |
 |---|---|---|---|---|---|
-| 00 | **Principios** — roles, qué es contrato, versionado, compatibilidad, conflictos, qué pasa al violarlo | [`contracts/00-principios.md`](contracts/00-principios.md) | `packages/contract/src/index.ts` · `packages/contract/src/runtime.ts` · `apps/api/src/app.ts` | N0-1, N0-6, N0-7, N0-11, N0-13, N0-22, N0-23, N0-44, N0-45 | 2026-09-06 |
+| 00 | **Principios** — roles, qué es contrato, versionado, compatibilidad, conflictos, qué pasa al violarlo | [`contracts/00-principios.md`](contracts/00-principios.md) | `packages/contract/src/index.ts` · `packages/contract/src/runtime.ts` · `packages/contract/src/site.ts` | N0-1, N0-6, N0-11, N0-13, N0-22, N0-23, N0-44, N0-45, N0-56 | 2026-09-06 |
 | 01 | **La materia** — `sinapsis.config.json`: campos, límites, rail, `wiki` | [`contracts/01-materia.md`](contracts/01-materia.md) | `packages/contract/src/index.ts` (`SubjectConfig`) · `packages/cli/src/commands/validate.ts` | N0-6, N0-11, N0-12, N0-14, N0-23, N0-27, N0-32 | 2026-09-06 |
 | 02 | **Las páginas** — wiki markdown → `Page`: frontmatter, slugs, wikilinks, encabezados, callouts, matemática | [`contracts/02-paginas.md`](contracts/02-paginas.md) | `packages/markdown/src/{compile,frontmatter,inline}.ts` · `packages/contract/src/index.ts` (`Page`, `headingId`) | N0-10, N0-13, N0-21, N0-22, N0-23, N0-42, N0-47 | 2026-09-06 |
-| 03 | **El estudio** — `StudyContent`: mazos, quizzes, `plan.json` (+`tracks`), `kits.json`, SRS, `StudyState` | [`contracts/03-estudio.md`](contracts/03-estudio.md) | `packages/markdown/src/study.ts` · `packages/contract/src/index.ts` (`StudyContent`, `sm2`) · `apps/api/src/services/study.ts` | N0-27, N0-28, N0-33, N0-37, N0-43 | 2026-09-06 |
-| 04 | **Herramientas y figuras** — `sinapsis.tools.json`, bundles, `CompatApp`, `SinapsisRuntime`, figuras | [`contracts/04-herramientas-y-figuras.md`](contracts/04-herramientas-y-figuras.md) | `packages/contract/src/runtime.ts` · `packages/runtime/src/` · `packages/cli/src/tools/bundle.ts` · `apps/api/src/{routes,services}/tools.ts` | N0-11, N0-40, N0-41, N0-42 | 2026-09-06 |
-| 05 | **Sync y API** — `SyncPayload`, autenticación, todas las rutas, errores, idempotencia | [`contracts/05-sync-y-api.md`](contracts/05-sync-y-api.md) | `apps/api/src/routes/` · `apps/api/src/services/sync.ts` · `apps/api/src/auth/sync-token.ts` · `apps/api/.env.example` | N0-2, N0-3, N0-4, N0-5, N0-6, N0-7, N0-9, N0-17, N0-32 | 2026-09-06 |
-| 06 | **Skill y agentes** — el CLI, `/sinapsis`, qué puede tocar un agente de materia, checklist | [`contracts/06-skill-y-agentes.md`](contracts/06-skill-y-agentes.md) | `skills/sinapsis/SKILL.md` · `packages/cli/src/cli.ts` · `packages/cli/src/commands/` | N0-5, N0-7, N0-13, N0-27, N0-40 | 2026-09-06 |
-| 07 | **Propuestas** — cómo se cambia la plataforma: rama, gates, siete lentes, estados, merge | [`contracts/07-propuestas.md`](contracts/07-propuestas.md) | `packages/cli/src/commands/propose.ts` · `skills/sinapsis-review/SKILL.md` · `docs/PROPOSALS.md` · `proposals/` | N0-44, N0-45 | 2026-09-06 |
+| 03 | **El estudio** — `StudyContent`: mazos, quizzes, `plan.json` (+`tracks`), `kits.json`, SRS, `StudyState` | [`contracts/03-estudio.md`](contracts/03-estudio.md) | `packages/markdown/src/study.ts` · `packages/contract/src/index.ts` (`StudyContent`, `sm2`) · `apps/web/src/local/` | N0-27, N0-28, N0-33, N0-37, N0-43 | 2026-09-06 |
+| 04 | **Herramientas y figuras** — `sinapsis.tools.json`, bundles, `CompatApp`, `SinapsisRuntime`, figuras | [`contracts/04-herramientas-y-figuras.md`](contracts/04-herramientas-y-figuras.md) | `packages/contract/src/runtime.ts` · `packages/runtime/src/` · `packages/cli/src/tools/bundle.ts` · `packages/cli/src/commands/site.ts` | N0-11, N0-40, N0-41, N0-42, N0-57 | 2026-09-06 |
+| 05 | **Publicación y sitio** — `publish`, `site build`, los cuatro JSON del sitio, estado local y copia de seguridad | [`contracts/05-publicacion-y-sitio.md`](contracts/05-publicacion-y-sitio.md) | `packages/contract/src/site.ts` · `packages/cli/src/commands/{publish,site}.ts` · `apps/web/src/local/` · `.github/workflows/` | N0-23, N0-27, N0-32, N0-56, N0-57, N0-58, N0-59, N0-60 | 2026-09-06 |
+| 06 | **Skill y agentes** — el CLI, `/sinapsis`, qué puede tocar un agente de materia, checklist | [`contracts/06-skill-y-agentes.md`](contracts/06-skill-y-agentes.md) | `skills/sinapsis/SKILL.md` · `packages/cli/src/cli.ts` · `packages/cli/src/commands/` | N0-13, N0-27, N0-40, N0-57, N0-58 | 2026-09-06 |
+| 07 | **Propuestas y PR de materia** — cómo se cambia la plataforma y cómo se integra una materia: ramas, gates, lentes, estados, merge | [`contracts/07-propuestas.md`](contracts/07-propuestas.md) | `packages/cli/src/commands/{propose,publish}.ts` · `skills/sinapsis-review/SKILL.md` · `docs/PROPOSALS.md` · `proposals/` | N0-44, N0-45, N0-58 | 2026-09-06 |
 
 **Por dónde empezar.** Un agente de materia que ve el contrato por primera vez: 00 → 01 → 02
-→ 03, y 04 solo si la materia tiene herramientas. Quien integra contra el API: 05. Quien
-necesita cambiar algo de la plataforma: 07.
+→ 03, y 04 solo si la materia tiene herramientas. Quien publica una materia en el sitio: 05.
+Quien necesita cambiar algo de la plataforma: 07.
 
 ---
 
@@ -34,12 +34,12 @@ necesita cambiar algo de la plataforma: 07.
 1. La materia produce datos y herramientas; la plataforma decide cómo se ven.
 2. Todo lo común se cambia por propuesta revisada, nunca por parche.
 3. Cada regla tiene un dueño único y todos los demás la importan.
-4. El contenido nunca rompe un sync: los problemas de contenido son advertencias.
+4. El contenido nunca rompe una publicación: los problemas de contenido son advertencias.
 5. Lo que viene de una materia es dato ajeno: se valida en el borde, siempre.
 6. Ninguna ruta declarada por una materia puede salir de su carpeta.
 7. Los ids son estado del usuario: cambiarlos le borra el progreso.
 8. Un campo nuevo nace opcional y con default.
-9. El sync reemplaza: lo que no viene, se borra (salvo el estado del usuario).
+9. Publicar reemplaza: lo que no viene, se borra (salvo el estado personal, que vive en el navegador).
 10. La fuente de verdad es el esquema zod; los documentos lo explican.
 
 El desarrollo de cada uno, con los roles, el versionado y qué pasa cuando algo viola el
@@ -75,7 +75,8 @@ contrato, está en [`contracts/00-principios.md`](contracts/00-principios.md).
    nuevo, el veredicto en la propuesta, y la fila del INBOX a «Cerradas».
 7. **Actualizar este contrato**: el archivo de `docs/contracts/` que corresponda y la fecha de
    «última revisión» de su fila. Un cambio que solo toca documentación va con `--skip-gates`.
-8. **Avisar a las materias** qué tienen que hacer. Casi siempre alcanza con `sinapsis sync`.
+8. **Avisar a las materias** qué tienen que hacer. Casi siempre alcanza con
+   `sinapsis publish`, que abre el PR con la materia recompilada.
 
 El flujo completo, desde los dos lados, está en
 [`contracts/07-propuestas.md`](contracts/07-propuestas.md).
@@ -84,12 +85,13 @@ El flujo completo, desde los dos lados, está en
 
 ## Alrededor
 
-- [`DECISIONS.md`](DECISIONS.md) — las decisiones de arquitectura `N0-1 … N0-47`, con su
+- [`DECISIONS.md`](DECISIONS.md) — las decisiones de arquitectura `N0-1 … N0-60`, con su
   porqué y su costo de revertir. Cada regla de estos contratos cita la suya.
 - [`PROPOSALS.md`](PROPOSALS.md) — el contrato de propuestas en prosa corta (N0-44).
 - [`SPRINTS.md`](SPRINTS.md) — el plan por sprints.
-- [`HANDOFF-sprint1.md`](HANDOFF-sprint1.md) · [`HANDOFF-sprint2.md`](HANDOFF-sprint2.md) —
-  qué se entregó en cada sprint.
+- [`HANDOFF-sprint4.md`](HANDOFF-sprint4.md) — qué cambió con el sitio estático y cómo se
+  opera. Los `HANDOFF-sprint1..3.md` describen la arquitectura anterior (API y sesión) y se
+  conservan como histórico.
 - [`../README.md`](../README.md) — puesta en marcha del monorepo.
 - `skills/sinapsis/reference/` — las mismas reglas, empaquetadas para el agente de una
   materia (`contrato.md`, `config-ejemplo.md`, `herramientas.md`).

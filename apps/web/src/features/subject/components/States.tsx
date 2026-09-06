@@ -1,7 +1,7 @@
 /**
  * Estados compartidos de las vistas de materia: cargas discretas (esqueletos que
- * ocupan el sitio del contenido real), errores con el mensaje del API y la
- * vista «Próximamente» de lo que todavía no existe.
+ * ocupan el sitio del contenido real), errores con el mensaje que traiga la capa
+ * de datos y la vista «Próximamente» de lo que todavía no existe.
  */
 import { Link } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
@@ -62,7 +62,7 @@ export function ErrorCard({ error, notFound, subject }: ErrorCardProps) {
       <div className={css.panel} role="alert">
         <span className={css.eyebrow}>{status === 404 ? "NO ENCONTRADO" : "ERROR"}</span>
         <h1 className={css.title}>{message}</h1>
-        {status && status !== 404 ? <p className={css.text}>El API respondió {status}.</p> : null}
+        {status && status !== 404 ? <p className={css.text}>Código de error: {status}.</p> : null}
         <div className={css.actions}>
           {subject ? (
             <Link className={css.action} to={routes.subject(subject)}>

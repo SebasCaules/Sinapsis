@@ -276,4 +276,48 @@ describe("unloadBundle — lo que el bundle dejó fuera de sus scripts (brecha h
     loader.unloadBundle("uno");
     expect(loader.searchProviders()).toEqual([]);
   });
+
+  it("los proveedores de progreso son del bundle y se olvidan al descargarlo", async () => {
+    const provider = { id: "ejercicios", label: "ejercicios", stepsOf: () => [] };
+    const { restore } = stubScripts({ [BASE + "p.js"]: (a) => a.registerProgressProvider(provider) }, app);
+    const loader = createLoader(app);
+    await loader.loadBundle({ id: "uno", base: BASE, data: [], styles: [], scripts: ["p.js"] });
+    restore();
+    expect(loader.progressProviders()).toEqual([provider]);
+    loader.unloadBundle("uno");
+    expect(loader.progressProviders()).toEqual([]);
+  });
+
+  it("cada bundle se lleva SUS proveedores de progreso: descargar uno no toca al otro", async () => {
+    const uno = { id: "ejercicios", label: "ejercicios", stepsOf: () => [] };
+    const dos = { id: "simulacros", label: "simulacros", stepsOf: () => [] };
+    const { restore } = stubScripts(
+      {
+        [BASE + "a.js"]: (a) => a.registerProgressProvider(uno),
+        [BASE + "b.js"]: (a) => a.registerProgressProvider(dos),
+      },
+      app,
+    );
+    const loader = createLoader(app);
+    await loader.loadBundle({ id: "uno", base: BASE, data: [], styles: [], scripts: ["a.js"] });
+    await loader.loadBundle({ id: "dos", base: BASE, data: [], styles: [], scripts: ["b.js"] });
+    restore();
+    expect(loader.progressProviders()).toEqual([uno, dos]);
+    loader.unloadBundle("uno");
+    expect(loader.progressProviders()).toEqual([dos]);
+  });
+
+  it("un proveedor de progreso sin `stepsOf` no se registra", async () => {
+    const { restore } = stubScripts(
+      {
+        [BASE + "malo.js"]: (a) =>
+          (a.registerProgressProvider as unknown as (p: unknown) => void)({ id: "x", label: "x" }),
+      },
+      app,
+    );
+    const loader = createLoader(app);
+    await loader.loadBundle({ id: "uno", base: BASE, data: [], styles: [], scripts: ["malo.js"] });
+    restore();
+    expect(loader.progressProviders()).toEqual([]);
+  });
 });

@@ -87,10 +87,10 @@ Grupo: `{ id, label, color?, items[] }` — `id` `^[a-z][a-z0-9_-]*$`, 1..8 íte
 
 | `kind` | `target` | Qué abre |
 |---|---|---|
-| `builtin` | `home` · `wiki` · `graph` · `flashcards` · `quiz` · `notes` · `favorites` | Vista de la plataforma. Hoy solo `home` y `wiki` existen. |
+| `builtin` | `home` · `plan` · `kits` · `wiki` · `graph` · `flashcards` · `quiz` · `notes` · `favorites` | Vista de la plataforma. No hace falta declararlas: los grupos fijos del rail ya las traen. |
 | `page` | slug de una página | Esa página en el lector. |
 | `link` | URL absoluta (`https://…`) | Pestaña nueva. |
-| `tool` | id de la herramienta | Sprint 3. Hoy: "Próximamente". |
+| `tool` | id de una **vista** de algún bundle de `tools/` | Esa herramienta (`/m/<slug>/t/<vista>`). Sin bundle que la registre: "Próximamente". |
 
 ### `wiki`
 
@@ -157,8 +157,9 @@ siga funcionando, pero conviene entrecomillarlo igual.
 normaliza (minúsculas, sin acentos, espacios → guiones) y se levanta una advertencia.
 
 **Cuerpo.** Markdown crudo. La plataforma lo renderiza en el cliente con KaTeX, tablas GFM,
-wikilinks y callouts de Obsidian `> [!info|nota|tip|ejemplo|warn|figura]`. El callout
-`[!figura]` muestra su epígrafe (las figuras interactivas son Sprint 2+).
+wikilinks y callouts de Obsidian `> [!info|nota|tip|intuicion|ejemplo|warn|discrepancia|figura]`.
+El callout `[!figura] <id>` monta la figura de ese id si la materia tiene un bundle de
+figuras; sin bundle, se ve el epígrafe y nada más.
 
 **Wikilinks.** `[[slug]]`, `[[slug|texto]]`, `[[slug#ancla|texto]]` y `[[#ancla]]` (misma
 página). Se desescapa `\|` (los pipes de las tablas de Obsidian). Se deduplica por la terna
@@ -213,48 +214,60 @@ Ninguna descarta contenido salvo el slug duplicado.
 
 ---
 
-## 4. Sync
+## 4. Publicación
+
+No hay servidor. La materia se **copia como fuente** al repositorio de la plataforma y entra
+por un pull request:
 
 ```
-PUT {api}/api/subjects/{slug}/sync
-Authorization: Bearer <SYNC_TOKEN>
-Content-Type: application/json
-
-{ config: SubjectConfig, pages: Page[], study?: StudyContent, generatedAt: string, generator?: string }
-→ { subject, pages, created, updated, deleted, warnings[] }
+sinapsis publish
+  → worktree temporal desde origin/main
+  → subjects/<slug>/  = sinapsis.config.json (con wiki.root "wiki" y wiki.study "estudio")
+                        + wiki/ + estudio/ + tools/<bundle>/
+  → rama subject/<slug>-<AAAAMMDD>, commit SIN trailers de coautoría
+  → pull request «Materia <slug>: <name>», con conteos, bundles y advertencias en el cuerpo
 ```
 
-`study` es lo compilado de la carpeta `wiki.study` (§7). Viaja en cada sync, también vacío
-(el sync lo reemplaza igual que a las páginas: borrar la carpeta lo borra de la plataforma).
-Sin material propio, la plataforma autogenera un mazo por división con los `resumen`.
+Es **reemplazo completo**: `subjects/<slug>/` pasa a ser lo que hay en el vault y lo que ya no
+existe se borra. El material de estudio se copia entero, también vacío (borrar la carpeta lo
+borra del sitio). Sin material propio, la plataforma autogenera un mazo por división con los
+`resumen`.
 
-Idempotente y **reemplaza** el conjunto de páginas de la materia: las que ya no están en el
-wiki se borran. El progreso del usuario sobre slugs borrados se conserva por si vuelven.
+El progreso de quien estudia vive en su navegador, se guarda por slug y por id y **no se
+borra** con la página: si el slug vuelve, la marca sigue ahí. Lo único que deja de verse es el
+repaso espaciado de tarjetas que ya no existen.
 
-## 5. API del Sprint 1
+El PR de una materia toca **solo** `subjects/<slug>/`; lo comprueba el CI. Lo mergea el
+orquestador con `/sinapsis-review`, y el merge dispara el despliegue a GitHub Pages.
 
-| Método y ruta | Auth | Qué |
-|---|---|---|
-| `POST /api/auth/google` | — | Login con el ID token de Google. |
-| `POST /api/auth/dev` | solo dev | Sesión local (`AUTH_DEV_BYPASS=1`). Es lo que usa `status`. |
-| `POST /api/auth/logout` | sesión | Cierra la sesión. |
-| `GET /api/me` · `PATCH /api/me` | sesión | Usuario y tema. |
-| `GET /api/landing` · `PUT /api/landing` | sesión | Grilla de materias del usuario. |
-| `POST /api/subjects` | sesión | Materia placeholder desde la landing. |
-| `DELETE /api/subjects/:slug/landing` | sesión | Quita la materia de la landing. |
-| `GET /api/subjects/:slug` | sesión | `SubjectDetail`: config, páginas sin cuerpo, progreso. |
-| `GET /api/subjects/:slug/pages/:page` | sesión | `PageDetail`: página, enlaces entrantes, estudiada. |
-| `GET /api/subjects/:slug/search?q=` | sesión | Búsqueda de texto completo. |
-| `PUT` / `DELETE /api/subjects/:slug/progress/:page` | sesión | Marcar / desmarcar estudiada. |
-| `PUT /api/subjects/:slug/sync` | `SYNC_TOKEN` | Ver §4. |
+## 5. Del repositorio al sitio
+
+Después del merge, el build de la plataforma (`sinapsis site build`, que corre
+`pnpm build:subjects`) convierte `subjects/**` en archivos estáticos que la web lee:
+
+```
+subjects/index.json                 catálogo: una entrada por materia
+subjects/<slug>/subject.json        config, páginas sin cuerpo, enlaces, estudio, advertencias
+subjects/<slug>/pages.json          cuerpos, enlaces y encabezados por slug
+subjects/<slug>/tools.json          los bundles, con su `base` relativa al sitio
+subjects/<slug>/tools/<id>/<path>   los archivos de cada bundle
+```
+
+Ese paso es de la plataforma: la materia no lo corre. Detalle completo en
+`docs/contracts/05-publicacion-y-sitio.md` del repositorio de Sinapsis.
 
 ## 6. La skill `/sinapsis`
 
 - `init` — lee el wiki, propone el `sinapsis.config.json` (tipos de las carpetas, divisiones
   de los valores del frontmatter, rail vacío) y lo deja para revisión.
 - `validate` — valida el config contra el contrato.
-- `sync` — compila y sincroniza; reporta conteos y advertencias.
-- `status` — última sync, páginas, divisiones sin páginas.
+- `publish` — compila, valida y publica: rama, commit y pull request. Con `--dry-run`, solo
+  informa.
+- `status` — qué cambió respecto de lo publicado y qué PR de materia quedaron abiertos.
+- `tools build | list` — los bundles de herramientas y figuras.
+- `propose` — un cambio a la plataforma.
+
+Variables de entorno: `SINAPSIS_HOME` y `SINAPSIS_WEB`. Nada más.
 
 ---
 
@@ -348,7 +361,7 @@ estable), `label` y `optional` (`true` para los recuperatorios, que el lector pl
 mientras no tengan fecha). La fase apunta a la suya con `instance` y a su recuperatorio con
 `retake`; sin `instance`, la fase no lleva campo de fecha. Las fechas las carga el usuario,
 se guardan en su cuenta por clave de instancia (`StudyState.planDates`) y **no** se borran
-al reiniciar el progreso del plan ni al volver a sincronizar la materia. `description` es
+al reiniciar el progreso del plan ni al volver a publicar la materia. `description` es
 el texto corto bajo el título de la fase; `scope` («qué cae en este examen») y `guide`
 («cómo recorrer el programa») son markdown, normalmente una lista.
 
@@ -364,7 +377,7 @@ el texto corto bajo el título de la fase; `scope` («qué cae en este examen»)
 
 ### Advertencias del material de estudio
 
-`sinapsis sync --dry-run` avisa (sin fallar) por: página / mazo / quiz / división / herramienta
+`sinapsis publish --dry-run` avisa (sin fallar) por: página / mazo / quiz / división / herramienta
 inexistente, `target` de una tarea `read` que no es una división o de una tarea `tool` que no
 es un id de ítem del `rail`, id repetido (mazo, quiz,
 tarjeta, pregunta, kit), clave de instancia repetida, fase que apunta a una instancia que

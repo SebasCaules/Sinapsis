@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
 import type { ZodIssue } from "zod";
-import { CreateSubjectInput } from "@sinapsis/contract";
-import { Button, Dialog, Field, SelectField } from "@/components/platform";
+import { CreateSubjectInput, plural, type SubjectCard } from "@sinapsis/contract";
+import { Button, Dialog, Field, SelectField, UiIcon } from "@/components/platform";
 import { slugify } from "@/lib/slug";
 import { nextSemesterSuggestion, semesterLabel } from "@/lib/semesters";
 import css from "./AddSubjectDialog.module.css";
@@ -46,6 +46,12 @@ const EMPTY = {
 export interface AddSubjectDialogProps {
   open: boolean;
   onClose: () => void;
+  /**
+   * Materias del catálogo del sitio que NO están en la landing: se ofrecen
+   * primero, porque agregarlas es un clic y traen su wiki entero. El formulario
+   * de abajo sigue siendo para las materias que el usuario inventa (S4 · §2.2).
+   */
+  available?: SubjectCard[];
   semesters: string[];
   /** Cuatrimestre preseleccionado (el más reciente). */
   defaultSemester?: string;
@@ -58,6 +64,7 @@ type Errors = Partial<Record<"name" | "slug" | "code" | "institution" | "semeste
 export function AddSubjectDialog({
   open,
   onClose,
+  available = [],
   semesters,
   defaultSemester,
   onSubmit,
@@ -69,6 +76,8 @@ export function AddSubjectDialog({
   const [semester, setSemester] = useState(defaultSemester ?? semesters[0] ?? "");
   const [newSemester, setNewSemester] = useState("");
   const [errors, setErrors] = useState<Errors>({});
+  /** Slug de la materia del catálogo elegida; `null` = «Materia nueva». */
+  const [picked, setPicked] = useState<string | null>(null);
   const swatchRef = useRef<HTMLDivElement>(null);
 
   /* Cada apertura arranca de cero. */
@@ -79,7 +88,10 @@ export function AddSubjectDialog({
     setErrors({});
     setSemester(defaultSemester ?? semesters[0] ?? NEW_SEMESTER);
     setNewSemester(nextSemesterSuggestion(semesters));
-  }, [open, defaultSemester, semesters]);
+    /* Si hay materias del catálogo, la primera viene elegida: agregarla es el
+       camino corto y el formulario queda para quien lo necesite. */
+    setPicked(available[0]?.slug ?? null);
+  }, [open, defaultSemester, semesters, available]);
 
   const set = (patch: Partial<typeof EMPTY>) => setForm((f) => ({ ...f, ...patch }));
 
@@ -107,18 +119,30 @@ export function AddSubjectDialog({
     [semesters],
   );
 
+  const chosen = picked ? available.find((card) => card.slug === picked) : undefined;
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const chosenSemester = semester === NEW_SEMESTER ? newSemester.trim() : semester;
-    const candidate = {
-      slug,
-      name: form.name.trim(),
-      code: form.code.trim(),
-      institution: form.institution.trim(),
-      semester: chosenSemester,
-      color: form.color,
-      division: { singular: form.singular.trim(), abbr: form.abbr.trim(), plural: form.plural.trim() },
-    };
+    const candidate = chosen
+      ? {
+          slug: chosen.slug,
+          name: chosen.name,
+          code: chosen.code,
+          institution: chosen.institution,
+          semester: chosenSemester,
+          color: chosen.color,
+          division: chosen.division,
+        }
+      : {
+          slug,
+          name: form.name.trim(),
+          code: form.code.trim(),
+          institution: form.institution.trim(),
+          semester: chosenSemester,
+          color: form.color,
+          division: { singular: form.singular.trim(), abbr: form.abbr.trim(), plural: form.plural.trim() },
+        };
 
     const parsed = CreateSubjectInput.safeParse(candidate);
     if (!parsed.success) {
@@ -134,7 +158,7 @@ export function AddSubjectDialog({
           next.form ??= issueText(issue);
         }
       }
-      if (candidate.slug === "") next.slug = "Se deriva del nombre: escriba un nombre o edite la dirección.";
+      if (!chosen && candidate.slug === "") next.slug = "Se deriva del nombre: escriba un nombre o edite la dirección.";
       setErrors(next);
       return;
     }
@@ -170,6 +194,45 @@ export function AddSubjectDialog({
       <form id="add-subject" className={css.grid} onSubmit={handleSubmit} noValidate>
         {errors.form ? <div className={css.formError}>{errors.form}</div> : null}
 
+        {available.length > 0 ? (
+          <div className={`${css.wide} ${css.catalog}`}>
+            <span className={css.catalogLabel}>Materias del catálogo</span>
+            <div className={css.catalogList} role="radiogroup" aria-label="Materias del catálogo">
+              {available.map((card) => (
+                <button
+                  key={card.slug}
+                  type="button"
+                  role="radio"
+                  aria-checked={picked === card.slug}
+                  className={css.catalogRow}
+                  onClick={() => setPicked(card.slug)}
+                >
+                  <span className={css.dot} style={{ "--sw": `var(${card.color})` } as CSSProperties} />
+                  <span className={css.catalogName}>{card.name}</span>
+                  <span className={css.catalogMeta}>
+                    {card.code} · {plural(card.pagesCount, "página", "páginas")}
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                role="radio"
+                aria-checked={picked === null}
+                className={css.catalogRow}
+                onClick={() => setPicked(null)}
+              >
+                <span className={css.dotPlus}>
+                  <UiIcon name="plus" size={12} />
+                </span>
+                <span className={css.catalogName}>Materia nueva</span>
+                <span className={css.catalogMeta}>Para completar a mano</span>
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {chosen ? null : (
+        <>
         <div className={css.wide}>
           <Field
             ref={nameRef}
@@ -218,6 +281,8 @@ export function AddSubjectDialog({
           onChange={(e) => set({ institution: e.target.value })}
           autoComplete="off"
         />
+        </>
+        )}
 
         <SelectField
           label="Cuatrimestre"
@@ -227,6 +292,7 @@ export function AddSubjectDialog({
           onChange={(e) => setSemester(e.target.value)}
         />
 
+        {chosen ? null : (
         <div className={css.swatches}>
           <span className={css.swatchLabel}>Color</span>
           <div
@@ -252,6 +318,7 @@ export function AddSubjectDialog({
             ))}
           </div>
         </div>
+        )}
 
         {semester === NEW_SEMESTER ? (
           <div className={css.wide}>
@@ -268,6 +335,7 @@ export function AddSubjectDialog({
           </div>
         ) : null}
 
+        {chosen ? null : (
         <div className={css.division}>
           <span className={css.divisionLabel}>Rótulo de división</span>
           <div className={css.divisionGrid}>
@@ -294,6 +362,7 @@ export function AddSubjectDialog({
             />
           </div>
         </div>
+        )}
       </form>
     </Dialog>
   );

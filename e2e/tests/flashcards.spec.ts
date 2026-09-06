@@ -3,21 +3,24 @@
  * y la sesión de repaso con el SM-2 del contrato.
  *
  * La sesión se maneja con el teclado, que es como está pensada: Espacio da
- * vuelta la tarjeta y 1-4 la califican. Lo que se comprueba del lado del
- * servidor es que la nota se haya PERSISTIDO: `GET .../study/state` devuelve un
- * `SrsState` por tarjeta calificada, con `due` en el futuro.
+ * vuelta la tarjeta y 1-4 la califican. Lo que se comprueba del lado del estado
+ * es que la nota se haya PERSISTIDO: el documento local guarda un `SrsState` por
+ * tarjeta calificada, con `due` en el futuro.
+ *
+ * El mazo con el que corre la sesión es el AUTORAL MÁS CORTO de la materia
+ * sembrada (`seed.study.deck`), así que una sesión entera cabe en la prueba
+ * tanto con Proba como con el fixture.
  */
 import { expect, test, type Page } from "@playwright/test";
-import { resetStudy, studyContent, studyState, waitForSubjectShell, withApi } from "../support/app";
+import { resetStudy, studyContent, studyState, waitForSubjectShell } from "../support/app";
 import { readSeed } from "../support/seed";
 
 const seed = readSeed();
 const subject = seed.subject;
 const flashcardsUrl = `/m/${subject.slug}/flashcards`;
 
-/** El mazo autoral más corto de Proba: cuatro tarjetas, una sesión entera cabe en la prueba. */
-const DECK = "procesos-estocasticos";
-const DECK_CARDS = 4;
+const DECK = seed.study.deck?.id ?? "";
+const DECK_CARDS = seed.study.deck?.cards ?? 0;
 /** Nota «Bien»: con una tarjeta nueva deja un intervalo de 1 día. */
 const BIEN = "3";
 
@@ -36,19 +39,16 @@ async function answer(page: Page, nota: string): Promise<void> {
   await page.keyboard.press(nota);
 }
 
-test.beforeEach(async ({ request }) => {
-  await resetStudy(request, subject.slug);
+test.beforeEach(async ({ page }) => {
+  await resetStudy(page, subject.slug);
 });
 
-test.afterAll(async () => {
-  await withApi((api) => resetStudy(api, subject.slug));
-});
-
-test("lista los mazos del wiki y los automáticos por división", async ({ page, request }) => {
-  const content = await studyContent(request, subject.slug);
+test("lista los mazos del wiki y los automáticos por división", async ({ page }) => {
+  const content = await studyContent(subject.slug);
   const autores = content.decks.filter((d) => d.source !== "auto");
   const automaticos = content.decks.filter((d) => d.source === "auto");
-  expect(autores.length).toBeGreaterThanOrEqual(6);
+  expect(autores.length).toBe(seed.study.authoredDecks);
+  expect(autores.length).toBeGreaterThanOrEqual(1);
   expect(automaticos.length).toBeGreaterThan(0);
 
   await page.goto(flashcardsUrl);
@@ -57,7 +57,6 @@ test("lista los mazos del wiki y los automáticos por división", async ({ page,
 
   const mazos = page.getByTestId("deck-card");
   await expect(mazos).toHaveCount(content.decks.length);
-  expect(await mazos.count()).toBeGreaterThanOrEqual(6);
 
   // La insignia distingue los mazos que arma la plataforma con los resúmenes.
   const auto = mazos.filter({ hasText: "Automático" });
@@ -69,7 +68,8 @@ test("lista los mazos del wiki y los automáticos por división", async ({ page,
   await expect(corto).not.toContainText("Automático");
 });
 
-test("calificar tres tarjetas avanza el contador y persiste el SRS", async ({ page, request }) => {
+test("calificar tres tarjetas avanza el contador y persiste el SRS", async ({ page }) => {
+  test.skip(DECK_CARDS < 4, "hace falta un mazo de al menos cuatro tarjetas");
   await openSession(page, DECK, "todo");
   await expect(counter(page)).toHaveText(`1 / ${DECK_CARDS}`);
 
@@ -79,12 +79,12 @@ test("calificar tres tarjetas avanza el contador y persiste el SRS", async ({ pa
   }
 
   await expect
-    .poll(async () => (await studyState(request, subject.slug)).srs.length, {
-      message: "el API no registró las tres calificaciones",
+    .poll(async () => (await studyState(page, subject.slug)).srs.length, {
+      message: "las tres calificaciones no quedaron guardadas",
     })
     .toBe(3);
 
-  const { srs } = await studyState(request, subject.slug);
+  const { srs } = await studyState(page, subject.slug);
   const ahora = Date.now();
   for (const card of srs) {
     expect(card.cardId.startsWith(`${DECK}:`)).toBe(true);

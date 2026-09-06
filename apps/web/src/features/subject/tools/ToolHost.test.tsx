@@ -21,7 +21,7 @@ import {
   type ToolInfo,
   type ViewFn,
 } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { api, type ApiClient } from "@/lib/api";
 import type { SubjectCtx } from "../context";
 import { buildSubjectModel } from "../model";
@@ -54,11 +54,12 @@ const tools: ToolInfo[] = [
         { id: "calc", label: "Calculadoras", layout: "wide" },
       ],
       figures: false,
+      progress: false,
       data: [],
     },
     bytes: 128,
     updatedAt: "2026-09-05T18:00:00.000Z",
-    base: "/api/subjects/proba/tools/demo/files",
+    base: "subjects/proba/tools/demo",
   },
   /* Un SEGUNDO bundle: la materia tiene más de uno y sus vistas viven en
      distintos scripts. Es el caso de Proba (figuras + taller + calculadoras). */
@@ -72,11 +73,12 @@ const tools: ToolInfo[] = [
       styles: [],
       views: [{ id: "laboratorio", label: "Laboratorio", layout: "wide" }],
       figures: false,
+      progress: false,
       data: [],
     },
     bytes: 128,
     updatedAt: "2026-09-05T18:00:00.000Z",
-    base: "/api/subjects/proba/tools/otro/files",
+    base: "subjects/proba/tools/otro",
   },
 ];
 
@@ -186,6 +188,8 @@ function fakeModule(): RuntimeModule {
     unloadBundle: () => undefined,
     view: (id) => views.get(id) ?? null,
     searchProviders: () => [],
+    progressProviders: () => [],
+    onProgressChange: () => () => undefined,
     /* Doble mínimo de la delegación real: lo que se prueba acá es el CONTRATO
        del host (atar antes de dibujar, soltar al desmontar, una sola vez). La
        gramática de `[data-nav]`/`[data-go]` se prueba en `packages/runtime`. */
@@ -301,7 +305,7 @@ describe("<ToolHost/>", () => {
 
     expect(await screen.findByText("Herramienta de prueba")).toBeTruthy();
     expect(mounted).toBe(1);
-    expect(loadedBundles).toEqual(["/api/subjects/proba/tools/demo/files/demo.js"]);
+    expect(loadedBundles).toEqual(["/subjects/proba/tools/demo/demo.js"]);
     /* La vista vive dentro del nodo del host, con el ancho del manifiesto. */
     expect(hostNode()?.getAttribute("data-layout")).toBe("wide");
     expect(hostNode()?.textContent).toContain("Herramienta de prueba");
@@ -424,8 +428,8 @@ describe("<ToolHost/>", () => {
 
     expect(visto).toEqual([]);
     expect(loadedBundles).toEqual([
-      "/api/subjects/proba/tools/demo/files/demo.js",
-      "/api/subjects/proba/tools/otro/files/otro.js",
+      "/subjects/proba/tools/demo/demo.js",
+      "/subjects/proba/tools/otro/otro.js",
     ]);
     /* La vista anterior se limpió y la nueva se montó: dos montajes, una limpieza. */
     expect(mounted).toBe(2);

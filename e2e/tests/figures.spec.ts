@@ -3,7 +3,7 @@
  * `> [!figura] id` deja un hueco (`figure.figura > .fig-host`) y, si la materia
  * trae un bundle de figuras cargado, el runtime dibuja adentro.
  *
- * La página y el id de la figura los elige la siembra (`.auth/seed.json`), que
+ * La página y el id de la figura los elige la siembra (`e2e/.seed.json`), que
  * además comprueba que algún script del bundle registre esa figura: acá se mira
  * el resultado en el navegador.
  *

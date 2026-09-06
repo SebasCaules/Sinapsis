@@ -7,43 +7,30 @@
  * wiki. De ahí salen los chips de cuenta regresiva del panel del hero y de cada
  * fase, y la línea de ritmo.
  *
- * Como todo lo demás del plan, las instancias salen del material sincronizado:
- * si la materia sembrada no declara ninguna, la prueba se saltea en vez de
- * inventar contenido.
+ * Como todo lo demás del plan, las instancias salen del material compilado: si
+ * la materia sembrada no declara ninguna, la prueba se saltea en vez de inventar
+ * contenido.
  *
- * El campo de fecha guarda con el evento `change` nativo, así que se usa
- * `fill()` (que lo dispara) y se espera al chip, no al valor del input: la
- * escritura es optimista y el chip es lo que ve quien estudia.
+ * Sprint 4: la prueba que reproducía el bug del guardado LENTO Y FALLIDO
+ * (`route.fulfill({status: 500})` sobre `PUT .../study/plan-dates/:key`) se
+ * eliminó con el API. Sin servidor no hay respuesta que falle ni mutaciones
+ * solapadas que revertir: el cliente local escribe en memoria y baja el
+ * documento con un rebote. Lo que sí se conserva es la otra mitad —que elegir
+ * una fecha guarde UNA sola fecha, y que abrir el calendario o cambiar de mes no
+ * guarden nada—, ahora leída del documento en vez de contando peticiones.
  */
-import { expect, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
-import { resetStudy, studyContent, studyState, waitForSubjectShell, withApi } from "../support/app";
-import { API_ORIGIN, readSeed } from "../support/seed";
-
-/* `support/app.ts` es de otro agente y sus DTO todavía no nombran las fechas del
-   plan (son de este sprint): acá se declaran las dos formas que hacen falta, sin
-   tocar el archivo compartido. */
-interface PlanInstanceDto {
-  key: string;
-  label: string;
-  optional?: boolean;
-}
-interface PlanDto {
-  title: string;
-  phases: Array<{ id: string; title: string; instance?: string; retake?: string }>;
-  instances?: PlanInstanceDto[];
-}
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { resetStudy, studyContent, studyState, waitForSubjectShell, type PlanDto } from "../support/app";
+import { readSeed } from "../support/seed";
 
 /** El plan de la materia sembrada, con las instancias evaluatorias que declara. */
-async function plan(request: APIRequestContext): Promise<PlanDto | null> {
-  return ((await studyContent(request, subject.slug)).plan ?? null) as PlanDto | null;
+async function plan(): Promise<PlanDto | null> {
+  return (await studyContent(subject.slug)).plan;
 }
 
 /** Las fechas cargadas por el usuario (`StudyState.planDates`). */
-async function planDates(request: APIRequestContext): Promise<Record<string, string>> {
-  const state = (await studyState(request, subject.slug)) as unknown as {
-    planDates?: Record<string, string>;
-  };
-  return state.planDates ?? {};
+async function planDates(page: Page): Promise<Record<string, string>> {
+  return (await studyState(page, subject.slug)).planDates;
 }
 
 const seed = readSeed();
@@ -96,34 +83,19 @@ function isoIn(days: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Las fechas del usuario, que `resetStudy` no toca (son otra tabla y otra acción). */
-async function clearDates(request: APIRequestContext): Promise<void> {
-  await request.delete(`${API_ORIGIN}/api/subjects/${subject.slug}/study/plan-dates`);
-}
-
 async function openPlan(page: Page): Promise<void> {
   await page.goto(planUrl);
   await waitForSubjectShell(page);
   await expect(phases(page).first()).toBeVisible();
 }
 
-test.beforeEach(async ({ request }) => {
-  await resetStudy(request, subject.slug);
-  await clearDates(request);
+/* `resetStudy` deja la materia sin repasos, sin tareas y SIN FECHAS del plan. */
+test.beforeEach(async ({ page }) => {
+  await resetStudy(page, subject.slug);
 });
 
-test.afterAll(async () => {
-  await withApi(async (api) => {
-    await resetStudy(api, subject.slug);
-    await clearDates(api);
-  });
-});
-
-test("cargar la fecha de una instancia la cuenta, la baja a su fase y persiste", async ({
-  page,
-  request,
-}) => {
-  const contenido = await plan(request);
+test("cargar la fecha de una instancia la cuenta, la baja a su fase y persiste", async ({ page }) => {
+  const contenido = await plan();
   const instances = contenido?.instances ?? [];
   test.skip(
     instances.length === 0,
@@ -150,8 +122,8 @@ test("cargar la fecha de una instancia la cuenta, la baja a su fase y persiste",
 
   // El API la guardó de verdad.
   await expect
-    .poll(async () => (await planDates(request))[primera.key], {
-      message: "el API no registró la fecha de la instancia",
+    .poll(async () => (await planDates(page))[primera.key], {
+      message: "la fecha de la instancia no quedó guardada",
     })
     .toBe(isoIn(12));
 
@@ -163,8 +135,8 @@ test("cargar la fecha de una instancia la cuenta, la baja a su fase y persiste",
   await expect(tarjeta.getByText("faltan 12 días")).toBeVisible();
 });
 
-test("vaciar el campo borra la fecha", async ({ page, request }) => {
-  const contenido = await plan(request);
+test("vaciar el campo borra la fecha", async ({ page }) => {
+  const contenido = await plan();
   const instances = contenido?.instances ?? [];
   test.skip(instances.length === 0, "el plan de esta materia todavía no declara instancias evaluatorias");
   const primera = instances[0]!;
@@ -179,12 +151,12 @@ test("vaciar el campo borra la fecha", async ({ page, request }) => {
 
   await expect(page.getByText("faltan 20 días")).toHaveCount(0);
   await expect
-    .poll(async () => (await planDates(request))[primera.key])
+    .poll(async () => (await planDates(page))[primera.key])
     .toBeUndefined();
 });
 
-test("«Borrar fechas» las saca todas y «Reiniciar el plan» no las toca", async ({ page, request }) => {
-  const contenido = await plan(request);
+test("«Borrar fechas» las saca todas y «Reiniciar el plan» no las toca", async ({ page }) => {
+  const contenido = await plan();
   const instances = contenido?.instances ?? [];
   test.skip(instances.length === 0, "el plan de esta materia todavía no declara instancias evaluatorias");
   const primera = instances[0]!;
@@ -207,7 +179,7 @@ test("«Borrar fechas» las saca todas y «Reiniciar el plan» no las toca", asy
   await expect(page.getByTestId("plan-total")).toHaveText(/^0\//);
   await expect(page.getByText("faltan 30 días").first()).toBeVisible();
   await expect
-    .poll(async () => (await planDates(request))[primera.key])
+    .poll(async () => (await planDates(page))[primera.key])
     .toBe(isoIn(30));
 
   // Ahora sí, borrar las fechas.
@@ -218,98 +190,48 @@ test("«Borrar fechas» las saca todas y «Reiniciar el plan» no las toca", asy
   await expect(page.getByText("faltan 30 días")).toHaveCount(0);
   await expect(page.getByLabel(`Fecha de ${primera.label}`, { exact: true }).first()).toHaveAttribute("data-value", "");
   await expect
-    .poll(async () => Object.keys(await planDates(request)).length)
+    .poll(async () => Object.keys(await planDates(page)).length)
     .toBe(0);
 });
 
 /**
- * Elegir un día en el calendario propio guarda UNA sola vez: ni al abrir, ni al
- * cambiar de mes, ni al mover el foco por la rejilla se dispara ningún PUT.
+ * Elegir un día en el calendario propio guarda UNA sola fecha: ni al abrirlo, ni
+ * al cambiar de mes, ni al mover el foco por la rejilla se escribe nada.
  */
-test("elegir la fecha en el calendario guarda una sola vez", async ({ page, request }) => {
-  const contenido = await plan(request);
+test("elegir la fecha en el calendario guarda una sola vez", async ({ page }) => {
+  const contenido = await plan();
   const instances = contenido?.instances ?? [];
   test.skip(instances.length === 0, "el plan de esta materia todavía no declara instancias evaluatorias");
   const primera = instances[0]!;
-
-  const puts: string[] = [];
-  await page.route("**/study/plan-dates/**", async (route) => {
-    if (route.request().method() === "PUT") puts.push(route.request().postData() ?? "");
-    await route.continue();
-  });
 
   await openPlan(page);
   await panel(page).click();
   const campo = page.getByLabel(`Fecha de ${primera.label}`, { exact: true }).first();
   const objetivo = isoIn(45);
+
+  // Abrir el calendario y pasear por los meses no guarda nada.
+  await campo.click();
+  const dialogo = page.getByRole("dialog", { name: /Elegir fecha/ });
+  await expect(dialogo).toBeVisible();
+  await dialogo.getByRole("button", { name: "Mes siguiente" }).click();
+  await dialogo.getByRole("button", { name: "Mes anterior" }).click();
+  expect(await planDates(page), "abrir el calendario guardó una fecha").toEqual({});
+  await page.keyboard.press("Escape");
+
   await elegirFecha(page, campo, objetivo);
 
   await expect
-    .poll(async () => (await planDates(request))[primera.key], {
-      message: "el API no registró la fecha elegida",
+    .poll(async () => (await planDates(page))[primera.key], {
+      message: "la fecha elegida no quedó guardada",
     })
     .toBe(objetivo);
-  expect(puts, `un solo PUT: ${puts.join(" | ")}`).toHaveLength(1);
+  // Una sola fecha: la de la instancia elegida.
+  expect(Object.keys(await planDates(page))).toEqual([primera.key]);
   await expect(page.getByLabel(`Fecha de ${primera.label}`, { exact: true }).nth(1)).toHaveAttribute("data-value", objetivo);
 });
 
-/**
- * Reproducción del bug: con el guardado lento y fallando, cada mutación
- * solapada guardaba como «estado anterior» una foto que ya traía el parche
- * optimista de la anterior, así que la última vuelta atrás restauraba una fecha
- * que el servidor nunca guardó. Quedaban los dos campos de la MISMA instancia
- * con valores distintos y dos chips contando días desde el año 202.
- */
-test("si el guardado falla no queda nada a la vista que el servidor no tenga", async ({
-  page,
-  request,
-}) => {
-  const contenido = await plan(request);
-  const instances = contenido?.instances ?? [];
-  test.skip(instances.length === 0, "el plan de esta materia todavía no declara instancias evaluatorias");
-  const primera = instances[0]!;
-
-  await page.route("**/study/plan-dates/**", async (route) => {
-    if (route.request().method() !== "PUT") return route.continue();
-    await new Promise((r) => setTimeout(r, 900));
-    await route.fulfill({
-      status: 500,
-      contentType: "application/json",
-      body: JSON.stringify({ error: "falla simulada" }),
-    });
-  });
-
-  await openPlan(page);
-  await panel(page).click();
-  const campos = page.getByLabel(`Fecha de ${primera.label}`, { exact: true });
-
-  /* Espaciados más que el antirrebote: cada uno sale como su propio PUT y, con
-     900 ms de latencia, se solapan entre sí. El foco NO se saca del campo. */
-  await campos.first().focus();
-  for (const value of ["0002-04-15", "0020-04-15", "0202-04-15", "2027-04-15"]) {
-    await campos.first().evaluate((el: HTMLInputElement, v: string) => {
-      el.value = v;
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-    }, value);
-    await page.waitForTimeout(450);
-  }
-  await expect(campos.first()).toBeFocused();
-
-  // Nada se guardó…
-  await expect
-    .poll(async () => Object.keys(await planDates(request)).length, {
-      message: "el API guardó algo pese al 500",
-    })
-    .toBe(0);
-
-  // …así que nada puede quedar a la vista, ni siquiera con el foco adentro.
-  await expect(campos.first()).toHaveAttribute("data-value", "");
-  await expect(campos.nth(1)).toHaveAttribute("data-value", "");
-  await expect(page.getByText(/faltan .* días|falta 1 día|es hoy|pasó hace/)).toHaveCount(0);
-});
-
-test("un plan sin instancias no dibuja el panel de fechas", async ({ page, request }) => {
-  const contenido = await plan(request);
+test("un plan sin instancias no dibuja el panel de fechas", async ({ page }) => {
+  const contenido = await plan();
   test.skip((contenido?.instances ?? []).length > 0, "el plan de esta materia sí declara instancias");
 
   await openPlan(page);

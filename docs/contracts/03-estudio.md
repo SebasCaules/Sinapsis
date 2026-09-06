@@ -25,7 +25,7 @@ Todo es opcional. Sin carpeta, la plataforma autogenera un mazo por división a 
 
 Reglas de descubrimiento (`compileStudy`):
 
-1. `wiki.study` es **relativa al config, no al wiki** (N0-27). `sinapsis sync --wiki
+1. `wiki.study` es **relativa al config, no al wiki** (N0-27). `sinapsis publish --wiki
    <otro-vault>` no la desvía: el material de estudio es del repositorio de la materia.
    No puede salir de la carpeta del config (error duro, ver `00-principios.md` §6.2).
 2. Si la carpeta no existe, el resultado es un `StudyContent` vacío y **ninguna advertencia**.
@@ -42,10 +42,10 @@ Reglas de descubrimiento (`compileStudy`):
 | `flashcards`, `mazo`, `cards`, `tarjetas` | Un `Deck` |
 | `quiz`, `cuestionario` | Un `Quiz` |
 
-**Nada de esto puede romper un sync.** Los problemas de formato y las referencias rotas son
-advertencias; el material se emite igual y el autor decide si lo arregla. La única
+**Nada de esto puede romper una publicación.** Los problemas de formato y las referencias
+rotas son advertencias; el material se emite igual y el autor decide si lo arregla. La única
 excepción es la red final: si el `StudyContent` armado no valida contra el contrato pese a
-todo, se avisa y se emite un `StudyContent` **vacío** antes que un payload inválido.
+todo, se avisa y se emite un `StudyContent` **vacío** antes que un material inválido.
 
 ---
 
@@ -386,18 +386,13 @@ instancias existen; la plataforma les pone la fecha.
 3. `PlanPhase.date` es la fecha **por defecto** —la del cronograma de la cátedra— y la del
    usuario la pisa. Sin `instance`, esa fecha se muestra pero no se puede editar.
 4. `optional: true` es para los recuperatorios: se dibujan plegados hasta que tienen fecha.
-5. Las fechas del usuario viajan en `StudyState.planDates` (`clave de instancia` →
-   `AAAA-MM-DD`) y se guardan con:
-
-   | Verbo | Ruta | Qué hace |
-   |---|---|---|
-   | `PUT` | `/api/subjects/:slug/study/plan-dates/:key` | Carga o cambia la fecha (`{ "date": "AAAA-MM-DD" }`). |
-   | `DELETE` | `/api/subjects/:slug/study/plan-dates/:key` | Borra la de esa instancia (vaciar el campo). |
-   | `DELETE` | `/api/subjects/:slug/study/plan-dates` | Borra todas («Borrar fechas»). |
-
-6. **Reiniciar el progreso del plan NO borra las fechas.** `DELETE
-   /api/subjects/:slug/tasks` destilda las tareas y no toca `planDates`; son dos acciones
-   separadas, con su propia confirmación, como en el baseline.
+5. Las fechas las carga cada persona y viven en su navegador, en
+   `LocalSubjectState.planDates` (`clave de instancia` → `AAAA-MM-DD`): cargarla, cambiarla
+   o vaciarla escribe esa clave, y «Borrar fechas» las borra todas. Viajan en la copia de
+   seguridad (`05-publicacion-y-sitio.md` §4).
+6. **Reiniciar el progreso del plan NO borra las fechas.** «Reiniciar el plan» destilda las
+   tareas (`tasksDone`) y no toca `planDates`; son dos acciones separadas, con su propia
+   confirmación, como en el baseline.
 7. Una fecha guardada con una clave que el plan ya no declara **no se borra**: deja de
    mostrarse y vuelve a aparecer si la materia repone esa instancia. Es la misma regla que
    `tasksDone` (§4.3).
@@ -518,9 +513,10 @@ con las páginas de contenido que tienen `resumen`:
 - Se saltan las páginas cuyo tipo tiene `countsAsContent: false` y las que no tienen
   `resumen`. Una división sin tarjetas no genera mazo.
 
-**No se guardan**: se calculan en cada lectura de `GET /api/subjects/:slug/study`, a partir de
-las páginas vigentes. Así siguen a los resúmenes del wiki sin depender de una
-re-sincronización. Sus ids son estables mientras no cambie el slug de la página.
+**No se guardan en el sitio**: `SiteSubject.study` trae solo el material autoral, y la web
+agrega los mazos automáticos al final de `decks` con `autoDecks(config, pages)` a partir de
+las páginas vigentes. Así siguen a los resúmenes del wiki sin depender de una nueva
+compilación. Sus ids son estables mientras no cambie el slug de la página.
 
 ---
 
@@ -535,17 +531,18 @@ re-sincronización. Sus ids son estables mientras no cambie el slug de la págin
 | `plan` | un `Plan` o `null` |
 | `kits` | ≤ 100 |
 
-**El campo viaja siempre, aunque esté vacío.** Es lo que hace que el sync reemplace el
-material igual que reemplaza las páginas: borrar la carpeta `estudio/` lo borra de la
-plataforma. La **ausencia** del campo queda reservada para un CLI anterior al Sprint 2, y el
-API la interpreta como «deje lo que ya tenía».
+**El campo se escribe siempre, aunque esté vacío.** Es lo que hace que publicar reemplace el
+material igual que reemplaza las páginas: borrar la carpeta `estudio/` lo borra del sitio.
+En `SiteSubject.study` el campo es obligatorio: un `StudyContent` vacío es un valor, no una
+ausencia.
 
 ---
 
 ## 9. Repaso espaciado — `sm2` (N0-28)
 
-SM-2 con **cuatro notas**, implementado como función pura en el contrato: lo usan el API
-para persistir y la web para previsualizar («en 3 d»).
+SM-2 con **cuatro notas**, implementado como función pura en el contrato: la web lo usa para
+calcular el próximo intervalo al calificar y para previsualizarlo («en 3 d»). Una sola
+implementación, del lado del cliente, porque no hay otro lado.
 
 | Nota | Significado | Qué hace |
 |---|---|---|
@@ -585,11 +582,12 @@ Estado inicial (`SRS_DEFAULT`): `ease 2.5`, `interval 0`, `reps 0`, `lapses 0`,
 
 ## 10. `StudyState` — el estado del usuario
 
-Lo devuelve `GET /api/subjects/:slug/study/state`. Es **por usuario y por materia**.
+Es el estado personal **por materia**, y vive en el navegador: `LocalSubjectState` lo extiende
+con `studied` (página → fecha). Ver `05-publicacion-y-sitio.md` §4.
 
 | Campo | Tipo | Qué es |
 |---|---|---|
-| `srs` | `SrsState[]` | Repaso espaciado, ordenado por `due` y después por `cardId`. **Solo tarjetas que existen hoy** (autorales + automáticas): las filas de tarjetas borradas se conservan en la base pero no viajan, para que la web no dibuje un «vence hoy» de algo que no puede abrir. |
+| `srs` | `SrsState[]` | Repaso espaciado, ordenado por `due` y después por `cardId`. **Solo tarjetas que existen hoy** (autorales + automáticas): las entradas de tarjetas borradas se conservan en el documento local pero se filtran al leer, para que la web no dibuje un «vence hoy» de algo que no puede abrir. |
 | `bookmarks` | `Slug[]` | Favoritos, por orden de alta. |
 | `notes` | `Note[]` | Apuntes por página: `{ page, body (≤ 50000), updatedAt }`. |
 | `tasksDone` | `StudyId[]` | Tareas del plan hechas, por id. |
@@ -631,17 +629,15 @@ Todas son **advertencias**, nunca errores.
 | Comando | Formato de los archivos | Ids repetidos | Referencias a divisiones, mazos, quizzes, rail | Referencias a **páginas** |
 |---|---|---|---|---|
 | `sinapsis validate` | sí | sí | sí | **no** (no compila el wiki) |
-| `sinapsis sync --dry-run` | sí | sí | sí | sí |
-| `sinapsis sync` | sí | sí | sí | sí |
-| API (al recibir el payload) | — | — | parcial (`read`/`cards`/`quiz` de la modalidad por defecto) | sí |
+| `sinapsis publish --dry-run` | sí | sí | sí | sí |
+| `sinapsis publish` | sí | sí | sí | sí |
+| `sinapsis site build` | sí | sí | sí | sí |
 
 `validate` lo aclara en su salida:
-`(las referencias a páginas se verifican en \`sinapsis sync --dry-run\`)`.
+`(las referencias a páginas se verifican en \`sinapsis publish --dry-run\`)`.
 
-> El API repite un subconjunto de las verificaciones sobre `SyncPayload.study`, pero recorre
-> **solo `plan.phases`**, no `plan.tracks`: una tarea rota que exista únicamente en una
-> modalidad alternativa la ve el compilador (`checkPlanIds` / `crossCheck` usan `planPhases`)
-> y no el API.
+> El compilador recorre `plan.phases` **y** `plan.tracks` (`checkPlanIds` / `crossCheck` usan
+> `planPhases`): una tarea rota que exista solo en una modalidad alternativa igual se avisa.
 
 ---
 
@@ -660,7 +656,7 @@ Todas son **advertencias**, nunca errores.
 | `"phases" no coincide con ninguna modalidad de "tracks"` | Se agregaron `tracks` sin repetir en `phases` las fases de la modalidad por defecto. | Copiar en `phases` las fases de `tracks[0]`. |
 | `la fase "x" aparece en dos modalidades con contenido distinto` | Se reusó un id de fase para dos fases parecidas. | Ids distintos, o repetir la fase idéntica. |
 | Una tarea `tool` no abre nada | El `target` es el id de la **vista** del bundle en vez del id del **ítem del rail**. | Usar el `rail[].items[].id`. |
-| El material desapareció de la plataforma | Se borró (o se movió) la carpeta `estudio/`: el sync la reemplaza por vacío. | Restaurarla y volver a sincronizar. |
+| El material desapareció de la plataforma | Se borró (o se movió) la carpeta `estudio/`: publicar la reemplaza por vacío. | Restaurarla y volver a publicar. |
 | «Estudio: sin material propio» | La carpeta no existe, está vacía o todos sus `.md` quedaron sin `tipo`. | Es válido: la plataforma autogenera un mazo por división. |
 
 ---
@@ -674,14 +670,15 @@ Todas son **advertencias**, nunca errores.
   `QuizOption`, `Plan`, `PlanTrack`, `PlanPhase`, `PlanMilestone`, `PlanTask`, `PlanTaskKind`,
   `Kit`, `StudyId`, `autoDecks`, `sm2`, `SrsState`, `SRS_DEFAULT`, `SrsGrade`, `StudyState`,
   `Note`, `QuizAttempt`.
-- `apps/api/src/services/study.ts` — `readStudyContent` (autoral + automático),
-  `studyCardIds`, `readStudyState`, `ATTEMPTS_LIMIT`.
-- `apps/api/src/services/sync.ts` — `studyWarnings` (lo que revalida el API).
-- `apps/api/src/routes/study.ts` — las rutas del estado del usuario.
-- `examples/proba/estudio/` — 6 mazos, 1 quiz, `plan.json` con modalidades, `kits.json`.
+- `packages/contract/src/site.ts` — `LocalSubjectState`, `LocalBackup`.
+- `apps/web/src/local/study.ts` — el material vigente (autoral + automático), el filtrado del
+  repaso a las tarjetas que existen y el tope de intentos.
+- `subjects/proba/estudio/` — 6 mazos, 1 quiz, `plan.json` con modalidades, `kits.json`.
 
 ## Decisiones relacionadas
 
 N0-27 (el material de estudio es contenido de la materia; mazos automáticos) ·
 N0-28 (SM-2 con cuatro notas) · N0-33 (nombres «Flashcards», «Quiz», «Kits de estudio») ·
-N0-37 (el plan sin modalidades hasta S-11) · N0-43 (`Plan.tracks`).
+N0-37 (el plan sin modalidades hasta S-11) · N0-43 (`Plan.tracks`) ·
+N0-52 (fechas del plan por instancia, ahora en el navegador) ·
+N0-56 (el estado personal vive en el navegador).

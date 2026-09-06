@@ -3,29 +3,26 @@
  * parcial y formularios).
  *
  * Lo que se prueba es que las TRES vistas del segundo bundle se monten en el
- * host y dibujen su contenido de verdad —el índice de las 289 fichas, la
- * pantalla de preparación del parcial con su banco y el formulario con sus
- * pestañas por unidad—, y que el estado por ejercicio quede guardado con el
- * prefijo de la materia. No se prueba el dibujo fino de cada vista: eso se
- * coteja contra el baseline en `design/referencias/brechas-fix/`.
+ * host y dibujen su contenido de verdad —el índice de las fichas, la pantalla de
+ * preparación del parcial con su banco y el formulario con sus pestañas por
+ * unidad—, y que el estado por ejercicio quede guardado con el prefijo de la
+ * materia. No se prueba el dibujo fino de cada vista: eso se coteja contra el
+ * baseline en `design/referencias/brechas-fix/`.
  *
- * La siembra general (`global-setup.ts`) publica UN bundle por materia, el de
- * `proba-tools`. Este archivo publica el suyo en `beforeAll` con el mismo
- * `buildBundle` que usa `sinapsis tools build` —un bundle roto corta la prueba
- * acá, con el problema que reportaría el CLI— y lo retira en `afterAll`, para
- * dejar la base como la encontró.
+ * Sprint 4: ya no hace falta publicar nada. `sinapsis site build` compila TODOS
+ * los bundles de `subjects/proba/tools/` al sitio, así que el segundo llega con
+ * la siembra igual que el primero; lo que antes hacían `beforeAll` y `afterAll`
+ * (publicar y retirar por HTTP) desapareció con el API.
  *
- * En modo demo (sin el vault de Proba) no hay corpus que montar: la suite se
- * salta entera.
+ * En modo demo (con el fixture) no hay corpus que montar: la suite se salta
+ * entera.
  */
-import path from "node:path";
-import { expect, test, type APIRequestContext } from "@playwright/test";
-import { subjectTools, waitForSubjectShell, withApi } from "../support/app";
-import { API_ORIGIN, REPO_ROOT, SYNC_TOKEN, readSeed } from "../support/seed";
+import { expect, test } from "@playwright/test";
+import { subjectTools, waitForSubjectShell } from "../support/app";
+import { readSeed } from "../support/seed";
 
 const seed = readSeed();
 const subject = seed.subject;
-const BUNDLE_DIR = path.join(REPO_ROOT, "examples/proba/tools/proba-exercises");
 const BUNDLE_ID = "proba-exercises";
 
 /** Las tres vistas del manifiesto, con algo que solo dibuja cada una. */
@@ -36,51 +33,14 @@ const VISTAS = [
 ] as const;
 
 test.describe("Ejercicios, parcial y formularios (bundle proba-exercises)", () => {
-  test.skip(seed.mode !== "proba", "sin el vault de Proba no hay corpus de ejercicios que montar");
+  test.skip(seed.mode !== "proba", "sin la materia real no hay corpus de ejercicios que montar");
 
-  test.beforeAll(async () => {
-    const { buildBundle } = (await import("../../packages/cli/src/tools/bundle.js")) as {
-      buildBundle: (dir: string) => Promise<
-        | { ok: true; bundle: { push: unknown; manifest: { id: string } } }
-        | { ok: false; problems: Array<{ where: string; message: string }> }
-      >;
-    };
-    const outcome = await buildBundle(BUNDLE_DIR);
-    if (!outcome.ok) {
-      const detalle = outcome.problems.map((p) => `${p.where}: ${p.message}`).join(" · ");
-      throw new Error(`El bundle ${BUNDLE_ID} no se puede publicar: ${detalle}`);
-    }
-    await withApi(async (api: APIRequestContext) => {
-      const res = await api.put(`${API_ORIGIN}/api/subjects/${subject.slug}/tools/${BUNDLE_ID}`, {
-        data: outcome.bundle.push,
-        headers: { authorization: `Bearer ${SYNC_TOKEN}` },
-      });
-      if (res.status() !== 200 && res.status() !== 201) {
-        throw new Error(`PUT .../tools/${BUNDLE_ID} → ${res.status()} ${await res.text()}`);
-      }
-    });
-  });
-
-  /* Se retira con el MISMO token con el que se publicó (`DELETE .../tools/:id`
-     pide el token de sync, no la cookie): si quedara publicado, el sitio del
-     rail que `tools.spec.ts` usa para probar «Próximamente» dejaría de estar
-     libre y esa prueba fallaría. */
-  test.afterAll(async () => {
-    await withApi(async (api: APIRequestContext) => {
-      const res = await api.delete(`${API_ORIGIN}/api/subjects/${subject.slug}/tools/${BUNDLE_ID}`, {
-        headers: { authorization: `Bearer ${SYNC_TOKEN}` },
-      });
-      if (res.status() !== 204) {
-        throw new Error(`DELETE .../tools/${BUNDLE_ID} → ${res.status()} ${await res.text()}`);
-      }
-    });
-  });
-
-  test("el API publica el bundle con sus tres vistas", async ({ request }) => {
-    const tools = await subjectTools(request, subject.slug);
+  test("el sitio compila el bundle con sus tres vistas", async () => {
+    const tools = subjectTools(subject.slug);
     const info = tools.find((t) => t.manifest.id === BUNDLE_ID);
-    expect(info, `«${BUNDLE_ID}» no quedó publicado`).toBeTruthy();
+    expect(info, `«${BUNDLE_ID}» no quedó compilado en el sitio`).toBeTruthy();
     expect(info?.manifest.views.map((v) => v.id)).toEqual(["ejercicios", "parcial", "formularios"]);
+    expect(info?.base).toBe(`subjects/${subject.slug}/tools/${BUNDLE_ID}`);
   });
 
   for (const vista of VISTAS) {

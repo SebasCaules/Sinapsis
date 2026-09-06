@@ -1,6 +1,6 @@
 /**
- * Implementación de mentira del API, para revisar la interfaz sin el servidor
- * levantado (`?mock=1` en desarrollo: smoke visual y capturas).
+ * Implementación de mentira de `ApiClient`, para revisar la interfaz con datos
+ * de muestra (`?mock=1` en desarrollo: smoke visual y capturas).
  *
  * Este módulo es el ÚNICO que conoce las fixtures, y nadie lo importa de forma
  * estática: `main.tsx` lo carga con un `import()` dinámico bajo
@@ -9,8 +9,8 @@
  *
  * Todo el estado vive en memoria y dura lo que dura la pestaña: al recargar se
  * vuelve al fixture. Eso alcanza para el smoke (guardar un cuatrimestre vacío,
- * calificar una tarjeta, marcar una tarea) y evita inventar una persistencia
- * que el servidor real ya resuelve.
+ * calificar una tarjeta, marcar una tarea) y evita duplicar la persistencia que
+ * el cliente local ya resuelve.
  */
 import {
   SRS_DEFAULT,
@@ -77,16 +77,16 @@ function copyState(s: StudyState): StudyState {
 export const mockApi: ApiClient = {
   auth: {
     me: async () => user,
-    google: async () => user,
-    dev: async () => user,
-    logout: async () => {
-      /* sin sesión que cerrar: el usuario de mentira sigue ahí */
-    },
     setTheme: async (theme: ThemeId) => (user = { ...user, theme }),
+    setName: async (name: string) => (user = { ...user, name: name.trim() || "Estudiante" }),
   },
 
   landing: {
     list: async () => copy(state()),
+
+    /* El catálogo de mentira no tiene materias fuera de la landing: el diálogo
+       «Agregar materia» abre directo en el formulario. */
+    available: async () => [],
 
     saveLayout: async (input) => {
       const byId = new Map(state().map((c) => [c.slug, c]));
@@ -220,6 +220,4 @@ export const mockApi: ApiClient = {
       return { ...attempt };
     },
   },
-
-  config: async () => ({ googleClientId: null, devBypass: true }),
 };

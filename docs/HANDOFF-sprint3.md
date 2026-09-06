@@ -1,5 +1,7 @@
 # Handoff — Sprint 3 («Herramientas») de Sinapsis
 
+> Histórico: describe la arquitectura anterior al Sprint 4 (sitio estático); ver HANDOFF-sprint4.md.
+
 Fecha: 2026-09-06. Ejecución autónoma (autopilot) continuando el Sprint 2 sin intervención del
 usuario; decisiones nuevas numeradas en `docs/DECISIONS.md` (N0-40 … N0-49). Todo lo que quedó
 diferido está en `EXEC_STATE.md` (S-14 … S-26).

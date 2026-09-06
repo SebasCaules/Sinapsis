@@ -4,7 +4,7 @@
  * materia, y una tarea tildada sigue tildada en la otra vía porque los ids de
  * tarea son globales al plan.
  *
- * El API se reemplaza por la MISMA costura del modo mock (`lib/api` es un objeto
+ * El cliente de datos se reemplaza por la MISMA costura del modo mock (`lib/api` es un objeto
  * mutable): no hay red ni fixtures escondidas.
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -12,7 +12,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 import { SubjectConfig, type StudyContent, type StudyState, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { api, type ApiClient } from "@/lib/api";
 import type { SubjectCtx } from "../context";
 import { buildSubjectModel } from "../model";

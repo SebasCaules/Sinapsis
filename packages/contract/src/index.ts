@@ -7,9 +7,11 @@
  *  2. Page           → lo que emite el compilador del wiki por cada página markdown
  *                      (mismo contrato que `build.py` de la app de Proba, con
  *                      `unidad` renombrado a `division`).
- *  3. SyncPayload / DTOs de la API → lo que viaja por HTTP.
+ *  3. SyncPayload / DTOs        → lo que emite el compilador y lo que leen las vistas.
+ *     El sitio estático (archivos JSON, estado local, copia de seguridad) vive
+ *     en `site.ts` y se importa como `@sinapsis/contract/site`.
  *
- * Todo está definido con zod para validar en el borde (CLI y API) y derivar los
+ * Todo está definido con zod para validar en el borde (CLI y web) y derivar los
  * tipos TypeScript de una sola fuente.
  */
 import { z } from "zod";
@@ -159,7 +161,7 @@ export type Fab = z.infer<typeof Fab>;
 /**
  * Ruta relativa segura: sin `..`, sin raíz absoluta, sin `~`. El config de una
  * materia puede venir de un repositorio ajeno: nunca debe poder apuntar fuera
- * de su propia carpeta (el CLI la lee y sube el contenido al API).
+ * de su propia carpeta (el CLI la lee y la copia al repositorio de la plataforma).
  */
 export const SafeRelativePath = z
   .string()
@@ -277,7 +279,7 @@ export const PageMeta = Page.omit({ body: true, links: true, headings: true });
 export type PageMeta = z.infer<typeof PageMeta>;
 
 // ---------------------------------------------------------------------------
-// 3. Sync y DTOs de la API
+// 3. Salida del compilador y DTOs de las vistas
 // ---------------------------------------------------------------------------
 
 export const SyncPayload = z.object({
@@ -291,20 +293,15 @@ export const SyncPayload = z.object({
 });
 export type SyncPayload = z.infer<typeof SyncPayload>;
 
-export const SyncResult = z.object({
-  subject: Slug,
-  pages: z.number().int(),
-  created: z.number().int(),
-  updated: z.number().int(),
-  deleted: z.number().int(),
-  warnings: z.array(z.string()),
-});
-export type SyncResult = z.infer<typeof SyncResult>;
 
-/** Usuario autenticado. */
+/**
+ * Quien usa la plataforma. Desde el Sprint 4 no hay sesión: es el PERFIL LOCAL
+ * del navegador (`LocalProfile` en `site.ts`), con `id: "local"` y `email` vacío.
+ * Se conserva la forma para que las vistas no cambien.
+ */
 export const User = z.object({
   id: z.string(),
-  email: z.string().email(),
+  email: z.string().default(""),
   name: z.string(),
   picture: z.string().url().nullable(),
   theme: ThemeId,
@@ -354,7 +351,7 @@ export const LandingLayoutInput = z.object({
 export type LandingLayoutInput = z.infer<typeof LandingLayoutInput>;
 
 /**
- * Config tal como la sirve el API: igual a SubjectConfig pero admite `divisions` y
+ * Config tal como lo ven las vistas: igual a SubjectConfig pero admite `divisions` y
  * `pageTypes` vacíos (materias placeholder creadas desde la landing, sin sync).
  */
 export const SubjectConfigLoose = SubjectConfig.extend({
@@ -496,14 +493,6 @@ export function cssColor(ref: string | null | undefined, fallback = "var(--u0)")
 /** Singular o plural según n: plural(1, "página", "páginas") → "página". */
 export function plural(n: number, singular: string, pluralForm: string): string {
   return n === 1 ? singular : pluralForm;
-}
-
-/** Mensaje de error de una respuesta del API (`{ error }`) o, si no, `HTTP <status> <statusText>`. */
-export function errorMessageFromBody(body: unknown, status: number, statusText = ""): string {
-  if (body && typeof body === "object" && typeof (body as { error?: unknown }).error === "string") {
-    return (body as { error: string }).error;
-  }
-  return `HTTP ${status}${statusText ? " " + statusText : ""}`;
 }
 
 /**
@@ -884,7 +873,7 @@ export const SRS_DEFAULT: Omit<SrsState, "cardId" | "due" | "updatedAt"> = { eas
 
 /**
  * SM-2 con 4 notas (1 = otra vez, 2 = difícil, 3 = bien, 4 = fácil). Pura: la usan el
- * API para persistir y la web para previsualizar («en 3 d»). `now` es ISO.
+ * cliente local para persistir y las vistas para previsualizar («en 3 d»). `now` es ISO.
  */
 export function sm2(prev: Omit<SrsState, "cardId" | "due" | "updatedAt"> & { due?: string }, grade: SrsGrade, now: string): Omit<SrsState, "cardId"> {
   let { ease, interval, reps, lapses } = prev;
@@ -912,7 +901,7 @@ export type Note = z.infer<typeof Note>;
 export const QuizAttempt = z.object({ quizId: StudyId, score: z.number().int().min(0), total: z.number().int().min(1), at: z.string() });
 export type QuizAttempt = z.infer<typeof QuizAttempt>;
 
-/** Cuerpos de request del Sprint 2 (los usan el API para validar y la web para tipar). */
+/** Entradas de las mutaciones de estudio del Sprint 2 (validación y tipado en la web). */
 export const SrsGradeInput = z.object({ grade: SrsGrade });
 export type SrsGradeInput = z.infer<typeof SrsGradeInput>;
 export const NoteInput = z.object({ body: z.string().max(50000) });
@@ -922,7 +911,7 @@ export const QuizAttemptInput = z
   .refine((v) => v.score <= v.total, "score no puede superar total");
 export type QuizAttemptInput = z.infer<typeof QuizAttemptInput>;
 
-/** Estado de estudio del usuario en una materia (lo devuelve `GET /api/subjects/:slug/study/state`). */
+/** Estado de estudio de la persona en una materia (lo sirve el cliente local: `api.study.state`). */
 export const StudyState = z.object({
   srs: z.array(SrsState),
   bookmarks: z.array(Slug),
@@ -993,6 +982,12 @@ export const ToolManifest = z.object({
   views: z.array(ToolView).max(32).default([]),
   /** true si registra figuras para los callouts `[!figura]` del wiki. */
   figures: z.boolean().default(false),
+  /**
+   * true si registra proveedores de progreso (`App.registerProgressProvider`).
+   * El bundle se carga al ENTRAR en la materia, como `figures`: la barra de
+   * cada división tiene que poder sumar sus pasos sin que nadie abra la vista.
+   */
+  progress: z.boolean().default(false),
   /** Datos JSON que el bundle puede leer con `App.STUDY`/`App.DATA` (p. ej. `study-data.json`). */
   data: z.array(ToolFilePath).max(16).default([]),
 });
@@ -1006,32 +1001,30 @@ export const ToolFile = z.object({
 });
 export type ToolFile = z.infer<typeof ToolFile>;
 
-/** Cuerpo de `PUT /api/subjects/:slug/tools/:id` (token de sync). Tope 20 MB por bundle. */
+/**
+ * Un bundle en memoria: el manifiesto más sus archivos, tal como lo valida
+ * `sinapsis tools build` y lo copian `publish` y `site build`. Tope 20 MB por bundle.
+ */
 export const ToolPush = z.object({
   manifest: ToolManifest,
   files: z.array(ToolFile).min(1).max(400),
 });
 export type ToolPush = z.infer<typeof ToolPush>;
 
-/** Lo que la web recibe en `GET /api/subjects/:slug/tools`. */
+/** Un bundle publicado, tal como lo lista `subjects/<slug>/tools.json` (ver `site.ts`). */
 export const ToolInfo = z.object({
   manifest: ToolManifest,
   bytes: z.number().int().min(0),
   updatedAt: z.string(),
-  /** URL base de los archivos del bundle: `${base}/${path}`. */
+  /**
+   * Base de los archivos del bundle, RELATIVA al sitio y sin barra final
+   * (`siteToolBase(slug, id)` = `subjects/<slug>/tools/<id>`); la web la
+   * prefija con `BASE_URL` y compone `${base}/${path}`.
+   */
   base: z.string(),
 });
 export type ToolInfo = z.infer<typeof ToolInfo>;
 
-/** Base (sin barra final) de los archivos de un bundle: `${base}/${path}`. Es lo que devuelve `ToolInfo.base`. */
-export function toolFilesBase(subject: string, toolId: string): string {
-  return `${API_PREFIX}/subjects/${encodeURIComponent(subject)}/tools/${encodeURIComponent(toolId)}/files`;
-}
-
-/** URL de un archivo de bundle servida por el API. */
-export function toolFileUrl(subject: string, toolId: string, path: string): string {
-  return `${toolFilesBase(subject, toolId)}/${path}`;
-}
 
 /** Vistas builtin que la plataforma garantiza en el Sprint 1. */
 export const BUILTIN_VIEWS = ["home", "plan", "kits", "wiki", "graph", "flashcards", "quiz", "notes", "favorites"] as const;
@@ -1118,7 +1111,6 @@ export const LS_KEYS = {
 /** Rutas del SPA — única fuente para web y CLI (mensajes de éxito). */
 export const routes = {
   landing: () => "/",
-  login: () => "/login",
   subject: (s: string) => `/m/${s}`,
   wiki: (s: string) => `/m/${s}/wiki`,
   graph: (s: string) => `/m/${s}/graph`,
@@ -1136,8 +1128,6 @@ export const routes = {
   favorites: (s: string) => `/m/${s}/favorites`,
 } as const;
 
-/** Prefijo de la API HTTP. */
-export const API_PREFIX = "/api" as const;
 
 /** Tipos del runtime del navegador para bundles de herramientas (Sprint 3). */
 export type * from "./runtime.js";

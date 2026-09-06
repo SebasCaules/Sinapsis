@@ -1,5 +1,7 @@
 # Fidelidad con la app original de Proba — Sprint 3 (N0-46)
 
+> Histórico: describe la arquitectura anterior al Sprint 4 (sitio estático); ver HANDOFF-sprint4.md.
+
 Comparación página a página entre la materia **Probabilidad y Estadística** dentro de
 Sinapsis (`http://localhost:5173/m/proba`) y la **app original de estudio**
 (`~/Desktop/ITBA/26-1C/Proba_Obsidian/estudio`, servida en `http://localhost:4599`).

@@ -4,25 +4,19 @@
  * recarga. Se prueban las tres operaciones del modo gestión: agregar, reordenar
  * con el teclado y quitar.
  *
- * `resetLanding` repone las materias pero no la lista de cuatrimestres
- * (`user_semesters`): eso lo hace `resetSemesters`, que es el único que la
- * reescribe (`PUT /api/landing` con `semesters`).
+ * `resetLanding` repone las materias (y la placeholder de la siembra);
+ * `resetSemesters` repone la LISTA de cuatrimestres declarados, que es estado
+ * aparte: sin ella un cuatrimestre vacío no tendría dónde vivir.
  */
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { resetLanding, resetSemesters, withApi } from "../support/app";
-import { API_ORIGIN, readSeed } from "../support/seed";
+import { expect, test, type Page } from "@playwright/test";
+import { resetLanding, resetSemesters, snapshot } from "../support/app";
+import { readSeed, semesterLabel } from "../support/seed";
 
 const seed = readSeed();
 const NUEVO = "2024-2C";
 
-/** "2026-1C" → "Cuatrimestre 1 · 2026". */
-function semesterLabel(raw: string): string {
-  const m = raw.match(/^(\d{4})-(\d)C$/);
-  return m ? `Cuatrimestre ${m[2] as string} · ${m[1] as string}` : raw;
-}
-
 const NUEVO_LABEL = semesterLabel(NUEVO);
-const sembrados = [...new Set(seed.landing.map((s) => s.semester))].map(semesterLabel);
+const sembrados = seed.landing.semesters.map(semesterLabel);
 
 /**
  * Región viva de dnd-kit: la landing le escribe los anuncios en castellano
@@ -51,11 +45,9 @@ async function orden(page: Page): Promise<string[]> {
     .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("aria-label") ?? ""));
 }
 
-/** `GET /api/landing/semesters`: lo que quedó guardado, vacíos incluidos. */
-async function savedSemesters(request: APIRequestContext): Promise<string[]> {
-  const res = await request.get(`${API_ORIGIN}/api/landing/semesters`);
-  if (!res.ok()) throw new Error(`GET /api/landing/semesters → ${res.status()}`);
-  return (await res.json()) as string[];
+/** Los cuatrimestres declarados que quedaron guardados, vacíos incluidos. */
+async function savedSemesters(page: Page): Promise<string[]> {
+  return (await snapshot(page)).landing.semesters;
 }
 
 async function manage(page: Page): Promise<void> {
@@ -80,19 +72,12 @@ async function addSemester(page: Page, label: string): Promise<void> {
   await expect(page.getByRole("dialog")).toHaveCount(0);
 }
 
-test.beforeEach(async ({ request }) => {
-  await resetLanding(request);
-  await resetSemesters(request);
+test.beforeEach(async ({ page }) => {
+  await resetLanding(page);
+  await resetSemesters(page);
 });
 
-test.afterAll(async () => {
-  await withApi(async (api) => {
-    await resetLanding(api);
-    await resetSemesters(api);
-  });
-});
-
-test("agregar un cuatrimestre vacío y guardarlo lo deja tras recargar", async ({ page, request }) => {
+test("agregar un cuatrimestre vacío y guardarlo lo deja tras recargar", async ({ page }) => {
   await manage(page);
   expect(await orden(page)).toEqual(sembrados);
 
@@ -107,7 +92,7 @@ test("agregar un cuatrimestre vacío y guardarlo lo deja tras recargar", async (
 
   // El cuatrimestre vacío sigue ahí: no lo sostiene ninguna materia.
   await expect(page.locator(`section[aria-label="${NUEVO_LABEL}"]`)).toBeVisible();
-  expect(await savedSemesters(request)).toContain(NUEVO);
+  expect(await savedSemesters(page)).toContain(NUEVO);
 });
 
 test("reordenar un cuatrimestre con el teclado cambia el orden guardado", async ({ page }) => {
@@ -138,7 +123,7 @@ test("reordenar un cuatrimestre con el teclado cambia el orden guardado", async 
   expect(despues[1]).toBe(primero);
 });
 
-test("quitar un cuatrimestre vacío lo saca de la landing", async ({ page, request }) => {
+test("quitar un cuatrimestre vacío lo saca de la landing", async ({ page }) => {
   await manage(page);
   await addSemester(page, NUEVO);
   await save(page);
@@ -154,5 +139,5 @@ test("quitar un cuatrimestre vacío lo saca de la landing", async ({ page, reque
   await expect(page.getByRole("heading", { name: "Materias", level: 1 })).toBeVisible();
   await expect(page.locator(`section[aria-label="${NUEVO_LABEL}"]`)).toHaveCount(0);
 
-  expect(await savedSemesters(request)).not.toContain(NUEVO);
+  expect(await savedSemesters(page)).not.toContain(NUEVO);
 });

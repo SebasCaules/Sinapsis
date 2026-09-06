@@ -1,0 +1,14 @@
+{
+  "name": "Sinapsis",
+  "short_name": "Sinapsis",
+  "description": "Plataforma de estudio multi-materia. El progreso se guarda en este navegador.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "lang": "es",
+  "theme_color": "#7c2230",
+  "background_color": "#ece3d2",
+  "icons": [
+    { "src": "icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}

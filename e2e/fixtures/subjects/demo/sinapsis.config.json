@@ -1,0 +1,62 @@
+{
+  "contract": 1,
+  "slug": "demo",
+  "name": "Materia Demo",
+  "code": "00.01",
+  "institution": "Instituto Demo",
+  "color": "--u4",
+  "semester": "2026-1C",
+  "division": {
+    "singular": "Semana",
+    "abbr": "S",
+    "plural": "Semanas"
+  },
+  "divisions": [
+    { "key": "1", "name": "Semana 01" },
+    { "key": "2", "name": "Semana 02" },
+    { "key": "3", "name": "Semana 03" }
+  ],
+  "pageTypes": [
+    { "key": "nota", "label": "Nota", "plural": "Notas", "folder": "notas" },
+    {
+      "key": "fuente",
+      "label": "Fuente",
+      "plural": "Fuentes",
+      "folder": "fuentes",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    }
+  ],
+  "rail": [
+    {
+      "id": "resolver",
+      "label": "Resolver",
+      "color": "--accent",
+      "items": [
+        { "id": "demo", "label": "Vista de demostración", "icon": "flask", "kind": "tool", "target": "demo" },
+        { "id": "calc", "label": "Calculadoras", "icon": "calc", "kind": "tool", "target": "calc" }
+      ]
+    },
+    {
+      "id": "material",
+      "label": "Material",
+      "color": "--u6",
+      "items": [
+        {
+          "id": "apunte",
+          "label": "Apunte de la cátedra",
+          "icon": "sigma",
+          "kind": "page",
+          "target": "demo-apunte-catedra"
+        }
+      ]
+    }
+  ],
+  "fab": null,
+  "wiki": {
+    "root": "wiki",
+    "ignore": [],
+    "divisionField": "unidad",
+    "study": "estudio"
+  }
+}

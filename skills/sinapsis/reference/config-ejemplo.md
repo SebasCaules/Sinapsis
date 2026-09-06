@@ -152,9 +152,9 @@ Compila a:
 ## Cosas que suelen salir mal
 
 - **Una división del frontmatter que no está en `divisions`.** La página se conserva pero
-  queda fuera del índice hasta que se declare la división. El sync avisa.
+  queda fuera del índice hasta que se declare la división. `publish` avisa.
 - **`kind: "page"` apuntando a un slug que no existe.** El ítem del rail no abre nada.
-  `validate` no lo detecta (no lee el wiki); el dry-run de `sync` sí lo va a mostrar como
+  `validate` no lo detecta (no lee el wiki); el dry-run de `publish` sí lo va a mostrar como
   wikilink roto solo si además está enlazado desde alguna página, así que conviene
   verificarlo a mano.
 - **Nombres de archivo con acentos o mayúsculas.** Se normalizan con advertencia, pero el

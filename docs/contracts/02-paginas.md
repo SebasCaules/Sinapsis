@@ -66,9 +66,10 @@ slug normalizado: "Distribución Normal" → "distribucion-normal"
 por guiones, recorta los guiones de los extremos y trunca a 120. Si no queda nada utilizable,
 el slug pasa a ser `pagina`.
 
-**Renombrar un archivo equivale a borrar una página y crear otra**: el sync borra el slug
-viejo (con su lugar en el grafo) y crea el nuevo. El progreso, los favoritos y los apuntes
-del usuario se guardan por slug y quedan huérfanos hasta que el slug vuelva.
+**Renombrar un archivo equivale a borrar una página y crear otra**: al publicar desaparece el
+slug viejo (con su lugar en el grafo) y aparece el nuevo. Las páginas estudiadas, los
+favoritos y los apuntes se guardan por slug en el navegador y quedan huérfanos hasta que el
+slug vuelva.
 
 ---
 
@@ -248,11 +249,11 @@ tiene que existir: si no existe, el compilador avisa.
   · "independencia" → de-morgan (escrito "De Morgan"), tp7
 ```
 
-**Lo que hace el sync con los enlaces** (S-07): la tabla `page_links` guarda solo las aristas
-cuyo destino existe **en la misma materia** y que no son auto-enlaces, deduplicadas por par.
-Es a la vez el índice de backlinks del lector y el grafo de conexiones. Un enlace roto no
-aparece en el grafo ni en los backlinks, pero sigue en `Page.links` y el lector lo dibuja
-como enlace roto.
+**Lo que hace el build con los enlaces**: `SiteSubject.links` guarda solo las aristas cuyo
+destino existe **en la misma materia** y que no son auto-enlaces, deduplicadas por par. Es a
+la vez el índice de enlaces entrantes del lector y el grafo de conexiones. Un enlace roto no
+aparece en el grafo ni en los enlaces entrantes, pero sigue en `SitePages` (`links` de la
+página) y el lector lo dibuja como enlace roto.
 
 ---
 
@@ -429,7 +430,7 @@ no rompe nada**. Un `[!figura]` sin id se dibuja como figura vacía (sin `data-f
 | Subcarpetas del wiki | El compilador recorre un solo nivel. | Aplanar la carpeta. |
 | Encabezados H5 y H6 en el índice de la página | `extractHeadings` solo mira H1–H4. | Usar hasta H4 para lo que deba aparecer en el índice. |
 | Enlaces markdown `[texto](otra-pagina)` como enlaces internos | Solo los wikilinks `[[…]]` se resuelven contra la materia y alimentan el grafo. | `[[slug|texto]]`. |
-| Adjuntos e imágenes locales del vault | No viajan en el sync: `Page` solo tiene texto. | Publicarlas dentro de un bundle de herramientas (`04`) o enlazarlas por URL. |
+| Adjuntos e imágenes locales del vault | No se publican: `Page` solo tiene texto. | Publicarlas dentro de un bundle de herramientas (`04`) o enlazarlas por URL. |
 | Un tipo de callout propio | El registro es cerrado. | Usar el más parecido; un tipo desconocido cae en `nota`. |
 | Frontmatter con claves propias | El compilador ignora lo que no está en §3. | Si hace falta un campo nuevo, es una propuesta (`07`). |
 
@@ -449,7 +450,7 @@ no rompe nada**. Un `[!figura]` sin id se dibuja como figura vacía (sin `data-f
 | `N página(s) sin "resumen": …` | `missing-summary` | Sin tooltip, sin tarjeta y sin mazo automático. | Escribir 1–2 frases. |
 | `N wikilink(s) roto(s) hacia M destino(s) inexistente(s): …` | `broken-link` | El destino no existe como página. | Corregir el slug, crear la página o desenlazar. |
 
-Ninguna de ellas detiene el sync. Las listas largas se recortan a 6 elementos con
+Ninguna de ellas detiene la publicación. Las listas largas se recortan a 6 elementos con
 `(+N más)`.
 
 ---
@@ -470,7 +471,8 @@ Ninguna de ellas detiene el sync. Las listas largas se recortan a 6 elementos co
 - `apps/web/src/features/subject/components/page-tip.ts` — `leadOf`, `firstPara`,
   `sectionOf`: de dónde sale cada texto de la vista previa (N0-50).
 - `packages/runtime/src/markdown.ts` — `figureMarkup`, el mismo marcado desde el runtime.
-- `apps/api/src/services/sync.ts` — `resolveLinks` (qué aristas entran en `page_links`).
+- `packages/cli/src/commands/site.ts` — `resolveLinks` (qué aristas entran en
+  `SiteSubject.links`).
 
 ## Decisiones relacionadas
 

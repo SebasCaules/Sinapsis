@@ -1,245 +1,97 @@
 /**
  * Siembra de las pruebas de punta a punta.
  *
- * Corre DESPUÉS de que `webServer` levantó el API (:3100) y la web (:5174), así
- * que no puede borrar la base: de eso se encarga el propio comando del API en
- * `playwright.config.ts` (`rm -f apps/api/data/e2e.db*` antes de arrancar).
+ * Sin API y sin sesión, «sembrar» ya no es hacer peticiones: es COMPILAR una
+ * materia al sitio estático que la web lee y describir en un manifiesto con qué
+ * datos está corriendo la suite.
  *
- * Lo que hace, en orden:
- *   a) POST /api/auth/dev  → guarda la cookie de sesión en `.auth/dev.json`
- *      (el `storageState` de todas las specs salvo `auth.spec.ts`).
- *   b) Sincroniza una materia con contenido real:
- *      · si existe `~/Desktop/ITBA/26-1C/Proba_Obsidian/wiki`, compila ese vault
- *        con `compileWiki({ config, rootDir })` — el config es
- *        `examples/proba/sinapsis.config.json` con `wiki.root` reescrito a la
- *        ruta ABSOLUTA del vault — y hace PUT /api/subjects/proba/sync.
- *      · si no existe, sube tal cual `fixtures/mini-payload.json` (materia
- *        "Materia Demo", 3 semanas, 8 páginas) a PUT /api/subjects/demo/sync.
- *      El sync se autentica con `Authorization: Bearer e2e-token` (SYNC_TOKEN).
- *      El payload lleva además el MATERIAL DE ESTUDIO del Sprint 2
- *      (`payload.study`: mazos, quiz, plan y kits de `examples/proba/estudio/`).
- *      Con el vault real se exige que llegue: sin él, las specs de estudio
- *      pasarían probando estados vacíos.
- *   c) POST /api/subjects para poner la materia sincronizada en la landing del
- *      usuario dev (el sync NO la agrega: es global, ver N0-6) y para crear la
- *      materia placeholder "Materia Demo B" (slug demo-b, 2025-2C).
- *      Se verifica con GET /api/landing.
- *   d) Publica el BUNDLE DE HERRAMIENTAS de la materia (Sprint 3 · N0-41):
- *      · con el vault real, el bundle de verdad de Proba
- *        (`examples/proba/tools/proba-tools`: 5 vistas y las figuras del wiki);
- *      · con el fixture, el bundle mínimo `fixtures/mini-tools/` (una vista
- *        «demo» y una figura «demo-fig»).
- *      Se construye con el MISMO `buildBundle` que usa `sinapsis tools build`
- *      —así la siembra falla igual que el CLI si el bundle está roto— y se sube
- *      con `PUT /api/subjects/:slug/tools/:id` y el token de sync, que es lo que
- *      hace `tools push`. Se verifica con GET /api/subjects/:slug/tools.
+ * El sitio lo construye `prepare-site.ts` desde el propio comando del
+ * `webServer` (Playwright levanta los servidores ANTES de correr este archivo, y
+ * Vite fotografía `publicDir` al crearse). Acá se lee lo que quedó escrito en
+ * `e2e/.site/subjects/` y se deriva `e2e/.seed.json`:
  *
- * Deja `.auth/seed.json` con qué camino se tomó, para que las specs adapten sus
- * aserciones (ver `support/seed.ts`).
+ *   a) el catálogo (`index.json`) y la materia (`subject.json`): nombre, código,
+ *      divisiones declaradas y visibles, páginas y material de estudio;
+ *   b) los bundles (`tools.json` + los archivos escritos): el principal es el
+ *      que registra figuras, que es con el que corren `tools.spec.ts` y
+ *      `figures.spec.ts`;
+ *   c) la página con `> [!figura] <id>` (de `pages.json`), comprobando que algún
+ *      script del bundle registre esa figura: sin eso `figures.spec.ts` fallaría
+ *      con «la figura no dibujó» sin decir por qué;
+ *   d) la landing inicial que reponen las specs de landing con `restore()`: el
+ *      catálogo en el cuatrimestre que declara cada config, más la materia
+ *      placeholder «Materia Demo B».
+ *
+ * El estado personal NO se siembra desde acá: vive en el navegador y cada prueba
+ * de Playwright arranca con un contexto limpio (IndexedDB y `localStorage`
+ * vacíos). Lo que una spec necesite ya cargado lo pone con
+ * `window.__sinapsis.restore()` (ver `support/app.ts`).
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
-  API_ORIGIN,
-  AUTH_DIR,
-  E2E_DIR,
-  MINI_BUNDLE,
-  PROBA_BUNDLE,
-  PROBA_VAULT,
-  REPO_ROOT,
   SEED_FILE,
   SHOTS_DIR,
-  STORAGE_STATE,
-  SYNC_TOKEN,
-  type CreateSubjectBody,
+  SEED_PLACEHOLDER,
   type SeedManifest,
+  type SeedStudy,
   type SeedTools,
 } from "./support/seed";
+import { SITE_SUBJECTS_DIR, readOrBuildSite } from "./support/site";
 
-/**
- * Lo que se sube en `PUT /api/subjects/:slug/sync`, con lo poco que la siembra
- * mira de adentro. `study` es del Sprint 2 y viaja SIEMPRE (aunque esté vacío):
- * ver §7 del contrato.
- */
-interface SyncPayloadLike {
-  config: Record<string, unknown>;
-  pages: unknown[];
-  study?: { decks: unknown[]; quizzes: unknown[]; plan: unknown; kits: unknown[] };
-}
-
-/** Página del payload, con lo que la siembra mira de adentro. */
-interface PageLike {
-  slug: string;
-  title: string;
-  division?: string;
-  body: string;
-}
-
-/** Lo que la siembra usa del bundle que devuelve `buildBundle` del CLI. */
-interface BuiltBundleLike {
-  manifest: {
-    id: string;
-    title: string;
-    views: Array<{ id: string; label: string }>;
-    figures: boolean;
+/** Lo que la siembra mira del `subject.json` que escribió `site build`. */
+interface SiteSubjectLike {
+  config: {
+    slug: string;
+    name: string;
+    code: string;
+    institution: string;
+    semester?: string;
+    division: { singular: string; abbr: string; plural: string };
+    divisions: Array<{ key: string }>;
+    pageTypes: Array<{ key: string; countsAsContent?: boolean }>;
+    rail: Array<{ label: string; items?: Array<{ id: string; label: string; kind: string; target: string }> }>;
   };
-  push: { manifest: unknown; files: Array<{ path: string; content: string }> };
-  bytes: number;
-  /** Código de la carpeta que el manifiesto no declara (no se sube). */
-  ignored: string[];
-  /** Archivos con extensión ajena al contrato (no se suben). */
-  skipped: string[];
-}
-
-type BuildOutcomeLike =
-  | { ok: true; bundle: BuiltBundleLike }
-  | { ok: false; problems: Array<{ where: string; message: string }> };
-
-interface ToolInfoDto {
-  manifest: { id: string; views: Array<{ id: string; label: string }> };
-  bytes: number;
-  updatedAt: string;
-  base: string;
-}
-
-interface SyncResultDto {
-  subject: string;
-  pages: number;
-  created: number;
-  updated: number;
-  deleted: number;
+  pages: Array<{ slug: string; title: string; type: string; division: string; summary: string }>;
+  study: {
+    decks: Array<{ id: string; title: string; source?: string; cards: unknown[] }>;
+    quizzes: Array<{ id: string; title: string; questions: unknown[] }>;
+    plan: unknown;
+    kits: unknown[];
+  };
   warnings: string[];
 }
 
-interface LandingCardDto {
-  slug: string;
-  name: string;
-  semester: string;
-  pagesCount: number;
+interface SiteToolsLike {
+  tools: Array<{
+    manifest: {
+      id: string;
+      title: string;
+      views: Array<{ id: string; label: string }>;
+      figures: boolean;
+    };
+    base: string;
+  }>;
 }
 
-/** Cuatrimestre con el que la materia sincronizada entra en la landing. */
-const SUBJECT_SEMESTER = "2026-1C";
-const PLACEHOLDER = { slug: "demo-b", name: "Materia Demo B", semester: "2025-2C" };
+interface SitePagesLike {
+  pages: Record<string, { body: string }>;
+}
 
-async function api(
-  method: string,
-  route: string,
-  init: { body?: unknown; token?: string; cookie?: string } = {},
-): Promise<{ status: number; body: unknown; setCookie: string[] }> {
-  const headers: Record<string, string> = { accept: "application/json" };
-  if (init.body !== undefined) headers["content-type"] = "application/json";
-  if (init.token) headers["authorization"] = `Bearer ${init.token}`;
-  if (init.cookie) headers["cookie"] = init.cookie;
+function readJson<T>(file: string): T {
+  return JSON.parse(readFileSync(file, "utf8")) as T;
+}
 
-  const res = await fetch(`${API_ORIGIN}/api${route}`, {
-    method,
-    headers,
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-  });
-  const text = await res.text();
-  let body: unknown = null;
-  if (text.trim() !== "") {
-    try {
-      body = JSON.parse(text) as unknown;
-    } catch {
-      body = text;
-    }
+/** Archivos de un bundle ya escritos en el sitio, recursivamente. */
+function bundleFiles(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const full = path.join(dir, name);
+    if (statSync(full).isDirectory()) out.push(...bundleFiles(full));
+    else out.push(full);
   }
-  return { status: res.status, body, setCookie: res.headers.getSetCookie() };
-}
-
-function fail(step: string, status: number, body: unknown): never {
-  const detail = typeof body === "string" ? body : JSON.stringify(body);
-  throw new Error(`Siembra E2E — ${step} devolvió ${status}: ${detail}`);
-}
-
-/** Convierte el `Set-Cookie` del API en una cookie de `storageState`. */
-function toStorageCookie(raw: string): {
-  name: string;
-  value: string;
-  domain: string;
-  path: string;
-  expires: number;
-  httpOnly: boolean;
-  secure: boolean;
-  sameSite: "Lax";
-} {
-  const [pair = "", ...attrs] = raw.split(";");
-  const eq = pair.indexOf("=");
-  const name = pair.slice(0, eq).trim();
-  const value = pair.slice(eq + 1).trim();
-  let expires = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
-  for (const attr of attrs) {
-    const [key = "", val = ""] = attr.split("=");
-    if (key.trim().toLowerCase() === "max-age") {
-      const seconds = Number(val.trim());
-      if (Number.isFinite(seconds)) expires = Math.floor(Date.now() / 1000) + seconds;
-    }
-  }
-  return {
-    name,
-    value,
-    domain: "localhost",
-    path: "/",
-    expires,
-    httpOnly: true,
-    secure: false,
-    sameSite: "Lax",
-  };
-}
-
-/**
- * Compila el vault real de Proba con el config del repo apuntado al vault.
- *
- * El payload que devuelve trae también `study` (mazos, quiz, plan y kits): el
- * compilador lee `wiki.study`, que es relativa al CONFIG y no al vault (N0-27),
- * así que sale de `examples/proba/estudio/` aunque `wikiRoot` apunte a otro
- * lado. Acá no hay que hacer nada especial para que viaje: `PUT .../sync` sube
- * el payload entero.
- */
-async function compileProba(): Promise<{ payload: SyncPayloadLike; warnings: string[] }> {
-  const { compileWiki } = (await import("../packages/markdown/src/index.js")) as {
-    compileWiki: (opts: {
-      config: unknown;
-      rootDir: string;
-      wikiRoot?: string;
-      generator?: string;
-    }) => Promise<{ payload: SyncPayloadLike; warnings: string[] }>;
-  };
-
-  const configPath = path.join(REPO_ROOT, "examples/proba/sinapsis.config.json");
-  const config = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, unknown>;
-
-  // El config del repo apunta a "wiki" relativo a sí mismo y el contrato exige que
-  // `wiki.root` sea RELATIVO (endurecimiento contra travesía de rutas), así que la
-  // raíz absoluta del vault se pasa por `wikiRoot` — el mismo camino que usa el
-  // flag `--wiki` del CLI, que el compilador trata como entrada de confianza.
-  return compileWiki({
-    config,
-    rootDir: path.dirname(configPath),
-    wikiRoot: PROBA_VAULT,
-    generator: "@sinapsis/e2e",
-  });
-}
-
-/**
- * Construye el bundle de herramientas con el MISMO código que `sinapsis tools
- * build` (`packages/cli/src/tools/bundle.ts`): valida el manifiesto, comprueba
- * que cada archivo declarado exista y que cada script parsee. Un bundle roto
- * corta la siembra acá, con el problema que reportaría el CLI.
- */
-async function buildTools(dir: string): Promise<BuiltBundleLike> {
-  const { buildBundle } = (await import("../packages/cli/src/tools/bundle.js")) as {
-    buildBundle: (dir: string, opts?: { minify?: boolean }) => Promise<BuildOutcomeLike>;
-  };
-
-  const outcome = await buildBundle(dir);
-  if (!outcome.ok) {
-    const detail = outcome.problems.map((p) => `${p.where}: ${p.message}`).join(" · ");
-    throw new Error(`Siembra E2E — el bundle de ${dir} no se puede publicar: ${detail}`);
-  }
-  return outcome.bundle;
+  return out;
 }
 
 /**
@@ -249,15 +101,18 @@ async function buildTools(dir: string): Promise<BuiltBundleLike> {
  * la spec fallaría sin decir por qué.
  */
 function figurePageOf(
-  pages: PageLike[],
+  subject: SiteSubjectLike,
+  bodies: SitePagesLike,
   slug: string,
-  bundle: BuiltBundleLike,
+  bundleDir: string,
+  bundleId: string,
 ): { slug: string; title: string; fig: string } {
-  const page = pages.find((p) => p.slug === slug);
-  if (!page) {
-    throw new Error(`Siembra E2E — la página de figuras «${slug}» no está en el payload sincronizado`);
+  const meta = subject.pages.find((p) => p.slug === slug);
+  const body = bodies.pages[slug]?.body;
+  if (!meta || body === undefined) {
+    throw new Error(`Siembra E2E — la página de figuras «${slug}» no está en la materia compilada`);
   }
-  const found = page.body.match(/^>[ \t]*\[!figura\][ \t]+(\S+)/m);
+  const found = body.match(/^>[ \t]*\[!figura\][ \t]+(\S+)/m);
   if (!found?.[1]) {
     throw new Error(`Siembra E2E — «${slug}» ya no trae ningún callout «> [!figura] <id>»`);
   }
@@ -266,177 +121,121 @@ function figurePageOf(
   // `registerFigure(` y el id pueden estar en líneas distintas y con comillas
   // simples o dobles: el bundle lo escribe como quiere.
   const call = new RegExp(`registerFigure\\(\\s*["']${fig.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`);
-  const registered = bundle.push.files.some(
-    (file) => file.path.endsWith(".js") && call.test(file.content),
-  );
+  const registered = bundleFiles(bundleDir)
+    .filter((file) => file.endsWith(".js"))
+    .some((file) => call.test(readFileSync(file, "utf8")));
   if (!registered) {
     throw new Error(
-      `Siembra E2E — ningún script de «${bundle.manifest.id}» registra la figura «${fig}» que pide ${slug}`,
+      `Siembra E2E — ningún script de «${bundleId}» registra la figura «${fig}» que pide ${slug}`,
     );
   }
-  return { slug: page.slug, title: page.title, fig };
+  return { slug: meta.slug, title: meta.title, fig };
+}
+
+/** Mazos automáticos que la web agrega al material autoral (contrato `autoDecks`). */
+async function autoDeckCount(subject: SiteSubjectLike): Promise<number> {
+  const { autoDecks } = (await import("../packages/contract/src/index.js")) as {
+    autoDecks: (cfg: unknown, pages: unknown) => unknown[];
+  };
+  return autoDecks(subject.config, subject.pages).length;
+}
+
+/** Divisiones que el índice llega a dibujar (las declaradas con páginas + las sintéticas). */
+function visibleDivisions(subject: SiteSubjectLike): number {
+  const used = new Set(subject.pages.map((p) => p.division || "meta"));
+  const declared = new Set(subject.config.divisions.map((d) => d.key));
+  return (
+    subject.config.divisions.filter((d) => used.has(d.key)).length +
+    // Divisiones sintéticas del modelo del front: "meta" (Transversales) y
+    // "otras" (claves que las páginas usan y el config no declara).
+    (used.has("meta") ? 1 : 0) +
+    ([...used].some((k) => k !== "meta" && !declared.has(k)) ? 1 : 0)
+  );
 }
 
 export default async function globalSetup(): Promise<void> {
-  mkdirSync(AUTH_DIR, { recursive: true });
   mkdirSync(SHOTS_DIR, { recursive: true });
 
-  // --- (a) sesión de desarrollo ---------------------------------------------
-  const dev = await api("POST", "/auth/dev");
-  if (dev.status !== 200) fail("POST /api/auth/dev", dev.status, dev.body);
-  const sessionCookie = dev.setCookie.find((c) => c.startsWith("sinapsis_sid="));
-  if (!sessionCookie) throw new Error("Siembra E2E — POST /api/auth/dev no devolvió la cookie de sesión");
-  const cookie = toStorageCookie(sessionCookie);
-  writeFileSync(STORAGE_STATE, `${JSON.stringify({ cookies: [cookie], origins: [] }, null, 2)}\n`, "utf8");
-  const cookieHeader = `${cookie.name}=${cookie.value}`;
-
-  // --- (b) materia con contenido real ---------------------------------------
-  const useProba = existsSync(PROBA_VAULT);
-  let payload: SyncPayloadLike;
-  let warnings: string[] = [];
-
-  if (useProba) {
-    const compiled = await compileProba();
-    payload = compiled.payload;
-    warnings = compiled.warnings;
-  } else {
-    payload = JSON.parse(
-      readFileSync(path.join(E2E_DIR, "fixtures/mini-payload.json"), "utf8"),
-    ) as SyncPayloadLike;
-  }
-
-  /* El material de estudio del Sprint 2 viaja en el MISMO payload. Si dejara de
-     llegar, las specs de estudio no fallarían: probarían una materia sin mazos
-     ni plan y pasarían por los estados vacíos. Se corta acá, con un mensaje que
-     dice qué se rompió. */
-  if (useProba && !payload.study?.decks.length) {
+  const build = await readOrBuildSite();
+  const proba = build.mode === "proba";
+  const slug = proba ? "proba" : "demo";
+  if (!build.subjects.includes(slug)) {
     throw new Error(
-      "Siembra E2E — el payload compilado no trae material de estudio (payload.study). " +
-        "Revisá `wiki.study` del config y `examples/proba/estudio/`.",
+      `Siembra E2E — el sitio compilado no trae la materia «${slug}»: ${build.subjects.join(", ") || "(ninguna)"}`,
     );
   }
 
-  const config = payload.config;
-  const slug = String(config["slug"]);
-  const sync = await api("PUT", `/subjects/${slug}/sync`, { body: payload, token: SYNC_TOKEN });
-  if (sync.status !== 200) fail(`PUT /api/subjects/${slug}/sync`, sync.status, sync.body);
-  const synced = sync.body as SyncResultDto;
+  const dir = path.join(SITE_SUBJECTS_DIR, slug);
+  const subject = readJson<SiteSubjectLike>(path.join(dir, "subject.json"));
+  const bodies = readJson<SitePagesLike>(path.join(dir, "pages.json"));
+  const tools = readJson<SiteToolsLike>(path.join(dir, "tools.json"));
+  const config = subject.config;
 
-  // --- (c) landing del usuario dev ------------------------------------------
-  const division = config["division"] as { singular: string; abbr: string; plural: string };
-  const landingBodies: CreateSubjectBody[] = [
-    {
-      slug,
-      name: String(config["name"]),
-      code: String(config["code"]),
-      institution: String(config["institution"]),
-      semester: SUBJECT_SEMESTER,
-      color: String(config["color"] ?? "--u1"),
-      division,
-    },
-    {
-      slug: PLACEHOLDER.slug,
-      name: PLACEHOLDER.name,
-      code: "00.02",
-      institution: "Instituto Demo",
-      semester: PLACEHOLDER.semester,
-      color: "--u6",
-      division: { singular: "Unidad", abbr: "U", plural: "Unidades" },
-    },
-  ];
-
-  for (const body of landingBodies) {
-    const added = await api("POST", "/subjects", { cookie: cookieHeader, body });
-    // 409 = ya estaba en la landing (no pasa con base limpia, pero el conflicto
-    // no es un fallo de la siembra).
-    if (added.status !== 201 && added.status !== 409) {
-      fail(`POST /api/subjects (${body.slug})`, added.status, added.body);
-    }
-  }
-
-  const landing = await api("GET", "/landing", { cookie: cookieHeader });
-  if (landing.status !== 200) fail("GET /api/landing", landing.status, landing.body);
-  const cards = landing.body as LandingCardDto[];
-  for (const expected of landingBodies.map((b) => b.slug)) {
-    if (!cards.some((c) => c.slug === expected)) {
-      throw new Error(`Siembra E2E — «${expected}» no quedó en la landing: ${JSON.stringify(cards)}`);
-    }
-  }
-
-  // --- (d) bundle de herramientas -------------------------------------------
-  const bundle = await buildTools(useProba ? PROBA_BUNDLE : MINI_BUNDLE);
-  const toolId = bundle.manifest.id;
-  const pushed = await api("PUT", `/subjects/${slug}/tools/${toolId}`, {
-    body: bundle.push,
-    token: SYNC_TOKEN,
-  });
-  // 201 la primera vez, 200 si el bundle ya estaba (base reusada).
-  if (pushed.status !== 200 && pushed.status !== 201) {
-    fail(`PUT /api/subjects/${slug}/tools/${toolId}`, pushed.status, pushed.body);
-  }
-
-  const published = await api("GET", `/subjects/${slug}/tools`, { cookie: cookieHeader });
-  if (published.status !== 200) fail(`GET /api/subjects/${slug}/tools`, published.status, published.body);
-  const infos = published.body as ToolInfoDto[];
-  const info = infos.find((t) => t.manifest.id === toolId);
-  if (!info) {
-    throw new Error(`Siembra E2E — «${toolId}» no quedó publicado: ${JSON.stringify(infos)}`);
-  }
+  // --- bundle principal ------------------------------------------------------
+  /* El de las figuras: es el que montan `tools.spec.ts` y `figures.spec.ts`. Con
+     Proba hay dos bundles (proba-tools y proba-exercises) y el orden del archivo
+     no es el que interesa. */
+  const main = tools.tools.find((t) => t.manifest.figures) ?? tools.tools[0];
+  if (!main) throw new Error(`Siembra E2E — la materia «${slug}» no compiló ningún bundle de herramientas`);
+  const view = main.manifest.views[0];
   /* Sin vistas, `/m/<materia>/t/<vista>` no tendría nada que montar y
      `tools.spec.ts` probaría el estado «Próximamente» creyendo que prueba una
      herramienta. */
-  const view = bundle.manifest.views[0];
-  if (!view) throw new Error(`Siembra E2E — el bundle «${toolId}» no declara ninguna vista`);
+  if (!view) throw new Error(`Siembra E2E — el bundle «${main.manifest.id}» no declara ninguna vista`);
 
-  const tools: SeedTools = {
-    id: toolId,
-    title: bundle.manifest.title,
-    views: bundle.manifest.views.map((v) => ({ id: v.id, label: v.label })),
+  const bundleDir = path.join(dir, "tools", main.manifest.id);
+  const seedTools: SeedTools = {
+    id: main.manifest.id,
+    title: main.manifest.title,
+    views: main.manifest.views.map((v) => ({ id: v.id, label: v.label })),
     view: { id: view.id, label: view.label },
-    figures: bundle.manifest.figures,
-    files: bundle.push.files.length,
+    allViews: tools.tools.flatMap((t) => t.manifest.views.map((v) => v.id)),
+    figures: main.manifest.figures,
+    files: bundleFiles(bundleDir).length,
   };
 
-  // --- manifiesto para las specs --------------------------------------------
-  const divisions = config["divisions"] as Array<{ key: string }>;
-  const pages = payload.pages as Array<{ division?: string }>;
-  const railGroups = (config["rail"] ?? []) as Array<{
-    items?: Array<{ id: string; label: string; kind: string; target: string }>;
-  }>;
-  const railTools = railGroups
-    .flatMap((group) => group.items ?? [])
-    .filter((item) => item.kind === "tool")
-    .map((item) => ({ id: item.id, label: item.label, target: item.target }));
+  // --- material de estudio ---------------------------------------------------
+  const authored = subject.study.decks.filter((d) => d.source !== "auto");
+  const shortest = [...authored].sort((a, b) => a.cards.length - b.cards.length)[0];
+  const quiz = subject.study.quizzes[0];
+  /* Con la materia real el material tiene que llegar: si dejara de llegar, las
+     specs de estudio no fallarían, probarían estados vacíos y pasarían. */
+  if (proba && (authored.length === 0 || !quiz || !subject.study.plan)) {
+    throw new Error(
+      "Siembra E2E — la materia real compiló sin material de estudio (mazos, quiz o plan). " +
+        "Revise `wiki.study` del config y `subjects/proba/estudio/`.",
+    );
+  }
+  const study: SeedStudy = {
+    deck: shortest ? { id: shortest.id, title: shortest.title, cards: shortest.cards.length } : null,
+    quiz: quiz ? { id: quiz.id, title: quiz.title, questions: quiz.questions.length } : null,
+    autoDecks: await autoDeckCount(subject),
+    authoredDecks: authored.length,
+    hasPlan: subject.study.plan !== null,
+    kits: subject.study.kits.length,
+  };
 
-  const figurePage = figurePageOf(
-    payload.pages as PageLike[],
-    useProba ? "tecnica-derivadas-parciales" : "demo-repaso",
-    bundle,
+  // --- landing inicial -------------------------------------------------------
+  const semester = config.semester ?? "Sin cuatrimestre";
+  const placeholder = SEED_PLACEHOLDER;
+  const catalog = readJson<{ subjects: Array<{ slug: string; semester?: string }> }>(
+    path.join(SITE_SUBJECTS_DIR, "index.json"),
   );
-  const usedDivisions = new Set(pages.map((p) => p.division ?? "meta"));
-  const declaredKeys = new Set(divisions.map((d) => d.key));
-  const visible =
-    divisions.filter((d) => usedDivisions.has(d.key)).length +
-    // divisiones sintéticas que agrega el modelo del front: "meta" (Transversales)
-    // y "otras" (claves que las páginas usan pero el config no declara).
-    (usedDivisions.has("meta") ? 1 : 0) +
-    ([...usedDivisions].some((k) => k !== "meta" && !declaredKeys.has(k)) ? 1 : 0);
+  const placements: Record<string, { semester: string; position: number }> = {};
+  const perSemester = new Map<string, number>();
+  for (const entry of catalog.subjects) {
+    const label = entry.semester ?? "Sin cuatrimestre";
+    const position = perSemester.get(label) ?? 0;
+    perSemester.set(label, position + 1);
+    placements[entry.slug] = { semester: label, position };
+  }
+  placements[placeholder.slug] = { semester: placeholder.semester, position: 0 };
 
-  const manifest: SeedManifest = useProba
+  const { semester: _placeholderSemester, ...placeholderDoc } = placeholder;
+
+  // --- páginas de referencia -------------------------------------------------
+  const references = proba
     ? {
-        mode: "proba",
-        subject: {
-          slug,
-          name: "Probabilidad y Estadística",
-          code: "93.24",
-          institution: "ITBA",
-          semester: SUBJECT_SEMESTER,
-          divisionPlural: division.plural.toUpperCase(),
-          divisionsDeclared: divisions.length,
-          divisionKeys: divisions.map((d) => d.key),
-          divisionsVisible: visible,
-          pages: synced.pages,
-        },
         readerPage: { slug: "distribucion-normal", title: "Distribución Normal", division: "4" },
         catalogDivision: "4",
         filterPage: {
@@ -446,63 +245,78 @@ export default async function globalSetup(): Promise<void> {
           division: "7",
         },
         palette: { term: "normal", expected: "Distribución Normal" },
-        tools,
-        railTools,
-        figurePage,
-        placeholder: PLACEHOLDER,
-        landing: landingBodies,
+        figure: "tecnica-derivadas-parciales",
       }
     : {
-        mode: "demo",
-        subject: {
-          slug,
-          name: String(config["name"]),
-          code: String(config["code"]),
-          institution: String(config["institution"]),
-          semester: SUBJECT_SEMESTER,
-          divisionPlural: division.plural.toUpperCase(),
-          divisionsDeclared: divisions.length,
-          divisionKeys: divisions.map((d) => d.key),
-          divisionsVisible: visible,
-          pages: synced.pages,
-        },
-        readerPage: { slug: "demo-formula-clave", title: "Fórmula clave", division: "1" },
+        readerPage: { slug: "demo-conceptos-basicos", title: "Conceptos básicos", division: "1" },
         catalogDivision: "1",
-        filterPage: { slug: "demo-tecnica", title: "Técnica de resolución", term: "técnica", division: "2" },
+        filterPage: {
+          slug: "demo-tecnica",
+          title: "Técnica de resolución",
+          term: "técnica",
+          division: "2",
+        },
         palette: { term: "formula", expected: "Fórmula clave" },
-        tools,
-        railTools,
-        figurePage,
-        placeholder: PLACEHOLDER,
-        landing: landingBodies,
+        figure: "demo-repaso",
       };
+
+  const contentTypes = new Set(
+    config.pageTypes.filter((t) => t.countsAsContent !== false).map((t) => t.key),
+  );
+
+  const manifest: SeedManifest = {
+    mode: build.mode,
+    subject: {
+      slug: config.slug,
+      name: config.name,
+      code: config.code,
+      institution: config.institution,
+      semester,
+      divisionPlural: config.division.plural.toUpperCase(),
+      divisionsDeclared: config.divisions.length,
+      divisionKeys: config.divisions.map((d) => d.key),
+      divisionsVisible: visibleDivisions(subject),
+      pages: subject.pages.length,
+      contentPages: subject.pages.filter((p) => contentTypes.has(p.type)).length,
+    },
+    readerPage: references.readerPage,
+    catalogDivision: references.catalogDivision,
+    filterPage: references.filterPage,
+    palette: references.palette,
+    tools: seedTools,
+    railTools: config.rail
+      .flatMap((group) => group.items ?? [])
+      .filter((item) => item.kind === "tool")
+      .map((item) => ({ id: item.id, label: item.label, target: item.target })),
+    railSlots: config.rail.map((group) => group.label),
+    figurePage: figurePageOf(subject, bodies, references.figure, bundleDir, main.manifest.id),
+    placeholder,
+    landing: {
+      placements,
+      semesters: [...new Set([...perSemester.keys(), placeholder.semester])],
+      hidden: [],
+      placeholders: [placeholderDoc],
+    },
+    study,
+  };
 
   writeFileSync(SEED_FILE, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 
-  const label = useProba ? `vault real (${PROBA_VAULT})` : "fixture mini-payload.json";
   console.log(
-    `[e2e] siembra: ${label} → ${slug} con ${synced.pages} páginas ` +
-      `(creadas ${synced.created}, borradas ${synced.deleted}); landing: ${cards.length} materias.`,
+    `[e2e] siembra: modo ${manifest.mode} → ${manifest.subject.slug} con ${manifest.subject.pages} páginas ` +
+      `(${manifest.subject.contentPages} de contenido) y ${manifest.subject.divisionsVisible} divisiones visibles.`,
   );
-  const study = payload.study;
-  if (study) {
-    /* Los mazos son los AUTORALES del wiki: los automáticos por división los
-       agrega el API al leer, no viajan en el sync (N0-27). */
-    const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
-    console.log(
-      `[e2e] material de estudio: ${n(study.decks.length, "mazo autoral", "mazos autorales")}, ` +
-        `${n(study.quizzes.length, "quiz", "quizzes")}, ${study.plan ? "plan" : "sin plan"}, ` +
-        `${n(study.kits.length, "kit", "kits")}.`,
-    );
-  }
   console.log(
-    `[e2e] herramientas: ${toolId} ${bundle.push.files.length} archivos ` +
-      `(${Math.round(bundle.bytes / 1024)} KB) · vistas: ${tools.views.map((v) => v.id).join(", ")} · ` +
-      `figuras: ${tools.figures ? "sí" : "no"}; página con figura: ${figurePage.slug} (${figurePage.fig}).`,
+    `[e2e] material de estudio: ${study.authoredDecks} mazo(s) autoral(es) + ${study.autoDecks} automático(s), ` +
+      `${study.quiz ? `quiz «${study.quiz.id}» de ${study.quiz.questions} preguntas` : "sin quiz"}, ` +
+      `${study.hasPlan ? "plan" : "sin plan"}, ${study.kits} kit(s).`,
   );
-  if (bundle.ignored.length) {
-    console.log(`[e2e] scripts del bundle sin declarar (no se suben): ${bundle.ignored.length}`);
+  console.log(
+    `[e2e] herramientas: ${tools.tools.length} bundle(s); principal ${seedTools.id} con ${seedTools.files} archivos · ` +
+      `vistas: ${seedTools.views.map((v) => v.id).join(", ")} · ` +
+      `página con figura: ${manifest.figurePage.slug} (${manifest.figurePage.fig}).`,
+  );
+  if (subject.warnings.length) {
+    console.log(`[e2e] avisos del compilador: ${subject.warnings.length}`);
   }
-  if (warnings.length) console.log(`[e2e] avisos del compilador: ${warnings.length}`);
-  if (synced.warnings.length) console.log(`[e2e] avisos del sync: ${synced.warnings.length}`);
 }

@@ -45,11 +45,11 @@ test("el rail separa los grupos fijos de la plataforma de los slots de la materi
   expect(fijosLabels).toContain("Mi ruta");
   expect(fijosLabels).toContain("Consultar");
 
-  /* SLOT: los que declara `rail[]` del config de la materia. Proba ya no trae
-     el grupo «Material» (el usuario sacó el enlace al campus), así que queda
-     solo «Resolver»: la lista sale del config sembrado, no de la plataforma. */
+  /* SLOT: los que declara `rail[]` del config de la materia. La lista sale del
+     config compilado (`seed.railSlots`), no de la plataforma: Proba trae solo
+     «Resolver» y el fixture trae además «Material». */
   const slotLabels = await slots.evaluateAll((nodes) => nodes.map((n) => n.getAttribute("aria-label") ?? ""));
-  expect(slotLabels).toEqual(["Resolver"]);
+  expect(slotLabels).toEqual(seed.railSlots);
 });
 
 test("el hero del índice muestra el nombre, el código y la institución", async ({ page }) => {

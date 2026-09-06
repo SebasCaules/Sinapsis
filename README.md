@@ -5,6 +5,17 @@ Cada materia aporta su wiki (estilo Obsidian) y un `sinapsis.config.json`; la pl
 los envuelve en un shell estándar de tres columnas —rail de herramientas, índice del
 temario y área de lectura— con estética *university press* y tres temas.
 
+Desde el Sprint 4 Sinapsis es un **sitio estático**: no hay servidor, ni base de datos, ni
+inicio de sesión. Las materias viven como fuente dentro de este repositorio, en
+`subjects/<slug>/`, y se compilan a archivos JSON durante el build. El sitio se publica en
+GitHub Pages:
+
+**<https://sebascaules.github.io/Sinapsis/>**
+
+Todo lo personal —progreso, favoritos, apuntes, repaso espaciado, plan, intentos de quiz y la
+disposición de la landing— vive en el navegador de cada persona y se puede exportar como
+copia de seguridad (N0-56).
+
 - **Contrato** plataforma ↔ materia: [`docs/CONTRACT.md`](docs/CONTRACT.md) (fuente ejecutable: `packages/contract`).
 - **Decisiones de arquitectura**: [`docs/DECISIONS.md`](docs/DECISIONS.md).
 - **Plan por sprints**: [`docs/SPRINTS.md`](docs/SPRINTS.md). Estado de ejecución: [`EXEC_STATE.md`](EXEC_STATE.md).
@@ -13,111 +24,149 @@ temario y área de lectura— con estética *university press* y tres temas.
 ## Estructura
 
 ```
-apps/web         SPA React + Vite (landing y shell de materia)
-apps/api         API Hono + Drizzle + SQLite (libsql), auth Google, sync
-packages/contract  esquemas zod y helpers compartidos (SubjectConfig, Page, DTOs)
-packages/markdown  compilador del wiki: frontmatter, wikilinks, headings → Page[]
-packages/cli       `sinapsis init | validate | sync | status | tools build|push|list | propose`
-skills/sinapsis    skill /sinapsis para el agente de cada materia
-examples/proba     configuración de la primera materia real (Probabilidad y Estadística)
-e2e/               pruebas Playwright de punta a punta
+subjects/<slug>/       FUENTE de cada materia (la copia `sinapsis publish` desde su vault)
+  sinapsis.config.json   configuración de la materia
+  wiki/**/*.md           el wiki markdown
+  estudio/               mazos, quizzes, plan.json, kits.json
+  tools/<bundle>/        sinapsis.tools.json + scripts, estilos y datos declarados
+
+apps/web/              SPA React + Vite (landing y shell de materia). Sin API ni sesión.
+apps/web/public/subjects/  GENERADO por `pnpm build:subjects` (no se versiona)
+packages/contract      esquemas zod y helpers compartidos (SubjectConfig, Page, site.ts)
+packages/markdown      compilador del wiki: frontmatter, wikilinks, headings → Page[]
+packages/runtime       runtime del navegador para los bundles de herramientas y figuras
+packages/cli           `sinapsis init | validate | publish | site build | status | tools | propose`
+skills/sinapsis        skill /sinapsis para el agente de cada materia
+skills/sinapsis-review skill /sinapsis-review para el orquestador
+e2e/                   pruebas Playwright de punta a punta
+.github/workflows/     ci.yml (gates de cada PR) y pages.yml (build y deploy)
 ```
 
 ## Requisitos
 
-Node ≥ 20 (probado con 23), pnpm 10. Sin servicios externos: la base es un archivo SQLite.
+Node ≥ 20 (probado con 22 y 23), pnpm 10. Sin servicios externos y sin archivos de entorno:
+todo lo que el sitio necesita sale del repositorio.
 
 ## Puesta en marcha
 
 ```bash
 pnpm install
-cp apps/api/.env.example apps/api/.env      # editar SESSION_SECRET y SYNC_TOKEN
-pnpm db:migrate
-pnpm dev                                    # API en :3000 y web en :5173
+pnpm dev            # compila subjects/ y levanta la web en :5173
 ```
 
-Abrir <http://localhost:5173>. En desarrollo, con `AUTH_DEV_BYPASS=1`, el botón
-"Entrar como usuario de desarrollo" inicia sesión sin Google.
+Abrir <http://localhost:5173>. No hay pantalla de inicio de sesión: el perfil es local (un
+nombre y un tema que se pueden cambiar desde el menú del avatar).
 
-### Login con Google
+`pnpm dev` corre `pnpm build:subjects` antes de Vite. Si se agrega o se cambia una materia en
+`subjects/` con el servidor levantado, hay que volver a correr `pnpm build:subjects` para que
+la web vea los datos nuevos.
 
-1. En [Google Cloud Console](https://console.cloud.google.com/apis/credentials) crear un
-   **OAuth 2.0 Client ID** de tipo *Web application*.
-2. Orígenes JavaScript autorizados: `http://localhost:5173` y `http://localhost:3000`
-   (agregar el dominio real al desplegar). No hace falta URI de redirección: se usa el
-   ID token de Google Identity Services.
-3. Copiar el Client ID a `GOOGLE_CLIENT_ID` en `apps/api/.env` y reiniciar el API.
-4. Para producción, poner `AUTH_DEV_BYPASS=0`.
+## Publicar una materia
 
-### Sincronizar una materia
+Cada materia es un repositorio aparte (el vault de Obsidian con su wiki). Su agente trabaja
+allí con la skill `/sinapsis` y la publica con `sinapsis publish`, que copia la materia a
+`subjects/<slug>/` de este repositorio, en su propia rama, y abre un pull request:
 
 ```bash
+SINAPSIS_HOME="${SINAPSIS_HOME:-$HOME/Desktop/Projects/Sinapsis}"
+
 # 1) generar la configuración a partir del wiki (una sola vez)
-pnpm sinapsis -- init --wiki ~/ruta/a/Materia_Obsidian/wiki --out ~/ruta/a/Materia_Obsidian/sinapsis.config.json
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- init --wiki wiki
 
 # 2) completar nombre, código, institución, divisiones y rail; validar
-pnpm sinapsis -- validate --config ~/ruta/a/Materia_Obsidian/sinapsis.config.json
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- validate --config sinapsis.config.json
 
-# 3) compilar y enviar al API (token = SYNC_TOKEN del .env del API)
-SINAPSIS_TOKEN=... pnpm sinapsis -- sync --config ~/ruta/a/Materia_Obsidian/sinapsis.config.json
+# 3) compilar y revisar sin escribir nada
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json --dry-run
+
+# 4) publicar: rama subject/<slug>-<AAAAMMDD>, commit y pull request
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json
 ```
 
-El ejemplo de Probabilidad y Estadística vive en `examples/proba/`; su wiki está en el vault
-del usuario, por eso el CLI acepta `--wiki` para apuntar a la carpeta real:
+`publish` trabaja en un worktree temporal creado desde `origin/main`: nunca toca el árbol de
+trabajo ni la rama del usuario. Copia el `sinapsis.config.json` (reescrito con `wiki.root:
+"wiki"` y `wiki.study: "estudio"`), el wiki, la carpeta de estudio y los archivos de cada
+bundle de `tools/`, y **reemplaza por completo** `subjects/<slug>/`: lo que ya no existe en el
+vault desaparece del repositorio. Los commits que genera no llevan trailers de coautoría.
 
-```bash
-SINAPSIS_TOKEN=... pnpm sinapsis -- sync --config examples/proba/sinapsis.config.json --wiki ~/Desktop/ITBA/26-1C/Proba_Obsidian/wiki
-```
+El material de estudio (mazos, quizzes, plan y kits) vive en la carpeta `estudio/` junto al
+wiki; el formato está en [`docs/contracts/03-estudio.md`](docs/contracts/03-estudio.md) y
+`sinapsis init` deja un ejemplo. Sin mazos propios, la plataforma genera uno por división a
+partir de los resúmenes.
 
-El material de estudio (mazos, quizzes, plan y kits) vive en la carpeta `estudio/` junto al wiki;
-el formato está en `docs/contracts/03-estudio.md` y `pnpm sinapsis -- init` deja un ejemplo. Sin mazos
-propios, la plataforma genera uno por división a partir de los resúmenes.
+Una materia también puede traer sus propias vistas (exploradores, calculadoras) y figuras
+interactivas como bundles de scripts clásicos en `tools/`, descritos por `sinapsis.tools.json`
+(contrato en [`docs/contracts/04-herramientas-y-figuras.md`](docs/contracts/04-herramientas-y-figuras.md)).
+Se validan con `sinapsis tools build` y viajan con el `publish`.
 
-### Herramientas y figuras de una materia
+## Cómo se revisa y se integra
 
-Una materia puede traer sus propias vistas (explorador, calculadoras…) y figuras interactivas como
-un bundle de scripts clásicos en `tools/` junto al wiki, descrito por `sinapsis.tools.json`
-(contrato en `docs/contracts/04-herramientas-y-figuras.md`; ejemplo real en
-`examples/proba/tools/proba-tools/`). Se construye, valida y sube con:
+Un pull request de materia toca **solo** `subjects/<slug>/`. El orquestador lo adjudica desde
+una sesión abierta en este repositorio con la skill `/sinapsis-review`:
 
-```bash
-pnpm sinapsis -- tools build --config examples/proba/sinapsis.config.json --dir examples/proba/tools/proba-tools
-SINAPSIS_TOKEN=... pnpm sinapsis -- tools push --config examples/proba/sinapsis.config.json --dir examples/proba/tools/proba-tools
-SINAPSIS_TOKEN=... pnpm sinapsis -- sync --config … --tools        # wiki + estudio + bundles en un paso
-```
+1. Comprueba que el CI del PR esté verde (typecheck, tests, `build:subjects` y build de la
+   web) y que el diff no salga de `subjects/<slug>/`.
+2. Revisa el contenido por muestreo: el config, un par de páginas, el material de estudio y
+   los manifiestos de los bundles.
+3. Aprueba con `gh pr merge --merge` (sin *squash*, para conservar el historial de la
+   materia) o pide cambios con los motivos escritos.
 
-Las vistas aparecen en el rail de la materia (`kind: "tool"` en el config) y en `/m/<materia>/t/<vista>`;
-un `> [!figura] id` en una página del wiki monta la figura dentro del lector.
+El mismo comando adjudica las **propuestas de cambio a la plataforma** (ramas `proposal/*`),
+que es el camino para todo lo que una materia no puede resolver dentro de su repositorio:
+`sinapsis propose` corre los gates, crea la rama, escribe la propuesta en `proposals/` y abre
+el PR. Flujo completo en [`docs/contracts/07-propuestas.md`](docs/contracts/07-propuestas.md).
 
-### Proponer un cambio a la plataforma
+Ninguna rama llega a `main` sin veredicto, y ningún commit del flujo lleva coautoría.
 
-Cuando una materia necesita algo común (un campo del contrato, un componente, una regla del
-compilador), su agente lo propone con `pnpm sinapsis -- propose --subject <slug> --title … --files …`:
-el CLI corre los gates, crea la rama `proposal/*`, escribe la propuesta en `proposals/` y anota la
-fila en `proposals/INBOX.md`; el orquestador la revisa con la skill `/sinapsis-review` y decide.
-Flujo completo en `docs/contracts/07-propuestas.md`.
+## Despliegue
 
-Dentro de cada repo de materia, el agente usa la skill `/sinapsis` (`init`, `validate`, `sync`,
-`status`, `tools`, `propose`), que envuelve estos comandos. Para tenerla disponible en todos los
-proyectos: `ln -s "$PWD/skills/sinapsis" ~/.claude/skills/sinapsis`; la del orquestador es
-`skills/sinapsis-review`.
+Cada push a `main` dispara `.github/workflows/pages.yml`: instala, corre `pnpm build:subjects`,
+construye la web con `VITE_BASE=/Sinapsis/` y publica `apps/web/dist` en GitHub Pages. No hay
+paso manual: mergear el PR de una materia la deja publicada.
+
+> **Configuración del repositorio, una sola vez.** En *Settings → Pages*, la fuente
+> («Source») tiene que ser **GitHub Actions**, no una rama. Con la opción de rama el workflow
+> corre pero el sitio no se actualiza.
+
+Detalles que hacen que el sitio funcione bajo `/Sinapsis/`: el router usa `basename` =
+`import.meta.env.BASE_URL`, el build copia `dist/index.html` a `dist/404.html` (GitHub Pages
+no tiene fallback de SPA) y `public/.nojekyll` evita que Jekyll se coma las carpetas con
+guion bajo (N0-59).
+
+## Dónde vive el progreso y cómo hacer una copia de seguridad
+
+El estado personal se guarda en el navegador, en IndexedDB, con un espejo en `localStorage`
+por si una de las dos se pierde; al arrancar gana la copia más reciente. En la primera
+modificación el sitio pide `navigator.storage.persist()`, y el sitio se puede instalar como
+aplicación, lo que en Chrome habilita el almacenamiento persistente automáticamente.
+
+Aun así, **el estado vive en un solo navegador**: no se sincroniza entre dispositivos y un
+borrado de datos del sitio lo elimina. Desde el menú del avatar:
+
+- **Descargar copia de seguridad** — escribe `sinapsis-backup-AAAA-MM-DD.json` con todo el
+  estado (perfil, landing, progreso, favoritos, apuntes, repaso, plan e intentos).
+- **Restaurar copia** — pide el archivo, lo valida, confirma y reemplaza el estado.
+- **Borrar todo lo local** — con confirmación.
+
+El formato del archivo es `LocalBackup`, descrito en
+[`docs/contracts/05-publicacion-y-sitio.md`](docs/contracts/05-publicacion-y-sitio.md).
+Conviene descargar una copia antes de limpiar el navegador o de cambiar de máquina.
 
 ## Scripts
 
 | Comando | Qué hace |
 |---|---|
-| `pnpm dev` | API + web en paralelo |
-| `pnpm build` | compila todos los paquetes (`apps/web/dist` lo sirve el API en producción) |
-| `pnpm typecheck` · `pnpm test` | gates de tipos y unitarios/integración en todo el repo |
-| `pnpm e2e` | Playwright contra API + web reales |
-| `pnpm db:migrate` | aplica las migraciones SQL |
+| `pnpm dev` | Compila `subjects/` y levanta la web en :5173 |
+| `pnpm build:subjects` | `sinapsis site build`: compila `subjects/**` a `apps/web/public/subjects/` |
+| `pnpm build` | `build:subjects` + build de todos los paquetes (`apps/web/dist` es el sitio) |
+| `pnpm typecheck` · `pnpm test` | Gates de tipos y de pruebas en todo el repositorio |
+| `pnpm e2e` | Playwright contra el sitio estático |
 | `pnpm sinapsis -- <cmd>` | CLI de materias |
 
-## Producción (adelanto del Sprint 4)
+## Las skills
 
-`pnpm build` y luego `pnpm --filter @sinapsis/api start` (fija `NODE_ENV=production`) con
-`WEB_DIST=../web/dist`, `AUTH_DEV_BYPASS=0` y un `GOOGLE_CLIENT_ID` real: el API sirve la SPA y
-`DATABASE_URL` puede apuntar a un archivo o a Turso (`libsql://…`). Con `NODE_ENV=production` el
-API se niega a arrancar si el bypass de desarrollo sigue activo, y la cookie de sesión lleva `Secure`
-(fuera de producción se puede forzar con `COOKIE_SECURE=1`). Si la SPA se sirve desde otro origen,
-declararlo en `ALLOWED_ORIGINS`.
+- `skills/sinapsis` — la del agente de cada materia (`init`, `validate`, `publish`,
+  `status`, `tools`, `propose`). Para tenerla disponible en todos los proyectos:
+  `ln -s "$PWD/skills/sinapsis" ~/.claude/skills/sinapsis`.
+- `skills/sinapsis-review` — la del orquestador, dentro de este repositorio: adjudica los PR
+  de materia (`subject/*`) y las propuestas (`proposal/*`).

@@ -27,7 +27,8 @@ Archivos tocados y qué cambia en cada uno. Contratos afectados.
 
 ## Compatibilidad
 
-Qué pasa con las demás materias y con los datos ya sincronizados.
+Qué pasa con las demás materias ya publicadas en `subjects/` y con el estado personal que
+la gente ya tiene guardado en su navegador.
 
 ## Gates
 

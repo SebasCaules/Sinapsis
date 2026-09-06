@@ -3,9 +3,9 @@
  * de una vía —«cursada y final» o «final directo»— con sus propias fases, y
  * arriba de la pantalla hay un conmutador para elegir.
  *
- * Las modalidades salen del material sincronizado (`estudio/plan.json`), así que
- * las pruebas preguntan al API qué trajo el plan antes de decidir qué esperar:
- * con modalidades se prueba el conmutador; sin ellas, que no aparezca.
+ * Las modalidades salen del material compilado (`estudio/plan.json`), así que
+ * las pruebas leen el plan del sitio antes de decidir qué esperar: con
+ * modalidades se prueba el conmutador; sin ellas, que no aparezca.
  *
  * La elección es del cliente y por materia (`sinapsis.<slug>.planTrack`): el
  * servidor no la guarda, de modo que la persistencia se comprueba recargando.
@@ -37,8 +37,8 @@ async function storedTrack(page: Page): Promise<string | null> {
   return page.evaluate((slug) => localStorage.getItem(`sinapsis.${slug}.planTrack`), subject.slug);
 }
 
-test("el conmutador ofrece las modalidades que trae el plan", async ({ page, request }) => {
-  const tracks = (await studyContent(request, subject.slug)).plan?.tracks ?? [];
+test("el conmutador ofrece las modalidades que trae el plan", async ({ page }) => {
+  const tracks = (await studyContent(subject.slug)).plan?.tracks ?? [];
   test.skip(tracks.length === 0, "el plan de esta materia no declara modalidades");
 
   await openPlan(page);
@@ -64,9 +64,8 @@ test("el conmutador ofrece las modalidades que trae el plan", async ({ page, req
 
 test("cambiar de modalidad cambia las fases y la elección sobrevive a la recarga", async ({
   page,
-  request,
 }) => {
-  const tracks = (await studyContent(request, subject.slug)).plan?.tracks ?? [];
+  const tracks = (await studyContent(subject.slug)).plan?.tracks ?? [];
   test.skip(tracks.length < 2, "hacen falta dos modalidades para poder cambiar");
   const primera = tracks[0] as PlanTrackDto;
   const otra = tracks[1] as PlanTrackDto;
@@ -100,8 +99,8 @@ test("cambiar de modalidad cambia las fases y la elección sobrevive a la recarg
  * radio recién desmarcado: quien navega con lector de pantalla oía que se
  * desmarcó, nunca cuál quedó activa.
  */
-test("la flecha cambia la modalidad y se lleva el foco", async ({ page, request }) => {
-  const tracks = (await studyContent(request, subject.slug)).plan?.tracks ?? [];
+test("la flecha cambia la modalidad y se lleva el foco", async ({ page }) => {
+  const tracks = (await studyContent(subject.slug)).plan?.tracks ?? [];
   test.skip(tracks.length < 2, "hacen falta dos modalidades para poder moverse con las flechas");
   const primera = tracks[0] as PlanTrackDto;
   const otra = tracks[1] as PlanTrackDto;
@@ -126,8 +125,8 @@ test("la flecha cambia la modalidad y se lleva el foco", async ({ page, request 
   await expect(radioPrimera).toBeFocused();
 });
 
-test("un plan sin modalidades no dibuja el conmutador", async ({ page, request }) => {
-  const plan = (await studyContent(request, subject.slug)).plan;
+test("un plan sin modalidades no dibuja el conmutador", async ({ page }) => {
+  const plan = (await studyContent(subject.slug)).plan;
   test.skip((plan?.tracks ?? []).length > 0, "el plan de esta materia sí declara modalidades");
 
   await openPlan(page);

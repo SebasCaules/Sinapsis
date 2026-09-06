@@ -1,5 +1,7 @@
 # Handoff — Sprint 1 (MVP) de Sinapsis
 
+> Histórico: describe la arquitectura anterior al Sprint 4 (sitio estático); ver HANDOFF-sprint4.md.
+
 Fecha: 2026-09-05 / 06. Ejecución autónoma (autopilot) del orquestador sobre el mockup
 exportado de Claude Design. Este documento resume qué quedó construido, qué se verificó,
 qué decisiones se tomaron sin consultar (para revisarlas en bloque) y cómo seguir.

@@ -145,6 +145,9 @@
 .progressNum { display: inline-flex; align-items: baseline; gap: 10px; }
 .progressPct { font: 600 24px var(--font-mono); color: var(--text); }
 .progressCount { font: 500 13px var(--font-mono); color: var(--text-3); }
+/* Desglose de los pasos de los bundles («· 8 / 34 ejercicios»): mismo renglón
+   que las páginas, sin partirse en dos líneas al angostar. */
+.progressExtra { white-space: nowrap; }
 
 /* La pista VACÍA es `--border-2`, no `--track`.
    `--track` es la tinta de «trazo que se tiene que ver» (3,2:1 sobre la hoja) y

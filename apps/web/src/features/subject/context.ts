@@ -1,6 +1,6 @@
 /**
  * Contexto que el shell le pasa a sus vistas por el Outlet: la materia ya
- * cargada y derivada. Ninguna vista vuelve a pedir `GET /api/subjects/:slug`.
+ * cargada y derivada. Ninguna vista vuelve a pedir `api.subject.detail(slug)`.
  */
 import { useOutletContext } from "react-router-dom";
 import type { SubjectModel } from "./model";

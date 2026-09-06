@@ -31,6 +31,7 @@ import {
   type DivisionKey,
   type PageMeta,
   type PageTypeDef,
+  type ProgressStep,
   type RailGroup,
   type RailItem,
   type SubjectConfig,
@@ -69,6 +70,72 @@ export interface Progress {
   total: number;
   /** 0..1; 0 cuando no hay páginas de contenido. */
   ratio: number;
+}
+
+/**
+ * Un paso de progreso que aporta un bundle de la materia (N0-61): el
+ * `ProgressStep` del contrato con el rótulo del proveedor que lo trajo, que es
+ * lo que el desglose lee («8 / 34 ejercicios resueltos»).
+ */
+export type ExtraStep = ProgressStep & {
+  /** Rótulo del proveedor, en plural y minúsculas («ejercicios»). */
+  source?: string;
+};
+
+/** Un grupo de pasos extra dentro de una división («Guía», «Parciales»). */
+export interface ProgressGroup {
+  id: string;
+  label: string;
+  done: number;
+  total: number;
+  /** Destino del grupo en el SPA, si el bundle lo declaró. */
+  to?: string;
+  /** Rótulo del proveedor que aportó el grupo («ejercicios»). */
+  source?: string;
+}
+
+/**
+ * Un paso de la secuencia EXTENDIDA de una división: las páginas de contenido
+ * en orden y, al final, un paso por grupo de ejercicios. Es lo que recorre el
+ * lector («página 3 de 14», y después «Guía», «Lutzio»…) y lo que lista el
+ * índice debajo de los bloques por tipo.
+ */
+export type UnitStep =
+  | { kind: "page"; page: PageMeta }
+  | {
+      kind: "extra";
+      /** Id del grupo dentro de la división. */
+      id: string;
+      label: string;
+      /** Cuántos del grupo están hechos y cuántos hay. */
+      done: number;
+      total: number;
+      to?: string;
+      source?: string;
+    };
+
+/**
+ * El progreso desglosado: qué parte son páginas leídas y qué parte pasos de los
+ * bundles. `progress()` suma las dos; esto es lo que necesita quien tiene que
+ * nombrarlas por separado (el texto del hero, la cabecera del inicio) o
+ * dibujarlas por grupo (las tarjetas de «Ejercicios»).
+ */
+export interface ProgressParts {
+  pages: Progress;
+  extras: Progress;
+  /** Un renglón por proveedor, en el orden en que aportaron pasos. */
+  sources: Array<{ label: string; done: number; total: number }>;
+  groups: ProgressGroup[];
+}
+
+/** Opciones de construcción del modelo: hoy, los pasos que aportan los bundles. */
+export interface SubjectModelOpts {
+  /**
+   * Pasos extra de una división. Se consulta CADA VEZ que se construye el
+   * modelo: quien la provee (el shell, con los proveedores del runtime) decide
+   * cuándo hay que rehacerlo.
+   */
+  extraSteps?: (division: string) => ExtraStep[];
 }
 
 export interface RailItemView {
@@ -135,8 +202,18 @@ export interface SubjectModel {
   positions: (key: string) => ReadonlyMap<string, number>;
   /** Bloques por tipo (en el orden de `pageTypes`) dentro de una división. */
   typeBlocks: (key: string) => TypeBlock[];
+  /**
+   * Progreso de la división: páginas de contenido leídas MÁS los pasos que
+   * aportan los bundles con `progress: true` (N0-61). Quien necesite solo las
+   * páginas —el tooltip del índice, el texto del hero— usa `progressParts`.
+   */
   progress: (key: string) => Progress;
+  /** Lo mismo, sumado sobre todas las divisiones. */
   progressTotal: Progress;
+  /** El progreso de la división desglosado en páginas, pasos y grupos. */
+  progressParts: (key: string) => ProgressParts;
+  /** El desglose global (la suma de todas las divisiones). */
+  progressPartsTotal: ProgressParts;
   /** Secuencia global: divisiones en orden, páginas de contenido en orden. */
   allSequence: PageMeta[];
   /** Total de páginas que no cuentan como contenido (fuentes). */
@@ -145,6 +222,20 @@ export interface SubjectModel {
   positionOf: (pageSlug: string) => number;
   nextUnread: () => PageMeta | null;
   prevNext: (pageSlug: string) => { prev: PageMeta | null; next: PageMeta | null };
+  /**
+   * La secuencia de la división EXTENDIDA con los grupos de ejercicios: las
+   * páginas de contenido en orden y, después, un paso por grupo (en el orden de
+   * `progressParts(key).groups`). Sin bundles de progreso es `sequence(key)`
+   * envuelto, ni un paso más.
+   */
+  unitSteps: (key: string) => UnitStep[];
+  /**
+   * `prevNext` sobre la secuencia extendida: la última página de la división
+   * tiene como siguiente el primer grupo de ejercicios, y recién después del
+   * último grupo se acaba la división (el salto a la siguiente lo decide quien
+   * llame, con `adjacentDivision`).
+   */
+  prevNextSteps: (pageSlug: string) => { prev: UnitStep | null; next: UnitStep | null };
   /** Las tres para repasar: estudiadas hace más tiempo, o las tres primeras sin leer. */
   reviewPages: () => PageMeta[];
   typeLabel: (key: string) => string;
@@ -196,7 +287,7 @@ function labelOf(short: string, name: string): string {
 }
 
 /** Construye el modelo. `dark` solo afecta a la escala paramétrica (N > 9 divisiones). */
-export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectModel {
+export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: SubjectModelOpts = {}): SubjectModel {
   // Los helpers del contrato (numeración, color) indexan por posición en
   // `divisions`: se les pasa la lista ya ordenada por `order` para que
   // rótulo, color y orden del índice coincidan.
@@ -356,10 +447,98 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     return { done, total, ratio: total ? done / total : 0 };
   };
 
-  const progress = (key: string): Progress => progressOf(contentPages(key));
+  /* --- pasos extra de los bundles (N0-61) -----------------------------------
+     Cada paso vale UNO, igual que una página leída: la barra de la unidad mide
+     «cuánto de esta unidad hice», y un ejercicio resuelto es tanto trabajo como
+     una página leída. El modelo no sabe de dónde salen: se los pide a quien lo
+     construyó, que es el shell con los proveedores del runtime. */
+  const extraOf = typeof opts.extraSteps === "function" ? opts.extraSteps : null;
+  const stepsCache = new Map<string, ExtraStep[]>();
+  const extraSteps = (key: string): ExtraStep[] => {
+    if (!extraOf) return [];
+    const hit = stepsCache.get(key);
+    if (hit) return hit;
+    let list: ExtraStep[] = [];
+    try {
+      list = extraOf(key) || [];
+    } catch {
+      /* Un bundle que se rompe al contar sus pasos no puede tumbar la materia:
+         la división queda con el progreso de sus páginas. */
+      list = [];
+    }
+    stepsCache.set(key, list);
+    return list;
+  };
+
+  const partsOf = (pages: Progress, steps: ExtraStep[]): ProgressParts => {
+    const done = steps.reduce((n, s) => (s.done ? n + 1 : n), 0);
+    const extras: Progress = { done, total: steps.length, ratio: steps.length ? done / steps.length : 0 };
+    /* El orden de las dos listas es el de aparición de los pasos: así el
+       desglose y las tarjetas siguen el orden que declaró el bundle. */
+    const sources: ProgressParts["sources"] = [];
+    const byLabel = new Map<string, { label: string; done: number; total: number }>();
+    const groups: ProgressGroup[] = [];
+    const byGroup = new Map<string, ProgressGroup>();
+    for (const step of steps) {
+      const label = step.source || "";
+      if (label) {
+        let row = byLabel.get(label);
+        if (!row) {
+          row = { label, done: 0, total: 0 };
+          byLabel.set(label, row);
+          sources.push(row);
+        }
+        row.total += 1;
+        if (step.done) row.done += 1;
+      }
+      const id = step.group || label || "extras";
+      let group = byGroup.get(id);
+      if (!group) {
+        group = {
+          id,
+          label: id,
+          done: 0,
+          total: 0,
+          ...(step.to ? { to: step.to } : {}),
+          ...(label ? { source: label } : {}),
+        };
+        byGroup.set(id, group);
+        groups.push(group);
+      }
+      group.total += 1;
+      if (step.done) group.done += 1;
+    }
+    return { pages, extras, sources, groups };
+  };
+
+  const partsCache = new Map<string, ProgressParts>();
+  const progressParts = (key: string): ProgressParts => {
+    const hit = partsCache.get(key);
+    if (hit) return hit;
+    const out = partsOf(progressOf(contentPages(key)), extraSteps(key));
+    partsCache.set(key, out);
+    return out;
+  };
+
+  /** Páginas + pasos, que es lo que mide la barra. */
+  const combine = (parts: ProgressParts): Progress => {
+    const done = parts.pages.done + parts.extras.done;
+    const total = parts.pages.total + parts.extras.total;
+    return { done, total, ratio: total ? done / total : 0 };
+  };
+
+  const progress = (key: string): Progress => combine(progressParts(key));
 
   const allSequence = nodes.flatMap((n) => sequence(n.key));
-  const progressTotal = progressOf(allSequence);
+  /* El total NO se recalcula sobre todos los pasos: se suman los desgloses de
+     cada división, que ya están memorizados y que son los mismos que muestran
+     las filas del inicio. */
+  const progressPartsTotal = ((): ProgressParts => {
+    const pages = progressOf(allSequence);
+    const steps = nodes.flatMap((n) => extraSteps(n.key));
+    return partsOf(pages, steps);
+  })();
+  const progressTotal = combine(progressPartsTotal);
   const sourcesCount = pages.length - allSequence.length;
 
   const positionOf = (pageSlug: string): number => {
@@ -378,6 +557,39 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     if (at === undefined) return { prev: null, next: null };
     const seq = sequence(key);
     return { prev: seq[at - 2] ?? null, next: seq[at] ?? null };
+  };
+
+  /* La secuencia extendida: las páginas primero (en el MISMO orden y con las
+     MISMAS posiciones que `sequence`, para que `positions` siga sirviendo de
+     índice) y los grupos de ejercicios al final. */
+  const stepsCacheByKey = new Map<string, UnitStep[]>();
+  const unitSteps = (key: string): UnitStep[] => {
+    const hit = stepsCacheByKey.get(key);
+    if (hit) return hit;
+    const out: UnitStep[] = sequence(key).map((page) => ({ kind: "page", page }));
+    for (const group of progressParts(key).groups) {
+      out.push({
+        kind: "extra",
+        id: group.id,
+        label: group.label,
+        done: group.done,
+        total: group.total,
+        ...(group.to ? { to: group.to } : {}),
+        ...(group.source ? { source: group.source } : {}),
+      });
+    }
+    stepsCacheByKey.set(key, out);
+    return out;
+  };
+
+  const prevNextSteps = (pageSlug: string): { prev: UnitStep | null; next: UnitStep | null } => {
+    const page = bySlug.get(pageSlug);
+    if (!page) return { prev: null, next: null };
+    const key = divisionOf(page);
+    const at = positions(key).get(pageSlug);
+    if (at === undefined) return { prev: null, next: null };
+    const steps = unitSteps(key);
+    return { prev: steps[at - 2] ?? null, next: steps[at] ?? null };
   };
 
   /* La cadena de divisiones recorribles: las DECLARADAS con secuencia. Las
@@ -508,11 +720,15 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     typeBlocks,
     progress,
     progressTotal,
+    progressParts,
+    progressPartsTotal,
     allSequence,
     sourcesCount,
     positionOf,
     nextUnread,
     prevNext,
+    unitSteps,
+    prevNextSteps,
     reviewPages,
     typeLabel,
     typeColor: (key: string) => typeColor(cfg, key),

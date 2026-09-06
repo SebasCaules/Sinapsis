@@ -3,7 +3,8 @@
 Una **herramienta** es una vista propia de la materia (un explorador, una calculadora, un
 laboratorio) y una **figura** es un dibujo interactivo que el lector monta dentro de una
 página del wiki. Las dos cosas viven en el mismo lugar: un **bundle** de scripts clásicos
-que el CLI empaqueta y el API sirve (decisiones N0-41 y N0-42 de la plataforma).
+que el CLI empaqueta, que viaja con la materia a `subjects/<slug>/tools/` y que el sitio sirve
+como archivos estáticos (decisiones N0-41, N0-42 y N0-57 de la plataforma).
 
 No hay React, ni build step obligatorio, ni módulos ES: son archivos `.js` que se cargan en
 orden y hablan con `window.App`. Es a propósito, para poder mudar herramientas ya escritas
@@ -50,7 +51,8 @@ tenga.
     { "id": "explorador", "label": "Explorador de distribuciones",
       "icon": "chart", "layout": "wide" }   // layout: "wide" (1120) o "full"
   ],
-  "figures": true                   // true si registra figuras para los callouts [!figura]
+  "figures": true,                  // true si registra figuras para los callouts [!figura]
+  "progress": false                 // true si registra proveedores de progreso (ver abajo)
 }
 ```
 
@@ -60,9 +62,9 @@ csv`. Cualquier otra cosa no se sube.
 
 **Qué viaja.** Los archivos declarados (`scripts`, `styles`, `data`) y los archivos sueltos
 de la carpeta que sirvan en tiempo de ejecución (una fuente, una imagen que pide el CSS).
-Un `.js`, `.mjs` o `.css` que el manifiesto **no** declara no se sube: el runtime nunca lo
+Un `.js`, `.mjs` o `.css` que el manifiesto **no** declara no se publica: el runtime nunca lo
 cargaría. Los scripts de construcción, entonces, pueden quedarse en la carpeta sin ensuciar
-lo publicado.
+lo publicado. `dist/`, `.dist/`, `scripts/` y `node_modules/` nunca se copian.
 
 **Tope:** 20 MB por bundle.
 
@@ -124,11 +126,43 @@ línea), `App.enhanceDoc(root)`, `App.emptyState(titulo, sub)`, `App.backBar(hre
 `App.Fig` y `App.Plot` (los helpers de dibujo portados del baseline) y `window.M` (la
 biblioteca numérica: densidades, acumuladas, inversas, matrices).
 
+**Progreso de la unidad**
+
+La barra de progreso de cada división cuenta sus páginas leídas **más los pasos que aporte el
+bundle**: cada paso vale uno, igual que una página. Un bundle que quiera sumar los suyos
+declara `"progress": true` en el manifiesto —así se carga al entrar en la materia, como los de
+figuras, y la barra cuenta aunque nadie abra la herramienta— y registra un proveedor:
+
+```js
+if (typeof App.registerProgressProvider === "function") {   // runtime viejo: no rompe
+  App.registerProgressProvider({
+    id: "ejercicios",
+    label: "ejercicios",                       // plural, en minúsculas: es el rótulo del desglose
+    stepsOf: function (u) {                    // los pasos de esa división
+      return itemsOf(u).map(function (it) {
+        return {
+          id: it.id,
+          label: "n.º " + it.numero,
+          done: getEstado(it.id) >= 1,         // el criterio lo pone el bundle
+          group: "Guía",                       // una tarjeta por grupo en la portada
+          to: "/m/" + App.SUBJECT.slug + "/t/ejercicios?arg=" + encodeURIComponent(u + "/guia")
+        };
+      });
+    }
+  });
+}
+```
+
+`stepsOf` se consulta cada vez que se recalcula el progreso: devuelva el estado del momento y
+avise de los cambios con `App.progressChanged()` en el punto donde guarda el estado. El texto
+del hero queda «12 / 20 páginas leídas · 8 / 34 ejercicios resueltos»; el progreso del lector
+sigue hablando solo de páginas.
+
 **Reglas de convivencia**
 
-- El bundle corre en el origen de la plataforma y comparte el ámbito global con ella y con
-  los demás bundles: envuelva todo en un IIFE y no cuelgue nada de `window` salvo por
-  `App.register*`.
+- El bundle corre en el origen del sitio y comparte el ámbito global con la plataforma y con
+  los demás bundles —incluido el almacenamiento donde vive el estado personal de quien
+  estudia—: envuelva todo en un IIFE y no cuelgue nada de `window` salvo por `App.register*`.
 - No toque el DOM fuera de `main` (en una vista) o de `host` (en una figura).
 - **Texto que no escribió usted** —el título de una página, lo que tipeó el usuario, un dato
   del JSON— se inserta con `textContent` o pasando por `App.escapeHtml`. Para markdown y
@@ -261,21 +295,21 @@ SINAPSIS_HOME="${SINAPSIS_HOME:-$HOME/Desktop/Projects/Sinapsis}"
 # y deja tools/<id>/dist/tool-push.json
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build
 
-# lo mismo, minificando los scripts en tools/<id>/.dist/ y subiendo esa versión
+# lo mismo, minificando los scripts en tools/<id>/.dist/ y publicando esa versión
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build --minify
 
-# construye y sube (necesita el token de sync)
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push
-
-# qué tiene publicado la materia (necesita sesión, como `status`)
+# qué bundles tiene la materia en subjects/<slug>/tools del repositorio de la plataforma
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools list
 
-# wiki + estudio + herramientas, en un solo paso
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --tools
+# wiki + estudio + herramientas, en un solo paso: rama, commit y pull request
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish
 ```
 
+**`tools push` ya no existe**: no hay servidor al que subir un bundle. Los bundles viajan
+dentro del `publish` y llegan al sitio cuando el orquestador mergea el pull request.
+
 Opciones comunes: `--config <file>`, `--dir <carpeta>` (otro lugar para los bundles),
-`--api`, `--token`.
+`--repo <dir>`.
 
 ### Qué revisa `tools build`
 

@@ -5,7 +5,7 @@
  * `@sinapsis/contract`: `unidad→division`, `tipo→type`, `resumen→summary`,
  * `fuentes→sources`, `actualizado→updatedAt`.
  */
-import { readFile, readdir } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import {
   DIVISION_NONE,
@@ -502,6 +502,49 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
   });
 
   return { payload, warnings: formatIssues(issues), issues, wikiRoot, study, studyDir };
+}
+
+/**
+ * Los archivos del wiki que el compilador lee, como rutas relativas a la raíz
+ * del wiki y con barras: `<carpeta>/<archivo>.md` de cada carpeta de primer
+ * nivel, más `wiki.index` y `wiki.log` si existen.
+ *
+ * Es la misma lista que recorre `compileWiki` (mismas carpetas, mismo filtro de
+ * `wiki.ignore`, mismo «solo el primer nivel»). La expone el paquete para que
+ * `sinapsis publish` copie al repositorio de la plataforma exactamente lo que la
+ * plataforma va a compilar, sin una segunda regla que se pueda desincronizar.
+ */
+export async function listWikiFiles(wikiRoot: string, config: SubjectConfigType): Promise<string[]> {
+  const root = path.resolve(wikiRoot);
+  const ignore = new Set(config.wiki.ignore);
+  const folders = await listFolders(root, ignore, config);
+
+  const out: string[] = [];
+  for (const folder of folders) {
+    const entries = await readdir(path.join(root, folder), { withFileTypes: true });
+    const names = entries
+      .filter((e) => e.isFile() && e.name.endsWith(".md"))
+      .map((e) => e.name)
+      .sort((a, b) => a.localeCompare(b, "en"));
+    for (const name of names) out.push(`${folder}/${name}`);
+  }
+
+  for (const file of [config.wiki.index, config.wiki.log]) {
+    if (!file) continue;
+    const full = path.resolve(root, file);
+    // La misma contención que `compileWiki`: nunca se copia nada de fuera del wiki.
+    if (!isInside(root, full)) continue;
+    if (await exists(full)) out.push(path.relative(root, full).split(path.sep).join("/"));
+  }
+  return out;
+}
+
+async function exists(file: string): Promise<boolean> {
+  try {
+    return (await stat(file)).isFile();
+  } catch {
+    return false;
+  }
 }
 
 /** Carpetas de primer nivel con al menos un `.md`, en orden de `pageTypes` y luego alfabético. */

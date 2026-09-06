@@ -8,7 +8,7 @@
  */
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { resetStudy, studyState, waitForSubjectShell, withApi } from "../support/app";
+import { resetStudy, studyState, waitForSubjectShell } from "../support/app";
 import { readSeed } from "../support/seed";
 
 const seed = readSeed();
@@ -27,17 +27,12 @@ async function openReader(page: Page): Promise<void> {
   await expect(page.getByRole("heading", { level: 1, name: target.title })).toBeVisible();
 }
 
-test.beforeEach(async ({ request }) => {
-  await resetStudy(request, subject.slug);
-});
-
-test.afterAll(async () => {
-  await withApi((api) => resetStudy(api, subject.slug));
+test.beforeEach(async ({ page }) => {
+  await resetStudy(page, subject.slug);
 });
 
 test("guardar una página desde el lector la deja en Favoritos y sobrevive a la recarga", async ({
   page,
-  request,
 }) => {
   await openReader(page);
 
@@ -52,7 +47,7 @@ test("guardar una página desde el lector la deja en Favoritos y sobrevive a la 
   await expect(favorito).toHaveText("En favoritos");
 
   await expect
-    .poll(async () => (await studyState(request, subject.slug)).bookmarks)
+    .poll(async () => (await studyState(page, subject.slug)).bookmarks)
     .toContain(target.slug);
 
   await page.goto(`/m/${subject.slug}/favorites`);
@@ -66,7 +61,7 @@ test("guardar una página desde el lector la deja en Favoritos y sobrevive a la 
   await expect(main(page).getByRole("link", { name: new RegExp(target.title) })).toBeVisible();
 });
 
-test("un apunte escrito en el lector se vuelve a ver tras recargar", async ({ page, request }) => {
+test("un apunte escrito en el lector se vuelve a ver tras recargar", async ({ page }) => {
   await openReader(page);
 
   await main(page).getByLabel("Apunte de esta página").fill(APUNTE);
@@ -74,7 +69,7 @@ test("un apunte escrito en el lector se vuelve a ver tras recargar", async ({ pa
   await expect(main(page).getByText(/^Guardado ·/)).toBeVisible();
 
   await expect
-    .poll(async () => (await studyState(request, subject.slug)).notes.map((n) => n.page))
+    .poll(async () => (await studyState(page, subject.slug)).notes.map((n) => n.page))
     .toContain(target.slug);
 
   await page.reload();

@@ -23,6 +23,7 @@ import {
   type CompatStorage,
   type FigureMeta,
   type PageMeta,
+  type ProgressProvider,
   type SearchProvider,
   type SubjectConfigLoose,
   type ThemeId,
@@ -173,6 +174,10 @@ export interface CompatHandle {
   runTeardowns(): void;
   /** Proveedores de resultados para la paleta (`App.registerSearchProvider`). */
   searchProviders(): SearchProvider[];
+  /** Proveedores de pasos de progreso (`App.registerProgressProvider`). */
+  progressProviders(): ProgressProvider[];
+  /** Se suscribe a `App.progressChanged()`; devuelve el desuscriptor. */
+  onProgressChange(fn: () => void): () => void;
 }
 
 /**
@@ -606,6 +611,10 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
      una carga cae en estas listas, que corren al desinstalar el runtime. */
   let teardowns: Array<() => void> = [];
   let providers: SearchProvider[] = [];
+  let progress: ProgressProvider[] = [];
+  /* Los suscriptores son del ANFITRIÓN (la barra de cada división), no del
+     bundle: sobreviven a cargar y descargar bundles y se sueltan al desinstalar. */
+  const progressListeners = new Set<() => void>();
 
   const d = derive(ctx);
 
@@ -797,6 +806,19 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     registerSearchProvider(fn: SearchProvider): void {
       if (typeof fn === "function") providers.push(fn);
     },
+    registerProgressProvider(provider: ProgressProvider): void {
+      if (provider && typeof provider.stepsOf === "function") progress.push(provider);
+    },
+    progressChanged(): void {
+      progressListeners.forEach((fn) => {
+        try {
+          fn();
+        } catch (e) {
+          /* un suscriptor que falla no puede impedir que se enteren los demás */
+          if (typeof console !== "undefined") console.error("onProgressChange:", e);
+        }
+      });
+    },
 
     // --- paleta ⌘K del shell (S-16) ---
     paletteOpen(): boolean {
@@ -907,6 +929,8 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
       }
     });
     providers = [];
+    progress = [];
+    progressListeners.clear();
   }
 
   return {
@@ -920,6 +944,13 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     saveScroll,
     runTeardowns,
     searchProviders: () => providers.slice(),
+    progressProviders: () => progress.slice(),
+    onProgressChange: (fn: () => void) => {
+      progressListeners.add(fn);
+      return () => {
+        progressListeners.delete(fn);
+      };
+    },
   };
 }
 

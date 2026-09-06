@@ -198,3 +198,76 @@ Ownership ola 1: A4 `apps/api/**` · B4 `packages/cli/**`, `packages/markdown/**
 ## Veredicto del Sprint 3
 
 **Sprint 3 («Herramientas») cerrado el 2026-09-06.** Gates en verde en `edcf469`: typecheck (0 errores), 721 pruebas unitarias/integración (contract 31 · runtime 133 · markdown 88 · api 169 · web 252 · cli 50), build, 60 E2E (59 pasadas, 1 solo con el fixture). Bundle real de Proba (5 vistas, 92 figuras) subido con el CLI y verificado en el navegador; revisión de diseño (33 fallas, 25 corregidas) y comparación con la app original (34 diferencias, 9 defectos corregidos); auditoría de seguridad (4) y corrección (15) con todo corregido; flujo de propuestas probado y una propuesta real aprobada. Cero hallazgos altos abiertos. Pendiente de revisión del usuario: decisiones N0-40..N0-49 y diferidos S-14, S-17..S-26.
+
+# EXEC_STATE — Sprint 4 (Sitio estático)
+
+Ejecución iniciada el 2026-09-06 por pedido del usuario: sin API ni sesión; sitio estático en
+GitHub Pages (`SebasCaules/Sinapsis`); estado personal en el navegador; materias integradas por
+PR. Brief de ejecución: `docs/SPRINT4-BRIEF.md`. Orquestador: sesión principal (Fable 5.1);
+workers en Opus 5. Regla global: ningún commit lleva coautoría.
+
+## Fase 0 — Reconciliación (orquestador)
+
+- Contrato del sitio escrito ANTES de lanzar la ola: `packages/contract/src/site.ts`
+  (`@sinapsis/contract/site`): archivos estáticos (`SiteCatalog`, `SiteSubject`, `SitePages`,
+  `SiteTools`, `sitePaths`, `siteToolBase`) y estado personal (`LocalBackup`, `LocalProfile`,
+  `LocalLanding`, `LocalSubjectState`). 7 tests nuevos; 42 en el paquete.
+- `index.ts`: `User.email` opcional (perfil local); fuera `API_PREFIX`, `SyncResult`,
+  `errorMessageFromBody`, `toolFilesBase`, `toolFileUrl`, `routes.login`.
+- `apps/api/` eliminado; scripts raíz reescritos (`build:subjects`, `dev`, `build`).
+- Remoto `origin` configurado hacia `https://github.com/SebasCaules/Sinapsis.git` (repo público
+  y vacío al inicio del sprint); la rama de la propuesta aprobada de Proba, ya mergeada, se borró.
+
+## Pasos
+
+| paso | estado | notas |
+|---|---|---|
+| S4-00 Contrato `site.ts` + limpieza del contrato | DONE | orquestador |
+| S4-A Web: cliente local, persistencia, sin auth, base URL, backup | DONE | agente A (Opus): `apps/web/src/local/`, 594 tests web |
+| S4-B CLI: `publish`, `site build`, `status`; `subjects/proba`; CI/Pages | DONE | agente B (Opus): 57 tests CLI; `publish` además hace `fetch origin main` (orquestador) |
+| S4-C Docs, contratos escritos, skills | DONE | agente C (Opus): contrato 05 renombrado, N0-56..60, HANDOFF-sprint4 |
+| S4-D E2E contra el sitio estático | DONE | agente D (Opus): un solo `webServer`, `prepare-site.ts`, fixture fuente `e2e/fixtures/subjects/demo`, helpers sobre `window.__sinapsis`, `backup.spec.ts`; 93 verdes (Proba) / 77 (demo). Halló el bug `clear()+invalidateQueries()` (vistas montadas sin refrescar tras borrar/restaurar): corregido por el orquestador con `resetQueries()` en `AvatarMenu` y `testHook` |
+| S4-E Progreso de unidad con ejercicios (pedido del usuario, 2026-09-06) | DONE | agente E (Opus): N0-61, 985 tests; verificado por el orquestador en Chrome (U3: 0/14 páginas · 0/35 ejercicios; tarjetas Guía/Lutzio/Parciales/Finales) |
+| S4-F Hoja del lector redimensionable a los costados (pedido del usuario, 2026-09-06) | DONE | agente F (Opus): `views/sheetWidth.ts`, asas con ARIA y teclado, 620..1320 px, simétrico, `sinapsis.sheetWidth`; N0-62; 641 tests web. Orquestador: agarradera permanente en cada borde (`::before` pegajosa entre 40vh y 60vh), a pedido del usuario |
+| S4-E2 Ejercicios en el índice lateral y en la barra de unidad de cada página (aclaración del usuario); botón «PANEL» pegajoso y pegado al borde izquierdo del sidebar (pedido del usuario) | DONE | agente E (Opus): `unitSteps`/`prevNextSteps`, bloque «EJERCICIOS · N» en `IndexPanel`, segmentos de grupo en la barra de unidad y «Siguiente» hacia la guía; 1 019 tests. Botón PANEL y columna a 8 px del borde: orquestador (N0-63), verificado en Chrome |
+| S4-V Verificación del orquestador: gates, revisión adversarial, smoke en navegador | DONE | `pnpm typecheck` limpio; 1 032 tests unitarios (contrato 43, markdown 97, runtime 178, web 657, cli 57); `pnpm build` OK; E2E 94 verdes + 3 salteadas (Proba) y verde en modo demo. Correcciones del orquestador: `deleteDatabase` bloqueado por la conexión abierta y base sin almacén (`db.ts`), `resetQueries` tras borrar/restaurar (`AvatarMenu`, `testHook`), `publish` con `fetch origin main`, tests del CLI sin color en TTY, manifiesto con `%BASE_URL%` |
+| S4-P Push a `origin/main`, fuente de Pages = GitHub Actions, primer deploy | PENDIENTE | requiere confirmación del usuario |
+
+## Ownership
+
+Ver `docs/SPRINT4-BRIEF.md` §3.
+
+## S4-E — La barra de progreso de cada unidad incluye todos los ejercicios de la unidad
+
+Pedido del usuario: «en la barra de progreso de cada unidad se incluyan todos los ejercicios
+de esa unidad: los de la guía, los de Lutzio y los de parcial». Hoy `model.progress(key)`
+(inicio: carril y filas por unidad; portada de unidad: barra del hero) cuenta solo páginas de
+contenido; el estado de cada ejercicio (0..3) vive en el bundle `proba-exercises`
+(`A.LS` `pe.exEstado`, escrito por `ejercicios.js`), que se carga solo al abrir su vista. La
+app original ya ponía las colecciones de ejercicios como pasos virtuales de la barra de unidad,
+pero NO las contaba en el progreso; acá sí se cuentan, cada ejercicio como un paso.
+
+Diseño (genérico, para cualquier materia):
+
+1. **Contrato** (`packages/contract`): `ToolManifest.progress: boolean` (default false; como
+   `figures`, el bundle se carga al ENTRAR en la materia). `runtime.ts`:
+   `ProgressStep { id; label; done; group?; to? }`, `ProgressProvider { id; label; stepsOf(division) }`,
+   `CompatApp.registerProgressProvider(p)`, `CompatApp.progressChanged()`,
+   `SinapsisRuntime.progressProviders()`, `SinapsisRuntime.onProgressChange(fn)`.
+2. **Runtime** (`packages/runtime`): registro atribuido por bundle (como los proveedores de
+   búsqueda en `loader.ts`; se olvida al descargar), `progressChanged` notifica al anfitrión.
+3. **Web**: `useRuntime` carga al entrar los bundles con `progress: true`, expone los
+   proveedores y un `progressTick`; `buildSubjectModel(detail, dark, { extraSteps })`:
+   `progress(key)` y `progressTotal` suman los pasos de los proveedores; `model.extras(key)`
+   devuelve los grupos (guía, Lutzio, parciales, finales) con hechos/total y destino.
+   `DivisionView`: la barra usa el progreso combinado y el texto se desglosa («12 / 20 páginas
+   leídas · 8 / 34 ejercicios resueltos»); tarjetas «Ejercicios» por grupo (como el original).
+   `HomeView`: carril y filas por unidad con el combinado; la cabecera desglosa páginas y
+   ejercicios. El tooltip de la barra de unidad del lector sigue hablando de páginas.
+4. **Proba** (`subjects/proba/tools/proba-exercises`): manifiesto `progress: true`;
+   `ejercicios.js` registra el proveedor (todos los ítems de la unidad, `done` = estado ≥ 1,
+   `group` = colección, `to` = la vista con unidad y colección) y llama a `progressChanged()`
+   en `setEstado`.
+5. **Docs/skill**: contrato 04 y `reference/herramientas.md`; decisión N0-61.
+6. **Pruebas**: contrato, runtime (registro, atribución, descarga, notificación), modelo web,
+   `DivisionView`/`HomeView`, y un E2E (marcar un ejercicio mueve la barra de la unidad).

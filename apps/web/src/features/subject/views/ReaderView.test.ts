@@ -11,9 +11,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { SubjectConfig, headingId, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
-import { neighborsOf, readingOrder, savedAt, tocLabel } from "./ReaderView";
+import { isGroupStep, neighborsOf, readSteps, readingOrder, savedAt, tocLabel } from "./ReaderView";
+import type { ExtraStep } from "../model";
 
 describe("tocLabel", () => {
   it("un wikilink con etiqueta muestra la etiqueta", () => {
@@ -189,6 +190,62 @@ describe("vecinos del lector", () => {
 
   it("una página que no existe no tiene vecinos", () => {
     expect(vecinos("no-existe")).toEqual({ prev: null, next: null });
+  });
+});
+
+/* ------------------------------------------------------------------ N0-61 */
+
+/**
+ * La barra de unidad incluye los ejercicios: los grupos son el último tramo de
+ * la unidad, después de la última página.
+ */
+describe("pasos del lector con ejercicios", () => {
+  const PASOS: Record<string, ExtraStep[]> = {
+    "1": [
+      { id: "g1", label: "Ejercicio 1", done: true, group: "Guía", to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+      { id: "g2", label: "Ejercicio 2", done: false, group: "Guía", to: "/m/proba/t/ejercicios?arg=1%2Fguia", source: "ejercicios" },
+      { id: "p1", label: "Parcial 1", done: false, group: "Parciales", to: "/m/proba/t/ejercicios?arg=1%2Fparciales", source: "ejercicios" },
+    ],
+  };
+  const conPasos = () =>
+    buildSubjectModel(
+      { config, pages, studied: [], placeholder: false, lastSyncAt: null },
+      false,
+      { extraSteps: (d) => PASOS[d] ?? [] },
+    );
+  const pasos = (slug: string) => {
+    const m = conPasos();
+    return readSteps(m, readingOrder(m), slug);
+  };
+
+  it("la última página de la unidad sigue en el primer grupo, no en la unidad siguiente", () => {
+    const { next } = pasos("u1-b");
+    expect(isGroupStep(next)).toBe(true);
+    expect(next).toMatchObject({ kind: "extra", id: "Guía", done: 1, total: 2, to: "/m/proba/t/ejercicios?arg=1%2Fguia" });
+  });
+
+  it("dentro de la unidad y desde atrás, nada cambia", () => {
+    const { prev, next } = pasos("u1-a");
+    expect(prev).toBeNull();
+    expect(isGroupStep(next)).toBe(false);
+    expect((next as { page: { slug: string } }).page.slug).toBe("u1-b");
+    /* «Anterior» no ve nunca un grupo: los ejercicios son una vista de
+       herramienta y no dibujan barra. */
+    expect(isGroupStep(pasos("u2-a").prev)).toBe(false);
+  });
+
+  it("una unidad sin grupos conserva el cruce a la siguiente", () => {
+    const { next } = pasos("u2-b");
+    expect(isGroupStep(next)).toBe(false);
+    expect((next as { page: { slug: string } }).page.slug).toBe("u3-a");
+  });
+
+  it("sin proveedores, los pasos son exactamente los vecinos de siempre", () => {
+    const m = model();
+    const order_ = readingOrder(m);
+    for (const slug of ["u1-a", "u1-b", "u2-a", "u1-fuente", "transv", "no-existe"]) {
+      expect(readSteps(m, order_, slug)).toEqual(neighborsOf(m, order_, slug));
+    }
   });
 });
 

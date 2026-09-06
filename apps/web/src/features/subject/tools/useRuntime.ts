@@ -3,9 +3,10 @@
  *
  * Entrar en una materia INSTALA el runtime con su contexto (config, páginas,
  * progreso, tema, navegación y avisos); salir lo desinstala. Los bundles con
- * `figures: true` se cargan en cuanto se entra —el lector los necesita para
- * montar `[!figura]` en la primera página que se abra—; los demás esperan a que
- * alguien abra su vista.
+ * `figures: true` o `progress: true` se cargan en cuanto se entra —el lector
+ * necesita las figuras para montar `[!figura]` en la primera página que se
+ * abra, y la barra de cada división necesita los pasos aunque nadie abra la
+ * herramienta—; los demás esperan a que alguien abra su vista.
  *
  * Nada de esto es obligatorio: si el API todavía no sirve `/tools`, si la
  * materia no declara bundles o si el paquete del runtime no está, el shell
@@ -15,7 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import type { SearchProvider, ThemeId, ToolInfo, ToolView, ViewFn } from "@sinapsis/contract";
+import type { ProgressProvider, SearchProvider, ThemeId, ToolInfo, ToolView, ViewFn } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
 import { useToast } from "@/components/platform";
 import type { SubjectModel } from "../model";
@@ -84,6 +85,18 @@ export interface RuntimeHandle {
    * (`App.registerSearchProvider`). La paleta ⌘K los puede sumar a los suyos.
    */
   searchProviders: () => SearchProvider[];
+  /**
+   * Proveedores de pasos de progreso que registraron los bundles cargados
+   * (`App.registerProgressProvider`). La barra de cada división suma sus pasos
+   * a las páginas leídas (N0-61).
+   */
+  progressProviders: () => ProgressProvider[];
+  /**
+   * Sube con cada `App.progressChanged()`: es la señal de que hay que volver a
+   * pedir los pasos y rehacer el modelo. Cambia también cuando termina de
+   * cargar un bundle de progreso.
+   */
+  progressTick: number;
   /** Migas que pidió la vista con `App.setCrumbs` (null si no pidió ninguna). */
   crumbs: RuntimeCrumb[] | null;
   /** Cambia con cada `App.render()`: el host vuelve a montar la vista. */
@@ -105,11 +118,11 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
   const { toast } = useToast();
   const theme = useTheme();
 
-  /* El API puede no tener todavía la ruta de herramientas (agente A4): un 404
+  /* La materia puede no tener `tools.json` (nunca publicó bundles): un 404
      acá no puede dejar la materia en estado de error ni reintentarse. */
   /* El manifiesto de una materia cambia solo cuando se vuelve a publicar el
      bundle: se cachea para toda la sesión. Sin esto, volver a entrar en la
-     materia pedía otra vez `/tools` y la miga y la pestaña decían «Herramienta»
+     materia volvía a pedir `tools.json`, y la miga y la pestaña decían «Herramienta»
      mientras tanto (brecha herr-20). */
   const query = useQuery({
     queryKey: qk.tools(slug),
@@ -126,6 +139,7 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
   const [loaded, setLoaded] = useState<ReadonlySet<string>>(NO_LOADED);
   const [crumbs, setCrumbs] = useState<RuntimeCrumb[] | null>(null);
   const [renderTick, setRenderTick] = useState(0);
+  const [progressTick, setProgressTick] = useState(0);
 
   const runtimeRef = useRef<RuntimeApi | null>(null);
   const moduleRef = useRef<RuntimeModule | null>(null);
@@ -233,6 +247,9 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
       setUnavailable(false);
       setLoaded(NO_LOADED);
       setCrumbs(null);
+      /* El tick sube también al salir: el modelo de la materia siguiente no
+         puede quedarse con los pasos de la anterior. */
+      setProgressTick((n) => n + 1);
     };
   }, [slug, hasModel, hasTools]);
 
@@ -283,13 +300,34 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
   );
 
   /* Los bundles de figuras se cargan al ENTRAR: la primera página del lector ya
-     tiene que poder montar sus `[!figura]` sin esperar a nadie. */
+     tiene que poder montar sus `[!figura]` sin esperar a nadie. Los de progreso,
+     por lo mismo: la barra de la unidad tiene que contar sus pasos aunque nadie
+     abra la herramienta (N0-61). */
   useEffect(() => {
     if (!ready) return;
     for (const info of tools) {
-      if (info.manifest.figures) void load(info.manifest.id).catch(() => undefined);
+      if (info.manifest.figures || info.manifest.progress) {
+        void load(info.manifest.id).catch(() => undefined);
+      }
     }
   }, [ready, tools, load]);
+
+  /* ---------- progreso de los bundles --------------------------------------
+     La suscripción va atada al ciclo de INSTALACIÓN (no al de la vista): un
+     bundle puede avisar de un cambio desde cualquier pantalla de la materia, y
+     el desuscriptor muere con el runtime. */
+  useEffect(() => {
+    if (!ready) return;
+    const off = runtimeRef.current?.onProgressChange(() => setProgressTick((n) => n + 1));
+    return () => off?.();
+  }, [ready]);
+
+  /* Cargar un bundle puede traer proveedores nuevos: el modelo tiene que
+     rehacerse aunque nadie haya tocado un ejercicio todavía. */
+  useEffect(() => {
+    if (!ready) return;
+    setProgressTick((n) => n + 1);
+  }, [ready, loaded]);
 
   /* ---------- handle -------------------------------------------------------- */
   const toolForView = useCallback(
@@ -334,11 +372,26 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
         runtimeRef.current?.onThemeChange(fn) ?? (() => undefined),
       watchRedraw: () => watchRedraw(runtimeRef.current),
       searchProviders: () => runtimeRef.current?.searchProviders() ?? [],
+      progressProviders: () => runtimeRef.current?.progressProviders() ?? [],
+      progressTick,
       crumbs,
       renderTick,
       clearCrumbs: () => setCrumbs(null),
     }),
-    [ready, unavailable, query.isPending, tools, toolForView, viewInfo, load, loaded, figures, crumbs, renderTick],
+    [
+      ready,
+      unavailable,
+      query.isPending,
+      tools,
+      toolForView,
+      viewInfo,
+      load,
+      loaded,
+      figures,
+      crumbs,
+      renderTick,
+      progressTick,
+    ],
   );
 }
 
@@ -361,6 +414,8 @@ export const IDLE_RUNTIME: RuntimeHandle = {
   onThemeChange: () => () => undefined,
   watchRedraw: () => ({ registered: () => false, release: () => undefined }),
   searchProviders: () => [],
+  progressProviders: () => [],
+  progressTick: 0,
   crumbs: null,
   renderTick: 0,
   clearCrumbs: () => undefined,

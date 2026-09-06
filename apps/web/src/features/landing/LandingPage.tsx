@@ -75,7 +75,7 @@ const SEMESTER_MAX = 24;
 
 /**
  * Valida el rótulo CONTRA EL CONTRATO en vez de reescribir la regla acá: lo que
- * el `PUT /api/landing` va a rechazar con 400 se rechaza antes, en el campo,
+ * el contrato va a rechazar (400 del viejo API) se rechaza antes, en el campo,
  * que es donde el usuario puede arreglarlo (B9).
  */
 function semesterIssue(label: string): string | undefined {
@@ -175,6 +175,11 @@ export function LandingPage() {
   /* Los cuatrimestres del usuario son estado propio (N0-32): vienen con los
      vacíos y con el orden que él eligió, que no tiene por qué ser el del rótulo. */
   const savedSemesters = useQuery({ queryKey: qk.semesters, queryFn: () => api.landing.semesters() });
+
+  /* Materias del catálogo que no están en la landing: lo que ofrece «Agregar
+     materia» antes del formulario. Es una lectura del sitio, no del usuario:
+     falla en silencio (el diálogo abre igual, con el formulario). */
+  const available = useQuery({ queryKey: qk.available, queryFn: () => api.landing.available() });
   /* Sin la lista guardada no se puede gestionar: el borrador saldría sin los
      cuatrimestres vacíos y guardarlo los borraría del servidor (B3). Vale para
      los tres finales de la consulta, no solo para «pendiente»: un error o un
@@ -377,6 +382,7 @@ export function LandingPage() {
       await Promise.all([
         qc.invalidateQueries({ queryKey: qk.landing }),
         qc.invalidateQueries({ queryKey: qk.semesters }),
+        qc.invalidateQueries({ queryKey: qk.available }),
       ]);
       toast(`«${card.name}» se agregó a sus materias.`, "good");
     },
@@ -387,7 +393,10 @@ export function LandingPage() {
     onSuccess: async (_data, slug) => {
       setDraft((prev) => prev && prev.map((g) => ({ ...g, slugs: g.slugs.filter((s) => s !== slug) })));
       setRemoving(null);
-      await qc.invalidateQueries({ queryKey: qk.landing });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.landing }),
+        qc.invalidateQueries({ queryKey: qk.available }),
+      ]);
       toast("Se quitó la materia. El progreso se conserva.", "good");
     },
     onError: (e: Error) => {
@@ -746,6 +755,7 @@ export function LandingPage() {
       <AddSubjectDialog
         open={addOpen}
         onClose={() => setAddOpen(false)}
+        available={available.data ?? []}
         semesters={semesters}
         defaultSemester={addTarget ?? newestSemester}
         submitting={createSubject.isPending}

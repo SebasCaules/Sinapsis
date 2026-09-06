@@ -1,9 +1,10 @@
 /**
  * Paridad con `build.py` — el compilador Python del baseline de Proba.
  *
- * Compila el wiki real del vault (solo lectura) con el config de ejemplo del repo
- * y lo compara contra `estudio/data.js`, la salida del script original. El test se
- * saltea si el vault no está en esta máquina.
+ * Compila el wiki real del vault (solo lectura) con el config de la materia del
+ * repositorio (`subjects/proba/`) y lo compara contra `estudio/data.js`, la
+ * salida del script original. El test se saltea si el vault no está en esta
+ * máquina.
  *
  * Vault por defecto: `~/Desktop/ITBA/26-1C/Proba_Obsidian`
  * (se puede apuntar a otro con la variable de entorno `SINAPSIS_PROBA_VAULT`).
@@ -20,7 +21,7 @@ import { countWords, extractHeadings, normalizeDisplayMath, splitLines } from ".
 const VAULT = process.env["SINAPSIS_PROBA_VAULT"] ?? path.join(homedir(), "Desktop/ITBA/26-1C/Proba_Obsidian");
 const DATA_JS = path.join(VAULT, "estudio", "data.js");
 const WIKI = path.join(VAULT, "wiki");
-const CONFIG = path.resolve(fileURLToPath(new URL("../../../examples/proba/sinapsis.config.json", import.meta.url)));
+const CONFIG = path.resolve(fileURLToPath(new URL("../../../subjects/proba/sinapsis.config.json", import.meta.url)));
 
 const available = existsSync(DATA_JS) && existsSync(WIKI) && existsSync(CONFIG);
 

@@ -15,7 +15,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 import { SubjectConfig, type PageMeta, type StudyState, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { qk } from "@/lib/api";
 import { buildSubjectModel } from "../model";
 import { CatalogView, chipCounts, haystack, matchesQuery, typeBlocks } from "./CatalogView";

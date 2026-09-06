@@ -12,7 +12,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { SubjectConfig, type PageHeading, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
 import { PageTip, PAGE_TIP_ID } from "./PageTip";
 import { clip, firstPara, leadOf, plainish, sectionOf, stripLabel, targetOf } from "./page-tip";

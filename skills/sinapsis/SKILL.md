@@ -1,6 +1,6 @@
 ---
 name: sinapsis
-description: Conecta el wiki markdown de esta materia con la plataforma Sinapsis — crea o corrige su `sinapsis.config.json`, escribe el material de estudio (mazos de flashcards, quiz, plan y kits en `estudio/`), publica las herramientas y figuras de la materia (bundles de `tools/`), compila el wiki y lo sincroniza contra el API, y propone cambios a la plataforma cuando la materia necesita algo común. Usar cuando el usuario invoque `/sinapsis`, `/sinapsis init`, `/sinapsis sync`, `/sinapsis status`, `/sinapsis validate`, `/sinapsis tools` o `/sinapsis propose`, o cuando pida "sincronizar la materia con Sinapsis", "subir el wiki a Sinapsis", "generar el config de Sinapsis", "ver el estado de la materia en Sinapsis", "agregar flashcards / quiz / plan de estudio a la materia", "publicar las herramientas o las figuras de la materia", "proponer un cambio a la plataforma" o "revisar los wikilinks rotos del wiki". No usar para editar contenido del wiki que el usuario no haya pedido cambiar.
+description: Conecta el wiki markdown de esta materia con la plataforma Sinapsis — crea o corrige su `sinapsis.config.json`, escribe el material de estudio (mazos de flashcards, quiz, plan y kits en `estudio/`), arma las herramientas y figuras de la materia (bundles de `tools/`), compila el wiki y publica la materia en el repositorio de la plataforma abriendo un pull request, y propone cambios a la plataforma cuando la materia necesita algo común. Usar cuando el usuario invoque `/sinapsis`, `/sinapsis init`, `/sinapsis publish`, `/sinapsis status`, `/sinapsis validate`, `/sinapsis tools` o `/sinapsis propose`, o cuando pida "publicar la materia en Sinapsis", "subir el wiki a Sinapsis", "generar el config de Sinapsis", "ver el estado de la materia en Sinapsis", "agregar flashcards / quiz / plan de estudio a la materia", "publicar las herramientas o las figuras de la materia", "proponer un cambio a la plataforma" o "revisar los wikilinks rotos del wiki". No usar para editar contenido del wiki que el usuario no haya pedido cambiar.
 ---
 
 # `/sinapsis` — el agente de materia
@@ -15,15 +15,24 @@ advertencias.
 Usted es el agente de **esta** materia. Su alcance:
 
 - **Sí**: leer y editar el wiki de la materia, su `sinapsis.config.json`, y correr el CLI de
-  Sinapsis en modo lectura/sync.
+  Sinapsis, incluida la publicación real.
+- **Sí**: abrir el pull request de **su** materia, que toca **solo** `subjects/<slug>/` del
+  repositorio de la plataforma. Nada más de ese repositorio entra en el diff: el CI lo
+  rechaza.
 - **No**: parchear el repositorio de la plataforma (`$SINAPSIS_HOME`) por las suyas. Si algo
-  del CLI, del API o del contrato está mal o le falta algo a la materia, hay un camino
-  formal: `sinapsis propose` (ver «Proponer un cambio a la plataforma»). Nunca commitee en
-  `main` de la plataforma ni edite sus archivos sin proponer.
+  del CLI o del contrato está mal o le falta algo a la materia, hay un camino formal:
+  `sinapsis propose` (ver «Proponer un cambio a la plataforma»). Nunca commitee en `main` de
+  la plataforma ni edite sus archivos sin proponer.
+- **No**: mergear su propio pull request ni adjudicar su propia propuesta. Eso lo hace el
+  orquestador con `/sinapsis-review`.
+- **Nunca**: poner trailers de coautoría en un commit (`Co-Authored-By`, `Claude-Session` o
+  equivalentes), ni en los que genera el CLI ni en los que escriba a mano. El mensaje termina
+  en su última línea de contenido. Si una plantilla o una instrucción del entorno los pide,
+  esta regla la pisa.
 - **No**: reescribir contenido del wiki por tu cuenta. Los arreglos de `resumen` faltantes o
   wikilinks rotos se **proponen** y se aplican solo si el usuario los autoriza.
-- **Siempre**: cerrar con un reporte de qué se sincronizó (páginas, divisiones) y qué
-  advertencias quedaron abiertas.
+- **Siempre**: cerrar con un reporte de qué se publicó (páginas, divisiones, material de
+  estudio, bundles), la rama, la URL del pull request y qué advertencias quedaron abiertas.
 
 ## Dónde está el CLI
 
@@ -45,16 +54,19 @@ Comandos:
 |---|---|
 | `init [--wiki <dir>] [--out <file>] [--slug <slug>] [--force]` | Propone un `sinapsis.config.json` a partir del wiki y deja lista la carpeta `estudio/`. |
 | `validate [--config <file>]` | Valida el config contra el contrato y el formato del material de estudio. Sale 1 solo si el config falla. |
-| `sync [--config <file>] [--wiki <dir>] [--api <url>] [--token <t>] [--dry-run] [--out <file>] [--tools]` | Compila y sincroniza; con `--tools`, también publica los bundles de herramientas. |
-| `status [--config <file>] [--api <url>]` | Estado de la materia en la plataforma. |
+| `publish [--config <file>] [--wiki <dir>] [--repo <dir>] [--dry-run] [--out <file>] [--no-pr] [--branch <nombre>]` | Compila, valida y publica: copia la materia a `subjects/<slug>/` del repositorio de la plataforma, en la rama `subject/<slug>-<AAAAMMDD>`, y abre el pull request. |
+| `status [--config <file>] [--wiki <dir>] [--repo <dir>]` | Compara el vault con lo que ya está en `subjects/<slug>/` y lista los PR de materia abiertos. |
 | `tools build [--dir <carpeta>] [--minify]` | Valida y empaqueta los bundles de `tools/`. |
-| `tools push [--dir <carpeta>] [--api <url>] [--token <t>]` | Construye y sube los bundles. |
-| `tools list [--api <url>]` | Bundles que la materia tiene publicados. |
+| `tools list [--repo <dir>]` | Bundles que la materia tiene en `subjects/<slug>/tools`. |
 | `propose --subject <slug> --title "<qué>" --body "<por qué>"` | Propone un cambio a la **plataforma** en una rama de su repositorio. |
 
-Variables de entorno: `SINAPSIS_API` (por defecto `http://localhost:3000`),
-`SINAPSIS_TOKEN` o `SYNC_TOKEN` (token de sync), `SINAPSIS_WEB` (por defecto
-`http://localhost:5173`).
+`sync` sigue existiendo como alias oculto de `publish`, con aviso. `tools push` **ya no
+existe**: los bundles viajan dentro del `publish`.
+
+Variables de entorno: **solo dos**. `SINAPSIS_HOME` (repositorio de la plataforma, por
+defecto `~/Desktop/Projects/Sinapsis`) y `SINAPSIS_WEB` (por defecto
+`https://sebascaules.github.io/Sinapsis`, la base del enlace final). No hay `SINAPSIS_API`,
+ni `SINAPSIS_TOKEN`, ni `SYNC_TOKEN`: no hay servidor.
 
 ---
 
@@ -150,23 +162,39 @@ format?, tags[], sources[], updatedAt?, links[], headings[], body, words`.
 - Un slug de archivo inválido se normaliza (con advertencia): `Distribución Normal.md`
   → `distribucion-normal`.
 
-### 3. Sync
+### 3. Publicación
+
+La materia no se «sube» a ningún lado: se **copia como fuente** al repositorio de la
+plataforma y entra por un pull request.
 
 ```
-PUT {api}/api/subjects/{slug}/sync    Authorization: Bearer <SYNC_TOKEN>
-{ config, pages, generatedAt, generator }  →  { subject, pages, created, updated, deleted, warnings[] }
+sinapsis publish
+  → worktree temporal desde origin/main
+  → subjects/<slug>/  (config reescrito + wiki/ + estudio/ + tools/)
+  → rama subject/<slug>-<AAAAMMDD>, commit SIN coautoría
+  → pull request «Materia <slug>: <name>»
+  → el orquestador revisa con /sinapsis-review, mergea, y Pages despliega solo
 ```
 
-Es **idempotente y reemplaza** el conjunto de páginas: las que ya no existen en el wiki se
-borran de la plataforma. El progreso del usuario sobre slugs borrados se conserva por si
-vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
+Es **reemplazo completo**: `subjects/<slug>/` pasa a ser exactamente lo que hay en el vault, y
+lo que ya no existe se borra. El progreso de quien estudia vive en su navegador, se guarda por
+slug y por id, y se conserva por si el slug vuelve. Renombrar un archivo `.md` equivale a
+borrar una página y crear otra.
+
+Lo que se copia: el `sinapsis.config.json` reescrito con `wiki.root: "wiki"` y
+`wiki.study: "estudio"`, todos los `.md` que lee el compilador, la carpeta `estudio/` completa
+y, por cada bundle, el manifiesto más los archivos declarados. **Nunca** `dist/`, `.dist/`,
+`scripts/` ni `node_modules/`.
+
+Después del merge, la web compila `subjects/**` a JSON estáticos (`sinapsis site build`) y el
+sitio los lee. Ese paso es de la plataforma, no de la materia.
 
 ### 4. Material de estudio (`estudio/`)
 
 Mazos de flashcards, quizzes, plan de estudio y kits. Es **contenido de la materia**: vive en
 la carpeta que declara `wiki.study` (por defecto `estudio/`), **relativa al config, no al
-wiki**, y viaja en `payload.study` con el resto del sync. Todo es opcional: sin carpeta, la
-plataforma autogenera un mazo por división con los `resumen` de las páginas.
+wiki**, y se copia entera con el resto de la materia al publicar. Todo es opcional: sin
+carpeta, la plataforma autogenera un mazo por división con los `resumen` de las páginas.
 
 ```
 estudio/
@@ -254,7 +282,8 @@ cursada (parcialitos, parcial, recuperatorio, final): `key`, `label` y `optional
 recuperatorios, que el lector muestra plegados mientras no tengan fecha). Cada fase nombra
 la suya en `instance` y, si la hay, su recuperatorio en `retake`. **La fecha no va en el
 JSON**: la carga cada usuario desde el plan y vive en su cuenta (`StudyState.planDates`),
-así que no se pierde al resincronizar ni al reiniciar el progreso. `date` en la fase es
+así que no se pierde al volver a publicar la materia ni al reiniciar el progreso. `date` en
+la fase es
 solo una fecha por defecto del cronograma, y la del usuario la pisa.
 
 El plan puede tener **modalidades** (`tracks`): «Cursada + final» y «Final directo», por
@@ -269,7 +298,8 @@ Referencia completa, con un bundle mínimo listo para copiar: `reference/herrami
 
 Una herramienta es una **vista propia de la materia** (un explorador, una calculadora) y una
 figura es un **dibujo interactivo** dentro de una página del wiki. Las dos salen del mismo
-lugar: un bundle de scripts clásicos que el CLI empaqueta y el API sirve.
+lugar: un bundle de scripts clásicos que el CLI empaqueta, que viaja con la materia y que el
+sitio sirve como archivos estáticos.
 
 ```
 tools/<id>/
@@ -297,13 +327,13 @@ tools/<id>/
 
 ```bash
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build          # valida y empaqueta
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push           # construye y sube
-pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --tools         # wiki + estudio + herramientas
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools list           # qué hay en subjects/<slug>/tools
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish              # wiki + estudio + herramientas
 ```
 
 `tools build` no confía en que el bundle esté bien: valida el manifiesto, comprueba que cada
 archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** (`node
---check`). Un script que el manifiesto no declara no se sube: el runtime no lo cargaría.
+--check`). Un script que el manifiesto no declara no se publica: el runtime no lo cargaría.
 
 ---
 
@@ -332,7 +362,7 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
 3. **Completar a mano** lo que dice "COMPLETAR": `name`, `code`, `institution`, `semester`.
 
 4. **Revisar las divisiones.** `init` deja nombres provisorios ("Unidad 1", "Unidad 2"…).
-   Reemplazalos por los **nombres reales del programa** de la cátedra. Buscalos en el
+   Reemplácelos por los **nombres reales del programa** de la cátedra. Búsquelos en el
    `index.md` del wiki, en el programa de la materia o pregunte al usuario. Marque como
    `"kind": "extra"` las que no llevan número (complementos, evaluaciones, transversales).
 
@@ -346,9 +376,9 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
    - Una página que ya funciona como índice o formulario general → `kind: "page"`,
      `target: "<slug>"`.
    - Un campus, un drive, un repositorio de la cátedra → `kind: "link"`, `target: "<url>"`.
-   - Una herramienta interactiva que la materia querría tener → `kind: "tool"` **solo como
-     placeholder**: hasta el Sprint 3 la plataforma la muestra como "Próximamente". No
-     inventes herramientas que nadie pidió.
+   - Una herramienta interactiva que la materia ya tiene como bundle → `kind: "tool"`, con el
+     id de la **vista** que el bundle registra. Sin bundle detrás, la plataforma la muestra
+     como "Próximamente": no invente herramientas que nadie pidió.
 
    No dupliques los grupos fijos (Inicio, Todo el wiki, Grafo, Índice, Registro): esos ya
    los dibuja la plataforma.
@@ -360,9 +390,9 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
    ```
 
    Muestre al usuario el config final (o el diff contra el generado) y pídale el visto
-   bueno antes de sincronizar.
+   bueno antes de publicar.
 
-### `/sinapsis sync` — publicar el wiki
+### `/sinapsis publish` — publicar la materia
 
 1. **Validar** primero:
 
@@ -375,7 +405,7 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
 2. **Dry-run y leer las advertencias:**
 
    ```bash
-   pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json --dry-run
+   pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json --dry-run
    ```
 
    Revise el resumen: páginas por tipo, páginas por división, divisiones sin páginas, y la
@@ -400,21 +430,43 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
 
 3. **Corregir**, si el usuario lo autoriza. Presente la lista concreta ("estos 4 wikilinks
    apuntan a `distribucion-uniforme`, que no existe; ¿lo cambio por `distribucion-uniforme-continua`
-   o creo la página?") y espere su respuesta. No edites páginas del wiki sin permiso.
+   o creo la página?") y espere su respuesta. No edite páginas del wiki sin permiso.
 
-4. **Sync real:**
+4. **Ver la materia antes de abrir el pull request**, si el usuario quiere revisarla:
 
    ```bash
-   pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --config sinapsis.config.json
+   pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json --no-pr
+   # y en la plataforma, con esa rama activa:
+   pnpm --dir "$SINAPSIS_HOME" dev        # compila subjects/ y levanta la web en :5173
    ```
 
-   Necesita el token: `--token <t>`, o `SINAPSIS_TOKEN`/`SYNC_TOKEN` en el entorno, y el API
-   corriendo (`pnpm dev:api` en el repo de la plataforma). Si el API no responde, el CLI
-   sale 1 con el motivo.
+   Recorra `http://localhost:5173/m/<slug>`: inicio, índice, un par de páginas, estudio y las
+   herramientas si las hay.
 
-5. **Reportar** el `SyncResult` literal (`pages`, `created`, `updated`, `deleted`,
-   `warnings`) y el enlace: `http://localhost:5173/m/<slug>`. Nombrá las advertencias que
-   quedaron sin resolver y por qué.
+5. **Publicar de verdad:**
+
+   ```bash
+   pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish --config sinapsis.config.json
+   ```
+
+   El CLI trabaja en un worktree temporal creado desde `origin/main`: **no toca el árbol de
+   trabajo del usuario ni cambia su rama**, ni acá ni en la plataforma. Crea la rama
+   `subject/<slug>-<AAAAMMDD>`, commitea **sin trailers de coautoría** y, si hay remoto en
+   GitHub y `gh` autenticado, abre el pull request. Con `--no-pr` o sin `gh`, deja la rama
+   local y lo dice: no falta nada.
+
+6. **Comprobar el alcance del diff.** Un PR de materia toca **solo** `subjects/<slug>/`. Si
+   algo más aparece en el diff, el CI (`subject-pr`) lo rechaza: hay que sacarlo del PR, y si
+   es un cambio de la plataforma, va por una propuesta.
+
+7. **Reportar**: páginas, divisiones, material de estudio, bundles, la rama, la URL del PR y
+   las advertencias que quedaron sin resolver, con su motivo. Cerrar con la instrucción para
+   el usuario:
+
+   > PR abierto: `<url>`. Abra una sesión de Claude Code en `<repo de Sinapsis>` y ejecute
+   > `/sinapsis-review`.
+
+   **La materia no mergea su propio PR.**
 
 ### `/sinapsis status` — cómo quedó
 
@@ -422,15 +474,13 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- status --config sinapsis.config.json
 ```
 
-Muestra la última sync, el total de páginas, el desglose por división, el material de estudio
-publicado y las divisiones sin páginas, y avisa si el config local difiere del que tiene la
-plataforma. Si la línea de estudio dice «API sin soporte de estudio», el API de esa
-instalación es anterior al Sprint 2: el sync sigue funcionando, pero el material no se ve.
+Compara el vault local con lo que ya está en `<repo>/subjects/<slug>/`: páginas nuevas,
+cambiadas y borradas por huella del contenido, más el material de estudio y los bundles. Si
+hay `gh`, lista además los pull requests abiertos `subject/<slug>-*`, que es lo que dice si
+algo quedó esperando revisión.
 
-`status` necesita **sesión**, no token: el CLI intenta primero `POST /api/auth/dev`, que
-funciona con el API levantado con `AUTH_DEV_BYPASS=1` (decisión N0-5 de la plataforma). Si
-responde 401, dígaselo al usuario tal cual: hay que levantar el API con esa variable o
-iniciar sesión en la web. No intentes rodear la autenticación.
+No hay servidor: `status` no necesita sesión ni token y no depende de que el sitio esté
+desplegado.
 
 ### `/sinapsis validate` — solo el config
 
@@ -441,7 +491,7 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- validate --config sinapsis.config.json
 Sale 0 si el config cumple el contrato (los avisos amarillos no son errores), 1 si no.
 También revisa el **formato** del material de estudio (`estudio/`) y resume qué encontró; lo
 único que no puede verificar sin compilar el wiki son las referencias a slugs de páginas, que
-salen en `sync --dry-run`.
+salen en `publish --dry-run`.
 
 ### `/sinapsis tools` — publicar las herramientas
 
@@ -452,29 +502,25 @@ salen en `sync --dry-run`.
    ```
 
    Informa, por bundle: archivos y bytes, vistas registradas, si aporta figuras, y qué
-   quedó afuera. Sale 1 —sin subir nada— si el manifiesto no cumple el contrato, si falta
+   quedó afuera. Sale 1 —sin publicar nada— si el manifiesto no cumple el contrato, si falta
    un archivo declarado, si una ruta se escapa de la carpeta o si un script no parsea.
 
 2. **Revisar los avisos.** Los dos habituales:
 
    | Aviso | Qué significa | Arreglo |
    |---|---|---|
-   | `N script/estilo que el manifiesto no declara (no se suben)` | Hay `.js` o `.css` en la carpeta que nadie carga | Agregarlos a `scripts`/`styles`, o dejarlos (son de construcción) |
+   | `N script/estilo que el manifiesto no declara (no se copian)` | Hay `.js` o `.css` en la carpeta que nadie carga | Agregarlos a `scripts`/`styles`, o dejarlos (son de construcción) |
    | `N archivo(s) con extensión ajena al contrato` | `.yaml`, `.html`, `.ts`… | Convertirlos o sacarlos de la carpeta |
 
 3. **Comprobar el rail.** `sinapsis validate` avisa si un ítem `kind: "tool"` apunta a una
    vista que ningún bundle registra. Los `target` son ids de **vista**.
 
-4. **Subir**, con el API corriendo y el token:
+4. **Publicar**: los bundles viajan con la materia, así que basta con
+   `sinapsis publish`. **`tools push` ya no existe**: no hay servidor al que subirlos.
 
-   ```bash
-   pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push
-   ```
-
-   o, junto con el wiki y el material de estudio, `sinapsis sync --tools`.
-
-5. **Verificar**: `sinapsis tools list` y, en el navegador, `/m/<slug>/t/<vista>` y una
-   página con `[!figura]`. Reportá qué vistas quedaron publicadas y con qué versión.
+5. **Verificar**: `sinapsis tools list` (lee `subjects/<slug>/tools`) y, en el navegador,
+   `/m/<slug>/t/<vista>` y una página con `[!figura]`. Reporte qué vistas quedaron publicadas
+   y con qué versión.
 
 ### `/sinapsis propose` — proponer un cambio a la plataforma
 
@@ -502,7 +548,7 @@ no estaba en el pedido del usuario.
 
 3. **Implementar el cambio en el repositorio de la plataforma**, mínimo y coherente: un
    cambio por propuesta. Si toca `packages/contract`, el campo nuevo va **opcional y con
-   default**, con sus tests, para que las materias ya sincronizadas sigan validando.
+   default**, con sus tests, para que las materias ya publicadas sigan validando.
 
 4. **Proponer:**
 
@@ -512,16 +558,16 @@ no estaba en el pedido del usuario.
      --title "Qué se propone, en una línea" \
      --body "Por qué lo necesita la materia y por qué no se resuelve en su repo" \
      [--files packages/contract/src/index.ts,apps/web/src/…] \
-     [--compat "Qué pasa con las demás materias y con lo ya sincronizado"]
+     [--compat "Qué pasa con las demás materias y con lo ya publicado"]
    ```
 
    El CLI comprueba que la plataforma esté en `main` y que lo único modificado sea lo que
    `--files` declara; corre los gates (`pnpm typecheck`, `pnpm test`, y `pnpm build` si toca
    `apps/`) **antes** de tocar git; crea la rama; escribe la propuesta con motivo, alcance
    (la lista real de archivos), compatibilidad y los conteos y últimas líneas de los gates;
-   commitea todo en la rama; abre el PR si hay remoto en GitHub y `gh` autenticado, y si no
-   anota la propuesta en `proposals/INBOX.md` de `main` **en un commit aparte**; y vuelve a
-   `main`.
+   commitea todo en la rama **sin trailers de coautoría**; abre el PR si hay remoto en GitHub
+   y `gh` autenticado, y si no anota la propuesta en `proposals/INBOX.md` de `main` **en un
+   commit aparte**; y vuelve a `main`.
 
    Los nombres son predecibles, y conviene nombrarlos en el reporte:
 
@@ -554,7 +600,7 @@ no estaba en el pedido del usuario.
 
 ## Checklist de calidad del wiki
 
-Antes de dar por buena una sincronización:
+Antes de dar por buena una publicación:
 
 - [ ] **Una sola nomenclatura de división.** Todas las páginas usan el mismo campo del
       frontmatter (el de `wiki.divisionField`). Nada de mezclar `unidad` en unas y `modulo`
@@ -574,6 +620,9 @@ Antes de dar por buena una sincronización:
 - [ ] **El material de estudio no tiene referencias rotas.** Cero advertencias `estudio ·`
       en el dry-run: cada `pagina:`, cada `pages[]` de un kit y cada `target` de una tarea
       apuntan a algo que existe.
+- [ ] **El PR solo toca `subjects/<slug>/`.** Nada de la plataforma se cuela en el diff.
+- [ ] **Sin coautoría.** Ningún commit lleva `Co-Authored-By`, `Claude-Session` ni
+      equivalentes.
 - [ ] **Los ids de las tarjetas son estables.** Si hubo que reordenar un mazo, las tarjetas
       que ya se venían repasando llevan `{#id}` para no perder su progreso de SRS.
 - [ ] **Los ids de tarea del plan son únicos** entre todas las modalidades, y una fase que
@@ -585,8 +634,8 @@ Antes de dar por buena una sincronización:
 
 ## Referencias
 
-- `reference/contrato.md` — el contrato completo: config, frontmatter, `Page`, sync y API.
+- `reference/contrato.md` — el contrato completo: config, frontmatter, `Page` y publicación.
 - `reference/config-ejemplo.md` — el `sinapsis.config.json` de Probabilidad y Estadística,
   comentado campo por campo.
 - `reference/herramientas.md` — bundles de herramientas y figuras: manifiesto, qué garantiza
-  el runtime (`window.App`), un bundle mínimo completo y los comandos `tools build/push/list`.
+  el runtime (`window.App`), un bundle mínimo completo y los comandos `tools build | list`.

@@ -4,17 +4,18 @@
   "version": "0.1.0",
   "description": "Plataforma multi-materia para estudiar wikis markdown",
   "packageManager": "pnpm@10.33.1",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "pnpm -r --parallel --filter ./apps/* run dev",
-    "dev:api": "pnpm --filter @sinapsis/api run dev",
+    "dev": "pnpm build:subjects && pnpm --filter @sinapsis/web run dev",
     "dev:web": "pnpm --filter @sinapsis/web run dev",
-    "build": "pnpm -r run build",
+    "build:subjects": "pnpm --filter @sinapsis/cli run start -- site build",
+    "build": "pnpm build:subjects && pnpm -r run build",
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
     "e2e": "pnpm --filter @sinapsis/web run e2e",
-    "db:migrate": "pnpm --filter @sinapsis/api run db:migrate",
     "sinapsis": "pnpm --filter @sinapsis/cli run start --"
   },
   "devDependencies": {

@@ -37,9 +37,9 @@ import {
 } from "./model";
 
 export interface UseStudyResult {
-  /** `GET /api/subjects/:slug/study` — el material que trajo el sync. */
+  /** `api.study.content(slug)` — el material compilado de la materia. */
   content: UseQueryResult<StudyContent>;
-  /** `GET /api/subjects/:slug/study/state` — SRS, tareas hechas e intentos. */
+  /** `api.study.state(slug)` — SRS, tareas hechas e intentos. */
   state: UseQueryResult<StudyState>;
   /** Nunca null: mientras carga es el modelo vacío. */
   model: StudyModel;

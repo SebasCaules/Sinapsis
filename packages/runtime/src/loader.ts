@@ -16,7 +16,7 @@
        promesa y no vuelve a insertar nada;
      · un script que falla corta la carga con un `Error` que nombra la URL.
    ============================================================ */
-import type { FigureMeta, SearchProvider, ViewFn } from "@sinapsis/contract";
+import type { FigureMeta, ProgressProvider, SearchProvider, ViewFn } from "@sinapsis/contract";
 import type { FigureDrawFn } from "./figures.js";
 import type { RuntimeApp } from "./compat.js";
 
@@ -42,6 +42,8 @@ interface LoadedBundle {
   teardowns: Array<() => void>;
   /** Proveedores de búsqueda que registró con `App.registerSearchProvider`. */
   providers: SearchProvider[];
+  /** Proveedores de progreso que registró con `App.registerProgressProvider`. */
+  progress: ProgressProvider[];
 }
 
 export interface BundleLoader {
@@ -52,6 +54,8 @@ export interface BundleLoader {
   ids(): string[];
   /** Proveedores de búsqueda que registraron los bundles cargados. */
   searchProviders(): SearchProvider[];
+  /** Proveedores de progreso que registraron los bundles cargados. */
+  progressProviders(): ProgressProvider[];
   /** Descarga todo (lo usa `uninstallRuntime`). */
   unloadAll(): void;
 }
@@ -86,6 +90,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const realFigure = app.registerFigure;
     const realTeardown = app.onTeardown;
     const realProvider = app.registerSearchProvider;
+    const realProgress = app.registerProgressProvider;
     const realFileUrl = app.toolFileUrl;
     app.registerView = function (id: string, fn: ViewFn) {
       entry.views.push(id);
@@ -104,6 +109,11 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     app.registerSearchProvider = function (fn: SearchProvider) {
       if (typeof fn === "function") entry.providers.push(fn);
     };
+    /* Los pasos que el bundle suma a la barra de cada división también son
+       SUYOS: descargarlo devuelve el progreso a las páginas leídas. */
+    app.registerProgressProvider = function (provider: ProgressProvider) {
+      if (provider && typeof provider.stepsOf === "function") entry.progress.push(provider);
+    };
     /* Un archivo del bundle que NO se declara en el manifiesto —una biblioteca
        pesada que solo hace falta en una pantalla— se pide por su URL. Solo
        resuelve mientras corren los scripts del bundle, que es cuando se sabe
@@ -116,6 +126,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
       app.registerFigure = realFigure;
       app.onTeardown = realTeardown;
       app.registerSearchProvider = realProvider;
+      app.registerProgressProvider = realProgress;
       app.toolFileUrl = realFileUrl;
     };
     return run().then(
@@ -188,6 +199,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
       nodes: [],
       teardowns: [],
       providers: [],
+      progress: [],
     };
     const run = async (): Promise<void> => {
       for (const file of info.data || []) {
@@ -239,6 +251,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const list = entry.teardowns;
     entry.teardowns = [];
     entry.providers = [];
+    entry.progress = [];
     list.forEach((fn) => {
       try {
         fn();
@@ -283,6 +296,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     isLoaded: (id: string) => bundles.has(id),
     ids: () => Array.from(bundles.keys()),
     searchProviders: () => Array.from(bundles.values()).flatMap((b) => b.providers),
+    progressProviders: () => Array.from(bundles.values()).flatMap((b) => b.progress),
     unloadAll: () => {
       Array.from(bundles.keys()).forEach(unloadBundle);
     },

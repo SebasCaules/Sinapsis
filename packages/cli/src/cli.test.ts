@@ -1,14 +1,13 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { createServer } from "node:http";
-import type { AddressInfo } from "node:net";
-import { homedir, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SubjectConfig, SyncPayload, ToolPush } from "@sinapsis/contract";
+import { SiteCatalog, SitePages, SiteSubject, SiteTools } from "@sinapsis/contract/site";
 import { compileStudy, studyCounts } from "@sinapsis/markdown";
 import { cleanArgv, extractCwd, main } from "./cli.js";
 import { gateCounts, shorten } from "./commands/propose.js";
@@ -19,10 +18,9 @@ const run = promisify(execFile);
 
 const PKG_ROOT = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const REPO_ROOT = path.resolve(PKG_ROOT, "../..");
-const PROBA_CONFIG = path.join(REPO_ROOT, "examples/proba/sinapsis.config.json");
-const PROBA_WIKI = process.env["SINAPSIS_PROBA_VAULT"]
-  ? path.join(process.env["SINAPSIS_PROBA_VAULT"], "wiki")
-  : path.join(homedir(), "Desktop/ITBA/26-1C/Proba_Obsidian/wiki");
+/** La materia real vive dentro del repositorio: los tests no necesitan el vault. */
+const PROBA_DIR = path.join(REPO_ROOT, "subjects/proba");
+const PROBA_CONFIG = path.join(PROBA_DIR, "sinapsis.config.json");
 
 /** Contexto de prueba: acumula la salida en memoria. */
 function testCtx(cwd: string, env: Record<string, string | undefined> = {}): Ctx & {
@@ -178,9 +176,9 @@ describe("sinapsis validate", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  it("acepta el config de ejemplo de Proba", async () => {
+  it("acepta el config de la materia real de Proba", async () => {
     const ctx = testCtx(REPO_ROOT);
-    expect(await main(["validate", "--config", "examples/proba/sinapsis.config.json"], ctx)).toBe(0);
+    expect(await main(["validate", "--config", "subjects/proba/sinapsis.config.json"], ctx)).toBe(0);
     expect(ctx.stdout.join("\n")).toContain("Config válido");
     // El material de estudio de Proba trae dos modalidades de plan (S-11).
     expect(ctx.stdout.join("\n")).toContain("Modalidades: Cursada + final (5 fases) · Final directo (1 fase)");
@@ -311,29 +309,18 @@ describe("sinapsis validate", () => {
   });
 });
 
-describe("sinapsis sync --dry-run", () => {
-  const available = existsSync(PROBA_WIKI) && existsSync(PROBA_CONFIG);
-
-  it.skipIf(!available)("compila el wiki de Proba y escribe un payload válido", async () => {
-    const out = path.join(await mkdtemp(path.join(tmpdir(), "sinapsis-sync-")), "payload.json");
+describe("sinapsis publish", () => {
+  it("compila la materia real de Proba y escribe un payload válido (--dry-run)", async () => {
+    const out = path.join(await mkdtemp(path.join(tmpdir(), "sinapsis-publish-")), "payload.json");
     const ctx = testCtx(REPO_ROOT);
     const code = await main(
-      [
-        "sync",
-        "--config",
-        "examples/proba/sinapsis.config.json",
-        "--wiki",
-        PROBA_WIKI,
-        "--dry-run",
-        "--out",
-        out,
-      ],
+      ["publish", "--config", "subjects/proba/sinapsis.config.json", "--dry-run", "--out", out],
       ctx,
     );
 
     expect(ctx.stderr.join("\n")).toBe("");
     expect(code).toBe(0);
-    expect(ctx.stdout.join("\n")).toContain("--dry-run: no se llamó al API");
+    expect(ctx.stdout.join("\n")).toContain("--dry-run: no se tocó el repositorio de la plataforma");
 
     const payload = SyncPayload.parse(JSON.parse(await readFile(out, "utf8")) as unknown);
     expect(payload.pages.length).toBeGreaterThanOrEqual(190);
@@ -341,8 +328,7 @@ describe("sinapsis sync --dry-run", () => {
     expect(payload.generator).toMatch(/^@sinapsis\/cli /);
     expect(new Date(payload.generatedAt).toString()).not.toBe("Invalid Date");
 
-    // El material de estudio de `examples/proba/estudio` viaja en el payload: la
-    // carpeta se resuelve contra el config, así que `--wiki` (otro vault) no la desvía.
+    // El material de estudio de `subjects/proba/estudio` viaja en el payload.
     const study = payload.study;
     expect(study).toBeDefined();
     expect(studyCounts(study!)).toEqual({
@@ -365,13 +351,17 @@ describe("sinapsis sync --dry-run", () => {
       "Estudio: 6 mazos (46 tarjetas) · 1 quiz (15 preguntas) · plan: 6 fases · 8 kits",
     );
 
+    // Los dos bundles reales de la materia compilan y viajarían con ella.
+    expect(ctx.stdout.join("\n")).toContain("bundle proba-tools");
+    expect(ctx.stdout.join("\n")).toContain("bundle proba-exercises");
+
     // Objetivo de la conversión: ninguna referencia rota en el material de estudio.
     expect(ctx.stdout.join("\n")).not.toContain("estudio ·");
 
     await rm(path.dirname(out), { recursive: true, force: true });
   });
 
-  it("no llama al API ni pide token en --dry-run", async () => {
+  it("--dry-run no necesita repositorio de plataforma ni red", async () => {
     const dir = await mkdtemp(path.join(tmpdir(), "sinapsis-dry-"));
     await mkdir(path.join(dir, "wiki", "conceptos"), { recursive: true });
     await writeFile(
@@ -395,19 +385,21 @@ describe("sinapsis sync --dry-run", () => {
       }),
     );
 
+    // `--repo` apunta a algo que ni siquiera es un repositorio: en dry-run no se mira.
     const ctx = testCtx(dir);
-    expect(await main(["sync", "--dry-run"], ctx)).toBe(0);
+    expect(await main(["publish", "--dry-run", "--repo", path.join(dir, "no-existe")], ctx)).toBe(0);
     const stdout = ctx.stdout.join("\n");
     expect(stdout).toContain("páginas: 1");
     expect(stdout).toContain("sin advertencias");
     expect(stdout).toContain("divisiones sin páginas: 2");
+    expect(stdout).toContain("sin bundles de herramientas");
 
     await rm(dir, { recursive: true, force: true });
   });
 
   /** Materia mínima con wiki y sin carpeta `tools/`. */
   async function makeWikiOnly(): Promise<string> {
-    const dir = await mkdtemp(path.join(tmpdir(), "sinapsis-sync-tools-"));
+    const dir = await mkdtemp(path.join(tmpdir(), "sinapsis-publish-tools-"));
     await mkdir(path.join(dir, "wiki", "conceptos"), { recursive: true });
     await writeFile(
       path.join(dir, "wiki", "conceptos", "uno.md"),
@@ -417,17 +409,16 @@ describe("sinapsis sync --dry-run", () => {
     return dir;
   }
 
-  it("--tools sin carpeta de herramientas avisa y SINCRONIZA IGUAL (AC-08)", async () => {
+  it("una materia sin herramientas se publica igual (AC-08)", async () => {
     const dir = await makeWikiOnly();
     const ctx = testCtx(dir);
-    /* El objeto del comando es el wiki: una materia sin herramientas no puede
-       hacerlo salir 1 ni dejar el wiki sin sincronizar. */
-    expect(await main(["sync", "--tools", "--dry-run"], ctx)).toBe(0);
+    /* El objeto del comando es la materia: no tener herramientas no puede
+       hacerlo salir 1 ni dejar el wiki sin publicar. */
+    expect(await main(["publish", "--dry-run"], ctx)).toBe(0);
     expect(ctx.stderr.join("\n")).toBe("");
     const stdout = ctx.stdout.join("\n");
-    expect(stdout).toContain("No encuentro la carpeta de herramientas");
+    expect(stdout).toContain("sin bundles de herramientas");
     expect(stdout).toContain("páginas: 1");
-    expect(stdout).toContain("--dry-run: no se llamó al API");
 
     /* `tools build`, en cambio, SÍ tiene a la carpeta por objeto: sigue saliendo 1. */
     const build = testCtx(dir);
@@ -437,19 +428,7 @@ describe("sinapsis sync --dry-run", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  it("--tools con la carpeta vacía de manifiestos también sincroniza (AC-08)", async () => {
-    const dir = await makeWikiOnly();
-    await mkdir(path.join(dir, "tools", "borrador"), { recursive: true });
-
-    const ctx = testCtx(dir);
-    expect(await main(["sync", "--tools", "--dry-run"], ctx)).toBe(0);
-    expect(ctx.stderr.join("\n")).toBe("");
-    expect(ctx.stdout.join("\n")).toContain("no tiene ningún bundle");
-
-    await rm(dir, { recursive: true, force: true });
-  });
-
-  it("--tools con un bundle que NO compila sigue cortando el sync (AC-08)", async () => {
+  it("un bundle que NO compila corta la publicación (AC-08)", async () => {
     const dir = await makeWikiOnly();
     const bundle = path.join(dir, "tools", "demo");
     await mkdir(bundle, { recursive: true });
@@ -461,87 +440,399 @@ describe("sinapsis sync --dry-run", () => {
     await writeFile(path.join(bundle, "demo.js"), "(function () {\n  var x = ;\n})();\n", "utf8");
 
     const ctx = testCtx(dir);
-    expect(await main(["sync", "--tools", "--dry-run"], ctx)).toBe(1);
+    expect(await main(["publish", "--dry-run"], ctx)).toBe(1);
     expect(ctx.stderr.join("\n")).toContain("SyntaxError");
 
     await rm(dir, { recursive: true, force: true });
   });
 
-  it("sale 1 sin token cuando no es dry-run", async () => {
-    const ctx = testCtx(REPO_ROOT, {});
-    const code = await main(
-      ["sync", "--config", "examples/proba/sinapsis.config.json", "--wiki", PROBA_WIKI],
-      ctx,
+  it("sale 1 si el repositorio de la plataforma no es un repositorio git", async () => {
+    const dir = await makeWikiOnly();
+    const ctx = testCtx(dir, {});
+    expect(await main(["publish", "--repo", dir], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("no es un repositorio git");
+    await rm(dir, { recursive: true, force: true });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sprint 4 — publish contra un repositorio de plataforma de verdad (sin red)
+// ---------------------------------------------------------------------------
+
+/** Página markdown mínima. */
+function page(titulo: string, unidad: string, cuerpo = "Cuerpo."): string {
+  return `---\ntitulo: ${titulo}\nunidad: ${unidad}\nresumen: 'Resumen de ${titulo}.'\n---\n\n${cuerpo}\n`;
+}
+
+/** El vault de la materia «demo»: config, wiki, estudio y un bundle. */
+async function makeVault(base: string): Promise<string> {
+  const dir = path.join(base, "vault");
+  await mkdir(path.join(dir, "wiki", "conceptos"), { recursive: true });
+  await mkdir(path.join(dir, "estudio"), { recursive: true });
+  await writeFile(path.join(dir, "sinapsis.config.json"), JSON.stringify(DEMO_CONFIG, null, 2), "utf8");
+  await writeFile(path.join(dir, "wiki", "conceptos", "uno.md"), page("Uno", "1", "Va a [[Dos]]."), "utf8");
+  await writeFile(path.join(dir, "wiki", "conceptos", "dos.md"), page("Dos", "1"), "utf8");
+  await writeFile(
+    path.join(dir, "estudio", "flashcards-uno.md"),
+    "---\ntipo: flashcards\ntitulo: Uno\nid: uno\n---\n\n## Anverso\n\nReverso.\n",
+    "utf8",
+  );
+  // Un bundle completo, con `dist/` y `scripts/` que NO tienen que viajar.
+  const bundle = path.join(dir, "tools", "demo");
+  await mkdir(path.join(bundle, "data"), { recursive: true });
+  await mkdir(path.join(bundle, "scripts"), { recursive: true });
+  await mkdir(path.join(bundle, "dist"), { recursive: true });
+  await writeFile(path.join(bundle, "sinapsis.tools.json"), JSON.stringify(DEMO_MANIFEST, null, 2), "utf8");
+  await writeFile(path.join(bundle, "demo.js"), DEMO_SCRIPT, "utf8");
+  await writeFile(path.join(bundle, "demo.css"), ".demo { padding: 8px; }\n", "utf8");
+  await writeFile(path.join(bundle, "data", "demo.json"), '{ "n": 1 }\n', "utf8");
+  await writeFile(path.join(bundle, "scripts", "construir.mjs"), "export const x = 1;\n", "utf8");
+  await writeFile(path.join(bundle, "dist", "tool-push.json"), "{}\n", "utf8");
+  return dir;
+}
+
+/**
+ * Repositorio de plataforma de mentira, en `main` y SIN remoto: ya trae una
+ * versión vieja de la materia («vieja.md», que la publicación tiene que borrar).
+ */
+async function makePlatform(base: string): Promise<string> {
+  const dir = path.join(base, "plataforma");
+  const published = path.join(dir, "subjects", "demo");
+  await mkdir(path.join(published, "wiki", "conceptos"), { recursive: true });
+  await mkdir(path.join(published, "estudio"), { recursive: true });
+  await writeFile(
+    path.join(published, "sinapsis.config.json"),
+    JSON.stringify({ ...DEMO_CONFIG, wiki: { ...DEMO_CONFIG.wiki, root: "wiki", study: "estudio" } }, null, 2),
+    "utf8",
+  );
+  await writeFile(path.join(published, "wiki", "conceptos", "uno.md"), page("Uno", "1", "Va a [[Dos]]."), "utf8");
+  await writeFile(path.join(published, "wiki", "conceptos", "vieja.md"), page("Vieja", "1"), "utf8");
+
+  const git = (...args: string[]) => run("git", args, { cwd: dir });
+  await git("init", "-q", "-b", "main", ".");
+  await git("config", "user.email", "prueba@sinapsis.local");
+  await git("config", "user.name", "Prueba");
+  await git("add", "-A");
+  await git("commit", "-qm", "inicial");
+  return dir;
+}
+
+describe("sinapsis publish --no-pr", () => {
+  let base = "";
+
+  beforeEach(async () => {
+    base = await mkdtemp(path.join(tmpdir(), "sinapsis-plataforma-"));
+  });
+
+  afterEach(async () => {
+    await rm(base, { recursive: true, force: true });
+  });
+
+  it("deja la materia en una rama nueva sin tocar el árbol ni la rama del usuario", async () => {
+    const vault = await makeVault(base);
+    const repo = await makePlatform(base);
+    const git = (...args: string[]) => run("git", ["-C", repo, ...args]);
+
+    // El usuario está trabajando: en otra rama y con un archivo sin commitear.
+    await git("checkout", "-q", "-b", "wip");
+    await writeFile(path.join(repo, "borrador.txt"), "no lo toques\n", "utf8");
+    const antes = (await git("status", "--porcelain")).stdout;
+
+    const ctx = testCtx(vault);
+    const code = await main(["publish", "--repo", repo, "--no-pr", "--branch", "subject/demo-20260906"], ctx);
+    expect(ctx.stderr.join("\n")).toBe("");
+    expect(code).toBe(0);
+
+    // 1. La rama existe, el usuario sigue en la suya y su borrador está intacto.
+    expect((await git("branch", "--list", "subject/demo-20260906")).stdout).toContain("subject/demo-20260906");
+    expect((await git("rev-parse", "--abbrev-ref", "HEAD")).stdout.trim()).toBe("wip");
+    expect((await git("status", "--porcelain")).stdout).toBe(antes);
+    // 2. El worktree temporal se desmontó.
+    expect((await git("worktree", "list")).stdout.trim().split("\n")).toHaveLength(1);
+
+    // 3. Lo copiado: reemplazo COMPLETO de subjects/demo (`vieja.md` ya no está).
+    const files = (await git("ls-tree", "-r", "--name-only", "subject/demo-20260906", "--", "subjects/demo")).stdout
+      .trim()
+      .split("\n")
+      .sort();
+    expect(files).toEqual([
+      "subjects/demo/estudio/flashcards-uno.md",
+      "subjects/demo/sinapsis.config.json",
+      "subjects/demo/tools/demo/data/demo.json",
+      "subjects/demo/tools/demo/demo.css",
+      "subjects/demo/tools/demo/demo.js",
+      "subjects/demo/tools/demo/sinapsis.tools.json",
+      "subjects/demo/wiki/conceptos/dos.md",
+      "subjects/demo/wiki/conceptos/uno.md",
+    ]);
+
+    // 4. El config publicado apunta a `wiki/` y `estudio/`.
+    const config = SubjectConfig.parse(
+      JSON.parse((await git("show", "subject/demo-20260906:subjects/demo/sinapsis.config.json")).stdout) as unknown,
     );
-    expect(code).toBe(1);
-    expect(ctx.stderr.join("\n")).toContain("Falta el token de sync");
+    expect(config.wiki.root).toBe("wiki");
+    expect(config.wiki.study).toBe("estudio");
+    expect(config.slug).toBe("demo");
+
+    // 5. El mensaje del commit: título, conteos y NINGÚN trailer de coautoría.
+    const message = (await git("log", "-1", "--format=%B", "subject/demo-20260906")).stdout;
+    expect(message).toContain("Materia demo: Demo — 2 páginas, 1 bundle");
+    expect(message).toContain("Páginas: 2");
+    expect(message).toContain("Bundles: 1");
+    expect(message).not.toMatch(/Co-Authored-By/i);
+    expect(message).not.toMatch(/Claude/i);
+
+    // 6. El informe dice dónde quedó, sin hablar de PR ni de red.
+    expect(ctx.stdout.join("\n")).toContain("--no-pr: la rama queda local");
+    expect(ctx.stdout.join("\n")).toContain("https://sebascaules.github.io/Sinapsis/m/demo");
+  });
+
+  it("una segunda publicación sin cambios no crea ninguna rama", async () => {
+    const vault = await makeVault(base);
+    const repo = await makePlatform(base);
+    const git = (...args: string[]) => run("git", ["-C", repo, ...args]);
+
+    // Se integra la primera publicación en `main` para que el estado quede al día.
+    expect(await main(["publish", "--repo", repo, "--no-pr", "--branch", "subject/demo-1"], testCtx(vault))).toBe(0);
+    await git("merge", "--ff-only", "subject/demo-1");
+
+    const ctx = testCtx(vault);
+    expect(await main(["publish", "--repo", repo, "--no-pr", "--branch", "subject/demo-2"], ctx)).toBe(0);
+    expect(ctx.stdout.join("\n")).toContain("no hay nada que proponer");
+    expect((await git("branch", "--list", "subject/demo-2")).stdout.trim()).toBe("");
   });
 });
 
 describe("sinapsis status", () => {
-  /** API de mentira: solo lo que `status` consulta. `study` responde lo que se le pida. */
-  async function withApi(
-    study: { status: number; body?: unknown },
-    run: (api: string) => Promise<void>,
-  ): Promise<void> {
-    const config = SubjectConfig.parse(
-      JSON.parse(await readFile(PROBA_CONFIG, "utf8")) as unknown,
-    );
-    const server = createServer((req, res) => {
-      const url = req.url ?? "";
-      const send = (status: number, body: unknown) => {
-        res.writeHead(status, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(body));
-      };
-      if (url === "/api/auth/dev") {
-        res.writeHead(200, { "Content-Type": "application/json", "Set-Cookie": "sid=x; Path=/" });
-        res.end("{}");
-        return;
-      }
-      if (url === "/api/subjects/proba") {
-        send(200, { config, pages: [], studied: [], placeholder: false, lastSyncAt: "2026-09-05T00:00:00.000Z" });
-        return;
-      }
-      if (url === "/api/subjects/proba/study") {
-        send(study.status, study.body ?? { error: "not found" });
-        return;
-      }
-      send(404, { error: "not found" });
-    });
-    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-    const port = (server.address() as AddressInfo).port;
-    try {
-      await run(`http://127.0.0.1:${port}`);
-    } finally {
-      await new Promise<void>((resolve) => server.close(() => resolve()));
-    }
-  }
+  let base = "";
 
-  it("resume el material de estudio que devuelve el API", async () => {
-    await withApi(
-      {
-        status: 200,
-        body: {
-          decks: [{ id: "d", title: "Mazo", cards: [{ id: "d:1", front: "a", back: "b" }] }],
-          quizzes: [],
-          plan: null,
-          kits: [],
-        },
-      },
-      async (api) => {
-        const ctx = testCtx(REPO_ROOT);
-        expect(await main(["status", "--config", "examples/proba/sinapsis.config.json", "--api", api], ctx)).toBe(0);
-        expect(ctx.stdout.join("\n")).toContain("Estudio: 1 mazo (1 tarjeta) · 0 quizzes (0 preguntas) · plan: no · 0 kits");
-      },
-    );
+  beforeEach(async () => {
+    base = await mkdtemp(path.join(tmpdir(), "sinapsis-status-"));
   });
 
-  it("dice «API sin soporte de estudio» cuando la ruta responde 404", async () => {
-    await withApi({ status: 404 }, async (api) => {
-      const ctx = testCtx(REPO_ROOT);
-      expect(await main(["status", "--config", "examples/proba/sinapsis.config.json", "--api", api], ctx)).toBe(0);
-      expect(ctx.stdout.join("\n")).toContain("API sin soporte de estudio");
-    });
+  afterEach(async () => {
+    await rm(base, { recursive: true, force: true });
+  });
+
+  it("compara el vault con lo publicado y nombra lo nuevo, lo cambiado y lo borrado", async () => {
+    const vault = await makeVault(base);
+    const repo = await makePlatform(base);
+
+    const ctx = testCtx(vault);
+    expect(await main(["status", "--repo", repo], ctx)).toBe(0);
+    expect(ctx.stderr.join("\n")).toBe("");
+
+    const stdout = ctx.stdout.join("\n");
+    expect(stdout).toContain("contra lo publicado");
+    expect(stdout).toMatch(/nuevas\s+1\s+dos/);
+    expect(stdout).toMatch(/borradas\s+1\s+vieja/);
+    expect(stdout).toMatch(/iguales\s+1/);
+    expect(stdout).toContain("el material de estudio local difiere del publicado");
+    expect(stdout).toContain("Publique los cambios con `sinapsis publish`");
+    expect(stdout).toContain("https://sebascaules.github.io/Sinapsis/m/demo");
+  });
+
+  it("dice que la materia todavía no está publicada", async () => {
+    const vault = await makeVault(base);
+    const repo = await makePlatform(base);
+    await rm(path.join(repo, "subjects", "demo"), { recursive: true, force: true });
+
+    const ctx = testCtx(vault);
+    expect(await main(["status", "--repo", repo], ctx)).toBe(0);
+    expect(ctx.stdout.join("\n")).toContain("la materia todavía no está en");
+    expect(ctx.stdout.join("\n")).toContain("Publíquela con `sinapsis publish`");
+  });
+
+  it("no reporta diferencias cuando el vault y lo publicado coinciden", async () => {
+    const vault = await makeVault(base);
+    const repo = await makePlatform(base);
+    // Se publica y se integra: a partir de ahí el vault y la plataforma son lo mismo.
+    expect(await main(["publish", "--repo", repo, "--no-pr", "--branch", "subject/demo-1"], testCtx(vault))).toBe(0);
+    await run("git", ["-C", repo, "merge", "--ff-only", "subject/demo-1"]);
+
+    const ctx = testCtx(vault);
+    expect(await main(["status", "--repo", repo], ctx)).toBe(0);
+    expect(ctx.stdout.join("\n")).toContain("al día: no hay nada que publicar");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sprint 4 — site build
+// ---------------------------------------------------------------------------
+
+describe("sinapsis site build", () => {
+  let base = "";
+  let subjects = "";
+  let out = "";
+
+  /** Una materia fuente completa dentro de `subjects/<slug>/`. */
+  async function makeSource(slug: string, opts: { tools?: boolean } = {}): Promise<string> {
+    const dir = path.join(subjects, slug);
+    await mkdir(path.join(dir, "wiki", "conceptos"), { recursive: true });
+    await mkdir(path.join(dir, "estudio"), { recursive: true });
+    await writeFile(
+      path.join(dir, "sinapsis.config.json"),
+      JSON.stringify({ ...DEMO_CONFIG, slug, wiki: { ...DEMO_CONFIG.wiki, root: "wiki", study: "estudio" } }, null, 2),
+      "utf8",
+    );
+    await writeFile(path.join(dir, "wiki", "conceptos", "uno.md"), page("Uno", "1", "Va a [[Dos]] y a [[Tres]]."), "utf8");
+    await writeFile(path.join(dir, "wiki", "conceptos", "dos.md"), page("Dos", "1", "Vuelve a [[Uno]]."), "utf8");
+    await writeFile(path.join(dir, "wiki", "conceptos", "tres.md"), page("Tres", "1"), "utf8");
+    await writeFile(
+      path.join(dir, "estudio", "flashcards-uno.md"),
+      "---\ntipo: flashcards\ntitulo: Uno\nid: uno\n---\n\n## Anverso\n\nReverso.\n",
+      "utf8",
+    );
+    if (opts.tools !== false) {
+      const bundle = path.join(dir, "tools", "demo");
+      await mkdir(path.join(bundle, "data"), { recursive: true });
+      await writeFile(path.join(bundle, "sinapsis.tools.json"), JSON.stringify(DEMO_MANIFEST, null, 2), "utf8");
+      await writeFile(path.join(bundle, "demo.js"), DEMO_SCRIPT, "utf8");
+      await writeFile(path.join(bundle, "demo.css"), ".demo { padding: 8px; }\n", "utf8");
+      await writeFile(path.join(bundle, "data", "demo.json"), '{ "n": 1 }\n', "utf8");
+    }
+    return dir;
+  }
+
+  beforeEach(async () => {
+    base = await mkdtemp(path.join(tmpdir(), "sinapsis-site-"));
+    subjects = path.join(base, "subjects");
+    out = path.join(base, "salida");
+    await mkdir(subjects, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await rm(base, { recursive: true, force: true });
+  });
+
+  const json = async (...parts: string[]): Promise<unknown> =>
+    JSON.parse(await readFile(path.join(out, ...parts), "utf8")) as unknown;
+
+  it("escribe los cuatro archivos del contrato y los archivos del bundle", async () => {
+    await makeSource("demo");
+    const ctx = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], ctx)).toBe(0);
+    expect(ctx.stderr.join("\n")).toBe("");
+
+    // 1. Catálogo.
+    const catalog = SiteCatalog.parse(await json("index.json"));
+    expect(catalog.subjects).toHaveLength(1);
+    const entry = catalog.subjects[0]!;
+    expect(entry.slug).toBe("demo");
+    // Las tres páginas cuentan como contenido; no hay índice ni registro.
+    expect(entry.pagesCount).toBe(3);
+    expect(entry.totalPages).toBe(3);
+    expect(entry.toolsCount).toBe(1);
+    expect(entry.divisionsCount).toBe(1);
+    expect(new Date(entry.builtAt).toString()).not.toBe("Invalid Date");
+
+    // 2. La materia: config, páginas sin cuerpo, enlaces resueltos y estudio.
+    const subject = SiteSubject.parse(await json("demo", "subject.json"));
+    expect(subject.pages.map((p) => p.slug).sort()).toEqual(["dos", "tres", "uno"]);
+    expect(subject.pages[0]).not.toHaveProperty("body");
+    // `uno → dos`, `uno → tres` y `dos → uno`: sin auto-enlaces, sin repetidos y
+    // solo hacia páginas que existen.
+    expect(subject.links.sort((a, b) => `${a.from}${a.to}`.localeCompare(`${b.from}${b.to}`))).toEqual([
+      { from: "dos", to: "uno" },
+      { from: "uno", to: "dos" },
+      { from: "uno", to: "tres" },
+    ]);
+    expect(subject.study.decks.map((d) => d.id)).toEqual(["uno"]);
+    expect(subject.warnings).toEqual([]);
+
+    // 3. Los cuerpos.
+    const pages = SitePages.parse(await json("demo", "pages.json"));
+    expect(Object.keys(pages.pages).sort()).toEqual(["dos", "tres", "uno"]);
+    expect(pages.pages["uno"]!.body).toContain("[[Dos]]");
+    expect(pages.pages["uno"]!.links.map((l) => l.slug).sort()).toEqual(["dos", "tres"]);
+
+    // 4. Los bundles: índice con la base relativa y los archivos escritos.
+    const tools = SiteTools.parse(await json("demo", "tools.json"));
+    expect(tools.tools).toHaveLength(1);
+    expect(tools.tools[0]!.base).toBe("subjects/demo/tools/demo");
+    expect(tools.tools[0]!.bytes).toBeGreaterThan(0);
+    expect(tools.tools[0]!.updatedAt).toBe(entry.builtAt);
+    expect(await readFile(path.join(out, "demo/tools/demo/demo.js"), "utf8")).toContain("registerView");
+    expect(existsSync(path.join(out, "demo/tools/demo/data/demo.json"))).toBe(true);
+  });
+
+  it("--only compila una sola materia y no borra el resto de la salida", async () => {
+    await makeSource("demo");
+    await makeSource("otra");
+    const primero = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], primero)).toBe(0);
+    expect(SiteCatalog.parse(await json("index.json")).subjects.map((s) => s.slug)).toEqual(["demo", "otra"]);
+
+    // Se cambia solo «demo» y se recompila solo «demo».
+    await writeFile(path.join(subjects, "demo", "wiki", "conceptos", "cuatro.md"), page("Cuatro", "1"), "utf8");
+    const ctx = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out, "--only", "demo"], ctx)).toBe(0);
+
+    const catalog = SiteCatalog.parse(await json("index.json"));
+    expect(catalog.subjects.map((s) => s.slug)).toEqual(["demo", "otra"]);
+    expect(catalog.subjects.find((s) => s.slug === "demo")!.totalPages).toBe(4);
+    expect(existsSync(path.join(out, "otra", "subject.json"))).toBe(true);
+
+    // Una materia que no existe es un error, no un build vacío.
+    const falta = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out, "--only", "no-existe"], falta)).toBe(1);
+    expect(falta.stderr.join("\n")).toContain('No encuentro la materia "no-existe"');
+  });
+
+  it("sin --only limpia de la salida las materias que ya no están", async () => {
+    await makeSource("demo");
+    await makeSource("otra");
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], testCtx(base))).toBe(0);
+    expect(existsSync(path.join(out, "otra", "subject.json"))).toBe(true);
+
+    await rm(path.join(subjects, "otra"), { recursive: true, force: true });
+    const ctx = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], ctx)).toBe(0);
+    expect(existsSync(path.join(out, "otra"))).toBe(false);
+    expect(SiteCatalog.parse(await json("index.json")).subjects.map((s) => s.slug)).toEqual(["demo"]);
+    expect(ctx.stdout.join("\n")).toContain("se quitó de la salida");
+  });
+
+  it("un bundle que no compila hace fallar el build y no escribe nada", async () => {
+    await makeSource("demo");
+    await writeFile(path.join(subjects, "demo", "tools", "demo", "demo.js"), "(function () { var x = ; })();\n", "utf8");
+
+    const ctx = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("SyntaxError");
+    expect(existsSync(path.join(out, "index.json"))).toBe(false);
+  });
+
+  it("--strict convierte las advertencias en un fallo", async () => {
+    await makeSource("demo");
+    // Un wikilink roto: el compilador lo advierte y el build sigue saliendo 0…
+    await writeFile(path.join(subjects, "demo", "wiki", "conceptos", "tres.md"), page("Tres", "1", "Va a [[Inexistente]]."), "utf8");
+
+    const normal = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], normal)).toBe(0);
+    expect(SiteSubject.parse(await json("demo", "subject.json")).warnings.join("\n")).toContain("inexistente");
+
+    // …salvo con --strict.
+    const strict = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out, "--strict"], strict)).toBe(1);
+    expect(strict.stderr.join("\n")).toContain("--strict");
+  });
+
+  it("suma las advertencias de coherencia que levantaba el API", async () => {
+    const dir = await makeSource("demo", { tools: false });
+    // Una página con una división que el config no declara.
+    await writeFile(path.join(dir, "wiki", "conceptos", "tres.md"), page("Tres", "9"), "utf8");
+
+    const ctx = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], ctx)).toBe(0);
+    const warnings = SiteSubject.parse(await json("demo", "subject.json")).warnings.join("\n");
+    expect(warnings).toContain('la división "9" no está declarada en el config');
+  });
+
+  it("sale 1 si la carpeta de materias no existe", async () => {
+    const ctx = testCtx(base);
+    expect(await main(["site", "build", "--subjects", path.join(base, "no-existe"), "--out", out], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("No encuentro la carpeta de materias");
   });
 });
 
@@ -800,63 +1091,6 @@ describe("sinapsis tools build", () => {
     const ok = testCtx(await makeSubject(await mkdtemp(path.join(tmpdir(), "sinapsis-tools-ok-"))));
     expect(await main(["validate"], ok)).toBe(0);
     expect(ok.stdout.join("\n")).not.toContain("ningún bundle");
-  });
-});
-
-describe("sinapsis tools push", () => {
-  let base = "";
-
-  beforeEach(async () => {
-    base = await mkdtemp(path.join(tmpdir(), "sinapsis-push-"));
-  });
-
-  afterEach(async () => {
-    await rm(base, { recursive: true, force: true });
-  });
-
-  it("sube el bundle con el token y muestra el ToolInfo que devuelve el API", async () => {
-    const dir = await makeSubject(base);
-    const received: Array<{ url: string; auth: string; body: unknown }> = [];
-    const server = createServer((req, res) => {
-      const chunks: Buffer[] = [];
-      req.on("data", (chunk: Buffer) => chunks.push(chunk));
-      req.on("end", () => {
-        const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as { manifest: unknown };
-        received.push({ url: `${req.method} ${req.url}`, auth: req.headers.authorization ?? "", body });
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({
-            manifest: body.manifest,
-            bytes: 1234,
-            updatedAt: "2026-09-06T00:00:00.000Z",
-            base: "/api/subjects/demo/tools/demo/files",
-          }),
-        );
-      });
-    });
-    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-    const port = (server.address() as AddressInfo).port;
-
-    try {
-      const ctx = testCtx(dir);
-      const code = await main(["tools", "push", "--api", `http://127.0.0.1:${port}`, "--token", "secreto"], ctx);
-      expect(ctx.stderr.join("\n")).toBe("");
-      expect(code).toBe(0);
-      expect(received).toHaveLength(1);
-      expect(received[0]!.url).toBe("PUT /api/subjects/demo/tools/demo");
-      expect(received[0]!.auth).toBe("Bearer secreto");
-      expect(ctx.stdout.join("\n")).toContain("push OK · demo 0.1.0");
-      expect(ctx.stdout.join("\n")).toContain("/m/demo/t/demo");
-    } finally {
-      await new Promise<void>((resolve) => server.close(() => resolve()));
-    }
-  });
-
-  it("sale 1 sin token", async () => {
-    const dir = await makeSubject(base);
-    const ctx = testCtx(dir, {});
-    expect(await main(["tools", "push"], ctx)).toBe(1);
-    expect(ctx.stderr.join("\n")).toContain("Falta el token de sync");
   });
 });
 

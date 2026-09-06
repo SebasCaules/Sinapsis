@@ -1,0 +1,14 @@
+[
+  {
+    "id": "repaso-final",
+    "title": "Repaso final",
+    "description": "Todo lo que entra en la evaluación de la materia demo, en un solo lugar.",
+    "icon": "layers",
+    "color": "--u4",
+    "divisions": ["1", "2", "3"],
+    "pages": ["demo-formula-clave", "demo-tecnica", "demo-repaso"],
+    "decks": ["demo-basico"],
+    "quizzes": ["quiz-demo"],
+    "tools": [{ "target": "demo", "label": "Vista de demostración", "icon": "flask" }]
+  }
+]

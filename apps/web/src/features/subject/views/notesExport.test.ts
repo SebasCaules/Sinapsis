@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { SubjectConfig, type Note, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
-import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
 import {
   fold,
