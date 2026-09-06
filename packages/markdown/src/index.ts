@@ -25,6 +25,9 @@ export type {
   CompileWikiResult,
 } from "./compile.js";
 
+export { compileStudy, studyCounts, isEmptyStudy, emptyStudy, splitSections } from "./study.js";
+export type { CompileStudyOptions, CompileStudyResult, StudyCounts, StudySection } from "./study.js";
+
 export { scaffoldConfig, inspectWiki, pendingFields, singularizeEs, isDirectory, TODO } from "./scaffold.js";
 export type { ScaffoldOptions, WikiSurvey, FolderSurvey } from "./scaffold.js";
 

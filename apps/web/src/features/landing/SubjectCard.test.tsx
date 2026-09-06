@@ -79,8 +79,24 @@ describe("<SubjectCard/>", () => {
 
   it("enlaza a la materia y marca las que no se sincronizaron", () => {
     renderCard(card({ placeholder: true }));
-    const link = screen.getByRole("link");
+    /* El enlace grande de la tarjeta se nombra con el nombre de la materia. */
+    const link = screen.getByRole("link", { name: "Probabilidad y Estadística" });
     expect(link.getAttribute("href")).toBe("/m/proba");
     expect(screen.getByText("Sin sincronizar")).toBeTruthy();
+  });
+
+  it("ofrece los atajos de estudio del pie", () => {
+    renderCard(card());
+    expect(screen.getByRole("link", { name: "Repasar" }).getAttribute("href")).toBe("/m/proba/flashcards");
+    expect(screen.getByRole("link", { name: "Plan" }).getAttribute("href")).toBe("/m/proba/plan");
+  });
+
+  it("en gestión la tarjeta no navega: ni enlace grande ni atajos", () => {
+    render(
+      <MemoryRouter>
+        <SubjectCard card={card()} manage semesters={["2026-1C"]} />
+      </MemoryRouter>,
+    );
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
   });
 });

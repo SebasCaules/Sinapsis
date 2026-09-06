@@ -10,11 +10,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
-import { UiIcon } from "@/components/platform";
+import { Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { Markdown } from "../markdown/Markdown";
 import { ErrorCard, SheetSkeleton } from "../components/States";
-import { usePage, useToggleStudied } from "../useSubject";
+import {
+  useDeleteNote,
+  usePage,
+  useSaveNote,
+  useStudyState,
+  useToggleBookmark,
+  useToggleStudied,
+} from "../useSubject";
 import css from "./ReaderView.module.css";
 
 export function ReaderView() {
@@ -23,6 +30,8 @@ export function ReaderView() {
   const location = useLocation();
   const query = usePage(slug, pageSlug);
   const toggleStudied = useToggleStudied(slug);
+  const { bookmarks } = useStudyState(slug);
+  const toggleBookmark = useToggleBookmark(slug);
   const [sideOpen, setSideOpen] = useState(true);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
   const sourcesRef = useRef<HTMLElement>(null);
@@ -89,12 +98,19 @@ export function ReaderView() {
   const color = division?.color ?? "var(--primary)";
   const sources = page.sources.map((s) => ({ slug: s, page: model.bySlug.get(s) }));
   const unit = model.config.division.singular.toLowerCase();
+  const bookmarked = bookmarks.has(pageSlug);
   const onToggleStudied = () => toggleStudied.mutate({ page: pageSlug, studied: !studied });
+  const onToggleBookmark = () => toggleBookmark.mutate({ page: pageSlug, on: !bookmarked });
 
   return (
     <div className={css.layout} style={{ ["--ucol" as string]: color }}>
       <div className={css.column}>
-        <StudyActions studied={studied} onToggle={onToggleStudied} />
+        <StudyActions
+          studied={studied}
+          onToggle={onToggleStudied}
+          bookmarked={bookmarked}
+          onToggleBookmark={onToggleBookmark}
+        />
 
         <article className={css.sheet} ref={sheetRef}>
           <header className={css.sheetHead}>
@@ -171,7 +187,13 @@ export function ReaderView() {
               arriba para marcar la página o pasar a la siguiente. */}
           <footer className={css.foot}>
             <PrevNext slug={slug} prev={prev} next={next} unit={unit} foot />
-            <StudyActions studied={studied} onToggle={onToggleStudied} foot />
+            <StudyActions
+              studied={studied}
+              onToggle={onToggleStudied}
+              bookmarked={bookmarked}
+              onToggleBookmark={onToggleBookmark}
+              foot
+            />
           </footer>
         </article>
       </div>
@@ -205,6 +227,8 @@ export function ReaderView() {
               <p className={css.cardEmpty}>Esta página no tiene secciones.</p>
             )}
           </section>
+
+          <NotesCard slug={slug} page={pageSlug} exists={exists} />
 
           {sources.length ? (
             <section className={css.card} ref={sourcesRef} aria-labelledby="reader-sources">
@@ -256,14 +280,18 @@ export function ReaderView() {
   );
 }
 
-/** «Marcar estudiado / Estudiada» + el hueco de Favoritos. Va arriba y al pie. */
+/** «Marcar estudiado / Estudiada» y «Guardar / Guardada». Va arriba y al pie. */
 function StudyActions({
   studied,
   onToggle,
+  bookmarked,
+  onToggleBookmark,
   foot = false,
 }: {
   studied: boolean;
   onToggle: () => void;
+  bookmarked: boolean;
+  onToggleBookmark: () => void;
   foot?: boolean;
 }) {
   return (
@@ -280,13 +308,14 @@ function StudyActions({
       </button>
       <button
         type="button"
-        className={css.chipDisabled}
-        disabled
-        aria-disabled="true"
-        title="Favoritos: próximamente"
+        className={css.chipSave}
+        data-on={bookmarked ? "true" : undefined}
+        onClick={onToggleBookmark}
+        aria-pressed={bookmarked}
+        title={bookmarked ? "Quitar de favoritos" : "Guardar en favoritos"}
       >
         <UiIcon name="bookmark" size={13} />
-        Guardar
+        {bookmarked ? "Guardada" : "Guardar"}
       </button>
     </div>
   );
@@ -324,6 +353,176 @@ function PrevNext({
         <span className={css.prevOff}>Última de la {unit}</span>
       )}
     </nav>
+  );
+}
+
+/** Rótulo del estado del apunte: «Guardado · 14:32». */
+function savedAt(value: string): string {
+  const at = Date.parse(value);
+  if (Number.isNaN(at)) return "Guardado";
+  return `Guardado · ${new Date(at).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+const NOTE_ROWS_MIN = 6;
+const NOTE_ROWS_MAX = 20;
+/** Rebote del guardado automático mientras se escribe. */
+const NOTE_DEBOUNCE = 800;
+
+/**
+ * Tarjeta «APUNTES»: lo que el usuario escribe sobre ESTA página.
+ *
+ * Tres reglas, en este orden:
+ *  1. Nunca se pierde nada: se guarda solo 800 ms después de la última tecla, y
+ *     también al salir del campo, con ⌘S y con el botón.
+ *  2. Al perder el foco se ve el markdown ya compuesto (mismo motor que la
+ *     página): el apunte se lee como se va a leer después, no como se escribió.
+ *  3. Vaciar el campo BORRA el apunte: no queda una entrada en blanco colgando
+ *     en «Mis apuntes».
+ */
+function NotesCard({ slug, page, exists }: { slug: string; page: string; exists: (target: string) => boolean }) {
+  const { notes } = useStudyState(slug);
+  const stored = notes.get(page);
+  const save = useSaveNote(slug);
+  const remove = useDeleteNote(slug);
+
+  const [draft, setDraft] = useState(stored?.body ?? "");
+  const [dirty, setDirty] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const areaRef = useRef<HTMLTextAreaElement>(null);
+  const timerRef = useRef(0);
+  const dirtyRef = useRef(false);
+
+  /* Cambiar de página cambia de apunte: se descarta el borrador de la anterior
+     (ya se guardó al desmontarse el temporizador o al perder el foco). */
+  useEffect(() => {
+    setDraft(notes.get(page)?.body ?? "");
+    setDirty(false);
+    dirtyRef.current = false;
+    setEditing(false);
+    // El apunte llega con el estado de estudio: solo se sigue al cambiar de página.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  /* Cuando la consulta responde (o el servidor devuelve la fecha real) se repone
+     el texto, pero SOLO si no hay nada escrito sin guardar. */
+  useEffect(() => {
+    if (dirtyRef.current) return;
+    setDraft(stored?.body ?? "");
+  }, [stored?.body, stored?.updatedAt]);
+
+  const commit = useCallback(
+    (body: string) => {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = 0;
+      dirtyRef.current = false;
+      setDirty(false);
+      const trimmed = body.trim();
+      if (!trimmed) {
+        if (stored) remove.mutate({ page });
+        return;
+      }
+      if (stored?.body === body) return;
+      save.mutate({ page, body });
+    },
+    [page, remove, save, stored],
+  );
+
+  /* Un desmontaje con el temporizador vivo (cerrar la pestaña, ir a otra página)
+     no puede tirar lo escrito. */
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const commitRef = useRef(commit);
+  commitRef.current = commit;
+  useEffect(
+    () => () => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        if (dirtyRef.current) commitRef.current(draftRef.current);
+      }
+    },
+    [],
+  );
+
+  const onChange = (value: string) => {
+    setDraft(value);
+    setDirty(true);
+    dirtyRef.current = true;
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => commit(value), NOTE_DEBOUNCE);
+  };
+
+  const rows = Math.min(NOTE_ROWS_MAX, Math.max(NOTE_ROWS_MIN, draft.split("\n").length + 1));
+  const showPreview = !editing && draft.trim().length > 0;
+
+  return (
+    <section className={css.card} aria-labelledby="reader-notes">
+      <div className={css.cardHead} id="reader-notes">
+        <Icon name="pencil" size={13} />
+        APUNTES
+        <span className={css.noteState} data-dirty={dirty ? "true" : undefined}>
+          {dirty ? "Sin guardar" : stored ? savedAt(stored.updatedAt) : ""}
+        </span>
+      </div>
+
+      {showPreview ? (
+        <button
+          type="button"
+          className={css.notePreview}
+          onClick={() => {
+            setEditing(true);
+            window.requestAnimationFrame(() => areaRef.current?.focus());
+          }}
+          title="Editar el apunte"
+        >
+          <Markdown body={draft} subject={slug} exists={exists} />
+        </button>
+      ) : (
+        <textarea
+          ref={areaRef}
+          className={css.noteArea}
+          value={draft}
+          rows={rows}
+          placeholder="Lo que quiera recordar de esta página…"
+          aria-label="Apunte de esta página"
+          onChange={(event) => onChange(event.target.value)}
+          onFocus={() => setEditing(true)}
+          onBlur={() => {
+            setEditing(false);
+            if (dirtyRef.current) commit(draft);
+          }}
+          onKeyDown={(event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+              event.preventDefault();
+              commit(draft);
+            }
+          }}
+        />
+      )}
+
+      <div className={css.noteFoot}>
+        <button
+          type="button"
+          className={css.noteSave}
+          onClick={() => commit(draft)}
+          disabled={!dirty}
+          title="Guardar el apunte (⌘S)"
+        >
+          Guardar
+        </button>
+        {stored ? (
+          <button
+            type="button"
+            className={css.noteDelete}
+            onClick={() => {
+              setDraft("");
+              commit("");
+            }}
+          >
+            Borrar
+          </button>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

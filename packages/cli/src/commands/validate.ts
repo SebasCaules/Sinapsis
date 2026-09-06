@@ -1,5 +1,6 @@
-/** `sinapsis validate` — valida el `sinapsis.config.json` contra el contrato. */
+/** `sinapsis validate` — valida el `sinapsis.config.json` y el material de estudio. */
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 import pc from "picocolors";
 import {
   BUILTIN_VIEWS,
@@ -8,7 +9,9 @@ import {
   isExternalUrl,
   type SubjectConfig as SubjectConfigType,
 } from "@sinapsis/contract";
+import { compileStudy, formatIssues } from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
+import { studyLine } from "../report.js";
 
 export interface ValidateOptions {
   config?: string;
@@ -70,6 +73,19 @@ export async function runValidate(opts: ValidateOptions, ctx: Ctx): Promise<numb
   ctx.out(
     `  ${loaded.config.slug} · ${loaded.config.name} · ${loaded.config.divisions.length} ${loaded.config.division.plural.toLowerCase()} · ${loaded.config.pageTypes.length} tipo(s) de página`,
   );
+
+  // Material de estudio: mismas advertencias que en `sync`, salvo las que
+  // necesitan las páginas del wiki (`validate` no lo compila): esas se ven en
+  // el dry-run del sync.
+  const studyDir = path.resolve(path.dirname(loaded.path), loaded.config.wiki.study);
+  const { study, issues } = await compileStudy({ dir: studyDir, config: loaded.config });
+  studyLine(ctx, study);
+  const studyWarnings = formatIssues(issues);
+  for (const line of studyWarnings) ctx.out(pc.yellow(`  aviso · ${line}`));
+  if (studyWarnings.length > 0) {
+    ctx.out(pc.dim("  (las referencias a páginas se verifican en `sinapsis sync --dry-run`)"));
+  }
+
   for (const problem of warnings) {
     ctx.out(pc.yellow(`  aviso · ${problem.field}: ${problem.message}`));
   }

@@ -6,9 +6,10 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { plural, routes, type PageMeta } from "@sinapsis/contract";
-import { UiIcon } from "@/components/platform";
+import { Icon, UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
 import { useSubjectCtx } from "../context";
+import { useStudyState } from "../useSubject";
 import type { DivisionNode } from "../model";
 import css from "./CatalogView.module.css";
 
@@ -20,6 +21,7 @@ function parseList(value: string | null): string[] {
 
 export function CatalogView() {
   const { slug, model } = useSubjectCtx();
+  const { bookmarks } = useStudyState(slug);
   const [params, setParams] = useSearchParams();
 
   const q = params.get("q") ?? "";
@@ -164,9 +166,14 @@ export function CatalogView() {
                 <span className={css.cardType}>{model.typeLabel(page.type).toUpperCase()}</span>
                 <span className={css.cardTitle}>{page.title}</span>
                 {page.summary ? <MathText className={css.cardSummary} text={page.summary} /> : null}
-                {model.studied.has(page.slug) ? (
-                  <UiIcon name="check" size={13} className={css.cardCheck} title="Estudiada" />
-                ) : null}
+                <span className={css.cardMarks}>
+                  {bookmarks.has(page.slug) ? (
+                    <Icon name="star" size={13} className={css.cardStar} title="Favorita" />
+                  ) : null}
+                  {model.studied.has(page.slug) ? (
+                    <UiIcon name="check" size={13} className={css.cardCheck} title="Estudiada" />
+                  ) : null}
+                </span>
               </Link>
             ))}
           </div>

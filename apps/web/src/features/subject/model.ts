@@ -25,6 +25,7 @@ import {
   effectiveDivisions,
   isExternalUrl,
   routes,
+  type BuiltinView,
   type DivisionDef,
   type DivisionKey,
   type PageMeta,
@@ -141,6 +142,24 @@ export interface SubjectModel {
 }
 
 const UNKNOWN_TYPE_ORDER = 9_999;
+
+/**
+ * Vista builtin → ruta del contrato. Es la ÚNICA tabla que traduce un ítem
+ * `builtin` del rail a una dirección: el rail, el fab y la paleta pasan todos
+ * por acá, así que ninguna vista de la plataforma puede quedar colgada de
+ * `/t/:tool` por olvido.
+ */
+const BUILTIN_ROUTES: Record<BuiltinView, (slug: string) => string> = {
+  home: routes.subject,
+  plan: routes.plan,
+  kits: routes.kits,
+  wiki: routes.wiki,
+  graph: routes.graph,
+  flashcards: routes.flashcards,
+  quiz: routes.quiz,
+  notes: routes.notes,
+  favorites: routes.favorites,
+};
 
 function orderedDivisions(cfg: SubjectConfig): SubjectConfig["divisions"] {
   return cfg.divisions
@@ -341,11 +360,16 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     if (item.kind === "tool") {
       return { item, to: routes.tool(cfg.slug, item.target), href: null, external: false };
     }
-    // builtin
-    if (item.target === "home") return { item, to: routes.subject(cfg.slug), href: null, external: false };
-    if (item.target === "wiki") return { item, to: routes.wiki(cfg.slug), href: null, external: false };
-    if (item.target === "graph") return { item, to: routes.graph(cfg.slug), href: null, external: false };
-    return { item, to: routes.tool(cfg.slug, item.id), href: null, external: false };
+    // builtin: la tabla de arriba decide; lo que no está en ella cae en /t/:id
+    // y lo atiende «Próximamente» (una materia puede declarar un builtin que
+    // esta versión de la plataforma todavía no dibuja).
+    const to = BUILTIN_ROUTES[item.target as BuiltinView];
+    return {
+      item,
+      to: to ? to(cfg.slug) : routes.tool(cfg.slug, item.id),
+      href: null,
+      external: false,
+    };
   };
 
   const toGroup = (group: RailGroup, slot: boolean): RailGroupView | null => {

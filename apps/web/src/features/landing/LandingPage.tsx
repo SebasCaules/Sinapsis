@@ -9,12 +9,19 @@ import {
   useSensor,
   useSensors,
   type Announcements,
+  type CollisionDetection,
   type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
+  type KeyboardCoordinateGetter,
   type ScreenReaderInstructions,
 } from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   LS_KEYS,
   fold,
@@ -27,10 +34,11 @@ import { api, qk } from "@/lib/api";
 import { readJson, writeJson } from "@/lib/store";
 import {
   compareSemestersDesc,
-  groupBySemester,
+  groupBySemesters,
   nextSemesterSuggestion,
   semesterChip,
   semesterLabel,
+  unionSemesters,
   type SemesterGroup,
 } from "@/lib/semesters";
 import {
@@ -41,7 +49,7 @@ import {
   UiIcon,
   useToast,
 } from "@/components/platform";
-import { SemesterSection, isGroupId, semesterOfGroupId } from "./SemesterSection";
+import { SemesterOverlay, SemesterSection, groupId, isGroupId, semesterOfGroupId } from "./SemesterSection";
 import { GhostCard, SubjectCard } from "./SubjectCard";
 import { AddSubjectDialog } from "./AddSubjectDialog";
 import css from "./LandingPage.module.css";
@@ -57,16 +65,61 @@ interface SemesterDialog {
   error?: string;
 }
 
+/**
+ * Inserta un cuatrimestre nuevo donde lo pondría el orden por rótulo y deja el
+ * resto como está: el usuario puede haber ordenado a mano y eso no se pisa.
+ */
+function insertSemester(list: DraftGroup[], semester: string): DraftGroup[] {
+  if (list.some((g) => g.semester === semester)) return list;
+  const at = list.findIndex((g) => compareSemestersDesc(semester, g.semester) < 0);
+  const group: DraftGroup = { semester, slugs: [] };
+  return at === -1 ? [...list, group] : [...list.slice(0, at), group, ...list.slice(at)];
+}
+
 function readCollapsed(): string[] {
   const raw = readJson<unknown>(LS_KEYS.landingCollapsed);
   return Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
 }
 
+/**
+ * Mientras se arrastra un cuatrimestre, las materias no son destino: son las que
+ * viajan adentro. Sin este filtro la sección se «suelta» sobre una tarjeta de sí
+ * misma y el orden nunca cambia.
+ */
+const collisionDetection: CollisionDetection = (args) =>
+  isGroupId(String(args.active.id))
+    ? closestCorners({ ...args, droppableContainers: args.droppableContainers.filter((c) => isGroupId(String(c.id))) })
+    : closestCorners(args);
+
+/**
+ * Teclado: para las materias vale el recorrido de dnd-kit; para un cuatrimestre
+ * se salta al cuatrimestre anterior o siguiente (arriba/abajo), que es el único
+ * movimiento que tiene sentido en una lista de secciones apiladas.
+ */
+const keyboardCoordinates: KeyboardCoordinateGetter = (event, args) => {
+  if (!isGroupId(String(args.active))) return sortableKeyboardCoordinates(event, args);
+  const down = event.code === "ArrowDown";
+  const up = event.code === "ArrowUp";
+  const { collisionRect, droppableRects, droppableContainers } = args.context;
+  if ((!down && !up) || !collisionRect) return undefined;
+  event.preventDefault();
+
+  let bestTop: number | undefined;
+  for (const container of droppableContainers.getEnabled()) {
+    if (!isGroupId(String(container.id)) || container.id === args.active) continue;
+    const rect = droppableRects.get(container.id);
+    if (!rect || (down ? rect.top <= collisionRect.top : rect.top >= collisionRect.top)) continue;
+    if (bestTop === undefined || (down ? rect.top < bestTop : rect.top > bestTop)) bestTop = rect.top;
+  }
+  return bestTop === undefined ? undefined : { x: args.currentCoordinates.x, y: bestTop };
+};
+
 /** Cómo se anuncia el arrastre con lector de pantalla (dnd-kit habla inglés por defecto). */
 const screenReaderInstructions: ScreenReaderInstructions = {
   draggable:
-    "Para tomar una materia, pulse la barra espaciadora. Mientras la arrastra, use las flechas para moverla " +
-    "dentro del cuatrimestre o hacia otro. Pulse otra vez la barra espaciadora para soltarla, o Escape para cancelar.",
+    "Para tomar una materia o un cuatrimestre, pulse la barra espaciadora sobre su asa. Mientras lo arrastra, use " +
+    "las flechas para mover la materia dentro del cuatrimestre o hacia otro, o para cambiar el orden de los " +
+    "cuatrimestres. Pulse otra vez la barra espaciadora para soltarlo, o Escape para cancelar.",
 };
 
 export function LandingPage() {
@@ -76,14 +129,21 @@ export function LandingPage() {
   const landing = useQuery({ queryKey: qk.landing, queryFn: () => api.landing.list() });
   const cards = useMemo(() => landing.data ?? [], [landing.data]);
 
+  /* Los cuatrimestres del usuario son estado propio (N0-32): vienen con los
+     vacíos y con el orden que él eligió, que no tiene por qué ser el del rótulo. */
+  const savedSemesters = useQuery({ queryKey: qk.semesters, queryFn: () => api.landing.semesters() });
+
   /* Un solo estado para el modo gestión: null = no se está gestionando. */
   const [draft, setDraft] = useState<DraftGroup[] | null>(null);
   const manage = draft !== null;
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  /** Lo que se está arrastrando: el slug de una materia o el id `sem:` de un cuatrimestre. */
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<string[]>(readCollapsed);
   const [addOpen, setAddOpen] = useState(false);
+  /** Cuatrimestre con el que abre el diálogo de materia nueva (la fantasma del grupo). */
+  const [addTarget, setAddTarget] = useState<string | undefined>(undefined);
   const [semesterDialog, setSemesterDialog] = useState<SemesterDialog | null>(null);
   const [removing, setRemoving] = useState<SubjectCardData | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -92,7 +152,11 @@ export function LandingPage() {
     document.title = "Materias · Sinapsis";
   }, []);
 
-  const serverGroups = useMemo(() => groupBySemester(cards), [cards]);
+  const serverSemesters = useMemo(
+    () => unionSemesters(savedSemesters.data ?? [], cards),
+    [savedSemesters.data, cards],
+  );
+  const serverGroups = useMemo(() => groupBySemesters(serverSemesters, cards), [serverSemesters, cards]);
   const byId = useMemo(() => new Map(cards.map((c) => [c.slug, c])), [cards]);
 
   /* Modo normal: lo que dice el servidor. Modo gestión: el borrador local. */
@@ -124,6 +188,11 @@ export function LandingPage() {
     ? `${matchCount} ${plural(matchCount, "coincidencia", "coincidencias")} de ${cards.length}`
     : `${cards.length} ${plural(cards.length, "materia", "materias")} · ` +
       `${groups.length} ${plural(groups.length, "cuatrimestre", "cuatrimestres")}`;
+
+  const openAdd = useCallback((semester?: string) => {
+    setAddTarget(semester);
+    setAddOpen(true);
+  }, []);
 
   const clearSearch = useCallback(() => {
     setQuery("");
@@ -167,19 +236,29 @@ export function LandingPage() {
 
   const cancelManage = useCallback(() => {
     setDraft(null);
-    setActiveSlug(null);
+    setActiveId(null);
   }, []);
 
   const saveLayout = useMutation({
     mutationFn: (input: LandingLayoutInput) => api.landing.saveLayout(input),
-    onSuccess: (data) => {
+    onSuccess: async (data, input) => {
       qc.setQueryData(qk.landing, data);
+      /* Sin esto, entre la respuesta y el refetch de `semesters` la lista vieja
+         haría desaparecer por un instante el cuatrimestre recién agregado. */
+      if (input.semesters) qc.setQueryData(qk.semesters, input.semesters);
       setDraft(null);
+      /* La respuesta trae las materias, no los cuatrimestres: la lista (con los
+         vacíos y su orden) se vuelve a pedir. */
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.semesters }),
+        qc.invalidateQueries({ queryKey: qk.landing }),
+      ]);
       toast("Landing guardada.", "good");
     },
     onError: () => {
       toast("No se pudo guardar el orden. Se recargó la landing.", "bad");
       void qc.invalidateQueries({ queryKey: qk.landing });
+      void qc.invalidateQueries({ queryKey: qk.semesters });
       cancelManage();
     },
   });
@@ -190,20 +269,19 @@ export function LandingPage() {
       setAddOpen(false);
       /* Si se está gestionando, la materia nueva entra en el borrador: si no,
          al guardar el orden desaparecería de la landing recién creada. */
-      setDraft((prev) => {
-        if (!prev) return prev;
-        if (prev.some((g) => g.semester === card.semester)) {
-          return prev.map((g) =>
-            g.semester === card.semester && !g.slugs.includes(card.slug)
-              ? { ...g, slugs: [...g.slugs, card.slug] }
-              : g,
-          );
-        }
-        return [...prev, { semester: card.semester, slugs: [card.slug] }].sort((a, b) =>
-          compareSemestersDesc(a.semester, b.semester),
-        );
-      });
-      await qc.invalidateQueries({ queryKey: qk.landing });
+      setDraft((prev) =>
+        prev === null
+          ? prev
+          : insertSemester(prev, card.semester).map((g) =>
+              g.semester === card.semester && !g.slugs.includes(card.slug)
+                ? { ...g, slugs: [...g.slugs, card.slug] }
+                : g,
+            ),
+      );
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.landing }),
+        qc.invalidateQueries({ queryKey: qk.semesters }),
+      ]);
       toast(`«${card.name}» se agregó a su landing.`, "good");
     },
   });
@@ -223,8 +301,10 @@ export function LandingPage() {
   });
 
   function handleSave() {
-    const items = (draft ?? []).flatMap((g) => g.slugs.map((slug, position) => ({ slug, semester: g.semester, position })));
-    saveLayout.mutate({ items });
+    const groupsToSave = draft ?? [];
+    const items = groupsToSave.flatMap((g) => g.slugs.map((slug, position) => ({ slug, semester: g.semester, position })));
+    /* `semesters` va SIEMPRE: es lo que persiste los vacíos y su orden (N0-32). */
+    saveLayout.mutate({ items, semesters: groupsToSave.map((g) => g.semester) });
   }
 
   function moveToSemester(card: SubjectCardData, semester: string) {
@@ -249,38 +329,43 @@ export function LandingPage() {
       setSemesterDialog((prev) => prev && { ...prev, error: "Ese cuatrimestre ya existe." });
       return;
     }
-    setDraft((prev) =>
-      (prev ?? []).concat({ semester: label, slugs: [] }).sort((a, b) => compareSemestersDesc(a.semester, b.semester)),
-    );
+    setDraft((prev) => insertSemester(prev ?? [], label));
     setSemesterDialog(null);
+  }
+
+  /** Solo se ofrece con el cuatrimestre vacío; se hace firme al guardar. */
+  function removeSemester(semester: string) {
+    setDraft((prev) => prev && prev.filter((g) => g.semester !== semester || g.slugs.length > 0));
   }
 
   /* --- arrastrar y soltar --- */
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, { coordinateGetter: keyboardCoordinates }),
   );
 
   const announcements: Announcements = useMemo(() => {
-    const nameOf = (id: string | number) => byId.get(String(id))?.name ?? String(id);
-    const placeOf = (id: string | number) => {
+    /* Se arrastran dos cosas: materias y cuatrimestres. El anuncio dice cuál. */
+    const what = (id: string | number) => {
       const raw = String(id);
-      return isGroupId(raw) ? semesterLabel(semesterOfGroupId(raw)) : nameOf(raw);
+      return isGroupId(raw)
+        ? `el cuatrimestre ${semesterLabel(semesterOfGroupId(raw))}`
+        : `la materia ${byId.get(raw)?.name ?? raw}`;
     };
     return {
-      onDragStart: ({ active }) => `Tomó la materia ${nameOf(active.id)}.`,
+      onDragStart: ({ active }) => `Tomó ${what(active.id)}.`,
       /* Al tomarla, dnd-kit avisa que está «sobre sí misma»: eso no se dice. */
       onDragOver: ({ active, over }) =>
         !over
-          ? `La materia ${nameOf(active.id)} no está sobre ningún destino.`
+          ? `${what(active.id)} no está sobre ningún destino.`
           : over.id === active.id
             ? undefined
-            : `La materia ${nameOf(active.id)} está sobre ${placeOf(over.id)}.`,
+            : `${what(active.id)} está sobre ${what(over.id)}.`,
       onDragEnd: ({ active, over }) =>
         over
-          ? `Soltó la materia ${nameOf(active.id)} sobre ${placeOf(over.id)}.`
-          : `Soltó la materia ${nameOf(active.id)} fuera de un destino: vuelve a su lugar.`,
-      onDragCancel: ({ active }) => `Se canceló el movimiento: la materia ${nameOf(active.id)} vuelve a su lugar.`,
+          ? `Soltó ${what(active.id)} sobre ${what(over.id)}.`
+          : `Soltó ${what(active.id)} fuera de un destino: vuelve a su lugar.`,
+      onDragCancel: ({ active }) => `Se canceló el movimiento: ${what(active.id)} vuelve a su lugar.`,
     };
   }, [byId]);
 
@@ -290,7 +375,7 @@ export function LandingPage() {
       : list.findIndex((g) => g.slugs.includes(id));
 
   function onDragStart(e: DragStartEvent) {
-    setActiveSlug(String(e.active.id));
+    setActiveId(String(e.active.id));
   }
 
   function onDragOver(e: DragOverEvent) {
@@ -298,6 +383,9 @@ export function LandingPage() {
     if (!over) return;
     const activeId = String(e.active.id);
     const overId = String(over.id);
+    /* Los cuatrimestres se reordenan al soltar, no al pasar por encima: mover
+       secciones enteras mientras se arrastra marea y confunde al lector. */
+    if (isGroupId(activeId)) return;
     setDraft((prev) => {
       if (!prev) return prev;
       const from = containerOf(prev, activeId);
@@ -316,12 +404,24 @@ export function LandingPage() {
   }
 
   function onDragEnd(e: DragEndEvent) {
-    setActiveSlug(null);
+    setActiveId(null);
     const over = e.over;
     if (!over) return;
     const activeId = String(e.active.id);
     const overId = String(over.id);
     if (activeId === overId) return;
+
+    /* Cuatrimestre: cambia el orden de las secciones (y con él, el que se guarda). */
+    if (isGroupId(activeId)) {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        const from = containerOf(prev, activeId);
+        const to = containerOf(prev, overId);
+        return from === -1 || to === -1 || from === to ? prev : arrayMove(prev, from, to);
+      });
+      return;
+    }
+
     setDraft((prev) => {
       if (!prev) return prev;
       const from = containerOf(prev, activeId);
@@ -340,27 +440,35 @@ export function LandingPage() {
     });
   }
 
-  const activeCard = activeSlug ? byId.get(activeSlug) : undefined;
+  const activeCard = activeId && !isGroupId(activeId) ? byId.get(activeId) : undefined;
+  const activeGroup =
+    activeId && isGroupId(activeId) ? groups.find((g) => g.semester === semesterOfGroupId(activeId)) : undefined;
   const isEmpty = !landing.isPending && !landing.isError && cards.length === 0;
   const newestSemester = groups[0]?.semester;
 
   const sections = (
-    <>
-      {visibleGroups.map((group, index) => (
-        <SemesterSection
-          key={group.semester}
-          group={group}
-          collapsed={!manage && collapsed.includes(group.semester)}
-          onToggle={() => toggleCollapsed(group.semester)}
-          manage={manage}
-          semesters={semesters}
-          onRemove={setRemoving}
-          onMove={moveToSemester}
-        >
-          {index === 0 && !q ? <GhostCard onClick={() => setAddOpen(true)} /> : null}
-        </SemesterSection>
-      ))}
-    </>
+    <SortableContext items={visibleGroups.map((g) => groupId(g.semester))} strategy={verticalListSortingStrategy}>
+      {visibleGroups.map((group, index) => {
+        /* La fantasma acompaña al primer cuatrimestre y a los vacíos; en gestión
+           el hueco vacío ya dice «suelte una materia aquí» y no hace falta. */
+        const ghost = !q && (group.cards.length === 0 ? !manage : index === 0);
+        return (
+          <SemesterSection
+            key={group.semester}
+            group={group}
+            collapsed={!manage && collapsed.includes(group.semester)}
+            onToggle={() => toggleCollapsed(group.semester)}
+            manage={manage}
+            semesters={semesters}
+            onRemove={setRemoving}
+            onMove={moveToSemester}
+            onRemoveSemester={removeSemester}
+          >
+            {ghost ? <GhostCard onClick={() => openAdd(group.semester)} /> : null}
+          </SemesterSection>
+        );
+      })}
+    </SortableContext>
   );
 
   return (
@@ -388,7 +496,7 @@ export function LandingPage() {
         <div className={css.manageBar}>
           <span className={css.dot} aria-hidden="true" />
           <span className={css.manageText}>
-            EDITANDO · ARRASTRE PARA REORDENAR · LOS CUATRIMESTRES SE ORDENAN POR SU RÓTULO
+            EDITANDO · ARRASTRE LAS MATERIAS Y LOS CUATRIMESTRES DESDE SU ASA ⋮⋮
           </span>
           <span className={css.manageSpacer} />
           <Button
@@ -416,11 +524,17 @@ export function LandingPage() {
             </div>
             {isEmpty ? null : (
               <div className={css.actions}>
-                <Button variant="primary" onClick={() => setAddOpen(true)}>
+                <Button variant="primary" onClick={() => openAdd()}>
                   <UiIcon name="plus" size={15} />
                   Agregar materia
                 </Button>
-                <Button active={manage} onClick={() => (manage ? cancelManage() : startManage())}>
+                {/* Gestionar con la landing a medio cargar armaría un borrador
+                    vacío y guardarlo borraría materias y cuatrimestres. */}
+                <Button
+                  active={manage}
+                  disabled={landing.isPending || savedSemesters.isPending}
+                  onClick={() => (manage ? cancelManage() : startManage())}
+                >
                   <UiIcon name="menu" size={15} />
                   Gestionar
                 </Button>
@@ -444,7 +558,7 @@ export function LandingPage() {
               </span>
               <span className={css.emptyTitle}>Todavía no hay materias</span>
               <span className={css.emptyText}>Cada materia trae su temario, sus herramientas y su color.</span>
-              <Button variant="primary" onClick={() => setAddOpen(true)}>
+              <Button variant="primary" onClick={() => openAdd()}>
                 Agregar la primera materia
               </Button>
             </div>
@@ -462,15 +576,18 @@ export function LandingPage() {
           {manage ? (
             <DndContext
               sensors={sensors}
-              collisionDetection={closestCorners}
+              collisionDetection={collisionDetection}
               accessibility={{ screenReaderInstructions, announcements }}
               onDragStart={onDragStart}
               onDragOver={onDragOver}
               onDragEnd={onDragEnd}
-              onDragCancel={() => setActiveSlug(null)}
+              onDragCancel={() => setActiveId(null)}
             >
               {sections}
-              <DragOverlay>{activeCard ? <SubjectCard card={activeCard} overlay /> : null}</DragOverlay>
+              <DragOverlay>
+                {activeCard ? <SubjectCard card={activeCard} overlay /> : null}
+                {activeGroup ? <SemesterOverlay group={activeGroup} /> : null}
+              </DragOverlay>
             </DndContext>
           ) : (
             sections
@@ -495,7 +612,7 @@ export function LandingPage() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         semesters={semesters}
-        defaultSemester={newestSemester}
+        defaultSemester={addTarget ?? newestSemester}
         submitting={createSubject.isPending}
         onSubmit={async (input) => {
           await createSubject.mutateAsync(input);

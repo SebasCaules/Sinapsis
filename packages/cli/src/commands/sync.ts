@@ -10,6 +10,7 @@ import {
   countsByType,
   heading,
   reportApiError,
+  studyLine,
   warnings as printWarnings,
   webUrl,
 } from "../report.js";
@@ -66,6 +67,9 @@ export async function runSync(opts: SyncOptions, ctx: Ctx): Promise<number> {
   countsByType(ctx, loaded.config, payload.pages);
   ctx.out("");
   countsByDivision(ctx, loaded.config, payload.pages);
+  ctx.out("");
+  studyLine(ctx, compiled.study);
+  ctx.out(`  ${pc.dim(compiled.studyDir)}`);
   ctx.out("");
   printWarnings(ctx, warnings);
   ctx.out("");

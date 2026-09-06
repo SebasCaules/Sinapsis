@@ -1,6 +1,6 @@
 ---
 name: sinapsis
-description: Conecta el wiki markdown de esta materia con la plataforma Sinapsis — crea o corrige su `sinapsis.config.json`, compila el wiki y lo sincroniza contra el API. Usar cuando el usuario invoque `/sinapsis`, `/sinapsis init`, `/sinapsis sync`, `/sinapsis status` o `/sinapsis validate`, o cuando pida "sincronizar la materia con Sinapsis", "subir el wiki a Sinapsis", "generar el config de Sinapsis", "ver el estado de la materia en Sinapsis" o "revisar los wikilinks rotos del wiki". No usar para editar contenido del wiki que el usuario no haya pedido cambiar.
+description: Conecta el wiki markdown de esta materia con la plataforma Sinapsis — crea o corrige su `sinapsis.config.json`, escribe el material de estudio (mazos de flashcards, quiz, plan y kits en `estudio/`), compila el wiki y lo sincroniza contra el API. Usar cuando el usuario invoque `/sinapsis`, `/sinapsis init`, `/sinapsis sync`, `/sinapsis status` o `/sinapsis validate`, o cuando pida "sincronizar la materia con Sinapsis", "subir el wiki a Sinapsis", "generar el config de Sinapsis", "ver el estado de la materia en Sinapsis", "agregar flashcards / quiz / plan de estudio a la materia" o "revisar los wikilinks rotos del wiki". No usar para editar contenido del wiki que el usuario no haya pedido cambiar.
 ---
 
 # `/sinapsis` — el agente de materia
@@ -42,8 +42,8 @@ Comandos:
 
 | Comando | Qué hace |
 |---|---|
-| `init [--wiki <dir>] [--out <file>] [--slug <slug>] [--force]` | Propone un `sinapsis.config.json` a partir del wiki. |
-| `validate [--config <file>]` | Valida el config contra el contrato. Sale 1 si falla. |
+| `init [--wiki <dir>] [--out <file>] [--slug <slug>] [--force]` | Propone un `sinapsis.config.json` a partir del wiki y deja lista la carpeta `estudio/`. |
+| `validate [--config <file>]` | Valida el config contra el contrato y el formato del material de estudio. Sale 1 solo si el config falla. |
 | `sync [--config <file>] [--wiki <dir>] [--api <url>] [--token <t>] [--dry-run] [--out <file>]` | Compila y sincroniza. |
 | `status [--config <file>] [--api <url>]` | Estado de la materia en la plataforma. |
 
@@ -156,6 +156,80 @@ Es **idempotente y reemplaza** el conjunto de páginas: las que ya no existen en
 borran de la plataforma. El progreso del usuario sobre slugs borrados se conserva por si
 vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
 
+### 4. Material de estudio (`estudio/`)
+
+Mazos de flashcards, quizzes, plan de estudio y kits. Es **contenido de la materia**: vive en
+la carpeta que declara `wiki.study` (por defecto `estudio/`), **relativa al config, no al
+wiki**, y viaja en `payload.study` con el resto del sync. Todo es opcional: sin carpeta, la
+plataforma autogenera un mazo por división con los `resumen` de las páginas.
+
+```
+estudio/
+  flashcards-definiciones-clave.md   # tipo: flashcards → un mazo
+  quiz-general.md                    # tipo: quiz       → un cuestionario
+  plan.json                          # fases → hitos → tareas
+  kits.json                          # paquetes de páginas + mazos + quizzes + herramientas
+```
+
+**Mazo.** Cada `##` abre una tarjeta: el encabezado es el anverso; lo que sigue, hasta el
+próximo `##`, el reverso (markdown y KaTeX). `pagina:` y `tags:` son directivas opcionales al
+principio del reverso, con o sin `>` delante.
+
+```markdown
+---
+tipo: flashcards
+titulo: Definiciones clave
+id: definiciones-clave      # opcional; si falta, el nombre del archivo
+division: "3"               # opcional; una clave de config.divisions
+---
+
+## Definición de esperanza $E[X]$
+
+> pagina: esperanza
+> tags: discreta, momentos
+
+$E[X]=\sum_x x\,p_X(x)$.
+```
+
+El id de una tarjeta es `<id del mazo>:<n>`; como el repaso espaciado del usuario se guarda
+por id, **si se reordenan las tarjetas se pierde su progreso**. Para fijarlo: `## Anverso {#mi-id}`.
+
+**Quiz.** Cada `##` abre una pregunta; las opciones son una lista de tildes (`- [x]` la
+correcta) y el blockquote que va después de la lista es la explicación. Hacen falta ≥ 2
+opciones y ≥ 1 correcta.
+
+```markdown
+---
+tipo: quiz
+titulo: Quiz conceptual
+---
+
+## ¿Qué distribución tiene media = varianza?
+
+> pagina: distribucion-poisson
+
+- [ ] Binomial
+- [x] Poisson
+- [ ] Normal
+
+> Poisson: $E[X]=V(X)=\lambda$.
+```
+
+**Plan y kits.** JSON validado contra `Plan` y `Kit[]`. Las tareas del plan llevan `kind`:
+`read` (destino: una división), `cards` (un mazo), `quiz` (un quiz), `exercises` y `custom`
+(una página o una URL). Los `tools` de un kit son **ids de ítems del `rail`** del config.
+
+```jsonc
+// plan.json
+{ "title": "Plan de estudio",
+  "phases": [{ "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
+    "date": "2026-10-01", "scope": "Qué cae en este examen (markdown)",
+    "milestones": [{ "id": "fase-1-h1", "title": "Unidad 1", "divisions": ["1"],
+      "tasks": [{ "id": "fase-1-h1-t1", "label": "Leer la teoría", "kind": "read", "target": "1" }] }] }] }
+```
+
+Referencia completa, con todas las verificaciones: `reference/contrato.md` §7.
+
 ---
 
 ## Procedimientos
@@ -175,6 +249,10 @@ vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
    Escribe `sinapsis.config.json` en el directorio actual e imprime qué infirió: tipos de
    página (de las carpetas), campo de división y sus valores, y páginas sin `resumen`.
    No sobreescribe un config existente salvo con `--force`.
+
+   Además deja lista la carpeta del material de estudio (`estudio/`) con un `README.md` del
+   formato y un `flashcards-ejemplo.md` de dos tarjetas. No pisa nada que ya exista, y no
+   hace falta usarla: si queda como está, la plataforma autogenera un mazo por división.
 
 3. **Completar a mano** lo que dice "COMPLETAR": `name`, `code`, `institution`, `semester`.
 
@@ -237,6 +315,13 @@ vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
    | `slug normalizado` | El nombre del archivo no es un slug válido | Renombrar el archivo |
    | `subcarpeta ignorada` | Hay `.md` en un segundo nivel que no se compilan | Aplanar la carpeta o aceptarlo |
    | `divisiones sin páginas` | Una división declarada quedó vacía | Ingerir contenido o sacarla del config |
+   | `estudio · referencia rota en …` | Una tarjeta, un kit o una tarea apunta a una página, un mazo, un quiz o una división que no existe | Corregir el destino en el archivo del material de estudio |
+   | `estudio · … no marca ninguna opción correcta` | Una pregunta del quiz no tiene `- [x]` | Marcar la correcta (si no, la pregunta se descarta) |
+   | `estudio · … no es JSON válido` / `phases.0.title: …` | `plan.json` o `kits.json` no cumplen el contrato | Corregir el campo que nombra la advertencia |
+
+   La línea `Estudio: N mazos (M tarjetas) · …` del resumen dice qué material se va a
+   publicar. Si dice «sin material propio», la materia no tiene carpeta `estudio/` (o está
+   vacía) y la plataforma va a autogenerar un mazo por división: es válido.
 
 3. **Corregir**, si el usuario lo autoriza. Presentá la lista concreta ("estos 4 wikilinks
    apuntan a `distribucion-uniforme`, que no existe; ¿lo cambio por `distribucion-uniforme-continua`
@@ -262,8 +347,10 @@ vuelven. Renombrar un archivo `.md` equivale a borrar una página y crear otra.
 pnpm --dir "$SINAPSIS_HOME" sinapsis -- status --config sinapsis.config.json
 ```
 
-Muestra la última sync, el total de páginas, el desglose por división y las divisiones sin
-páginas, y avisa si el config local difiere del que tiene la plataforma.
+Muestra la última sync, el total de páginas, el desglose por división, el material de estudio
+publicado y las divisiones sin páginas, y avisa si el config local difiere del que tiene la
+plataforma. Si la línea de estudio dice «API sin soporte de estudio», el API de esa
+instalación es anterior al Sprint 2: el sync sigue funcionando, pero el material no se ve.
 
 `status` necesita **sesión**, no token: el CLI intenta primero `POST /api/auth/dev`, que
 funciona con el API levantado con `AUTH_DEV_BYPASS=1` (decisión N0-5 de la plataforma). Si
@@ -277,6 +364,9 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- validate --config sinapsis.config.json
 ```
 
 Sale 0 si el config cumple el contrato (los avisos amarillos no son errores), 1 si no.
+También revisa el **formato** del material de estudio (`estudio/`) y resume qué encontró; lo
+único que no puede verificar sin compilar el wiki son las referencias a slugs de páginas, que
+salen en `sync --dry-run`.
 
 ---
 
@@ -299,6 +389,11 @@ Antes de dar por buena una sincronización:
 - [ ] **`orden`** es un entero positivo donde exista, y es coherente dentro de cada división.
 - [ ] **El `rail`** apunta a páginas que existen (`kind: "page"`) y a URLs absolutas
       (`kind: "link"`).
+- [ ] **El material de estudio no tiene referencias rotas.** Cero advertencias `estudio ·`
+      en el dry-run: cada `pagina:`, cada `pages[]` de un kit y cada `target` de una tarea
+      apuntan a algo que existe.
+- [ ] **Los ids de las tarjetas son estables.** Si hubo que reordenar un mazo, las tarjetas
+      que ya se venían repasando llevan `{#id}` para no perder su progreso de SRS.
 
 ## Referencias
 

@@ -1,0 +1,179 @@
+/* Detalle de un kit · cabecera y secciones de filas. */
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.headMain { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.back:hover { color: var(--primary); border-color: var(--primary); }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.08em;
+  color: var(--primary);
+}
+
+.title {
+  margin: 0;
+  font: 600 var(--h1) / 1.08 var(--font-display);
+  color: var(--text);
+}
+
+.lead {
+  margin: 0;
+  max-width: 620px;
+  font: 400 13.5px/1.6 var(--font-ui);
+  color: var(--text-2);
+}
+
+.headAside { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.totals { display: flex; gap: 20px; }
+
+/* ---------- secciones ---------- */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sectionTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 13px var(--font-ui);
+  color: var(--text);
+}
+
+.sectionCount { font: 500 11px var(--font-mono); color: var(--text-3); }
+
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 8px;
+  margin: 0 -8px;
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  transition: background var(--t);
+}
+.row:hover { background: var(--surface-2); }
+.row:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+.check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: transparent;
+}
+.row[data-done="true"] .check {
+  background: var(--good);
+  border-color: var(--good);
+  color: var(--on-good);
+}
+
+.rowTitle {
+  flex: 1;
+  min-width: 0;
+  font: 500 13px var(--font-ui);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row[data-done="true"] .rowTitle { color: var(--text-3); }
+
+.rowBar { flex: none; width: 120px; }
+
+.rowMeta {
+  flex: none;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.chevron { flex: none; color: var(--text-3); }
+
+/* ---------- herramientas ---------- */
+.tools { list-style: none; margin: 0; padding: 4px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--surface-2);
+  box-shadow: var(--relief);
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.tool:hover { color: var(--primary); border-color: var(--primary); }
+
+.text { margin: 0; font: 400 13.5px/1.65 var(--font-ui); color: var(--text-2); }
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .head { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .headAside { align-items: flex-start; }
+  .rowBar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row { transition: none; }
+}

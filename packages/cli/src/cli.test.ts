@@ -1,12 +1,15 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SubjectConfig, SyncPayload } from "@sinapsis/contract";
+import { compileStudy, studyCounts } from "@sinapsis/markdown";
 import { cleanArgv, extractCwd, main } from "./cli.js";
 import { extraChecks } from "./commands/validate.js";
 import { invocationCwd, type Ctx } from "./context.js";
@@ -120,6 +123,26 @@ describe("sinapsis init", () => {
     expect(await main(["validate", "--config", "sinapsis.config.json"], validateCtx)).toBe(0);
   });
 
+  it("deja lista la carpeta del material de estudio", async () => {
+    const ctx = testCtx(subject);
+    expect(await main(["init", "--wiki", "wiki"], ctx)).toBe(0);
+
+    const study = path.join(subject, "estudio");
+    expect(existsSync(path.join(study, "README.md"))).toBe(true);
+    const ejemplo = await readFile(path.join(study, "flashcards-ejemplo.md"), "utf8");
+    expect(ejemplo).toContain("tipo: flashcards");
+    expect(ctx.stdout.join("\n")).toContain("material de estudio");
+
+    // El config declara la carpeta y el ejemplo compila: 2 tarjetas, sin advertencias.
+    const parsed = SubjectConfig.parse(
+      JSON.parse(await readFile(path.join(subject, "sinapsis.config.json"), "utf8")) as unknown,
+    );
+    expect(parsed.wiki.study).toBe("estudio");
+    const compiled = await compileStudy({ dir: study, config: parsed });
+    expect(compiled.issues).toEqual([]);
+    expect(compiled.study.decks[0]!.cards.map((c) => c.id)).toEqual(["ejemplo:1", "ids"]);
+  });
+
   it("no sobreescribe un config existente salvo con --force", async () => {
     const ctx = testCtx(subject);
     expect(await main(["init", "--wiki", "wiki"], ctx)).toBe(0);
@@ -196,6 +219,38 @@ describe("sinapsis validate", () => {
     const sinBandera = testCtx(path.join(dir, "no-existe"));
     expect(await main(["validate"], sinBandera)).toBe(1);
     expect(sinBandera.stderr.join("\n")).toContain("No encuentro el config");
+  });
+
+  it("resume el material de estudio y detecta un quiz sin opción correcta", async () => {
+    await writeFile(
+      path.join(dir, "sinapsis.config.json"),
+      JSON.stringify({
+        slug: "demo",
+        name: "Demo",
+        code: "0",
+        institution: "ITBA",
+        division: { singular: "Unidad", abbr: "U", plural: "Unidades" },
+        divisions: [{ key: "1", name: "Una" }],
+        pageTypes: [{ key: "concepto", label: "Concepto", plural: "Conceptos", folder: "conceptos" }],
+        wiki: { root: "wiki", divisionField: "unidad", study: "estudio" },
+      }),
+    );
+    await mkdir(path.join(dir, "estudio"), { recursive: true });
+    await writeFile(
+      path.join(dir, "estudio", "flashcards-uno.md"),
+      "---\ntipo: flashcards\ntitulo: Uno\nid: uno\n---\n\n## Anverso\n\nReverso.\n",
+    );
+    await writeFile(
+      path.join(dir, "estudio", "quiz-roto.md"),
+      "---\ntipo: quiz\ntitulo: Roto\n---\n\n## ¿Cuál es?\n\n- [ ] Una\n- [ ] Otra\n",
+    );
+
+    const ctx = testCtx(dir);
+    // Las advertencias del material de estudio no invalidan el config.
+    expect(await main(["validate"], ctx)).toBe(0);
+    const stdout = ctx.stdout.join("\n");
+    expect(stdout).toContain("Estudio: 1 mazo (1 tarjeta) · 0 quizzes (0 preguntas) · plan: no · 0 kits");
+    expect(stdout).toContain("no marca ninguna opción correcta");
   });
 
   it("sale 1 si el archivo no existe o no es JSON", async () => {
@@ -285,6 +340,29 @@ describe("sinapsis sync --dry-run", () => {
     expect(payload.generator).toMatch(/^@sinapsis\/cli /);
     expect(new Date(payload.generatedAt).toString()).not.toBe("Invalid Date");
 
+    // El material de estudio de `examples/proba/estudio` viaja en el payload: la
+    // carpeta se resuelve contra el config, así que `--wiki` (otro vault) no la desvía.
+    const study = payload.study;
+    expect(study).toBeDefined();
+    expect(studyCounts(study!)).toEqual({
+      decks: 6,
+      cards: 46,
+      quizzes: 1,
+      questions: 15,
+      phases: 6,
+      milestones: 30,
+      tasks: 89,
+      kits: 8,
+    });
+    expect(study!.decks.map((d) => d.id)).toContain("distribuciones");
+    expect(study!.kits.map((k) => k.id)).toContain("parcialito-1");
+    expect(ctx.stdout.join("\n")).toContain(
+      "Estudio: 6 mazos (46 tarjetas) · 1 quiz (15 preguntas) · plan: 6 fases · 8 kits",
+    );
+
+    // Objetivo de la conversión: ninguna referencia rota en el material de estudio.
+    expect(ctx.stdout.join("\n")).not.toContain("estudio ·");
+
     await rm(path.dirname(out), { recursive: true, force: true });
   });
 
@@ -330,6 +408,73 @@ describe("sinapsis sync --dry-run", () => {
     );
     expect(code).toBe(1);
     expect(ctx.stderr.join("\n")).toContain("Falta el token de sync");
+  });
+});
+
+describe("sinapsis status", () => {
+  /** API de mentira: solo lo que `status` consulta. `study` responde lo que se le pida. */
+  async function withApi(
+    study: { status: number; body?: unknown },
+    run: (api: string) => Promise<void>,
+  ): Promise<void> {
+    const config = SubjectConfig.parse(
+      JSON.parse(await readFile(PROBA_CONFIG, "utf8")) as unknown,
+    );
+    const server = createServer((req, res) => {
+      const url = req.url ?? "";
+      const send = (status: number, body: unknown) => {
+        res.writeHead(status, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(body));
+      };
+      if (url === "/api/auth/dev") {
+        res.writeHead(200, { "Content-Type": "application/json", "Set-Cookie": "sid=x; Path=/" });
+        res.end("{}");
+        return;
+      }
+      if (url === "/api/subjects/proba") {
+        send(200, { config, pages: [], studied: [], placeholder: false, lastSyncAt: "2026-09-05T00:00:00.000Z" });
+        return;
+      }
+      if (url === "/api/subjects/proba/study") {
+        send(study.status, study.body ?? { error: "not found" });
+        return;
+      }
+      send(404, { error: "not found" });
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const port = (server.address() as AddressInfo).port;
+    try {
+      await run(`http://127.0.0.1:${port}`);
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  }
+
+  it("resume el material de estudio que devuelve el API", async () => {
+    await withApi(
+      {
+        status: 200,
+        body: {
+          decks: [{ id: "d", title: "Mazo", cards: [{ id: "d:1", front: "a", back: "b" }] }],
+          quizzes: [],
+          plan: null,
+          kits: [],
+        },
+      },
+      async (api) => {
+        const ctx = testCtx(REPO_ROOT);
+        expect(await main(["status", "--config", "examples/proba/sinapsis.config.json", "--api", api], ctx)).toBe(0);
+        expect(ctx.stdout.join("\n")).toContain("Estudio: 1 mazo (1 tarjeta) · 0 quizzes (0 preguntas) · plan: no · 0 kits");
+      },
+    );
+  });
+
+  it("dice «API sin soporte de estudio» cuando la ruta responde 404", async () => {
+    await withApi({ status: 404 }, async (api) => {
+      const ctx = testCtx(REPO_ROOT);
+      expect(await main(["status", "--config", "examples/proba/sinapsis.config.json", "--api", api], ctx)).toBe(0);
+      expect(ctx.stdout.join("\n")).toContain("API sin soporte de estudio");
+    });
   });
 });
 

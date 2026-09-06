@@ -1,0 +1,260 @@
+[
+  {
+    "id": "parcialito-1",
+    "title": "Parcialito 1 · TP1–TP2",
+    "description": "Unidades 1 y 2: estadística descriptiva sobre datos agrupados, conteo, probabilidad condicional, independencia y Bayes.",
+    "divisions": [
+      "1",
+      "2"
+    ],
+    "pages": [
+      "estadistica-descriptiva",
+      "datos-agrupados",
+      "cuartiles-y-percentiles",
+      "probabilidad",
+      "regla-de-laplace",
+      "probabilidad-condicional",
+      "probabilidad-total-y-bayes",
+      "independencia"
+    ],
+    "decks": [
+      "definiciones-clave"
+    ],
+    "tools": [
+      "calc",
+      "formularios"
+    ]
+  },
+  {
+    "id": "parcialito-2",
+    "title": "Parcialito 2 · TP3–TP4",
+    "description": "Unidades 3 y 4: variables aleatorias discretas y continuas, PMF y densidad, FDA, esperanza y varianza, y el catálogo de distribuciones. Los parcialitos de este hito tienen enunciado simbólico: la respuesta es una fórmula en los parámetros, no un número.",
+    "divisions": [
+      "3",
+      "4"
+    ],
+    "pages": [
+      "variable-aleatoria",
+      "esperanza",
+      "varianza",
+      "distribucion-binomial",
+      "distribucion-poisson",
+      "distribucion-hipergeometrica",
+      "variable-aleatoria-continua",
+      "distribucion-normal",
+      "distribucion-exponencial",
+      "distribucion-uniforme-continua"
+    ],
+    "decks": [
+      "distribuciones",
+      "definiciones-clave"
+    ],
+    "tools": [
+      "explorador",
+      "calc",
+      "formularios"
+    ]
+  },
+  {
+    "id": "parcial",
+    "title": "Parcial · TP1–TP7",
+    "description": "Unidades 1 a 7, con foco en transformaciones, conjuntas, procesos estocásticos y TCL sobre el repaso de lo anterior.",
+    "divisions": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7"
+    ],
+    "pages": [
+      "funcion-de-variable-aleatoria",
+      "variables-aleatorias-bidimensionales",
+      "covarianza-y-correlacion",
+      "proceso-de-poisson",
+      "cadenas-de-markov",
+      "suma-de-variables-aleatorias",
+      "teorema-central-del-limite",
+      "aproximacion-normal-de-la-binomial",
+      "distribucion-normal",
+      "distribucion-exponencial",
+      "distribucion-binomial",
+      "probabilidad-total-y-bayes",
+      "estadistica-descriptiva"
+    ],
+    "decks": [
+      "definiciones-clave",
+      "teoremas",
+      "distribuciones",
+      "procesos-estocasticos"
+    ],
+    "tools": [
+      "taller",
+      "calc",
+      "formularios"
+    ]
+  },
+  {
+    "id": "parcialito-3",
+    "title": "Parcialito 3 · TP8–TP9",
+    "description": "Unidades 8 y 9: estimación, intervalos de confianza, tamaño muestral, pruebas de hipótesis, error tipo II y valor p. Los parcialitos de este hito tienen enunciado simbólico: la respuesta es una fórmula en los parámetros, no un número.",
+    "divisions": [
+      "8",
+      "9"
+    ],
+    "pages": [
+      "estimacion-puntual",
+      "intervalos-de-confianza",
+      "varianza-muestral",
+      "distribucion-t-de-student",
+      "prueba-de-hipotesis",
+      "prueba-de-hipotesis-para-la-media",
+      "prueba-de-hipotesis-para-la-proporcion",
+      "error-tipo-i-y-tipo-ii",
+      "valor-p"
+    ],
+    "decks": [
+      "inferencia",
+      "pruebas-de-hipotesis"
+    ],
+    "tools": [
+      "calc",
+      "formularios"
+    ]
+  },
+  {
+    "id": "final",
+    "title": "Final · todos los TPs",
+    "description": "Repaso de todo el programa con foco en EMV, inferencia completa, Markov y conjuntas, más simulacro y quiz.",
+    "divisions": [
+      "2",
+      "3",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "pages": [
+      "estimacion-puntual",
+      "cadenas-de-markov",
+      "proceso-de-poisson",
+      "teorema-central-del-limite",
+      "probabilidad-total-y-bayes",
+      "covarianza-y-correlacion",
+      "distribucion-hipergeometrica",
+      "distribucion-binomial-negativa",
+      "prueba-de-hipotesis",
+      "intervalos-de-confianza"
+    ],
+    "decks": [
+      "definiciones-clave",
+      "teoremas",
+      "inferencia",
+      "pruebas-de-hipotesis",
+      "procesos-estocasticos"
+    ],
+    "quizzes": [
+      "quiz-general"
+    ],
+    "tools": [
+      "calc",
+      "formularios"
+    ]
+  },
+  {
+    "id": "distribuciones",
+    "title": "Distribuciones",
+    "description": "Las 14 distribuciones del programa con su PMF/PDF, E[X] y V(X), el explorador interactivo y el asistente para reconocerlas.",
+    "divisions": [
+      "3",
+      "4",
+      "7",
+      "8"
+    ],
+    "pages": [
+      "distribucion-bernoulli",
+      "distribucion-binomial",
+      "distribucion-geometrica",
+      "distribucion-binomial-negativa",
+      "distribucion-hipergeometrica",
+      "distribucion-poisson",
+      "distribucion-uniforme-continua",
+      "distribucion-exponencial",
+      "distribucion-normal",
+      "distribucion-gamma",
+      "distribucion-erlang",
+      "distribucion-weibull",
+      "distribucion-t-de-student",
+      "distribucion-ji-cuadrado"
+    ],
+    "decks": [
+      "distribuciones"
+    ],
+    "tools": [
+      "explorador",
+      "calc"
+    ]
+  },
+  {
+    "id": "inferencia",
+    "title": "Inferencia y pruebas de hipótesis",
+    "description": "Estimación, intervalos de confianza y pruebas de hipótesis con las calculadoras de fractiles t y χ² y el paso a paso.",
+    "divisions": [
+      "8",
+      "9"
+    ],
+    "pages": [
+      "estimacion-puntual",
+      "intervalos-de-confianza",
+      "prueba-de-hipotesis",
+      "prueba-de-hipotesis-para-la-media",
+      "prueba-de-hipotesis-para-la-proporcion",
+      "error-tipo-i-y-tipo-ii",
+      "valor-p",
+      "distribucion-t-de-student",
+      "distribucion-ji-cuadrado",
+      "varianza-muestral"
+    ],
+    "decks": [
+      "inferencia",
+      "pruebas-de-hipotesis"
+    ],
+    "tools": [
+      "calc",
+      "formularios"
+    ]
+  },
+  {
+    "id": "express",
+    "title": "Repaso exprés (última semana)",
+    "description": "Para la última semana: repaso activo intensivo con flashcards del día, simulacro cronometrado, formularios imprimibles y quiz.",
+    "divisions": [
+      "1",
+      "2",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "pages": [
+      "estadistica-descriptiva",
+      "probabilidad",
+      "procesos-estocasticos",
+      "suma-de-variables-aleatorias",
+      "inferencia-estadistica",
+      "prueba-de-hipotesis"
+    ],
+    "decks": [
+      "definiciones-clave",
+      "teoremas"
+    ],
+    "quizzes": [
+      "quiz-general"
+    ],
+    "tools": [
+      "formularios"
+    ]
+  }
+]

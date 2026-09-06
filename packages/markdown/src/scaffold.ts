@@ -222,6 +222,8 @@ export async function scaffoldConfig(opts: ScaffoldOptions): Promise<SubjectConf
       ...(survey.logFile ? { log: survey.logFile } : {}),
       ignore: [],
       divisionField: survey.divisionField,
+      // Material de estudio: relativo al config, no al wiki (ver `study.ts`).
+      study: "estudio",
     },
   };
 }

@@ -1,12 +1,11 @@
-import { defineConfig, type ViteUserConfig } from "vitest/config";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
+/* vitest 3 ya trae los tipos de vite 6: el plugin de React entra sin el molde
+   que hizo falta con vitest 2 (decisión W2-7 del Sprint 1, ya saldada). */
 export default defineConfig({
-  /* vitest 2 arrastra los tipos de vite 5 y la app corre sobre vite 6: sus
-     `Plugin` no son asignables entre sí. El molde alcanza solo al plugin; el
-     resto de la configuración sí se verifica. */
-  plugins: react() as unknown as ViteUserConfig["plugins"],
+  plugins: [react()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: {
     port: 5173,

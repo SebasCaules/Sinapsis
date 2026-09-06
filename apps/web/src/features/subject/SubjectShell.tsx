@@ -4,13 +4,18 @@
  *   rail 52 · índice 250 · [ cabecera 40 · migas 28 · contenido con scroll propio ]
  *
  * Carga la materia UNA vez y la reparte por el Outlet; el resto de las vistas no
- * vuelven a pedirla. Es también quien conoce la ruta activa: de ahí salen la
- * pestaña, las migas, el título del documento, la división abierta en el índice
- * y el ítem activo del rail. Todo eso sale de UN solo cálculo (`route`): antes
- * la pestaña y las migas resolvían la misma ruta por separado y se contradecían.
+ * vuelven a pedirla. Es también quien conoce la ruta activa: de ahí salen las
+ * pestañas, las migas, el título del documento, la división abierta en el índice
+ * y el ítem activo del rail. Todo eso sale de UNA sola función pura
+ * (`describePath`), que además puede describir rutas que no se están visitando
+ * — la que abre un ⌘-clic en una pestaña nueva.
+ *
+ * Las pestañas (N0-29) viven en el store; acá se las conecta con el router:
+ * navegar actualiza la activa, ⌘-clic abre una nueva sin moverse, cada una
+ * recuerda el scroll de `main`.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Outlet, useMatch, useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
 import { Seal } from "@/components/platform";
 import { isTypingTarget } from "@/lib/keyboard";
@@ -22,94 +27,211 @@ import { SearchPalette } from "./components/SearchPalette";
 import { SubjectHeader } from "./components/SubjectHeader";
 import { ErrorCard, WideSkeleton } from "./components/States";
 import type { SubjectCtx } from "./context";
-import { useCompact } from "./store";
-import { useSubject } from "./useSubject";
+import { describePath, isSubjectPath, type StudyLabels } from "./route-info";
+import { useCompact, useSubjectTabsStore, useTabs } from "./store";
+import { useStudy } from "./study/useStudy";
+import { useStudyState, useSubject } from "./useSubject";
 import css from "./SubjectShell.module.css";
-
-/** Lo que la ruta activa aporta a la pestaña, a las migas y al título de la pestaña del navegador. */
-interface RouteInfo {
-  /** Rótulo de la vista: pestaña, última miga y `document.title`. */
-  title: string;
-  /** Rótulo corto de la división (solo con una página abierta). */
-  chip: string | null;
-  /** Color de la división, si la ruta pertenece a una. */
-  color: string | null;
-  /** Miga intermedia (la división de la página abierta). */
-  parent: Crumb | null;
-}
 
 export function SubjectShell() {
   const { subject = "" } = useParams();
   const { query, model } = useSubject(subject);
+  const { bookmarks } = useStudyState(subject);
   const { compact, toggle } = useCompact();
   const [searchOpen, setSearchOpen] = useState(false);
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
 
-  const homeMatch = useMatch("/m/:subject");
-  const pageMatch = useMatch("/m/:subject/p/:page");
-  const divisionMatch = useMatch("/m/:subject/d/:division");
-  const toolMatch = useMatch("/m/:subject/t/:tool");
-  const wikiMatch = useMatch("/m/:subject/wiki");
-  const graphMatch = useMatch("/m/:subject/graph");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const mainRef = useRef<HTMLElement>(null);
 
-  /* ⌘K / Ctrl+K en cualquier lado; «/» solo fuera de un campo de texto. */
+  const tabs = useTabs(subject);
+  const openTab = useSubjectTabsStore((s) => s.openTab);
+  const newTab = useSubjectTabsStore((s) => s.newTab);
+  const activateTab = useSubjectTabsStore((s) => s.activateTab);
+  const closeTabAction = useSubjectTabsStore((s) => s.closeTab);
+  const moveTab = useSubjectTabsStore((s) => s.moveTab);
+  const syncActive = useSubjectTabsStore((s) => s.syncActive);
+  const setScroll = useSubjectTabsStore((s) => s.setScroll);
+
+  /* Los rótulos del material de estudio salen del modelo de `study/`: así una
+     pestaña de flashcards dice «Repaso U1» y no «Flashcards» a secas. La consulta
+     ya está en caché (la comparten el rail y las vistas de estudio). */
+  const study = useStudy(subject);
+  const studyLabels = useMemo<StudyLabels>(
+    () => ({
+      deck: (id) => study.model.deck(id)?.deck.title,
+      quiz: (id) => study.model.quiz(id)?.quiz.title,
+      kit: (id) => study.model.kit(id)?.kit.title,
+    }),
+    [study.model],
+  );
+
+  const route = useMemo(
+    () => describePath(model, subject, location.pathname, studyLabels),
+    [model, subject, location.pathname, studyLabels],
+  );
+
+  /* ---------- pestañas ↔ router ------------------------------------------- */
+
+  /** Escribe en la pestaña activa el scroll con el que se la está dejando. */
+  const saveScroll = useCallback(() => {
+    const y = mainRef.current?.scrollTop;
+    if (y !== undefined) setScroll(subject, tabs.active, y);
+  }, [setScroll, subject, tabs.active]);
+
+  /* Navegar dentro de la materia mueve la pestaña activa (o salta a la que ya
+     tenga abierto el destino). */
+  useEffect(() => {
+    if (!isSubjectPath(subject, location.pathname)) return;
+    syncActive(
+      subject,
+      { path: location.pathname, title: route.title, chip: route.chip, color: route.color },
+      mainRef.current?.scrollTop,
+    );
+  }, [subject, location.pathname, route.title, route.chip, route.color, syncActive]);
+
+  /* Mientras se lee, la pestaña activa va anotando su scroll: al volver a ella
+     no hace falta haber pasado por ningún «guardar antes de salir». */
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        setScroll(subject, useSubjectTabsStore.getState().tabsOf(subject).active, main.scrollTop);
+      });
+    };
+    main.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      main.removeEventListener("scroll", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [subject, setScroll, model]);
+
+  /* Al cambiar de pestaña se repone su scroll (dos cuadros: el primero monta la
+     vista, el segundo ya tiene el alto real para desplazarse). */
+  const restoredRef = useRef(tabs.active);
+  useEffect(() => {
+    if (restoredRef.current === tabs.active) return;
+    restoredRef.current = tabs.active;
+    const y = tabs.list.find((t) => t.id === tabs.active)?.scrollY ?? 0;
+    let second = 0;
+    const first = window.requestAnimationFrame(() => {
+      second = window.requestAnimationFrame(() => mainRef.current?.scrollTo({ top: y }));
+    });
+    return () => {
+      window.cancelAnimationFrame(first);
+      if (second) window.cancelAnimationFrame(second);
+    };
+  }, [tabs.active, tabs.list]);
+
+  const selectTab = useCallback(
+    (id: string) => {
+      if (id === tabs.active) return;
+      const target = tabs.list.find((t) => t.id === id);
+      if (!target) return;
+      saveScroll();
+      activateTab(subject, id);
+      navigate(target.path);
+    },
+    [tabs.active, tabs.list, saveScroll, activateTab, subject, navigate],
+  );
+
+  const closeTab = useCallback(
+    (id: string) => {
+      const path = closeTabAction(subject, id);
+      if (path) navigate(path);
+    },
+    [closeTabAction, subject, navigate],
+  );
+
+  const addTab = useCallback(() => {
+    saveScroll();
+    newTab(subject);
+    navigate(routes.subject(subject));
+  }, [saveScroll, newTab, subject, navigate]);
+
+  const reorderTabs = useCallback((from: number, to: number) => moveTab(subject, from, to), [moveTab, subject]);
+
+  /**
+   * ⌘/Ctrl-clic (y clic con el botón del medio) sobre CUALQUIER enlace interno
+   * de la materia: abre una pestaña nueva sin moverse de la actual. Se delega en
+   * la raíz del shell a propósito — así vale igual para el índice, los wikilinks
+   * del lector, el catálogo, el rail y todo lo que venga, sin que ninguna de esas
+   * piezas tenga que saber que las pestañas existen.
+   */
+  const openLinkInNewTab = useCallback(
+    (event: ReactMouseEvent, aux: boolean) => {
+      if (!aux && !(event.metaKey || event.ctrlKey)) return;
+      if (event.shiftKey || event.altKey) return;
+      const anchor = (event.target as HTMLElement | null)?.closest?.("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+      if (anchor.target === "_blank") return;
+      const href = anchor.getAttribute("href") ?? "";
+      if (!href.startsWith("/") || !isSubjectPath(subject, href.split("#")[0] ?? "")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const path = anchor.getAttribute("href") ?? "";
+      const info = describePath(model, subject, path.split("#")[0] ?? path, studyLabels);
+      openTab(subject, { path, title: info.title, chip: info.chip, color: info.color });
+    },
+    [subject, model, openTab, studyLabels],
+  );
+
+  /* ---------- teclado ------------------------------------------------------ */
+  /* ⌘K / Ctrl+K en cualquier lado; «/» y los atajos de pestaña solo fuera de un
+     campo de texto. */
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setSearchOpen(true);
         return;
       }
-      if (
-        event.key === "/" &&
-        !isTypingTarget(event.target) &&
-        !event.metaKey &&
-        !event.ctrlKey &&
-        !event.altKey
-      ) {
+      if (isTypingTarget(event.target)) return;
+
+      if (mod && event.shiftKey) {
+        /* `code` sobrevive al Shift (que convierte «]» en «}») y a los teclados
+           que no tienen corchetes sin AltGr. */
+        const forward = event.code === "BracketRight" || event.key === "]" || event.key === "}";
+        const back = event.code === "BracketLeft" || event.key === "[" || event.key === "{";
+        if (forward || back) {
+          event.preventDefault();
+          const state = useSubjectTabsStore.getState().tabsOf(subject);
+          if (state.list.length < 2) return;
+          const at = state.list.findIndex((t) => t.id === state.active);
+          const next = state.list[(at + (forward ? 1 : -1) + state.list.length) % state.list.length];
+          if (next) selectTab(next.id);
+          return;
+        }
+      }
+      if (mod && !event.shiftKey && event.key.toLowerCase() === "w") {
+        event.preventDefault();
+        closeTab(useSubjectTabsStore.getState().tabsOf(subject).active);
+        return;
+      }
+      if (event.key === "/" && !mod && !event.altKey) {
         event.preventDefault();
         setSearchOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [subject, selectTab, closeTab]);
 
-  const pageSlug = pageMatch?.params.page ?? null;
-  const page = pageSlug && model ? (model.bySlug.get(pageSlug) ?? null) : null;
-  const divisionKey = divisionMatch?.params.division ?? (page && model ? model.divisionOf(page) : null);
-  const division = divisionKey && model ? (model.division(divisionKey) ?? null) : null;
-
-  const route = useMemo<RouteInfo>(() => {
-    const unit = model?.config.division.singular ?? "División";
-    if (pageSlug) {
-      return {
-        title: page?.title ?? pageSlug,
-        chip: division?.short ?? null,
-        color: division?.color ?? null,
-        parent: division ? { label: division.label, to: routes.division(subject, division.key) } : null,
-      };
-    }
-    if (wikiMatch) return { title: "Todo el wiki", chip: null, color: null, parent: null };
-    if (graphMatch) return { title: "Grafo de conexiones", chip: null, color: null, parent: null };
-    if (divisionMatch) {
-      return { title: division?.label ?? unit, chip: null, color: division?.color ?? null, parent: null };
-    }
-    if (toolMatch) {
-      const label = model?.railItem(toolMatch.params.tool ?? "")?.item.label ?? "Herramienta";
-      return { title: label, chip: null, color: null, parent: null };
-    }
-    if (homeMatch) return { title: "Inicio", chip: null, color: null, parent: null };
-    return { title: "No encontrado", chip: null, color: null, parent: null };
-  }, [model, subject, pageSlug, page, division, homeMatch, wikiMatch, graphMatch, divisionMatch, toolMatch]);
+  /* ---------- migas y título ----------------------------------------------- */
 
   const crumbs = useMemo<Crumb[]>(() => {
     const head: Crumb = { label: model?.config.name ?? subject, to: routes.subject(subject) };
     return route.parent ? [head, route.parent, { label: route.title }] : [head, { label: route.title }];
   }, [model, subject, route]);
 
-  /* La pestaña del navegador dice lo mismo que la pestaña de la cabecera. */
+  /* La pestaña del navegador dice lo mismo que la pestaña activa de la cabecera. */
   useEffect(() => {
     const name = model?.config.name ?? subject;
     if (!name) return;
@@ -146,22 +268,35 @@ export function SubjectShell() {
   }
 
   return (
-    <div className={css.shell}>
+    <div
+      className={css.shell}
+      onClick={(event) => openLinkInNewTab(event, false)}
+      onAuxClick={(event) => openLinkInNewTab(event, event.button === 1)}
+    >
       <a href="#contenido" className={css.skip}>
         Saltar al contenido
       </a>
       <Rail slug={subject} groups={model.railGroups} compact={compact} onToggleCompact={toggle} />
       {compact ? null : (
-        <IndexPanel model={model} activePage={pageSlug} activeDivision={divisionKey ?? null} />
+        <IndexPanel
+          model={model}
+          activePage={route.page}
+          activeDivision={route.division}
+          bookmarks={bookmarks}
+        />
       )}
       <div className={css.content}>
         <SubjectHeader
-          tab={{ title: route.title, chip: route.chip, color: route.color }}
-          subject={subject}
+          tabs={tabs.list}
+          activeId={tabs.active}
+          onSelect={selectTab}
+          onClose={closeTab}
+          onNew={addTab}
+          onReorder={reorderTabs}
           onSearch={openSearch}
         />
         <Crumbs items={crumbs} />
-        <main className={css.main} id="contenido" data-subject-main="">
+        <main className={css.main} id="contenido" data-subject-main="" ref={mainRef}>
           <Outlet context={ctx} />
         </main>
         {model.fab ? <Fab view={model.fab} /> : null}

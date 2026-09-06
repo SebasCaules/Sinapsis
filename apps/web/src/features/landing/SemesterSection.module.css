@@ -1,4 +1,6 @@
 .section { display: flex; flex-direction: column; gap: 14px; padding-top: 8px; }
+/* El cuatrimestre que se está arrastrando deja su hueco: lo que se ve es el overlay. */
+.section[data-dragging="true"] { opacity: .4; }
 
 .head {
   display: flex;
@@ -7,6 +9,55 @@
   padding-bottom: 9px;
   border-bottom: 1px solid var(--border);
 }
+
+/* Asa ⋮⋮ del cuatrimestre: mismo blanco y mismo gesto que la de las materias. */
+.handle {
+  flex: none;
+  margin-left: -8px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  min-height: 32px;
+  padding: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: 600 12px var(--font-mono);
+  letter-spacing: -.1em;
+  color: var(--text-3);
+  cursor: grab;
+  touch-action: none;
+}
+.handle:hover { color: var(--text); background: var(--surface-2); }
+.handle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: 0 0 0 5px var(--primary-ring); }
+@media (pointer: coarse) { .handle { padding: 14px; margin: -8px 0 -8px -14px; } }
+
+.removeSemester {
+  flex: none;
+  font: 600 11px var(--font-ui);
+  color: var(--bad);
+  border: 1px solid var(--bad-soft);
+  background: var(--bad-soft);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.removeSemester:hover { border-color: var(--bad); }
+
+/* Copia que sigue al puntero al arrastrar un cuatrimestre entero. */
+.overlay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--relief), var(--shadow-lg);
+  transform: rotate(1deg);
+  cursor: grabbing;
+}
+.overlay .title { font-size: 18px; }
 
 .bar { flex: none; width: 3px; height: 26px; border-radius: 2px; background: var(--accent); }
 

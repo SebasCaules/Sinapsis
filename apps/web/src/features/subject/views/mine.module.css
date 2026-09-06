@@ -1,0 +1,277 @@
+/* «Lo mío»: favoritos y apuntes. Comparten hoja porque comparten gramática —
+   cabecera editorial, grupos con filete de división y filas con acción a la
+   derecha—; lo único que cambia es qué se lista. Vista ancha 1120. */
+
+.view {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 24px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- cabecera ---------- */
+.headRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.head { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+.ribbon {
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.14em;
+  color: var(--warn-ink, var(--warn));
+}
+
+.h1 {
+  margin: 0;
+  font: 600 var(--h1-hero) / 1.05 var(--font-display);
+  color: var(--text);
+}
+
+.sub { margin: 0; font: 500 12.5px var(--font-mono); color: var(--text-3); }
+
+.exportButton {
+  flex: none;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t);
+}
+.exportButton:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.exportButton:disabled { opacity: 0.5; cursor: not-allowed; }
+.exportButton:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
+}
+
+/* ---------- vacío ---------- */
+/* No es un cartel de error: explica PARA QUÉ sirve la función y ofrece el
+   camino más corto para estrenarla. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 46px 32px 40px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r-lg);
+}
+
+.emptyIcon { color: var(--border-2); }
+
+.emptyTitle { margin: 0; font: 600 19px var(--font-display); color: var(--text); }
+
+.emptyText {
+  margin: 0;
+  max-width: 560px;
+  font: 400 13.5px/1.65 var(--font-ui);
+  color: var(--text-2);
+}
+.emptyText strong { color: var(--text); font-weight: 600; }
+
+.emptyAction {
+  margin-top: 6px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--elevated);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.emptyAction:hover { border-color: var(--primary); color: var(--primary); }
+.emptyAction:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- grupos por división (favoritos) ---------- */
+.group { display: flex; flex-direction: column; gap: 10px; }
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.groupBar { width: 3px; height: 24px; border-radius: 2px; background: var(--ucol); }
+
+.groupChip {
+  font: 600 10.5px var(--font-mono);
+  color: var(--uink, var(--ucol));
+  border: 1px solid var(--ucol);
+  border-radius: 5px;
+  padding: 2px 6px;
+}
+
+.groupTitle {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 600 20px/1.2 var(--font-display);
+  color: var(--text);
+}
+
+.groupCount { font: 500 11.5px var(--font-mono); color: var(--text-3); }
+
+.rows { display: flex; flex-direction: column; gap: 6px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ucol);
+  border-radius: var(--r);
+  box-shadow: var(--relief);
+  transition: box-shadow var(--t);
+}
+.row:hover { box-shadow: var(--relief), var(--shadow); }
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-decoration: none;
+}
+.rowMain:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
+
+.rowType { font: 500 10px var(--font-mono); letter-spacing: 0.05em; color: var(--text-3); }
+
+.rowTitle { font: 600 14px/1.3 var(--font-ui); color: var(--text); }
+.rowMain:hover .rowTitle { color: var(--primary); }
+
+.rowSummary {
+  font: 400 12px/1.5 var(--font-ui);
+  color: var(--text-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rowAction {
+  flex: none;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface-2);
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t);
+}
+.rowAction:hover { border-color: var(--bad); color: var(--bad-text); }
+.rowAction:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- apuntes ---------- */
+.notes { display: flex; flex-direction: column; gap: 12px; }
+
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ucol, var(--warn));
+  border-radius: var(--r);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.noteHead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.noteChip {
+  flex: none;
+  font: 600 9.5px var(--font-mono);
+  color: var(--uink, var(--ucol));
+  border: 1px solid var(--ucol);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.noteTitle {
+  flex: 1;
+  min-width: 0;
+  font: 600 15px var(--font-ui);
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.noteTitle:hover { color: var(--primary); }
+.noteTitle:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
+
+.noteDate { flex: none; font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+/* El extracto va en monoespaciada igual que el editor: es una cita de lo que
+   uno escribió, no prosa de la plataforma. */
+.noteBody {
+  margin: 0;
+  font: 400 12.5px/1.65 var(--font-mono);
+  color: var(--text-2);
+  white-space: pre-wrap;
+}
+
+.noteFoot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.noteAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-3);
+  text-decoration: none;
+  cursor: pointer;
+}
+.noteAction:hover { background: var(--surface-2); color: var(--text-2); }
+.noteAction:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+@media (max-width: 760px) {
+  .headRow { flex-direction: column; align-items: stretch; }
+  .row { flex-direction: column; align-items: stretch; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row, .exportButton, .rowAction { transition: none; }
+}

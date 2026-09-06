@@ -5,9 +5,12 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+  BUILTIN_VIEWS,
   DIVISION_NONE,
   DIVISION_OTHER,
   SubjectConfig,
+  routes,
+  type BuiltinView,
   type PageMeta,
   type SubjectDetail,
 } from "@sinapsis/contract";
@@ -176,5 +179,56 @@ describe("rail", () => {
     const campus = groups[4]?.items[0];
     expect(campus?.external).toBe(true);
     expect(campus?.href).toBe("https://campus.itba.edu.ar");
+  });
+
+  /* Sprint 2: las nueve vistas builtin del contrato tienen que caer en su ruta
+     de `routes.*`, no en «Próximamente». Si alguna vuelve a /t/:id es que se
+     olvidó de la tabla `BUILTIN_ROUTES`. */
+  it("manda cada vista builtin del contrato a su ruta del contrato", () => {
+    const m = model();
+    const expected: Record<BuiltinView, string> = {
+      home: routes.subject("proba"),
+      plan: routes.plan("proba"),
+      kits: routes.kits("proba"),
+      wiki: routes.wiki("proba"),
+      graph: routes.graph("proba"),
+      flashcards: routes.flashcards("proba"),
+      quiz: routes.quiz("proba"),
+      notes: routes.notes("proba"),
+      favorites: routes.favorites("proba"),
+    };
+    for (const view of BUILTIN_VIEWS) {
+      expect(m.railItem(view)?.to, `builtin «${view}»`).toBe(expected[view]);
+    }
+  });
+
+  it("no deja ninguna vista builtin del rail colgada de /t/:id", () => {
+    const tools = model()
+      .railGroups.flatMap((g) => g.items)
+      .filter((v) => v.item.kind === "builtin")
+      .map((v) => v.to);
+    expect(tools.some((to) => to?.startsWith("/m/proba/t/"))).toBe(false);
+  });
+
+  it("una vista builtin que la plataforma no conoce cae en «Próximamente» (/t/:id)", () => {
+    const detail: SubjectDetail = {
+      config: {
+        ...config,
+        rail: [
+          {
+            id: "futuro",
+            label: "Futuro",
+            items: [
+              { id: "holodeck", label: "Holodeck", icon: "sparkle", kind: "builtin", target: "holodeck" },
+            ],
+          },
+        ],
+      },
+      pages,
+      studied: [],
+      placeholder: false,
+      lastSyncAt: null,
+    };
+    expect(buildSubjectModel(detail).railItem("holodeck")?.to).toBe("/m/proba/t/holodeck");
   });
 });

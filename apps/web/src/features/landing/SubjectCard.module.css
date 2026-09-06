@@ -16,18 +16,28 @@
   text-decoration: none;
   transition: transform var(--t), box-shadow var(--t), border-color var(--t);
 }
-a.card:hover {
+/* La tarjeta que navega es un div con un enlace-capa encima (.stretch): el
+   relieve y el foco se pintan sobre el contenedor, no sobre el ancla. */
+.card[data-interactive="true"]:hover {
   transform: translateY(-2px);
   box-shadow: var(--relief), var(--shadow-lg);
   border-color: var(--border-2);
   border-left-color: var(--ucol, var(--u0));
 }
-a.card:focus-visible {
+.card:has(.stretch:focus-visible) {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
   box-shadow: var(--relief), var(--shadow), 0 0 0 6px var(--primary-ring);
 }
-@media (prefers-reduced-motion: reduce) { a.card:hover { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card[data-interactive="true"]:hover { transform: none; } }
+
+/* Enlace grande de la tarjeta: cubre todo menos lo que se levante por encima. */
+.stretch {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
 
 /* Elemento arrastrado: la tarjeta se levanta de la mesa. */
 .overlay {
@@ -129,6 +139,25 @@ a.card:focus-visible {
   min-height: 33px;
 }
 .meta { font: 500 11px var(--font-mono); color: var(--text-3); white-space: nowrap; }
+
+/* Atajos de estudio del pie: discretos y por encima del enlace-capa. */
+.study {
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.studyLink {
+  font: 500 12px var(--font-mono);
+  color: var(--text-3);
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 2px 1px;
+}
+.studyLink:hover { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.studyLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; color: var(--primary); }
 
 .badge {
   font: 600 9.5px var(--font-ui);

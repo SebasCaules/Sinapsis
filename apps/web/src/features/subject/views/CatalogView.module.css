@@ -160,7 +160,7 @@
 .cardTitle {
   font: 600 13px/1.35 var(--font-ui);
   color: var(--text);
-  padding-right: 18px;
+  padding-right: 40px;
 }
 
 .cardSummary {
@@ -172,7 +172,18 @@
   overflow: hidden;
 }
 
-.cardCheck { position: absolute; right: 12px; top: 12px; color: var(--good); stroke-width: 2; }
+/* Marcas de la tarjeta: ★ favorita y ✓ estudiada, en la esquina, en fila. */
+.cardMarks {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cardStar { color: var(--warn); fill: currentColor; }
+.cardCheck { color: var(--good); stroke-width: 2; }
 
 .empty { margin: 20px 0; font: 400 13px var(--font-ui); color: var(--text-3); }
 

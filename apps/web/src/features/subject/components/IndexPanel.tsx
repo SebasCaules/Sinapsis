@@ -9,7 +9,7 @@
 import { memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
-import { UiIcon } from "@/components/platform";
+import { Icon, UiIcon } from "@/components/platform";
 import { pad2, type DivisionNode, type SubjectModel } from "../model";
 import { useOpenDivisions, useSubjectUiStore, useTypeCollapsed } from "../store";
 import css from "./IndexPanel.module.css";
@@ -20,9 +20,11 @@ export interface IndexPanelProps {
   activePage: string | null;
   /** Clave de la división en foco (por la página abierta o por /d/:division). */
   activeDivision: string | null;
+  /** Slugs marcados como favoritos: la ★ del árbol. */
+  bookmarks: ReadonlySet<string>;
 }
 
-export function IndexPanel({ model, activePage, activeDivision }: IndexPanelProps) {
+export function IndexPanel({ model, activePage, activeDivision, bookmarks }: IndexPanelProps) {
   const { config, placeholder } = model;
   const open = useOpenDivisions(model.slug);
   const openDivision = useSubjectUiStore((s) => s.openDivision);
@@ -62,6 +64,7 @@ export function IndexPanel({ model, activePage, activeDivision }: IndexPanelProp
             expanded={open.includes(division.key)}
             active={activeDivision === division.key}
             activePage={activePage}
+            bookmarks={bookmarks}
           />
         ))}
         {!divisions.length ? <p className={css.empty}>Todavía no hay páginas sincronizadas.</p> : null}
@@ -76,6 +79,7 @@ interface DivisionRowProps {
   expanded: boolean;
   active: boolean;
   activePage: string | null;
+  bookmarks: ReadonlySet<string>;
 }
 
 /* `memo` de verdad: todas las props son estables (el modelo y la división viven
@@ -87,6 +91,7 @@ const DivisionRow = memo(function DivisionRow({
   expanded,
   active,
   activePage,
+  bookmarks,
 }: DivisionRowProps) {
   const toggleDivision = useSubjectUiStore((s) => s.toggleDivision);
   const count = model.contentPages(division.key).length;
@@ -134,6 +139,7 @@ const DivisionRow = memo(function DivisionRow({
               block={block}
               position={position}
               activePage={activePage}
+              bookmarks={bookmarks}
             />
           ))}
         </div>
@@ -148,12 +154,14 @@ function TypeBlockRows({
   block,
   position,
   activePage,
+  bookmarks,
 }: {
   model: SubjectModel;
   divisionKey: string;
   block: ReturnType<SubjectModel["typeBlocks"]>[number];
   position: ReadonlyMap<string, number>;
   activePage: string | null;
+  bookmarks: ReadonlySet<string>;
 }) {
   const collapsed = useTypeCollapsed(model.slug, divisionKey, block.type.key, block.type.collapsedByDefault);
   const toggleType = useSubjectUiStore((s) => s.toggleType);
@@ -180,6 +188,7 @@ function TypeBlockRows({
           num={position.get(page.slug)}
           title={page.title}
           studied={model.studied.has(page.slug)}
+          bookmarked={bookmarks.has(page.slug)}
           active={page.slug === activePage}
         />
       ))}
@@ -192,12 +201,15 @@ const PageRow = memo(function PageRow({
   num,
   title,
   studied,
+  bookmarked,
   active,
 }: {
   to: string;
   num: number | undefined;
   title: string;
   studied: boolean;
+  /** Favorito: la ★ del contrato («Lo mío»). */
+  bookmarked: boolean;
   active: boolean;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
@@ -216,6 +228,7 @@ const PageRow = memo(function PageRow({
     >
       <span className={css.num}>{num ? pad2(num) : "·"}</span>
       <span className={css.pageTitle}>{title}</span>
+      {bookmarked ? <Icon name="star" size={11} className={css.star} title="Favorita" /> : null}
       {studied ? <UiIcon name="check" size={12} className={css.check} title="Estudiada" /> : null}
     </Link>
   );

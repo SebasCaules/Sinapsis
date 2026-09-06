@@ -4,9 +4,11 @@
  */
 import {
   API_PREFIX,
+  StudyContent,
   SubjectDetail,
   SyncResult,
   errorMessageFromBody,
+  type StudyContent as StudyContentType,
   type SubjectDetail as SubjectDetailType,
   type SyncPayload,
   type SyncResult as SyncResultType,
@@ -112,6 +114,11 @@ export async function putSync(opts: ApiOptions, slug: string, payload: SyncPaylo
 /** `GET /api/subjects/:slug` — requiere sesión. */
 export async function getSubject(opts: ApiOptions, slug: string): Promise<SubjectDetailType> {
   return requestJson(opts, "GET", `/subjects/${slug}`, SubjectDetail, { name: "SubjectDetail" });
+}
+
+/** `GET /api/subjects/:slug/study` — material de estudio publicado. Requiere sesión. */
+export async function getStudy(opts: ApiOptions, slug: string): Promise<StudyContentType> {
+  return requestJson(opts, "GET", `/subjects/${slug}/study`, StudyContent, { name: "StudyContent" });
 }
 
 /** `POST /api/auth/dev` — sesión local con `AUTH_DEV_BYPASS=1`. Devuelve la cookie o `null`. */

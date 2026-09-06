@@ -95,7 +95,8 @@ Grupo: `{ id, label, color?, items[] }` — `id` `^[a-z][a-z0-9_-]*$`, 1..8 íte
 ### `wiki`
 
 ```json
-{ "root": "wiki", "index": "index.md", "log": "log.md", "ignore": [], "divisionField": "unidad" }
+{ "root": "wiki", "index": "index.md", "log": "log.md", "ignore": [],
+  "divisionField": "unidad", "study": "estudio" }
 ```
 
 | Campo | Default | Notas |
@@ -105,6 +106,7 @@ Grupo: `{ id, label, color?, items[] }` — `id` `^[a-z][a-z0-9_-]*$`, 1..8 íte
 | `log` | — | Ídem, como el slug `log`. |
 | `ignore` | `[]` | Carpetas de `root` que no se compilan. |
 | `divisionField` | `"division"` | Campo del frontmatter que dice la división. |
+| `study` | `"estudio"` | Material de estudio (§7), **relativo al config**, no a `root`. |
 
 ### Qué es FIJO y qué es SLOT
 
@@ -218,9 +220,13 @@ PUT {api}/api/subjects/{slug}/sync
 Authorization: Bearer <SYNC_TOKEN>
 Content-Type: application/json
 
-{ config: SubjectConfig, pages: Page[], generatedAt: string, generator?: string }
+{ config: SubjectConfig, pages: Page[], study?: StudyContent, generatedAt: string, generator?: string }
 → { subject, pages, created, updated, deleted, warnings[] }
 ```
+
+`study` es lo compilado de la carpeta `wiki.study` (§7). Viaja en cada sync, también vacío
+(el sync lo reemplaza igual que a las páginas: borrar la carpeta lo borra de la plataforma).
+Sin material propio, la plataforma autogenera un mazo por división con los `resumen`.
 
 Idempotente y **reemplaza** el conjunto de páginas de la materia: las que ya no están en el
 wiki se borran. El progreso del usuario sobre slugs borrados se conserva por si vuelven.
@@ -249,3 +255,93 @@ wiki se borran. El progreso del usuario sobre slugs borrados se conserva por si 
 - `validate` — valida el config contra el contrato.
 - `sync` — compila y sincroniza; reporta conteos y advertencias.
 - `status` — última sync, páginas, divisiones sin páginas.
+
+---
+
+## 7. Material de estudio (`wiki.study`)
+
+Mazos, quizzes, plan y kits. Carpeta declarada en `wiki.study` (por defecto `estudio/`),
+**relativa al config** (no al wiki: `--wiki <otro-vault>` no la mueve). Todo opcional.
+
+```
+estudio/
+  flashcards-*.md   → Deck   (tipo: flashcards)
+  quiz-*.md         → Quiz   (tipo: quiz)
+  plan.json         → Plan
+  kits.json         → Kit[]
+```
+
+Los `.md` sin `tipo` en el frontmatter (README, notas) se ignoran en silencio.
+
+### Mazo (`tipo: flashcards`)
+
+| Frontmatter | Obligatorio | Notas |
+|---|---|---|
+| `tipo: flashcards` | sí | Lo que hace que el archivo sea un mazo. |
+| `titulo` | sí | Nombre del mazo en la plataforma. |
+| `id` | no | Si falta, el nombre del archivo normalizado. Lo usan `plan.json` y `kits.json`. |
+| `division` | no | Una clave de `config.divisions`; las tarjetas la heredan. |
+| `descripcion` | no | Una o dos frases. |
+
+Cada `##` abre una tarjeta: encabezado = anverso, cuerpo hasta el próximo `##` = reverso
+(markdown + KaTeX). Los `###` no abren tarjeta, ni los `##` dentro de un bloque de código o
+de un `$$…$$`. Al principio del reverso valen dos directivas, con o sin `>` delante:
+
+- `pagina: <slug>` — página del wiki relacionada («ver en el wiki»).
+- `tags: a, b` — etiquetas de la tarjeta.
+
+Id de tarjeta: `<id del mazo>:<n>`, `n` correlativo. **Reordenar tarjetas cambia los ids y
+pierde el progreso del SRS**; para fijarlo: `## Anverso {#mi-id}`.
+
+### Quiz (`tipo: quiz`)
+
+Mismo frontmatter (`tipo: quiz`). Cada `##` abre una pregunta; el texto entre el encabezado y
+la lista se suma al enunciado. Opciones: lista de tildes, `- [x]` correcta, `- [ ]` incorrecta
+(≥ 2 opciones, ≥ 1 correcta). El blockquote **posterior** a la lista es la explicación.
+`pagina:` vale igual que en los mazos.
+
+### `plan.json` (`Plan`)
+
+```jsonc
+{ "title": "Plan de estudio",
+  "phases": [{
+    "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
+    "date": "2026-10-01",             // opcional, AAAA-MM-DD
+    "scope": "Qué cae (markdown)",    // opcional
+    "milestones": [{
+      "id": "fase-1-h1", "title": "Unidad 1", "divisions": ["1"],
+      "tasks": [
+        { "id": "fase-1-h1-t1", "label": "Leer la teoría", "kind": "read", "target": "1" },
+        { "id": "fase-1-h1-t2", "label": "Flashcards", "kind": "cards", "target": "definiciones-clave" }
+      ] }] }] }
+```
+
+| `kind` | `target` |
+|---|---|
+| `read` | clave de división |
+| `cards` | id de mazo (o sin `target`: repaso del día) |
+| `quiz` | id de quiz |
+| `exercises` | slug de página o URL (opcional) |
+| `custom` | slug de página o URL (opcional) |
+
+Los ids son la clave del progreso del usuario («tarea hecha»): conviene que sean estables
+(`fase-1`, `fase-1-h2-t3`).
+
+### `kits.json` (`Kit[]`)
+
+```jsonc
+[{ "id": "parcial-1", "title": "Parcialito 1 · TP1–TP2", "description": "…",
+   "divisions": ["1", "2"], "pages": ["esperanza"], "decks": ["definiciones-clave"],
+   "quizzes": ["quiz-general"], "tools": ["calc"] }]
+```
+
+`tools` son **ids de ítems del `rail`** del config, no URLs.
+
+### Advertencias del material de estudio
+
+`sinapsis sync --dry-run` avisa (sin fallar) por: página / mazo / quiz / división / herramienta
+inexistente, `target` de una tarea `read` que no es una división, id repetido (mazo, quiz,
+tarjeta, pregunta, kit), tarjeta sin reverso, pregunta con menos de 2 opciones o sin correcta,
+y JSON que no cumple el contrato (con la ruta del campo).
+
+`sinapsis validate` corre lo mismo salvo lo que necesita las páginas del wiki (no lo compila).

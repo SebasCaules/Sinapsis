@@ -1,12 +1,16 @@
 /**
- * Inicio de la materia: por dónde empezar, progreso por división y repaso.
- * Es la vista ancha (1120) del contrato; no inventa datos: todo sale del modelo.
+ * Inicio de la materia: qué toca hoy, por dónde empezar, progreso por división
+ * y repaso. Es la vista ancha (1120) del contrato; no inventa datos: todo sale
+ * del modelo, del estado de estudio y del material que trajo el sync.
  */
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
-import { pad2 } from "../model";
+import { pad2, type SubjectModel } from "../model";
+import { useStudy } from "../study/useStudy";
+import { useStudyState } from "../useSubject";
 import css from "./HomeView.module.css";
 
 export function HomeView() {
@@ -64,6 +68,8 @@ export function HomeView() {
           </Link>
         </div>
       </section>
+
+      <TodayCard model={model} slug={slug} />
 
       <section className={css.progress} aria-labelledby="home-progress">
         <div className={css.progressHead}>
@@ -124,6 +130,100 @@ export function HomeView() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * «PARA HOY»: la agenda del día, con lo único que de verdad caduca.
+ *
+ * Tres renglones, en orden de urgencia: las tarjetas que el SM-2 dio por
+ * vencidas, la próxima tarea del plan que sigue sin hacer y los últimos
+ * favoritos. La tarjeta entera desaparece si no hay nada de las tres cosas: un
+ * «no tiene nada pendiente» todos los días enseña a no mirarla.
+ */
+function TodayCard({ model, slug }: { model: SubjectModel; slug: string }) {
+  const { state } = useStudyState(slug);
+  const study = useStudy(slug);
+  const task = study.nextTask();
+
+  const due = useMemo(() => {
+    const now = Date.now();
+    return state.srs.filter((card) => {
+      const at = Date.parse(card.due);
+      return Number.isFinite(at) && at <= now;
+    }).length;
+  }, [state.srs]);
+
+  /* Los últimos guardados primero: el API devuelve los favoritos en el orden en
+     que se marcaron. */
+  const favorites = useMemo(
+    () =>
+      state.bookmarks
+        .slice(-3)
+        .reverse()
+        .map((page) => model.bySlug.get(page))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p)),
+    [state.bookmarks, model],
+  );
+
+  if (!due && !task && !favorites.length) return null;
+
+  return (
+    <section className={css.today} aria-labelledby="home-today">
+      <span className={`${css.eyebrow} ${css.eyebrowToday}`} id="home-today">
+        <Icon name="timer" size={14} />
+        PARA HOY
+      </span>
+
+      <div className={css.todayGrid}>
+        {due ? (
+          <div className={css.todayItem}>
+            <span className={css.todayLabel}>REPASO</span>
+            <p className={css.todayText}>
+              {due} {plural(due, "tarjeta vencida", "tarjetas vencidas")} esperando en el mazo.
+            </p>
+            <Link className={css.todayAction} to={routes.flashcards(slug)}>
+              <Icon name="cards" size={15} />
+              Repasar {due} {plural(due, "tarjeta", "tarjetas")}
+            </Link>
+          </div>
+        ) : null}
+
+        {task ? (
+          <div className={css.todayItem}>
+            <span className={css.todayLabel}>PLAN</span>
+            <p className={css.todayText}>
+              <strong>{task.task.label}</strong>
+              <br />
+              <span className={css.todayWhere}>
+                {task.phase.title} · {task.milestone.title}
+              </span>
+            </p>
+            <Link className={css.todayAction} to={routes.plan(slug)}>
+              <Icon name="map" size={15} />
+              Ver el plan
+            </Link>
+          </div>
+        ) : null}
+
+        {favorites.length ? (
+          <div className={css.todayItem}>
+            <span className={css.todayLabel}>GUARDADAS</span>
+            <div className={css.todayList}>
+              {favorites.map((page) => (
+                <Link key={page.slug} className={css.todayLink} to={routes.page(slug, page.slug)}>
+                  <Icon name="star" size={12} className={css.todayStar} />
+                  {page.title}
+                </Link>
+              ))}
+            </div>
+            <Link className={css.todayMore} to={routes.favorites(slug)}>
+              Ver todos los favoritos →
+            </Link>
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

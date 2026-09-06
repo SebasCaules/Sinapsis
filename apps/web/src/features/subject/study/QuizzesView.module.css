@@ -1,0 +1,74 @@
+/* Lista de quizzes · filas anchas con el mejor puntaje a la derecha. */
+
+.totals { display: flex; gap: 20px; }
+
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.rowMain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+
+.rowHead { display: flex; align-items: center; gap: 8px; }
+
+.rowCount { font: 500 11px var(--font-mono); color: var(--text-3); }
+
+.rowTitle {
+  margin: 0;
+  font: 600 17px/1.25 var(--font-display);
+  color: var(--text);
+}
+
+.rowText {
+  margin: 0;
+  font: 400 12.5px/1.5 var(--font-ui);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowScore {
+  flex: none;
+  width: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.best {
+  font: 600 22px var(--font-mono);
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.bestOf { font-size: 13px; color: var(--text-3); }
+
+.bestBar { width: 100%; }
+
+.rowMeta { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+.text { margin: 0; font: 400 13.5px/1.65 var(--font-ui); color: var(--text-2); }
+
+.code {
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
+  font: 500 11.5px var(--font-mono);
+  color: var(--text-2);
+}
+
+@media (max-width: 900px) {
+  .row { flex-wrap: wrap; }
+  .rowScore { width: auto; align-items: flex-start; }
+}

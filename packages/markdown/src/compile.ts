@@ -20,11 +20,13 @@ import {
   normalizeDivisionKey,
   normalizeSlug,
   type Page as PageType,
+  type StudyContent as StudyContentType,
   type SubjectConfig as SubjectConfigType,
   type SyncPayload as SyncPayloadType,
 } from "@sinapsis/contract";
 import { parseFrontmatter } from "./frontmatter.js";
 import { countWords, extractHeadings, extractLinks, firstH1Line } from "./inline.js";
+import { compileStudy, isEmptyStudy } from "./study.js";
 import { PACKAGE_VERSION } from "./version.js";
 
 /** Motivo por el que el compilador levantó una advertencia. */
@@ -37,11 +39,21 @@ export type IssueKind =
   | "missing-summary"
   | "invalid-order"
   | "broken-link"
-  | "nested-folder";
+  | "nested-folder"
+  // Material de estudio (`wiki.study`, ver `study.ts`).
+  | "study-invalid"
+  | "study-empty"
+  | "study-duplicate-id"
+  | "study-broken-ref"
+  | "quiz-few-options"
+  | "quiz-no-correct";
 
 export interface CompileIssue {
   kind: IssueKind;
-  /** Slug (o nombre de archivo) de la página afectada. */
+  /**
+   * Slug (o nombre de archivo) de la página afectada. En las advertencias del
+   * material de estudio, el archivo o el objeto afectado ("kits.json · final").
+   */
   page: string;
   detail: string;
 }
@@ -318,6 +330,13 @@ export interface CompileWikiResult {
   issues: CompileIssue[];
   /** Raíz del wiki efectivamente recorrida (absoluta). */
   wikiRoot: string;
+  /**
+   * Material de estudio compilado (`wiki.study`). Siempre presente, aunque esté
+   * vacío; `payload.study` lo lleva solo cuando hay algo que enviar.
+   */
+  study: StudyContentType;
+  /** Carpeta del material de estudio, resuelta contra el config (absoluta). */
+  studyDir: string;
 }
 
 /** Compila un wiki completo y devuelve el `SyncPayload` listo para el API. */
@@ -452,14 +471,30 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
     }
   }
 
+  // --- material de estudio --------------------------------------------------
+  // `wiki.study` es relativa al **config**, no al wiki: el material de estudio
+  // es del repositorio de la materia y no se mueve aunque `--wiki` apunte a otro
+  // lado (decisión N0-27).
+  const studyDir = path.resolve(rootDir, config.wiki.study);
+  if (!isInside(rootDir, studyDir)) {
+    throw new Error(`wiki.study: "${config.wiki.study}" queda fuera de la carpeta del config`);
+  }
+  const { study, issues: studyIssues } = await compileStudy({ dir: studyDir, config, pages });
+  issues.push(...studyIssues);
+
+  // `study` viaja siempre, aunque esté vacío: el sync reemplaza el material de
+  // estudio igual que reemplaza las páginas, así borrar la carpeta lo borra de
+  // la plataforma. La ausencia del campo queda reservada para un CLI anterior al
+  // Sprint 2, y el API la interpreta como "dejá lo que ya tenías".
   const payload: SyncPayloadType = SyncPayload.parse({
     config,
     pages,
+    study,
     generatedAt: new Date().toISOString(),
     generator: opts.generator ?? `@sinapsis/markdown ${PACKAGE_VERSION}`,
   });
 
-  return { payload, warnings: formatIssues(issues), issues, wikiRoot };
+  return { payload, warnings: formatIssues(issues), issues, wikiRoot, study, studyDir };
 }
 
 /** Carpetas de primer nivel con al menos un `.md`, en orden de `pageTypes` y luego alfabético. */
@@ -556,6 +591,26 @@ export function formatIssues(issues: readonly CompileIssue[]): string[] {
     for (const issue of broken) {
       out.push(`  · "${issue.page}" → ${issue.detail}`);
     }
+  }
+
+  // --- material de estudio --------------------------------------------------
+  for (const issue of of("study-invalid")) {
+    out.push(`estudio · ${issue.page}: ${issue.detail}`);
+  }
+  for (const issue of of("study-empty")) {
+    out.push(`estudio · ${issue.page}: ${issue.detail}`);
+  }
+  for (const issue of of("quiz-few-options")) {
+    out.push(`estudio · ${issue.page}: ${issue.detail}`);
+  }
+  for (const issue of of("quiz-no-correct")) {
+    out.push(`estudio · ${issue.page}: ${issue.detail}`);
+  }
+  for (const issue of of("study-duplicate-id")) {
+    out.push(`estudio · ${issue.page}: ${issue.detail} repetido`);
+  }
+  for (const issue of of("study-broken-ref")) {
+    out.push(`estudio · referencia rota en ${issue.page}: ${issue.detail}`);
   }
 
   return out;

@@ -1,14 +1,17 @@
-/** Resúmenes que imprimen `sync` y `status`. */
+/** Resúmenes que imprimen `sync`, `status` y `validate`. */
 import pc from "picocolors";
 import {
   DIVISION_NONE,
   PAGE_TYPE_META,
   divisionLong,
+  plural,
   routes,
   type Page,
   type PageMeta,
+  type StudyContent,
   type SubjectConfigLoose,
 } from "@sinapsis/contract";
+import { isEmptyStudy, studyCounts } from "@sinapsis/markdown";
 import { ApiError } from "./api.js";
 import type { Ctx } from "./context.js";
 
@@ -113,6 +116,27 @@ export function countsByDivision(ctx: Ctx, config: AnyConfig, pages: readonly An
         : { label: `${key} (no está en config.divisions)`, mark: "", warn: true },
     footer: (empty) => (empty.length > 0 ? `    divisiones sin páginas: ${empty.join(", ")}` : null),
   });
+}
+
+/**
+ * Una línea con el material de estudio (`wiki.study`). La imprimen igual `sync`
+ * (desde lo compilado), `validate` (ídem, sin verificar slugs) y `status` (desde
+ * lo que devuelve el API), para poder compararlas de un vistazo.
+ */
+export function studyLine(ctx: Ctx, study: StudyContent): void {
+  if (isEmptyStudy(study)) {
+    ctx.out(
+      `  ${pc.bold("Estudio")}: ${pc.dim("sin material propio (la plataforma genera un mazo por división)")}`,
+    );
+    return;
+  }
+  const n = studyCounts(study);
+  ctx.out(
+    `  ${pc.bold("Estudio")}: ${n.decks} ${plural(n.decks, "mazo", "mazos")} (${n.cards} ${plural(n.cards, "tarjeta", "tarjetas")})` +
+      ` · ${n.quizzes} ${plural(n.quizzes, "quiz", "quizzes")} (${n.questions} ${plural(n.questions, "pregunta", "preguntas")})` +
+      ` · plan: ${n.phases === 0 ? "no" : `${n.phases} ${plural(n.phases, "fase", "fases")}`}` +
+      ` · ${n.kits} ${plural(n.kits, "kit", "kits")}`,
+  );
 }
 
 export function warnings(ctx: Ctx, lines: readonly string[], limit = Number.POSITIVE_INFINITY): void {

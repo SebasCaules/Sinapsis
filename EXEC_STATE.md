@@ -115,7 +115,7 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 | S2-01 contract tests | DONE | | 16 tests (sm2, autoDecks) |
 | S2-02 compilador + CLI + skill | DONE | | compileStudy, 69 tests markdown, 22 CLI; CONTRACT §7 |
 | S2-03 contenido Proba | DONE | | 6 mazos/46 tarjetas, 1 quiz/15, plan 6 fases/30 hitos/89 tareas, 8 kits; 0 referencias rotas |
-| S2-04 API | DOING | | 122 tests; A3b ajusta FTS con resumen + inputs del contrato |
+| S2-04 API | DONE | | 124 tests; migración 0002 con backfill de page_links; FTS externa (title, summary, body) |
 | S2-05 web shell (pestañas, grafo, favoritos, apuntes) | TODO | | agente D3a |
 | S2-06 web estudio (flashcards, quiz, plan, kits) | TODO | | agente D3b |
 | S2-07 web landing (S-03) + vitest 3 | TODO | | agente C3 |
@@ -138,6 +138,6 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 
 | # | fix | superficie | origen | cuándo |
 |---|---|---|---|---|
-| S-10 | FTS: incluir `summary` en el índice externo (A3-5) | apps/api migración 0002 | reporte A3 | en curso (A3b) |
+| S-10 | FTS: incluir `summary` en el índice externo (A3-5) | apps/api migración 0002 | reporte A3 | HECHO (A3b) |
 | S-11 | `Plan` sin modalidades (cursada vs. final directo): hoy son fases consecutivas; agregar `Plan.tracks` | contrato, compilador, web plan | reporte B3 (contractRequest 2) | Sprint 3 |
 | S-12 | Re-ejecutar `examples/proba/tools/convert-study-data.mjs` para usar `PlanTask.kind = "tool"`, `detail` e `icon` recién agregados al contrato | examples/proba/estudio | reporte B3 | auditoría Sprint 2 |

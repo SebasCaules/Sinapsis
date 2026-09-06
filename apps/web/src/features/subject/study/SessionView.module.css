@@ -1,0 +1,243 @@
+/* Sesión de repaso · columna centrada de 760 con la tarjeta que gira. */
+
+.view {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 26px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.head { display: flex; align-items: center; gap: 14px; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.back:hover { color: var(--primary); border-color: var(--primary); }
+
+.headTitle { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+
+.eyebrow {
+  font: 600 10px var(--font-ui);
+  letter-spacing: 0.09em;
+  color: var(--primary);
+}
+
+.title {
+  margin: 0;
+  font: 600 20px/1.2 var(--font-display);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.counter {
+  flex: none;
+  font: 600 14px var(--font-mono);
+  color: var(--text-3);
+  letter-spacing: -0.02em;
+}
+
+.progress { margin-bottom: 6px; }
+
+/* ---------- la tarjeta que gira ---------- */
+.stage { perspective: 1600px; }
+
+.flip {
+  position: relative;
+  display: grid;
+  min-height: 300px;
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  cursor: pointer;
+  border-radius: var(--r-xl);
+}
+.flip[data-flipped="true"] { transform: rotateY(180deg); }
+.flip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
+.face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 26px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--relief), var(--shadow);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.faceBack {
+  /* el reverso vive girado: al rotar la tarjeta queda de frente */
+  transform: rotateY(180deg);
+  border-left: 3px solid var(--primary);
+}
+
+.faceTag { display: flex; align-items: center; gap: 8px; }
+
+.faceKind {
+  font: 600 9.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+
+.faceBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 16px;
+  overflow-y: auto;
+  max-height: 46vh;
+}
+.faceBody :global(p) { margin: 0 0 0.6em; }
+.faceBody :global(p:last-child) { margin-bottom: 0; }
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 11px var(--font-ui);
+  color: var(--text-3);
+}
+
+/* ---------- bajo la tarjeta ---------- */
+.underCard { display: flex; align-items: center; min-height: 26px; }
+
+.wikiLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 12px var(--font-ui);
+  color: var(--link);
+  text-decoration: none;
+}
+.wikiLink:hover { text-decoration: underline; }
+
+.queueNote { font: 500 11px var(--font-mono); color: var(--text-3); }
+
+/* ---------- notas ---------- */
+.grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+.grade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 8px 9px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  cursor: pointer;
+  transition: transform var(--t), border-color var(--t), background var(--t);
+}
+.grade:hover:not(:disabled) { transform: translateY(-1px); }
+.grade:disabled { opacity: 0.55; cursor: default; }
+.grade:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.gradeLabel { font: 600 13px var(--font-ui); color: var(--text); }
+.gradeInterval { font: 500 11px var(--font-mono); color: var(--text-3); }
+
+.grade[data-grade="1"]:hover:not(:disabled) { border-color: var(--bad); background: var(--bad-soft); }
+.grade[data-grade="2"]:hover:not(:disabled) { border-color: var(--warn); background: var(--warn-soft); }
+.grade[data-grade="3"]:hover:not(:disabled) { border-color: var(--good); background: var(--good-soft); }
+.grade[data-grade="4"]:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-soft); }
+
+.grade[data-grade="1"] .gradeLabel { color: var(--bad-text); }
+.grade[data-grade="2"] .gradeLabel { color: var(--warn-text); }
+.grade[data-grade="3"] .gradeLabel { color: var(--good-text); }
+.grade[data-grade="4"] .gradeLabel { color: var(--primary); }
+
+/* ---------- resumen ---------- */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 26px 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.summaryTitle {
+  margin: 0;
+  font: 600 24px/1.2 var(--font-display);
+  color: var(--text);
+}
+
+.text { margin: 0; font: 400 13.5px/1.6 var(--font-ui); color: var(--text-2); }
+.mono { font: 600 13px var(--font-mono); color: var(--text); }
+
+.summaryGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
+
+.summaryCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
+.summaryValue { font: 600 22px var(--font-mono); color: var(--text); line-height: 1.1; }
+.summaryLabel { font: 600 9.5px var(--font-ui); letter-spacing: 0.08em; color: var(--text-3); }
+
+.summaryCell[data-grade="1"] .summaryValue { color: var(--bad-text); }
+.summaryCell[data-grade="2"] .summaryValue { color: var(--warn-text); }
+.summaryCell[data-grade="3"] .summaryValue { color: var(--good-text); }
+.summaryCell[data-grade="4"] .summaryValue { color: var(--primary); }
+
+.summaryActions { display: flex; gap: 10px; margin-top: 8px; }
+
+.repeat {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--primary);
+  border-radius: var(--r-ctrl);
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  font: 600 12.5px var(--font-ui);
+  cursor: pointer;
+}
+.repeat:hover { background: var(--primary-2); }
+.repeat:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+@media (max-width: 720px) {
+  .grades { grid-template-columns: repeat(2, 1fr); }
+  .summaryGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip { transition: none; }
+  .grade { transition: none; }
+}

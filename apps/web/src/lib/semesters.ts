@@ -37,23 +37,45 @@ export interface SemesterGroup {
   cards: SubjectCard[];
 }
 
-/** Agrupa por `semester` (descendente) y ordena cada grupo por `position` (empate: por nombre). */
-export function groupBySemester(cards: SubjectCard[]): SemesterGroup[] {
-  const buckets = new Map<string, SubjectCard[]>();
-  for (const card of cards) {
-    const key = card.semester || "Sin cuatrimestre";
-    const list = buckets.get(key);
-    if (list) list.push(card);
-    else buckets.set(key, [card]);
-  }
-  return [...buckets.entries()]
-    .sort((a, b) => compareSemestersDesc(a[0], b[0]))
-    .map(([semester, list]) => ({
-      semester,
-      label: semesterLabel(semester),
-      chip: semesterChip(semester),
-      cards: [...list].sort((a, b) => a.position - b.position || a.name.localeCompare(b.name, "es")),
-    }));
+/** Cuatrimestre de una tarjeta; las que no traen rótulo caen en un grupo propio. */
+export const semesterOf = (card: Pick<SubjectCard, "semester">): string => card.semester || "Sin cuatrimestre";
+
+/**
+ * Cuatrimestres que se muestran: los que el usuario guardó (`GET /landing/semesters`,
+ * que incluye los vacíos y manda el ORDEN) más los que alguna materia use y la
+ * lista no mencione, agregados al final del más reciente al más antiguo.
+ *
+ * La unión es lo que evita que una materia quede huérfana si la lista guardada
+ * llega vieja o vacía: sin cuatrimestres guardados, el resultado es exactamente
+ * el orden por rótulo de antes.
+ */
+export function unionSemesters(saved: readonly string[], cards: readonly SubjectCard[]): string[] {
+  const out: string[] = [];
+  for (const s of saved) if (s && !out.includes(s)) out.push(s);
+  const extra = [...new Set(cards.map(semesterOf))].filter((s) => !out.includes(s)).sort(compareSemestersDesc);
+  return [...out, ...extra];
+}
+
+/**
+ * Reparte las tarjetas en los cuatrimestres dados, en ese orden y sin descartar
+ * los vacíos. Cada grupo se ordena por `position` (empate: por nombre).
+ */
+export function groupBySemesters(semesters: readonly string[], cards: readonly SubjectCard[]): SemesterGroup[] {
+  const buckets = new Map<string, SubjectCard[]>(semesters.map((s) => [s, []]));
+  for (const card of cards) buckets.get(semesterOf(card))?.push(card);
+  return semesters.map((semester) => ({
+    semester,
+    label: semesterLabel(semester),
+    chip: semesterChip(semester),
+    cards: [...(buckets.get(semester) ?? [])].sort(
+      (a, b) => a.position - b.position || a.name.localeCompare(b.name, "es"),
+    ),
+  }));
+}
+
+/** Atajo sin lista guardada: agrupa por rótulo descendente, solo con los cuatrimestres que tienen materias. */
+export function groupBySemester(cards: readonly SubjectCard[]): SemesterGroup[] {
+  return groupBySemesters(unionSemesters([], cards), cards);
 }
 
 /** Sugerencia para "+ Agregar cuatrimestre": el siguiente al más reciente. */

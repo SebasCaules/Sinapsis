@@ -229,6 +229,17 @@
   white-space: nowrap;
 }
 
+/* La ★ del favorito va ANTES del ✓ de estudiada: son dos estados distintos y
+   una página puede tener los dos. El relleno la distingue del contorno del ✓. */
+.star {
+  flex: none;
+  margin-left: auto;
+  color: var(--warn);
+  fill: currentColor;
+  opacity: 0.9;
+}
+.star + .check { margin-left: 0; }
+
 .check {
   flex: none;
   margin-left: auto;

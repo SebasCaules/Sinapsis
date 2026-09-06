@@ -1,0 +1,220 @@
+/* Vocabulario compartido de las vistas de estudio · vista ancha 1120. */
+
+.view {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 26px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- cabecera de vista ---------- */
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.headMain { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.08em;
+  color: var(--primary);
+}
+
+.h1 {
+  margin: 0;
+  font: 600 var(--h1) / 1.08 var(--font-display);
+  color: var(--text);
+}
+
+.lead {
+  margin: 0;
+  max-width: 620px;
+  font: 400 13.5px/1.6 var(--font-ui);
+  color: var(--text-2);
+}
+
+.headActions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 6px; }
+
+.headAside {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* ---------- chips de división ---------- */
+.chips { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 21px;
+  padding: 0 8px 0 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ucol, var(--u0));
+}
+
+/* ---------- barras y anillo ---------- */
+.track {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--primary);
+  transition: width var(--t-slow);
+}
+
+.ring { position: relative; display: grid; place-items: center; flex: none; }
+
+.ringTrack { stroke: var(--track); }
+.ringFill { stroke: var(--primary); transition: stroke-dasharray var(--t-slow); }
+
+.ringPct {
+  position: absolute;
+  font: 600 20px var(--font-mono);
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.ringUnit { font-size: 12px; color: var(--text-3); margin-left: 1px; }
+
+/* ---------- cifras con rótulo ---------- */
+.stat { display: flex; flex-direction: column; gap: 2px; min-width: 62px; }
+
+.statValue {
+  font: 600 20px var(--font-mono);
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.statLabel {
+  font: 600 9.5px var(--font-ui);
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.stat[data-tone="due"] .statValue { color: var(--warn-text); }
+.stat[data-tone="fresh"] .statValue { color: var(--link); }
+.stat[data-tone="mastered"] .statValue { color: var(--good-text); }
+
+/* ---------- tecla ---------- */
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--border-2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--kbd-bg);
+  font: 600 10px var(--font-mono);
+  color: var(--text-3);
+}
+
+/* ---------- botones y enlaces con forma de botón ---------- */
+.action {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: var(--r-ctrl);
+  font: 600 12.5px var(--font-ui);
+  text-decoration: none;
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  transition: border-color var(--t), background var(--t), color var(--t);
+  cursor: pointer;
+}
+
+.actionPrimary {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--on-primary);
+}
+.actionPrimary:hover:not(:disabled) { background: var(--primary-2); }
+
+.actionSecondary {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  color: var(--text-2);
+}
+.actionSecondary:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+
+.action:disabled { opacity: 0.75; cursor: default; }
+
+.action:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
+}
+
+/* ---------- estado vacío ---------- */
+.emptyWrap { display: grid; place-items: center; min-height: 46vh; padding: 20px 0 40px; }
+
+.empty {
+  width: min(600px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 26px 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.emptyTitle {
+  margin: 0;
+  font: 600 22px/1.25 var(--font-display);
+  color: var(--text);
+}
+
+.emptyActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+
+@media (max-width: 900px) {
+  .head { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill, .ringFill { transition: none; }
+}

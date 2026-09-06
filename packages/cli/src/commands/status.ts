@@ -1,8 +1,8 @@
 /** `sinapsis status` — estado de la materia en la plataforma. */
 import pc from "picocolors";
-import { devLogin, getSubject } from "../api.js";
+import { ApiError, devLogin, getStudy, getSubject } from "../api.js";
 import type { Ctx } from "../context.js";
-import { countsByDivision, countsByType, heading, reportApiError, webUrl } from "../report.js";
+import { countsByDivision, countsByType, heading, reportApiError, studyLine, webUrl } from "../report.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
 import { resolveApi, resolveToken } from "./sync.js";
 
@@ -11,6 +11,27 @@ export interface StatusOptions {
   api?: string;
   token?: string;
   web?: string;
+}
+
+/**
+ * Material de estudio publicado. Es una ruta del Sprint 2: contra un API viejo
+ * responde 404 y `status` lo dice en vez de romper el informe entero.
+ */
+async function reportStudy(
+  ctx: Ctx,
+  opts: { api: string; token?: string | undefined; cookie?: string | undefined },
+  slug: string,
+): Promise<void> {
+  try {
+    studyLine(ctx, await getStudy(opts, slug));
+  } catch (cause) {
+    if (cause instanceof ApiError && cause.status === 404) {
+      ctx.out(`  ${pc.bold("Estudio")}: ${pc.yellow("API sin soporte de estudio")} ${pc.dim("(GET /study → 404)")}`);
+      return;
+    }
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    ctx.out(`  ${pc.bold("Estudio")}: ${pc.yellow(`no se pudo consultar (${detail})`)}`);
+  }
 }
 
 export async function runStatus(opts: StatusOptions, ctx: Ctx): Promise<number> {
@@ -39,6 +60,8 @@ export async function runStatus(opts: StatusOptions, ctx: Ctx): Promise<number> 
     countsByType(ctx, detail.config, detail.pages);
     ctx.out("");
     countsByDivision(ctx, detail.config, detail.pages);
+    ctx.out("");
+    await reportStudy(ctx, { api, token, cookie }, detail.config.slug);
     ctx.out("");
 
     const local = loaded.config;

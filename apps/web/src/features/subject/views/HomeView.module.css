@@ -200,6 +200,110 @@
   .startActions { width: auto; }
 }
 
+/* ---------- para hoy ---------- */
+/* Lo único de la pantalla que caduca. Se distingue del resto por el verde de la
+   práctica (--good) y por el filete superior: no es una sección más del informe
+   de progreso, es una lista de cosas que hacer ahora. */
+.today {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--good);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.eyebrowToday { color: var(--good-ink, var(--good-text)); }
+
+.todayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+/* Separador entre columnas: filete de 1 px, no tarjetas anidadas. La tarjeta
+   dentro de la tarjeta es la forma más rápida de que nada se lea. */
+.todayItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+}
+.todayItem:first-child { padding-left: 0; border-left: 0; }
+
+.todayLabel {
+  font: 600 9.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+}
+
+.todayText {
+  margin: 0;
+  flex: 1;
+  font: 400 13px/1.55 var(--font-ui);
+  color: var(--text-2);
+}
+.todayText strong { font-weight: 600; color: var(--text); }
+
+.todayWhere { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+.todayAction {
+  align-self: flex-start;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid var(--good);
+  border-radius: var(--r-ctrl);
+  background: var(--good-soft);
+  box-shadow: var(--relief);
+  font: 600 12px var(--font-ui);
+  color: var(--good-text);
+  text-decoration: none;
+  transition: background var(--t);
+}
+.todayAction:hover { background: var(--surface); }
+.todayAction:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
+}
+
+.todayList { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+
+.todayLink {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0;
+  font: 500 12.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.todayLink:hover { color: var(--primary); }
+.todayLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
+.todayStar { flex: none; color: var(--warn); fill: currentColor; }
+
+.todayMore {
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-3);
+  text-decoration: none;
+}
+.todayMore:hover { color: var(--primary); }
+
+@media (max-width: 760px) {
+  .todayItem { padding-left: 0; border-left: 0; }
+}
+
 /* ---------- repaso ---------- */
 .review {
   display: flex;
@@ -250,5 +354,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .totalFill, .rowFill, .reviewCard, .primaryAction, .secondaryAction { transition: none; }
+  .totalFill, .rowFill, .reviewCard, .primaryAction, .secondaryAction, .todayAction { transition: none; }
 }

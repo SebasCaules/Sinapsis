@@ -170,3 +170,129 @@ pnpm sinapsis sync --config /ruta/a/sinapsis.config.json --api http://localhost:
   (wikilinks rotos, páginas sin `resumen`).
 - `/sinapsis status` — muestra el estado de la materia en la plataforma (última sync,
   páginas, divisiones sin páginas).
+
+## 7. Material de estudio (`wiki.study`)
+
+Los mazos, el quiz, el plan y los kits son **contenido de la materia**, no de la plataforma
+(N0-27): viven en la carpeta que declara `wiki.study` (por defecto `estudio/`), que es
+**relativa al config, no al wiki** —así `--wiki <otro-vault>` no la desvía—, se compilan con
+el resto del wiki y viajan en `SyncPayload.study` (`StudyContent`). Todo es opcional: sin
+carpeta, `payload.study` viaja vacío y la plataforma autogenera un mazo por división con los
+`resumen` de las páginas (`autoDecks`, marcado `source: "auto"`), que además siempre agrega
+como complemento. El campo viaja en cada sync —también vacío— para que el sync reemplace el
+material igual que reemplaza las páginas: borrar la carpeta lo borra de la plataforma. Su
+ausencia queda reservada para un CLI anterior al Sprint 2, y el API la lee como «dejá lo que
+ya tenías».
+
+```
+estudio/
+  flashcards-<lo-que-sea>.md   → Deck    (tipo: flashcards)
+  quiz-<lo-que-sea>.md         → Quiz    (tipo: quiz)
+  plan.json                    → Plan
+  kits.json                    → Kit[]
+```
+
+Los `.md` sin `tipo` (un `README.md`, notas del autor) se ignoran en silencio. Nada de esto
+puede romper un sync: los problemas de formato y las referencias rotas son **advertencias**,
+igual que los wikilinks rotos.
+
+### Mazos — `tipo: flashcards`
+
+```markdown
+---
+tipo: flashcards
+titulo: Definiciones clave
+id: definiciones-clave      # opcional; si falta, el nombre del archivo normalizado
+division: "3"               # opcional; una clave de config.divisions
+descripcion: Las que se toman siempre.   # opcional
+---
+
+## Definición de esperanza $E[X]$
+
+> pagina: esperanza          # opcional: página del wiki relacionada
+> tags: discreta, momentos   # opcional
+
+$E[X]=\sum_x x\,p_X(x)$.
+```
+
+Cada `##` abre una tarjeta: el encabezado es el **anverso** y lo que sigue, hasta el próximo
+`##`, el **reverso** (markdown y KaTeX, igual que una página). Los `###` no abren tarjeta, y
+los `##` dentro de un bloque de código o de un `$$…$$` tampoco. Las directivas `pagina:` y
+`tags:` valen al principio del reverso, con o sin `>` delante (así se leen como un callout en
+Obsidian). Las tarjetas heredan la `division` del mazo.
+
+El id de una tarjeta es `<id del mazo>:<n>`, con `n` correlativo: es estable mientras no se
+reordenen las tarjetas. Como el SRS del usuario se guarda por id, para fijarlo se escribe al
+final del encabezado: `## Anverso {#mi-id}`.
+
+### Quizzes — `tipo: quiz`
+
+```markdown
+---
+tipo: quiz
+titulo: Quiz conceptual
+id: quiz-general
+---
+
+## ¿Qué distribución tiene media = varianza?
+
+> pagina: distribucion-poisson
+
+- [ ] Binomial
+- [x] Poisson
+- [ ] Normal
+
+> Poisson: $E[X]=V(X)=\lambda$.
+```
+
+Cada `##` abre una pregunta; el texto entre el encabezado y la lista se suma al enunciado.
+Las opciones son una lista de tildes (`- [x]` la correcta, `- [ ]` las demás) y el blockquote
+que va **después** de la lista es la explicación. Hacen falta ≥ 2 opciones y ≥ 1 correcta: si
+no, la pregunta se descarta con una advertencia (y si no queda ninguna, el quiz entero).
+
+### `plan.json` y `kits.json`
+
+JSON validado contra `Plan` y `Kit[]` del contrato; los errores se informan con la ruta del
+campo (`phases.0.milestones.2.title: Required`).
+
+```jsonc
+// plan.json — fases → hitos → tareas
+{ "title": "Plan de estudio",
+  "phases": [{ "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
+    "date": "2026-10-01",            // opcional, AAAA-MM-DD
+    "scope": "Qué cae en este examen (markdown)",
+    "milestones": [{ "id": "fase-1-h1", "title": "Unidad 1", "divisions": ["1"],
+      "tasks": [{ "id": "fase-1-h1-t1", "label": "Leer la teoría", "kind": "read", "target": "1" }] }] }] }
+```
+
+```jsonc
+// kits.json — paquetes de material para un objetivo
+[{ "id": "parcial-1", "title": "Parcialito 1 · TP1–TP2", "description": "…",
+   "divisions": ["1", "2"], "pages": ["esperanza"], "decks": ["definiciones-clave"],
+   "quizzes": ["quiz-general"], "tools": ["calc"] }]
+```
+
+`kind` de una tarea y qué es su `target`:
+
+| `kind` | `target` | Qué abre |
+|---|---|---|
+| `read` | clave de división | La división en el índice. |
+| `cards` | id de mazo (o sin `target`) | El mazo (o el repaso del día). |
+| `quiz` | id de quiz | El quiz. |
+| `exercises` | slug de página o URL (opcional) | Práctica: TP, guía de ejercicios. |
+| `custom` | slug de página o URL (opcional) | Cualquier otra cosa. |
+
+### Qué se verifica
+
+`sinapsis sync --dry-run` levanta una advertencia (nunca un error) por cada:
+
+- `pagina:` de una tarjeta o pregunta, o `pages[]` de un kit, que apunta a un slug inexistente;
+- `decks[]` / `quizzes[]` de un kit, o `target` de una tarea `cards` / `quiz`, que no existe;
+- `target` de una tarea `read` que no es una división declarada;
+- `division` de un mazo, quiz, hito o kit que no está en `config.divisions`;
+- `tools[]` de un kit que no es un id de ítem del `rail` del config;
+- id repetido (mazo, quiz, tarjeta, pregunta o kit);
+- tarjeta sin reverso, pregunta sin opciones o sin correcta, JSON inválido.
+
+`sinapsis validate` corre las mismas verificaciones salvo las que necesitan las páginas del
+wiki (no lo compila): las referencias a slugs se ven en el dry-run del sync.

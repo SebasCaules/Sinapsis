@@ -102,6 +102,19 @@ export function SubjectCard({
 
       <div className={css.foot}>
         <span className={css.meta}>{metaOf(card)}</span>
+        {/* Atajos de estudio: no piden ningún dato más que el slug, así que no
+            cuestan una llamada por tarjeta. Van por encima del enlace de la
+            tarjeta (z-index), que si no se los comería. */}
+        {!manage && !overlay ? (
+          <span className={css.study}>
+            <Link className={css.studyLink} to={routes.flashcards(card.slug)}>
+              Repasar
+            </Link>
+            <Link className={css.studyLink} to={routes.plan(card.slug)}>
+              Plan
+            </Link>
+          </span>
+        ) : null}
         {manage ? (
           <span className={css.manageTools}>
             <button type="button" className={css.remove} onClick={() => onRemove?.(card)}>
@@ -136,16 +149,17 @@ export function SubjectCard({
     );
   }
 
+  /**
+   * La tarjeta entera navega a la materia, pero el pie lleva sus propios enlaces
+   * («Repasar», «Plan»): un `<a>` dentro de otro `<a>` no es HTML válido ni se
+   * puede recorrer con el teclado, así que el enlace grande es una capa
+   * (`.stretch`) que cubre la tarjeta y los del pie viajan por encima.
+   */
   return (
-    <Link
-      className={className}
-      style={vars}
-      to={routes.subject(card.slug)}
-      data-testid="subject-card"
-      data-slug={card.slug}
-    >
+    <div className={className} style={vars} data-interactive="true" data-testid="subject-card" data-slug={card.slug}>
+      <Link className={css.stretch} to={routes.subject(card.slug)} aria-label={card.name} />
       {body}
-    </Link>
+    </div>
   );
 }
 

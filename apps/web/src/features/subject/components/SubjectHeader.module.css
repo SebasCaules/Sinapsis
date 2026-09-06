@@ -1,5 +1,9 @@
-/* Cabecera 40 · pestaña 30 con filete superior de 2 · controles de 24 (objetivo
-   táctil mínimo del contrato). */
+/* Cabecera 40 · pestañas 30 con filete superior de 2 · controles de 24 (objetivo
+   táctil mínimo del contrato).
+
+   La barra de pestañas es la única pieza elástica: crece hasta donde llegue y
+   desborda en horizontal. La cabecera NO cambia de alto por muchas pestañas que
+   haya — de ahí `min-width: 0` y `flex: none` en todo lo demás. */
 
 .header {
   height: 40px;
@@ -32,20 +36,67 @@
   box-shadow: 0 0 0 4px var(--primary-ring);
 }
 
+/* ---------- barra de pestañas ---------- */
+/* Se pega arriba (alto completo de la cabecera) para que el filete de 2 px de la
+   pestaña activa nazca del borde, como en Obsidian. */
+.strip {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  padding-top: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.strip::-webkit-scrollbar { height: 0; }
+
 .tab {
+  position: relative;
   height: 30px;
-  max-width: 420px;
+  flex: 0 1 auto;
+  min-width: 92px;
+  max-width: 220px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--primary);
+  gap: 7px;
+  padding: 0 8px 0 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-top: 2px solid transparent;
   border-radius: 0 0 var(--r-sm) var(--r-sm);
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  transition: background var(--t), border-color var(--t);
+}
+
+/* Inactiva: solo el rótulo, atenuado. Al pasar por encima insinúa la caja. */
+.tab:hover { background: var(--surface-2); }
+
+.tab[aria-selected="true"] {
+  background: var(--surface-2);
+  border-color: var(--border);
+  border-top-color: var(--primary);
   box-shadow: var(--relief);
 }
 
+.tab[data-dragging="true"] {
+  z-index: 3;
+  opacity: 0.9;
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 5px var(--primary-ring);
+}
+
+/* Chip mono de la división: solo en las pestañas que son una página del wiki. */
 .tabChip {
   flex: none;
   font: 600 9.5px var(--font-mono);
@@ -55,76 +106,78 @@
   padding: 1px 4px;
 }
 
+/* Punto --primary: las vistas de la plataforma (Inicio, wiki, grafo, apuntes…). */
 .tabDot {
   width: 7px;
   height: 7px;
   flex: none;
   border-radius: 50%;
   background: var(--primary);
+  opacity: 0.45;
 }
+.tab[aria-selected="true"] .tabDot { opacity: 1; }
 
 .tabTitle {
+  flex: 1;
   min-width: 0;
-  font: 600 12.5px var(--font-ui);
-  color: var(--text);
+  font: 500 12.5px var(--font-ui);
+  color: var(--text-3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.tab[aria-selected="true"] .tabTitle { font-weight: 600; color: var(--text); }
 
-/* La ✕ de la pestaña única: cierra = volver al inicio de la materia. El icono
-   sigue midiendo 13, pero el objetivo táctil llega a 25 con el relleno. */
+/* La ✕ se reserva su sitio siempre (si apareciera al pasar por encima, el
+   rótulo saltaría); solo cambia de opacidad. El icono mide 13 y el objetivo
+   táctil llega a 22 con el relleno. */
 .tabClose {
   flex: none;
   display: grid;
   place-items: center;
-  padding: 6px;
-  margin: -6px -4px -6px -2px;
-  border-radius: 6px;
+  padding: 4px;
+  margin-right: -2px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
   color: var(--text-3);
-  opacity: 0.6;
-  transition: opacity var(--t), background var(--t);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--t), background var(--t), color var(--t);
 }
-.tabClose:hover { opacity: 1; background: var(--surface); }
+.tab:hover .tabClose,
+.tab[aria-selected="true"] .tabClose { opacity: 0.6; }
+.tabClose:hover { opacity: 1; background: var(--surface); color: var(--text-2); }
 .tabClose:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: -1px;
-  box-shadow: inset 0 0 0 5px var(--primary-ring);
   opacity: 1;
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
 }
 
 .addTab {
-  position: relative;
+  position: sticky;
+  right: 0;
   width: 24px;
   height: 24px;
   flex: none;
   display: grid;
   place-items: center;
+  margin: 3px 0 0 2px;
   border: 1px solid var(--border);
   border-radius: 7px;
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text-3);
-  cursor: not-allowed;
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t);
+}
+.addTab:hover { border-color: var(--border-2); color: var(--text-2); }
+.addTab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
 }
 
-.tip {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 40;
-  padding: 5px 9px;
-  border-radius: var(--r-sm);
-  background: var(--elevated);
-  border: 1px solid var(--border-2);
-  box-shadow: var(--relief), var(--shadow);
-  font: 500 11.5px var(--font-ui);
-  color: var(--text-2);
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--t);
+@media (prefers-reduced-motion: reduce) {
+  .strip { scroll-behavior: auto; }
+  .tab, .tabClose, .addTab, .back { transition: none; }
 }
-.addTab:hover .tip,
-.addTab:focus-visible .tip { opacity: 1; }
-
-.spacer { flex: 1; }

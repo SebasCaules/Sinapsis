@@ -1,0 +1,320 @@
+/* Grafo: cabecera editorial + barra de filtros + escenario (lienzo 1fr y
+   columna de 236). El lienzo ocupa TODO el alto que queda: la vista no tiene
+   scroll propio, se mira entera de una vez. */
+
+.view {
+  width: min(1360px, 100%);
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- cabecera ---------- */
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex: none;
+}
+
+.headText { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.ribbon {
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.14em;
+  color: var(--primary);
+}
+
+.h1 {
+  margin: 0;
+  font: 600 var(--h1) / 1.05 var(--font-display);
+  color: var(--text);
+}
+
+.sub { margin: 0; font: 500 12px var(--font-mono); color: var(--text-3); }
+
+.searchField {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: min(300px, 40vw);
+  height: 34px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--relief);
+  color: var(--text-3);
+}
+.searchField:focus-within { border-color: var(--primary); box-shadow: var(--relief), 0 0 0 3px var(--primary-ring); }
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font: 400 13px var(--font-ui);
+  color: var(--text);
+}
+
+/* ---------- filtros ---------- */
+.filters { flex: none; display: flex; flex-direction: column; gap: 7px; }
+
+.chipRow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+.chipLabel {
+  width: 62px;
+  flex: none;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color var(--t), background var(--t), color var(--t);
+}
+.chip:hover { border-color: var(--border-2); }
+.chip[data-on="true"] {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+.chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--primary-ring);
+}
+
+/* «Solo contenido» no es un filtro más de la fila: es un interruptor. Se separa
+   con un margen y se enciende en verde, no en el color de los chips. */
+.chipToggle { margin-left: auto; color: var(--text-3); }
+.chipToggle svg { opacity: 0.35; }
+.chipToggle[data-on="true"] {
+  background: var(--good-soft);
+  border-color: var(--good);
+  color: var(--good-text);
+}
+.chipToggle[data-on="true"] svg { opacity: 1; }
+
+.chipDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
+.chipCount { font: 500 10px var(--font-mono); color: var(--text-3); }
+.chip[data-on="true"] .chipCount { color: var(--primary); }
+
+/* ---------- escenario ---------- */
+.stage {
+  flex: 1;
+  min-height: 380px;
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.canvasWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+  box-shadow: var(--relief), var(--shadow);
+  overflow: hidden;
+}
+
+.canvas { display: block; cursor: grab; touch-action: none; }
+.canvas:active { cursor: grabbing; }
+.canvas[data-hover="true"] { cursor: pointer; }
+
+/* ---------- capas sobre el lienzo ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  text-align: center;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+}
+
+.overlayTitle { margin: 0; font: 600 17px var(--font-display); color: var(--text); }
+
+.overlayText {
+  margin: 0;
+  max-width: 380px;
+  font: 400 13px/1.6 var(--font-ui);
+  color: var(--text-3);
+}
+.overlayText code { font: 500 12px var(--font-mono); color: var(--text-2); }
+
+.overlayAction {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  font: 600 12px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.overlayAction:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Cartel del nodo bajo el cursor: se dibuja arriba a la derecha del puntero y no
+   intercepta el ratón (si lo hiciera, el hover parpadearía). */
+.tooltip {
+  position: absolute;
+  z-index: 4;
+  transform: translate(14px, -50%);
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 11px;
+  background: var(--elevated);
+  border: 1px solid var(--border-2);
+  border-left: 3px solid var(--ucol);
+  border-radius: var(--r-sm);
+  box-shadow: var(--relief), var(--shadow-lg);
+  pointer-events: none;
+}
+
+.tipChip {
+  align-self: flex-start;
+  font: 600 9.5px var(--font-mono);
+  color: var(--uink, var(--ucol));
+  border: 1px solid var(--ucol);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.tipTitle { font: 600 13px/1.3 var(--font-ui); color: var(--text); }
+.tipMeta { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+.zoomBar {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.zoomValue { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+.zoomReset {
+  height: 22px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font: 600 10.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.zoomReset:hover { border-color: var(--primary); color: var(--primary); }
+.zoomReset:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- columna derecha ---------- */
+.side {
+  width: 236px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.cardHead {
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+
+.cardNote { margin: 6px 0 0; font: 400 11px/1.5 var(--font-ui); color: var(--text-3); }
+
+.legendRow { display: flex; align-items: center; gap: 8px; }
+.legendDot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--ucol); }
+.legendLabel { flex: 1; min-width: 0; font: 500 12px var(--font-mono); color: var(--text-2); }
+.legendCount { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+.topRow {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 3px 4px;
+  margin: 0 -4px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.topRow:hover { background: var(--surface-2); }
+.topRow:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+.topCount {
+  flex: none;
+  width: 18px;
+  text-align: right;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+}
+
+.topTitle {
+  flex: 1;
+  min-width: 0;
+  font: 500 12px/1.35 var(--font-ui);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topRow:hover .topTitle { color: var(--primary); }
+
+/* Por debajo de 1100 la columna se va abajo del lienzo: el grafo manda. */
+@media (max-width: 1100px) {
+  .stage { flex-direction: column; }
+  .side { width: auto; flex-direction: row; overflow-x: auto; }
+  .card { flex: 1; min-width: 220px; }
+  .head { flex-direction: column; align-items: stretch; }
+  .searchField { width: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip, .zoomReset { transition: none; }
+}
