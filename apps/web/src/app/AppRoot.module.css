@@ -6,17 +6,20 @@
   background: var(--bg);
 }
 
-/* Grano de papel: ruido SVG al 5 %, tesela de 140 px, por debajo del contenido.
-   En claustro se mezcla en «screen» para que el ruido ACLARE la tinta oscura. */
+/* Grano de imprenta como capa propia, mezclada por tema con los tokens del design system
+   (`--grain`, `--grain-size`, `--grain-blend`, `--grain-opacity`): en los temas claros
+   multiplica al 50 %; en Claustro el ruido es pleno y se mezcla en «screen» al 22 % para
+   ACLARAR la tinta oscura (medido en el baseline: luminancia 18 → 37 en la zona libre). */
 .grain {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='gn'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23gn)' opacity='.05'/%3E%3C/svg%3E");
-  background-size: 140px 140px;
+  background-image: var(--grain);
+  background-size: var(--grain-size, 150px) var(--grain-size, 150px);
+  mix-blend-mode: var(--grain-blend, multiply);
+  opacity: var(--grain-opacity, 0.5);
 }
-:global([data-theme="claustro"]) .grain { mix-blend-mode: screen; }
 
 .content {
   position: relative;
