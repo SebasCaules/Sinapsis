@@ -25,6 +25,7 @@ import { PAGE_TYPE_META, plural, routes, type PageHeading, type PageMeta } from 
 import { Dialog, Icon, UiIcon, useToast } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { recordActivity, setLastRead } from "../activity";
+import { openFoldedAncestors } from "../markdown/folded";
 import { Markdown } from "../markdown/Markdown";
 import { MathText } from "../components/MathText";
 import { ErrorCard, SheetSkeleton } from "../components/States";
@@ -276,6 +277,10 @@ export function ReaderView() {
     const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
     const target = hash ? document.getElementById(hash) : null;
     if (target) {
+      /* Un ancla puede caer dentro de un aviso plegado (N0-62): si el destino
+         está en un `<details>` cerrado, no tiene medida y el salto no llega a
+         ningún lado. */
+      openFoldedAncestors(target);
       scrollMainTo(target, "auto");
       return;
     }
