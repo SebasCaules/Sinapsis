@@ -20,11 +20,17 @@ import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.jso
 import { api, type ApiClient } from "@/lib/api";
 import type { SubjectCtx } from "../context";
 import { buildSubjectModel } from "../model";
+import { IDLE_RUNTIME } from "../tools/useRuntime";
 import { SessionView } from "./SessionView";
 
 const config = SubjectConfig.parse(rawProbaConfig);
 const detail: SubjectDetail = { config, pages: [], studied: [], placeholder: false, lastSyncAt: null };
-const ctx: SubjectCtx = { slug: "proba", model: buildSubjectModel(detail), openSearch: () => {} };
+const ctx: SubjectCtx = {
+  slug: "proba",
+  model: buildSubjectModel(detail),
+  openSearch: () => {},
+  runtime: IDLE_RUNTIME,
+};
 
 const content: StudyContent = {
   decks: [

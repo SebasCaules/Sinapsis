@@ -24,6 +24,8 @@ export interface RouteInfo {
   page: string | null;
   /** División en foco: la de `/d/:division` o la de la página abierta. */
   division: string | null;
+  /** Id de la vista de herramienta que abre la ruta (`/t/:tool`), o null. */
+  tool: string | null;
 }
 
 /**
@@ -34,9 +36,23 @@ export interface StudyLabels {
   deck?: (id: string) => string | undefined;
   quiz?: (id: string) => string | undefined;
   kit?: (id: string) => string | undefined;
+  /**
+   * Rótulo de una vista de herramienta (`ToolView.label` del manifiesto), que
+   * manda sobre el del rail: la materia puede llamar «Explorador» al ítem y
+   * «Explorador de distribuciones» a la vista.
+   */
+  tool?: (id: string) => string | undefined;
 }
 
-const EMPTY: RouteInfo = { title: "No encontrado", chip: null, color: null, parent: null, page: null, division: null };
+const EMPTY: RouteInfo = {
+  title: "No encontrado",
+  chip: null,
+  color: null,
+  parent: null,
+  page: null,
+  division: null,
+  tool: null,
+};
 
 const plain = (title: string): RouteInfo => ({ ...EMPTY, title });
 
@@ -105,7 +121,11 @@ export function describePath(
       };
     }
     case "t":
-      return plain(model?.railItem(arg)?.item.label ?? "Herramienta");
+      return {
+        ...EMPTY,
+        title: labels.tool?.(arg) ?? model?.railItem(arg)?.item.label ?? "Herramienta",
+        tool: arg || null,
+      };
     case "p": {
       const page = model?.bySlug.get(arg) ?? null;
       const key = page && model ? model.divisionOf(page) : null;
@@ -117,6 +137,7 @@ export function describePath(
         parent: division ? { label: division.label, to: routes.division(subject, division.key) } : null,
         page: arg || null,
         division: key,
+        tool: null,
       };
     }
     default:

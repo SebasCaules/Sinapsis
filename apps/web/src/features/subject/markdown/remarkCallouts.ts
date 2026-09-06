@@ -5,9 +5,20 @@
  *   > cuerpo del aviso
  *
  * pasa a `<aside class="callout" data-type="info">` con un rótulo en versalita.
- * El tipo `figura` es especial: en el Sprint 1 la plataforma todavía no dibuja
- * figuras interactivas, así que muestra el epígrafe con el rótulo «Figura · id»
- * y un marco discontinuo que anuncia el sprint en el que llegará.
+ *
+ * El tipo `figura` es OTRA cosa (N0-42): `> [!figura] id` no es un aviso, es el
+ * hueco de una figura interactiva. Emite EXACTAMENTE el marcado que espera
+ * `App.mountFigures` de `@sinapsis/runtime` (`figureMarkup`)
+ *
+ *   <figure class="figura doc-figure" data-fig="id">
+ *     <div class="fig-host">…marco de reserva…</div>
+ *     <figcaption>…epígrafe…</figcaption>
+ *   </figure>
+ *
+ * y el lector se encarga del resto: si la materia trae un bundle de figuras
+ * cargado, vacía el hueco y llama a `App.mountFigures`; si no, el marco
+ * discontinuo se queda donde está y el epígrafe se lee igual. El marcado no
+ * promete nada: una materia sin figuras no anuncia ninguna que vaya a llegar.
  */
 import { fold } from "@sinapsis/contract";
 import { visit } from "unist-util-visit";
@@ -54,6 +65,27 @@ function normalizeType(raw: string): string {
   return CALLOUT_LABELS[aliased] ? aliased : "nota";
 }
 
+/** Nodo de HTML puro dentro del árbol de markdown (el hueco de la figura). */
+function host(): MdNode {
+  return {
+    type: "calloutPart",
+    data: {
+      hName: "div",
+      hProperties: { className: ["fig-host"] },
+      /* El marco de reserva vive DENTRO del hueco: montar una figura lo vacía y
+         lo reemplaza por el dibujo, así no quedan los dos a la vez. */
+      hChildren: [
+        {
+          type: "element",
+          tagName: "span",
+          properties: { className: ["figFrame"] },
+          children: [{ type: "text", value: "Figura interactiva" }],
+        },
+      ],
+    },
+  };
+}
+
 function span(className: string, value: string): MdNode {
   return {
     type: "calloutPart",
@@ -84,19 +116,36 @@ export function remarkCallouts() {
         if (!first.children.length) quote.children?.shift();
       }
 
-      const head: MdNode[] = [span("calloutLabel", labelFor(kind, title))];
       if (kind === "figura") {
-        head.push({
+        /* El primer token del título es el ID de la figura (lo que el bundle
+           registró con `App.registerFigure`); lo que siga es epígrafe. */
+        const [id = "", ...rest] = title.split(/\s+/);
+        const extra = rest.join(" ").trim();
+        const caption: MdNode = {
           type: "calloutPart",
-          data: {
-            hName: "div",
-            hProperties: { className: ["calloutFrame"] },
-            hChildren: [{ type: "text", value: "Figura interactiva: Sprint 2" }],
-          },
-        });
-      } else if (title) {
-        head.push(span("calloutTitle", title));
+          data: { hName: "figcaption" },
+          children: [
+            span("figLabel", labelFor(kind, id)),
+            ...(extra ? [span("calloutTitle", extra)] : []),
+            ...(quote.children ?? []),
+          ],
+        };
+        quote.data = {
+          ...quote.data,
+          hName: "figure",
+          /* `doc-figure` es el nombre del baseline de Proba y `figura` el de la
+             plataforma: la figura lleva los dos para que sirvan tanto el CSS del
+             runtime como el de esta hoja. */
+          hProperties: id
+            ? { className: ["figura", "doc-figure"], "data-fig": id }
+            : { className: ["figura", "doc-figure"] },
+        };
+        quote.children = [host(), caption];
+        return;
       }
+
+      const head: MdNode[] = [span("calloutLabel", labelFor(kind, title))];
+      if (title) head.push(span("calloutTitle", title));
 
       quote.data = {
         ...quote.data,

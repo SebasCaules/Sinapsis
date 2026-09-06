@@ -46,7 +46,7 @@ function useWideViewport(): boolean {
 }
 
 export function ReaderView() {
-  const { slug, model } = useSubjectCtx();
+  const { slug, model, runtime } = useSubjectCtx();
   const { page: pageSlug = "" } = useParams();
   const location = useLocation();
   const query = usePage(slug, pageSlug);
@@ -90,6 +90,32 @@ export function ReaderView() {
     }
     scroller?.scrollTo({ top: 0 });
   }, [detail, pageSlug, location.hash]);
+
+  /**
+   * Figuras interactivas (N0-42). El markdown deja el hueco
+   * (`figure.figura > .fig-host`) con un marco de reserva; si la materia trae un
+   * bundle de figuras YA cargado, se vacía el hueco y las dibuja el runtime.
+   * Sin bundle no se toca nada: se lee el epígrafe con su marco, como siempre.
+   *
+   * El handle cambia de identidad seguido (migas, bundles): se lo lee de una ref
+   * para que este efecto dependa solo de la página y de si hay figuras.
+   */
+  const runtimeRef = useRef(runtime);
+  runtimeRef.current = runtime;
+  const hasFigures = runtime.figures;
+
+  useEffect(() => {
+    const article = sheetRef.current;
+    if (!article || !detail || !hasFigures) return;
+    /* `mountFigures` vacía el hueco antes de dibujar (y pone `.fig-missing` si
+       la figura no está registrada): el marco de reserva se va solo. */
+    if (!article.querySelector("figure[data-fig] > .fig-host")) return;
+    const rt = runtimeRef.current;
+    rt.mountFigures(article);
+    return () => {
+      rt.unmountFigures(article);
+    };
+  }, [detail, pageSlug, hasFigures]);
 
   /* Scroll-spy del índice de la página. */
   useEffect(() => {

@@ -142,6 +142,25 @@
 }
 .meta { font: 500 11px var(--font-mono); color: var(--text-3); white-space: nowrap; }
 
+/* «N para repasar»: cifras, por encima del enlace-capa como los atajos, y con
+   el color de aviso que ya usa la plataforma para lo que vence. El `margin-left`
+   automático lo pone `.study`, que va después: esta insignia queda pegada al
+   recuento de páginas, que es de lo que habla. */
+.due {
+  position: relative;
+  z-index: 2;
+  font: 600 11px/1 var(--font-mono);
+  color: var(--warn-text, var(--warn));
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft);
+  border-radius: 6px;
+  padding: 5px 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.due:hover { border-color: var(--warn); }
+.due:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
 /* Atajos de estudio del pie: discretos y por encima del enlace-capa. */
 .study {
   position: relative;

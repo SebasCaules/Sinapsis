@@ -21,6 +21,7 @@ const proba: SubjectCardData = {
   divisionsCount: 12,
   pagesCount: 200,
   studiedCount: 62,
+  dueCount: 0,
   semester: "2026-1C",
   position: 0,
   placeholder: false,

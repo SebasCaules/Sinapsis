@@ -170,6 +170,84 @@
 .prose :global(.callout[data-type="discrepancia"]) { --callout: var(--bad); }
 .prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface); }
 
+/* ---------- figuras interactivas (N0-42) ----------
+   `> [!figura] id` sale como <figure class="figura">: el hueco `.fig-host` es
+   donde el runtime dibuja, y mientras no haya bundle cargado se ve el marco
+   discontinuo de reserva. El epígrafe se lee igual en los dos casos. */
+.prose :global(.figura) {
+  margin: 22px 0;
+  padding: 12px 14px 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--u0);
+  border-radius: var(--r);
+  box-shadow: var(--relief);
+}
+
+.prose :global(.figura .fig-host) {
+  display: block;
+  min-width: 0;
+  margin: 0 0 10px;
+}
+/* Solo el hueco VACÍO (todavía sin figura) reserva altura: una vez montada, el
+   alto lo pone el dibujo. */
+.prose :global(.figura .fig-host:empty) { min-height: 96px; }
+.prose :global(.figura .fig-host) > :is(svg, canvas, img) { max-width: 100%; }
+
+.prose :global(.figFrame) {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: 18px;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  font: 500 11.5px var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* Lo que el runtime deja cuando el bundle está pero la figura no se registró.
+   Es del mismo material que el marco de reserva: un hueco declarado, no un
+   error rojo (la página se sigue leyendo igual). */
+.prose :global(.fig-missing) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 96px;
+  padding: 18px;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-3);
+  text-align: center;
+}
+.prose :global(.fig-missing code) { font: 500 11.5px var(--font-mono); color: var(--text-2); }
+
+.prose :global(.figura figcaption) {
+  font: 400 12.5px/1.55 var(--font-read);
+  font-style: italic;
+  color: var(--text-3);
+}
+.prose :global(.figura figcaption p) { margin: 0 0 6px; }
+.prose :global(.figura figcaption > :last-child) { margin-bottom: 0; }
+.prose :global(.figura .figLabel) {
+  font: 600 10.5px var(--font-ui);
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--u0);
+}
+.prose :global(.figura .calloutTitle) {
+  font: 600 13.5px var(--font-ui);
+  font-style: normal;
+  color: var(--text);
+}
+
 .prose :global(.calloutFrame) {
   display: grid;
   place-items: center;

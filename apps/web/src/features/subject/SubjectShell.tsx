@@ -30,6 +30,7 @@ import { ErrorCard, WideSkeleton } from "./components/States";
 import type { SubjectCtx } from "./context";
 import { describePath, isSubjectPath, type StudyLabels } from "./route-info";
 import { splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
+import { useRuntime } from "./tools/useRuntime";
 import { useStudy } from "./study/useStudy";
 import { useStudyState, useSubject } from "./useSubject";
 import css from "./SubjectShell.module.css";
@@ -64,13 +65,20 @@ export function SubjectShell() {
      pestaña de flashcards dice «Repaso U1» y no «Flashcards» a secas. La consulta
      ya está en caché (la comparten el rail y las vistas de estudio). */
   const study = useStudy(subject);
+  /* El runtime de la materia (N0-41): se instala al entrar, se desinstala al
+     salir y es quien conoce los bundles de herramientas y de figuras. */
+  const runtime = useRuntime(subject, model);
+  const { viewLabel } = runtime;
   const studyLabels = useMemo<StudyLabels>(
     () => ({
       deck: (id) => study.model.deck(id)?.deck.title,
       quiz: (id) => study.model.quiz(id)?.quiz.title,
       kit: (id) => study.model.kit(id)?.kit.title,
+      /* El rótulo de una herramienta es el de SU VISTA en el manifiesto: la
+         pestaña, la miga y el título del documento dicen lo mismo que el host. */
+      tool: (id) => viewLabel(id),
     }),
-    [study.model],
+    [study.model, viewLabel],
   );
 
   const route = useMemo(
@@ -269,10 +277,17 @@ export function SubjectShell() {
 
   /* ---------- migas y título ----------------------------------------------- */
 
+  const runtimeCrumbs = runtime.crumbs;
   const crumbs = useMemo<Crumb[]>(() => {
     const head: Crumb = { label: model?.config.name ?? subject, to: routes.subject(subject) };
+    /* Una vista de herramienta puede escribir sus propias migas con
+       `App.setCrumbs` (el «Explorador · Normal» del baseline): cuelgan de la
+       materia y reemplazan el rótulo único de la vista. */
+    if (route.tool && runtimeCrumbs?.length) {
+      return [head, ...runtimeCrumbs.map((c) => ({ label: c.label, to: c.href }))];
+    }
     return route.parent ? [head, route.parent, { label: route.title }] : [head, { label: route.title }];
-  }, [model, subject, route]);
+  }, [model, subject, route, runtimeCrumbs]);
 
   /* La pestaña del navegador dice lo mismo que la pestaña activa de la cabecera. */
   useEffect(() => {
@@ -282,8 +297,8 @@ export function SubjectShell() {
   }, [route.title, model, subject]);
 
   const ctx = useMemo<SubjectCtx | null>(
-    () => (model ? { slug: subject, model, openSearch } : null),
-    [subject, model, openSearch],
+    () => (model ? { slug: subject, model, openSearch, runtime } : null),
+    [subject, model, openSearch, runtime],
   );
 
   if (!model || !ctx) {

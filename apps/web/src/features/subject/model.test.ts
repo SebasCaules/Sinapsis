@@ -210,6 +210,51 @@ describe("rail", () => {
     expect(tools.some((to) => to?.startsWith("/m/proba/t/"))).toBe(false);
   });
 
+  /* Sprint 3 · `kind: "tool"`: el rail sigue mandando a `/t/:target` y quien
+     decide si hay herramienta o «Próximamente» es el host, con los bundles que
+     declaró la materia. El modelo NO valida ids de herramienta: un bundle puede
+     llegar en el próximo sync y el ítem tiene que seguir estando. */
+  it("los ítems `tool` van a /t/:target, exista o no el bundle", () => {
+    const m = model();
+    const explorador = m.railItem("explorador");
+    expect(explorador?.item.kind).toBe("tool");
+    expect(explorador?.to).toBe(routes.tool("proba", "explorador"));
+    expect(explorador?.href).toBeNull();
+    expect(explorador?.external).toBe(false);
+    /* Los cuatro que declara Proba, en el orden del config. */
+    expect(
+      m.railGroups
+        .find((g) => g.id === "resolver")
+        ?.items.map((v) => v.to),
+    ).toEqual(["explorador", "taller", "calc", "lab"].map((id) => routes.tool("proba", id)));
+  });
+
+  it("`railItem` busca las herramientas por su `target`, no por su id", () => {
+    const detail: SubjectDetail = {
+      config: {
+        ...config,
+        rail: [
+          {
+            id: "propias",
+            label: "Propias",
+            items: [
+              { id: "atajo", label: "La calculadora", icon: "calc", kind: "tool", target: "calculadora" },
+            ],
+          },
+        ],
+      },
+      pages,
+      studied: [],
+      placeholder: false,
+      lastSyncAt: null,
+    };
+    const m = buildSubjectModel(detail);
+    /* `/t/:tool` trae el TARGET: es lo que el host busca en los manifiestos. */
+    expect(m.railItem("calculadora")?.item.label).toBe("La calculadora");
+    expect(m.railItem("calculadora")?.to).toBe(routes.tool("proba", "calculadora"));
+    expect(m.railItem("atajo")).toBeNull();
+  });
+
   it("una vista builtin que la plataforma no conoce cae en «Próximamente» (/t/:id)", () => {
     const detail: SubjectDetail = {
       config: {

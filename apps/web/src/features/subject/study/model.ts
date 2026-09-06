@@ -26,6 +26,7 @@ import {
   type PlanMilestone,
   type PlanPhase,
   type PlanTask,
+  type PlanTrack,
   type Quiz,
   type QuizAttempt,
   type SrsGrade,
@@ -151,6 +152,12 @@ export interface StudyModel {
   quiz: (id: string) => QuizStat | undefined;
 
   plan: Plan | null;
+  /** Modalidades del plan (S-11 / N0-43); vacío en los planes de una sola vía. */
+  tracks: PlanTrack[];
+  /** La modalidad activa, o null cuando el plan no declara modalidades. */
+  track: PlanTrack | null;
+  /** Las fases de la modalidad activa: es lo que se dibuja y lo que se cuenta. */
+  phases: PlanPhase[];
   planProgress: Progress;
   phaseProgress: (phaseId: string) => Progress;
   milestoneProgress: (milestoneId: string) => Progress;
@@ -335,6 +342,16 @@ export function relativeSince(iso: string, now: Date): string {
 const ratioOf = (done: number, total: number): number => (total ? done / total : 0);
 
 /**
+ * La modalidad activa de un plan: la elegida si sigue existiendo, si no la
+ * primera. Un plan sin `tracks` no tiene modalidad (manda `plan.phases`).
+ */
+export function resolveTrack(plan: Plan | null | undefined, trackId: string | null): PlanTrack | null {
+  const tracks = plan?.tracks ?? [];
+  if (!tracks.length) return null;
+  return tracks.find((t) => t.id === trackId) ?? tracks[0] ?? null;
+}
+
+/**
  * Construye el modelo. `studied` (las páginas leídas del shell) solo lo usan los
  * kits para su barra de lectura: el material de estudio no lo conoce.
  */
@@ -343,6 +360,7 @@ export function buildStudyModel(
   state: StudyState | null | undefined,
   now: Date = new Date(),
   studied: ReadonlySet<string> = new Set<string>(),
+  trackId: string | null = null,
 ): StudyModel {
   const data = content ?? EMPTY_CONTENT;
   const user = state ?? EMPTY_STATE;
@@ -453,7 +471,14 @@ export function buildStudyModel(
   const quizById = new Map(quizzes.map((q) => [q.quiz.id, q]));
 
   // --- plan -----------------------------------------------------------------
+  /* Las modalidades (N0-43) reparten las MISMAS tareas en fases distintas: los
+     ids son globales al plan, así que tildar en una se ve en la otra. Todo lo
+     que se cuenta acá —progreso, fase actual, «lo próximo»— es de la modalidad
+     activa y de ninguna otra. */
   const plan = data.plan;
+  const tracks = plan?.tracks ?? [];
+  const track = resolveTrack(plan, trackId);
+  const phases: PlanPhase[] = track ? track.phases : (plan?.phases ?? []);
   const done = new Set(user.tasksDone);
   const isTaskDone = (taskId: string): boolean => done.has(taskId);
 
@@ -469,7 +494,7 @@ export function buildStudyModel(
   let planTotal = 0;
   let currentPhase: PlanPhase | null = null;
 
-  for (const phase of plan?.phases ?? []) {
+  for (const phase of phases) {
     const tasks: PlanTask[] = [];
     for (const milestone of phase.milestones) {
       milestoneProgressById.set(milestone.id, progressOf(milestone.tasks));
@@ -485,7 +510,7 @@ export function buildStudyModel(
   const EMPTY_PROGRESS: Progress = { done: 0, total: 0, ratio: 0 };
 
   const nextTask = (): TaskRef | null => {
-    for (const phase of plan?.phases ?? []) {
+    for (const phase of phases) {
       for (const milestone of phase.milestones) {
         for (const task of milestone.tasks) {
           if (!done.has(task.id)) return { phase, milestone, task };
@@ -533,6 +558,9 @@ export function buildStudyModel(
     quizzes,
     quiz: (id) => quizById.get(id),
     plan,
+    tracks,
+    track,
+    phases,
     planProgress: { done: planDone, total: planTotal, ratio: ratioOf(planDone, planTotal) },
     phaseProgress: (id) => phaseProgressById.get(id) ?? EMPTY_PROGRESS,
     milestoneProgress: (id) => milestoneProgressById.get(id) ?? EMPTY_PROGRESS,

@@ -24,6 +24,7 @@ import {
   type SubjectCard,
   type SubjectDetail,
   type ThemeId,
+  type ToolInfo,
   type User,
 } from "@sinapsis/contract";
 
@@ -79,6 +80,8 @@ export interface ApiClient {
     markStudied(slug: string, page: string): Promise<void>;
     unmarkStudied(slug: string, page: string): Promise<void>;
     graph(slug: string): Promise<GraphData>;
+    /** Sprint 3 · bundles de herramientas y figuras que declaró la materia. */
+    tools(slug: string): Promise<ToolInfo[]>;
   };
   /** Sprint 2 · material y estado de estudio por materia. */
   study: {
@@ -120,6 +123,7 @@ export const api: ApiClient = {
     markStudied: (slug, page) => request<void>("PUT", `/subjects/${enc(slug)}/progress/${enc(page)}`),
     unmarkStudied: (slug, page) => request<void>("DELETE", `/subjects/${enc(slug)}/progress/${enc(page)}`),
     graph: (slug) => request<GraphData>("GET", `/subjects/${enc(slug)}/graph`),
+    tools: (slug) => request<ToolInfo[]>("GET", `/subjects/${enc(slug)}/tools`),
   },
   study: {
     content: (slug) => request<StudyContent>("GET", `/subjects/${enc(slug)}/study`),
@@ -160,6 +164,7 @@ export const qk = {
   page: (slug: string, page: string) => ["subject", slug, "page", page] as const,
   search: (slug: string, q: string) => ["subject", slug, "search", q] as const,
   graph: (slug: string) => ["subject", slug, "graph"] as const,
+  tools: (slug: string) => ["subject", slug, "tools"] as const,
   study: (slug: string) => ["subject", slug, "study"] as const,
   studyState: (slug: string) => ["subject", slug, "study", "state"] as const,
   semesters: ["landing", "semesters"] as const,

@@ -1,5 +1,58 @@
 /* Plan de estudio · fases apiladas, hitos con tareas tildables. */
 
+/* ---------- modalidades (N0-43) ----------
+   Un conmutador de dos o tres vías sobre el mismo plan: parece un juego de
+   pestañas de papel, no un menú. La activa es la única con superficie propia. */
+.tracks { display: flex; flex-direction: column; gap: 7px; }
+
+.tracksLabel {
+  font: 600 10px var(--font-ui);
+  letter-spacing: 0.09em;
+  color: var(--text-3);
+}
+
+.segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  box-shadow: var(--relief);
+}
+
+.segment {
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.segment:hover { color: var(--text); }
+.segment[data-on="true"] {
+  background: var(--surface);
+  border-color: var(--border-2);
+  color: var(--text);
+  box-shadow: var(--shadow-ctrl);
+}
+.segment:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 5px var(--primary-ring);
+}
+
+.tracksHint {
+  margin: 0;
+  max-width: 640px;
+  font: 400 12.5px/1.5 var(--font-ui);
+  color: var(--text-3);
+}
+
 /* ---------- cabecera ---------- */
 .totalText { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 

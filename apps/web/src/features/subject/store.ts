@@ -8,6 +8,9 @@
  *  - `tabs`: las pestañas de la cabecera (N0-29), por materia, persistidas en
  *    `LS_KEYS.tabs(slug)`. Viven en su propio store: cambian en cada navegación
  *    y no tienen por qué redibujar el índice.
+ *  - `planTrack`: la modalidad de plan elegida (N0-43), POR MATERIA, persistida
+ *    en `sinapsis.<slug>.planTrack`. Vive acá y no en la vista porque el modelo
+ *    de estudio la necesita para contar el progreso y decir «lo próximo».
  *  - `compact`: el índice plegado. NO es estado propio de la materia: se comparte
  *    con la plataforma (`LS_KEYS.sidebarCompact` + clase `sb-compact` en <html>),
  *    así que este módulo lo delega en el store de UI de la plataforma y es el
@@ -35,6 +38,32 @@ function writeOpen(slug: string, keys: string[]): void {
   }
 }
 
+/**
+ * Clave de la modalidad de plan elegida. Sigue la forma de `LS_KEYS` del
+ * contrato (`sinapsis.<materia>.<preferencia>`) sin agregarle una entrada: es
+ * una preferencia solo de la web y no viaja por ningún contrato.
+ */
+export function planTrackKey(subject: string): string {
+  return `sinapsis.${subject}.planTrack`;
+}
+
+function readPlanTrack(slug: string): string | null {
+  try {
+    const raw = localStorage.getItem(planTrackKey(slug));
+    return raw && raw.length <= 120 ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePlanTrack(slug: string, id: string): void {
+  try {
+    localStorage.setItem(planTrackKey(slug), id);
+  } catch {
+    /* modo privado o cuota llena: la preferencia se pierde, la app sigue */
+  }
+}
+
 /** Cache de la primera lectura: mantiene estable la referencia del array vacío. */
 const initialCache = new Map<string, string[]>();
 function initialOpen(slug: string): string[] {
@@ -48,18 +77,22 @@ function initialOpen(slug: string): string[] {
 
 export interface SubjectUiState {
   open: Record<string, string[]>;
+  /** Modalidad de plan elegida por materia (null = la primera del plan). */
+  planTracks: Record<string, string | null>;
   /** Estado explícito por bloque: true plegado, false desplegado; ausente = `collapsedByDefault`. */
   collapsedTypes: Record<string, boolean>;
   toggleDivision: (slug: string, key: string) => void;
   /** Abre la división (idempotente): la usa la navegación a una página. */
   openDivision: (slug: string, key: string) => void;
   toggleType: (slug: string, division: string, type: string, byDefault: boolean) => void;
+  setPlanTrack: (slug: string, trackId: string) => void;
 }
 
 const typeId = (slug: string, division: string, type: string): string => `${slug}/${division}/${type}`;
 
 export const useSubjectUiStore = create<SubjectUiState>((set, get) => ({
   open: {},
+  planTracks: {},
   collapsedTypes: {},
 
   toggleDivision: (slug, key) => {
@@ -77,6 +110,11 @@ export const useSubjectUiStore = create<SubjectUiState>((set, get) => ({
     set((s) => ({ open: { ...s.open, [slug]: next } }));
   },
 
+  setPlanTrack: (slug, trackId) => {
+    writePlanTrack(slug, trackId);
+    set((s) => ({ planTracks: { ...s.planTracks, [slug]: trackId } }));
+  },
+
   toggleType: (slug, division, type, byDefault) => {
     const id = typeId(slug, division, type);
     set((s) => {
@@ -89,6 +127,24 @@ export const useSubjectUiStore = create<SubjectUiState>((set, get) => ({
 /** Divisiones abiertas de una materia (referencia estable entre renders). */
 export function useOpenDivisions(slug: string): string[] {
   return useSubjectUiStore((s) => s.open[slug] ?? initialOpen(slug));
+}
+
+/**
+ * La modalidad de plan elegida para esta materia (null: todavía no eligió, o el
+ * plan no tiene modalidades). Quien la resuelve contra el plan real es
+ * `resolveTrack` del modelo de estudio: acá solo se recuerda el id.
+ */
+export function usePlanTrack(slug: string): string | null {
+  return useSubjectUiStore((s) => {
+    const chosen = s.planTracks[slug];
+    return chosen === undefined ? initialPlanTrack(slug) : chosen;
+  });
+}
+
+const planTrackCache = new Map<string, string | null>();
+function initialPlanTrack(slug: string): string | null {
+  if (!planTrackCache.has(slug)) planTrackCache.set(slug, readPlanTrack(slug));
+  return planTrackCache.get(slug) ?? null;
 }
 
 /** ¿Está plegado este bloque de tipo? `byDefault` viene de `collapsedByDefault`. */
@@ -421,4 +477,10 @@ export function useTabs(slug: string): TabsState {
 export function resetTabsForTests(): void {
   initialTabsCache.clear();
   useSubjectTabsStore.setState({ tabs: {} });
+}
+
+/** Solo para los tests: olvida la modalidad de plan leída de localStorage. */
+export function resetPlanTracksForTests(): void {
+  planTrackCache.clear();
+  useSubjectUiStore.setState({ planTracks: {} });
 }

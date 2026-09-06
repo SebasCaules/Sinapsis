@@ -102,6 +102,19 @@ export function SubjectCard({
 
       <div className={css.foot}>
         <span className={css.meta}>{metaOf(card)}</span>
+        {/* Tarjetas vencidas (Sprint 3): es lo único de la tarjeta que caduca
+            solo, así que va en cifras y enlaza directo al repaso. Con cero no se
+            dibuja: un «0 para repasar» sería ruido en todas las materias al
+            día. En gestión y en la copia que sigue al puntero, no. */}
+        {!manage && !overlay && card.dueCount > 0 ? (
+          <Link
+            className={css.due}
+            to={routes.flashcards(card.slug)}
+            aria-label={`${card.dueCount} ${plural(card.dueCount, "tarjeta", "tarjetas")} para repasar en ${card.name}`}
+          >
+            {card.dueCount} para repasar
+          </Link>
+        ) : null}
         {/* Atajos de estudio: no piden ningún dato más que el slug, así que no
             cuestan una llamada por tarjeta. Van por encima del enlace de la
             tarjeta (z-index), que si no se los comería. */}

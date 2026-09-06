@@ -472,6 +472,38 @@ export function GraphView() {
   const cursorNode = cursor >= 0 ? (ranked[cursor] ?? null) : null;
   cursorRef.current = cursorNode?.slug ?? null;
 
+  /**
+   * El cursor de teclado tiene que quedar A LA VISTA (U5). Con 400 nodos el aro
+   * discontinuo caía casi siempre fuera del lienzo y las flechas parecían no
+   * hacer nada: si el nodo está fuera del área útil, se centra el lienzo en él
+   * con `translateTo` de d3-zoom (el mismo comportamiento del arrastre, así que
+   * `transformRef` se entera por el propio evento de zoom). Si ya está adentro
+   * no se mueve nada: desplazar el dibujo en cada flecha marea.
+   */
+  const ensureVisible = (slug: string | null) => {
+    const canvas = canvasRef.current;
+    const behavior = zoomRef.current;
+    if (!slug || !canvas || !behavior) return;
+    const node = nodesRef.current.find((n) => n.slug === slug);
+    if (!node) return;
+    const { w, h } = sizeRef.current;
+    if (!w || !h) return;
+    const t = transformRef.current;
+    const px = t.applyX(node.x);
+    const py = t.applyY(node.y);
+    /* Margen: el aro y la etiqueta del nodo también tienen que entrar. */
+    const margin = Math.min(64, Math.max(24, Math.min(w, h) * 0.12));
+    if (px >= margin && px <= w - margin && py >= margin && py <= h - margin) return;
+    select(canvas).call(behavior.translateTo, node.x, node.y);
+  };
+
+  /* Se centra DESPUÉS de pintar: el nodo puede haberse movido en el mismo tick
+     de la simulación que lo trajo. */
+  useEffect(() => {
+    ensureVisible(cursorRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cursor, nodeKey]);
+
   const moveCursor = (delta: number) => {
     if (!ranked.length) return;
     setCursor((at) => {

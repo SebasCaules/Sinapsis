@@ -225,6 +225,123 @@ export const probaPlan: Plan = {
       ],
     },
   ],
+  /* Modalidades (N0-43): las MISMAS tareas repartidas de otra manera. Los ids
+     son globales al plan, así que tildar «Leer la unidad 1» en la cursada la deja
+     tildada también en el final directo. */
+  tracks: [
+    {
+      id: "cursada",
+      label: "Cursada y final",
+      description: "Dos parciales durante el cuatrimestre y el final al cierre.",
+      phases: [
+        {
+          id: "fase-parcial-1",
+          title: "Primer parcial",
+          subtitle: "Descriptiva y probabilidad elemental",
+          date: "2026-10-08",
+          scope:
+            "Unidades 1 y 2: medidas de posición y dispersión, histogramas, probabilidad condicional e independencia.",
+          milestones: [
+            {
+              id: "hito-descriptiva",
+              title: "Descriptiva al día",
+              divisions: ["1"],
+              tasks: [
+                { id: "task:leer-u1", label: "Leer las cuatro páginas de la unidad 1", kind: "read", target: "1" },
+                {
+                  id: "task:mazo-descriptiva",
+                  label: "Repasar el mazo de medidas",
+                  kind: "cards",
+                  target: "deck-descriptiva",
+                },
+              ],
+            },
+            {
+              id: "hito-probabilidad",
+              title: "Probabilidad elemental",
+              divisions: ["2"],
+              tasks: [
+                {
+                  id: "task:tp1",
+                  label: "Resolver el TP1 con las consignas de la cátedra",
+                  kind: "exercises",
+                  target: "tp1-probabilidad",
+                },
+                { id: "task:consulta", label: "Anotar las dudas para la clase de consulta", kind: "custom" },
+              ],
+            },
+          ],
+        },
+        {
+          id: "fase-final",
+          title: "Final",
+          subtitle: "Continuas e inferencia",
+          date: "2026-12-10",
+          scope: "Toda la materia, con énfasis en la unidad 4 y en el uso de tablas.",
+          milestones: [
+            {
+              id: "hito-continuas",
+              title: "Continuas firmes",
+              divisions: ["4"],
+              tasks: [
+                { id: "task:leer-u4", label: "Releer la unidad 4 completa", kind: "read", target: "4" },
+                {
+                  id: "task:quiz-continuas",
+                  label: "Hacer el quiz de continuas sin la tabla a mano",
+                  kind: "quiz",
+                  target: "quiz-continuas",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "final-directo",
+      label: "Final directo",
+      description: "Sin cursada: una sola instancia con toda la materia.",
+      phases: [
+        {
+          id: "fase-libre",
+          title: "Final libre",
+          subtitle: "Toda la materia en una sola instancia",
+          date: "2026-12-10",
+          scope: "Las cuatro unidades, con el formulario permitido y las tablas de la cátedra.",
+          milestones: [
+            {
+              id: "hito-repaso-general",
+              title: "Repaso general",
+              divisions: ["1", "2", "4"],
+              tasks: [
+                { id: "task:leer-u1", label: "Leer las cuatro páginas de la unidad 1", kind: "read", target: "1" },
+                { id: "task:leer-u4", label: "Releer la unidad 4 completa", kind: "read", target: "4" },
+                {
+                  id: "task:quiz-continuas",
+                  label: "Hacer el quiz de continuas sin la tabla a mano",
+                  kind: "quiz",
+                  target: "quiz-continuas",
+                },
+              ],
+            },
+            {
+              id: "hito-explorador",
+              title: "Herramientas a mano",
+              divisions: [],
+              tasks: [
+                {
+                  id: "task:explorador",
+                  label: "Recorrer el explorador de distribuciones",
+                  kind: "tool",
+                  target: "explorador",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------

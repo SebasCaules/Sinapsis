@@ -11,8 +11,7 @@ import { Suspense, lazy } from "react";
 import { useParams, type RouteObject } from "react-router-dom";
 import { studyRoutes } from "./study/routes";
 import { SubjectShell } from "./SubjectShell";
-import { ComingSoon, NotFoundInSubject, SheetSkeleton, WideSkeleton } from "./components/States";
-import { useSubjectCtx } from "./context";
+import { NotFoundInSubject, SheetSkeleton, WideSkeleton } from "./components/States";
 import { HomeView } from "./views/HomeView";
 
 const ReaderView = lazy(() => import("./views/ReaderView"));
@@ -21,17 +20,9 @@ const DivisionView = lazy(() => import("./views/DivisionView"));
 const GraphView = lazy(() => import("./views/GraphView"));
 const FavoritesView = lazy(() => import("./views/FavoritesView"));
 const NotesView = lazy(() => import("./views/NotesView"));
-
-/** «Próximamente» con el nombre real que la materia le dio a la herramienta. */
-function ToolView() {
-  const { model } = useSubjectCtx();
-  const { tool = "" } = useParams();
-  /* El mismo buscador que usa el shell para la pestaña: una sola definición de
-     «qué ítem del rail corresponde a /t/:tool». */
-  const view = model.railItem(tool);
-  if (!view) return <ComingSoon title="Herramienta de la materia" />;
-  return <ComingSoon title={view.item.label} />;
-}
+/* El anfitrión de las herramientas de la materia (Sprint 3). Llega en diferido:
+   una materia sin bundles no paga ni un byte de él. */
+const ToolHost = lazy(() => import("./tools/ToolHost"));
 
 function SubjectNotFound() {
   const { subject = "" } = useParams();
@@ -94,7 +85,14 @@ export const subjectRoutes: RouteObject[] = [
           </Suspense>
         ),
       },
-      { path: "t/:tool", element: <ToolView /> },
+      {
+        path: "t/:tool",
+        element: (
+          <Suspense fallback={<WideSkeleton />}>
+            <ToolHost />
+          </Suspense>
+        ),
+      },
       { path: "*", element: <SubjectNotFound /> },
     ],
   },

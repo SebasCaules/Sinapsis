@@ -22,6 +22,7 @@ function card(slug: string, semester: string, position: number, name = slug): Su
     divisionsCount: 1,
     pagesCount: 10,
     studiedCount: 0,
+    dueCount: 0,
     semester,
     position,
     placeholder: false,

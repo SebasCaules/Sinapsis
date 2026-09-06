@@ -81,6 +81,7 @@ const content: StudyContent = {
   ],
   plan: {
     title: "Plan de estudio",
+    tracks: [],
     phases: [
       {
         id: "p1",

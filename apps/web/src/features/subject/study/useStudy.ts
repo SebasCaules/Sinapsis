@@ -26,6 +26,7 @@ import type {
   StudyState,
 } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
+import { usePlanTrack, useSubjectUiStore } from "../store";
 import {
   EMPTY_STATE,
   buildStudyModel,
@@ -44,8 +45,14 @@ export interface UseStudyResult {
   model: StudyModel;
   /** La cola de hoy: vencidas (la más atrasada primero) y después las nuevas. */
   dueCards: (now?: Date) => CardEntry[];
-  /** La primera tarea pendiente del plan (null si no hay plan o está completo). */
+  /**
+   * La primera tarea pendiente del plan, DENTRO de la modalidad elegida (N0-43):
+   * quien estudia por «final directo» no tiene que ver como próximo paso una
+   * tarea que solo existe en la cursada.
+   */
   nextTask: () => TaskRef | null;
+  /** Elige la modalidad del plan (se recuerda por materia en el cliente). */
+  setTrack: (trackId: string) => void;
   /** Califica una tarjeta con el SM-2 del contrato. Devuelve el estado que persistió el API. */
   grade: (cardId: string, grade: SrsGrade) => Promise<SrsState>;
   /** Tilda o destilda una tarea del plan. */
@@ -70,6 +77,10 @@ function patchState(
  *
  * `studied` (las páginas leídas, que conoce el shell) es opcional y solo alimenta
  * la barra de lectura de los kits: el material de estudio no sabe de páginas.
+ *
+ * La modalidad del plan sale del store de la materia, no de la vista: así el
+ * progreso, la fase actual y «lo próximo» son los MISMOS en el plan y en el
+ * inicio de la materia.
  */
 export function useStudy(slug: string, studied?: ReadonlySet<string>): UseStudyResult {
   const qc = useQueryClient();
@@ -80,9 +91,13 @@ export function useStudy(slug: string, studied?: ReadonlySet<string>): UseStudyR
      (y con él la cola de repaso) se rearmaría a cada tecla. */
   const [now] = useState(() => new Date());
 
+  const trackId = usePlanTrack(slug);
+  const setPlanTrack = useSubjectUiStore((s) => s.setPlanTrack);
+  const setTrack = useCallback((id: string) => setPlanTrack(slug, id), [setPlanTrack, slug]);
+
   const model = useMemo(
-    () => buildStudyModel(content.data, state.data, now, studied),
-    [content.data, state.data, now, studied],
+    () => buildStudyModel(content.data, state.data, now, studied, trackId),
+    [content.data, state.data, now, studied, trackId],
   );
 
   const gradeMutation = useMutation({
@@ -167,7 +182,7 @@ export function useStudy(slug: string, studied?: ReadonlySet<string>): UseStudyR
     [attemptMutation],
   );
 
-  return { content, state, model, dueCards, nextTask, grade, setTask, recordAttempt };
+  return { content, state, model, dueCards, nextTask, setTrack, grade, setTask, recordAttempt };
 }
 
 /**

@@ -29,6 +29,7 @@ import type { ApiClient } from "@/lib/api";
 import { mockPageDetail, mockSearch, mockSubjectDetail } from "@/features/subject/mocks/proba-fixture";
 import { mockLanding, mockParam, mockUser } from "./dev-fixtures";
 import { mockGraph, mockStudyContent, mockStudyState } from "./study-fixture";
+import { mockTools } from "./tools-fixture";
 
 /* Estado en memoria: dura lo que dura la pestaña. */
 let user: User = { ...mockUser };
@@ -112,6 +113,7 @@ export const mockApi: ApiClient = {
         divisionsCount: 0,
         pagesCount: 0,
         studiedCount: 0,
+        dueCount: 0,
         position: state().filter((c) => c.semester === input.semester).length,
         placeholder: true,
         lastSyncAt: null,
@@ -140,6 +142,7 @@ export const mockApi: ApiClient = {
       /* ídem */
     },
     graph: async () => mockGraph(),
+    tools: async () => mockTools(),
   },
 
   study: {

@@ -33,6 +33,7 @@ function fakeClient(tag: string): ApiClient {
       markStudied: stub("markStudied"),
       unmarkStudied: stub("unmarkStudied"),
       graph: stub("graph"),
+      tools: stub("tools"),
     },
     study: {
       content: stub("content"),

@@ -16,6 +16,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@sinapsis/contract": "workspace:*",
+    "@sinapsis/runtime": "workspace:*",
     "@tanstack/react-query": "^5.62.11",
     "d3-force": "^3.0.0",
     "d3-selection": "^3.0.0",

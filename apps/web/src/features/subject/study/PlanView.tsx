@@ -5,6 +5,12 @@
  *
  * Tildar es optimista: la casilla se enciende antes que responda el API y
  * vuelve atrás sola si falla.
+ *
+ * Modalidades (S-11 / N0-43): un plan puede traer más de una vía —«cursada y
+ * final» o «final directo»— con sus propias fases. Arriba de todo hay un
+ * conmutador; la elección se recuerda por materia, y el progreso, la fase actual
+ * y «lo próximo» se cuentan SOLO sobre la modalidad activa. Los ids de tarea son
+ * globales al plan: lo tildado en una vía aparece tildado en la otra.
  */
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
@@ -15,6 +21,7 @@ import {
   type PlanMilestone,
   type PlanPhase,
   type PlanTask,
+  type PlanTrack,
 } from "@sinapsis/contract";
 import { Icon, UiIcon, useToast } from "@/components/platform";
 import { useSubjectCtx } from "../context";
@@ -90,7 +97,7 @@ function taskLink(
 export function PlanView() {
   const { slug, model } = useSubjectCtx();
   const { toast } = useToast();
-  const { content, state, model: study, setTask } = useStudy(slug);
+  const { content, state, model: study, setTask, setTrack } = useStudy(slug);
   const [busy, setBusy] = useState<string | null>(null);
   const unit = model.config.division.singular.toLowerCase();
 
@@ -171,9 +178,14 @@ export function PlanView() {
 
   const total = study.planProgress;
   const next = study.nextTask();
+  const tracks = study.tracks;
 
   return (
     <StudyView>
+      {tracks.length > 0 ? (
+        <TrackPicker tracks={tracks} active={study.track?.id ?? null} onPick={setTrack} />
+      ) : null}
+
       <StudyHead
         icon="map"
         eyebrow="CAMINO AL FINAL"
@@ -204,7 +216,7 @@ export function PlanView() {
         }
       />
 
-      {plan.phases.map((phase) => (
+      {study.phases.map((phase) => (
         <Phase
           key={phase.id}
           phase={phase}
@@ -218,6 +230,69 @@ export function PlanView() {
         />
       ))}
     </StudyView>
+  );
+}
+
+/**
+ * Conmutador de modalidad. Es un `radiogroup` de verdad y no un puñado de
+ * botones: son opciones EXCLUYENTES sobre el mismo plan, y con las flechas se
+ * recorren como tales. La activa lleva `aria-checked`, no solo el color.
+ */
+function TrackPicker({
+  tracks,
+  active,
+  onPick,
+}: {
+  tracks: readonly PlanTrack[];
+  active: string | null;
+  onPick: (id: string) => void;
+}) {
+  const at = Math.max(0, tracks.findIndex((t) => t.id === active));
+  const current = tracks[at];
+
+  const move = (delta: number) => {
+    const next = tracks[(at + delta + tracks.length) % tracks.length];
+    if (next) onPick(next.id);
+  };
+
+  return (
+    <div className={css.tracks}>
+      <span className={css.tracksLabel} id="plan-tracks-label">
+        MODALIDAD
+      </span>
+      <div className={css.segmented} role="radiogroup" aria-labelledby="plan-tracks-label">
+        {tracks.map((track, i) => {
+          const on = i === at;
+          return (
+            <button
+              key={track.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              /* Solo la activa entra en el orden de tabulación: adentro del
+                 grupo se mueve uno con las flechas (patrón `radiogroup`). */
+              tabIndex={on ? 0 : -1}
+              className={css.segment}
+              data-on={on ? "true" : undefined}
+              title={track.description}
+              onClick={() => onPick(track.id)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+                  event.preventDefault();
+                  move(1);
+                } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+                  event.preventDefault();
+                  move(-1);
+                }
+              }}
+            >
+              {track.label}
+            </button>
+          );
+        })}
+      </div>
+      {current?.description ? <p className={css.tracksHint}>{current.description}</p> : null}
+    </div>
   );
 }
 

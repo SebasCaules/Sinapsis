@@ -17,6 +17,7 @@ function card(overrides: Partial<SubjectCardData> = {}): SubjectCardData {
     divisionsCount: 12,
     pagesCount: 200,
     studiedCount: 0,
+    dueCount: 0,
     semester: "2026-1C",
     position: 0,
     placeholder: false,
@@ -89,6 +90,32 @@ describe("<SubjectCard/>", () => {
     renderCard(card());
     expect(screen.getByRole("link", { name: "Repasar" }).getAttribute("href")).toBe("/m/proba/flashcards");
     expect(screen.getByRole("link", { name: "Plan" }).getAttribute("href")).toBe("/m/proba/plan");
+  });
+
+  /* Sprint 3 · `dueCount`: la insignia solo existe cuando hay algo vencido, y
+     lleva al repaso de la materia, que es lo único que se puede hacer con ella. */
+  it("con tarjetas vencidas muestra «N para repasar» y enlaza al repaso", () => {
+    renderCard(card({ dueCount: 17 }));
+    const badge = screen.getByText("17 para repasar");
+    expect(badge.getAttribute("href")).toBe("/m/proba/flashcards");
+    /* El rótulo visible se repite en todas las tarjetas: el accesible dice de
+       cuál materia son las tarjetas vencidas. */
+    expect(
+      screen.getByRole("link", { name: "17 tarjetas para repasar en Probabilidad y Estadística" }),
+    ).toBeTruthy();
+  });
+
+  it("con una sola vencida, el nombre accesible va en singular", () => {
+    renderCard(card({ dueCount: 1 }));
+    expect(screen.getByText("1 para repasar")).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "1 tarjeta para repasar en Probabilidad y Estadística" }),
+    ).toBeTruthy();
+  });
+
+  it("sin nada vencido no dibuja la insignia", () => {
+    renderCard(card());
+    expect(screen.queryByText(/para repasar/)).toBeNull();
   });
 
   it("en gestión la tarjeta no navega: ni enlace grande ni atajos", () => {

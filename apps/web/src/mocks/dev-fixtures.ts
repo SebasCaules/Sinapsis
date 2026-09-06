@@ -77,6 +77,9 @@ function card(
     divisionsCount,
     pagesCount,
     studiedCount,
+    /* Sprint 3: tarjetas SRS vencidas. Cero salvo que la fixture diga otra cosa,
+       para poder ver la insignia «N para repasar» y también su ausencia. */
+    dueCount: 0,
     semester,
     position,
     placeholder: false,
@@ -89,12 +92,14 @@ function card(
    probar que `card()` no tiene efectos y deja las fixtures en el bundle de
    producción aunque nadie use `mockLanding`. */
 export const mockLanding: SubjectCard[] = [
-  /*#__PURE__*/ card("proba", "Probabilidad y Estadística", "93.24", "--u9", "2026-2C", 0, 12, 207, 62),
+  /*#__PURE__*/ card("proba", "Probabilidad y Estadística", "93.24", "--u9", "2026-2C", 0, 12, 207, 62, {
+    dueCount: 17,
+  }),
   /*#__PURE__*/ card("analisis-ii", "Análisis Matemático II", "93.28", "--u2", "2026-2C", 1, 9, 118, 0),
   /*#__PURE__*/ card("algoritmos-iii", "Algoritmos y Estructuras de Datos III", "72.33", "--u1", "2026-2C", 2, 8, 96, 96, {
     division: modulo,
   }),
-  /*#__PURE__*/ card("fisica-ii", "Física II", "93.26", "--u4", "2026-1C", 0, 10, 132, 44),
+  /*#__PURE__*/ card("fisica-ii", "Física II", "93.26", "--u4", "2026-1C", 0, 10, 132, 44, { dueCount: 3 }),
   /*#__PURE__*/ card("quimica", "Química General", "12.09", "--u6", "2026-1C", 1, 7, 71, 71),
   /*#__PURE__*/ card("ingles-tecnico", "Inglés Técnico", "94.02", "--u8", "2026-1C", 2, 14, 38, 5, {
     division: semana,
