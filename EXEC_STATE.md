@@ -26,8 +26,8 @@ Workers y verificadores de ola: Opus 5. Auditoría final: modelo N0.
 | S1-04 api sync/pages/search | DONE | ola1 | sync Proba ~89 ms; FTS5 + scorer propio (A-2) |
 | S1-05 cli | DONE | ola1 | init/validate/sync/status; sync real contra API verificado por el orquestador |
 | S1-06 skill /sinapsis | DONE | ola1 | skills/sinapsis + symlink .claude/skills/sinapsis |
-| S1-07 web base | TODO | | ola 1 · agente C |
-| S1-08 web landing | TODO | | ola 1 · agente C |
+| S1-07 web base | DONE | ola1 | store, auth, login GIS+dev, componentes de plataforma |
+| S1-08 web landing | DONE | ola1 | grilla, gestión con dnd-kit, diálogo, vacía; 39 tests web (C+D) |
 | S1-09 web shell materia | TODO | | ola 1 · agente D |
 | S1-10 web inicio | TODO | | ola 1 · agente D |
 | S1-11 web lector | TODO | | ola 1 · agente D |
@@ -56,6 +56,7 @@ Ver `docs/DECISIONS.md` (N0-1 … N0-19).
 |---|---|---|---|---|
 | S-01 | El sync del API avisa «tipo meta no declarado» para indice/log; el compilador ya reserva `meta` (B-3). Alinear el API. | apps/api/src/services/sync.ts | verificación del orquestador | antes del cierre |
 | S-02 | `packages/contract` se consume como .ts crudo; `node dist` del API depende del type stripping de Node ≥ 22.18 (A pendiente). Dar build al contract o bundlear el API. | packages/contract, apps/api | reporte A | Sprint 4 (deploy) |
+| S-03 | Un cuatrimestre creado en la landing sin materias desaparece al guardar y el orden de cuatrimestres no es persistible: `LandingLayoutInput` no transporta `semesters`. Evaluar `semesters: string[]` en API + web. | contract, apps/api, apps/web landing | reporte C (contractRequest 2) | auditoría final |
 
 ## Veredicto final
 

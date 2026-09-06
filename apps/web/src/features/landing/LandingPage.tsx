@@ -32,7 +32,7 @@ import {
   useToast,
 } from "@/components/platform";
 import { landingData } from "./data";
-import { SemesterSection } from "./SemesterSection";
+import { SemesterSection, isGroupId, semesterOfGroupId } from "./SemesterSection";
 import { GhostCard, SubjectCard } from "./SubjectCard";
 import { AddSubjectDialog } from "./AddSubjectDialog";
 import css from "./LandingPage.module.css";
@@ -240,8 +240,8 @@ export function LandingPage() {
   );
 
   const containerOf = (list: DraftGroup[], id: string): number =>
-    id.startsWith("sem:")
-      ? list.findIndex((g) => g.semester === id.slice(4))
+    isGroupId(id)
+      ? list.findIndex((g) => g.semester === semesterOfGroupId(id))
       : list.findIndex((g) => g.slugs.includes(id));
 
   function onDragStart(e: DragStartEvent) {
@@ -262,7 +262,7 @@ export function LandingPage() {
       const target = next[to];
       if (!source || !target) return prev;
       source.slugs = source.slugs.filter((s) => s !== activeId);
-      const overIndex = overId.startsWith("sem:") ? -1 : target.slugs.indexOf(overId);
+      const overIndex = isGroupId(overId) ? -1 : target.slugs.indexOf(overId);
       const at = overIndex < 0 ? target.slugs.length : overIndex;
       target.slugs.splice(at, 0, activeId);
       return next;
@@ -283,7 +283,7 @@ export function LandingPage() {
       const group = prev[from];
       if (!group) return prev;
       const oldIndex = group.slugs.indexOf(activeId);
-      const newIndex = overId.startsWith("sem:") ? group.slugs.length - 1 : group.slugs.indexOf(overId);
+      const newIndex = isGroupId(overId) ? group.slugs.length - 1 : group.slugs.indexOf(overId);
       if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return prev;
       const next = prev.map((g) => ({ ...g, slugs: [...g.slugs] }));
       const moved = next[from];

@@ -8,7 +8,10 @@ import { SortableSubjectCard, SubjectCard } from "./SubjectCard";
 import css from "./SemesterSection.module.css";
 
 /** id del contenedor droppable de un cuatrimestre (dnd-kit). */
-export const groupId = (semester: string) => `sem:${semester}`;
+export const GROUP_PREFIX = "sem:";
+export const groupId = (semester: string) => `${GROUP_PREFIX}${semester}`;
+export const isGroupId = (id: string) => id.startsWith(GROUP_PREFIX);
+export const semesterOfGroupId = (id: string) => id.slice(GROUP_PREFIX.length);
 
 export interface SemesterSectionProps {
   group: SemesterGroup;

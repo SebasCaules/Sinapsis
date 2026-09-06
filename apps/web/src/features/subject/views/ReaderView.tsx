@@ -21,7 +21,9 @@ export function ReaderView() {
   const toggleStudied = useToggleStudied(slug);
   const [sideOpen, setSideOpen] = useState(true);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
+  const [domHeadings, setDomHeadings] = useState<PageHeading[]>([]);
   const sourcesRef = useRef<HTMLElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
 
   const detail = query.data;
   const page = detail?.page;
@@ -33,10 +35,26 @@ export function ReaderView() {
   const { prev, next } = model.prevNext(pageSlug);
   const upcoming = position ? sequence.slice(position, position + 3) : [];
   const slugs = useMemo(() => new Set(model.bySlug.keys()), [model]);
-  const headings = useMemo(
+  const metaHeadings = useMemo(
     () => (page?.headings ?? []).filter((h) => h.level === 2 || h.level === 3),
     [page?.headings],
   );
+  /* Los ids de verdad son los que puso rehype-slug en el DOM: el índice de la
+     página se arma con ellos, no con los del compilador, para que un criterio
+     distinto de slug (acentos, puntuación) no rompa las anclas. */
+  const headings = domHeadings.length ? domHeadings : metaHeadings;
+
+  useEffect(() => {
+    if (!detail) return;
+    const found = sheetRef.current?.querySelectorAll<HTMLElement>("h2[id], h3[id]");
+    setDomHeadings(
+      [...(found ?? [])].map((el) => ({
+        level: el.tagName === "H3" ? 3 : 2,
+        text: el.textContent ?? "",
+        id: el.id,
+      })),
+    );
+  }, [detail, pageSlug]);
 
   /* Al cambiar de página: arriba de todo, salvo que la URL traiga un ancla. */
   useEffect(() => {
@@ -44,14 +62,14 @@ export function ReaderView() {
     const scroller = document.querySelector<HTMLElement>("main[data-subject-main]");
     const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
     if (hash) {
-      const target = document.getElementById(hash);
+      const target = findAnchor(sheetRef.current, hash);
       if (target) {
         target.scrollIntoView({ block: "start" });
         return;
       }
     }
     scroller?.scrollTo({ top: 0 });
-  }, [detail, pageSlug, location.hash]);
+  }, [detail, pageSlug, location.hash, domHeadings]);
 
   /* Scroll-spy del índice de la página. */
   useEffect(() => {
@@ -107,7 +125,7 @@ export function ReaderView() {
           </span>
         </div>
 
-        <article className={css.sheet}>
+        <article className={css.sheet} ref={sheetRef}>
           <header className={css.sheetHead}>
             {division ? (
               <Link className={css.divisionChip} to={routes.division(slug, division.key)}>
@@ -211,7 +229,7 @@ export function ReaderView() {
                     data-active={activeHeading === h.id ? "true" : undefined}
                     onClick={(e) => {
                       e.preventDefault();
-                      document.getElementById(h.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
+                      findAnchor(sheetRef.current, h.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
                       history.replaceState(null, "", `#${h.id}`);
                     }}
                   >
@@ -272,6 +290,24 @@ export function ReaderView() {
       </button>
     </div>
   );
+}
+
+/**
+ * Busca el destino de un ancla. Primero por id exacto; si no, comparando sin
+ * acentos: un wikilink escrito «#estandarizacion» tiene que abrir la sección
+ * «Estandarización» aunque el id del DOM conserve la tilde.
+ */
+function findAnchor(root: HTMLElement | null, hash: string): HTMLElement | null {
+  if (!hash) return null;
+  const direct = document.getElementById(hash);
+  if (direct) return direct;
+  const norm = (value: string) =>
+    value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const wanted = norm(hash);
+  for (const el of root?.querySelectorAll<HTMLElement>("[id]") ?? []) {
+    if (norm(el.id) === wanted) return el;
+  }
+  return null;
 }
 
 export default ReaderView;

@@ -406,6 +406,7 @@ export const FIXED_RAIL_TAIL: readonly RailGroup[] = [
 export const LS_KEYS = {
   theme: "sinapsis.theme",
   sidebarCompact: "sinapsis.sbCompact",
+  landingCollapsed: "sinapsis.landing.collapsed",
   openDivisions: (subject: string) => `sinapsis.${subject}.openDivisions`,
 } as const;
 

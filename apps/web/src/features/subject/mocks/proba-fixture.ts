@@ -6,6 +6,7 @@
  * En producción no se importa nunca: `useSubject` solo lo carga (import dinámico)
  * cuando `isMockMode()` es verdadero, y ese guardia ya exige `import.meta.env.DEV`.
  */
+import { mockParam } from "@/mocks/dev-fixtures";
 import {
   SubjectConfig,
   type Page,
@@ -77,6 +78,10 @@ export const mockPages: PageMeta[] = [
 export const mockStudied: string[] = ["estadistica-descriptiva", "medidas-de-tendencia-central"];
 
 export function mockSubjectDetail(slug: string): SubjectDetail {
+  /* ?placeholder=1 finge una materia creada a mano y todavía sin sincronizar. */
+  if (mockParam("placeholder") === "1") {
+    return { config: { ...probaConfig, slug }, pages: [], studied: [], placeholder: true, lastSyncAt: null };
+  }
   return {
     config: { ...probaConfig, slug },
     pages: mockPages,

@@ -53,7 +53,8 @@ function collectWarnings(config: SubjectConfig, list: Page[]): string[] {
     if (page.division !== DIVISION_NONE && !divisions.has(page.division)) {
       push(`página "${page.slug}": la división "${page.division}" no está declarada en el config`);
     }
-    if (!types.has(page.type)) {
+    // "meta" es el tipo reservado de las páginas índice/registro: nunca se declara en pageTypes.
+    if (page.type !== "meta" && !types.has(page.type)) {
       push(`página "${page.slug}": el tipo "${page.type}" no está declarado en pageTypes`);
     }
   }

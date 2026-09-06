@@ -16,8 +16,10 @@ import { isMockMode } from "@/mocks/dev-fixtures";
 import { buildSubjectModel, type SubjectModel } from "./model";
 import { useIsDark } from "./store";
 
+/* El `import.meta.env.DEV &&` no es redundante: es literal `false` en la compilación
+   de producción, así que el bundler poda el import dinámico y las fixtures no viajan. */
 async function fetchSubject(slug: string): Promise<SubjectDetail> {
-  if (isMockMode()) {
+  if (import.meta.env.DEV && isMockMode()) {
     const { mockSubjectDetail } = await import("./mocks/proba-fixture");
     return mockSubjectDetail(slug);
   }
@@ -25,7 +27,7 @@ async function fetchSubject(slug: string): Promise<SubjectDetail> {
 }
 
 async function fetchPage(slug: string, page: string): Promise<PageDetail> {
-  if (isMockMode()) {
+  if (import.meta.env.DEV && isMockMode()) {
     const { mockPageDetail } = await import("./mocks/proba-fixture");
     return mockPageDetail(slug, page);
   }
@@ -33,7 +35,7 @@ async function fetchPage(slug: string, page: string): Promise<PageDetail> {
 }
 
 async function fetchSearch(slug: string, q: string): Promise<SearchHit[]> {
-  if (isMockMode()) {
+  if (import.meta.env.DEV && isMockMode()) {
     const { mockSearch } = await import("./mocks/proba-fixture");
     return mockSearch(slug, q);
   }
@@ -78,7 +80,7 @@ export function useToggleStudied(slug: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ page, studied }: { page: string; studied: boolean }) => {
-      if (isMockMode()) return;
+      if (import.meta.env.DEV && isMockMode()) return;
       if (studied) await api.subject.markStudied(slug, page);
       else await api.subject.unmarkStudied(slug, page);
     },
