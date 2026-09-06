@@ -28,11 +28,11 @@ Workers y verificadores de ola: Opus 5. Auditoría final: modelo N0.
 | S1-06 skill /sinapsis | DONE | ola1 | skills/sinapsis + symlink .claude/skills/sinapsis |
 | S1-07 web base | DONE | ola1 | store, auth, login GIS+dev, componentes de plataforma |
 | S1-08 web landing | DONE | ola1 | grilla, gestión con dnd-kit, diálogo, vacía; 39 tests web (C+D) |
-| S1-09 web shell materia | TODO | | ola 1 · agente D |
-| S1-10 web inicio | TODO | | ola 1 · agente D |
-| S1-11 web lector | TODO | | ola 1 · agente D |
-| S1-12 web catálogo + búsqueda | TODO | | ola 1 · agente D |
-| S1-13 e2e + smoke visual | TODO | | ola 2 |
+| S1-09 web shell materia | DONE | ola1 | medidas 52/250/40/28/840/248 verificadas en DOM |
+| S1-10 web inicio | DONE | ola1 | progreso real 0/97 → 1/97 tras marcar |
+| S1-11 web lector | DONE | ola1 | 147 nodos KaTeX, 28 wikilinks, callout; H1 duplicado corregido por el orquestador |
+| S1-12 web catálogo + búsqueda | DONE | ola1 | filtros en URL, paleta ⌘K |
+| S1-13 e2e + smoke visual | DOING | | agente E (Playwright) + smoke manual del orquestador sobre stack real |
 | S1-14 auditoría final | TODO | | ola 3 |
 | S1-15 docs | TODO | | ola 3 |
 
@@ -57,6 +57,8 @@ Ver `docs/DECISIONS.md` (N0-1 … N0-19).
 | S-01 | El sync del API avisa «tipo meta no declarado» para indice/log; el compilador ya reserva `meta` (B-3). Alinear el API. | apps/api/src/services/sync.ts | verificación del orquestador | antes del cierre |
 | S-02 | `packages/contract` se consume como .ts crudo; `node dist` del API depende del type stripping de Node ≥ 22.18 (A pendiente). Dar build al contract o bundlear el API. | packages/contract, apps/api | reporte A | Sprint 4 (deploy) |
 | S-03 | Un cuatrimestre creado en la landing sin materias desaparece al guardar y el orden de cuatrimestres no es persistible: `LandingLayoutInput` no transporta `semesters`. Evaluar `semesters: string[]` en API + web. | contract, apps/api, apps/web landing | reporte C (contractRequest 2) | auditoría final |
+| S-04 | Ids de encabezado: el compilador usa el slugify de build.py y el lector `rehype-slug` (github-slugger); coinciden en la práctica pero no por contrato. Unificar en github-slugger. | packages/markdown, apps/web reader | reporte D | Sprint 2 |
+| S-05 | Guard CSRF: el `Origin` del dev server (:5173) no coincidía con el `Host` del API (:3000) vía proxy → 403 «Origen no permitido» en todo login. Corregido: `ALLOWED_ORIGINS` + `x-forwarded-host` + proxy sin `changeOrigin`. | apps/api csrf, apps/web vite.config | smoke del orquestador | HECHO |
 
 ## Veredicto final
 

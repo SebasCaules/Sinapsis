@@ -208,7 +208,7 @@ export function ReaderView() {
 
           <h1 className={css.title}>{page.title}</h1>
 
-          <Markdown body={page.body} subject={slug} slugs={slugs} />
+          <Markdown body={stripLeadingH1(page.body, page.title)} subject={slug} slugs={slugs} />
         </article>
       </div>
 
@@ -311,3 +311,17 @@ function findAnchor(root: HTMLElement | null, hash: string): HTMLElement | null 
 }
 
 export default ReaderView;
+
+/**
+ * El lector ya muestra el título como h1: si el cuerpo empieza con su propio
+ * `# Título` (convención del wiki), se quita para no duplicarlo. Solo se quita
+ * el primer H1 y solo si es lo primero que hay en el cuerpo.
+ */
+export function stripLeadingH1(body: string, title: string): string {
+  const m = /^\s*#\s+(.+?)\s*#*\s*(\r?\n|$)/.exec(body);
+  if (!m) return body;
+  const norm = (t: string) => t.replace(/[*_`]/g, "").trim().toLowerCase();
+  const h = norm(m[1] ?? "");
+  if (h !== norm(title) && h.length > 0 && !norm(title).startsWith(h)) return body;
+  return body.slice(m[0].length).replace(/^\s*\n/, "");
+}

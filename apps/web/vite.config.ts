@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: {
     port: 5173,
-    proxy: { "/api": { target: process.env.VITE_API_URL ?? "http://localhost:3000", changeOrigin: true } },
+    proxy: { "/api": { target: process.env.VITE_API_URL ?? "http://localhost:3000", changeOrigin: false } },
   },
   build: { outDir: "dist", sourcemap: true },
   test: { environment: "jsdom", globals: true },
