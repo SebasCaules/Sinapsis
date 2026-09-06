@@ -76,7 +76,12 @@ export const DivisionDef = z.object({
 export type DivisionDef = z.infer<typeof DivisionDef>;
 
 export const PageTypeDef = z.object({
-  key: z.string().min(1).max(32).regex(/^[a-z][a-z0-9_-]*$/),
+  key: z
+    .string()
+    .min(1)
+    .max(32)
+    .regex(/^[a-z][a-z0-9_-]*$/)
+    .refine((k) => k !== "meta", "pageTypes: la clave «meta» está reservada para índice y registro"),
   label: z.string().min(1).max(40),
   plural: z.string().min(1).max(40),
   /** Carpeta del wiki cuyas páginas son de este tipo por defecto (el frontmatter manda). */
@@ -221,6 +226,12 @@ export type PageHeading = z.infer<typeof PageHeading>;
 
 /** Clave reservada para páginas sin división (transversales). */
 export const DIVISION_NONE = "meta" as const;
+/** Clave sintética que agrupa páginas cuya división no está declarada en el config. */
+export const DIVISION_OTHER = "otras" as const;
+/** Tipo de página reservado para las páginas índice y registro del wiki. */
+export const PAGE_TYPE_META = "meta" as const;
+/** Slugs reservados de las páginas meta que emite el compilador. */
+export const META_PAGES = { index: "indice", log: "log" } as const;
 
 export const Page = z.object({
   slug: Slug,
@@ -494,6 +505,58 @@ export function compareSemestersDesc(a: string, b: string): number {
   return b.localeCompare(a, "es", { numeric: true, sensitivity: "base" });
 }
 
+// ---------------------------------------------------------------------------
+// Divisiones efectivas y anclas de encabezado (regla única para api, web y compilador)
+// ---------------------------------------------------------------------------
+
+/** División de una página según el config: declarada, DIVISION_NONE o DIVISION_OTHER. */
+export function divisionOf(cfg: Pick<SubjectConfigLoose, "divisions">, page: Pick<Page, "division">): DivisionKey {
+  const key = page.division || DIVISION_NONE;
+  if (key === DIVISION_NONE) return DIVISION_NONE;
+  return cfg.divisions.some((d) => d.key === key) ? key : DIVISION_OTHER;
+}
+
+/**
+ * Divisiones que se muestran: las declaradas (ordenadas por `order`, luego por
+ * posición) más las sintéticas que hagan falta: «Transversales» (DIVISION_NONE)
+ * si hay páginas sin división y «Otras» (DIVISION_OTHER) si hay páginas con una
+ * división no declarada. Las sintéticas son `kind: "extra"`.
+ */
+export function effectiveDivisions(
+  cfg: Pick<SubjectConfigLoose, "divisions">,
+  pages: ReadonlyArray<Pick<Page, "division">>,
+): DivisionDef[] {
+  const declared = cfg.divisions
+    .map((d, i) => ({ d, i }))
+    .sort((a, b) => (a.d.order ?? a.i) - (b.d.order ?? b.i) || a.i - b.i)
+    .map((x) => x.d);
+  const keys = new Set(pages.map((p) => divisionOf(cfg, p)));
+  const out: DivisionDef[] = [...declared];
+  if (keys.has(DIVISION_NONE) && !declared.some((d) => d.key === DIVISION_NONE)) {
+    out.push({ key: DIVISION_NONE, name: "Transversales", kind: "extra", color: "--umeta" });
+  }
+  if (keys.has(DIVISION_OTHER)) {
+    out.push({ key: DIVISION_OTHER, name: "Otras", kind: "extra", color: "--u0" });
+  }
+  return out;
+}
+
+/**
+ * Id estable de un encabezado, dueño único: lo usa el compilador (`Page.headings[].id`)
+ * y el lector al renderizar, así `[[pagina#ancla]]` resuelve siempre igual. Quita
+ * `$math$`, resuelve wikilinks, borra `*_\``, minúsculas, deja `[a-z0-9áéíóúñü]` y guiones.
+ * Idéntico a `slugify_anchor` de `build.py` (paridad con el baseline).
+ */
+export function headingId(text: string): string {
+  let t = (text ?? "").replace(/\$[^$]*\$/g, "");
+  t = t.replace(/\[\[([^\]|]+)(\|[^\]]+)?\]\]/g, (_m, target: string, alias?: string) => (alias ? alias.slice(1) : target));
+  t = t.replace(/[*_`]/g, "");
+  t = t.toLowerCase().trim();
+  t = t.replace(/[^a-z0-9áéíóúñü ]+/g, "");
+  t = t.replace(/\s+/g, "-").replace(/^-+|-+$/g, "");
+  return t || "h";
+}
+
 /** Vistas builtin que la plataforma garantiza en el Sprint 1. */
 export const BUILTIN_VIEWS = ["home", "wiki", "graph", "flashcards", "quiz", "notes", "favorites"] as const;
 export type BuiltinView = (typeof BUILTIN_VIEWS)[number];
@@ -524,8 +587,8 @@ export const FIXED_RAIL_TAIL: readonly RailGroup[] = [
     label: "Wiki",
     color: "--text-2",
     items: [
-      { id: "index", label: "Índice del wiki", icon: "list", kind: "page", target: "indice" },
-      { id: "log", label: "Registro del wiki", icon: "clock", kind: "page", target: "log" },
+      { id: "index", label: "Índice del wiki", icon: "list", kind: "page", target: META_PAGES.index },
+      { id: "log", label: "Registro del wiki", icon: "clock", kind: "page", target: META_PAGES.log },
     ],
   },
 ];
