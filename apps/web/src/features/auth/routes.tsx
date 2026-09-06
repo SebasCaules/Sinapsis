@@ -1,2 +1,5 @@
 import type { RouteObject } from "react-router-dom";
-export const authRoutes: RouteObject[] = [{ path: "/login", element: <div>Login (pendiente)</div> }];
+import { routes } from "@sinapsis/contract";
+import { LoginPage } from "./LoginPage";
+
+export const authRoutes: RouteObject[] = [{ path: routes.login(), element: <LoginPage /> }];

@@ -1,0 +1,37 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex: none;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--r-ctrl);
+}
+.brand:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+.wordmark {
+  font: 600 15px var(--font-display);
+  color: var(--text);
+  letter-spacing: -.005em;
+}
+
+.spacer { flex: 1; min-width: 8px; }
+
+.tools { display: flex; align-items: center; gap: 8px; }
+
+@media (max-width: 720px) {
+  .wordmark { display: none; }
+  .header { gap: 8px; padding: 0 10px; }
+}

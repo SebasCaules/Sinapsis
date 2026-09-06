@@ -19,13 +19,13 @@ Workers y verificadores de ola: Opus 5. Auditoría final: modelo N0.
 
 | paso | estado | commit | notas |
 |---|---|---|---|
-| F0 Reconciliación + contratos | DONE | — | |
-| S1-01 contract | DOING | | zod + helpers escritos; faltan tests (ola 1, agente B) |
-| S1-02 markdown | TODO | | ola 1 · agente B |
-| S1-03 api auth/db | TODO | | ola 1 · agente A |
-| S1-04 api sync/pages/search | TODO | | ola 1 · agente A |
-| S1-05 cli | TODO | | ola 1 · agente B |
-| S1-06 skill /sinapsis | TODO | | ola 1 · agente B |
+| F0 Reconciliación + contratos | DONE | 5a39786 | |
+| S1-01 contract | DONE | ola1 | 11 tests; SubjectConfigLoose y PageLink.slug libre por pedido del API |
+| S1-02 markdown | DONE | ola1 | paridad exacta con build.py (209 páginas), 46 tests |
+| S1-03 api auth/db | DONE | ola1 | Hono + Drizzle + libsql; 58 tests en total con S1-04 |
+| S1-04 api sync/pages/search | DONE | ola1 | sync Proba ~89 ms; FTS5 + scorer propio (A-2) |
+| S1-05 cli | DONE | ola1 | init/validate/sync/status; sync real contra API verificado por el orquestador |
+| S1-06 skill /sinapsis | DONE | ola1 | skills/sinapsis + symlink .claude/skills/sinapsis |
 | S1-07 web base | TODO | | ola 1 · agente C |
 | S1-08 web landing | TODO | | ola 1 · agente C |
 | S1-09 web shell materia | TODO | | ola 1 · agente D |
@@ -54,7 +54,8 @@ Ver `docs/DECISIONS.md` (N0-1 … N0-19).
 
 | # | fix | superficie | origen | cuándo |
 |---|---|---|---|---|
-| — | | | | |
+| S-01 | El sync del API avisa «tipo meta no declarado» para indice/log; el compilador ya reserva `meta` (B-3). Alinear el API. | apps/api/src/services/sync.ts | verificación del orquestador | antes del cierre |
+| S-02 | `packages/contract` se consume como .ts crudo; `node dist` del API depende del type stripping de Node ≥ 22.18 (A pendiente). Dar build al contract o bundlear el API. | packages/contract, apps/api | reporte A | Sprint 4 (deploy) |
 
 ## Veredicto final
 

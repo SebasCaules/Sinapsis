@@ -1,0 +1,120 @@
+/* Rail 52 · ítems 36×36 radio 10 · icono 18 · barra activa 3×20 pegada al borde. */
+
+.rail {
+  position: relative;
+  z-index: 3;
+  width: 52px;
+  flex: none;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+}
+
+.sealRow {
+  height: 40px;
+  width: 100%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.seal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  outline-offset: 3px;
+}
+
+.group {
+  width: 100%;
+  flex: none;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.item {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+
+.item:hover { background: var(--surface-2); color: var(--text-2); }
+.item:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+
+.item[data-active="true"] {
+  color: var(--gcol, var(--primary));
+  background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
+}
+
+.bar {
+  position: absolute;
+  left: -8px;
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--gcol, var(--primary));
+}
+
+.externalMark {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  color: var(--text-3);
+}
+
+.spacer { flex: 1; }
+
+.foot {
+  padding: 8px 0;
+  flex: none;
+}
+
+/* Tooltip propio, a la derecha del rail. */
+.tip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-3px);
+  z-index: 40;
+  padding: 5px 9px;
+  border-radius: var(--r-sm);
+  background: var(--elevated);
+  border: 1px solid var(--border-2);
+  box-shadow: var(--relief), var(--shadow);
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-2);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t), transform var(--t);
+}
+
+.item:hover .tip,
+.item:focus-visible .tip,
+.seal:hover .tip,
+.seal:focus-visible .tip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tip { transition: none; }
+}

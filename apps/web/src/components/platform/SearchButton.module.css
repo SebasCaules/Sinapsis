@@ -1,0 +1,66 @@
+.shell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface-2);
+  box-shadow: var(--relief);
+  color: var(--text-3);
+  min-width: 0;
+  transition: border-color var(--t), background var(--t);
+}
+.shell:focus-within { border-color: var(--primary); background: var(--surface); }
+
+.button { cursor: pointer; text-align: left; }
+.button:hover { background: var(--surface-3); }
+.button:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+
+.label {
+  flex: 1;
+  min-width: 0;
+  font: 500 12.5px var(--font-ui);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kbd {
+  flex: none;
+  font: 600 10px var(--font-mono);
+  color: var(--text-3);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 4px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font: 500 12.5px var(--font-ui);
+  color: var(--text);
+  padding: 0;
+}
+.input::placeholder { color: var(--text-3); }
+
+.clear {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.clear:hover { background: var(--surface-3); color: var(--text); }

@@ -1,0 +1,24 @@
+/* Sello «S»: el glifo de la plataforma. Idéntico en la landing y en el rail. */
+.seal {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+}
+.ring {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+}
+.letter {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--on-primary);
+  /* la itálica de Fraunces se apoya a la derecha: media letra de compensación */
+  transform: translateX(-.02em);
+}

@@ -1,0 +1,22 @@
+.fab {
+  position: absolute;
+  right: 28px;
+  bottom: 26px;
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  box-shadow: var(--relief), var(--shadow-lg);
+  color: var(--text-2);
+  transition: transform var(--t), color var(--t);
+}
+.fab:hover { transform: translateY(-1px); color: var(--primary); }
+.fab:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fab { transition: none; }
+}

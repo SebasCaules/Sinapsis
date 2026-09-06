@@ -1,2 +1,5 @@
 import type { RouteObject } from "react-router-dom";
-export const landingRoutes: RouteObject[] = [{ path: "/", element: <div>Landing (pendiente)</div> }];
+import { routes } from "@sinapsis/contract";
+import { LandingPage } from "./LandingPage";
+
+export const landingRoutes: RouteObject[] = [{ path: routes.landing(), element: <LandingPage /> }];

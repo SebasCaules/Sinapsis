@@ -165,7 +165,8 @@ export type SubjectConfigInput = z.input<typeof SubjectConfig>;
 // ---------------------------------------------------------------------------
 
 export const PageLink = z.object({
-  slug: Slug,
+  /** Destino tal como está escrito en el wikilink; puede no ser un slug válido (enlace roto). */
+  slug: z.string().min(1).max(200),
   anchor: z.string().max(200).optional(),
   text: z.string().max(200).optional(),
 });
@@ -281,9 +282,19 @@ export const LandingLayoutInput = z.object({
 });
 export type LandingLayoutInput = z.infer<typeof LandingLayoutInput>;
 
-/** Detalle de materia para el shell: config completa + páginas sin cuerpo + progreso. */
+/**
+ * Config tal como la sirve el API: igual a SubjectConfig pero admite `divisions` y
+ * `pageTypes` vacíos (materias placeholder creadas desde la landing, sin sync).
+ */
+export const SubjectConfigLoose = SubjectConfig.extend({
+  divisions: z.array(DivisionDef).max(64),
+  pageTypes: z.array(PageTypeDef).max(24),
+});
+export type SubjectConfigLoose = z.infer<typeof SubjectConfigLoose>;
+
+/** Detalle de materia para el shell: config (laxa) + páginas sin cuerpo + progreso. */
 export const SubjectDetail = z.object({
-  config: SubjectConfig,
+  config: SubjectConfigLoose,
   pages: z.array(PageMeta),
   studied: z.array(Slug),
   placeholder: z.boolean(),

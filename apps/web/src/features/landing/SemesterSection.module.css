@@ -1,0 +1,88 @@
+.section { display: flex; flex-direction: column; gap: 14px; padding-top: 8px; }
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
+}
+
+.handle {
+  flex: none;
+  font: 600 12px var(--font-mono);
+  letter-spacing: -.1em;
+  color: var(--text-3);
+  cursor: default;
+}
+
+.bar { flex: none; width: 3px; height: 26px; border-radius: 2px; background: var(--accent); }
+
+.toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+.toggle:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; border-radius: 6px; }
+
+.chip {
+  flex: none;
+  font: 600 10.5px var(--font-mono);
+  color: var(--text-2);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 7px;
+}
+
+.title {
+  font: 600 22px/1.2 var(--font-display);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spacer { flex: 1; min-width: 8px; }
+.count { flex: none; font: 500 11.5px var(--font-mono); color: var(--text-3); }
+.chev { flex: none; color: var(--text-3); transition: transform var(--t); }
+.chev[data-collapsed="true"] { transform: rotate(-90deg); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  border-radius: var(--r);
+  transition: outline-color var(--t);
+  outline: 2px solid transparent;
+  outline-offset: 6px;
+}
+.grid[data-over="true"] { outline-color: var(--accent); }
+
+.empty {
+  grid-column: 1 / -1;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed var(--border-2);
+  border-radius: var(--r);
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: .06em;
+  color: var(--text-3);
+}
+.empty[data-over="true"] { border-color: var(--accent); background: var(--accent-soft); }
+
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+  .title { font-size: 18px; }
+  .count { display: none; }
+}

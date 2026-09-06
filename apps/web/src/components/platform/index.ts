@@ -11,6 +11,7 @@
  *  <Dialog open onClose title eyebrow> children </Dialog>
  *  <Field label ... /> <SelectField label options />
  *  useToast() → { toast(msg) }  y  <Toaster />
+ *  <PlatformHeader search={{ placeholder, onClick, width? }} />   cabecera de 40 px
  */
 export * from "./Icon";
 export * from "./Seal";
@@ -21,3 +22,4 @@ export * from "./Button";
 export * from "./Dialog";
 export * from "./Field";
 export * from "./Toast";
+export * from "./PlatformHeader";

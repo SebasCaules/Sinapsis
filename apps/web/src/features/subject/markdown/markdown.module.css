@@ -1,0 +1,191 @@
+/* Prosa del lector: Spectral 17/1.72 sobre la hoja, con las piezas propias del
+   wiki (placas de fórmula, callouts, wikilinks, tablas con scroll propio).
+   Los nombres globales (.callout, .katex-display, .wikilink) los emiten los
+   plugins de markdown, así que se estilan con :global() dentro de este ámbito. */
+
+.prose {
+  font: 400 17px/1.72 var(--font-read);
+  color: var(--text);
+  overflow-wrap: break-word;
+}
+
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+
+.prose p { margin: 0 0 15px; }
+
+.prose h2 {
+  margin: 30px 0 14px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+  font: 600 16.5px var(--font-ui);
+  letter-spacing: 0.005em;
+  color: var(--text);
+  scroll-margin-top: 90px;
+}
+
+.prose h3 {
+  margin: 22px 0 10px;
+  font: 600 14.5px var(--font-ui);
+  color: var(--text-2);
+  scroll-margin-top: 90px;
+}
+
+.prose h4 {
+  margin: 18px 0 8px;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.prose ul,
+.prose ol { margin: 0 0 15px; padding-left: 22px; }
+.prose li { margin-bottom: 6px; }
+.prose li::marker { color: var(--text-3); }
+
+.prose strong { font-weight: 600; color: var(--text); }
+.prose em { font-style: italic; }
+.prose hr { margin: 24px 0; border: 0; border-top: 1px solid var(--border); }
+
+.prose a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--t);
+}
+.prose a:hover { text-decoration-color: var(--link); }
+
+.prose :global(.wikilink) { font-weight: 500; }
+
+.prose :global(.wikilink-broken) {
+  color: var(--text-3);
+  border-bottom: 1px dashed var(--border-2);
+  cursor: help;
+}
+
+/* ---------- citas ---------- */
+.prose blockquote {
+  margin: 18px 0;
+  padding: 2px 0 2px 16px;
+  border-left: 2px solid var(--border-2);
+  color: var(--text-2);
+  font-style: italic;
+}
+
+/* ---------- código ---------- */
+.prose code {
+  font: 500 13.5px/1.5 var(--font-mono);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+
+.prose pre {
+  margin: 18px 0;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow-x: auto;
+}
+.prose pre code { background: none; border: 0; padding: 0; font-size: 13px; }
+
+/* ---------- tablas ---------- */
+.tableWrap {
+  margin: 18px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+.tableWrap table { width: 100%; border-collapse: collapse; font: 400 13.5px/1.5 var(--font-ui); }
+.tableWrap th {
+  text-align: left;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--surface-2);
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tableWrap td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+.tableWrap tr:last-child td { border-bottom: 0; }
+
+/* ---------- matemática ---------- */
+.prose :global(.katex) { font-size: calc(1em * var(--math-scale)); color: var(--math-ink); }
+
+.prose :global(.katex-display) {
+  margin: 20px 0;
+  padding: 22px 26px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ucol, var(--primary));
+  border-radius: var(--r);
+  box-shadow: var(--relief);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+:global([data-theme="claustro"]) .prose :global(.katex-display) { background: var(--bg-2); }
+
+.prose :global(.katex-error) { font-family: var(--font-mono); font-size: 13px; }
+
+/* ---------- callouts ---------- */
+.prose :global(.callout) {
+  --callout: var(--u2);
+  margin: 20px 0;
+  padding: 12px 16px 13px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--callout);
+  border-radius: var(--r);
+  box-shadow: var(--relief);
+  font: 400 14px/1.62 var(--font-ui);
+  color: var(--text-2);
+  font-style: normal;
+}
+.prose :global(.callout p) { margin: 0 0 8px; }
+.prose :global(.callout > :last-child) { margin-bottom: 0; }
+.prose :global(.callout .calloutLabel) {
+  margin: 0 0 6px;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--callout);
+}
+.prose :global(.callout .calloutTitle) {
+  margin: 0 0 6px;
+  font: 600 13.5px var(--font-ui);
+  color: var(--text);
+}
+.prose :global(.callout[data-type="nota"]) { --callout: var(--text-3); }
+.prose :global(.callout[data-type="tip"]) { --callout: var(--good); }
+.prose :global(.callout[data-type="intuicion"]) { --callout: var(--u3); }
+.prose :global(.callout[data-type="ejemplo"]) { --callout: var(--accent); }
+.prose :global(.callout[data-type="warn"]) { --callout: var(--warn); }
+.prose :global(.callout[data-type="discrepancia"]) { --callout: var(--bad); }
+.prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface); }
+
+.prose :global(.calloutFrame) {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  margin: 4px 0 10px;
+  padding: 18px;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  font: 500 11.5px var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+
+.prose :global(.callout[data-type="figura"] p) {
+  font: 400 12.5px/1.55 var(--font-read);
+  font-style: italic;
+  color: var(--text-3);
+}

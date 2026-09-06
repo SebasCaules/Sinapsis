@@ -1,0 +1,175 @@
+.sortable { height: 100%; }
+
+.card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ucol, var(--u0));
+  border-radius: var(--r);
+  box-shadow: var(--relief), var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+}
+a.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--relief), var(--shadow-lg);
+  border-color: var(--border-2);
+  border-left-color: var(--ucol, var(--u0));
+}
+a.card:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { a.card:hover { transform: none; } }
+
+/* Elemento arrastrado: la tarjeta se levanta de la mesa. */
+.overlay {
+  transform: rotate(1deg);
+  box-shadow: var(--relief), var(--shadow-lg);
+  cursor: grabbing;
+}
+
+/* Hueco de destino: donde estaba la tarjeta queda el filete discontinuo. */
+.hole {
+  border: 1.5px dashed var(--accent);
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+.hole > * { visibility: hidden; }
+
+.top { display: flex; align-items: flex-start; gap: 11px; }
+
+.handle {
+  margin-top: 6px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 600 12px var(--font-mono);
+  letter-spacing: -.1em;
+  color: var(--text-3);
+  cursor: grab;
+  touch-action: none;
+}
+.handle:hover { color: var(--text); }
+.handle:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; border-radius: 4px; }
+
+.mark {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: var(--relief);
+  font: 600 13px var(--font-display);
+  color: var(--uink, var(--ucol, var(--u0)));
+}
+
+.ident { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.code { font: 500 11px var(--font-mono); color: var(--text-3); }
+.name {
+  font: 600 15px/1.25 var(--font-ui);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.institution { font: 500 11px var(--font-ui); color: var(--text-3); }
+
+.progress { display: flex; flex-direction: column; gap: 6px; }
+.track { height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+.fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ucol, var(--u0));
+  transition: width var(--t-slow);
+}
+.progressRow { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pages { font: 500 11px var(--font-mono); color: var(--text-3); }
+.state { font: 600 10px var(--font-ui); letter-spacing: .05em; }
+.state[data-state="none"] { color: var(--text-3); }
+.state[data-state="doing"] { color: var(--warn); }
+.state[data-state="done"] { color: var(--good); }
+
+.foot {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 9px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 33px;
+}
+.meta { font: 500 11px var(--font-mono); color: var(--text-3); white-space: nowrap; }
+
+.badge {
+  margin-left: auto;
+  font: 600 9.5px var(--font-ui);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--warn-text, var(--warn));
+  background: var(--warn-soft);
+  border: 1px solid var(--warn-soft);
+  border-radius: 6px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.manageTools { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+
+.remove {
+  font: 600 11px var(--font-ui);
+  color: var(--bad);
+  border: 1px solid var(--bad-soft);
+  background: var(--bad-soft);
+  border-radius: var(--r-sm);
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.remove:hover { border-color: var(--bad); }
+
+.move {
+  font: 600 11px var(--font-mono);
+  color: var(--text-2);
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  padding: 3px 20px 3px 8px;
+  cursor: pointer;
+  appearance: none;
+  max-width: 118px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position: calc(100% - 11px) calc(50% + 1px), calc(100% - 7px) calc(50% + 1px);
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+
+/* --- tarjeta fantasma "+ Agregar materia" --- */
+.ghost {
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px dashed var(--border-2);
+  border-radius: var(--r);
+  background: none;
+  color: var(--text-3);
+  font: 600 12.5px var(--font-ui);
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t), background var(--t);
+}
+.ghost:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+.ghost:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }

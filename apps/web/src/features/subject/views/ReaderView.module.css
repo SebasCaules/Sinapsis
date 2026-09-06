@@ -1,0 +1,324 @@
+/* Lector: hoja 840 + columna 248, separadas por 34. El color de la división
+   entra por --ucol (y con él --uink, la versión legible como texto). */
+
+.layout {
+  position: relative;
+  display: flex;
+  gap: 34px;
+  padding: 4px 24px 60px;
+  align-items: flex-start;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------- chips sobre la hoja ---------- */
+.chips {
+  width: min(840px, 100%);
+  display: flex;
+  gap: 10px;
+  padding: 4px 0 12px;
+}
+
+.chipButton,
+.chipDisabled {
+  position: relative;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  font: 600 12px var(--font-ui);
+  color: var(--text-2);
+}
+
+.chipButton { cursor: pointer; transition: border-color var(--t), color var(--t), background var(--t); }
+.chipButton:hover { border-color: var(--good); color: var(--good-text); }
+.chipButton[data-on="true"] {
+  background: var(--good-soft);
+  border-color: var(--good);
+  color: var(--good-text);
+}
+.chipButton:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 2px; }
+
+.chipDisabled { color: var(--text-3); cursor: not-allowed; }
+
+.tip {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  padding: 5px 9px;
+  border-radius: var(--r-sm);
+  background: var(--elevated);
+  border: 1px solid var(--border-2);
+  box-shadow: var(--relief), var(--shadow);
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-2);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t);
+}
+.chipDisabled:hover .tip { opacity: 1; }
+
+/* ---------- la hoja ---------- */
+.sheet {
+  width: min(840px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 40px 40px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--ucol);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow-lg);
+}
+
+.sheetHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.divisionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  border: 1px solid var(--ucol);
+  border-radius: var(--r-sm);
+  font: 600 12px var(--font-ui);
+  color: var(--text);
+  text-decoration: none;
+  transition: background var(--t);
+}
+.divisionChip:hover { background: color-mix(in srgb, var(--ucol) 12%, transparent); }
+
+.divisionDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
+
+.typeChip {
+  font: 600 10.5px var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.position { font: 500 11.5px var(--font-mono); color: var(--text-3); }
+
+.headSpacer { flex: 1; }
+
+/* ---------- ¿qué sigue? ---------- */
+.whatsNext { position: relative; }
+
+.whatsNextSummary {
+  list-style: none;
+  cursor: pointer;
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 4px 9px;
+  background: var(--surface-2);
+}
+.whatsNextSummary::-webkit-details-marker { display: none; }
+.whatsNextSummary::after { content: " ▾"; color: var(--text-3); }
+
+.whatsNextPanel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: var(--elevated);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  box-shadow: var(--relief), var(--shadow-lg);
+}
+
+.whatsNextItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  font: 500 12.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.whatsNextItem:hover { background: var(--surface-2); color: var(--text); }
+
+.whatsNextNum { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+.sourcesLink {
+  font: 500 11.5px var(--font-mono);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 4px 9px;
+  background: transparent;
+  cursor: pointer;
+}
+.sourcesLink:hover { color: var(--text-2); border-color: var(--border-2); }
+
+/* ---------- barra de segmentos ---------- */
+.segments { display: flex; flex-direction: column; gap: 6px; }
+
+.segmentsLabel {
+  font: 600 9.5px var(--font-ui);
+  letter-spacing: 0.08em;
+  color: var(--uink, var(--ucol));
+  text-align: center;
+}
+
+.segmentsRow { display: flex; gap: 4px; align-items: center; }
+
+.segment {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--track);
+  transition: transform var(--t), background var(--t);
+}
+.segment[data-state="studied"] { background: var(--ucol); opacity: 0.45; }
+.segment[data-state="current"] { background: var(--ucol); }
+.segment:hover { transform: scaleY(1.8); }
+.segment:focus-visible { outline: 2px solid var(--primary-ring); outline-offset: 3px; }
+
+/* ---------- anterior / siguiente ---------- */
+.prevNext {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  font: 500 11.5px var(--font-ui);
+}
+
+.prev,
+.next { color: var(--text-2); text-decoration: none; }
+.prev:hover,
+.next:hover { color: var(--primary); }
+.next { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prevOff { color: var(--text-3); opacity: 0.65; }
+
+.title {
+  margin: 6px 0 0;
+  font: 600 40px/1.1 var(--font-display);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* ---------- columna derecha ---------- */
+.side {
+  position: sticky;
+  top: 4px;
+  width: 248px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.cardEmpty { margin: 0; font: 400 12px var(--font-ui); color: var(--text-3); }
+
+.toc { display: flex; flex-direction: column; gap: 1px; }
+
+.tocItem,
+.tocSub {
+  padding: 4px 0 4px 9px;
+  border-left: 2px solid var(--border);
+  font: 500 12.5px/1.35 var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color var(--t), border-color var(--t);
+}
+.tocSub { padding-left: 18px; font-size: 12px; color: var(--text-3); }
+.tocItem:hover,
+.tocSub:hover { color: var(--text); }
+.tocItem[data-active="true"],
+.tocSub[data-active="true"] { border-left-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+.cardLink {
+  font: 500 12.5px/1.35 var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.cardLink:hover { color: var(--primary); }
+
+.cardMissing {
+  font: 500 12px var(--font-mono);
+  color: var(--text-3);
+  opacity: 0.8;
+}
+
+/* ---------- pestaña vertical del panel ---------- */
+/* Va absoluta contra el borde de la hoja de trabajo, como en el mockup: no le
+   quita ancho ni a la hoja ni a la columna. */
+.sideTab {
+  position: absolute;
+  right: 0;
+  top: 16px;
+  padding: 12px 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-right: 0;
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
+  box-shadow: var(--relief);
+  font: 600 9.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  writing-mode: vertical-rl;
+  cursor: pointer;
+}
+.sideTab:hover { color: var(--text-2); }
+
+/* Por debajo de 1280 px la columna se va sola: la hoja manda. */
+@media (max-width: 1279px) {
+  .side { display: none; }
+  .sideTab { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment, .chipButton, .divisionChip { transition: none; }
+}

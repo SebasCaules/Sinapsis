@@ -1,0 +1,35 @@
+.crumbs {
+  height: 28px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  font: 400 11.5px var(--font-ui);
+  color: var(--text-3);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.home { display: grid; place-items: center; color: var(--text-3); }
+.home:hover { color: var(--text-2); }
+
+.step { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sep { color: var(--border-2); }
+
+.link {
+  color: var(--text-3);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+a.link:hover { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
+
+.current {
+  color: var(--text-2);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}

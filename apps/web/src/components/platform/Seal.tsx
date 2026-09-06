@@ -1,7 +1,17 @@
+import css from "./Seal.module.css";
+
+/**
+ * Sello «S» de Sinapsis. Referencia: 34 px de círculo, aro de 26 px y letra de
+ * 15 px; los demás tamaños escalan esas proporciones.
+ */
 export function Seal({ size = 34, title = "Sinapsis" }: { size?: number; title?: string }) {
   return (
-    <span role="img" aria-label={title} style={{ width: size, height: size, borderRadius: "50%", background: "var(--primary)", display: "inline-grid", placeItems: "center", boxShadow: "var(--relief), var(--shadow-ctrl)" }}>
-      <span style={{ width: size * 0.76, height: size * 0.76, borderRadius: "50%", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 600, fontSize: size * 0.44, color: "var(--on-primary)", lineHeight: 1 }}>S</span>
+    <span role="img" aria-label={title} className={css.seal} style={{ width: size, height: size }}>
+      <span className={css.ring} style={{ width: (size * 26) / 34, height: (size * 26) / 34 }}>
+        <span className={css.letter} style={{ fontSize: (size * 15) / 34 }}>
+          S
+        </span>
+      </span>
     </span>
   );
 }
