@@ -85,20 +85,21 @@
 
 .item[data-active="true"] {
   color: var(--gcol, var(--primary));
-  background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  /* El tinte lo pinta ::before como UNA sola caja continua desde la barra hasta
+     el borde derecho del ítem (con el fondo propio y una extensión aparte
+     quedaba una costura). */
+  background: transparent;
+  isolation: isolate;
 }
-/* El resaltado del activo se extiende hacia la izquierda hasta la barra, por
-   debajo del rótulo vertical: barra + tinte + icono se leen como una sola
-   franja seleccionada. */
 .item[data-active="true"]::before {
   content: "";
   position: absolute;
   top: 0;
   bottom: 0;
   left: -12px;
-  width: 12px;
+  right: 0;
+  z-index: -1;
+  border-radius: 0 10px 10px 0;
   background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
   pointer-events: none;
 }

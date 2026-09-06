@@ -14,7 +14,6 @@ const readerUrl = `/m/${subject.slug}/p/${target.slug}`;
 
 const panel = (page: Page) => page.locator('aside[aria-label^="Índice de"]');
 const toc = (page: Page) => page.locator('section[aria-labelledby="reader-toc"]');
-const backlinks = (page: Page) => page.locator('section[aria-labelledby="reader-backlinks"]');
 const sheet = (page: Page) => page.locator("article").first();
 
 async function openReader(page: Page): Promise<void> {
@@ -54,14 +53,17 @@ test("un wikilink interno navega a otra página de la materia", async ({ page })
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
 });
 
-test("la columna derecha trae el índice de la página y los backlinks", async ({ page }) => {
+test("la columna derecha trae el índice de la página y los apuntes, y nada más", async ({ page }) => {
   await openReader(page);
 
   await expect(toc(page)).toContainText("EN ESTA PÁGINA");
   expect(await toc(page).getByRole("link").count()).toBeGreaterThanOrEqual(3);
 
-  await expect(backlinks(page)).toContainText("ENLAZAN AQUÍ");
-  expect(await backlinks(page).getByRole("link").count()).toBeGreaterThanOrEqual(1);
+  /* Fuentes y «Enlazan aquí» salieron de la columna (decisión del usuario, N0-51):
+     la columna es índice de la página + apuntes. */
+  await expect(page.locator('section[aria-labelledby="reader-backlinks"]')).toHaveCount(0);
+  await expect(page.locator('section[aria-labelledby="reader-sources"]')).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /APUNTES/i }).or(page.getByText("APUNTES", { exact: true }))).toBeVisible();
 });
 
 test("marcar estudiado se refleja en el índice, en el progreso y tras recargar", async ({ page }) => {

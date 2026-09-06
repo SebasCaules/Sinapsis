@@ -45,9 +45,11 @@ test("el rail separa los grupos fijos de la plataforma de los slots de la materi
   expect(fijosLabels).toContain("Mi ruta");
   expect(fijosLabels).toContain("Consultar");
 
-  // SLOT: los que declara `rail[]` del config de la materia.
+  /* SLOT: los que declara `rail[]` del config de la materia. Proba ya no trae
+     el grupo «Material» (el usuario sacó el enlace al campus), así que queda
+     solo «Resolver»: la lista sale del config sembrado, no de la plataforma. */
   const slotLabels = await slots.evaluateAll((nodes) => nodes.map((n) => n.getAttribute("aria-label") ?? ""));
-  expect(slotLabels).toEqual(["Resolver", "Material"]);
+  expect(slotLabels).toEqual(["Resolver"]);
 });
 
 test("el hero del índice muestra el nombre, el código y la institución", async ({ page }) => {
@@ -68,10 +70,11 @@ test("el índice lista las divisiones bajo el rótulo del contrato", async ({ pa
   expect(subject.divisionsDeclared).toBe(subject.divisionKeys.length);
 });
 
-test("plegar el índice desde el rail lo oculta y sobrevive a la recarga", async ({ page }) => {
+test("ocultar el índice desde el rail lo esconde y sobrevive a la recarga", async ({ page }) => {
   await expect(panel(page)).toBeVisible();
 
-  await rail(page).getByRole("button", { name: "Plegar el índice" }).click();
+  // El botón del rail se llama «Ocultar el índice» / «Mostrar el índice».
+  await rail(page).getByRole("button", { name: "Ocultar el índice" }).click();
   await expect(panel(page)).toHaveCount(0);
 
   await page.reload();
@@ -79,7 +82,7 @@ test("plegar el índice desde el rail lo oculta y sobrevive a la recarga", async
   await expect(panel(page)).toHaveCount(0);
 
   // Se deja el shell como estaba para el resto de la suite.
-  await rail(page).getByRole("button", { name: "Desplegar el índice" }).click();
+  await rail(page).getByRole("button", { name: "Mostrar el índice" }).click();
   await expect(panel(page)).toBeVisible();
 });
 

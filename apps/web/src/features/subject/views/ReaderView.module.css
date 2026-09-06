@@ -5,11 +5,16 @@
    de ancho útil, y 8 + 840 + 34 + 248 + 8 = 1138. El relleno lateral es de 8: si
    fuera de 24, la hoja se quedaría en 808 y perdería la medida de lectura. */
 
+/* Canaletas iguales a los dos lados (pedido del usuario): la de la derecha es
+   donde vive el botón «PANEL» (28 px + 8 de aire), y la de la izquierda la
+   copia, así la hoja queda centrada entre el índice y el botón. Con la columna
+   abierta, el botón queda a la derecha de la columna, en la misma canaleta. */
 .layout {
+  --reader-gutter: 36px;
   position: relative;
   display: flex;
   gap: 34px;
-  padding: 4px 8px 60px;
+  padding: 4px var(--reader-gutter) 60px;
   align-items: flex-start;
 }
 
@@ -24,17 +29,26 @@
 /* ---------- chips sobre la hoja ---------- */
 /* Las acciones acompañan la lectura: quedan a la vista mientras se baja. */
 .chips {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  /* Sin banda propia: pegajosa y con fondo pintaba un rectángulo de otro tono
+     sobre el grano (pedido del usuario). Las acciones se repiten al pie. */
+  position: static;
   width: min(840px, 100%);
   display: flex;
   gap: 10px;
   padding: 4px 0 12px;
-  background: var(--bg);
+  background: transparent;
 }
 
 /* La copia del pie va dentro de la hoja: ni se pega ni pinta fondo propio. */
+.chipsInline {
+  width: auto;
+  padding: 0;
+  gap: 6px;
+  flex: none;
+}
+.chipsInline .chipButton,
+.chipsInline .chipSave { height: 26px; padding: 0 9px; font-size: 11.5px; }
+
 .chipsFoot {
   position: static;
   width: 100%;
@@ -140,72 +154,27 @@
 .headSpacer { flex: 1; }
 
 /* ---------- ¿qué sigue? ---------- */
-.whatsNext { position: relative; }
 
-.whatsNextSummary {
-  list-style: none;
-  cursor: pointer;
-  font: 500 11.5px var(--font-ui);
-  color: var(--text-2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 4px 9px;
-  background: var(--surface-2);
-}
-.whatsNextSummary::-webkit-details-marker { display: none; }
-.whatsNextSummary::after { content: " ▾"; color: var(--text-3); }
 
-.whatsNextPanel {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  z-index: 30;
-  width: 280px;
-  display: flex;
-  flex-direction: column;
-  padding: 6px;
-  background: var(--elevated);
-  border: 1px solid var(--border-2);
-  border-radius: var(--r);
-  box-shadow: var(--relief), var(--shadow-lg);
-}
 
-.whatsNextItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-  border-radius: var(--r-sm);
-  font: 500 12.5px var(--font-ui);
-  color: var(--text-2);
-  text-decoration: none;
-}
-.whatsNextItem:hover { background: var(--surface-2); color: var(--text); }
 
-.whatsNextNum { font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
-.sourcesLink {
-  font: 500 11.5px var(--font-mono);
-  color: var(--text-3);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 4px 9px;
-  background: transparent;
-  cursor: pointer;
-}
-.sourcesLink:hover { color: var(--text-2); border-color: var(--border-2); }
 
 /* ---------- barra de segmentos ---------- */
 .segments { display: flex; flex-direction: column; gap: 6px; }
 
-.segmentsLabel {
-  font: 600 9.5px var(--font-ui);
-  letter-spacing: 0.08em;
-  color: var(--uink, var(--ucol));
-  text-align: center;
-}
 
-.segmentsRow { display: flex; gap: 4px; align-items: center; }
+.segmentsRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  font: 500 11.5px var(--font-ui);
+}
+.segmentsTrack { flex: 1; min-width: 0; display: flex; gap: 4px; align-items: center; }
+.sidePrev { flex: none; }
+.sideNext { flex: 0 1 auto; max-width: 42%; }
 
 /* El enlace mide 24 de alto —objetivo táctil mínimo del contrato, medido antes
    en 18,2 × 20—; la barra de 5 la pinta ::after, centrada, así que el segmento
@@ -230,6 +199,9 @@
   transform: translateY(-50%);
   transition: transform var(--t), background var(--t);
 }
+/* Los colores dicen el ESTADO (pista = sin leer, color de la división al 45 % =
+   leída, pleno = actual); el tipo de página lo dice la tarjeta de vista previa
+   con una etiqueta, no el color (decisión del usuario). */
 .segment[data-state="studied"]::after { background: var(--ucol); opacity: 0.45; }
 .segment[data-state="current"]::after { background: var(--ucol); }
 .segment:hover::after { transform: translateY(-50%) scaleY(1.8); }
@@ -524,8 +496,8 @@
 /* Por debajo de 1280 px la columna no cabe al lado de la hoja, pero tampoco
    desaparece (N0-36): se convierte en un panel deslizante que abre y cierra el
    mismo botón «PANEL», que ahí queda fijo contra el borde de la ventana. Sin
-   esto, apuntes, índice de la página, fuentes y backlinks eran inalcanzables en
-   cualquier pantalla de portátil. */
+   esto, apuntes e índice de la página eran inalcanzables en cualquier pantalla
+   de portátil. */
 .sideFloating {
   position: fixed;
   top: 76px;
@@ -561,10 +533,3 @@
   background-blend-mode: screen;
 }
 
-/* Claustro: la banda pegajosa de los chips tapa el grano del fondo; lleva el
-   mismo grano que las demás superficies para no verse como un rectángulo liso. */
-:global([data-theme="claustro"]) .chips {
-  background-image: var(--grain-22);
-  background-size: 140px 140px;
-  background-blend-mode: screen;
-}

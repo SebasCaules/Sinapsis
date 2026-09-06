@@ -1,6 +1,6 @@
 /**
  * Lector de una página del wiki (regiones 09 y 10): hoja de 840 con la barra de
- * la división, la prosa y la columna de 248 (índice de la página, fuentes y
+ * la división, la prosa y la columna de 248 (índice de la página y
  * backlinks). Es la vista más pesada del shell: se carga en diferido.
  *
  * Los ids de los encabezados los pone el compilador (`Page.headings[].id`, con
@@ -72,7 +72,6 @@ export function ReaderView() {
   const [sideOpen, setSideOpen] = useState(wide);
   useEffect(() => setSideOpen(wide), [wide]);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
-  const sourcesRef = useRef<HTMLElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
 
   const detail = query.data;
@@ -83,7 +82,6 @@ export function ReaderView() {
   const sequence = divisionKey ? model.sequence(divisionKey) : [];
   const position = model.positionOf(pageSlug);
   const { prev, next } = model.prevNext(pageSlug);
-  const upcoming = position ? sequence.slice(position, position + 3) : [];
   /* Callback estable: el pipeline de markdown se rearma solo si cambia la materia. */
   const exists = useCallback((target: string) => model.bySlug.has(target), [model]);
   const headings = useMemo(
@@ -98,7 +96,7 @@ export function ReaderView() {
     const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
     const target = hash ? document.getElementById(hash) : null;
     if (target) {
-      target.scrollIntoView({ block: "start" });
+      scrollMainTo(target, "auto");
       return;
     }
     scroller?.scrollTo({ top: 0 });
@@ -169,7 +167,6 @@ export function ReaderView() {
 
   const studied = detail.studied;
   const color = division?.color ?? "var(--primary)";
-  const sources = page.sources.map((s) => ({ slug: s, page: model.bySlug.get(s) }));
   const unit = model.config.division.singular.toLowerCase();
   const bookmarked = bookmarks.has(pageSlug);
   const onToggleStudied = () => toggleStudied.mutate({ page: pageSlug, studied: !studied });
@@ -178,13 +175,6 @@ export function ReaderView() {
   return (
     <div className={css.layout} style={{ ["--ucol" as string]: color }}>
       <div className={css.column}>
-        <StudyActions
-          studied={studied}
-          onToggle={onToggleStudied}
-          bookmarked={bookmarked}
-          onToggleBookmark={onToggleBookmark}
-        />
-
         <article className={css.sheet} ref={sheetRef}>
           <header className={css.sheetHead}>
             {division ? (
@@ -202,55 +192,60 @@ export function ReaderView() {
               <span className={css.position}>fuera de la secuencia</span>
             )}
             <span className={css.headSpacer} />
-            {upcoming.length ? (
-              <details className={css.whatsNext}>
-                <summary className={css.whatsNextSummary}>¿Qué sigue?</summary>
-                <div className={css.whatsNextPanel}>
-                  {upcoming.map((p, i) => (
-                    <Link key={p.slug} className={css.whatsNextItem} to={routes.page(slug, p.slug)}>
-                      <span className={css.whatsNextNum}>{position + i + 1}</span>
-                      {p.title}
-                    </Link>
-                  ))}
-                </div>
-              </details>
-            ) : null}
-            {sources.length ? (
-              <button
-                type="button"
-                className={css.sourcesLink}
-                onClick={() => {
-                  setSideOpen(true);
-                  window.requestAnimationFrame(() =>
-                    sourcesRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }),
-                  );
-                }}
-              >
-                +{sources.length} fuentes
-              </button>
-            ) : null}
+            {/* Las acciones de la página viven en la línea de identidad de la
+                hoja (pedido del usuario): antes iban en una fila propia arriba
+                y acá había «¿Qué sigue?» y «+N fuentes» (las fuentes siguen en
+                la columna lateral y al pie). */}
+            <StudyActions
+              studied={studied}
+              onToggle={onToggleStudied}
+              bookmarked={bookmarked}
+              onToggleBookmark={onToggleBookmark}
+              inline
+            />
           </header>
 
           {sequence.length > 1 ? (
             <div className={css.segments}>
-              <span className={css.segmentsLabel}>{model.typeLabel(page.type).toUpperCase()}</span>
+              {/* Anterior y siguiente flanquean la barra (pedido del usuario): a
+                  la izquierda el enlace corto, a la derecha el título de la
+                  página que sigue, recortado; el pie repite los dos completos. */}
               <div className={css.segmentsRow}>
+                {prev ? (
+                  <Link className={`${css.prev} ${css.sidePrev}`} to={routes.page(slug, prev.slug)}>
+                    ← Anterior
+                  </Link>
+                ) : (
+                  <span className={`${css.prevOff} ${css.sidePrev}`}>← Anterior</span>
+                )}
+                <div className={css.segmentsTrack}>
+                {/* Sin `title`: el segmento lo cubre la tarjeta de vista previa
+                    del shell (N0-50), que muestra el título, el resumen y la
+                    posición «N de M»; el tooltip nativo dibujaría dos a la vez.
+                    El nombre accesible y `aria-current` se conservan. */}
                 {sequence.map((p) => (
                   <Link
                     key={p.slug}
                     to={routes.page(slug, p.slug)}
                     className={css.segment}
                     data-state={p.slug === pageSlug ? "current" : model.studied.has(p.slug) ? "studied" : "todo"}
-                    title={p.title}
                     aria-label={p.title}
                     aria-current={p.slug === pageSlug ? "page" : undefined}
                   />
                 ))}
               </div>
+                {next ? (
+                  <Link className={`${css.next} ${css.sideNext}`} to={routes.page(slug, next.slug)}>
+                    Siguiente: {next.title} →
+                  </Link>
+                ) : (
+                  <span className={`${css.prevOff} ${css.sideNext}`}>Última de la {unit}</span>
+                )}
+              </div>
             </div>
-          ) : null}
-
-          <PrevNext slug={slug} prev={prev} next={next} unit={unit} />
+          ) : (
+            <PrevNext slug={slug} prev={prev} next={next} unit={unit} />
+          )}
 
           <h1 className={css.title}>{page.title}</h1>
 
@@ -297,7 +292,8 @@ export function ReaderView() {
                     data-active={activeHeading === h.id ? "true" : undefined}
                     onClick={(e) => {
                       e.preventDefault();
-                      document.getElementById(h.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
+                      const el = document.getElementById(h.id);
+                      if (el) scrollMainTo(el, "smooth");
                       history.replaceState(null, "", `#${h.id}`);
                     }}
                   >
@@ -312,39 +308,6 @@ export function ReaderView() {
 
           <NotesCard slug={slug} page={pageSlug} exists={exists} />
 
-          {sources.length ? (
-            <section className={css.card} ref={sourcesRef} aria-labelledby="reader-sources">
-              <div className={css.cardHead} id="reader-sources">
-                <UiIcon name="file" size={13} />
-                FUENTES
-              </div>
-              {sources.map((source) =>
-                source.page ? (
-                  <Link key={source.slug} className={css.cardLink} to={routes.page(slug, source.slug)}>
-                    {source.page.title}
-                  </Link>
-                ) : (
-                  <span key={source.slug} className={css.cardMissing} title="No está en la materia">
-                    {source.slug}
-                  </span>
-                ),
-              )}
-            </section>
-          ) : null}
-
-          {detail.backlinks.length ? (
-            <section className={css.card} aria-labelledby="reader-backlinks">
-              <div className={css.cardHead} id="reader-backlinks">
-                <UiIcon name="external" size={13} />
-                ENLAZAN AQUÍ ({detail.backlinks.length})
-              </div>
-              {detail.backlinks.map((back: PageMeta) => (
-                <Link key={back.slug} className={css.cardLink} to={routes.page(slug, back.slug)}>
-                  → {back.title}
-                </Link>
-              ))}
-            </section>
-          ) : null}
         </div>
       ) : null}
 
@@ -370,15 +333,18 @@ function StudyActions({
   bookmarked,
   onToggleBookmark,
   foot = false,
+  inline = false,
 }: {
   studied: boolean;
   onToggle: () => void;
   bookmarked: boolean;
   onToggleBookmark: () => void;
   foot?: boolean;
+  /** Dentro de la línea de identidad de la hoja: chips más bajos, sin margen. */
+  inline?: boolean;
 }) {
   return (
-    <div className={foot ? `${css.chips} ${css.chipsFoot}` : css.chips}>
+    <div className={foot ? `${css.chips} ${css.chipsFoot}` : inline ? `${css.chips} ${css.chipsInline}` : css.chips}>
       <button
         type="button"
         className={css.chipButton}
@@ -686,3 +652,19 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
 }
 
 export default ReaderView;
+
+/**
+ * Desplaza SOLO el contenedor de la materia (`main[data-subject-main]`) hasta
+ * `el`. `scrollIntoView` no sirve acá: también desplaza a los ancestros con
+ * `overflow: hidden` (la cabecera y el rail se iban de la pantalla al tocar un
+ * enlace del índice de la página y todo quedaba «elevado» hasta recargar).
+ */
+function scrollMainTo(el: HTMLElement, behavior: ScrollBehavior): void {
+  const main = el.closest<HTMLElement>("main[data-subject-main]") ?? document.querySelector<HTMLElement>("main[data-subject-main]");
+  if (!main) {
+    el.scrollIntoView({ block: "start", behavior });
+    return;
+  }
+  const top = el.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop - 12;
+  main.scrollTo({ top: Math.max(0, top), behavior });
+}

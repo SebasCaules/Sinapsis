@@ -22,6 +22,7 @@ import { isTypingTarget } from "@/lib/keyboard";
 import { Crumbs, type Crumb } from "./components/Crumbs";
 import { Fab } from "./components/Fab";
 import { IndexPanel } from "./components/IndexPanel";
+import { PageTip } from "./components/PageTip";
 import { Rail } from "./components/Rail";
 import { SearchPalette } from "./components/SearchPalette";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
@@ -67,6 +68,9 @@ export function SubjectShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const mainRef = useRef<HTMLElement>(null);
+  /* Raíz del shell: es el nodo sobre el que la tarjeta de vista previa (N0-50)
+     delega puntero, foco y tacto, igual que el ⌘-clic de las pestañas. */
+  const shellRef = useRef<HTMLDivElement>(null);
 
   const tabs = useTabs(subject);
   const openTab = useSubjectTabsStore((s) => s.openTab);
@@ -350,6 +354,7 @@ export function SubjectShell() {
   return (
     <div
       className={css.shell}
+      ref={shellRef}
       onClick={(event) => openLinkInNewTab(event, false)}
       onAuxClick={(event) => openLinkInNewTab(event, event.button === 1)}
     >
@@ -391,6 +396,9 @@ export function SubjectShell() {
         {model.fab ? <Fab view={model.fab} /> : null}
       </div>
       <SearchPalette model={model} open={searchOpen} onClose={closeSearch} />
+      {/* Una sola tarjeta de vista previa para todo el shell: cubre por
+          delegación los enlaces a páginas de cualquier vista (N0-50). */}
+      <PageTip model={model} subject={subject} rootRef={shellRef} currentPage={route.page} />
       <ShortcutsDialog open={shortcutsOpen} onClose={closeShortcuts} />
     </div>
   );

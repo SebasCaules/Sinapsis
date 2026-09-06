@@ -145,6 +145,31 @@ actualizado: 2026-09-04
 `PageMeta` es `Page` sin `body`, `links` ni `headings`: es lo que viaja en listados
 (`SubjectDetail.pages`, backlinks, `App.PAGES`).
 
+### Vista previa de página (la tarjeta de los enlaces, N0-50)
+
+Cualquier enlace a una página dentro del shell —wikilink de la prosa, fila del índice,
+segmento de la barra de la división, backlink, fuente, «¿Qué sigue?», resultado del
+catálogo, enlace de una herramienta— muestra al pasar por encima (o al recibir el foco)
+UNA tarjeta flotante con la vista previa del destino. Esto es lo que dibuja, y de dónde
+sale cada dato:
+
+| Lo que se ve | De dónde sale |
+|---|---|
+| Título | `Page.title` (§3). |
+| «U3 · Concepto», con el punto del color de la división | División y `type` de la página, con los rótulos del `sinapsis.config.json` (`01`). |
+| «4 de 12 · sin leer» | Solo cuando el enlace apunta a una página de la MISMA división que la abierta: posición en la secuencia pedagógica y progreso del usuario. |
+| **Resumen** | **`resumen` del frontmatter (§3).** Si está vacío, el primer párrafo del cuerpo —sin el rótulo «**En breve.**» / «**Qué es:**», sin títulos, citas, listas ni fórmulas de display— recortado a 280 caracteres. |
+| «§ Sección» + su primer párrafo | Solo si el enlace trae ancla (`[[pagina#ancla]]`): el encabezado que resuelve el ancla (§7) y su primer párrafo, recortado a 220. |
+| «N palabras · leída ✓» | `Page.words` y el progreso del usuario. |
+
+La consecuencia práctica para quien escribe el wiki: **el campo `resumen` es lo que se lee
+en los tooltips**. Una página sin `resumen` no se queda sin tarjeta —cae al primer párrafo—,
+pero muestra lo que el cuerpo diga primero, que casi nunca es una definición. El compilador
+ya avisa cuáles faltan (`missing-summary`, §12).
+
+La matemática en línea (`$…$`) se compone en la tarjeta; el recorte nunca parte una fórmula
+por la mitad.
+
 ---
 
 ## 5. Divisiones efectivas
@@ -418,6 +443,8 @@ Ninguna de ellas detiene el sync. Las listas largas se recortan a 6 elementos co
   `DIVISION_OTHER`, `PAGE_TYPE_META`, `META_PAGES`, `divisionOf`, `effectiveDivisions`.
 - `apps/web/src/features/subject/markdown/remarkCallouts.ts` — `CALLOUT_LABELS`, alias,
   `[!figura]`.
+- `apps/web/src/features/subject/components/page-tip.ts` — `leadOf`, `firstPara`,
+  `sectionOf`: de dónde sale cada texto de la vista previa (N0-50).
 - `packages/runtime/src/markdown.ts` — `figureMarkup`, el mismo marcado desde el runtime.
 - `apps/api/src/services/sync.ts` — `resolveLinks` (qué aristas entran en `page_links`).
 
@@ -426,4 +453,4 @@ Ninguna de ellas detiene el sync. Las listas largas se recortan a 6 elementos co
 N0-10 (markdown en el cliente, sin HTML crudo) · N0-13 (compilador propio) ·
 N0-21 (recorte del H1 duplicado) · N0-22 (el compilador es dueño de los ids de encabezado) ·
 N0-23 (divisiones sintéticas) · N0-42 (figuras en callouts) ·
-N0-47 (normalización de los `$$` de display).
+N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página).

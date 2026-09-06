@@ -235,7 +235,8 @@ const PageRow = memo(function PageRow({
       className={css.page}
       data-active={active ? "true" : undefined}
       aria-current={active ? "page" : undefined}
-      title={title}
+      /* Sin `title`: la fila la cubre la tarjeta de vista previa del shell
+         (N0-50), que dice bastante más que el título repetido. */
     >
       <span className={css.num}>{num ? pad2(num) : "·"}</span>
       <span className={css.pageTitle}>{title}</span>
