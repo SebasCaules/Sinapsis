@@ -49,6 +49,24 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
         </Link>
       </div>
 
+      {/* Mostrar u ocultar el índice: arriba, bajo el sello, con el icono clásico
+          del panel lateral (antes vivía al pie del rail con un chevrón ambiguo). */}
+      <div className={css.toggleRow}>
+        <button
+          type="button"
+          className={css.item}
+          onClick={onToggleCompact}
+          aria-expanded={!compact}
+          aria-label={compact ? "Mostrar el índice" : "Ocultar el índice"}
+          title={compact ? "Mostrar el índice" : "Ocultar el índice"}
+        >
+          <UiIcon name="sidebar" size={18} />
+          <span className={css.tip} role="tooltip">
+            {compact ? "Mostrar el índice" : "Ocultar el índice"}
+          </span>
+        </button>
+      </div>
+
       {groups.map((group) => (
         <div
           key={group.id}
@@ -66,22 +84,6 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
       ))}
 
       <div className={css.spacer} />
-
-      <div className={css.foot}>
-        <button
-          type="button"
-          className={css.item}
-          onClick={onToggleCompact}
-          aria-expanded={!compact}
-          aria-label={compact ? "Desplegar el índice" : "Plegar el índice"}
-          title={compact ? "Desplegar el índice" : "Plegar el índice"}
-        >
-          <UiIcon name={compact ? "chevronRight" : "chevronLeft"} size={18} />
-          <span className={css.tip} role="tooltip">
-            {compact ? "Desplegar el índice" : "Plegar el índice"}
-          </span>
-        </button>
-      </div>
     </nav>
   );
 }

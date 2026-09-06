@@ -13,7 +13,6 @@
  * `tabpanel` que rotula la pestaña activa.
  */
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   DndContext,
   PointerSensor,
@@ -62,7 +61,6 @@ function numberedTitles(tabs: SubjectTab[]): string[] {
 }
 
 export function SubjectHeader({ tabs, activeId, onSelect, onClose, onNew, onReorder, onSearch }: SubjectHeaderProps) {
-  const navigate = useNavigate();
   const stripRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState(false);
 
@@ -142,10 +140,6 @@ export function SubjectHeader({ tabs, activeId, onSelect, onClose, onNew, onReor
 
   return (
     <header className={css.header} data-testid="subject-header">
-      <button type="button" className={css.back} onClick={() => navigate(-1)} aria-label="Atrás" title="Atrás">
-        <UiIcon name="chevronLeft" size={14} />
-      </button>
-
       <div className={css.tabsArea}>
         {overflow ? (
           <button

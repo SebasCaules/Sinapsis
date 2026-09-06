@@ -68,7 +68,8 @@ function copyState(s: StudyState): StudyState {
     srs: s.srs.map((x) => ({ ...x })),
     bookmarks: [...s.bookmarks],
     notes: s.notes.map((n) => ({ ...n })),
-    tasksDone: [...s.tasksDone],
+    planDates: {},
+  tasksDone: [...s.tasksDone],
     attempts: s.attempts.map((a) => ({ ...a })),
   };
 }
@@ -194,6 +195,24 @@ export const mockApi: ApiClient = {
         : s.tasksDone.filter((t) => t !== taskId);
     },
 
+    /* Fechas del plan (mock): en memoria, por materia. Tareas: `resetTasks` vacía las tildadas. */
+    resetTasks: async (slug) => {
+      const st = studyState(slug);
+      st.tasksDone = [];
+    },
+    setPlanDate: async (slug, key, date) => {
+      const st = studyState(slug);
+      st.planDates = { ...st.planDates, [key]: date };
+    },
+    clearPlanDate: async (slug, key) => {
+      const st = studyState(slug);
+      const { [key]: _gone, ...rest } = st.planDates;
+      st.planDates = rest;
+    },
+    resetPlanDates: async (slug) => {
+      const st = studyState(slug);
+      st.planDates = {};
+    },
     recordAttempt: async (slug, quizId, score, total) => {
       const s = studyState(slug);
       const attempt: QuizAttempt = { quizId, score, total, at: new Date().toISOString() };

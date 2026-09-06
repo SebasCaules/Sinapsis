@@ -40,6 +40,7 @@ const content: StudyContent = {
   kits: [],
   plan: {
     title: "Plan de estudio",
+    instances: [],
     phases: [
       {
         id: "p-unica",
@@ -123,6 +124,7 @@ const state: StudyState = {
   srs: [],
   bookmarks: [],
   notes: [],
+  planDates: {},
   tasksDone: ["t-leer"],
   attempts: [],
 };

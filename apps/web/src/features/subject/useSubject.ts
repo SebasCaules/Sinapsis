@@ -106,7 +106,8 @@ export function useToggleStudied(slug: string) {
 // ---------------------------------------------------------------------------
 
 /** El estado vacío: referencia estable, para que las vistas no ramifiquen por `undefined`. */
-const EMPTY_STUDY_STATE: StudyState = { srs: [], bookmarks: [], notes: [], tasksDone: [], attempts: [] };
+const EMPTY_STUDY_STATE: StudyState = { srs: [], bookmarks: [], notes: [], planDates: {},
+      tasksDone: [], attempts: [] };
 
 export interface UseStudyStateResult {
   query: UseQueryResult<StudyState>;

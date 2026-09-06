@@ -159,5 +159,6 @@ export async function readStudyState(
     attempts: attemptRows.map(
       (row): QuizAttempt => ({ quizId: row.quizId, score: row.score, total: row.total, at: row.at }),
     ),
+    planDates: {},
   };
 }

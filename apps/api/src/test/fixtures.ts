@@ -171,6 +171,7 @@ export function demoStudy(overrides: Partial<StudyContent> = {}): StudyContent {
     plan: {
       title: "Plan de estudio",
       tracks: [],
+      instances: [],
       phases: [
         {
           id: "parcial-1",

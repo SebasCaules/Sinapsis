@@ -560,3 +560,11 @@
   background-size: 140px 140px;
   background-blend-mode: screen;
 }
+
+/* Claustro: la banda pegajosa de los chips tapa el grano del fondo; lleva el
+   mismo grano que las demás superficies para no verse como un rectángulo liso. */
+:global([data-theme="claustro"]) .chips {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
+}

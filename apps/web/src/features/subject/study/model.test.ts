@@ -82,6 +82,7 @@ const content: StudyContent = {
   plan: {
     title: "Plan de estudio",
     tracks: [],
+    instances: [],
     phases: [
       {
         id: "p1",
@@ -142,6 +143,7 @@ const state: StudyState = {
   srs: [srs("c1", -1, 5), srs("c2", 1, 30), srs("c4", -3, 21), srs("c6", 10, 20)],
   bookmarks: [],
   notes: [],
+  planDates: {},
   tasksDone: ["t1", "t2", "t3"],
   attempts: [
     { quizId: "q1", score: 2, total: 3, at: "2026-09-01T10:00:00.000Z" },

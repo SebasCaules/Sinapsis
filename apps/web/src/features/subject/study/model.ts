@@ -54,6 +54,7 @@ export const EMPTY_STATE: StudyState = Object.freeze({
   srs: [],
   bookmarks: [],
   notes: [],
+  planDates: {},
   tasksDone: [],
   attempts: [],
 });

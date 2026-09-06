@@ -16,26 +16,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-.back {
-  width: 24px;
-  height: 24px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--text-3);
-  cursor: pointer;
-  transition: background var(--t), color var(--t);
-}
-.back:hover { background: var(--surface-2); color: var(--text-2); }
-.back:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 1px;
-  box-shadow: 0 0 0 4px var(--primary-ring);
-}
-
 /* ---------- barra de pestañas ---------- */
 /* La zona elástica de la cabecera: los ‹ ›, la tira que desborda y el «+». El
    «+» vive FUERA del `tablist` (dentro sería un hijo que no es una pestaña) y
@@ -214,6 +194,8 @@
   flex: none;
   display: grid;
   place-items: center;
+  padding: 0;
+  line-height: 0;
   /* las pestañas miden 30 px y arrancan en 10 px: el «+» de 24 px se centra con ellas */
   margin: 13px 0 0 4px;
   border: 1px solid var(--border);
@@ -223,6 +205,7 @@
   cursor: pointer;
   transition: border-color var(--t), color var(--t);
 }
+.addTab svg { display: block; }
 .addTab:hover { border-color: var(--border-2); color: var(--text-2); }
 .addTab:focus-visible {
   outline: 2px solid var(--primary);
@@ -232,7 +215,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .strip { scroll-behavior: auto; }
-  .tab, .tabClose, .addTab, .back, .scrollTabs { transition: none; }
+  .tab, .tabClose, .addTab, .scrollTabs { transition: none; }
 }
 
 /* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */

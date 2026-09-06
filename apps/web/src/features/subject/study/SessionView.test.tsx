@@ -49,7 +49,8 @@ const content: StudyContent = {
   kits: [],
 };
 
-const emptyState: StudyState = { srs: [], bookmarks: [], notes: [], tasksDone: [], attempts: [] };
+const emptyState: StudyState = { srs: [], bookmarks: [], notes: [], planDates: {},
+      tasksDone: [], attempts: [] };
 
 let graded: Array<{ cardId: string; grade: SrsGrade }> = [];
 let original: ApiClient["study"];

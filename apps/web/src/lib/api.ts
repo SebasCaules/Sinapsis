@@ -94,6 +94,13 @@ export interface ApiClient {
     saveNote(slug: string, page: string, body: string): Promise<Note>;
     deleteNote(slug: string, page: string): Promise<void>;
     setTask(slug: string, taskId: string, done: boolean): Promise<void>;
+    /** Reinicia el plan: borra todas las tareas tildadas de la materia (las fechas quedan). */
+    resetTasks(slug: string): Promise<void>;
+    /** Fecha de una instancia evaluatoria del plan (AAAA-MM-DD). */
+    setPlanDate(slug: string, key: string, date: string): Promise<void>;
+    clearPlanDate(slug: string, key: string): Promise<void>;
+    /** Borra todas las fechas cargadas de la materia. */
+    resetPlanDates(slug: string): Promise<void>;
     recordAttempt(slug: string, quizId: string, score: number, total: number): Promise<QuizAttempt>;
   };
   config(): Promise<PublicConfig>;
@@ -135,6 +142,10 @@ export const api: ApiClient = {
     saveNote: (slug, page, body) => request<Note>("PUT", `/subjects/${enc(slug)}/notes/${enc(page)}`, { body }),
     deleteNote: (slug, page) => request<void>("DELETE", `/subjects/${enc(slug)}/notes/${enc(page)}`),
     setTask: (slug, taskId, done) => request<void>(done ? "PUT" : "DELETE", `/subjects/${enc(slug)}/tasks/${enc(taskId)}`),
+    resetTasks: (slug) => request<void>("DELETE", `/subjects/${enc(slug)}/tasks`),
+    setPlanDate: (slug, key, date) => request<void>("PUT", `/subjects/${enc(slug)}/study/plan-dates/${enc(key)}`, { date }),
+    clearPlanDate: (slug, key) => request<void>("DELETE", `/subjects/${enc(slug)}/study/plan-dates/${enc(key)}`),
+    resetPlanDates: (slug) => request<void>("DELETE", `/subjects/${enc(slug)}/study/plan-dates`),
     recordAttempt: (slug, quizId, score, total) =>
       request<QuizAttempt>("POST", `/subjects/${enc(slug)}/quiz/${enc(quizId)}/attempts`, { score, total }),
   },

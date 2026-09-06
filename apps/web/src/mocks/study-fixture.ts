@@ -178,6 +178,7 @@ export const quizzes: Quiz[] = [quizContinuas];
 
 export const probaPlan: Plan = {
   title: "Plan de estudio · Probabilidad y Estadística",
+  instances: [],
   phases: [
     {
       id: "fase-parcial-1",
@@ -400,6 +401,7 @@ export function mockStudyContent(
 export function mockStudyState(): StudyState {
   return {
     srs: [],
+    planDates: {},
     bookmarks: ["distribucion-normal"],
     notes: [
       {

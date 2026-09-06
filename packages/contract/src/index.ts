@@ -656,13 +656,40 @@ export const PlanPhase = z.object({
   title: z.string().min(1).max(160),
   subtitle: z.string().max(300).optional(),
   icon: IconName.optional(),
-  /** Fecha objetivo (AAAA-MM-DD), p. ej. la del parcial. */
+  /**
+   * Fecha objetivo por defecto (AAAA-MM-DD), p. ej. la del parcial según el cronograma
+   * de la cátedra. La fecha real la carga cada usuario por instancia (`instance`) y
+   * pisa a esta.
+   */
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  /**
+   * Instancia evaluatoria de la fase (clave de `Plan.instances`): a esa clave se le
+   * carga la fecha del usuario (`StudyState.planDates`). Sin instancia, la fase no
+   * lleva fecha editable.
+   */
+  instance: StudyId.optional(),
+  /** Instancia de recuperatorio de la fase (clave de `Plan.instances`), si la hay. */
+  retake: StudyId.optional(),
   /** Texto libre «qué cae en este examen». */
   scope: z.string().max(4000).optional(),
+  /** Texto libre «cómo recorrer el programa» de la fase (orden sugerido, ritmo). */
+  guide: z.string().max(4000).optional(),
   milestones: z.array(PlanMilestone).max(40),
 });
 export type PlanPhase = z.infer<typeof PlanPhase>;
+
+/**
+ * Instancia evaluatoria real de la cursada (parcialito, parcial, recuperatorio, final).
+ * Las fases apuntan a ellas por `key`; el usuario les carga la fecha desde el plan
+ * («Fechas de las instancias»), y esa fecha vive en su estado, no en el wiki.
+ */
+export const PlanInstance = z.object({
+  key: StudyId,
+  label: z.string().min(1).max(120),
+  /** Recuperatorios y opcionales: se muestran plegados hasta que tienen fecha. */
+  optional: z.boolean().default(false),
+});
+export type PlanInstance = z.infer<typeof PlanInstance>;
 
 /** Modalidad alternativa del plan (S-11): p. ej. «Cursada + final» vs. «Final directo». */
 export const PlanTrack = z.object({
@@ -690,8 +717,15 @@ export const Plan = z.object({
    * advertencia (`estudio · plan.json: id de tarea … repetido`).
    */
   tracks: z.array(PlanTrack).max(6).default([]),
+  /** Instancias evaluatorias con fecha editable por el usuario (ver `PlanInstance`). */
+  instances: z.array(PlanInstance).max(20).default([]),
 });
 export type Plan = z.infer<typeof Plan>;
+
+/** Fecha de una instancia (AAAA-MM-DD), tal como la carga el usuario. */
+export const PlanDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+export const PlanDateInput = z.object({ date: PlanDate });
+export type PlanDateInput = z.infer<typeof PlanDateInput>;
 
 export const Kit = z.object({
   id: StudyId,
@@ -806,6 +840,8 @@ export const StudyState = z.object({
   notes: z.array(Note),
   tasksDone: z.array(StudyId),
   attempts: z.array(QuizAttempt),
+  /** Fechas cargadas por el usuario por instancia evaluatoria (`Plan.instances[].key` → AAAA-MM-DD). */
+  planDates: z.record(StudyId, PlanDate).default({}),
 });
 export type StudyState = z.infer<typeof StudyState>;
 

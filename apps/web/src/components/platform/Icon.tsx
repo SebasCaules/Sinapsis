@@ -87,6 +87,8 @@ export const UI_PATHS = {
   folder: "M4 6h6l2 2h8v11H4z",
   file: "M6 4h9l3 3v13H6z M15 4v3h3",
   back: "M10 6l-6 6 6 6 M4 12h16",
+  /* Panel lateral (el icono clásico de mostrar/ocultar la barra): marco con la columna izquierda. */
+  sidebar: "M4 5h16v14H4z M9 5v14",
   /* Cuadrícula con un hueco a completar: estado vacío de la landing. */
   gridPlus: "M5 5h6v6H5z M13 5h6v6h-6z M5 13h6v6H5z M16 13v6 M13 16h6",
 } as const;

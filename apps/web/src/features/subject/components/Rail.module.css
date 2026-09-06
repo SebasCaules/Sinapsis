@@ -86,9 +86,13 @@
 
 .spacer { flex: 1; }
 
-.foot {
-  padding: 8px 0;
+.toggleRow {
+  width: 100%;
   flex: none;
+  padding: 6px 0;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--border);
 }
 
 /* Tooltip propio, a la derecha del rail. */

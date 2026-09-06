@@ -29,7 +29,7 @@ describe("favoritos, apuntes, tareas e intentos", () => {
   afterAll(() => h.close());
 
   it("el estado arranca vacío", async () => {
-    expect(await state()).toEqual({ srs: [], bookmarks: [], notes: [], tasksDone: [], attempts: [] });
+    expect(await state()).toEqual({ srs: [], bookmarks: [], notes: [], tasksDone: [], attempts: [], planDates: {} });
   });
 
   it("exige sesión y 404 si la materia no existe", async () => {
@@ -197,6 +197,7 @@ describe("el estado de estudio no se filtra entre usuarios", () => {
       notes: [],
       tasksDone: [],
       attempts: [],
+      planDates: {},
     });
   });
 
