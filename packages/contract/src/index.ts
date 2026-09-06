@@ -1104,6 +1104,8 @@ export const LS_KEYS = {
   landingCollapsed: "sinapsis.landing.collapsed",
   tabs: (subject: string) => `sinapsis.${subject}.tabs`,
   openDivisions: (subject: string) => `sinapsis.${subject}.openDivisions`,
+  /** Actividad local de la materia: días con estudio (racha) y última página leída. */
+  activity: (subject: string) => `sinapsis.${subject}.activity`,
 } as const;
 
 /** Rutas del SPA — única fuente para web y CLI (mensajes de éxito). */
