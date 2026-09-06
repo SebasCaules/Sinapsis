@@ -8,8 +8,15 @@
 
 /* Grano de imprenta como capa propia, mezclada por tema con los tokens del design system
    (`--grain`, `--grain-size`, `--grain-blend`, `--grain-opacity`): en los temas claros
-   multiplica al 50 %; en Claustro el ruido es pleno y se mezcla en «screen» al 22 % para
-   ACLARAR la tinta oscura (medido en el baseline: luminancia 18 → 37 en la zona libre). */
+   multiplica al 50 % y vive DEBAJO del contenido (solo textura el fondo; las superficies de
+   papel quedan lisas); en Claustro el ruido es pleno, se mezcla en «screen» al 22 % para
+   ACLARAR la tinta oscura (medido en el baseline: luminancia 18 → 37 en la zona libre) y vive
+   ENCIMA de todo (N0-65). Antes cada superficie de Claustro repetía el grano por su cuenta
+   (`--grain-22` en 29 sitios) y todo hijo con fondo sólido —un rótulo pegajoso, una fila
+   activa, un resaltado `--primary-soft`— quedaba MÁS OSCURO que su entorno texturizado,
+   invirtiendo la jerarquía de los tokens. Con una sola capa, el grano aclara por igual cada
+   píxel y el orden `--bg < --surface < --surface-2 < --primary-soft < --elevated` se
+   conserva tal cual lo declara tokens.css. */
 .grain {
   position: fixed;
   inset: 0;
@@ -19,6 +26,10 @@
   background-size: var(--grain-size, 150px) var(--grain-size, 150px);
   mix-blend-mode: var(--grain-blend, multiply);
   opacity: var(--grain-opacity, 0.5);
+}
+:global([data-theme="claustro"]) .grain,
+:global([data-theme="dark"]) .grain {
+  z-index: 2147483647; /* por encima de diálogos, paleta y tooltips en portal (máximo del rango) */
 }
 
 .content {

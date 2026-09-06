@@ -218,11 +218,3 @@
   outline-color: var(--on-primary);
   outline-offset: -3px;
 }
-
-/* Claustro: la superficie elevada lleva el mismo grano que el resto de los
-   paneles del tema (mezcla screen), como el Dialog. */
-:global([data-theme="claustro"]) .pop {
-  background-image: var(--grain-22);
-  background-size: 140px 140px;
-  background-blend-mode: screen;
-}

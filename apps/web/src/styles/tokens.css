@@ -251,8 +251,9 @@
   /* «screen» al 22 %: el grano ACLARA de verdad el fondo oscuro (medido: luminancia
      18 → 37 en la zona libre) y se ve la textura; con overlay quedaba imperceptible. */
   --grain-blend:screen; --grain-opacity:.22;
-  /* grano al 22 % para las superficies (tarjetas, cabeceras, hoja): capa de imagen sobre su propio color */
-  --grain-22:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+  /* El grano de las superficies ya no es un token por componente: en Claustro la capa
+     `.grain` de AppRoot va ENCIMA del contenido y texturiza todo por igual (N0-65). Ningún
+     módulo debe volver a pintar `background-image` de ruido sobre una superficie. */
   /* tintas oscuras sobre los colores sólidos claros del tema (patrón de .logo) */
   --on-primary:#1a1408; --on-good:#12200c; --on-bad:#2a120c;
   --edge-light:rgba(236,226,205,.06); --edge-dark:rgba(0,0,0,.55);

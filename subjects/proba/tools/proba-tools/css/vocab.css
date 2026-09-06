@@ -904,10 +904,6 @@
       -webkit-mask-image:none; mask-image:none;
     }
   }
-  [data-theme="claustro"] & .card,
-  [data-theme="dark"] & .card {
-    background-image: var(--grain-22); background-size: 140px 140px; background-blend-mode: screen;
-  }
 
   /* ========================================================
      RESCATADO DE reader.css — .unit-hero · .unit-hero-row · .unit-hero-prog

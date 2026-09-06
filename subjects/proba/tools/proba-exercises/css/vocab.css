@@ -1064,14 +1064,6 @@
   [data-theme="dark"] & .sidebar {
     background: transparent;
   }
-  [data-theme="claustro"] & .card,
-  [data-theme="dark"] & .card,
-  [data-theme="claustro"] & .app-header,
-  [data-theme="dark"] & .app-header,
-  [data-theme="claustro"] & .sheet,
-  [data-theme="dark"] & .sheet {
-    background-image: var(--grain-22); background-size: 140px 140px; background-blend-mode: screen;
-  }
 
   /* ========================================================
      PIEL DE DOCUMENTO — latex.css del baseline

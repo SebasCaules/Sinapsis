@@ -77,6 +77,10 @@
 /* ---------- código ---------- */
 .prose code {
   font: 500 13.5px/1.5 var(--font-mono);
+  /* JetBrains Mono liga `->`, `-->` y `=>` en una flecha sola. En un wiki de
+     criptografía eso es una errata a la vista: `-->` de un diagrama, `!=` de una
+     condición y `<-` de una asignación se leen literales o no se leen (N0-63). */
+  font-variant-ligatures: none;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -85,6 +89,7 @@
 
 .prose pre {
   margin: 18px 0;
+  font-variant-ligatures: none;
   padding: 14px 16px;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -92,6 +97,28 @@
   overflow-x: auto;
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: 13px; }
+
+/* ---------- diagramas Mermaid (N0-63) ----------
+   El SVG lo compone Mermaid con los tokens del tema; acá solo se lo centra y se
+   lo deja achicarse. Un diagrama que no compila cae al bloque de código, que se
+   marca para distinguirlo de uno escrito a propósito. */
+/* `display:block` y no flex: Mermaid le pone al SVG `width="100%"` con un
+   `max-width` en píxeles, y dentro de un contenedor flex ese 100 % se resuelve
+   contra un ancho indefinido y el diagrama sale de cero. */
+.prose .mermaid {
+  margin: 18px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+.prose .mermaid:empty {
+  display: none;
+}
+.prose .mermaid svg {
+  height: auto;
+}
+.prose .mermaidFallback {
+  border-color: var(--warn);
+}
 
 /* ---------- tablas ---------- */
 .tableWrap {
