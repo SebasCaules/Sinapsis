@@ -119,8 +119,8 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 | S2-05 web shell (pestañas, grafo, favoritos, apuntes) | DONE | c4b8787 | 52 tests nuevos; smoke real: grafo 209 nodos, pestañas persistentes |
 | S2-06 web estudio (flashcards, quiz, plan, kits) | DONE | c4b8787 | 27 tests; smoke real con el material de Proba |
 | S2-07 web landing (S-03) + vitest 3 | DONE | c4b8787 | cuatrimestres persistentes y ordenables; vitest 3.2.7 |
-| S2-08 E2E | DOING | | agente E3 |
-| S2-09 auditoría | DOING | | finders: seguridad, corrección, UX (Opus); adjudica el orquestador |
+| S2-08 E2E | DONE | 2c79496 | 47 pruebas (24 + 23); 0 bugs de la app |
+| S2-09 auditoría | DOING | | seguridad 0 hallazgos; corrección 12 bugs; UX 43 (4 bloqueantes) → fixers S4, WS, WL |
 | S2-10 docs | TODO | | cierre |
 
 ## Ownership (ola 1)
