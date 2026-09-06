@@ -15,7 +15,7 @@ import { SubjectConfig, type PageHeading, type PageMeta, type SubjectDetail } fr
 import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
 import { PageTip, PAGE_TIP_ID } from "./PageTip";
-import { clip, firstPara, leadOf, plainish, sectionOf, stripLabel, targetOf } from "./page-tip";
+import { clip, firstPara, leadOf, pageRoutePrefix, plainish, sectionOf, stripLabel, targetOf, tipSelector } from "./page-tip";
 
 // ---------------------------------------------------------------------------
 // 1 · lógica pura
@@ -431,3 +431,23 @@ describe("PageTip", () => {
   });
 });
 
+
+describe("base del sitio (GitHub Pages)", () => {
+  it("el selector y el prefijo llevan la base cuando el sitio cuelga de una subcarpeta", () => {
+    expect(pageRoutePrefix("proba")).toBe("/m/proba/p/");
+    expect(pageRoutePrefix("proba", "/Sinapsis/")).toBe("/Sinapsis/m/proba/p/");
+    expect(pageRoutePrefix("proba", "/Sinapsis")).toBe("/Sinapsis/m/proba/p/");
+    expect(tipSelector("proba", "/Sinapsis/")).toContain('a[href^="/Sinapsis/m/proba/p/"]');
+  });
+
+  it("targetOf reconoce un enlace con la base y devuelve el slug limpio", () => {
+    const a = document.createElement("a");
+    a.setAttribute("href", "/Sinapsis/m/proba/p/esperanza#definicion");
+    document.body.appendChild(a);
+    expect(targetOf(a, "proba")).toBeNull();
+    const hit = targetOf(a, "proba", "/Sinapsis/");
+    expect(hit?.slug).toBe("esperanza");
+    expect(hit?.anchor).toBe("definicion");
+    a.remove();
+  });
+});

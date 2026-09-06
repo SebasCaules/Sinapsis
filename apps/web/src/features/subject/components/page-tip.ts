@@ -39,9 +39,20 @@ export interface TipTarget {
  *  3. `[data-go="#/p/<slug>"]` y `[data-nav="#/p/<slug>"]` — ídem, sin `<a>`.
  *  4. `[data-page-tip="<slug>[#ancla]"]` — marca explícita para cualquier nodo.
  */
-export function tipSelector(subject: string): string {
+/**
+ * `base` es `import.meta.env.BASE_URL` (termina en `/`): en GitHub Pages el
+ * sitio cuelga de `/Sinapsis/` y los `<Link>` del router llevan ese prefijo en
+ * el `href`, así que el selector tiene que llevarlo también. Sin esto, la
+ * tarjeta funcionaba en desarrollo (`/`) y desaparecía en el sitio publicado.
+ */
+export function pageRoutePrefix(subject: string, base = "/"): string {
+  const root = base.endsWith("/") ? base : `${base}/`;
+  return `${root}m/${subject}/p/`;
+}
+
+export function tipSelector(subject: string, base = "/"): string {
   return [
-    `a[href^="/m/${subject}/p/"]`,
+    `a[href^="${pageRoutePrefix(subject, base)}"]`,
     'a[href^="#/p/"]',
     '[data-go^="#/p/"]',
     '[data-nav^="#/p/"]',
@@ -78,16 +89,16 @@ function safeDecode(value: string): string {
  * `{el, slug, anchor}` del enlace bajo `node`, o null si no apunta a una página
  * de esta materia. No valida que la página exista: eso lo sabe el modelo.
  */
-export function targetOf(node: EventTarget | null, subject: string): TipTarget | null {
+export function targetOf(node: EventTarget | null, subject: string, base = "/"): TipTarget | null {
   if (!(node instanceof Element)) return null;
-  const el = node.closest<HTMLElement>(tipSelector(subject));
+  const el = node.closest<HTMLElement>(tipSelector(subject, base));
   if (!el) return null;
   if (el.closest(EXCLUDED)) return null;
 
   let raw = attr(el, "data-page-tip");
   if (!raw) {
     const href = attr(el, "data-go") || attr(el, "data-nav") || attr(el, "href");
-    const routePrefix = `/m/${subject}/p/`;
+    const routePrefix = pageRoutePrefix(subject, base);
     const prefix = href.startsWith(HASH_PREFIX) ? HASH_PREFIX : href.startsWith(routePrefix) ? routePrefix : "";
     if (!prefix) return null;
     raw = href.slice(prefix.length);

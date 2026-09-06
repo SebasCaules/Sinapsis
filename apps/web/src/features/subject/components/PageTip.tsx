@@ -43,6 +43,7 @@ import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import type { PageHeading, PageMeta } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
+import { siteBase } from "@/local/catalog";
 import type { SubjectModel } from "../model";
 import { MathText } from "./MathText";
 import { leadOf, sectionOf, targetOf, type TipTarget } from "./page-tip";
@@ -171,7 +172,7 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
 
     /** El enlace bajo el evento, solo si su página existe en la materia. */
     const hit = (node: EventTarget | null): TipTarget | null => {
-      const target = targetOf(node, subject);
+      const target = targetOf(node, subject, siteBase());
       if (!target || !modelRef.current.bySlug.has(target.slug)) return null;
       return target;
     };
@@ -186,7 +187,7 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
       const from = hit(event.target);
       if (!from) return;
       const related = event.relatedTarget;
-      const to = related instanceof Element ? targetOf(related, subject) : null;
+      const to = related instanceof Element ? targetOf(related, subject, siteBase()) : null;
       /* Seguimos dentro del mismo enlace (pasar de su texto a su icono, por
          ejemplo): la tarjeta no parpadea. */
       if (to && to.el === from.el) return;
