@@ -55,7 +55,16 @@ los servidores están arriba.
    compila `examples/proba/estudio/` —que es relativa al config, no al vault (N0-27)— y lo
    mete en el `SyncPayload`, así que la siembra no hace nada especial para que llegue. Con
    el vault real quedan 6 mazos autorales (46 tarjetas) + 12 automáticos por unidad, 1 quiz
-   de 15 preguntas, un plan de 6 fases (89 tareas) y 8 kits.
+   de 15 preguntas, un plan con dos modalidades (N0-43: «cursada + final» y «final
+   directo») y 8 kits.
+
+   `SINAPSIS_E2E_VAULT` reemplaza la ruta del vault: apuntándola a una carpeta que no
+   existe se fuerza el camino del fixture, que es la única forma de ejercitarlo en una
+   máquina que sí tiene el vault.
+
+   ```bash
+   SINAPSIS_E2E_VAULT=/no/existe pnpm e2e
+   ```
 
 3. **Landing.** El sync **no** pone la materia en la landing de nadie (las materias son
    globales, N0-6), así que se llama `POST /api/subjects` dos veces: una para la materia
@@ -63,9 +72,31 @@ los servidores están arriba.
    **«Materia Demo B»** (slug `demo-b`, `2025-2C`). Después se verifica con
    `GET /api/landing` que las dos quedaron.
 
-4. **Manifiesto.** Escribe `.auth/seed.json` con qué camino se tomó y qué páginas usar
+4. **Herramientas** (Sprint 3 · N0-41). Publica el bundle de la materia con el mismo
+   `buildBundle` que usa `sinapsis tools build` —valida el manifiesto, que cada archivo
+   declarado exista y que cada script parsee— y lo sube con
+   `PUT /api/subjects/:slug/tools/:id` y el token de sync, que es lo que hace
+   `sinapsis tools push`. Después lo verifica con `GET /api/subjects/:slug/tools`.
+
+   | Camino | Bundle | Qué trae |
+   |---|---|---|
+   | **Vault real** | `examples/proba/tools/proba-tools` | 22 archivos (913 KB): 5 vistas (`explorador`, `calc`, `asistente`, `taller`, `lab`) y las figuras del wiki. |
+   | **Fixture** | `fixtures/mini-tools/` | 2 archivos: la vista `demo` (un `<h2>` y un hueco de figura) y la figura `demo-fig`, que dibuja un `<canvas>`. La página `demo-repaso` del fixture la usa con `> [!figura] demo-fig`. |
+
+   Los archivos del bundle se guardan en disco, no en la base: el `webServer` del API los
+   manda a una carpeta propia (`TOOLS_DIR=./data/e2e-tools`) y la borra antes de cada
+   corrida, igual que la base, así que la suite no toca las herramientas del entorno de
+   desarrollo.
+
+   La siembra comprueba además que la página de figuras traiga su callout
+   `> [!figura] <id>` y que algún script del bundle registre esa figura: sin eso,
+   `figures.spec.ts` fallaría con «la figura no dibujó» sin decir por qué.
+
+5. **Manifiesto.** Escribe `.auth/seed.json` con qué camino se tomó y qué páginas usar
    (`support/seed.ts` lo lee). Las specs consultan ese manifiesto en vez de tener los
-   datos de Proba escritos a mano, así que la suite corre igual con el fixture.
+   datos de Proba escritos a mano, así que la suite corre igual con el fixture. Del
+   Sprint 3 trae `tools` (id del bundle, vistas y rótulos), `railTools` (los ítems
+   `kind: "tool"` del config) y `figurePage` (la página con figura y el id de la figura).
 
 ### Aislamiento entre pruebas
 
@@ -86,6 +117,15 @@ Lo único que **no** se puede reponer son los intentos de quiz: el contrato no e
 `DELETE` de `attempts`, así que `quiz.spec.ts` asserta «al menos uno» en vez de una
 cantidad exacta.
 
+`support/app.ts` tiene además **una sola** función que escribe en la base sin pasar por el
+API, `expireSrsCards(slug)`: adelanta el vencimiento de las tarjetas SRS de una materia.
+No es comodidad. Calificar por HTTP corre el SM-2 del contrato, que nunca deja la próxima
+revisión en el pasado —con «Otra vez» la deja a diez minutos—, y el `dueCount` de la
+landing cuenta `due <= ahora`: sin adelantar la fecha, la única prueba posible sería
+esperar diez minutos. Los tests del API insertan filas con `due` de ayer por la misma
+razón. Lo que se prueba sigue siendo del producto: el conteo lo calcula el API y la
+tarjeta la dibuja la web. `resetStudy` la limpia como a cualquier otra fila de SRS.
+
 El estado de UI del cliente (pestañas, divisiones abiertas del índice) vive en
 `localStorage` y no hace falta reponerlo: el `storageState` sembrado solo trae la cookie,
 así que cada prueba arranca con `localStorage` vacío.
@@ -96,17 +136,21 @@ así que cada prueba arranca con `localStorage` vacío.
 |---|---|
 | `auth.spec.ts` | Sin sesión `/` rebota a `/login`; el botón de desarrollo entra; «Cerrar sesión» desde el avatar vuelve a `/login`. |
 | `catalog-search.spec.ts` | `?d=` recorta el catálogo; el filtro de texto y su `?q=`; ⌘K/Ctrl+K abre la paleta y Enter navega al lector. |
+| `figures.spec.ts` | Figuras del lector (N0-42): el callout `> [!figura] id` monta un `canvas`/`svg` dentro de `figure.figura .fig-host`, sin marco de reserva ni `.fig-missing`, con su epígrafe «Figura · id»; todas las figuras de la página dibujan; y la regresión N0-47 (`tecnica-derivadas-parciales` entera: ≥ 6 `h2`, `.katex-display`, sin `.katex-error` ni «undefined»). |
 | `flashcards.spec.ts` | La lista de mazos (autorales + automáticos, con la insignia «Automático»); la sesión con Espacio y notas 1-4: el contador avanza, el SRS queda persistido con `due` futuro y el mazo corto llega a la pantalla final. |
 | `graph.spec.ts` | El `canvas`, la lista accesible «MÁS CITADAS», el filtro «Solo contenido» (baja el contador de nodos, no el total), el resaltado por título (`?q=`) y el salto al lector. |
 | `landing.spec.ts` | Tarjeta de la materia sincronizada (código, institución, «SIN COMENZAR»); agrupado por cuatrimestre; gestión (mover + guardar + recarga); quitar con confirmación; alta desde el diálogo; estado vacío. |
+| `landing-due.spec.ts` | El contador «N para repasar» de la tarjeta (Sprint 3): calificar «Otra vez» en la sesión deja la tarjeta a diez minutos y la landing todavía no la cuenta; con la tarjeta vencida (`expireSrsCards`) aparece el contador, con su cifra, su nombre accesible y su enlace al repaso. |
 | `landing-semesters.spec.ts` | Cuatrimestres del usuario (N0-32): agregar uno vacío y que sobreviva a la recarga, reordenar con el teclado (asa → Espacio → flecha → Espacio) y quitar uno vacío. |
 | `plan-kits.spec.ts` | Las 6 fases del plan y la fase actual; tildar una tarea sube el contador y persiste; los 8 kits, el detalle de uno y «Repasar los mazos del kit» → `flashcards/kit:<id>`. |
+| `plan-tracks.spec.ts` | Modalidades del plan (N0-43): el conmutador ofrece las que trae el plan y arranca en la primera; cambiar de modalidad cambia las fases visibles y se recuerda en `sinapsis.<slug>.planTrack` tras recargar; un plan sin modalidades no dibuja el conmutador (con el fixture). |
 | `quiz.spec.ts` | La lista con su recuento de preguntas; el revelado CORRECTO/INCORRECTO con explicación; el quiz entero (15) con su resultado `n/15` y el intento registrado. |
 | `reader.spec.ts` | KaTeX (`.katex-display` y `.katex`), wikilink interno navegable, «EN ESTA PÁGINA» y «ENLAZAN AQUÍ», marcar estudiado (índice + progreso + recarga) y «Siguiente». |
 | `study.spec.ts` | «Lo mío»: favorito desde el lector → `/favorites` y recarga; apunte con guardado automático → recarga; `/notes` lo lista y «Exportar markdown» baja el `.md`. |
 | `subject-shell.spec.ts` | Geometría del contrato (rail 52 · panel 250 · cabecera 40 · migas 28 medidos con `boundingBox`), grupos `data-slot` fijos y slot, hero, árbol del índice, plegado persistente y el sello «S». |
 | `tabs.spec.ts` | Pestañas (N0-29): ⌘-clic en el índice abre dos sin navegar, el clic activa y navega, la ✕ cierra, la recarga las conserva y ⌘⇧] pasa a la siguiente. |
 | `themes.spec.ts` | La tecla `T` cicla pergamino → laurel → claustro y persiste; capturas del smoke visual. |
+| `tools.spec.ts` | Herramientas de la materia (N0-41): el rail abre los slots que declara el config; `/m/:materia/t/:vista` monta la vista dentro de `.sinapsis-tool` con su título y su dibujo; cambiar de tema desde la cabecera no la rompe; volver al inicio y regresar la vuelve a montar; una vista que ningún bundle registra muestra «PRÓXIMAMENTE» sin errores de consola. |
 
 ## Capturas
 
@@ -128,6 +172,15 @@ Se sobrescriben en cada corrida y son deterministas (el árbol del índice se fi
 la primera captura) **salvo el grafo**: su lienzo parte de posiciones al azar y cada
 corrida lo dibuja distinto. Sirve para mirar el tema, no para comparar píxeles.
 
+Las specs del Sprint 3 dejan además, con los nombres de la siembra:
+
+```
+herramienta-<vista>.png            la vista de la materia recién montada
+herramienta-<vista>-<tema>.png     la misma vista después de cambiar el tema
+figura-<id>.png                    la página del lector con la figura dibujada
+plan-modalidades.png               el plan con el conmutador de modalidad
+```
+
 ## Selectores
 
 Se prefieren roles y etiquetas accesibles (`getByRole`, `getByLabel`) y texto visible. Los
@@ -146,6 +199,12 @@ Modules (con hash) y no sirven como anclas:
 | `plan-phase` (+ `data-phase`) | `features/subject/study/PlanView.tsx` | contar fases y apuntar a una. |
 | `plan-total` | `features/subject/study/PlanView.tsx` | el «1/89» de pasos completados. |
 | `kit-card` (+ `data-kit`) | `features/subject/study/KitsView.tsx` | contar kits y abrir uno concreto. |
+| `tool-host` | `features/subject/tools/ToolHost.tsx` | el marco de una herramienta (lo trajo la app, no esta suite): distingue «hay una vista montada» de los estados «Próximamente» y de error. |
+
+El nodo que el host le presta al bundle se apunta con `.sinapsis-tool[data-view="<vista>"]`
+(y `data-tool` con el id del bundle). La clase sola **no** alcanza: los bundles pueden
+montar la suya fuera del host —el buscador ⌘J de Proba dibuja un `div.sinapsis-tool.ql-host`
+colgado del documento—, así que sin el `[data-view]` el selector devuelve dos elementos.
 
 Dos detalles del cliente que la suite tuvo que respetar y conviene no olvidar:
 
