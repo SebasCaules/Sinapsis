@@ -65,6 +65,7 @@ export const mockApi: ApiClient = {
     removeFromLanding: async (slug) => {
       cards = state().filter((c) => c.slug !== slug);
     },
+    semesters: async () => Array.from(new Set(state().map((c) => c.semester))),
   },
 
   subject: {
@@ -77,6 +78,24 @@ export const mockApi: ApiClient = {
     unmarkStudied: async () => {
       /* ídem */
     },
+    // Sprint 2: el agente C3 completa el grafo de mentira a partir de las páginas del fixture.
+    graph: async () => ({ nodes: [], edges: [] }),
+  },
+
+  // Sprint 2: estado de estudio en memoria (el agente C3 lo completa con fixtures reales).
+  study: {
+    content: async () => ({ decks: [], quizzes: [], plan: null, kits: [] }),
+    state: async () => ({ srs: [], bookmarks: [], notes: [], tasksDone: [], attempts: [] }),
+    grade: async (_slug, cardId, grade) => ({
+      cardId, ease: 2.5, interval: 1, due: new Date().toISOString(), reps: 1, lapses: 0, lastGrade: grade, updatedAt: new Date().toISOString(),
+    }),
+    resetCard: async () => {},
+    addBookmark: async () => {},
+    removeBookmark: async () => {},
+    saveNote: async (_slug, page, body) => ({ page, body, updatedAt: new Date().toISOString() }),
+    deleteNote: async () => {},
+    setTask: async () => {},
+    recordAttempt: async (_slug, quizId, score, total) => ({ quizId, score, total, at: new Date().toISOString() }),
   },
 
   config: async () => ({ googleClientId: null, devBypass: true }),

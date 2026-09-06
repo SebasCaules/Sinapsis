@@ -11,7 +11,14 @@ import {
   API_PREFIX,
   errorMessageFromBody,
   type CreateSubjectInput,
+  type GraphData,
   type LandingLayoutInput,
+  type Note,
+  type QuizAttempt,
+  type SrsGrade,
+  type SrsState,
+  type StudyContent,
+  type StudyState,
   type PageDetail,
   type SearchHit,
   type SubjectCard,
@@ -62,6 +69,8 @@ export interface ApiClient {
     saveLayout(input: LandingLayoutInput): Promise<SubjectCard[]>;
     createSubject(input: CreateSubjectInput): Promise<SubjectCard>;
     removeFromLanding(slug: string): Promise<void>;
+    /** Cuatrimestres del usuario (incluidos los vacíos), en orden. */
+    semesters(): Promise<string[]>;
   };
   subject: {
     detail(slug: string): Promise<SubjectDetail>;
@@ -69,6 +78,20 @@ export interface ApiClient {
     search(slug: string, q: string): Promise<SearchHit[]>;
     markStudied(slug: string, page: string): Promise<void>;
     unmarkStudied(slug: string, page: string): Promise<void>;
+    graph(slug: string): Promise<GraphData>;
+  };
+  /** Sprint 2 · material y estado de estudio por materia. */
+  study: {
+    content(slug: string): Promise<StudyContent>;
+    state(slug: string): Promise<StudyState>;
+    grade(slug: string, cardId: string, grade: SrsGrade): Promise<SrsState>;
+    resetCard(slug: string, cardId: string): Promise<void>;
+    addBookmark(slug: string, page: string): Promise<void>;
+    removeBookmark(slug: string, page: string): Promise<void>;
+    saveNote(slug: string, page: string, body: string): Promise<Note>;
+    deleteNote(slug: string, page: string): Promise<void>;
+    setTask(slug: string, taskId: string, done: boolean): Promise<void>;
+    recordAttempt(slug: string, quizId: string, score: number, total: number): Promise<QuizAttempt>;
   };
   config(): Promise<PublicConfig>;
 }
@@ -88,6 +111,7 @@ export const api: ApiClient = {
     saveLayout: (input) => request<SubjectCard[]>("PUT", "/landing", input),
     createSubject: (input) => request<SubjectCard>("POST", "/subjects", input),
     removeFromLanding: (slug) => request<void>("DELETE", `/subjects/${enc(slug)}/landing`),
+    semesters: () => request<string[]>("GET", "/landing/semesters"),
   },
   subject: {
     detail: (slug) => request<SubjectDetail>("GET", `/subjects/${enc(slug)}`),
@@ -95,6 +119,20 @@ export const api: ApiClient = {
     search: (slug, q) => request<SearchHit[]>("GET", `/subjects/${enc(slug)}/search?q=${encodeURIComponent(q)}`),
     markStudied: (slug, page) => request<void>("PUT", `/subjects/${enc(slug)}/progress/${enc(page)}`),
     unmarkStudied: (slug, page) => request<void>("DELETE", `/subjects/${enc(slug)}/progress/${enc(page)}`),
+    graph: (slug) => request<GraphData>("GET", `/subjects/${enc(slug)}/graph`),
+  },
+  study: {
+    content: (slug) => request<StudyContent>("GET", `/subjects/${enc(slug)}/study`),
+    state: (slug) => request<StudyState>("GET", `/subjects/${enc(slug)}/study/state`),
+    grade: (slug, cardId, grade) => request<SrsState>("POST", `/subjects/${enc(slug)}/study/srs/${enc(cardId)}`, { grade }),
+    resetCard: (slug, cardId) => request<void>("DELETE", `/subjects/${enc(slug)}/study/srs/${enc(cardId)}`),
+    addBookmark: (slug, page) => request<void>("PUT", `/subjects/${enc(slug)}/bookmarks/${enc(page)}`),
+    removeBookmark: (slug, page) => request<void>("DELETE", `/subjects/${enc(slug)}/bookmarks/${enc(page)}`),
+    saveNote: (slug, page, body) => request<Note>("PUT", `/subjects/${enc(slug)}/notes/${enc(page)}`, { body }),
+    deleteNote: (slug, page) => request<void>("DELETE", `/subjects/${enc(slug)}/notes/${enc(page)}`),
+    setTask: (slug, taskId, done) => request<void>(done ? "PUT" : "DELETE", `/subjects/${enc(slug)}/tasks/${enc(taskId)}`),
+    recordAttempt: (slug, quizId, score, total) =>
+      request<QuizAttempt>("POST", `/subjects/${enc(slug)}/quiz/${enc(quizId)}/attempts`, { score, total }),
   },
   config: () => request<PublicConfig>("GET", "/config"),
 };
@@ -109,6 +147,7 @@ export function installMockApi(mock: ApiClient): void {
   Object.assign(api.auth, mock.auth);
   Object.assign(api.landing, mock.landing);
   Object.assign(api.subject, mock.subject);
+  Object.assign(api.study, mock.study);
   api.config = mock.config;
 }
 
@@ -120,4 +159,8 @@ export const qk = {
   subject: (slug: string) => ["subject", slug] as const,
   page: (slug: string, page: string) => ["subject", slug, "page", page] as const,
   search: (slug: string, q: string) => ["subject", slug, "search", q] as const,
+  graph: (slug: string) => ["subject", slug, "graph"] as const,
+  study: (slug: string) => ["subject", slug, "study"] as const,
+  studyState: (slug: string) => ["subject", slug, "study", "state"] as const,
+  semesters: ["landing", "semesters"] as const,
 };

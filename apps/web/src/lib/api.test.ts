@@ -24,6 +24,7 @@ function fakeClient(tag: string): ApiClient {
       saveLayout: stub("saveLayout"),
       createSubject: stub("createSubject"),
       removeFromLanding: stub("removeFromLanding"),
+      semesters: stub("semesters"),
     },
     subject: {
       detail: stub("detail"),
@@ -31,6 +32,19 @@ function fakeClient(tag: string): ApiClient {
       search: stub("search"),
       markStudied: stub("markStudied"),
       unmarkStudied: stub("unmarkStudied"),
+      graph: stub("graph"),
+    },
+    study: {
+      content: stub("content"),
+      state: stub("state"),
+      grade: stub("grade"),
+      resetCard: stub("resetCard"),
+      addBookmark: stub("addBookmark"),
+      removeBookmark: stub("removeBookmark"),
+      saveNote: stub("saveNote"),
+      deleteNote: stub("deleteNote"),
+      setTask: stub("setTask"),
+      recordAttempt: stub("recordAttempt"),
     },
     config: stub("config"),
   };
