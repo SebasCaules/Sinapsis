@@ -52,7 +52,9 @@
 /* Se pega arriba (alto completo de la cabecera) para que el filete de 2 px de la
    pestaña activa nazca del borde, como en Obsidian. */
 .strip {
-  flex: 1;
+  /* Solo el ancho de sus pestañas: el «+» queda pegado a la última (Obsidian). Con
+     min-width: 0 sigue pudiendo encogerse y desbordar cuando hay muchas. */
+  flex: 0 1 auto;
   min-width: 0;
   height: 40px;
   display: flex;
@@ -205,7 +207,8 @@
   flex: none;
   display: grid;
   place-items: center;
-  margin: 3px 0 0 2px;
+  /* las pestañas miden 30 px y arrancan en 10 px: el «+» de 24 px se centra con ellas */
+  margin: 13px 0 0 4px;
   border: 1px solid var(--border);
   border-radius: 7px;
   background: var(--surface);
@@ -223,4 +226,11 @@
 @media (prefers-reduced-motion: reduce) {
   .strip { scroll-behavior: auto; }
   .tab, .tabClose, .addTab, .back, .scrollTabs { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */
+:global([data-theme="claustro"]) .header {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

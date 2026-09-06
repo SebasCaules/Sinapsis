@@ -38,14 +38,17 @@ export function IndexPanel({ model, activePage, activeDivision, bookmarks }: Ind
 
   return (
     <aside className={css.panel} aria-label={`Índice de ${config.name}`}>
-      <div className={css.hero}>
-        <span className={css.name} title={config.name}>
-          {config.name}
-        </span>
+      <Link
+        to={routes.subject(model.slug)}
+        className={css.hero}
+        aria-label={`Inicio de ${config.name}`}
+        title="Ir al inicio de la materia"
+      >
+        <span className={css.name}>{config.name}</span>
         <span className={css.code}>
           {config.code} · {config.institution}
         </span>
-      </div>
+      </Link>
 
       {placeholder ? (
         <p className={css.placeholder}>

@@ -201,3 +201,10 @@
 @media (prefers-reduced-motion: reduce) {
   .card { transition: none; }
 }
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */
+:global([data-theme="claustro"]) .card {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
+}

@@ -21,6 +21,16 @@
   flex-direction: column;
   justify-content: center;
   gap: 2px;
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--t);
+}
+.hero:hover { background: var(--surface-2); }
+.hero:hover .name { color: var(--primary); }
+.hero:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 5px var(--primary-ring);
 }
 
 .name {
@@ -259,4 +269,11 @@
     z-index: 20;
     box-shadow: var(--shadow-lg);
   }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */
+:global([data-theme="claustro"]) .panel {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

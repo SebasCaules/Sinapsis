@@ -6,7 +6,7 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
-  background: var(--bg);
+  background: transparent; /* el fondo --bg y el grano los pinta AppRoot */
 }
 
 /* Salto al contenido: primer tabulador de la materia. Fuera de pantalla hasta
