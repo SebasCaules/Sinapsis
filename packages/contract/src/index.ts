@@ -686,7 +686,8 @@ export const Plan = z.object({
    * ES LA MISMA FASE: su contenido tiene que ser idéntico y sus ids de tarea no
    * cuentan como repetidos; así una modalidad puede compartir fases con otra sin
    * duplicar tareas ni perder el progreso (`tasksDone`) al cambiar de modalidad.
-   * Cualquier otro id de tarea repetido en el plan es un error del compilador.
+   * Cualquier otro id de tarea repetido en el plan lo señala el compilador como
+   * advertencia (`estudio · plan.json: id de tarea … repetido`).
    */
   tracks: z.array(PlanTrack).max(6).default([]),
 });

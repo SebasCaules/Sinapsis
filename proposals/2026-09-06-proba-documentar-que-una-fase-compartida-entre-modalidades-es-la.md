@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: proba
 titulo: "Documentar que una fase compartida entre modalidades es la misma fase"
 rama: proposal/proba-20260906-documentar-que-una-fase-compartida-entre-modalidades-es-la
-estado: abierta
+estado: aprobada
 pr: null
 ---
 
@@ -89,4 +89,22 @@ packages/cli test: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-06
+**Commit de merge:** `b2f3a62`
+
+### Gates en la rama
+- `pnpm typecheck`: OK (0 errores en los 6 paquetes)
+- `pnpm test`: OK (721 pruebas: contract 31 · runtime 133 · markdown 88 · api 169 · web 252 · cli 50; los conteos coinciden con los de la propuesta)
+- `pnpm build`: no corresponde (no toca `apps/`)
+- `pnpm e2e`: no corresponde
+
+### Hallazgos
+1. **(bajo)** `packages/contract/src/index.ts:690` — el texto decía que un id de tarea repetido «es un error del compilador»; el compilador lo emite como advertencia (`study-duplicate-id` → `formatIssues` → `warnings`) y la sincronización sigue. Errata corregida al mergear: «lo señala el compilador como advertencia».
+2. **(bajo, aceptado)** `packages/contract/src/study.test.ts` — los dos tests ejercitan solo el esquema (`Plan.parse`), así que no fallarían si la regla de «misma fase» cambiara en `packages/markdown` (`checkPlanIds`). Valen como red de regresión del contrato (que `Plan` admite fases compartidas entre `phases` y `tracks`), no de la regla; la regla ya tiene sus pruebas en `packages/markdown/src/study.test.ts`.
+
+Se buscó además: cambios de esquema (ninguno: solo JSDoc y pruebas), datos de la materia sin validar (no aplica), voseo en la propuesta y en el código (ninguno), duplicación de helpers (ninguna), alcance extra (ninguno).
+
+### Efecto en las materias
+- Ninguno en los datos: no cambia ningún esquema ni payload. Las materias no tienen que volver a sincronizar.
+- Decisión: amplía N0-43 en `docs/DECISIONS.md` (no abre fila nueva).

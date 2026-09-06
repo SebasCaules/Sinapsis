@@ -10,7 +10,6 @@ Una fila por propuesta pendiente. La agrega `sinapsis propose`; la mueve `/sinap
 
 | fecha | materia | título | rama | estado |
 |---|---|---|---|---|
-| 2026-09-06 | proba | Documentar que una fase compartida entre modalidades es la misma fase | proposal/proba-20260906-documentar-que-una-fase-compartida-entre-modalidades-es-la | abierta |
 
 ## Cerradas
 
@@ -19,3 +18,4 @@ rama, que se conserva 30 días, así que esta fila tiene que bastarse sola.
 
 | fecha | materia | título | rama | veredicto | commit |
 |---|---|---|---|---|---|
+| 2026-09-06 | proba | Documentar que una fase compartida entre modalidades es la misma fase | proposal/proba-20260906-documentar-que-una-fase-compartida-entre-modalidades-es-la | aprobada | `b2f3a62` |
