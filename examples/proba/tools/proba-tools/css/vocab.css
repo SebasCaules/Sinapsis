@@ -744,15 +744,7 @@
   & .control .val {
     font-family:var(--font-mono); font-weight:600; color:var(--primary-2); background:var(--primary-soft); padding:1px 8px; border-radius:6px; font-size:12.5px;
   }
-  & input[type=range] {
-    -webkit-appearance:none; appearance:none; width:100%; height:5px; border-radius:5px; background:var(--surface-3); cursor:pointer;
-  }
-  & input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance:none; width:17px; height:17px; border-radius:50%; background:var(--primary); border:2px solid var(--surface); box-shadow:var(--shadow-ctrl); cursor:pointer;
-  }
-  & input[type=range]::-moz-range-thumb {
-    width:17px; height:17px; border-radius:50%; background:var(--primary); border:2px solid var(--surface); cursor:pointer;
-  }
+  /* deslizadores: los pinta la plataforma (base.css) */
   & .dist-formula {
     margin-top:16px; padding:16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--relief), var(--shadow);
   }

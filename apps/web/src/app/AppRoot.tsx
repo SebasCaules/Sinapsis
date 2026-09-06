@@ -4,6 +4,7 @@ import { Toaster } from "@/components/platform";
 import { ThemeId } from "@sinapsis/contract";
 import { useMe } from "@/lib/auth";
 import { useUiStore } from "@/lib/store";
+import { installRangeFill } from "@/lib/rangeFill";
 import { mockParam } from "@/mocks/dev-fixtures";
 import css from "./AppRoot.module.css";
 
@@ -18,6 +19,10 @@ export function AppRoot() {
   const setTheme = useUiStore((s) => s.setTheme);
   const setSignedIn = useUiStore((s) => s.setSignedIn);
   const adopted = useRef(false);
+
+  /* Deslizadores de toda la plataforma (bundles incluidos): base.css los pinta
+     y lib/rangeFill.ts mantiene la parte recorrida. */
+  useEffect(() => installRangeFill(), []);
 
   /* El `<html>` ya trae data-theme del script de index.html; esto lo mantiene
      alineado con el store si algo lo cambia (tests, otra pestaña). */
