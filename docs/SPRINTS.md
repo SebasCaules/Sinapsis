@@ -54,7 +54,7 @@ estudio compilado desde el wiki de cada materia (N0-27). Cierra S-03, S-06 y S-0
 | S2-10 | Docs: CONTRACT §7 (formato de estudio), README, HANDOFF-sprint2, DECISIONS | docs | — |
 
 
-## Sprint 3 — Herramientas (en ejecución, 2026-09-06)
+## Sprint 3 — Herramientas (cerrado el 2026-09-06, pendiente de revisión del usuario)
 
 Objetivo: que cada materia traiga sus propias herramientas y figuras (plugins), que el plan
 admita modalidades, que las materias puedan proponer cambios a la plataforma con un flujo de
@@ -62,16 +62,17 @@ revisión, y que Proba en Sinapsis se vea igual que su app original.
 
 | # | Unidad | Paquete | Done-test |
 |---|---|---|---|
-| S3-01 | Contrato: `ToolManifest`/`ToolPush`/`ToolInfo`, tipos del runtime (`CompatApp`, `SinapsisRuntime`), `Plan.tracks`, `SubjectCard.dueCount` | packages/contract | tests de validación del manifiesto |
-| S3-02 | Runtime del navegador (`packages/runtime`): compat `window.App`/`window.M` con el motor de figuras (`figures.js`, `plot.js`, `lib-math.js` portados), `renderMarkdown` compatible, loader de bundles | packages/runtime | tests: `Fig`/`Plot`/`M` numéricos (Φ, t, χ², binomial) y `loadBundle` en jsdom |
-| S3-03 | API: `PUT/GET /api/subjects/:slug/tools[/:id]`, archivos servidos con MIME y caché, tope 20 MB, `dueCount` en landing, diagnóstico S-13 | apps/api | tests de push/serve/borrado; landing con vencidas |
-| S3-04 | CLI: `sinapsis tools build` (manifiesto + esbuild opcional), `sinapsis tools push`, `sinapsis propose`; compilador con `Plan.tracks`; skill con herramientas, figuras y propuestas | packages/cli, packages/markdown, skills | build+push de Proba; propose crea rama y archivo |
-| S3-05 | Bundle real de Proba: explorador, calculadoras, asistente, taller, laboratorio, buscador de valores y 92 figuras, con su CSS acotado | examples/proba/tools | `sinapsis tools build` sin errores; las vistas registran; figuras montan |
-| S3-06 | Web: `ToolHost` (`/m/:s/t/:id`), figuras en callouts, `Plan.tracks` con conmutador, `dueCount` en tarjetas, grafo que sigue al nodo enfocado | apps/web | E2E: explorador abre y dibuja; figura montada en `distribucion-normal`; conmutador de modalidad |
-| S3-07 | Skill `/sinapsis-review` del orquestador y flujo de propuestas de punta a punta con una propuesta de prueba | skills, proposals | propose → review → merge en un caso real |
-| S3-08 | E2E + revisión de diseño con el navegador + comparación con la app original de Proba (3 temas) | e2e, docs | tabla de diferencias con veredicto |
-| S3-09 | Auditoría (seguridad, corrección, UX) + fixes | — | cero altas |
-| S3-10 | Contratos consolidados en `docs/contracts/`, handoff, decisiones | docs | — |
+| S3-01 | Contrato: `ToolManifest`/`ToolPush`/`ToolInfo`, tipos del runtime (`CompatApp`, `SinapsisRuntime`), `Plan.tracks`, `SubjectCard.dueCount` | packages/contract | HECHO · 29 tests |
+| S3-02 | Runtime del navegador (`packages/runtime`): compat `window.App`/`window.M` con el motor de figuras (`figures.js`, `plot.js`, `lib-math.js` portados), `renderMarkdown` compatible, loader de bundles | packages/runtime | HECHO · 133 tests |
+| S3-03 | API: `PUT/GET /api/subjects/:slug/tools[/:id]`, archivos servidos con MIME y caché, tope 20 MB, `dueCount` en landing, diagnóstico S-13 | apps/api | HECHO · 169 tests; S-13 diagnosticado (→ S-15, S-24) |
+| S3-04 | CLI: `sinapsis tools build` (manifiesto + esbuild opcional), `sinapsis tools push`, `sinapsis propose`; compilador con `Plan.tracks`; skill con herramientas, figuras y propuestas | packages/cli, packages/markdown, skills | HECHO · 50 tests CLI, 88 markdown; push real del bundle de Proba |
+| S3-05 | Bundle real de Proba: explorador, calculadoras, asistente, taller, laboratorio, buscador de valores y 92 figuras, con su CSS acotado | examples/proba/tools | HECHO · 22 archivos, 913 KB, 5 vistas, 92 figuras |
+| S3-06 | Web: `ToolHost` (`/m/:s/t/:id`), figuras en callouts, `Plan.tracks` con conmutador, `dueCount` en tarjetas, grafo que sigue al nodo enfocado | apps/web | HECHO · 252 tests |
+| S3-07 | Skill `/sinapsis-review` del orquestador y flujo de propuestas de punta a punta con una propuesta de prueba | skills, proposals | HECHO · flujo probado en clon (5 casos negativos) y propuesta real cerrada en `proposals/` |
+| S3-08 | E2E + revisión de diseño con el navegador + comparación con la app original de Proba (3 temas) | e2e, docs | HECHO · 60 E2E; `docs/DISENO-sprint3.md` (33 fallas) y `docs/FIDELIDAD-sprint3.md` (34 diferencias) |
+| S3-09 | Auditoría (seguridad, corrección) + fixes | — | HECHO · 4 + 15 hallazgos corregidos; cero altas abiertas |
+| S3-10 | Contratos consolidados en `docs/contracts/`, handoff, decisiones | docs | HECHO · `docs/contracts/00-07`, `docs/HANDOFF-sprint3.md`, N0-40..49 |
 
 ## Sprint 4 — Deploy (propuesto)
-Dockerfile, Turso/libSQL remoto, dominio, Google OAuth de producción, backups.
+Dockerfile, Turso/libSQL remoto, dominio, Google OAuth de producción, backups; tokens de sync por
+usuario; modo móvil completo; diferidos S-14, S-17 … S-26 de `EXEC_STATE.md`.

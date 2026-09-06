@@ -73,9 +73,34 @@ El material de estudio (mazos, quizzes, plan y kits) vive en la carpeta `estudio
 el formato está en `docs/contracts/03-estudio.md` y `pnpm sinapsis -- init` deja un ejemplo. Sin mazos
 propios, la plataforma genera uno por división a partir de los resúmenes.
 
-Dentro de cada repo de materia, el agente usa la skill `/sinapsis` (`init`, `validate`,
-`sync`, `status`), que envuelve estos comandos. Para tenerla disponible en todos los
-proyectos: `ln -s "$PWD/skills/sinapsis" ~/.claude/skills/sinapsis`.
+### Herramientas y figuras de una materia
+
+Una materia puede traer sus propias vistas (explorador, calculadoras…) y figuras interactivas como
+un bundle de scripts clásicos en `tools/` junto al wiki, descrito por `sinapsis.tools.json`
+(contrato en `docs/contracts/04-herramientas-y-figuras.md`; ejemplo real en
+`examples/proba/tools/proba-tools/`). Se construye, valida y sube con:
+
+```bash
+pnpm sinapsis -- tools build --config examples/proba/sinapsis.config.json --dir examples/proba/tools/proba-tools
+SINAPSIS_TOKEN=... pnpm sinapsis -- tools push --config examples/proba/sinapsis.config.json --dir examples/proba/tools/proba-tools
+SINAPSIS_TOKEN=... pnpm sinapsis -- sync --config … --tools        # wiki + estudio + bundles en un paso
+```
+
+Las vistas aparecen en el rail de la materia (`kind: "tool"` en el config) y en `/m/<materia>/t/<vista>`;
+un `> [!figura] id` en una página del wiki monta la figura dentro del lector.
+
+### Proponer un cambio a la plataforma
+
+Cuando una materia necesita algo común (un campo del contrato, un componente, una regla del
+compilador), su agente lo propone con `pnpm sinapsis -- propose --subject <slug> --title … --files …`:
+el CLI corre los gates, crea la rama `proposal/*`, escribe la propuesta en `proposals/` y anota la
+fila en `proposals/INBOX.md`; el orquestador la revisa con la skill `/sinapsis-review` y decide.
+Flujo completo en `docs/contracts/07-propuestas.md`.
+
+Dentro de cada repo de materia, el agente usa la skill `/sinapsis` (`init`, `validate`, `sync`,
+`status`, `tools`, `propose`), que envuelve estos comandos. Para tenerla disponible en todos los
+proyectos: `ln -s "$PWD/skills/sinapsis" ~/.claude/skills/sinapsis`; la del orquestador es
+`skills/sinapsis-review`.
 
 ## Scripts
 
