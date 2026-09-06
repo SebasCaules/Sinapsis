@@ -673,6 +673,7 @@ export const StudyContent = z.object({
   kits: z.array(Kit).max(100).default([]),
 });
 export type StudyContent = z.infer<typeof StudyContent>;
+export type StudyContentInput = z.input<typeof StudyContent>;
 
 /**
  * Mazo automático por división a partir de los resúmenes de las páginas de
@@ -748,6 +749,16 @@ export type Note = z.infer<typeof Note>;
 export const QuizAttempt = z.object({ quizId: StudyId, score: z.number().int().min(0), total: z.number().int().min(1), at: z.string() });
 export type QuizAttempt = z.infer<typeof QuizAttempt>;
 
+/** Cuerpos de request del Sprint 2 (los usan el API para validar y la web para tipar). */
+export const SrsGradeInput = z.object({ grade: SrsGrade });
+export type SrsGradeInput = z.infer<typeof SrsGradeInput>;
+export const NoteInput = z.object({ body: z.string().max(50000) });
+export type NoteInput = z.infer<typeof NoteInput>;
+export const QuizAttemptInput = z
+  .object({ score: z.number().int().min(0), total: z.number().int().min(1) })
+  .refine((v) => v.score <= v.total, "score no puede superar total");
+export type QuizAttemptInput = z.infer<typeof QuizAttemptInput>;
+
 /** Estado de estudio del usuario en una materia (lo devuelve `GET /api/subjects/:slug/study/state`). */
 export const StudyState = z.object({
   srs: z.array(SrsState),
@@ -758,7 +769,11 @@ export const StudyState = z.object({
 });
 export type StudyState = z.infer<typeof StudyState>;
 
-/** Grafo de conexiones: nodos = páginas, aristas = wikilinks resueltos. */
+/**
+ * Grafo de conexiones: nodos = páginas, aristas = wikilinks resueltos (sin auto-enlaces).
+ * `division` es la división EFECTIVA (`divisionOf`: declarada, DIVISION_NONE u OTHER), así
+ * los filtros del grafo coinciden con los del índice (N0-23).
+ */
 export const GraphNode = z.object({ slug: Slug, title: z.string(), type: z.string(), division: DivisionKey, words: z.number().int(), inDegree: z.number().int(), outDegree: z.number().int() });
 export const GraphEdge = z.object({ from: Slug, to: Slug });
 export const GraphData = z.object({ nodes: z.array(GraphNode), edges: z.array(GraphEdge) });
