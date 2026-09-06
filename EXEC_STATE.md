@@ -99,3 +99,37 @@ UX: 35 hallazgos (4 bloqueantes, 15 importantes, 16 menores). Se corrigen todos 
 ## Veredicto final
 
 **Sprint 1 (MVP) cerrado el 2026-09-06.** Gates en verde en `dfbd68b`: typecheck, 216 tests unitarios/integración (contract 11 · markdown 52 · api 68 · web 67 · cli 18), build, 24 E2E. Cero hallazgos altos abiertos. Smoke real del orquestador sobre Proba (209 páginas) correcto. Pendiente de revisión del usuario: decisiones N0-1..N0-25 y S-03, S-06..S-09.
+
+
+---
+
+# EXEC_STATE — Sprint 2 (Estudio)
+
+Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md` (N0-26…).
+
+## Pasos
+
+| paso | estado | commit | notas |
+|---|---|---|---|
+| F0 contrato + docs | DONE | | StudyContent, SRS, GraphData, rail y rutas nuevas |
+| S2-01 contract tests | TODO | | agente B3 |
+| S2-02 compilador + CLI + skill | TODO | | agente B3 |
+| S2-03 contenido Proba | TODO | | agente B3 |
+| S2-04 API | TODO | | agente A3 |
+| S2-05 web shell (pestañas, grafo, favoritos, apuntes) | TODO | | agente D3a |
+| S2-06 web estudio (flashcards, quiz, plan, kits) | TODO | | agente D3b |
+| S2-07 web landing (S-03) + vitest 3 | TODO | | agente C3 |
+| S2-08 E2E | TODO | | ola 2 |
+| S2-09 auditoría | TODO | | ola 3 |
+| S2-10 docs | TODO | | cierre |
+
+## Ownership (ola 1)
+
+| Agente | Carpetas exclusivas |
+|---|---|
+| A3 | `apps/api/**` |
+| B3 | `packages/markdown/**`, `packages/cli/**`, `packages/contract/src/*.test.ts`, `skills/sinapsis/**`, `examples/**` |
+| C3 | `apps/web/**` salvo `src/features/subject/**` y `src/app/router.tsx` |
+| D3a | `apps/web/src/features/subject/**` salvo `study/**` |
+| D3b | `apps/web/src/features/subject/study/**` (exporta `studyRoutes`) |
+| Orquestador | `packages/contract/src/index.ts`, docs, raíz |

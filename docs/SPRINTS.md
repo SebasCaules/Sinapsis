@@ -34,8 +34,25 @@ Pestañas múltiples estilo Obsidian, grafo de conexiones, flashcards/quiz/SRS, 
 kits, figuras interactivas, herramientas React por materia (plugins), tokens de sync por usuario,
 deploy (Dockerfile + Turso), modo móvil completo.
 
-## Sprint 2 — Estudio (propuesto)
-Grafo, flashcards + SRS, quiz, plan/kits desde `study-data`, favoritos y apuntes, pestañas.
+## Sprint 2 — Estudio (en ejecución, 2026-09-06)
+
+Objetivo: convertir el shell en una mesa de estudio: pestañas, grafo, favoritos y apuntes,
+flashcards con repetición espaciada, quiz, plan de estudio y kits; con el material de
+estudio compilado desde el wiki de cada materia (N0-27). Cierra S-03, S-06 y S-07.
+
+| # | Unidad | Paquete | Done-test |
+|---|---|---|---|
+| S2-01 | Contrato: StudyContent (Deck/Card/Quiz/Plan/Kit), SrsState + `sm2`, GraphData, StudyState, rail FIJO ampliado, rutas | packages/contract | tests de `sm2` (intervalos crecientes, lapso reinicia) y `autoDecks` con Proba |
+| S2-02 | Compilador: `wiki.study` → StudyContent (markdown de mazos y quizzes, `plan.json`, `kits.json`); CLI sync lo envía; skill documenta el formato | packages/markdown, packages/cli, skills | fixtures + `examples/proba/estudio/` compilan; 0 errores de validación |
+| S2-03 | Contenido real de Proba: convertir FLASHCARDS/QUIZ/ROADMAP/KITS de `study-data.js` a `examples/proba/estudio/` | examples | `sinapsis sync --dry-run` reporta N mazos, M quizzes, plan con fases, kits |
+| S2-04 | API: tablas `bookmarks`, `notes`, `srs_cards`, `tasks`, `quiz_attempts`, `user_semesters`, `page_links`, `subject_study`; rutas de estudio, grafo, favoritos, apuntes, tareas, intentos, cuatrimestres; FTS externa por materia (S-06); backlinks por `page_links` (S-07) | apps/api | tests de integración por ruta; sync de Proba llena `page_links`; búsqueda filtra por materia con índice |
+| S2-05 | Web · shell: pestañas múltiples (N0-29), grafo (N0-31), favoritos, apuntes en el lector y vista «Mis apuntes», «Guardar» vivo, rail con los grupos nuevos, rutas | apps/web features/subject (shell) | E2E: abrir 3 pestañas y cambiar; grafo con nodos de Proba; favorito persiste; apunte se guarda |
+| S2-06 | Web · estudio: flashcards (mazos, sesión de repaso con SM-2, atajos Espacio/1-4), quiz (opción múltiple, explicación, resultado, intentos), plan (fases, hitos, tareas tildables, progreso), kits (tarjetas con páginas/mazos/quizzes/herramientas) | apps/web features/subject/study | E2E: repasar 3 tarjetas cambia `due`; quiz de 3 preguntas muestra resultado; tildar tarea persiste |
+| S2-07 | Web · landing: cuatrimestres vacíos persistentes y ordenables (S-03); vitest 3 | apps/web landing | E2E: crear cuatrimestre vacío → recargar → sigue |
+| S2-08 | E2E + smoke visual de las vistas nuevas en 3 temas | e2e | `pnpm e2e` verde |
+| S2-09 | Auditoría final (seguridad, corrección, UX) + fixes | — | cero altas abiertas |
+| S2-10 | Docs: CONTRACT §7 (formato de estudio), README, HANDOFF-sprint2, DECISIONS | docs | — |
+
 
 ## Sprint 3 — Herramientas por materia (propuesto)
 Sistema de plugins: cada materia publica un bundle React registrado en `rail[].items[kind=tool]`;

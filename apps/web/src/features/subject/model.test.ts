@@ -154,8 +154,8 @@ describe("vecinos", () => {
 describe("rail", () => {
   it("intercala los grupos SLOT entre los FIJOS y marca cuál es cuál", () => {
     const groups = model().railGroups;
-    expect(groups.map((g) => g.id)).toEqual(["ruta", "consultar", "resolver", "material"]);
-    expect(groups.map((g) => g.slot)).toEqual([false, false, true, true]);
+    expect(groups.map((g) => g.id)).toEqual(["ruta", "consultar", "practicar", "resolver", "material", "mio"]);
+    expect(groups.map((g) => g.slot)).toEqual([false, false, false, true, true, false]);
   });
 
   it("esconde los ítems `page` cuyo slug no existe y los grupos que quedan vacíos", () => {
@@ -171,9 +171,9 @@ describe("rail", () => {
     expect(home?.to).toBe("/m/proba");
     const graph = groups[1]?.items[1];
     expect(graph?.to).toBe("/m/proba/graph");
-    const explorador = groups[2]?.items[0];
+    const explorador = groups[3]?.items[0];
     expect(explorador?.to).toBe("/m/proba/t/explorador");
-    const campus = groups[3]?.items[0];
+    const campus = groups[4]?.items[0];
     expect(campus?.external).toBe(true);
     expect(campus?.href).toBe("https://campus.itba.edu.ar");
   });

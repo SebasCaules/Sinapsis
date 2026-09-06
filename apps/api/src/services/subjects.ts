@@ -34,7 +34,7 @@ export function resolveConfig(row: SubjectRow): SubjectConfigLoose {
     pageTypes: [],
     rail: [],
     fab: null,
-    wiki: { root: "wiki", ignore: [], divisionField: "division" },
+    wiki: { root: "wiki", ignore: [], divisionField: "division", study: "estudio" },
   };
 }
 

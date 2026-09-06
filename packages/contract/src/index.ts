@@ -181,6 +181,8 @@ export const WikiSource = z.object({
   ignore: z.array(z.string()).default([]),
   /** Campo del frontmatter que indica la división (por compatibilidad: "unidad" en Proba). */
   divisionField: z.string().default("division"),
+  /** Carpeta (relativa al config) con el material de estudio: mazos, quizzes, plan y kits. */
+  study: SafeRelativePath.default("estudio"),
 });
 export type WikiSource = z.infer<typeof WikiSource>;
 
@@ -269,6 +271,8 @@ export type PageMeta = z.infer<typeof PageMeta>;
 export const SyncPayload = z.object({
   config: SubjectConfig,
   pages: z.array(Page).max(20000),
+  /** Material de estudio compilado de `wiki.study` (Sprint 2). Opcional: sin él, la plataforma autogenera un mazo por división. */
+  study: z.lazy(() => StudyContent).optional(),
   generatedAt: z.string(),
   /** Identificador de la herramienta que compiló (p. ej. "@sinapsis/cli 0.1.0"). */
   generator: z.string().max(80).optional(),
@@ -330,6 +334,8 @@ export type CreateSubjectInput = z.infer<typeof CreateSubjectInput>;
 /** Reordenar / mover en la landing: lista completa de posiciones del usuario. */
 export const LandingLayoutInput = z.object({
   items: z.array(z.object({ slug: Slug, semester: z.string().min(1).max(24), position: z.number().int() })),
+  /** Lista ordenada de cuatrimestres del usuario (incluye los vacíos). Si falta, no se toca. */
+  semesters: z.array(z.string().min(1).max(24)).max(64).optional(),
 });
 export type LandingLayoutInput = z.infer<typeof LandingLayoutInput>;
 
@@ -557,8 +563,211 @@ export function headingId(text: string): string {
   return t || "h";
 }
 
+// ---------------------------------------------------------------------------
+// Sprint 2 — material de estudio (compilado desde `wiki.study`)
+// ---------------------------------------------------------------------------
+
+/** Id de tarjeta/pregunta/tarea: estable entre syncs (lo fija el compilador). */
+export const StudyId = z.string().min(1).max(160).regex(/^[a-z0-9][a-z0-9._:-]*$/i);
+
+export const Card = z.object({
+  id: StudyId,
+  /** Anverso y reverso en markdown (KaTeX admitido). */
+  front: z.string().min(1).max(4000),
+  back: z.string().min(1).max(8000),
+  division: DivisionKey.optional(),
+  /** Página del wiki relacionada (para «ver en el wiki»). */
+  page: Slug.optional(),
+  tags: z.array(z.string().max(60)).default([]),
+});
+export type Card = z.infer<typeof Card>;
+
+export const Deck = z.object({
+  id: StudyId,
+  title: z.string().min(1).max(120),
+  description: z.string().max(600).optional(),
+  division: DivisionKey.optional(),
+  /** authored: escrito en `wiki.study`; auto: generado por la plataforma desde los resúmenes. */
+  source: z.enum(["authored", "auto"]).default("authored"),
+  cards: z.array(Card).max(2000),
+});
+export type Deck = z.infer<typeof Deck>;
+
+export const QuizOption = z.object({ text: z.string().min(1).max(600), correct: z.boolean() });
+export type QuizOption = z.infer<typeof QuizOption>;
+
+export const QuizQuestion = z
+  .object({
+    id: StudyId,
+    prompt: z.string().min(1).max(4000),
+    options: z.array(QuizOption).min(2).max(8),
+    explanation: z.string().max(4000).optional(),
+    division: DivisionKey.optional(),
+    page: Slug.optional(),
+  })
+  .refine((q) => q.options.some((o) => o.correct), "quiz: cada pregunta necesita al menos una opción correcta");
+export type QuizQuestion = z.infer<typeof QuizQuestion>;
+
+export const Quiz = z.object({
+  id: StudyId,
+  title: z.string().min(1).max(120),
+  description: z.string().max(600).optional(),
+  division: DivisionKey.optional(),
+  questions: z.array(QuizQuestion).min(1).max(500),
+});
+export type Quiz = z.infer<typeof Quiz>;
+
+export const PlanTaskKind = z.enum(["read", "cards", "quiz", "exercises", "custom"]);
+export const PlanTask = z.object({
+  id: StudyId,
+  label: z.string().min(1).max(200),
+  kind: PlanTaskKind.default("custom"),
+  /** Destino según kind: división (read), id de mazo (cards), id de quiz (quiz), slug de página o URL (exercises/custom). */
+  target: z.string().max(400).optional(),
+});
+export type PlanTask = z.infer<typeof PlanTask>;
+
+export const PlanMilestone = z.object({
+  id: StudyId,
+  title: z.string().min(1).max(160),
+  divisions: z.array(DivisionKey).default([]),
+  tasks: z.array(PlanTask).max(40),
+});
+export type PlanMilestone = z.infer<typeof PlanMilestone>;
+
+export const PlanPhase = z.object({
+  id: StudyId,
+  title: z.string().min(1).max(160),
+  subtitle: z.string().max(300).optional(),
+  /** Fecha objetivo (AAAA-MM-DD), p. ej. la del parcial. */
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  /** Texto libre «qué cae en este examen». */
+  scope: z.string().max(4000).optional(),
+  milestones: z.array(PlanMilestone).max(40),
+});
+export type PlanPhase = z.infer<typeof PlanPhase>;
+
+export const Plan = z.object({
+  title: z.string().max(160).default("Plan de estudio"),
+  phases: z.array(PlanPhase).min(1).max(20),
+});
+export type Plan = z.infer<typeof Plan>;
+
+export const Kit = z.object({
+  id: StudyId,
+  title: z.string().min(1).max(120),
+  description: z.string().max(600).optional(),
+  divisions: z.array(DivisionKey).default([]),
+  pages: z.array(Slug).default([]),
+  decks: z.array(StudyId).default([]),
+  quizzes: z.array(StudyId).default([]),
+  /** Ids de ítems del rail (herramientas de la materia). */
+  tools: z.array(z.string().max(48)).default([]),
+});
+export type Kit = z.infer<typeof Kit>;
+
+export const StudyContent = z.object({
+  decks: z.array(Deck).max(200).default([]),
+  quizzes: z.array(Quiz).max(200).default([]),
+  plan: Plan.nullable().default(null),
+  kits: z.array(Kit).max(100).default([]),
+});
+export type StudyContent = z.infer<typeof StudyContent>;
+
+/**
+ * Mazo automático por división a partir de los resúmenes de las páginas de
+ * contenido: anverso = título, reverso = `summary`. Lo genera la plataforma cuando
+ * la materia no trae mazos propios (y siempre como complemento, marcado `auto`).
+ */
+export function autoDecks(
+  cfg: Pick<SubjectConfigLoose, "division" | "divisions" | "pageTypes">,
+  pages: ReadonlyArray<Pick<Page, "slug" | "title" | "summary" | "type" | "division">>,
+): Deck[] {
+  const out: Deck[] = [];
+  for (const d of effectiveDivisions(cfg, pages)) {
+    const cards: Card[] = pages
+      .filter((p) => divisionOf(cfg, p) === d.key && countsAsContent(cfg, p.type) && p.summary.trim().length > 0)
+      .map((p) => ({ id: `auto:${p.slug}`, front: p.title, back: p.summary, division: d.key, page: p.slug, tags: [] }));
+    if (cards.length === 0) continue;
+    out.push({ id: `auto-${d.key}`, title: `Resúmenes · ${divisionLong(cfg, d.key)}`, division: d.key, source: "auto", cards });
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 2 — estado por usuario: SRS (SM-2), favoritos, apuntes, tareas, intentos
+// ---------------------------------------------------------------------------
+
+export const SrsGrade = z.number().int().min(1).max(4);
+export type SrsGrade = z.infer<typeof SrsGrade>;
+
+export const SrsState = z.object({
+  cardId: StudyId,
+  /** Factor de facilidad (SM-2), mínimo 1.3. */
+  ease: z.number().min(1.3).max(5),
+  /** Intervalo actual en días. */
+  interval: z.number().min(0),
+  /** Próxima revisión (ISO). */
+  due: z.string(),
+  reps: z.number().int().min(0),
+  lapses: z.number().int().min(0),
+  lastGrade: SrsGrade.nullable(),
+  updatedAt: z.string(),
+});
+export type SrsState = z.infer<typeof SrsState>;
+
+export const SRS_DEFAULT: Omit<SrsState, "cardId" | "due" | "updatedAt"> = { ease: 2.5, interval: 0, reps: 0, lapses: 0, lastGrade: null };
+
+/**
+ * SM-2 con 4 notas (1 = otra vez, 2 = difícil, 3 = bien, 4 = fácil). Pura: la usan el
+ * API para persistir y la web para previsualizar («en 3 d»). `now` es ISO.
+ */
+export function sm2(prev: Omit<SrsState, "cardId" | "due" | "updatedAt"> & { due?: string }, grade: SrsGrade, now: string): Omit<SrsState, "cardId"> {
+  let { ease, interval, reps, lapses } = prev;
+  if (grade === 1) {
+    reps = 0;
+    lapses += 1;
+    interval = 0;
+    ease = Math.max(1.3, ease - 0.2);
+  } else {
+    const q = grade === 2 ? 3 : grade === 3 ? 4 : 5;
+    ease = Math.max(1.3, ease + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+    if (reps === 0) interval = 1;
+    else if (reps === 1) interval = grade === 4 ? 4 : 3;
+    else interval = Math.round(interval * ease * (grade === 2 ? 0.8 : grade === 4 ? 1.3 : 1));
+    if (grade === 2 && reps > 1) interval = Math.max(1, interval);
+    reps += 1;
+  }
+  const dueMs = Date.parse(now) + (interval === 0 ? 10 * 60 * 1000 : interval * 24 * 60 * 60 * 1000);
+  return { ease, interval, reps, lapses, lastGrade: grade, due: new Date(dueMs).toISOString(), updatedAt: now };
+}
+
+export const Note = z.object({ page: Slug, body: z.string().max(50000), updatedAt: z.string() });
+export type Note = z.infer<typeof Note>;
+
+export const QuizAttempt = z.object({ quizId: StudyId, score: z.number().int().min(0), total: z.number().int().min(1), at: z.string() });
+export type QuizAttempt = z.infer<typeof QuizAttempt>;
+
+/** Estado de estudio del usuario en una materia (lo devuelve `GET /api/subjects/:slug/study/state`). */
+export const StudyState = z.object({
+  srs: z.array(SrsState),
+  bookmarks: z.array(Slug),
+  notes: z.array(Note),
+  tasksDone: z.array(StudyId),
+  attempts: z.array(QuizAttempt),
+});
+export type StudyState = z.infer<typeof StudyState>;
+
+/** Grafo de conexiones: nodos = páginas, aristas = wikilinks resueltos. */
+export const GraphNode = z.object({ slug: Slug, title: z.string(), type: z.string(), division: DivisionKey, words: z.number().int(), inDegree: z.number().int(), outDegree: z.number().int() });
+export const GraphEdge = z.object({ from: Slug, to: Slug });
+export const GraphData = z.object({ nodes: z.array(GraphNode), edges: z.array(GraphEdge) });
+export type GraphNode = z.infer<typeof GraphNode>;
+export type GraphEdge = z.infer<typeof GraphEdge>;
+export type GraphData = z.infer<typeof GraphData>;
+
 /** Vistas builtin que la plataforma garantiza en el Sprint 1. */
-export const BUILTIN_VIEWS = ["home", "wiki", "graph", "flashcards", "quiz", "notes", "favorites"] as const;
+export const BUILTIN_VIEWS = ["home", "plan", "kits", "wiki", "graph", "flashcards", "quiz", "notes", "favorites"] as const;
 export type BuiltinView = (typeof BUILTIN_VIEWS)[number];
 
 /** Grupos FIJOS del rail (regiones 02 del contrato). Los dibuja la plataforma, no la materia. */
@@ -567,7 +776,11 @@ export const FIXED_RAIL: readonly RailGroup[] = [
     id: "ruta",
     label: "Mi ruta",
     color: "--primary",
-    items: [{ id: "home", label: "Inicio", icon: "home", kind: "builtin", target: "home" }],
+    items: [
+      { id: "home", label: "Inicio", icon: "home", kind: "builtin", target: "home" },
+      { id: "plan", label: "Plan de estudio", icon: "map", kind: "builtin", target: "plan" },
+      { id: "kits", label: "Kits de estudio", icon: "grid", kind: "builtin", target: "kits" },
+    ],
   },
   {
     id: "consultar",
@@ -578,10 +791,28 @@ export const FIXED_RAIL: readonly RailGroup[] = [
       { id: "graph", label: "Grafo de conexiones", icon: "graph", kind: "builtin", target: "graph" },
     ],
   },
+  {
+    id: "practicar",
+    label: "Practicar",
+    color: "--good",
+    items: [
+      { id: "flashcards", label: "Flashcards", icon: "cards", kind: "builtin", target: "flashcards" },
+      { id: "quiz", label: "Quiz", icon: "quiz", kind: "builtin", target: "quiz" },
+    ],
+  },
 ];
 
-/** Grupo FIJO de cierre: se dibuja después de los slots de la materia. */
+/** Grupos FIJOS de cierre: se dibujan después de los slots de la materia. */
 export const FIXED_RAIL_TAIL: readonly RailGroup[] = [
+  {
+    id: "mio",
+    label: "Lo mío",
+    color: "--warn",
+    items: [
+      { id: "notes", label: "Mis apuntes", icon: "notebook", kind: "builtin", target: "notes" },
+      { id: "favorites", label: "Favoritos", icon: "star", kind: "builtin", target: "favorites" },
+    ],
+  },
   {
     id: "wikimeta",
     label: "Wiki",
@@ -598,6 +829,7 @@ export const LS_KEYS = {
   theme: "sinapsis.theme",
   sidebarCompact: "sinapsis.sbCompact",
   landingCollapsed: "sinapsis.landing.collapsed",
+  tabs: (subject: string) => `sinapsis.${subject}.tabs`,
   openDivisions: (subject: string) => `sinapsis.${subject}.openDivisions`,
 } as const;
 
@@ -611,6 +843,15 @@ export const routes = {
   division: (s: string, d: string) => `/m/${s}/d/${d}`,
   page: (s: string, p: string) => `/m/${s}/p/${p}`,
   tool: (s: string, t: string) => `/m/${s}/t/${t}`,
+  plan: (s: string) => `/m/${s}/plan`,
+  kits: (s: string) => `/m/${s}/kits`,
+  kit: (s: string, k: string) => `/m/${s}/kits/${k}`,
+  flashcards: (s: string) => `/m/${s}/flashcards`,
+  deck: (s: string, d: string) => `/m/${s}/flashcards/${d}`,
+  quiz: (s: string) => `/m/${s}/quiz`,
+  quizOne: (s: string, q: string) => `/m/${s}/quiz/${q}`,
+  notes: (s: string) => `/m/${s}/notes`,
+  favorites: (s: string) => `/m/${s}/favorites`,
 } as const;
 
 /** Prefijo de la API HTTP. */
