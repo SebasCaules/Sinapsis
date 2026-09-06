@@ -166,7 +166,7 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
   // ============================================================
   A.registerView("taller", function (main, arg) {
     if (arg && BY_KEY[arg]) { renderSolver(main, BY_KEY[arg]); return; }
-    document.title = "Taller de resolución · Estudio P&E";
+    if (A.setTitle) A.setTitle("Taller de resolución");   // [bundle]
     var cards = SOLVERS.map(function (s) {
       return '<a class="kit-card card" href="#/taller/' + s.key + '" data-nav style="--kcol:' + s.color + '">' +
         '<div class="kit-card-top"><span class="kit-ic" style="background:color-mix(in srgb,' + s.color + ' 16%,transparent);color:' + s.color + '">' + icon(s.icon, 22) + "</span></div>" +
@@ -185,7 +185,7 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
   });
 
   function renderSolver(main, s) {
-    document.title = s.title + " · Taller · Estudio P&E";
+    if (A.setTitle) A.setTitle(s.title + " · Taller");   // [bundle]
     // El core no conoce los títulos de los talleres: sin este setCrumbs el último
     // tramo sería la clave interna capitalizada ('Markov', 'Inferencia').
     A.setCrumbs([

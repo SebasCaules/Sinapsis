@@ -22,8 +22,17 @@
        baseline (`#/p/slug`, `#/unidad/3`, `#/vista/arg`) y las rutas del SPA.
    ============================================================ */
 
-/** Selector del baseline, más `[data-go]`. */
-export const NAV_SEL = "[data-nav], [data-go], a.wikilink[data-slug]";
+/**
+ * Selector del baseline, más `[data-go]` y —brecha herr-02— cualquier ancla cuyo
+ * `href` sea una ruta del baseline (`#/calc/ic`).
+ *
+ * En el baseline esas anclas no necesitaban `data-nav`: el `href` era un hash de
+ * verdad, el navegador disparaba `hashchange` y el router volvía a dibujar. En un
+ * SPA con rutas de camino, un `href="#/calc/ic"` solo agrega un fragmento y NO
+ * navega, así que la subnavegación de calculadoras (seis chips sin `data-nav`)
+ * quedaba muerta. Un `#/…` es, en la gramática de la materia, una ruta.
+ */
+export const NAV_SEL = '[data-nav], [data-go], a.wikilink[data-slug], a[href^="#/"]';
 
 /** El clic «normal»: botón principal, sin modificadores y sin dueño previo. */
 export function isPlainClick(ev: MouseEvent): boolean {
@@ -90,6 +99,10 @@ export function navTargetOf(start: Element, root?: Element | null): string | nul
     const anchor = (el.getAttribute("data-anchor") ?? "").trim();
     return withAnchor(href.startsWith("/") ? href : "#/p/" + slug, anchor);
   }
+
+  /* Un ancla con la gramática del baseline (`#/vista/arg`) es una ruta aunque no
+     lleve `data-nav`: es lo que hacía `hashchange` en el original (herr-02). */
+  if (tag === "a" && href.startsWith("#/")) return href;
 
   /* Nada resolvió. Un `[data-nav]` con `href` vacío recargaría la página: el
      clic se frena, pero no se navega a ningún lado. */

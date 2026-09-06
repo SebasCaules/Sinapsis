@@ -178,3 +178,50 @@ describe("installRuntime", () => {
     expect(rt.App.PAGES).toHaveLength(3);
   });
 });
+
+describe("rutas propias de la plataforma con nombre del baseline (brecha herr-03)", () => {
+  it("las vistas de la plataforma NO caen en /t/<vista>", () => {
+    expect(translateRoute("proba", "#/plan")).toBe("/m/proba/plan");
+    expect(translateRoute("proba", "#/kits")).toBe("/m/proba/kits");
+    expect(translateRoute("proba", "#/kits/u2")).toBe("/m/proba/kits/u2");
+    expect(translateRoute("proba", "#/flashcards")).toBe("/m/proba/flashcards");
+    expect(translateRoute("proba", "#/flashcards/u1")).toBe("/m/proba/flashcards/u1");
+    expect(translateRoute("proba", "#/quiz")).toBe("/m/proba/quiz");
+    expect(translateRoute("proba", "#/quiz/u2")).toBe("/m/proba/quiz/u2");
+    expect(translateRoute("proba", "#/apuntes")).toBe("/m/proba/notes");
+    expect(translateRoute("proba", "#/favoritos")).toBe("/m/proba/favorites");
+    expect(translateRoute("proba", "#/grafo")).toBe("/m/proba/graph");
+  });
+  it("una vista que no es de la plataforma sigue siendo una herramienta", () => {
+    expect(translateRoute("proba", "#/taller")).toBe("/m/proba/t/taller");
+    expect(translateRoute("proba", "#/asistente/test")).toBe("/m/proba/t/asistente?arg=test");
+  });
+  it("la query del baseline se conserva", () => {
+    expect(translateRoute("proba", "#/plan?fase=2")).toBe("/m/proba/plan?fase=2");
+  });
+});
+
+describe("App.setCrumbs — las dos formas de nombrar el destino (brecha herr-08)", () => {
+  it("traduce el `hash` del baseline a la ruta del SPA", () => {
+    const crumbs: Array<{ label: string; href?: string }> = [];
+    const ctx = makeContext({ setCrumbs: (items) => crumbs.splice(0, crumbs.length, ...items) });
+    const { app } = createCompatApp(ctx);
+    app.setCrumbs([
+      { label: "Inicio", hash: "#/inicio" },
+      { label: "Taller de resolución", hash: "#/taller" },
+      { label: "Cadenas de Markov" },
+    ]);
+    expect(crumbs).toEqual([
+      { label: "Inicio", href: "/m/proba" },
+      { label: "Taller de resolución", href: "/m/proba/t/taller" },
+      { label: "Cadenas de Markov" },
+    ]);
+  });
+  it("un `href` del contrato pasa tal cual", () => {
+    const crumbs: Array<{ label: string; href?: string }> = [];
+    const ctx = makeContext({ setCrumbs: (items) => crumbs.splice(0, crumbs.length, ...items) });
+    const { app } = createCompatApp(ctx);
+    app.setCrumbs([{ label: "Materia", href: "/m/proba" }, { label: "Ahora" }]);
+    expect(crumbs).toEqual([{ label: "Materia", href: "/m/proba" }, { label: "Ahora" }]);
+  });
+});

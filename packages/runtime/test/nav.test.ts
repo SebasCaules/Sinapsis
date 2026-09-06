@@ -343,3 +343,38 @@ describe("App.paletteOpen / App.openPalette", () => {
     expect(PALETTE_EVENT).toBe("sinapsis:palette");
   });
 });
+
+describe("anclas con la gramática del baseline (brecha herr-02)", () => {
+  it("un `<a href=\"#/…\">` SIN data-nav también navega", () => {
+    /* Los seis chips de la subnavegación de calculadoras son así: en el baseline
+       alcanzaba con el `href`, porque el hash disparaba `hashchange`. */
+    const host = mount('<a class="chip-btn" href="#/calc/ic" data-sec="ic">Intervalos</a>');
+    expect(navTargetOf(host.querySelector("a")!)).toBe("#/calc/ic");
+  });
+
+  it("el clic llega a `App.go` traducido a la ruta del SPA", () => {
+    const ctx = makeContext();
+    const rt = installRuntime(ctx);
+    const host = mount('<nav id="calcSubnav"><a class="chip-btn" href="#/calc/ic">Intervalos</a></nav>');
+    const unbind = rt.bindView(host);
+    const ev = click(host.querySelector("a")!);
+    expect(ev.defaultPrevented).toBe(true);
+    expect(ctx.navigated[0]?.path).toBe("/m/proba/t/calc?arg=ic");
+    unbind();
+  });
+
+  it("un `href` de ancla de verdad (#seccion) sigue siendo del navegador", () => {
+    const host = mount('<a href="#tabla-z">ir a la tabla</a>');
+    expect(navTargetOf(host.querySelector("a")!)).toBeNull();
+  });
+
+  it("⌘-clic sobre un `#/…` sigue siendo del navegador", () => {
+    const ctx = makeContext();
+    const rt = installRuntime(ctx);
+    const host = mount('<a href="#/calc/ic">Intervalos</a>');
+    const unbind = rt.bindView(host);
+    click(host.querySelector("a")!, { metaKey: true });
+    expect(ctx.navigated).toHaveLength(0);
+    unbind();
+  });
+});

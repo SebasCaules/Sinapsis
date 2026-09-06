@@ -19,8 +19,11 @@ import {
   effectiveDivisions,
   routes,
   type CompatApp,
+  type CompatRoute,
+  type CompatStorage,
   type FigureMeta,
   type PageMeta,
+  type SearchProvider,
   type SubjectConfigLoose,
   type ThemeId,
   type ViewFn,
@@ -38,10 +41,18 @@ import {
   type MarkdownApi,
 } from "./markdown.js";
 
-/** Miga de pan: el último tramo, sin `href`, es la pantalla actual. */
+/**
+ * Miga de pan: el último tramo, sin destino, es la pantalla actual.
+ *
+ * `href` es la forma del contrato (ruta del SPA) y `hash` la del baseline
+ * (`#/taller`): `App.setCrumbs` acepta las dos y le entrega al host siempre un
+ * `href` ya traducido (brecha herr-08).
+ */
 export interface Crumb {
   label: string;
   href?: string;
+  /** Alias del baseline: `#/inicio`, `#/taller`, `#/p/slug`… */
+  hash?: string;
 }
 
 /** Lo que la plataforma (host) le presta al runtime por materia abierta. */
@@ -68,6 +79,17 @@ export interface SubjectContext {
    * provee, el runtime despacha `PALETTE_EVENT` en `window`.
    */
   openPalette?(): void;
+  /**
+   * Anota actividad de estudio de hoy (compat: `App.markActivity()`). Lo resuelve
+   * el host con `features/subject/activity.ts` mientras la actividad viva en el
+   * navegador; el día que `StudyState` la lleve al API, cambia solo acá.
+   */
+  markActivity?(): void;
+  /**
+   * Título que pide la vista (compat: `App.setTitle()`). El host lo compone con
+   * el nombre de la materia; el bundle NO escribe `document.title` (herr-10).
+   */
+  setTitle?(label: string): void;
 }
 
 /** KaTeX del baseline: `A.katex(tex, display)` y, además, la API de la librería. */
@@ -141,6 +163,16 @@ export interface CompatHandle {
   setViewRoot(el: HTMLElement | null): void;
   viewRoot(): HTMLElement | null;
   markdown: MarkdownApi;
+  /** Anota la posición de scroll de la ruta actual (la lee `App.scrollFor`). */
+  saveScroll(y: number): void;
+  /**
+   * Corre los limpiadores que se registraron con `App.onTeardown` FUERA de la
+   * carga de un bundle (los de un bundle los corre `unloadBundle`) y olvida los
+   * proveedores de búsqueda. Lo llama el desmontaje del runtime.
+   */
+  runTeardowns(): void;
+  /** Proveedores de resultados para la paleta (`App.registerSearchProvider`). */
+  searchProviders(): SearchProvider[];
 }
 
 /**
@@ -204,6 +236,37 @@ export function backBar(href: string, label: string): string {
   );
 }
 
+/**
+ * `A.normText` del baseline: normalización de búsqueda —minúsculas y sin
+ * diacríticos—, para que «funcion» encuentre «función». `normalize("NFD")` no
+ * está en todos los motores viejos: si tira, se devuelve el texto en minúsculas.
+ */
+export function normText(s: string): string {
+  const t = String(s ?? "").toLowerCase();
+  try {
+    return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  } catch {
+    return t;
+  }
+}
+
+/**
+ * `A.texPlain` del baseline: texto buscable de una fórmula. Se quitan barras,
+ * llaves y `\dfrac` para que «sqrt n» u «overline x» encuentren la expresión
+ * aunque esté escrita en LaTeX. El `trim` final es parte del contrato: el
+ * resultado se compara con `startsWith`, y un espacio inicial —el que deja
+ * cualquier rótulo que empiece en `$`— anulaba el acierto.
+ */
+export function texPlain(tex: string): string {
+  return String(tex ?? "")
+    .replace(/\\(?:text|textrm|mathrm|mathit|mathbf|operatorname)\s*\{/g, " {")
+    .replace(/\\[dt]?frac/g, " frac ")
+    .replace(/\\left|\\right|\\!|\\,|;|\\qquad|\\quad/g, " ")
+    .replace(/[\\{}$&]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function shuffle<T>(a: T[]): T[] {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -226,10 +289,47 @@ function isExternal(t: string): boolean {
 }
 
 /**
+ * Vistas PROPIAS de la plataforma con nombre del baseline (brecha herr-03): sin
+ * esta tabla, `#/plan` o `#/apuntes` caían en `/m/<materia>/t/plan`, que ningún
+ * bundle registra, y el usuario terminaba en «Próximamente».
+ *
+ * Cada entrada dice qué ruta usar sin argumento y con argumento; el resto de las
+ * vistas sigue cayendo en `/t/<vista>`, que es donde viven las herramientas.
+ */
+const PLATFORM_VIEWS: Record<
+  string,
+  { base: (s: string) => string; withArg?: (s: string, a: string) => string }
+> = {
+  plan: { base: routes.plan },
+  kits: { base: routes.kits, withArg: routes.kit },
+  kit: { base: routes.kits, withArg: routes.kit },
+  flashcards: { base: routes.flashcards, withArg: routes.deck },
+  mazo: { base: routes.flashcards, withArg: routes.deck },
+  quiz: { base: routes.quiz, withArg: routes.quizOne },
+  apuntes: { base: routes.notes },
+  notas: { base: routes.notes },
+  favoritos: { base: routes.favorites },
+  grafo: { base: routes.graph },
+};
+
+/** Nombre del baseline de cada vista propia de la plataforma (inversa de `PLATFORM_VIEWS`). */
+const BASELINE_NAME: Record<string, string> = {
+  plan: "plan",
+  kits: "kits",
+  flashcards: "flashcards",
+  quiz: "quiz",
+  notes: "apuntes",
+  favorites: "favoritos",
+  graph: "grafo",
+  wiki: "wiki",
+};
+
+/**
  * Traduce una ruta del baseline a una ruta del SPA:
  *   `#/p/slug`         → `/m/<materia>/p/slug`
  *   `#/unidad/3`       → `/m/<materia>/d/3`   (también `#/division/3`)
  *   `#/wiki`           → `/m/<materia>/wiki`
+ *   `#/plan`, `#/quiz/1`, `#/apuntes`… → la vista propia de la plataforma
  *   `#/inicio` o `#/`  → `/m/<materia>`
  *   `#/<vista>[/arg]`  → `/m/<materia>/t/<vista>[?arg=…]`
  * Una ruta que ya empieza con `/` se devuelve tal cual, y `null` avisa que el
@@ -255,8 +355,99 @@ export function translateRoute(subject: string, target: string): string | null {
   if (view === "p" && arg) return routes.page(subject, arg) + tail;
   if ((view === "unidad" || view === "division") && arg) return routes.division(subject, arg) + tail;
   if (view === "wiki") return routes.wiki(subject) + tail;
+  const platform = PLATFORM_VIEWS[view];
+  if (platform) {
+    const path = arg && platform.withArg ? platform.withArg(subject, arg) : platform.base(subject);
+    return path + tail;
+  }
   const q = arg ? "?arg=" + encodeURIComponent(arg) + (qs ? "&" + qs : "") : tail;
   return routes.tool(subject, view) + q;
+}
+
+/**
+ * La INVERSA de `translateRoute`: lee la ruta real del SPA con la gramática del
+ * baseline (`A.parseRoute()`), para que una vista portada sepa dónde está.
+ *
+ *   `/m/proba/t/calc/ic?x=1` → `{ view: "calc", arg: "ic", query: { x: "1" } }`
+ *   `/m/proba/t/calc?arg=ic` → lo mismo (forma antigua: el argumento en la query)
+ *   `/m/proba/p/normal`      → `{ view: "p", arg: "normal" }`
+ *   `/m/proba`               → `{ view: "inicio", arg: "" }`
+ *
+ * El parámetro `arg` NUNCA aparece en `query`: es el argumento de la vista, no
+ * un parámetro suyo.
+ */
+/**
+ * ¿El destino es el sitio donde ya estamos, con otra consulta?
+ *
+ * Sirve para saber si hay que volver a dibujar la vista después de navegar: el
+ * host la reinvoca cuando cambia el ARGUMENTO, pero no cuando cambia el resto de
+ * la query (`?sel=1`, `?ej=…`), y en el baseline cualquier cambio de ruta
+ * redibujaba. Devuelve `false` si cambia la vista o el argumento —eso ya lo
+ * atiende el host, y sin desmontar— y `false` si la ruta es idéntica, para que
+ * un enlace al sitio donde uno está no borre lo que la vista tenga cargado.
+ *
+ * `here` es opcional para poder probarla sin navegador; sin ella lee
+ * `location`.
+ */
+export function isQueryOnlyChange(
+  subject: string,
+  path: string,
+  here?: { pathname: string; search: string },
+): boolean {
+  const now = here ?? (typeof location === "undefined" ? null : location);
+  if (!now) return false;
+  const qi = path.indexOf("?");
+  const nextPath = qi < 0 ? path : path.slice(0, qi);
+  const nextSearch = qi < 0 ? "" : path.slice(qi);
+  const a = parseLocation(subject, now.pathname, now.search || "");
+  const b = parseLocation(subject, nextPath, nextSearch);
+  return a.view === b.view && a.arg === b.arg && a.qs !== b.qs;
+}
+
+export function parseLocation(subject: string, pathname: string, search = ""): CompatRoute {
+  const query: Record<string, string> = {};
+  const raw = String(search || "").replace(/^\?/, "");
+  raw.split("&").forEach((kv) => {
+    if (!kv) return;
+    const i = kv.indexOf("=");
+    let k = i < 0 ? kv : kv.slice(0, i);
+    let v = i < 0 ? "" : kv.slice(i + 1);
+    try {
+      k = decodeURIComponent(k);
+      v = decodeURIComponent(v.replace(/\+/g, " "));
+    } catch {
+      /* un porcentaje suelto no puede tumbar la lectura de la ruta */
+    }
+    if (k) query[k] = v;
+  });
+  const fromQuery = query["arg"] ?? "";
+  delete query["arg"];
+  const qs = serializeQuery(query);
+
+  let path = String(pathname || "");
+  const prefix = routes.subject(subject);
+  if (subject && (path === prefix || path.startsWith(prefix + "/"))) path = path.slice(prefix.length);
+  const parts = path.split("/").filter((x) => x !== "");
+  const head = parts[0] || "";
+  const rest = parts.slice(1).join("/");
+
+  const done = (view: string, arg: string): CompatRoute => ({ view, arg: arg || fromQuery, query, qs });
+  if (!head) return done("inicio", "");
+  if (head === "t") return done(parts[1] || "", parts.slice(2).join("/"));
+  if (head === "p") return done("p", rest);
+  if (head === "d") return done("unidad", rest);
+  const baseline = BASELINE_NAME[head];
+  if (baseline) return done(baseline, rest);
+  return done(head, rest);
+}
+
+/** Claves ordenadas: dos rutas con los mismos parámetros dan el mismo string. */
+export function serializeQuery(q: Record<string, string>): string {
+  return Object.keys(q)
+    .filter((k) => q[k] != null)
+    .sort()
+    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(q[k] as string))
+    .join("&");
 }
 
 // ---------------------------------------------------------------------------
@@ -269,6 +460,10 @@ interface Derived {
   BY_SLUG: Record<string, PageMeta>;
   UNITS: Array<{ key: string; name: string; color: string }>;
   TYPES: Array<{ key: string; label: string }>;
+  /** `UNITS` en forma de tabla: clave de división → posición en el programa. */
+  unitOrder: Record<string, number>;
+  /** `TYPES` en forma de tabla: clave de tipo → rótulo. */
+  TYPE_LABEL: Record<string, string>;
 }
 
 function derive(ctx: SubjectContext): Derived {
@@ -284,7 +479,18 @@ function derive(ctx: SubjectContext): Derived {
     color: divisionColor(ctx.config, d.key),
   }));
   const TYPES = ctx.config.pageTypes.map((t) => ({ key: t.key, label: t.label }));
-  return { PAGES, CONTENT, BY_SLUG, UNITS, TYPES };
+  /* Las dos tablas del baseline (`core.js`: `unitOrder`, `TYPE_LABEL`): son la
+     misma información que `UNITS`/`TYPES`, indexada. Ordenar 289 ejercicios por
+     unidad con `UNITS.findIndex` es cuadrático; con la tabla es una lectura. */
+  const unitOrder: Record<string, number> = {};
+  UNITS.forEach((u, i) => {
+    unitOrder[u.key] = i;
+  });
+  const TYPE_LABEL: Record<string, string> = {};
+  TYPES.forEach((t) => {
+    TYPE_LABEL[t.key] = t.label;
+  });
+  return { PAGES, CONTENT, BY_SLUG, UNITS, TYPES, unitOrder, TYPE_LABEL };
 }
 
 /** Crea el `App` de compatibilidad para una materia. */
@@ -323,6 +529,84 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     return doc();
   };
 
+  /**
+   * Selectores con los que el baseline nombraba al contenedor de la vista. En la
+   * plataforma `#main` es OTRA cosa (el `<main id="contenido">` del shell no
+   * lleva ese id, y aunque lo llevara no sería el nodo de la herramienta), así
+   * que `App.$("#main")` devolvía null y escribir en él lanzaba una excepción
+   * (brecha herr-01). Acá se resuelven a la raíz de la vista montada, que es lo
+   * que el bundle quiere decir.
+   */
+  const VIEW_ROOT_SELECTORS = new Set(["#main", "#app", "#content", "#contenido"]);
+
+  /* --- almacenamiento local con prefijo por materia (A.LS) ------------------ */
+  const lsPrefix = (): string => "sinapsis." + (ctx.slug || "_") + ".rt.";
+  const storage = (): Storage | null => {
+    try {
+      return typeof localStorage === "undefined" ? null : localStorage;
+    } catch {
+      /* modo privado o almacenamiento bloqueado: la herramienta sigue, sin memoria */
+      return null;
+    }
+  };
+  const LS: CompatStorage = {
+    key(name: string): string {
+      return lsPrefix() + String(name || "");
+    },
+    get<T = unknown>(name: string, fallback?: T): T {
+      try {
+        const raw = storage()?.getItem(LS.key(name));
+        if (raw == null) return fallback as T;
+        return JSON.parse(raw) as T;
+      } catch {
+        return fallback as T;
+      }
+    },
+    getObj(name: string): Record<string, unknown> {
+      const v = LS.get<unknown>(name, null);
+      return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+    },
+    set(name: string, value: unknown): void {
+      try {
+        storage()?.setItem(LS.key(name), JSON.stringify(value));
+      } catch {
+        /* sin cuota: el estado vive lo que dure la sesión */
+      }
+    },
+    del(name: string): void {
+      try {
+        storage()?.removeItem(LS.key(name));
+      } catch {
+        /* nada que borrar */
+      }
+    },
+  };
+
+  /* --- estado por vista, en memoria (A.viewState) --------------------------
+     Vive en el runtime y NO en el DOM: por eso sobrevive a que el host vuelva a
+     montar la vista al cambiar el tema (brecha herr-05). Se limpia al cambiar
+     de materia, que es cuando deja de tener sentido. */
+  let viewStates: Record<string, Record<string, unknown>> = {};
+
+  /* --- memoria de scroll por ruta (A.scrollFor) ---------------------------- */
+  const scrollMem = new Map<string, number>();
+  const routeKey = (target?: string): string => {
+    if (target) {
+      const path = translateRoute(ctx.slug, target);
+      if (path) return path;
+    }
+    if (typeof location === "undefined") return "";
+    return location.pathname + (location.search || "");
+  };
+
+  /* --- limpiadores y proveedores de búsqueda -------------------------------
+     El cargador de bundles ENVUELVE `onTeardown` y `registerSearchProvider`
+     mientras corre un bundle (igual que con `registerView`), para atribuirle lo
+     que registre y poder deshacerlo al descargarlo. Lo que se registre fuera de
+     una carga cae en estas listas, que corren al desinstalar el runtime. */
+  let teardowns: Array<() => void> = [];
+  let providers: SearchProvider[] = [];
+
   const d = derive(ctx);
 
   const app = {
@@ -335,6 +619,8 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     BY_SLUG: d.BY_SLUG,
     UNITS: d.UNITS,
     TYPES: d.TYPES,
+    unitOrder: d.unitOrder,
+    TYPE_LABEL: d.TYPE_LABEL,
     STUDY: {} as Record<string, unknown>,
     DATA: {} as Record<string, unknown>,
 
@@ -357,10 +643,37 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
         if (typeof window !== "undefined") window.open(String(target), "_blank", "noopener");
         return;
       }
+      /* Enlace a la MISMA vista con el MISMO argumento y otra consulta
+         (`#/formularios?sel=1`, `#/ejercicios/5/guia?ej=…`): el host no
+         reinvoca la vista —solo mira el argumento— así que la ruta cambiaba y
+         el documento se quedaba como estaba. En el baseline cualquier cambio de
+         ruta disparaba `hashchange` y la vista se volvía a dibujar; acá se pide
+         ese redibujo explícitamente. Un cambio de ARGUMENTO no entra: de eso se
+         encarga el host sin desmontar, que es lo que conserva lo escrito al
+         saltar de sección (brecha herr-13). */
+      const redraw = isQueryOnlyChange(ctx.slug, path);
       ctx.navigate(path, opts);
+      if (redraw) ctx.render?.();
     },
+    /**
+     * Migas de la vista. El baseline las escribe con `hash` (`#/taller`) y el
+     * contrato las quiere con `href` (ruta del SPA): se aceptan las dos formas y
+     * el host recibe siempre una ruta navegable (brecha herr-08).
+     */
     setCrumbs(items: Crumb[]): void {
-      ctx.setCrumbs?.(items);
+      const list = (items || []).map((c) => {
+        if (c.href) return { label: c.label, href: c.href };
+        if (!c.hash) return { label: c.label };
+        const href = translateRoute(ctx.slug, c.hash);
+        return href ? { label: c.label, href } : { label: c.label };
+      });
+      ctx.setCrumbs?.(list);
+    },
+    setTitle(label: string): void {
+      ctx.setTitle?.(String(label || ""));
+    },
+    markActivity(): void {
+      ctx.markActivity?.();
     },
     render(): void {
       ctx.render?.();
@@ -383,6 +696,8 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     figureMarkup,
     emptyState,
     backBar,
+    normText,
+    texPlain,
     fmt,
     fmt4,
     fmt6,
@@ -392,12 +707,95 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
 
     // --- consulta del DOM (S-16) ---
     $(sel: string, explicit?: ParentNode | null): HTMLElement | null {
+      /* `#main` y compañía SON el contenedor de la vista: el baseline los usaba
+         para redibujarse entero (herr-01). */
+      if (!explicit && VIEW_ROOT_SELECTORS.has(String(sel).trim()) && root && root.isConnected) return root;
       const where = scope(explicit);
       return where ? where.querySelector<HTMLElement>(sel) : null;
     },
     $$(sel: string, explicit?: ParentNode | null): HTMLElement[] {
+      if (!explicit && VIEW_ROOT_SELECTORS.has(String(sel).trim()) && root && root.isConnected) return [root];
       const where = scope(explicit);
       return where ? Array.prototype.slice.call(where.querySelectorAll<HTMLElement>(sel)) : [];
+    },
+    viewRoot(): HTMLElement | null {
+      return root && root.isConnected ? root : null;
+    },
+
+    // --- almacenamiento, ruta y estado (primitivas del baseline) ---
+    LS,
+    parseRoute(): CompatRoute {
+      if (typeof location === "undefined") return { view: "inicio", arg: "", query: {}, qs: "" };
+      return parseLocation(ctx.slug, location.pathname, location.search);
+    },
+    setQuery(patch: Record<string, string | number | boolean | null | undefined>): Record<string, string> {
+      const current = app.parseRoute();
+      const q: Record<string, string> = { ...current.query };
+      Object.keys(patch || {}).forEach((k) => {
+        const v = patch[k];
+        /* Solo null/undefined borran la clave; `""` fija un parámetro vacío. */
+        if (v == null) delete q[k];
+        else q[k] = String(v);
+      });
+      const qs = serializeQuery(q);
+      if (typeof location !== "undefined" && typeof history !== "undefined") {
+        /* El argumento de la vista viaja en la ruta o como `?arg=`: no es un
+           parámetro de la vista y no puede perderse al fusionar la query. */
+        const keep = new URLSearchParams(location.search).get("arg");
+        const extra = keep == null ? "" : (qs ? "&" : "") + "arg=" + encodeURIComponent(keep);
+        const dest = location.pathname + (qs || extra ? "?" + qs + extra : "");
+        if (dest !== location.pathname + location.search) {
+          try {
+            /* `replaceState`: NO dispara navegación, NO re-renderiza y NO empuja
+               historial, igual que el `setQuery` del baseline. */
+            history.replaceState(history.state, "", dest);
+          } catch {
+            /* sin permiso de historial: la query se queda como estaba */
+          }
+        }
+      }
+      return q;
+    },
+    viewState(id: string): Record<string, unknown> {
+      const key = String(id || "");
+      const hit = viewStates[key];
+      if (hit) return hit;
+      const fresh: Record<string, unknown> = {};
+      viewStates[key] = fresh;
+      return fresh;
+    },
+    scrollFor(target?: string): number | undefined {
+      return scrollMem.get(routeKey(target));
+    },
+    localToday(): string {
+      const d = new Date();
+      return (
+        d.getFullYear() +
+        "-" +
+        String(d.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(d.getDate()).padStart(2, "0")
+      );
+    },
+    today(): string {
+      return new Date().toISOString().slice(0, 10);
+    },
+
+    // --- ciclo de vida del bundle ---
+    /**
+     * Fuera de la carga de un bundle no hay a qué base resolver: se devuelve la
+     * ruta tal cual. El cargador la reemplaza mientras corren los scripts del
+     * bundle (igual que `registerView`), así que una vista que necesite cargar
+     * algo perezosamente tiene que guardarse la URL AL EVALUARSE.
+     */
+    toolFileUrl(file: string): string {
+      return String(file || "");
+    },
+    onTeardown(fn: () => void): void {
+      if (typeof fn === "function") teardowns.push(fn);
+    },
+    registerSearchProvider(fn: SearchProvider): void {
+      if (typeof fn === "function") providers.push(fn);
     },
 
     // --- paleta ⌘K del shell (S-16) ---
@@ -461,6 +859,12 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
   createPlot(app);
 
   function setContext(next: SubjectContext): void {
+    /* Cambiar de materia borra lo que era de la anterior: el estado por vista es
+       de la materia abierta, no del runtime. */
+    if (next.slug !== ctx.slug) {
+      viewStates = {};
+      scrollMem.clear();
+    }
     ctx = next;
     const nd = derive(ctx);
     app.SUBJECT = { slug: ctx.slug, config: ctx.config };
@@ -471,6 +875,8 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     app.BY_SLUG = nd.BY_SLUG;
     app.UNITS = nd.UNITS;
     app.TYPES = nd.TYPES;
+    app.unitOrder = nd.unitOrder;
+    app.TYPE_LABEL = nd.TYPE_LABEL;
   }
 
   function setTheme(theme: ThemeId): void {
@@ -483,7 +889,38 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     root = el;
   }
 
-  return { app, setContext, context: () => ctx, setTheme, setViewRoot, viewRoot: () => root, markdown };
+  /** Anota dónde quedó el scroll de la ruta actual (lo llama el runtime). */
+  function saveScroll(y: number): void {
+    const key = routeKey();
+    if (key) scrollMem.set(key, y);
+  }
+
+  /** Corre y olvida los limpiadores registrados fuera de un bundle. */
+  function runTeardowns(): void {
+    const list = teardowns;
+    teardowns = [];
+    list.forEach((fn) => {
+      try {
+        fn();
+      } catch (e) {
+        if (typeof console !== "undefined") console.error("onTeardown:", e);
+      }
+    });
+    providers = [];
+  }
+
+  return {
+    app,
+    setContext,
+    context: () => ctx,
+    setTheme,
+    setViewRoot,
+    viewRoot: () => root,
+    markdown,
+    saveScroll,
+    runTeardowns,
+    searchProviders: () => providers.slice(),
+  };
 }
 
 /** División efectiva de una página, con el criterio del contrato. */

@@ -75,7 +75,7 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
   var lab = { dist: "exponencial", params: { lam: 1, p: 0.3, a: 0, b: 1 }, n: 30, rep: 20000, mode: "tcl", seed: 12345, last: null };
 
   A.registerView("lab", function (main) {
-    document.title = "Laboratorio Monte Carlo · Estudio P&E";
+    if (A.setTitle) A.setTitle("Laboratorio Monte Carlo");   // [bundle]
     var d = DISTS[lab.dist];
     var distSeg = Object.keys(DISTS).map(function (k) { return '<button data-labdist="' + k + '"' + (k === lab.dist ? ' class="on"' : "") + ">" + DISTS[k].name.replace(/\(.*\)/, "") + "</button>"; }).join("");
     var modeSeg = [["tcl", "TCL · histograma de X̄"], ["lgn", "LGN · convergencia"]].map(function (m) { return '<button data-labmode="' + m[0] + '"' + (m[0] === lab.mode ? ' class="on"' : "") + ">" + m[1] + "</button>"; }).join("");

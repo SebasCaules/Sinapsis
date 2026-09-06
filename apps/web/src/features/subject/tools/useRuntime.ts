@@ -15,10 +15,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import type { ThemeId, ToolInfo, ToolView, ViewFn } from "@sinapsis/contract";
+import type { SearchProvider, ThemeId, ToolInfo, ToolView, ViewFn } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
 import { useToast } from "@/components/platform";
 import type { SubjectModel } from "../model";
+import { recordActivity } from "../activity";
 import { useTheme } from "../store";
 import {
   bundleOf,
@@ -78,6 +79,11 @@ export interface RuntimeHandle {
   onThemeChange: (fn: (theme: ThemeId) => void) => () => void;
   /** Vigila si la vista montada registró redibujo propio (ver `watchRedraw`). */
   watchRedraw: () => RedrawWatch;
+  /**
+   * Proveedores de resultados que registraron los bundles cargados
+   * (`App.registerSearchProvider`). La paleta ⌘K los puede sumar a los suyos.
+   */
+  searchProviders: () => SearchProvider[];
   /** Migas que pidió la vista con `App.setCrumbs` (null si no pidió ninguna). */
   crumbs: RuntimeCrumb[] | null;
   /** Cambia con cada `App.render()`: el host vuelve a montar la vista. */
@@ -101,12 +107,17 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
 
   /* El API puede no tener todavía la ruta de herramientas (agente A4): un 404
      acá no puede dejar la materia en estado de error ni reintentarse. */
+  /* El manifiesto de una materia cambia solo cuando se vuelve a publicar el
+     bundle: se cachea para toda la sesión. Sin esto, volver a entrar en la
+     materia pedía otra vez `/tools` y la miga y la pestaña decían «Herramienta»
+     mientras tanto (brecha herr-20). */
   const query = useQuery({
     queryKey: qk.tools(slug),
     queryFn: () => api.subject.tools(slug),
     enabled: slug.length > 0,
     retry: false,
-    staleTime: 5 * 60_000,
+    staleTime: Infinity,
+    gcTime: 60 * 60_000,
   });
   const tools = query.data ?? NO_TOOLS;
 
@@ -161,6 +172,15 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
          que el contexto se vuelva a instalar. */
       paletteOpen: () => hooksRef.current?.paletteOpen?.() ?? false,
       openPalette: () => hooksRef.current?.openPalette?.(),
+      /* La actividad vive HOY en el navegador (`activity.ts`); el día que
+         `StudyState` la lleve al API, cambia solo esta línea. */
+      markActivity: () => recordActivity(slug),
+      /* El título de la pestaña es del ANFITRIÓN: el bundle pide un rótulo y la
+         plataforma le agrega el nombre de la materia (brecha herr-10). */
+      setTitle: (label: string) => {
+        const name = modelRef.current?.config.name ?? slug;
+        document.title = label ? `${label} · ${name}` : name;
+      },
     };
   };
   const contextRef = useRef(contextOf);
@@ -313,6 +333,7 @@ export function useRuntime(slug: string, model: SubjectModel | null, hooks?: Run
       onThemeChange: (fn: (next: ThemeId) => void) =>
         runtimeRef.current?.onThemeChange(fn) ?? (() => undefined),
       watchRedraw: () => watchRedraw(runtimeRef.current),
+      searchProviders: () => runtimeRef.current?.searchProviders() ?? [],
       crumbs,
       renderTick,
       clearCrumbs: () => setCrumbs(null),
@@ -339,6 +360,7 @@ export const IDLE_RUNTIME: RuntimeHandle = {
   unmountFigures: () => 0,
   onThemeChange: () => () => undefined,
   watchRedraw: () => ({ registered: () => false, release: () => undefined }),
+  searchProviders: () => [],
   crumbs: null,
   renderTick: 0,
   clearCrumbs: () => undefined,

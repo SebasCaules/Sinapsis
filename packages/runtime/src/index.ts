@@ -22,7 +22,7 @@
        </figure>
    ============================================================ */
 import katex from "katex";
-import type { SinapsisRuntime, ThemeId, ViewFn } from "@sinapsis/contract";
+import type { SearchProvider, SinapsisRuntime, ThemeId, ViewFn } from "@sinapsis/contract";
 import { createCompatApp, type CompatHandle, type RuntimeApp, type SubjectContext } from "./compat.js";
 import { createLoader, type BundleInfo, type BundleLoader } from "./loader.js";
 import { bindNav } from "./nav.js";
@@ -31,7 +31,7 @@ export type { SubjectContext, RuntimeApp, Crumb, KatexCompat } from "./compat.js
 export type { BundleInfo, BundleLoader } from "./loader.js";
 export type { MathLib, Matrix } from "./math.js";
 export type { MarkdownApi, MarkdownContext } from "./markdown.js";
-export { createCompatApp, translateRoute, fmt, fmt4, fmt6, cssVar, withAlpha, emptyState, backBar, PALETTE_EVENT } from "./compat.js";
+export { createCompatApp, translateRoute, parseLocation, isQueryOnlyChange, serializeQuery, fmt, fmt4, fmt6, cssVar, withAlpha, emptyState, backBar, PALETTE_EVENT } from "./compat.js";
 export { NAV_SEL, bindNav, isPlainClick, navTargetOf } from "./nav.js";
 export { createLoader, resolveUrl, dataKey } from "./loader.js";
 export { createMath } from "./math.js";
@@ -118,6 +118,26 @@ export function installRuntime(ctx: SubjectContext): Runtime {
   };
   if (typeof document !== "undefined") document.addEventListener("click", onClick);
 
+  /* Memoria de scroll (`App.scrollFor`): el baseline la llevaba sobre `window`,
+     pero en la plataforma quien scrollea es el `<main>` del shell. Se escucha en
+     FASE DE CAPTURA porque el evento `scroll` de un elemento no burbujea, y se
+     anota con un techo de una vez cada 150 ms. */
+  let lastSave = 0;
+  const onScroll = (ev: Event): void => {
+    const now = Date.now();
+    if (now - lastSave < 150) return;
+    lastSave = now;
+    const target = ev.target as (Element & { scrollTop?: number }) | Document | null;
+    const y =
+      target && (target as Element).nodeType === 1
+        ? ((target as Element).scrollTop ?? 0)
+        : typeof window !== "undefined"
+          ? window.scrollY || 0
+          : 0;
+    handle.saveScroll(y);
+  };
+  if (typeof document !== "undefined") document.addEventListener("scroll", onScroll, true);
+
   const runtime: Runtime = {
     version: 1,
     get subject(): string | null {
@@ -135,6 +155,11 @@ export function installRuntime(ctx: SubjectContext): Runtime {
     },
     view(id: string): ViewFn | null {
       return app.view(id);
+    },
+    searchProviders(): SearchProvider[] {
+      /* Los de los bundles cargados más los que se hayan registrado fuera de una
+         carga (una materia que instale el runtime a mano). */
+      return loader.searchProviders().concat(handle.searchProviders());
     },
     onThemeChange(fn: (theme: ThemeId) => void): () => void {
       themeListeners.add(fn);
@@ -178,10 +203,17 @@ export function installRuntime(ctx: SubjectContext): Runtime {
   };
 
   currentTeardown = () => {
-    if (typeof document !== "undefined") document.removeEventListener("click", onClick);
+    if (typeof document !== "undefined") {
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("scroll", onScroll, true);
+    }
     themeListeners.clear();
     handle.setViewRoot(null);
+    /* Los bundles se descargan (y con ellos corren SUS limpiadores) y después
+       los que se registraron fuera de una carga: nada del material de la materia
+       puede sobrevivir a salir de ella (brecha herr-04). */
     loader.unloadAll();
+    handle.runTeardowns();
     if (typeof window !== "undefined") {
       if (window.App === (app as unknown as Window["App"])) delete window.App;
       if (window.M === (app.M as unknown as Window["M"])) delete window.M;

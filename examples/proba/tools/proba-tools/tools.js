@@ -102,7 +102,9 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
   var exState = { id: "binomial", params: null, _for: null, a: null, b: null };
 
   A.registerView("explorador", function (main, arg) {
-    document.title = "Explorador de distribuciones · Estudio P&E";
+    // [bundle] el título es del ANFITRIÓN: se le pide el rótulo y él le suma el
+    // nombre de la materia (ver ADAPTACIONES.md §3-f).
+    if (A.setTitle) A.setTitle("Explorador de distribuciones");
     var dists = STUDY.DISTS || [];
     if (arg && dists.find(function (d) { return d.id === arg; })) exState.id = arg;
     var dist = dists.find(function (d) { return d.id === exState.id; }) || dists[0];
@@ -703,7 +705,7 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
 
   A.registerView("calc", function (main, arg) {
     var sec = calcSection(arg);
-    document.title = (sec ? sec.title + " · " : "") + "Calculadoras · Estudio P&E";
+    if (A.setTitle) A.setTitle((sec ? sec.title + " · " : "") + "Calculadoras");   // [bundle]
     A.setCrumbs(sec
       ? [{ label: "Inicio", hash: "#/inicio" }, { label: "Calculadoras", hash: "#/calc" }, { label: sec.title }]
       : [{ label: "Inicio", hash: "#/inicio" }, { label: "Resolver" }, { label: "Calculadoras" }]);
@@ -1815,14 +1817,20 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
   var wizState = { which: "dist", node: null, crumbs: [], done: null };
 
   A.registerView("asistente", function (main, arg) {
-    document.title = "¿Qué distribución o prueba? · Estudio P&E";
+    if (A.setTitle) A.setTitle("¿Qué distribución o prueba?");   // [bundle]
     if (arg === "test" || arg === "dist") wizState.which = arg;
     var wz = wizState.which === "dist" ? STUDY.DIST_WIZARD : STUDY.TEST_WIZARD;
     if (!wizState.node) { wizState.node = wz.start; wizState.crumbs = []; wizState.done = null; }
     drawWizard(main);
   });
 
+  // [bundle] El contenedor de la vista. En el baseline era `$("#main")`, que ahí
+  // ERA el nodo de la vista; en Sinapsis el `#main` del shell es otra cosa y el
+  // runtime lo expone como `A.viewRoot()` (brecha herr-01).
+  function wizRoot() { return (A.viewRoot && A.viewRoot()) || $("#main"); }
+
   function drawWizard(main) {
+    if (!main) return;
     var isDist = wizState.which === "dist";
     var wz = isDist ? STUDY.DIST_WIZARD : STUDY.TEST_WIZARD;
     var node = wz.nodes[wizState.node];
@@ -1879,12 +1887,12 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
     wizState.which = el.dataset.which;
     var wz = wizState.which === "dist" ? STUDY.DIST_WIZARD : STUDY.TEST_WIZARD;
     wizState.node = wz.start; wizState.crumbs = []; wizState.done = null;
-    drawWizard($("#main"));
+    drawWizard(wizRoot());
   });
   A.registerAction("wiz-reset", function () {
     var wz = wizState.which === "dist" ? STUDY.DIST_WIZARD : STUDY.TEST_WIZARD;
     wizState.node = wz.start; wizState.crumbs = []; wizState.done = null;
-    drawWizard($("#main"));
+    drawWizard(wizRoot());
   });
   A.registerAction("wiz-pick", function (el) {
     var isDist = wizState.which === "dist";
@@ -1895,6 +1903,6 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
     if (opt.to) { wizState.node = opt.to; }
     else if (opt.dist) { wizState.done = { dist: opt.dist }; }
     else if (opt.result) { wizState.done = { result: opt.result }; }
-    drawWizard($("#main"));
+    drawWizard(wizRoot());
   });
 })();

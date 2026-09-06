@@ -16,7 +16,7 @@
        promesa y no vuelve a insertar nada;
      · un script que falla corta la carga con un `Error` que nombra la URL.
    ============================================================ */
-import type { FigureMeta, ViewFn } from "@sinapsis/contract";
+import type { FigureMeta, SearchProvider, ViewFn } from "@sinapsis/contract";
 import type { FigureDrawFn } from "./figures.js";
 import type { RuntimeApp } from "./compat.js";
 
@@ -38,6 +38,10 @@ interface LoadedBundle {
   /** Claves de `App.DATA` que puso este bundle. */
   data: string[];
   nodes: Element[];
+  /** Limpiadores que el bundle registró con `App.onTeardown`. */
+  teardowns: Array<() => void>;
+  /** Proveedores de búsqueda que registró con `App.registerSearchProvider`. */
+  providers: SearchProvider[];
 }
 
 export interface BundleLoader {
@@ -46,6 +50,8 @@ export interface BundleLoader {
   isLoaded(id: string): boolean;
   /** Ids de los bundles cargados (o cargándose). */
   ids(): string[];
+  /** Proveedores de búsqueda que registraron los bundles cargados. */
+  searchProviders(): SearchProvider[];
   /** Descarga todo (lo usa `uninstallRuntime`). */
   unloadAll(): void;
 }
@@ -78,6 +84,9 @@ export function createLoader(app: RuntimeApp): BundleLoader {
   function attribute(entry: LoadedBundle, run: () => Promise<void>): Promise<void> {
     const realView = app.registerView;
     const realFigure = app.registerFigure;
+    const realTeardown = app.onTeardown;
+    const realProvider = app.registerSearchProvider;
+    const realFileUrl = app.toolFileUrl;
     app.registerView = function (id: string, fn: ViewFn) {
       entry.views.push(id);
       return realView.call(app, id, fn);
@@ -86,9 +95,28 @@ export function createLoader(app: RuntimeApp): BundleLoader {
       entry.figures.push(id);
       return realFigure.call(app, id, draw, meta);
     };
+    /* Lo que el bundle registre para deshacerse (marcado colgado del `body`,
+       teclas atadas a `document`) es SUYO: corre al descargarlo, no antes ni
+       después (brecha herr-04). */
+    app.onTeardown = function (fn: () => void) {
+      if (typeof fn === "function") entry.teardowns.push(fn);
+    };
+    app.registerSearchProvider = function (fn: SearchProvider) {
+      if (typeof fn === "function") entry.providers.push(fn);
+    };
+    /* Un archivo del bundle que NO se declara en el manifiesto —una biblioteca
+       pesada que solo hace falta en una pantalla— se pide por su URL. Solo
+       resuelve mientras corren los scripts del bundle, que es cuando se sabe
+       de quién es la base; la vista se guarda la URL al evaluarse. */
+    app.toolFileUrl = function (file: string) {
+      return resolveUrl(entry.info.base, file);
+    };
     const restore = () => {
       app.registerView = realView;
       app.registerFigure = realFigure;
+      app.onTeardown = realTeardown;
+      app.registerSearchProvider = realProvider;
+      app.toolFileUrl = realFileUrl;
     };
     return run().then(
       (v) => {
@@ -151,7 +179,16 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const already = bundles.get(info.id);
     if (already) return already.promise;
 
-    const entry: LoadedBundle = { info, promise: Promise.resolve(), views: [], figures: [], data: [], nodes: [] };
+    const entry: LoadedBundle = {
+      info,
+      promise: Promise.resolve(),
+      views: [],
+      figures: [],
+      data: [],
+      nodes: [],
+      teardowns: [],
+      providers: [],
+    };
     const run = async (): Promise<void> => {
       for (const file of info.data || []) {
         await loadData(entry, resolveUrl(info.base, file), file);
@@ -173,6 +210,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
       // alcanzaron a registrar los scripts anteriores al que reventó: se limpia
       // acá, igual que en la descarga.
       bundles.delete(info.id);
+      runTeardowns(entry);
       removeNodes(entry);
       forget(entry);
       throw e;
@@ -186,6 +224,29 @@ export function createLoader(app: RuntimeApp): BundleLoader {
       if (n.parentNode) n.parentNode.removeChild(n);
     });
     entry.nodes = [];
+    /* Cinturón para el marcado que el bundle colgó por su cuenta: cualquier nodo
+       que lleve su marca desaparece con él. Sin esto, el FAB del buscador de
+       valores se acumulaba en cada reentrada a la materia (brecha herr-04). */
+    if (typeof document === "undefined") return;
+    const mark = String(entry.info.id).replace(/["\\]/g, "\\$&");
+    document.querySelectorAll('[data-bundle="' + mark + '"]').forEach((n) => {
+      if (n.parentNode) n.parentNode.removeChild(n);
+    });
+  }
+
+  /** Corre los limpiadores que el bundle registró con `App.onTeardown`. */
+  function runTeardowns(entry: LoadedBundle): void {
+    const list = entry.teardowns;
+    entry.teardowns = [];
+    entry.providers = [];
+    list.forEach((fn) => {
+      try {
+        fn();
+      } catch (e) {
+        /* un limpiador que falla no puede impedir que se descargue el resto */
+        if (typeof console !== "undefined") console.error("onTeardown:", e);
+      }
+    });
   }
 
   /** Borra del `App` todo lo que registró el bundle: vistas, figuras y datos. */
@@ -208,6 +269,10 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const entry = bundles.get(id);
     if (!entry) return;
     bundles.delete(id);
+    /* Primero lo que el bundle sabe deshacer (su marcado, sus teclas), después
+       lo que puso el cargador: si se hiciera al revés, el limpiador correría con
+       sus estilos ya retirados. */
+    runTeardowns(entry);
     removeNodes(entry);
     forget(entry);
   }
@@ -217,6 +282,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     unloadBundle,
     isLoaded: (id: string) => bundles.has(id),
     ids: () => Array.from(bundles.keys()),
+    searchProviders: () => Array.from(bundles.values()).flatMap((b) => b.providers),
     unloadAll: () => {
       Array.from(bundles.keys()).forEach(unloadBundle);
     },

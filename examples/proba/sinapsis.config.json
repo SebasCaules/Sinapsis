@@ -113,10 +113,10 @@
       "items": [
         {
           "id": "formularios",
-          "label": "Formulario general",
+          "label": "Formularios",
           "icon": "sigma",
-          "kind": "page",
-          "target": "formulario-maestro"
+          "kind": "tool",
+          "target": "formularios"
         },
         {
           "id": "explorador",
@@ -140,11 +140,32 @@
           "target": "calc"
         },
         {
+          "id": "asistente",
+          "label": "¿Qué distribución o prueba?",
+          "icon": "compass",
+          "kind": "tool",
+          "target": "asistente"
+        },
+        {
           "id": "lab",
           "label": "Laboratorio Monte Carlo",
           "icon": "flask",
           "kind": "tool",
           "target": "lab"
+        },
+        {
+          "id": "ejercicios",
+          "label": "Ejercicios",
+          "icon": "pencil",
+          "kind": "tool",
+          "target": "ejercicios"
+        },
+        {
+          "id": "parcial",
+          "label": "Simulador de parcial",
+          "icon": "timer",
+          "kind": "tool",
+          "target": "parcial"
         }
       ]
     }

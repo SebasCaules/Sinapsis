@@ -309,6 +309,53 @@ chrome del baseline:
   lector del baseline: hoy no matchea. Corría el FAB hacia adentro cuando el
   rail del lector estaba abierto.
 
+### (i) `document.title` lo escribe el ANFITRIÓN, no el bundle *(brecha herr-10)*
+
+Las cinco vistas fijaban `document.title = "… · Estudio P&E"` y ganaban siempre,
+porque el bundle llega asíncrono y se monta después del efecto del shell: la
+pestaña del navegador nombraba a la app anterior en toda la materia.
+
+Ahora el bundle **pide un rótulo** y la plataforma compone el título con el
+nombre de la materia:
+
+```js
+if (A.setTitle) A.setTitle("Calculadoras");   // → «Calculadoras · Probabilidad y Estadística»
+```
+
+Cambió en `tools.js` (3 vistas), `taller.js` (2) y `lab.js` (1). La guardia
+`if (A.setTitle)` deja el bundle corriendo contra un runtime anterior, sin
+título propio, que es la degradación correcta: el título es del anfitrión.
+
+### (j) El árbol de decisión se redibuja sobre `A.viewRoot()` *(brecha herr-01)*
+
+Las tres acciones del asistente (`wiz-pick`, `wiz-which`, `wiz-reset`) llamaban a
+`drawWizard($("#main"))`. En el baseline `#main` **era** el contenedor de la
+vista; en la plataforma no existe con ese id, así que `$("#main")` devolvía
+`null` y cada clic lanzaba una excepción: la herramienta quedaba congelada en la
+primera pregunta.
+
+El runtime expone ahora `App.viewRoot()` —el nodo que el host le presta a la
+vista— y además resuelve `App.$("#main")` (y `#app`, `#content`, `#contenido`) a
+esa misma raíz, para cualquier materia. En el bundle:
+
+```js
+function wizRoot() { return (A.viewRoot && A.viewRoot()) || $("#main"); }
+```
+
+### (k) La burbuja ⌘J se desmonta con el bundle *(brecha herr-04)*
+
+`lookup.js` cuelga su FAB y su panel de `document.body` y ata ⌘J en `document`.
+En el baseline el script corría una vez por vida de la página; acá se ejecuta
+cada vez que se entra en la materia, así que se acumulaban un FAB, un panel y un
+`keydown` por reentrada (tres FAB tras dos idas y vueltas, ids duplicados y
+marcado huérfano sin estilos en la portada).
+
+El runtime agregó `App.onTeardown(fn)`, que corre cuando se **descarga el
+bundle** (salir de la materia, cambiar de materia, desinstalar el runtime), y el
+módulo lo usa para retirar su host, sus teclas y `A.quickLookup`. El cargador,
+además, barre cualquier nodo con `data-bundle="<id>"` que el bundle haya dejado
+suelto, como cinturón para materias que no limpien.
+
 ---
 
 ## 4. Verificación
@@ -591,6 +638,14 @@ completo:
 7. **El host de la vista debe llevar la clase `sinapsis-tool`** y definir los
    tokens del baseline. En pantallas ≤720 px conviene reservar ~72 px de aire
    abajo para que el FAB de ⌘J no tape los últimos controles.
+
+Estado tras la ronda de brechas (fixer «herramientas»): 1, 5, 6 y 7 **hechos**;
+2, 3 y 4 siguen abiertos (son correcciones del tipo, no del runtime). Se
+agregaron además `App.viewRoot()`, `App.setTitle()`, `App.onTeardown()`,
+`App.LS`, `App.parseRoute()`, `App.setQuery()`, `App.viewState()`,
+`App.scrollFor()`, `App.markActivity()`, `App.localToday()`, `App.today()` y
+`App.registerSearchProvider()` — ver §3 (i), (j) y (k) y el contrato en
+`packages/contract/src/runtime.ts`.
 
 ## 6. Decisiones
 

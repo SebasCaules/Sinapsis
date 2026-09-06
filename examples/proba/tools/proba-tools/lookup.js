@@ -542,7 +542,7 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
   // si la paleta ⌘K está abierta, la tecla es de ella y esta burbuja no la
   // toca; core.js recién cierra la paleta después, en fase de burbujeo.
   // ⌘J/Ctrl+J no colisiona con nada: core.js solo toma ⌘K, "/", "t" y Escape.
-  document.addEventListener("keydown", function (e) {
+  function onKeydown(e) {
     var key = (e.key || "").toLowerCase();
     if ((e.metaKey || e.ctrlKey) && !e.altKey && key === "j") {
       e.preventDefault();
@@ -553,12 +553,28 @@ var STUDY = window.STUDY || (window.App && window.App.STUDY) || {};
       e.preventDefault();
       close();
     }
-  }, true);
+  }
+  document.addEventListener("keydown", onKeydown, true);
 
   // ---------------------------------------------------------------- arranque
   function boot() { build(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
+
+  // [bundle] Desmontaje del BUNDLE (brecha herr-04). En el baseline el script se
+  // cargaba una vez por vida de la página; en la plataforma se carga cada vez
+  // que se entra en la materia, así que sin esto el FAB, el panel y la tecla ⌘J
+  // se duplicaban en cada reentrada (tres FAB tras dos idas y vueltas) y el
+  // marcado quedaba huérfano —y sin estilos— fuera de la materia.
+  if (typeof A.onTeardown === "function") {
+    A.onTeardown(function () {
+      document.removeEventListener("keydown", onKeydown, true);
+      document.removeEventListener("DOMContentLoaded", boot);
+      if (host && host.parentNode) host.parentNode.removeChild(host);
+      host = null; fab = null; panel = null; open = false;
+      if (A.quickLookup === api) delete A.quickLookup;
+    });
+  }
 
   var api = { open: doOpen, close: close, toggle: toggle, set: set, isOpen: isOpen };
   A.quickLookup = api;

@@ -217,3 +217,63 @@ describe("loadBundle", () => {
     expect(loader.isLoaded("tools")).toBe(false);
   });
 });
+
+describe("unloadBundle — lo que el bundle dejó fuera de sus scripts (brecha herr-04)", () => {
+  it("corre los `App.onTeardown` del bundle y solo los suyos", async () => {
+    const limpioA = vi.fn();
+    const limpioB = vi.fn();
+    const { restore } = stubScripts(
+      {
+        [BASE + "a.js"]: (a) => a.onTeardown(limpioA),
+        "/otro/b.js": (a) => a.onTeardown(limpioB),
+      },
+      app,
+    );
+    const loader = createLoader(app);
+    await loader.loadBundle({ id: "uno", base: BASE, data: [], styles: [], scripts: ["a.js"] });
+    await loader.loadBundle({ id: "dos", base: "/otro", data: [], styles: [], scripts: ["b.js"] });
+    restore();
+
+    loader.unloadBundle("uno");
+    expect(limpioA).toHaveBeenCalledTimes(1);
+    expect(limpioB).not.toHaveBeenCalled();
+
+    loader.unloadAll();
+    expect(limpioB).toHaveBeenCalledTimes(1);
+    /* Descargar dos veces no vuelve a limpiar. */
+    loader.unloadBundle("uno");
+    expect(limpioA).toHaveBeenCalledTimes(1);
+  });
+
+  it("barre el marcado que el bundle colgó del `body` con su marca", async () => {
+    const { restore } = stubScripts(
+      {
+        [BASE + "fab.js"]: () => {
+          const host = document.createElement("div");
+          host.className = "ql-host";
+          host.setAttribute("data-bundle", "uno");
+          document.body.appendChild(host);
+        },
+      },
+      app,
+    );
+    const loader = createLoader(app);
+    await loader.loadBundle({ id: "uno", base: BASE, data: [], styles: [], scripts: ["fab.js"] });
+    restore();
+    expect(document.body.querySelectorAll(".ql-host")).toHaveLength(1);
+
+    loader.unloadBundle("uno");
+    expect(document.body.querySelectorAll(".ql-host")).toHaveLength(0);
+  });
+
+  it("los proveedores de búsqueda son del bundle y se olvidan al descargarlo", async () => {
+    const provider = () => [{ label: "Ejercicio 1", target: "#/ejercicios/1" }];
+    const { restore } = stubScripts({ [BASE + "s.js"]: (a) => a.registerSearchProvider(provider) }, app);
+    const loader = createLoader(app);
+    await loader.loadBundle({ id: "uno", base: BASE, data: [], styles: [], scripts: ["s.js"] });
+    restore();
+    expect(loader.searchProviders()).toEqual([provider]);
+    loader.unloadBundle("uno");
+    expect(loader.searchProviders()).toEqual([]);
+  });
+});

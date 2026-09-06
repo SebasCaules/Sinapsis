@@ -13,7 +13,7 @@ import { useMemo } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Outlet, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { MemoryRouter, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   SubjectConfig,
   type SubjectDetail,
@@ -49,7 +49,10 @@ const tools: ToolInfo[] = [
       runtime: 1,
       scripts: ["demo.js"],
       styles: [],
-      views: [{ id: "explorador", label: "Explorador de distribuciones", layout: "wide" }],
+      views: [
+        { id: "explorador", label: "Explorador de distribuciones", layout: "wide" },
+        { id: "calc", label: "Calculadoras", layout: "wide" },
+      ],
       figures: false,
       data: [],
     },
@@ -89,6 +92,10 @@ let bound: HTMLElement[] = [];
 let unbound: HTMLElement[] = [];
 let navigated: string[] = [];
 let searchOpened = 0;
+/** Dispara el cambio de tema del runtime de mentira (para probar D4-2 / herr-05). */
+let fireTheme: (theme: ThemeId) => void = () => undefined;
+/** Cuántas veces se CONSTRUYÓ la vista `calc` (no cuántas se la invocó). */
+let built = 0;
 
 /** Un runtime de mentira con la superficie que consume la web. */
 function fakeModule(): RuntimeModule {
@@ -103,6 +110,34 @@ function fakeModule(): RuntimeModule {
     mountFigures: () => 0,
     unmountFigures: () => 0,
   } as unknown as RuntimeApi["App"];
+
+  /**
+   * Una vista con el ciclo de vida de las calculadoras del baseline: se
+   * construye UNA vez y, al cambiar de sección, solo anota el argumento. Sirve
+   * para probar que cambiar `?arg=` no la desmonta (brecha herr-13) y que un
+   * campo escrito sobrevive al cambio de tema (brecha herr-05).
+   */
+  const registerCalc = () => {
+    app.registerView("calc", (main, arg) => {
+      mounted += 1;
+      lastArg = arg;
+      if (!main.querySelector("#calcRoot")) {
+        built += 1;
+        const root = document.createElement("div");
+        root.id = "calcRoot";
+        const title = document.createElement("h1");
+        title.textContent = "Calculadoras de prueba";
+        const field = document.createElement("input");
+        field.setAttribute("aria-label", "z");
+        field.setAttribute("value", "0");
+        root.append(title, field);
+        main.appendChild(root);
+      }
+      return () => {
+        cleaned += 1;
+      };
+    });
+  };
 
   /** El «script» de una vista: lo mismo que haría un IIFE contra `window.App`. */
   const register = (id: string, heading: string) => {
@@ -128,7 +163,10 @@ function fakeModule(): RuntimeModule {
      su script corrió. */
   const runScript = (id: string) => {
     if (id === "otro") register("laboratorio", "Laboratorio de prueba");
-    else register("explorador", "Herramienta de prueba");
+    else {
+      register("explorador", "Herramienta de prueba");
+      registerCalc();
+    }
   };
 
   const runtime: RuntimeApi = {
@@ -147,6 +185,7 @@ function fakeModule(): RuntimeModule {
     },
     unloadBundle: () => undefined,
     view: (id) => views.get(id) ?? null,
+    searchProviders: () => [],
     /* Doble mínimo de la delegación real: lo que se prueba acá es el CONTRATO
        del host (atar antes de dibujar, soltar al desmontar, una sola vez). La
        gramática de `[data-nav]`/`[data-go]` se prueba en `packages/runtime`. */
@@ -166,6 +205,7 @@ function fakeModule(): RuntimeModule {
     },
     onThemeChange: (fn) => {
       themeListeners.add(fn);
+      fireTheme = (theme: ThemeId) => themeListeners.forEach((listener) => listener(theme));
       return () => void themeListeners.delete(fn);
     },
     setTheme: () => undefined,
@@ -198,6 +238,8 @@ beforeEach(() => {
   unbound = [];
   navigated = [];
   searchOpened = 0;
+  built = 0;
+  fireTheme = () => undefined;
   resetRuntimeModuleForTests(fakeModule());
 });
 
@@ -222,6 +264,8 @@ function ShellStub() {
       <span data-testid="crumbs">{(runtime.crumbs ?? []).map((c) => c.label).join(" · ")}</span>
       {/* El rail, reducido a lo único que importa acá: saltar de una vista a otra. */}
       <button onClick={() => navigate("/m/proba/t/laboratorio")}>Ir al laboratorio</button>
+      <button onClick={() => navigate("/m/proba/t/calc?arg=tablas")}>Ir a Tablas</button>
+      <span data-testid="ruta">{useLocation().pathname}</span>
     </>
   );
 }
@@ -386,6 +430,59 @@ describe("<ToolHost/>", () => {
     /* La vista anterior se limpió y la nueva se montó: dos montajes, una limpieza. */
     expect(mounted).toBe(2);
     expect(cleaned).toBe(1);
+  });
+
+  it("cambiar de sección (`?arg=`) NO desmonta la vista (brecha herr-13)", async () => {
+    renderTool("/m/proba/t/calc?arg=continuas");
+    await screen.findByText("Calculadoras de prueba");
+    expect(built).toBe(1);
+
+    const campo = screen.getByLabelText("z") as HTMLInputElement;
+    campo.value = "42";
+    const nodo = hostNode();
+
+    act(() =>
+      void screen
+        .getByText("Ir a Tablas")
+        .dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })),
+    );
+    await waitFor(() => expect(lastArg).toBe("tablas"));
+
+    /* La vista se volvió a invocar con el argumento nuevo, pero sobre el MISMO
+       nodo y sin reconstruirse: lo escrito sigue ahí. */
+    expect(hostNode()).toBe(nodo);
+    expect(built).toBe(1);
+    expect((screen.getByLabelText("z") as HTMLInputElement).value).toBe("42");
+  });
+
+  it("cambiar de tema no borra lo que el usuario cargó (brecha herr-05)", async () => {
+    renderTool("/m/proba/t/calc?arg=continuas");
+    await screen.findByText("Calculadoras de prueba");
+    const campo = screen.getByLabelText("z") as HTMLInputElement;
+    campo.value = "42";
+
+    act(() => fireTheme("claustro"));
+    await waitFor(() => expect(screen.getByText("Calculadoras de prueba")).toBeTruthy());
+
+    expect(built).toBe(1);
+    expect((screen.getByLabelText("z") as HTMLInputElement).value).toBe("42");
+  });
+
+  it("con la vista intacta, el cambio de tema sí la vuelve a montar (D4-2)", async () => {
+    renderTool("/m/proba/t/calc?arg=continuas");
+    await screen.findByText("Calculadoras de prueba");
+    expect(built).toBe(1);
+
+    act(() => fireTheme("claustro"));
+    /* Nadie escribió nada: se puede reconstruir para que tome los colores. */
+    await waitFor(() => expect(built).toBe(2));
+    expect(cleaned).toBe(1);
+  });
+
+  it("una herramienta que la materia no reservó devuelve al inicio (brecha herr-12)", async () => {
+    renderTool("/m/proba/t/no-existe-ni-en-el-rail");
+    await waitFor(() => expect(screen.getByTestId("ruta").textContent).toBe("/m/proba"));
+    expect(screen.queryByText("PRÓXIMAMENTE")).toBeNull();
   });
 
   it("sin bundle que declare la vista, sigue el «Próximamente» del rail", async () => {
