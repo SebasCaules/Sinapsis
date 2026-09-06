@@ -105,10 +105,42 @@ describe("normalizeDisplayMath", () => {
   });
 
   it("respeta la sangría del contenido al partir el cierre", () => {
-    expect(normalizeDisplayMath("$$ a\n   b. $$")).toBe("$$\na\n   b.\n$$");
+    expect(normalizeDisplayMath("$$ a\n   b. $$")).toBe("$$\na\n   b.\n   $$");
   });
 
-  it("no confunde un $$ que solo cierra con un cierre inline", () => {
-    expect(normalizeDisplayMath("$$\na\n$$ b $$")).toBe("$$\na\n$$ b $$");
+  it("conserva el marcador de cita: el bloque sigue dentro de la cita (AC-01)", () => {
+    expect(normalizeDisplayMath("> texto\n> $$ V(X+Y)=V(X)+V(Y). $$\n> sigue")).toBe(
+      "> texto\n> $$\n> V(X+Y)=V(X)+V(Y).\n> $$\n> sigue",
+    );
+    expect(normalizeDisplayMath("> $$ a\n> b $$")).toBe("> $$\n> a\n> b\n> $$");
+  });
+
+  it("conserva la sangría del ítem de lista (AC-02)", () => {
+    expect(normalizeDisplayMath("- item\n  $$ x = 1 $$\n- otro")).toBe("- item\n  $$\n  x = 1\n  $$\n- otro");
+  });
+
+  it("empareja los $$ en orden dentro de una línea con tres o más (AC-03)", () => {
+    expect(normalizeDisplayMath("$$ a $$ b $$\nc $$\n\n## T")).toBe("$$\na\n$$\nb\n$$\nc\n$$\n\n## T");
+    expect(extractHeadings(normalizeDisplayMath("$$ a $$ b $$\nc $$\n\n## T")).map((h) => h.text)).toEqual(["T"]);
+  });
+
+  it("un cierre con texto detrás cierra ahí y el texto queda en su línea (AC-03)", () => {
+    expect(normalizeDisplayMath("$$\na\nx $$ y")).toBe("$$\na\nx\n$$\ny");
+    expect(normalizeDisplayMath("$$\na\n$$ b $$")).toBe("$$\na\n$$\nb\n$$");
+  });
+
+  it("un $$ que abre a mitad de línea y cierra en otra se parte", () => {
+    expect(normalizeDisplayMath("Sea $$ x = 1\ny = 2 $$ fin")).toBe("Sea\n$$\nx = 1\ny = 2\n$$\nfin");
+  });
+
+  it("ignora los $$ dentro de código en línea", () => {
+    const body = "partidas en dos bloques `$$…$$` o `aligned`.\n\n## Sigue";
+    expect(normalizeDisplayMath(body)).toBe(body);
+    expect(normalizeDisplayMath("el segundo `$$`, y `\\begin{aligned}`\n## T")).toBe("el segundo `$$`, y `\\begin{aligned}`\n## T");
+  });
+
+  it("una cerca de cuatro acentos graves no se cierra con una de tres (AC-06)", () => {
+    const body = "````markdown\n```\n$$ x\n```\n````\n$$ y $$";
+    expect(normalizeDisplayMath(body)).toBe("````markdown\n```\n$$ x\n```\n````\n$$\ny\n$$");
   });
 });

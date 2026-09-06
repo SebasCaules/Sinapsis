@@ -535,3 +535,10 @@ describe("compileWiki · integración", () => {
     expect(compiled.warnings.join("\n")).toContain("no marca ninguna opción correcta");
   });
 });
+
+describe("splitSections — cercas largas (AC-06)", () => {
+  it("una cerca de cuatro acentos graves no se cierra con una de tres", () => {
+    const body = ["## A", "````markdown", "```", "## NO ES UNA TARJETA", "```", "````", "cuerpo"].join("\n");
+    expect(splitSections(body).map((s) => s.heading.text)).toEqual(["A"]);
+  });
+});

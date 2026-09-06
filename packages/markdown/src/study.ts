@@ -641,9 +641,10 @@ export function splitSections(body: string): StudySection[] {
     const trimmed = line.trim();
     const fenceMatch = line.match(FENCE);
     if (fenceMatch) {
-      const mark = (fenceMatch[1] ?? "").slice(0, 3);
+      const mark = fenceMatch[1] ?? "";
+      // La cerca de cierre lleva el MISMO carácter y al menos tantos como la de apertura.
       if (fence === null) fence = mark;
-      else if (fence === mark) fence = null;
+      else if (mark[0] === fence[0] && mark.length >= fence.length) fence = null;
     } else if (fence === null && trimmed.startsWith("$$")) {
       const count = (trimmed.match(/\$\$/g) ?? []).length;
       if (count % 2 === 1) math = !math;

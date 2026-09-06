@@ -109,18 +109,16 @@ export function firstH1(body: string): string | null {
   return firstH1Line(body)?.text ?? null;
 }
 
-const FENCE = /^\s{0,3}(```|~~~)/;
+const FENCE = /^\s{0,3}(`{3,}|~{3,})/;
+/** Marcadores de cita (`>`) y sangría que preceden al contenido de una línea. */
+const PREFIX = /^(\s*(?:>[ \t]?)*\s*)/;
 const DD = /\$\$/g;
-
-function count(re: RegExp, s: string): number {
-  return (s.match(re) ?? []).length;
-}
 
 /**
  * Normaliza los delimitadores de matemática en display para que remark-math
- * lea lo mismo que el baseline (`renderMathHtml`), que empareja `$$…$$` sin
- * importar dónde caigan los saltos de línea. remark-math en cambio solo abre
- * un bloque si `$$` está solo en su línea:
+ * lea lo mismo que el baseline (`renderMathHtml`), que empareja `$$…$$` de a
+ * pares, en orden, sin importar dónde caigan los saltos de línea. remark-math
+ * en cambio solo abre un bloque si `$$` está solo en su línea:
  *
  *   `$$ f(x)`  al principio de una línea    → cerca de apertura con «meta» y la
  *                                             fórmula se PIERDE; el bloque no
@@ -130,22 +128,86 @@ function count(re: RegExp, s: string): number {
  *   `$$ h(x) $$` en una sola línea           → matemática inline (chica), no
  *                                             display.
  *
- * Se reescriben esas tres formas a `$$` / contenido / `$$` en líneas propias.
- * Fuera de bloques de código; `$$a$$` dentro de una línea con texto alrededor
- * se deja como está (inline doble, igual que en el baseline).
+ * Se reescriben a `$$` / contenido / `$$` en líneas propias, conservando el
+ * prefijo de la línea (marcadores de cita `>` y sangría de lista) para que el
+ * bloque siga dentro de la cita o del ítem. Los `$$` se emparejan en orden
+ * dentro de la línea (`$$ a $$ b $$` abre, cierra y vuelve a abrir), fuera de
+ * bloques de código. `texto $$a$$ texto` (par completo dentro de una línea con
+ * texto alrededor) se deja como está: inline doble, igual que en el baseline.
  */
 export function normalizeDisplayMath(body: string): string {
   const out: string[] = [];
   let inMath = false;
   let fence: string | null = null;
 
+  const push = (pre: string, text: string): void => {
+    out.push(text ? pre + text : pre.trimEnd());
+  };
+
+  /* Reparte los `$$` de `t` (ya sin prefijo) en líneas propias; `pre` es lo que
+     antecede al contenido en la línea original. Los `$$` dentro de código en
+     línea (`` `$$…$$` ``) no cuentan. */
+  const emit = (pre: string, t: string, original: string | null): void => {
+    const masked = t.replace(/`+[^`]*`+/g, (m) => "`".repeat(m.length));
+    const pos: number[] = [];
+    for (const m of masked.matchAll(DD)) pos.push(m.index);
+    const n = pos.length;
+    if (n === 0) {
+      out.push(original ?? pre + t);
+      return;
+    }
+    if (inMath) {
+      // Cierra en el PRIMER `$$`; lo que siga es una línea nueva.
+      const at = pos[0] ?? 0;
+      const before = t.slice(0, at).trimEnd();
+      const after = t.slice(at + 2).trim();
+      if (before) push(pre, before);
+      push(pre, "$$");
+      inMath = false;
+      if (after) emit(pre, after, null);
+      return;
+    }
+    if (pos[0] !== 0) {
+      if (n % 2 === 0) {
+        // `texto $$a$$ texto`: pares completos con texto alrededor, inline doble.
+        out.push(original ?? pre + t);
+        return;
+      }
+      // `texto $$ f(x)`: el último `$$` abre un bloque que sigue en otra línea.
+      const at = pos[n - 1] ?? 0;
+      const before = t.slice(0, at).trimEnd();
+      const rest = t.slice(at + 2).trim();
+      if (before) push(pre, before);
+      push(pre, "$$");
+      inMath = true;
+      if (rest) push(pre, rest);
+      return;
+    }
+    // Empieza con `$$`: abre; cada `$$` siguiente alterna cierra/abre.
+    let open = false;
+    for (let k = 0; k < n; k += 1) {
+      open = !open;
+      push(pre, "$$");
+      const from = (pos[k] ?? 0) + 2;
+      const to = k + 1 < n ? pos[k + 1] : undefined;
+      const seg = t.slice(from, to).trim();
+      const last = k === n - 1;
+      if (open) {
+        if (seg) push(pre, seg);
+        if (last) inMath = true;
+      } else if (seg) {
+        // texto suelto entre un cierre y la próxima apertura (o al final)
+        push(pre, seg);
+      }
+    }
+  };
+
   for (const line of splitLines(body)) {
-    const t = line.trim();
     const f = FENCE.exec(line);
     if (!inMath && f) {
       const mark = f[1] ?? "";
       if (fence === null) fence = mark;
-      else if (fence === mark) fence = null;
+      else if (mark[0] === fence[0] && mark.length >= fence.length) fence = null;
       out.push(line);
       continue;
     }
@@ -153,32 +215,9 @@ export function normalizeDisplayMath(body: string): string {
       out.push(line);
       continue;
     }
-
-    const n = count(DD, t);
-    if (!inMath) {
-      if (t === "$$") {
-        inMath = true;
-        out.push(line);
-      } else if (t.startsWith("$$") && n === 2 && t.endsWith("$$") && t.length > 4) {
-        // `$$ x $$` solo en su línea → bloque display de tres líneas.
-        out.push("$$", t.slice(2, -2).trim(), "$$");
-      } else if (t.startsWith("$$") && n % 2 === 1) {
-        // `$$ x` abre con contenido en la misma línea.
-        inMath = true;
-        out.push("$$", t.slice(2).trimStart());
-      } else {
-        out.push(line);
-      }
-    } else if (t === "$$") {
-      inMath = false;
-      out.push(line);
-    } else if (t.endsWith("$$") && n % 2 === 1) {
-      // `x $$` cierra con contenido antes.
-      inMath = false;
-      out.push(line.replace(/\s*\$\$\s*$/, ""), "$$");
-    } else {
-      out.push(line);
-    }
+    const pre = PREFIX.exec(line)?.[1] ?? "";
+    const t = line.slice(pre.length).trimEnd();
+    emit(pre, t, line);
   }
 
   return out.join("\n");
