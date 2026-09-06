@@ -116,11 +116,11 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 | S2-02 compilador + CLI + skill | DONE | | compileStudy, 69 tests markdown, 22 CLI; CONTRACT §7 |
 | S2-03 contenido Proba | DONE | | 6 mazos/46 tarjetas, 1 quiz/15, plan 6 fases/30 hitos/89 tareas, 8 kits; 0 referencias rotas |
 | S2-04 API | DONE | | 124 tests; migración 0002 con backfill de page_links; FTS externa (title, summary, body) |
-| S2-05 web shell (pestañas, grafo, favoritos, apuntes) | TODO | | agente D3a |
-| S2-06 web estudio (flashcards, quiz, plan, kits) | TODO | | agente D3b |
-| S2-07 web landing (S-03) + vitest 3 | TODO | | agente C3 |
-| S2-08 E2E | TODO | | ola 2 |
-| S2-09 auditoría | TODO | | ola 3 |
+| S2-05 web shell (pestañas, grafo, favoritos, apuntes) | DONE | c4b8787 | 52 tests nuevos; smoke real: grafo 209 nodos, pestañas persistentes |
+| S2-06 web estudio (flashcards, quiz, plan, kits) | DONE | c4b8787 | 27 tests; smoke real con el material de Proba |
+| S2-07 web landing (S-03) + vitest 3 | DONE | c4b8787 | cuatrimestres persistentes y ordenables; vitest 3.2.7 |
+| S2-08 E2E | DOING | | agente E3 |
+| S2-09 auditoría | DOING | | finders: seguridad, corrección, UX (Opus); adjudica el orquestador |
 | S2-10 docs | TODO | | cierre |
 
 ## Ownership (ola 1)
