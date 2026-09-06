@@ -1,0 +1,1375 @@
+@keyframes ejPrintLatido { 50% { opacity: .35; } }
+@keyframes ejRevela { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ============================================================
+   ejercicios.css — copia envuelta de `estudio/ejercicios.css` del baseline de Proba.
+   GENERADO por `scripts/wrap-css.mjs`. No editar a mano.
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista,
+   salvo las reglas de `@media print`, que van al final PLANAS: sus
+   selectores nombran a `html` y `body`, que son ancestros del
+   contenedor y no pueden vivir dentro del envoltorio.
+   ============================================================ */
+
+.sinapsis-tool {
+  /* ============================================================
+     ejercicios.css — vista "Ejercicios" (índice por unidad, unidad con
+     colecciones y documento continuo de ejercicios resueltos).
+
+     Dos mitades:
+       1) .ej-doc — port del contrato de impresión de las resoluciones
+          (Parcial-Para-Imprimir/_src/estilo.css), con los colores traducidos
+          a los tokens de tema de la app. Es el ámbito en el que entra el HTML
+          de window.EJERCICIOS: callouts (.def .si .no .trade .cita .ej .tip
+          .parcial), marcas de color, chips, tablas booktabs, notas y diagramas.
+       2) el andamiaje de la vista: .ej-item, .ej-head, .ej-sem (el semáforo de
+          estado), .ej-enunciado, .ej-reso, .ej-bar, .ej-index-card.
+
+     La vista de colección compone el documento con la piel compartida de
+     latex.css (.tex-doc, .tex-title, .tex-rule, .tex-box.resp): aquí solo se
+     ajusta lo que esa hoja no cubre, nunca se la edita.
+
+     Todo con tokens var(--…): funciona en pergamino, laurel y claustro.
+     ============================================================ */
+  /* ============================================================
+     1) ÁMBITO DE DOCUMENTO  (.ej-doc)
+     ============================================================ */
+  /* Tipografía de la piel compartida (latex.css): Latin Modern, justificado con
+     partición de palabras y sangría francesa entre párrafos seguidos. Se aplica a
+     .ej-doc en general —no solo a esta vista— porque el simulador de parcial de
+     study.css reusa el mismo ámbito y tiene que verse igual de coherente. */
+  & .ej-doc {
+    font-family: var(--font-tex);
+    font-size: 16.5px;
+    line-height: 1.5;
+    color: var(--text);
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    font-feature-settings: "liga" 1, "kern" 1;
+    counter-reset: ejtabla ejfigura;
+  }
+  & .ej-doc > *:first-child {
+    margin-top: 0;
+  }
+  & .ej-doc > *:last-child {
+    margin-bottom: 0;
+  }
+  & .ej-doc p {
+    margin: 0 0 .55em;
+  }
+  /* Sangría LaTeX: solo la lleva el párrafo que sigue a otro párrafo, así que
+     después de un título, una lista, una tabla o una fórmula no aparece sola. */
+  & .ej-doc p + p {
+    text-indent: 1.2em;
+  }
+  & .ej-doc li > p,
+  & .ej-doc td p,
+  & .ej-doc .noindent {
+    text-indent: 0;
+  }
+  /* Las listas y las notas al pie no se justifican: quedarían con ríos de blanco. */
+  & .ej-doc ul,
+  & .ej-doc ol,
+  & .ej-doc .nota,
+  & .ej-doc figcaption,
+  & .ej-doc caption {
+    text-align: left;
+  }
+  & .ej-doc strong {
+    font-weight: 600; color: var(--text);
+  }
+  & .ej-doc em {
+    font-style: italic;
+  }
+  & .ej-doc hr {
+    border: none; border-top: 1px solid var(--border); margin: 22px 0;
+  }
+  & .ej-doc a {
+    color: var(--link); text-decoration: underline; text-underline-offset: 2px;
+  }
+  & .ej-doc h2 {
+    font-family: var(--font-ui); font-weight: 700; font-size: 18px;
+    letter-spacing: -.01em; margin: 26px 0 10px;
+  }
+  /* Los subtítulos del cuerpo de la resolución («Planteo», «Cálculo», «Resolución»)
+     son rótulos del documento, no encabezados de interfaz: van en la tipografía de
+     la piel LaTeX, en negrita itálica y sin tarjeta ni filete propio, igual que un
+     \paragraph. El corpus los emite como <h4> (169 en los datos) y el simulador de
+     parcial puede emitir <h3>: los dos se componen igual, con un escalón de cuerpo.
+     El título del ejercicio abierto del simulador (h3.exo-title) queda fuera de
+     .ej-doc, así que esta regla no lo alcanza. */
+  & .ej-doc h3,
+  & .ej-doc h4 {
+    font-family: var(--font-tex);
+    font-weight: 700; font-style: italic;
+    letter-spacing: 0; text-transform: none;
+    color: var(--text);
+    background: none; border: 0; padding: 0;
+    margin: 1.1em 0 .28em;
+  }
+  & .ej-doc h3 {
+    font-size: 1.06em;
+  }
+  & .ej-doc h4 {
+    font-size: 1em;
+  }
+  & .ej-doc ul,
+  & .ej-doc ol {
+    margin: 4px 0 13px; padding-left: 24px;
+  }
+  & .ej-doc li {
+    margin: 4px 0;
+  }
+  & .ej-doc li::marker {
+    color: var(--text-3);
+  }
+  & .ej-doc ul.tight li,
+  & .ej-doc ol.tight li {
+    margin: 1px 0;
+  }
+  & .ej-doc code {
+    font-family: var(--font-mono); font-size: .86em; background: var(--surface-3); padding: 2px 6px; border-radius: 6px;
+  }
+  & .ej-doc pre.code,
+  & .ej-doc pre {
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.45;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 12px 14px; margin: 10px 0 16px; white-space: pre-wrap; overflow-x: auto;
+  }
+  & .ej-doc pre code {
+    background: none; padding: 0;
+  }
+  & .ej-doc blockquote {
+    margin: 12px 0; padding: 2px 0 2px 14px;
+    border-left: 2px solid var(--border-2); color: var(--text-2); font-style: italic;
+  }
+  /* Matemática en display: ecuación centrada del documento (misma composición que
+     .tex-eq de latex.css), sin caja tintada ni filete izquierdo. En una
+     resolución larga la placa se repetía diez veces y partía la lectura; aquí la
+     fórmula queda suelta en el ancho del texto, como en el PDF de la cátedra. */
+  & .ej-doc .katex {
+    font-size: calc(1em * var(--math-scale)); color: var(--math-ink);
+  }
+  & .ej-doc .katex-display {
+    margin: .85em 0; padding: 0;
+    background: none; border: 0; border-radius: 0; box-shadow: none;
+    text-align: center;
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: thin;
+  }
+  & .ej-doc .katex-display > .katex {
+    font-size: 1em;
+  }
+  /* ---------- callouts (tcolorbox del PDF) ---------- */
+  /* Sobrios, como el tcolorbox de .tex-box (latex.css): un filete de 1 px y radio
+     corto, sin fondo tintado ni barra de color a la izquierda. El sentido del
+     callout lo lleva su rótulo, que sí conserva el color. */
+  & .ej-doc .def,
+  & .ej-doc .si,
+  & .ej-doc .no,
+  & .ej-doc .trade,
+  & .ej-doc .cita,
+  & .ej-doc .ej,
+  & .ej-doc .tip,
+  & .ej-doc .parcial {
+    --co: var(--border-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: none;
+    padding: .6em .9em; margin: .9em 0;
+    break-inside: avoid;
+  }
+  & .ej-doc .def > :first-child,
+  & .ej-doc .si > :first-child,
+  & .ej-doc .no > :first-child,
+  & .ej-doc .trade > :first-child,
+  & .ej-doc .cita > :first-child,
+  & .ej-doc .ej > :first-child,
+  & .ej-doc .tip > :first-child,
+  & .ej-doc .parcial > :first-child {
+    margin-top: 0;
+  }
+  & .ej-doc .def > :last-child,
+  & .ej-doc .si > :last-child,
+  & .ej-doc .no > :last-child,
+  & .ej-doc .trade > :last-child,
+  & .ej-doc .cita > :last-child,
+  & .ej-doc .ej > :last-child,
+  & .ej-doc .tip > :last-child,
+  & .ej-doc .parcial > :last-child {
+    margin-bottom: 0;
+  }
+  /* etiqueta automática; .plain la suprime */
+  & .ej-doc .def:not(.plain)::before,
+  & .ej-doc .si:not(.plain)::before,
+  & .ej-doc .no:not(.plain)::before,
+  & .ej-doc .trade:not(.plain)::before,
+  & .ej-doc .cita:not(.plain)::before,
+  & .ej-doc .ej:not(.plain)::before,
+  & .ej-doc .tip:not(.plain)::before,
+  & .ej-doc .parcial:not(.plain)::before {
+    display: block;
+    font-family: var(--font-tex); font-weight: 700;
+    font-variant: small-caps; text-transform: none;
+    font-size: .86em; letter-spacing: .06em;
+    color: var(--co); margin-bottom: .3em;
+  }
+  & .ej-doc .def {
+    --co: var(--u2);
+  }
+  & .ej-doc .def:not(.plain)::before {
+    content: "Definición";
+  }
+  & .ej-doc .si {
+    --co: var(--good);
+  }
+  & .ej-doc .si:not(.plain)::before {
+    content: "Cuándo sí";
+  }
+  & .ej-doc .no {
+    --co: var(--bad);
+  }
+  & .ej-doc .no:not(.plain)::before {
+    content: "Cuándo no";
+  }
+  & .ej-doc .trade {
+    --co: var(--warn);
+  }
+  & .ej-doc .trade:not(.plain)::before {
+    content: "Compromiso";
+  }
+  & .ej-doc .cita {
+    --co: var(--u3);
+  }
+  & .ej-doc .cita:not(.plain)::before {
+    content: "Fuente";
+  }
+  & .ej-doc .ej {
+    --co: var(--u1);
+  }
+  & .ej-doc .ej:not(.plain)::before {
+    content: "Ejemplo";
+  }
+  & .ej-doc .tip {
+    --co: var(--u5);
+  }
+  & .ej-doc .tip:not(.plain)::before {
+    content: "Regla de oro";
+  }
+  & .ej-doc .parcial {
+    --co: var(--primary);
+  }
+  & .ej-doc .parcial:not(.plain)::before {
+    content: "En el parcial";
+  }
+  /* en los frags, '.ej' con un <strong>Resultado.</strong> adentro es el bloque
+     de resultado final, no un ejemplo: el build lo marca con .resultado */
+  /* En 20 ítems la respuesta viene embebida en la resolución como este bloque:
+     se lo pinta igual que la caja .tex-box.resp que arma la vista para los ítems
+     que sí traen respuestaHtml aparte, para que las dos se lean como lo mismo. */
+  & .ej-doc .ej.resultado {
+    --co: var(--good); border-left: 3px solid var(--good);
+  }
+  & .ej-doc .ej.resultado:not(.plain)::before {
+    content: "Respuesta";
+  }
+  /* título propio dentro de un callout */
+  & .ej-doc .box-tit {
+    display: block; font-weight: 700; margin-bottom: .25em; font-family: var(--font-tex); font-style: italic; font-size: 1em;
+  }
+  /* ---------- marcas de color (bajo en tinta: subrayado, no fondo) ---------- */
+  & .ej-doc mark,
+  & .ej-doc .hl-amber,
+  & .ej-doc .hl-blue,
+  & .ej-doc .hl-green,
+  & .ej-doc .hl-red,
+  & .ej-doc .hl-purple,
+  & .ej-doc .hl-teal {
+    background: none; color: inherit;
+    border-bottom: 2px solid var(--hl-co, var(--accent));
+    padding-bottom: .04em;
+  }
+  & .ej-doc mark,
+  & .ej-doc .hl-amber {
+    --hl-co: var(--accent);
+  }
+  & .ej-doc .hl-blue {
+    --hl-co: var(--u2);
+  }
+  & .ej-doc .hl-green {
+    --hl-co: var(--good);
+  }
+  & .ej-doc .hl-red {
+    --hl-co: var(--bad);
+  }
+  & .ej-doc .hl-purple {
+    --hl-co: var(--u3);
+  }
+  & .ej-doc .hl-teal {
+    --hl-co: var(--u1);
+  }
+  & .ej-doc .term {
+    font-style: italic; color: var(--u2);
+  }
+  & .ej-doc .chip {
+    display: inline-block; white-space: nowrap;
+    border: 1px solid var(--chip-co, var(--u2)); color: var(--chip-co, var(--u2));
+    background: color-mix(in srgb, var(--chip-co, var(--u2)) 8%, transparent);
+    border-radius: 999px; padding: 0 .55em;
+    font-family: var(--font-ui); font-size: .78em; line-height: 1.6;
+  }
+  & .ej-doc .chip.g {
+    --chip-co: var(--good);
+  }
+  & .ej-doc .chip.r {
+    --chip-co: var(--bad);
+  }
+  & .ej-doc .chip.a {
+    --chip-co: var(--warn);
+  }
+  & .ej-doc .chip.p {
+    --chip-co: var(--u3);
+  }
+  /* ---------- tablas booktabs ---------- */
+  & .ej-doc table {
+    border-collapse: collapse; width: auto; max-width: 100%; margin: 0 auto;
+    font-family: var(--font-ui); font-size: 13px;
+    border-top: 2px solid var(--text-2);
+  }
+  & .ej-doc caption {
+    caption-side: top; text-align: left;
+    font-family: var(--font-ui); font-size: 12px; color: var(--text-3);
+    margin-bottom: 5px; padding: 0 2px;
+  }
+  & .ej-doc caption::before {
+    counter-increment: ejtabla; content: "Tabla " counter(ejtabla) ". "; font-weight: 700; color: var(--text-2);
+  }
+  & .ej-doc thead th {
+    border-bottom: 1px solid var(--text-2); font-weight: 700; color: var(--text-2);
+  }
+  & .ej-doc th,
+  & .ej-doc td {
+    padding: 5px 11px; text-align: center; vertical-align: top; white-space: nowrap;
+  }
+  & .ej-doc th:first-child,
+  & .ej-doc td:first-child {
+    text-align: left;
+  }
+  & .ej-doc td.l,
+  & .ej-doc th.l {
+    text-align: left;
+  }
+  & .ej-doc td.r,
+  & .ej-doc th.r {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  & .ej-doc tbody tr:last-child td {
+    border-bottom: 2px solid var(--text-2);
+  }
+  & .ej-doc table.midrules tbody td {
+    border-bottom: 1px solid var(--border);
+  }
+  & .ej-doc table.midrules tbody tr:last-child td {
+    border-bottom: 2px solid var(--text-2);
+  }
+  /* enhanceDoc envuelve cada <table> en .table-wrap (scroll horizontal) */
+  & .ej-doc .table-wrap {
+    margin: 12px 0 18px; padding: 0; background: none; overflow-x: auto;
+  }
+  /* ---------- nota al pie de bloque ---------- */
+  & .ej-doc .nota {
+    font-size: .9em; color: var(--text-2);
+    border-top: 1px solid var(--border); padding-top: 6px; margin: 14px 0;
+  }
+  & .ej-doc .nota::before {
+    content: "Nota. "; font-family: var(--font-ui); font-weight: 700;
+    font-size: .85em; letter-spacing: .05em; text-transform: uppercase; color: var(--text-3);
+  }
+  /* ---------- layout multicolumna del PDF ---------- */
+  & .ej-doc .cols2 {
+    column-count: 2; column-gap: 26px;
+  }
+  & .ej-doc .cols2 > * {
+    break-inside: avoid;
+  }
+  & .ej-doc .grid2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; align-items: start;
+  }
+  & .ej-doc .grid2 > * {
+    min-width: 0;
+  }
+  /* ---------- diagramas (mermaid, carga perezosa) ---------- */
+  & .ej-doc .diag-slot {
+    display: grid; place-items: center; min-height: 60px;
+    background: var(--surface); border: 1px dashed var(--border-2); border-radius: var(--r);
+    margin: 16px 0; padding: 14px; color: var(--text-3); font-family: var(--font-ui); font-size: 12.5px;
+  }
+  & .ej-doc .ej-diag {
+    margin: 18px 0; text-align: center;
+  }
+  & .ej-doc .ej-diag-svg {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 14px 12px; overflow-x: auto;
+  }
+  & .ej-doc .ej-diag-svg svg {
+    max-width: 100%; height: auto;
+  }
+  & .ej-doc .ej-diag figcaption {
+    margin-top: 7px; font-family: var(--font-ui); font-size: 12px; color: var(--text-3); text-align: center;
+  }
+  & .ej-doc .ej-diag figcaption::before {
+    counter-increment: ejfigura; content: "Figura " counter(ejfigura) ". "; font-weight: 700; color: var(--text-2);
+  }
+  /* ============================================================
+     2) ANDAMIAJE DE LA VISTA
+     ============================================================ */
+  & .ej-wrap {
+    max-width: var(--maxw);
+  }
+  /* ---------- índice: una tarjeta por unidad ---------- */
+  /* cinco cifras (resueltos + los cuatro estados) tienen que entrar en una línea:
+     el mínimo de .stat-row está pensado para cuatro */
+  & .ej-stats {
+    grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+  }
+  & .ej-index-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-top: 6px;
+  }
+  & a.ej-index-card,
+  & a.ej-index-card h3 {
+    color: var(--text);
+  }
+  & .ej-index-card {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 16px 18px; box-shadow: var(--relief), var(--shadow);
+    transition: border-color var(--t), transform var(--t);
+  }
+  & .ej-index-card:hover {
+    border-color: var(--border-2); transform: translateY(-1px); text-decoration: none;
+  }
+  & .ej-index-card .ring {
+    width: 62px; height: 62px; flex: none;
+  }
+  /* .ring::after (el disco interior) es un pseudo posicionado y se pinta DESPUÉS
+     del <b>, que solo declara position:relative: sin z-index el porcentaje queda
+     tapado. Se corrige aquí para esta tarjeta; el mismo defecto está en styles.css. */
+  & .ej-index-card .ring b {
+    position: relative; z-index: 1; font-size: 13px;
+  }
+  & .eic-body {
+    flex: 1; min-width: 0;
+  }
+  & .eic-body h3 {
+    margin: 0 0 2px; font-family: var(--font-ui); font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+  }
+  & .eic-unit {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-3); letter-spacing: .04em;
+  }
+  & .eic-cols {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px;
+  }
+  & .eic-cols .badge {
+    font-size: 10.5px;
+  }
+  & .eic-break {
+    display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 9px; font-size: 11.5px; color: var(--text-3);
+  }
+  & .eic-break span {
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  & .eic-break i {
+    width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex: none; background: currentColor;
+  }
+  & .eic-break b {
+    font-family: var(--font-mono); font-weight: 600; color: var(--text-2);
+  }
+  /* colores de los cuatro estados, compartidos por el desglose del índice y los
+     botones de estado: el mismo código cromático que las notas de flashcards */
+  & .ej-k1 {
+    color: var(--good-text);
+  }
+  & .ej-k2 {
+    color: var(--warn-text);
+  }
+  & .ej-k3 {
+    color: var(--bad-text);
+  }
+  & .ej-k0 {
+    color: var(--text-3);
+  }
+  /* ---------- "seguir donde estaba" ---------- */
+  & .ej-resume {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--primary-soft); border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+    border-radius: var(--r-lg); padding: 13px 17px; margin-bottom: 20px;
+  }
+  & .ej-resume .eyebrow {
+    color: var(--primary-2);
+  }
+  & .ej-resume-t {
+    flex: 1; min-width: 200px; font-size: 13.5px; color: var(--text-2);
+  }
+  & .ej-resume-t b {
+    color: var(--text);
+  }
+  /* ---------- barra de herramientas de la colección (una sola fila) ----------
+     Colecciones, filtro por estado, búsqueda, progreso y acciones comparten una
+     fila pegajosa de ~43 px. Antes eran tres filas (171 px medidos a 1280 px), y
+     dos de sus contenedores dejaban a sus hijos pegados al borde: la caja
+     segmentada de colecciones se estiraba a los 840 px del documento con los
+     botones amontonados a la izquierda, y la barra de progreso corría de borde a
+     borde de la fila pegajosa (0 px de separación medidos). Aquí cada contenedor
+     —la barra, los dos grupos segmentados, la mini barra y el grupo de iconos—
+     lleva su propio relleno, nunca menor que 3 px. */
+  & .ej-toolbar {
+    position: sticky; top: calc(var(--header-h) + var(--crumbs-h)); z-index: 30;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+    /* el margen negativo devuelve el relleno propio: el contenido de la barra
+       queda alineado con el documento y la fila gana esos 12 px */
+    background: var(--bg); padding: 3px 6px; margin: 2px -6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  /* los dos grupos segmentados no se estiran: ocupan lo que miden sus botones */
+  & .ej-toolbar .seg {
+    flex: none; padding: 3px; gap: 4px;
+  }
+  /* colecciones: rótulo corto y el conteo como sufijo pequeño («Guía 24») */
+  & .ej-cols-seg {
+    display: flex; flex-wrap: wrap; max-width: 100%; margin: 0;
+  }
+  & .ej-toolbar .ej-cols-seg button {
+    display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+    height: 24px; padding: 0 8px; font-size: 11.5px;
+  }
+  & .ej-toolbar .ej-cols-seg button i {
+    font-style: normal; font-family: var(--font-mono); font-size: 10.5px;
+    font-variant-numeric: tabular-nums; color: var(--text-3);
+  }
+  & .ej-toolbar .ej-cols-seg button.on i {
+    color: var(--primary-2);
+  }
+  /* El filtro por estado hace de leyenda del semáforo: cada botón lleva su icono
+     y su color, en el mismo orden que los botones del encabezado. Aquí va solo el
+     glifo; el nombre del estado está en title y aria-label. */
+  & .ej-seg-est button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  & .ej-toolbar .ej-seg-est button {
+    width: 24px; height: 24px; padding: 0;
+  }
+  & .ej-toolbar .ej-seg-est button.ej-est-todos {
+    width: auto; padding: 0 6px; font-size: 10.5px;
+  }
+  & .ej-seg-est button .ej-sem-i {
+    flex: none; opacity: .55;
+  }
+  & .ej-seg-est button:hover .ej-sem-i,
+  & .ej-seg-est button.on .ej-sem-i {
+    opacity: 1;
+  }
+  & .ej-seg-est button.ej-k0 .ej-sem-i {
+    color: var(--text-3);
+  }
+  & .ej-seg-est button.ej-k3 .ej-sem-i {
+    color: var(--bad);
+  }
+  & .ej-seg-est button.ej-k2 .ej-sem-i {
+    color: var(--warn);
+  }
+  & .ej-seg-est button.ej-k1 .ej-sem-i {
+    color: var(--good);
+  }
+  /* búsqueda: es lo único que crece con el ancho sobrante */
+  /* El contador va DENTRO del campo, contra el borde derecho: al lado obligaba a
+     la barra a una segunda fila cada vez que había filtro puesto. El hueco está
+     reservado siempre (padding-right del campo), así que no hay salto. */
+  & .ej-buscar {
+    position: relative; display: flex; align-items: center; flex: 1 1 120px; min-width: 120px;
+  }
+  & .ej-search {
+    flex: 1 1 auto; min-width: 0;
+    height: 30px; padding: 0 44px 0 11px; border-radius: var(--r-ctrl);
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    font-family: var(--font-ui); font-size: 12.5px;
+  }
+  & .ej-search:focus {
+    outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-ring);
+  }
+  /* El gris del agente de usuario para el texto de ayuda queda en 3,8-4,2:1 según
+     el tema: se lo tematiza con --text-3, que mide 5,2-6,9:1 sobre --surface. */
+  & .ej-search::placeholder {
+    color: var(--text-3); opacity: 1;
+  }
+  & .ej-count {
+    position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; font-family: var(--font-mono); font-size: 10.5px;
+    color: var(--text-2); white-space: nowrap;
+  }
+  /* mini barra de progreso + «3/24» */
+  & .ej-prog {
+    display: flex; align-items: center; gap: 5px; flex: none;
+    padding: 4px 5px; border: 1px solid var(--border); border-radius: var(--r);
+    background: var(--surface-2);
+  }
+  & .ej-bar {
+    flex: none; width: 72px; display: flex; height: 6px; border-radius: 999px;
+    overflow: hidden; background: var(--surface-3); border: 1px solid var(--border);
+  }
+  & .ej-bar i {
+    display: block; height: 100%; transition: width var(--t-slow);
+  }
+  /* mismo orden que el semáforo: gris → rojo → ámbar → verde */
+  & .ej-bar .s0 {
+    background: color-mix(in srgb, var(--text-3) 30%, transparent);
+  }
+  & .ej-bar .s3 {
+    background: var(--bad);
+  }
+  & .ej-bar .s2 {
+    background: var(--warn);
+  }
+  & .ej-bar .s1 {
+    background: var(--good);
+  }
+  & .ej-bar-txt {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-2);
+    flex: none; font-variant-numeric: tabular-nums;
+  }
+  & .ej-bar-txt b {
+    color: var(--text);
+  }
+  /* grupo de acciones: cuatro botones de icono de 30 px, con su propio relleno y
+     separado del resto por un filete */
+  & .ej-acts {
+    display: flex; align-items: center; gap: 4px; flex: none;
+    padding: 3px 3px 3px 6px; margin-left: 2px; border-left: 1px solid var(--border);
+  }
+  & .ej-ib {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; padding: 0; flex: none;
+    border: 1px solid transparent; border-radius: var(--r-ctrl);
+    background: transparent; color: var(--text-2); cursor: pointer;
+    transition: background var(--t), color var(--t), border-color var(--t);
+  }
+  & .ej-ib:hover {
+    background: var(--surface); border-color: var(--border); color: var(--text);
+  }
+  & .ej-ib.on {
+    background: var(--primary-soft); border-color: transparent; color: var(--primary-2);
+  }
+  & .ej-ib svg {
+    flex: none;
+  }
+  & .ej-ib:focus-visible {
+    outline: 2px solid var(--primary); outline-offset: 2px;
+  }
+  /* interruptor "Mostrar las resoluciones" (preferencia global, pe.exReso).
+     Sigue siendo una casilla de verdad —teclado y lector de pantalla la ven—:
+     se la estira sobre el botón con opacidad 0 y el chevrón dibuja el estado. */
+  & .ej-toggle {
+    position: relative;
+  }
+  & .ej-toggle input {
+    position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
+    opacity: 0; cursor: pointer;
+  }
+  & .ej-toggle .ej-ic-on {
+    display: none;
+  }
+  & .ej-toggle.on .ej-ic-off {
+    display: none;
+  }
+  & .ej-toggle.on .ej-ic-on {
+    display: block;
+  }
+  & .ej-toggle:has(input:focus-visible) {
+    outline: 2px solid var(--primary); outline-offset: 2px;
+  }
+  & .ej-print[disabled] {
+    opacity: .6; cursor: progress;
+  }
+  & .ej-print.is-busy svg {
+    animation: ejPrintLatido 1s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    & .ej-print.is-busy svg {
+      animation: none;
+    }
+  }
+  /* ---------- modo "Ocultar respuestas" (preferencia global, pe.exPractica) ----------
+     Con el modo activo, la lista lleva la clase .ej-practica y cada ejercicio
+     tapa su caja «Respuesta» y los bloques de resultado embebidos en la
+     resolución. La clase .ej-rev del artículo —que pone el semáforo al marcar un
+     estado distinto de "Sin resolver"— es la que los descubre, y ya no se quita.
+     El estado se lee por el rótulo del interruptor y por el texto del marcador,
+     nunca por el color. En papel el modo no rige: ver el bloque @media print. */
+  & .ej-prac-b .ej-ojo {
+    flex: none;
+  }
+  & .ej-oculta {
+    display: none;
+  }
+  & .ej-list.ej-practica .ej-item:not(.ej-rev) .tex-box.resp,
+  & .ej-list.ej-practica .ej-item:not(.ej-rev) .ej-doc .ej.resultado {
+    display: none;
+  }
+  /* El marcador se dibuja dos veces (ejercicios.js, marcadorOculta) y aquí se elige
+     cuál se ve: con la resolución PLEGADA, el de bajo el enunciado, que es lo
+     único a la vista; con la resolución ABIERTA, el de adentro, en el hueco que
+     deja la caja «Respuesta», para que se lea dónde va a emerger. */
+  & .ej-list.ej-practica .ej-item:not(.ej-rev):not(.ej-reso-abierta) .ej-oculta-fuera,
+  & .ej-list.ej-practica .ej-item:not(.ej-rev).ej-reso-abierta .ej-oculta-dentro {
+    display: inline-flex; align-items: center; gap: 7px;
+    margin: 10px 0 2px; padding: 5px 11px;
+    border: 1px dashed var(--border-2); border-radius: var(--r-ctrl);
+    background: var(--surface); color: var(--text-2);
+    font-family: var(--font-ui); font-size: 12.5px; line-height: 1.35;
+    text-align: left; cursor: pointer;
+  }
+  /* Adentro de la resolución el marcador ocupa su propio renglón: se apoya donde
+     arrancaría la caja y no se enreda con el último párrafo. */
+  & .ej-list.ej-practica .ej-item:not(.ej-rev).ej-reso-abierta .ej-oculta-dentro {
+    display: flex; width: fit-content; margin-top: 14px;
+  }
+  & .ej-list.ej-practica .ej-item:not(.ej-rev) .ej-oculta:hover {
+    color: var(--text); border-color: var(--text-3);
+  }
+  & .ej-oculta .ej-ojo {
+    flex: none;
+  }
+  & .ej-oculta:focus-visible {
+    outline: 2px solid var(--primary); outline-offset: 2px;
+  }
+  /* revelado: una transición breve para que se note de dónde salió la respuesta */
+  & .ej-item.ej-revelando .tex-box.resp,
+  & .ej-item.ej-revelando .ej-doc .ej.resultado {
+    animation: ejRevela .3s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    & .ej-item.ej-revelando .tex-box.resp,
+    & .ej-item.ej-revelando .ej-doc .ej.resultado {
+      animation: none;
+    }
+  }
+  /* ---------- barra de unidad (la dibuja reader.js; el aspecto lo trae
+                reader.css: aquí solo se la encaja en el flujo de la vista) ---------- */
+  /* .ej-strip solo encaja la barra en el flujo: no pinta caja ni borde, así que
+     no hay borde contra el que su hijo pueda chocar. */
+  & .ej-strip {
+    margin: 4px 0 0;
+  }
+  & .ej-strip .unit-strip {
+    margin-bottom: 10px;
+  }
+  /* filtro sin resultados: el documento no puede quedar en blanco y mudo */
+  & .ej-nores {
+    display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 26px;
+  }
+  & .ej-nores[hidden] {
+    display: none;
+  }
+  /* ---------- un ejercicio ---------- */
+  /* ---------- encabezado de examen (colecciones 'parciales' y 'finales') ---------- */
+  & .ej-group {
+    margin: 34px 0 0;
+  }
+  /* El nombre del examen es el título de sección del documento: misma cara que el
+     resto de la guía, con el filete fino de LaTeX debajo. */
+  & .ej-group > h2 {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    font-family: var(--font-tex); font-weight: 700; font-size: 1.28em; letter-spacing: 0;
+    margin: 0 0 4px; padding-bottom: .16em; border-bottom: .6pt solid var(--text);
+  }
+  & .ej-group-n {
+    margin-left: auto; flex: none;
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 400; color: var(--text-3);
+  }
+  & .ej-group[hidden] {
+    display: none;
+  }
+  /* La lista entera es un .tex-doc (piel de latex.css): el ancho, la tipografía y
+     el justificado los pone esa hoja. Aquí solo va lo propio del andamiaje. */
+  & .ej-list {
+    --sem-glifo: var(--surface);
+  }
+  /* La portada («Ejercicios · Unidad N · Colección», título y conteo) es el primer
+     elemento DE la hoja, como en el lector y en los formularios: sin margen
+     superior propio, que el relleno de .sheet ya lo pone. */
+  & .ej-list > .tex-title {
+    margin-top: 0;
+  }
+  /* La división entre ejercicios es un filete DOBLE fino con 36 px de aire a cada
+     lado: con el filete de .4pt y el aire justo, el documento se leía como una
+     sola mancha corrida y no se veía dónde terminaba un ejercicio. */
+  & .ej-item {
+    --ucol: var(--umeta);
+    /* --border-2 dejaba el filete en 1,4-1,7:1 contra el fondo (en claustro casi
+       no se veía): el mismo doble filete con tinta derivada de --text-3 al 80 %
+       mide 3,3:1 en pergamino, 3,2:1 en laurel y 4,4:1 en claustro (medido). */
+    border-top: 3px double color-mix(in srgb, var(--text-3) 80%, transparent);
+    padding: 36px 0 40px;
+    scroll-margin-top: calc(var(--header-h) + var(--crumbs-h) + 74px);
+  }
+  & .ej-item[hidden] {
+    display: none;
+  }
+  & .ej-item:first-child {
+    border-top: none; padding-top: 6px;
+  }
+  & .ej-item.is-target {
+    background: color-mix(in srgb, var(--ucol) 9%, transparent);
+    outline: 1px dashed color-mix(in srgb, var(--ucol) 50%, transparent);
+    outline-offset: 5px;                 /* el contorno no ocupa lugar: no corre el texto */
+  }
+  /* El artículo abre con el enunciado; el semáforo va contra el margen derecho,
+     alineado con su primera línea. Ya no hay ni título ni fila de metadatos. */
+  & .ej-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px;
+  }
+  & .ej-cuerpo {
+    flex: 1 1 auto; min-width: 0;
+  }
+  /* «Ejercicio N.» — el ancla de la vista: pesa y mide un poco más que el resto
+     del enunciado para que el ojo encuentre dónde empieza cada ejercicio. */
+  /* El selector lleva .ej-doc por delante para ganarle por especificidad a
+     «.ej-doc strong { font-weight: 600 }» y a la regla equivalente de latex.css. */
+  & .ej-n,
+  & .ej-doc strong.ej-n {
+    font-family: var(--font-tex); font-weight: 700; font-size: 1.05em;
+    color: var(--text);
+    white-space: nowrap;
+    margin-right: .3em;
+  }
+  /* renumerado: el rótulo explica de dónde sale el número */
+  & .ej-n[title] {
+    cursor: help; border-bottom: 1px dotted var(--border-2);
+  }
+  & .ej-list .ej-lead {
+    text-indent: 0;
+  }
+  /* Incisos en renglones propios, con sangría colgante: «a)» queda en el margen y
+     el texto del inciso alineado por debajo de sí mismo. */
+  & .ej-inciso {
+    display: block;
+    padding-left: 1.4em; text-indent: -1.4em;
+    margin-top: .35em;
+  }
+  /* aviso de respuesta simbólica, al pie del enunciado */
+  & .ej-list .ej-simb {
+    margin: .5em 0 0; text-indent: 0;
+    font-size: .92em; color: var(--text-3);
+  }
+  /* ---------- semáforo (esquina superior derecha del encabezado) ---------- */
+  & .ej-sem {
+    display: inline-flex; align-items: center; gap: 2px; flex: none;
+  }
+  & .ej-sem-b {
+    width: 26px; height: 26px; flex: none;
+    display: grid; place-items: center;
+    padding: 0; border: 0; background: none; border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--t);
+  }
+  & .ej-sem-b:hover {
+    background: var(--surface-2);
+  }
+  & .ej-sem-b:focus-visible {
+    outline: 2px solid var(--primary); outline-offset: 1px;
+  }
+  & .ej-sem-b.on {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+  }
+  /* El estado NO elegido se distingue por relleno, no por opacidad: atenuarlo a
+     .35 dejaba el contraste en ~1,5:1 (WCAG 1.4.11 pide 3:1 para componentes de
+     interfaz) y borraba el glifo. Elegido = círculo lleno; el resto, anillo del
+     mismo color pleno. Vale igual para el filtro, que hace de leyenda. */
+  & .ej-sem-i {
+    --sem-glifo: var(--surface);
+  }
+  & .ej-sem-i circle {
+    fill: currentColor;
+  }
+  & .ej-sem-i > g {
+    stroke: var(--sem-glifo);
+  }
+  & .ej-sem-b:not(.on) > .ej-sem-i circle,
+  & .ej-seg-est button:not(.on) > .ej-sem-i circle {
+    fill: none;
+  }
+  & .ej-sem-b:not(.on) > .ej-sem-i > g,
+  & .ej-seg-est button:not(.on) > .ej-sem-i > g {
+    stroke: currentColor;
+  }
+  /* Segundo semáforo, al pie de la resolución abierta */
+  & .ej-sem-foot {
+    display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+    margin-top: 14px; padding-top: 8px; border-top: 1px solid var(--border);
+  }
+  & .ej-sem-foot::before {
+    content: "¿Cómo lo resolvió?";
+    /* --text-3 a 12 px quedaba en 4,4:1 sobre el panel de la resolución (bajo el
+       mínimo de 4,5:1 de WCAG 1.4.3): con --text-2 mide 6,7-8:1 en los tres temas. */
+    font-family: var(--font-ui); font-size: 12px; color: var(--text-2);
+    margin-right: auto;
+  }
+  /* cada botón lleva su color desde el principio; el glifo interior se pinta con
+     el color de la hoja para que se lea sobre el círculo lleno */
+  & .ej-sem-b.ej-k0 {
+    color: var(--text-3);
+  }
+  & .ej-sem-b.ej-k3 {
+    color: var(--bad);
+  }
+  & .ej-sem-b.ej-k2 {
+    color: var(--warn);
+  }
+  & .ej-sem-b.ej-k1 {
+    color: var(--good);
+  }
+  & .ej-sem-i {
+    display: block;
+  }
+  & .ej-aviso {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 12.5px; color: var(--warn-text); background: var(--warn-soft);
+    border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent); border-radius: var(--r-sm);
+    padding: 7px 11px; margin: 0 0 12px;
+  }
+  & .ej-aviso svg {
+    flex: none; margin-top: 2px; color: currentColor;
+  }
+  & .ej-list .ej-mismo {
+    font-size: 13px; color: var(--text-2); margin: 0 0 10px;
+    text-align: left; text-indent: 0;
+  }
+  /* Enunciado: prosa del documento, sin fondo ni borde. El «Enunciado.» que ya
+     traen la mayoría de los ítems queda como rótulo run-in, a la LaTeX. */
+  & .ej-enunciado {
+    margin: 0 0 6px;
+  }
+  /* el envoltorio de callout del enunciado es accidental (viene de la fuente):
+     ni etiqueta ni caja propia dentro del recuadro del enunciado */
+  & .ej-enunciado .cita::before,
+  & .ej-enunciado .ej::before,
+  & .ej-enunciado .def::before,
+  & .ej-enunciado .parcial::before,
+  & .ej-enunciado .si::before,
+  & .ej-enunciado .no::before,
+  & .ej-enunciado .trade::before,
+  & .ej-enunciado .tip::before {
+    content: none;
+  }
+  & .ej-enunciado > .cita,
+  & .ej-enunciado > .ej,
+  & .ej-enunciado > .def,
+  & .ej-enunciado > .parcial,
+  & .ej-enunciado > .si,
+  & .ej-enunciado > .no,
+  & .ej-enunciado > .trade,
+  & .ej-enunciado > .tip {
+    border: none; background: none; padding: 0; margin: 0;
+  }
+  /* Resolución: un solo desplegable por ejercicio. El rótulo dejó de ser un
+     filete de LaTeX y pasó a ser una BARRA visible en el color de la unidad: es la
+     acción principal de la vista y antes se perdía dentro del corrido del
+     documento. Abierta, el cuerpo va en un panel con filete izquierdo del mismo
+     color, de modo que se ve de un vistazo dónde empieza y dónde termina. */
+  & .ej-reso {
+    margin: 16px 0 0;
+  }
+  /* El desplegable es la acción principal de la vista: se le da alto de blanco
+     táctil (28 px de mínimo con puntero, 44 px en el teléfono) en vez de los
+     20,4 px que dejaba la línea de texto sola. */
+  & .ej-reso > .ej-reso-sum {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; list-style: none; user-select: none;
+    padding: .5em .9em; min-height: 28px;
+    /* Al 35 % el borde medía 1,9-2,1:1 contra la página, por debajo del 3:1 que
+       pide WCAG 1.4.11 para el límite de un control. Mezclar más color de unidad
+       contra --border no alcanzaba con los ocres (unidad 6: 2,3:1 en pergamino);
+       la mezcla contra la tinta --text-3 sí, porque oscurece en los temas claros
+       y aclara en el oscuro: 3,3:1 en el peor caso (unidad 6, pergamino) y hasta
+       7,3:1 en claustro, medido en las tres pieles. */
+    border: 1px solid color-mix(in srgb, var(--ucol) 75%, var(--text-3));
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--ucol) 22%, var(--surface));
+    transition: background var(--t), border-color var(--t);
+  }
+  & .ej-reso > .ej-reso-sum::-webkit-details-marker {
+    display: none;
+  }
+  & .ej-reso-lbl {
+    flex: 1; min-width: 0;
+    /* versalitas, como los rótulos de la piel LaTeX (latex.css) */
+    font-family: var(--font-tex); font-size: 13.5px; font-weight: 700;
+    font-variant: small-caps; text-transform: none; letter-spacing: .07em;
+    color: var(--text-2);
+  }
+  & .ej-reso > .ej-reso-sum:hover {
+    background: color-mix(in srgb, var(--ucol) 32%, var(--surface));
+    border-color: color-mix(in srgb, var(--ucol) 60%, var(--text-2));
+  }
+  & .ej-reso > .ej-reso-sum:focus-visible {
+    outline: 2px solid var(--primary); outline-offset: 2px;
+  }
+  & .ej-reso > .ej-reso-sum .ej-chev {
+    display: flex; flex: none; color: var(--text-3);
+  }
+  & .ej-reso > .ej-reso-sum .ej-chev svg {
+    transition: transform var(--t);
+  }
+  & .ej-reso[open] > .ej-reso-sum {
+    border-radius: 6px 6px 0 0;
+  }
+  & .ej-reso[open] > .ej-reso-sum .ej-chev svg {
+    transform: rotate(180deg);
+  }
+  & .ej-reso-body {
+    margin-top: 0;
+    border-left: 3px solid var(--ucol);
+    background: color-mix(in srgb, var(--ucol) 4%, transparent);
+    padding: 12px 16px;
+    border-radius: 0 0 6px 0;
+  }
+  /* los anexos de Lutzio van como sub-rótulos DENTRO de la resolución abierta */
+  & .ej-reso-body .tex-rule.sub {
+    font-size: .8rem; margin: 1.3em 0 .45em;
+  }
+  & .ej-anexo {
+    margin-top: 2px;
+  }
+  /* anexos de Lutzio: fórmulas usadas y derivación paso a paso */
+  & .ej-take {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  & .ej-take-it {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 10px 13px;
+  }
+  & .ej-take-n {
+    font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; color: var(--text-2);
+  }
+  & .ej-take-f {
+    margin: 5px 0 0; overflow-x: auto;
+  }
+  & .ej-take-note {
+    margin: 5px 0 0; font-size: 12.5px; color: var(--text-3);
+  }
+  & .ej-eq {
+    margin-bottom: 14px;
+  }
+  & .ej-eq-t {
+    font-family: var(--font-ui); font-size: 12.5px; font-weight: 700; color: var(--text-2); margin-bottom: 6px;
+  }
+  & .ej-doc .pop-eq {
+    background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--u2);
+    border-radius: var(--r); padding: 10px 13px; margin: 0 0 10px; font-size: 14.5px;
+  }
+  & .ej-doc .pop-eq-t {
+    display: block; font-family: var(--font-ui); font-weight: 700; font-size: 12.5px; color: var(--text-2); margin-bottom: 4px;
+  }
+  /* ---------- movimiento reducido ----------
+     Quien pide menos movimiento no debería ver el giro del chevrón, el relleno de
+     la barra de progreso ni el tinte de los botones del semáforo animarse. Se
+     apagan las transiciones propias de esta vista; el resto de la aplicación lo
+     cubre el bloque equivalente de styles.css. */
+  @media (prefers-reduced-motion: reduce) {
+    & .ej-sem-b,
+    & .ej-bar i,
+    & .ej-reso > .ej-reso-sum,
+    & .ej-reso > .ej-reso-sum .ej-chev svg {
+      transition: none;
+    }
+  }
+  /* ---------- responsive ---------- */
+  @media (max-width: 640px) {
+    & .ej-doc {
+      font-size: 15.5px;
+    }
+    /* A este ancho, una expresión inline larga (KaTeX viene con white-space:
+         nowrap) ensanchaba el documento y aparecía scroll horizontal en toda la
+         página: se la deja partir en varias líneas, y el recorte del artículo es
+         la red de seguridad para lo que aun así no entre. */
+    & .ej-doc,
+    & .ej-enunciado {
+      overflow-wrap: anywhere;
+    }
+    & .ej-doc .katex {
+      white-space: normal;
+    }
+    & .ej-item {
+      overflow-x: clip;
+    }
+    & .ej-doc .cols2 {
+      column-count: 1;
+    }
+    & .ej-doc .grid2 {
+      grid-template-columns: 1fr;
+    }
+    & .ej-index-grid {
+      grid-template-columns: 1fr;
+    }
+    /* el semáforo sube a su propia fila, por encima del enunciado, y a blancos
+         táctiles de 44 px (column-reverse: en el HTML va después del cuerpo) */
+    & .ej-head {
+      flex-direction: column-reverse; align-items: stretch; gap: 4px;
+    }
+    & .ej-sem {
+      width: 100%; justify-content: flex-start; gap: 6px; margin: 0 0 2px;
+    }
+    & .ej-sem-b {
+      width: 44px; height: 44px;
+    }
+    /* la sangría colgante se achica: a 375 px, 1,4em se comían la línea */
+    & .ej-inciso {
+      padding-left: 1.15em; text-indent: -1.15em;
+    }
+    & .ej-reso-body {
+      padding: 10px 12px;
+    }
+    /* a este ancho la barra deja de ser pegajosa y envuelve en varias líneas:
+         adentro se llevaba buena parte de los 740 px de alto del teléfono */
+    & .ej-toolbar {
+      position: static; gap: 6px; padding: 3px 4px 6px;
+    }
+    & .ej-toolbar .seg {
+      flex-wrap: wrap;
+    }
+    & .ej-buscar {
+      flex: 1 1 100%;
+    }
+    & .ej-acts {
+      border-left: none; padding-left: 3px; margin-left: 0;
+    }
+    & .ej-ib {
+      width: 34px; height: 34px;
+    }
+    & .ej-group > h2 {
+      font-size: 17px;
+    }
+    /* el conteo del examen baja a su propia línea en vez de apretar el nombre */
+    & .ej-group-n {
+      margin-left: 0; flex: 1 1 100%;
+    }
+    & .ej-cols-seg button {
+      font-size: 12px;
+    }
+    & .ej-reso > .ej-reso-sum {
+      min-height: 44px;
+    }
+    & .ej-sem-foot {
+      flex-wrap: wrap;
+    }
+    /* imprimir una colección entera no es algo que se haga desde el teléfono */
+    & .ej-print {
+      display: none;
+    }
+  }
+  /* ============================================================
+     IMPRESIÓN — todo abierto, sin controles y en blanco y negro.
+     El @media print de styles.css pone el cuerpo en negro sobre blanco, pero
+     .ej-doc declara su propio color (var(--text)) y la matemática el suyo
+     (var(--math-ink)): en el tema claustro los dos son casi blancos, así que el
+     documento salía invisible sobre el papel. Por eso la tinta va aquí en bloque
+     y con !important —igual que en formularios.css—, y los grises de las notas
+     se restituyen después con la misma fuerza.
+     ============================================================ */
+  /* ------------------------------------------------------------
+     PINTADO POR BLOQUES — costo de maquetado del cuerpo abierto
+     ------------------------------------------------------------
+     Al marcar «Mostrar las resoluciones» se abren todas las resoluciones de la
+     colección de una vez. El trabajo de JavaScript ya va repartido en cuadros
+     (ejercicios.js), pero maquetar de golpe más de mil nodos de KaTeX seguía
+     costando una sola tarea de 843 ms medidos. Con content-visibility el
+     navegador saltea el maquetado del cuerpo que quedó fuera de la ventana y lo
+     hace recién cuando se acerca al scroll; contain-intrinsic-size le reserva
+     mientras tanto un alto estimado, de modo que la barra de scroll no salta y
+     lo que se está leyendo no se mueve. En papel no corresponde: la impresión
+     necesita el documento entero maquetado. */
+  & #ejList .ej-doc[data-body],
+  & #ejList [data-anexos] {
+    content-visibility: auto; contain-intrinsic-size: auto 480px;
+  }
+  /* P-40: entre 641 y 1279 px la fila también entra en una sola línea: se esconde el conteo de las colecciones (queda en title/aria-label) y la búsqueda cede 20 px */
+  @media (max-width: 1279px) and (min-width: 641px) {
+    & .ej-toolbar .ej-cols-seg button i {
+      display: none;
+    }
+    & .ej-buscar {
+      flex-basis: 110px; min-width: 110px;
+    }
+    /* el «0/24» queda en el title del grupo y en la portada; la barra se acorta */
+    & .ej-prog #ejBarTxt {
+      display: none;
+    }
+    & .ej-prog .ej-bar {
+      width: 56px; min-width: 56px;
+    }
+  }
+}
+
+/* ------------------------------------------------------------
+   IMPRESIÓN — fuera del envoltorio a propósito.
+   Los selectores que empiezan por `html` o `body` quedan verbatim
+   (son ancestros del contenedor); el resto lleva el prefijo
+   `.sinapsis-tool`, que es el mismo acotado con otra sintaxis.
+   ------------------------------------------------------------ */
+@media print {
+  /* El lienzo de la hoja. Sin esto, con un tema oscuro el navegador pinta de
+       negro los márgenes de la página. */
+  html:has(.ej-doc),
+  body:has(.ej-doc) {
+    background: #fff !important; color-scheme: light !important;
+  }
+  /* controles flotantes de otros módulos, solo mientras se imprime esta vista */
+  body:has(.ej-doc) .crumbs,
+  body:has(.ej-doc) .ql-fab,
+  body:has(.ej-doc) .ql-panel {
+    display: none !important;
+  }
+  .sinapsis-tool .ej-toolbar,
+  .sinapsis-tool .ej-resume,
+  .sinapsis-tool .ej-strip,
+  .sinapsis-tool .ej-nores,
+  .sinapsis-tool .ej-sem,
+  .sinapsis-tool .ej-sem-foot,
+  .sinapsis-tool .ej-reso > .ej-reso-sum .ej-chev {
+    display: none !important;
+  }
+  /* El modo "Ocultar respuestas" es una ayuda de pantalla: en papel la
+       colección sale entera, con respuestas y resultados, y sin el marcador. */
+  .sinapsis-tool .ej-oculta {
+    display: none !important;
+  }
+  .sinapsis-tool .ej-list.ej-practica .ej-item .tex-box.resp,
+  .sinapsis-tool .ej-list.ej-practica .ej-item .ej-doc .ej.resultado {
+    display: block !important;
+  }
+  .sinapsis-tool .ej-wrap {
+    max-width: none;
+  }
+  /* El rótulo «Resolución ————» se conserva en papel: es el filete que separa
+       el enunciado de la resolución, igual que en la guía impresa. */
+  .sinapsis-tool .ej-reso {
+    display: block;
+  }
+  .sinapsis-tool .ej-reso > .ej-reso-sum {
+    display: flex;
+  }
+  /* El contenido plegado lo abre onBeforePrint (JS, ejercicios.js): antes de
+       imprimir se abren y se rellenan todas las resoluciones. El CSS de aquí solo
+       quita el color y los controles; no hay respaldo sin JS. */
+  .sinapsis-tool .ej-reso-body {
+    border-left: none; padding-left: 0; background: none !important; padding: 0 !important;
+  }
+  /* la barra de la resolución en papel: filete gris, sin fondo de color */
+  .sinapsis-tool .ej-reso > .ej-reso-sum {
+    background: none !important; border: 0 !important; border-bottom: .6pt solid #999 !important;
+    border-radius: 0 !important; padding: .3em 0 !important;
+  }
+  .sinapsis-tool .ej-item {
+    break-inside: avoid; border-top: 1.5pt double #999; padding: 22px 0 24px;
+  }
+  /* ---- tinta: todo el documento en negro ---- */
+  .sinapsis-tool .ej-doc,
+  .sinapsis-tool .ej-doc *,
+  .sinapsis-tool .ej-doc .katex,
+  .sinapsis-tool .ej-group > h2,
+  .sinapsis-tool .ej-list > .tex-title,
+  .sinapsis-tool .ej-list > .tex-title * {
+    color: #000 !important;
+  }
+  .sinapsis-tool .ej-n {
+    color: #000 !important;
+  }
+  /* ---- y los grises de vuelta, con la misma fuerza ---- */
+  .sinapsis-tool .ej-doc .nota,
+  .sinapsis-tool .ej-doc .nota *,
+  .sinapsis-tool .ej-doc caption,
+  .sinapsis-tool .ej-doc caption::before,
+  .sinapsis-tool .ej-doc figcaption,
+  .sinapsis-tool .ej-doc figcaption::before,
+  .sinapsis-tool .ej-doc blockquote,
+  .sinapsis-tool .ej-doc .term,
+  .sinapsis-tool .ej-doc .chip,
+  .sinapsis-tool .ej-doc li::marker,
+  .sinapsis-tool .ej-mismo,
+  .sinapsis-tool .ej-mismo *,
+  .sinapsis-tool .ej-group-n,
+  .sinapsis-tool .ej-wrap .section-sub,
+  .sinapsis-tool .ej-list .ej-simb,
+  .sinapsis-tool .ej-aviso,
+  .sinapsis-tool .ej-aviso *,
+  .sinapsis-tool /* acotado a esta vista: los mismos selectores de la piel compartida se
+     filtraban al formulario y le pisaban su gris de documento */
+  .ej-wrap .tex-title .tex-kicker,
+  .sinapsis-tool .ej-wrap .tex-title .tex-sub,
+  .sinapsis-tool .ej-wrap .tex-title .tex-meta,
+  .sinapsis-tool .ej-reso > .ej-reso-sum,
+  .sinapsis-tool .ej-reso-lbl {
+    color: #444 !important;
+  }
+  .sinapsis-tool .ej-doc .def:not(.plain)::before,
+  .sinapsis-tool .ej-doc .si:not(.plain)::before,
+  .sinapsis-tool .ej-doc .no:not(.plain)::before,
+  .sinapsis-tool .ej-doc .trade:not(.plain)::before,
+  .sinapsis-tool .ej-doc .cita:not(.plain)::before,
+  .sinapsis-tool .ej-doc .ej:not(.plain)::before,
+  .sinapsis-tool .ej-doc .tip:not(.plain)::before,
+  .sinapsis-tool .ej-doc .parcial:not(.plain)::before,
+  .sinapsis-tool .ej-doc .ej.resultado:not(.plain)::before {
+    color: #444 !important;
+  }
+  /* ---- cajas: fondo blanco y filete gris fino, sin relieve ---- */
+  .sinapsis-tool .ej-enunciado,
+  .sinapsis-tool .ej-doc .katex-display,
+  .sinapsis-tool .ej-doc pre,
+  .sinapsis-tool .ej-doc pre.code,
+  .sinapsis-tool .ej-doc code,
+  .sinapsis-tool .ej-doc .def,
+  .sinapsis-tool .ej-doc .si,
+  .sinapsis-tool .ej-doc .no,
+  .sinapsis-tool .ej-doc .trade,
+  .sinapsis-tool .ej-doc .cita,
+  .sinapsis-tool .ej-doc .ej,
+  .sinapsis-tool .ej-doc .tip,
+  .sinapsis-tool .ej-doc .parcial,
+  .sinapsis-tool .ej-doc .table-wrap,
+  .sinapsis-tool .ej-doc .ej-diag-svg,
+  .sinapsis-tool .ej-doc .pop-eq,
+  .sinapsis-tool .ej-take-it,
+  .sinapsis-tool .ej-aviso,
+  .sinapsis-tool .ej-index-card {
+    background: #fff !important; box-shadow: none !important; border-color: #999 !important;
+  }
+  .sinapsis-tool .ej-doc blockquote {
+    border-left-color: #999 !important;
+  }
+  .sinapsis-tool .ej-doc mark,
+  .sinapsis-tool .ej-doc .hl-amber,
+  .sinapsis-tool .ej-doc .hl-blue,
+  .sinapsis-tool .ej-doc .hl-green,
+  .sinapsis-tool .ej-doc .hl-red,
+  .sinapsis-tool .ej-doc .hl-purple,
+  .sinapsis-tool .ej-doc .hl-teal {
+    border-bottom-color: #666 !important;
+  }
+  .sinapsis-tool .ej-doc table,
+  .sinapsis-tool .ej-doc thead th,
+  .sinapsis-tool .ej-doc td,
+  .sinapsis-tool .ej-doc th,
+  .sinapsis-tool .ej-doc tbody tr:last-child td,
+  .sinapsis-tool .ej-doc table.midrules tbody td {
+    border-color: #666 !important;
+  }
+  .sinapsis-tool .ej-doc a {
+    text-decoration: none;
+  }
+}
+@media print {
+  .sinapsis-tool #ejList .ej-doc[data-body],
+  .sinapsis-tool #ejList [data-anexos] {
+    content-visibility: visible;
+  }
+}

@@ -1,0 +1,610 @@
+/* ============================================================
+   formularios.css — copia envuelta de `estudio/formularios.css` del baseline de Proba.
+   GENERADO por `scripts/wrap-css.mjs`. No editar a mano.
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista,
+   salvo las reglas de `@media print`, que van al final PLANAS: sus
+   selectores nombran a `html` y `body`, que son ancestros del
+   contenedor y no pueden vivir dentro del envoltorio.
+   ============================================================ */
+
+.sinapsis-tool {
+  /* ============================================================
+     formularios.css — vista "Formularios"
+
+     Un APUNTE en LaTeX, no un tablero. Toda la tipografía del documento la pone
+     la piel compartida estudio/latex.css (clases .tex-*): portada \maketitle,
+     secciones numeradas, ecuaciones en display centradas con su número al
+     margen, tablas booktabs. Aquí va solo lo propio de esta vista: la barra de
+     unidades, el bloque de una fórmula (.fmx-item), el ajuste de ancho y los
+     dos bloques de impresión.
+
+     IMPRESIÓN
+     El bloque `@media print` y el bloque `.print-emulate` de más abajo son
+     ESPEJO uno del otro: las mismas reglas, con distinto selector de entrada.
+     `.print-emulate` en <html> sirve para verificar la impresión desde una
+     captura (además estrecha la hoja a 178 mm, el ancho útil de una A4 con
+     márgenes de 16 mm) y tiene que repetir además lo que latex.css hace solo
+     dentro de @media print: papel blanco, tinta cálida y cuerpo de 11 pt.
+     Si toca uno de los dos bloques, toque el otro.
+
+     UNA sola columna, siempre. Una ecuación en display no entra en una columna
+     de 84 mm: el apunte a dos columnas se dio de baja con el rediseño.
+
+     ESCALA DE LA MATEMÁTICA
+     formularios.js mide cada ecuación una vez y deja dos variables en la caja
+     .fm-fit:
+       --fs  factor para pantalla
+       --fp  factor para papel (calculado contra la caja A4, corregido por la
+             diferencia de cuerpo entre pantalla y papel, porque el navegador no
+             vuelve a ejecutar JS con el ancho de la página impresa)
+     El factor es una fracción de CUERPO, no un transform: así la caja sigue
+     midiendo el 100 % de la columna y no queda área desplazable escondida.
+     Las TABLAS no se escalan celda por celda: llevan --fs / --fp sobre el
+     <table> y bajan el cuerpo de toda la tabla a la vez (--tf es la variable de
+     trabajo mientras se mide).
+     ============================================================ */
+  & .fm {
+    max-width: 1010px; margin: 0 auto;
+  }
+  /* Mientras se compone el documento, las fórmulas todavía no tienen su factor
+     de ajuste (--fs) y las más anchas sobresalen de la columna por unos cientos
+     de milisegundos, lo que hacía aparecer una barra de desplazamiento
+     horizontal en toda la página. `clip` recorta ese sobrante sin crear un
+     contenedor de desplazamiento, así que no afecta a los elementos pegajosos
+     ni a la impresión; el desbordamiento propio de cada ecuación lo sigue
+     manejando .tex-eq (overflow-x: auto). */
+  & .fm-doc {
+    overflow-x: clip;
+  }
+  /* ---------------- barra de navegación (una sola línea) ---------------- */
+  & .fm-bar {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 16px 24px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 9px; margin-bottom: 30px;
+  }
+  & .fm-tabs {
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 1px;
+  }
+  & .fm-tab {
+    font-family: var(--font-read); font-size: 13px; letter-spacing: .04em;
+    color: var(--text-2); text-decoration: none;
+    padding: 4px 8px 6px; border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  & .fm-tab:hover {
+    color: var(--text); text-decoration: none; border-bottom-color: var(--border-2);
+  }
+  & .fm-tab.on {
+    color: var(--text); border-bottom-color: var(--primary); font-weight: 600;
+  }
+  /* cuántas fórmulas tiene la unidad: el dato que antes solo aparecía al entrar */
+  & .fm-tab-n {
+    font-family: var(--font-mono); font-size: 10px; color: var(--text-2);
+    margin-left: 4px; font-variant-numeric: tabular-nums;
+  }
+  /* unidad sin fórmulas: se dice con el «0» y con el title, no atenuando el
+     rótulo hasta volverlo ilegible */
+  & .fm-tab.zero {
+    color: var(--text-3);
+  }
+  & .fm-tab.all {
+    font-style: italic;
+  }
+  & .fm-tools {
+    display: flex; align-items: center; gap: 18px;
+  }
+  & .fm-q {
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid var(--border-2); padding: 3px 2px;
+  }
+  & .fm-q-ico {
+    color: var(--text-3); display: flex;
+  }
+  & .fm-q input {
+    border: 0; background: transparent; outline: none; font: inherit;
+    font-size: 12.5px; color: var(--text); width: 148px; padding: 0;
+  }
+  & .fm-q input::placeholder {
+    color: var(--text-3);
+  }
+  & .fm-ess {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    font-size: 12px; color: var(--text-2); white-space: nowrap;
+  }
+  & .fm-ess input {
+    margin: 0; accent-color: var(--primary);
+  }
+  /* ---------------- el documento ---------------- */
+  & .fm-sheet {
+    max-width: 980px; margin: 0 auto 36px;
+    padding: 40px clamp(22px, 4vw, 54px) 46px;
+    /* Dentro de Sinapsis la hoja ocupa todo el ancho de la vista: la sombra
+       grande del original (--shadow-lg, 54 px) se veía como una franja oscura
+       al costado. Va la sombra corta de las tarjetas de la plataforma. */
+    box-shadow: var(--relief), var(--shadow);
+  }
+  & .fm-empty {
+    padding: 40px 0;
+  }
+  & .fm-sheet > .fm-body > .tex-sec:first-child > h2 {
+    margin-top: 0;
+  }
+  /* Controles y contador: son de la aplicación, no del apunte. Van fuera de la
+     portada y no heredan ni la fuente ni el justificado del documento. */
+  & .fm-acts {
+    display: flex; flex-wrap: wrap; gap: 4px 16px;
+    margin-bottom: 14px; text-align: left;
+  }
+  & .fm-act {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: var(--font-ui); font-size: 12px; color: var(--link);
+    text-decoration: none; border-bottom: 1px solid transparent;
+  }
+  & .fm-act:hover {
+    border-bottom-color: currentColor; text-decoration: none;
+  }
+  & .fm-act.on {
+    color: var(--text); font-weight: 700; border-bottom-color: var(--text-3);
+  }
+  /* «Vaciar» borra la hoja: se aparta del primario y no se pinta como enlace,
+     para que un error de 16 px no la borre por vecindad. «Deshacer» ocupa
+     después su mismo lugar. */
+  & .fm-act-danger,
+  & .fm-act-undo {
+    margin-left: auto; color: var(--text-2);
+  }
+  & .fm-act-danger:hover {
+    color: var(--text);
+  }
+  & .fm-meta {
+    font-family: var(--font-ui); font-size: 11.5px; color: var(--text-2);
+    margin: -6px 0 16px; line-height: 1.45; text-align: left;
+  }
+  /* pie: solo en papel */
+  & .fm-foot {
+    display: none;
+  }
+  /* ---------------- el bloque de una fórmula ---------------- */
+  /* rótulo run-in → ecuación en display a todo el ancho → nota. */
+  & .fmx-item {
+    position: relative;
+    margin: 0 0 .5em;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  & .fmx-lab {
+    text-align: left; text-indent: 0;
+    margin: .8em 0 -.05em; line-height: 1.35;
+  }
+  & .fmx-lab:empty {
+    display: none;
+  }
+  & .fmx-var {
+    color: var(--text-2); font-style: italic;
+  }
+  & .fmx-item > .tex-eq {
+    margin: .3em 0 .15em;
+  }
+  & .fmx-item > .tex-note {
+    margin: 0 0 .1em;
+  }
+  /* La fila que se compone como prosa (una fórmula que en realidad es una frase
+     con matemática intercalada) guarda el mismo ritmo vertical que las
+     ecuaciones en display: si no, entre 48 ecuaciones se leía apretada. */
+  & .fmx-item > .tex-para {
+    margin: .3em 0 .15em;
+  }
+  & .fm-hl {
+    background: var(--hl); color: inherit; padding: 0 1px; border-radius: 2px;
+  }
+  & .fm-wiki {
+    font-family: var(--font-ui); font-size: 10.5px; color: var(--text-3);
+    text-decoration: none; white-space: nowrap; font-style: normal;
+    font-variant: normal; letter-spacing: 0;
+  }
+  & .fm-wiki:hover {
+    color: var(--link); text-decoration: none;
+  }
+  /* La ecuación que no entra pierde CUERPO, no forma: la caja mantiene el 100 %
+     del ancho y solo baja su font-size, del que cuelga el de KaTeX. Deformarla
+     con transform:scale() dejaba a .tex-eq —que la piel declara overflow-x:auto—
+     con scrollWidth mayor que clientWidth, o sea con recorte horizontal latente. */
+  & .fm-fit {
+    display: block;
+    font-size: calc(1em * var(--fs, 1));
+  }
+  & .fm-fit .katex-display {
+    margin: 0;
+  }
+  /* La prosa con matemática no se escala: fluye en varias líneas, justificada
+     como cualquier párrafo del apunte. */
+  & .fm-fit.flowed {
+    text-align: justify; line-height: 1.5;
+  }
+  /* Ecuación partida en renglones (formularios.js, fase 2b): cada tramo —los
+     \qquad de la fórmula o las filas de su \begin{cases}— es una ecuación en
+     display propia, centrada como las demás. El corte lo decide el JS, no el
+     navegador: por eso .tex-eq lleva white-space: nowrap en latex.css. */
+  /* Último recurso (formularios.js): la fórmula que no entra, no ofrece dónde
+     cortar y no es prosa recupera el envolver del navegador antes que quedar en
+     un cuerpo ilegible. */
+  & .fm-fit.wrapped .katex-display > .katex {
+    white-space: normal;
+  }
+  & .fm-fit.split {
+    display: block;
+  }
+  & .fm-fit .fm-row {
+    display: block;
+  }
+  & .fm-fit .fm-row + .fm-row {
+    margin-top: .3em;
+  }
+  & .fmx-prosa {
+    text-indent: 0;
+  }
+  /* casilla "mi hoja": discreta, a la izquierda del rótulo */
+  & .fm-pick {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 14px; height: 14px; margin-right: .35em; vertical-align: -1px;
+    /* Visible en reposo: es la única afordancia de «mi hoja». Atenuada para no
+       competir con el rótulo, plena al apuntarla o al estar marcada. */
+    opacity: .35; transition: opacity var(--t);
+  }
+  & .fm-pick input {
+    margin: 0; width: 12px; height: 12px; cursor: pointer; accent-color: var(--primary);
+  }
+  & .fmx-item:hover .fm-pick,
+  & .fm-pick:focus-within,
+  & .fm-doc.picking .fm-pick,
+  & .fmx-item.picked .fm-pick,
+  & .fmx-tab tr:hover .fm-pick,
+  & .fmx-tab tr.picked .fm-pick {
+    opacity: 1;
+  }
+  & .fmx-item.picked::before,
+  & .fmx-tab tr.picked .fmx-tname::before {
+    content: ""; position: absolute; left: -12px; top: .35em; bottom: .35em;
+    width: 2px; background: var(--text-3);
+  }
+  /* ---------------- ancla ?f= ---------------- */
+  /* El resalte tiene que verse en los tres temas: se usa el mismo color que el
+     de la búsqueda, con un halo para que se lea también sobre la ecuación. */
+  & .fmx-item.is-target {
+    background: var(--hl);
+    box-shadow: 0 0 0 7px var(--hl);
+    border-radius: 2px;
+  }
+  & .fmx-tab tr.is-target > * {
+    background: var(--hl);
+  }
+  /* ---------------- tablas (booktabs, piel .tex-tab) ---------------- */
+  & .fmx-tabwrap {
+    margin: .5em 0 1.2em;
+  }
+  /* La tabla que no entra en la medida del texto usa el ancho completo de la
+     hoja (formularios.js le pone la clase tras medirla). Si aun así no entra,
+     .tex-tabwrap la desplaza en horizontal: se prefiere el desplazamiento a una
+     matemática de 10 px. */
+  & .fmx-tabwrap.fmx-bleed {
+    margin-left: calc(-1 * clamp(22px, 4vw, 54px));
+    margin-right: calc(-1 * clamp(22px, 4vw, 54px));
+  }
+  /* El cuerpo de TODA la tabla es lo que se ajusta: --tf mientras se mide,
+     --fs cuando ya está medida. Gana a table.tex-tab por venir después. */
+  & table.fmx-tab {
+    font-size: calc(.93em * var(--tf, var(--fs, 1)));
+    width: 100%;
+  }
+  & .fmx-tab .katex-display {
+    margin: 0;
+  }
+  & .fmx-tab .fmx-cell {
+    text-align: center;
+  }
+  & .fmx-tab th.fmx-tname {
+    position: relative; text-align: left; font-weight: 400;
+    font-variant: normal; letter-spacing: 0; vertical-align: middle;
+    padding-left: 0;
+  }
+  & .fmx-nm {
+    font-style: italic;
+  }
+  & .fmx-nm .katex {
+    font-style: normal;
+  }
+  & .fmx-tcond {
+    display: block; font-size: .8em; color: var(--text-2);
+    line-height: 1.35; margin-top: .1em; font-style: normal;
+  }
+  & .fmx-dash {
+    color: var(--text-3);
+  }
+  & .fmx-tab td {
+    vertical-align: middle;
+  }
+  /* ---------------- angosto ---------------- */
+  @media (max-width: 720px) {
+    & .fm-sheet {
+      padding: 24px 16px 30px;
+    }
+    & .fm-pick {
+      opacity: 1;
+    }
+    & .fmx-item.picked::before,
+    & .fmx-tab tr.picked .fmx-tname::before {
+      display: none;
+    }
+    & .fmx-item.picked {
+      box-shadow: inset 2px 0 0 var(--text-3); padding-left: 8px;
+    }
+  }
+  /* Solo pantalla: en papel el número vuelve al margen y los controles no se
+     imprimen. */
+  @media screen and (max-width: 720px) {
+    /* El número «(4.1)» dejaba de caber junto a la fórmula centrada y la tapaba:
+         a este ancho baja a su propio renglón. Espejo de eqnGutter() en
+         formularios.js, que a partir de aquí no reserva canal. */
+    & .fm-doc .tex-eqn {
+      position: static; display: block; text-align: right;
+      transform: none; margin-top: .15em;
+    }
+    /* Blancos de toque: marcar, buscar, imprimir y cambiar de unidad con el
+         pulgar. */
+    & .fm-pick {
+      width: 28px; height: 28px; margin-right: .15em;
+    }
+    & .fm-pick input {
+      width: 20px; height: 20px;
+    }
+    & .fm-acts {
+      gap: 0 18px;
+    }
+    & .fm-act {
+      display: inline-flex; align-items: center; min-height: 40px;
+    }
+    & .fm-wiki {
+      display: inline-block; padding: 12px 0;
+    }
+    & .fm-q {
+      padding: 10px 2px;
+    }
+    & .fm-ess {
+      min-height: 40px;
+    }
+    & .fm-ess input {
+      width: 18px; height: 18px;
+    }
+    & .fm-tab {
+      padding: 10px 10px 8px;
+    }
+    & .fm-tabs {
+      gap: 2px;
+    }
+  }
+  /* ============================================================
+     IMPRESIÓN — apunte a UNA columna, 11 pt Latin Modern, blanco y
+     negro, solo filetes finos. ESPEJO del bloque .print-emulate.
+     ============================================================ */
+  /* ============================================================
+     .print-emulate — ESPEJO de @media print, para verificar la
+     impresión desde una captura. Mismas reglas, más el ancho de A4
+     y lo que latex.css hace solo dentro de @media print.
+     ============================================================ */
+  & .print-emulate,
+  & .print-emulate body,
+  & .print-emulate .layout,
+  & .print-emulate .content-col {
+    background: #fff !important; color-scheme: light !important;
+  }
+  & .print-emulate body::before {
+    display: none !important;
+  }
+  & .print-emulate .app-header,
+  & .print-emulate .sidebar,
+  & .print-emulate .rail,
+  & .print-emulate .rail-actions,
+  & .print-emulate .prevnext,
+  & .print-emulate .nav-scrim,
+  & .print-emulate .scrim,
+  & .print-emulate .palette,
+  & .print-emulate .back-bar,
+  & .print-emulate .crumbs,
+  & .print-emulate .toast,
+  & .print-emulate .ql-fab,
+  & .print-emulate .ql-panel,
+  & .print-emulate .no-print {
+    display: none !important;
+  }
+  & .print-emulate .main {
+    padding: 0; max-width: 100%;
+  }
+  & .print-emulate .fm-bar,
+  & .print-emulate .fm-acts,
+  & .print-emulate .fm-meta,
+  & .print-emulate .fm-pick,
+  & .print-emulate .fm-wiki,
+  & .print-emulate .fm-empty {
+    display: none !important;
+  }
+  & .print-emulate .fm {
+    max-width: none;
+  }
+  /* lo que latex.css aplica solo en @media print: papel, cuerpo y filetes */
+  & .print-emulate .fm-sheet.tex-doc {
+    max-width: none; width: 178mm; margin: 0 auto 10mm; padding: 0;
+    background: #fff;
+    font-size: 11pt;
+    --tex-rule: #16130d;
+    --tex-rule-thin: #8a857c;
+    --math-ink: #16130d;
+    border: 0; border-radius: 0; box-shadow: none;
+  }
+  & .print-emulate .fm-sheet::before {
+    display: none;
+  }
+  & .print-emulate .fm-sheet + .fm-sheet {
+    break-before: page;
+  }
+  & .print-emulate .fm-doc,
+  & .print-emulate .fm-doc *,
+  & .print-emulate .fm-doc .katex {
+    color: #16130d !important;
+  }
+  & .print-emulate .fm-doc .tex-note,
+  & .print-emulate .fm-doc .tex-note *,
+  & .print-emulate .fm-doc .tex-eqn,
+  & .print-emulate .fm-doc .tex-n,
+  & .print-emulate .fm-doc .tex-kicker,
+  & .print-emulate .fm-doc .tex-meta,
+  & .print-emulate .fm-doc .fmx-var,
+  & .print-emulate .fm-doc .fmx-tcond,
+  & .print-emulate .fm-doc .fmx-tcond *,
+  & .print-emulate .fm-doc .fmx-dash,
+  & .print-emulate .fm-foot,
+  & .print-emulate .fm-foot * {
+    color: #4a463d !important;
+  }
+  & .print-emulate .fm-hl {
+    background: none;
+  }
+  & .print-emulate .fm-doc a {
+    color: #16130d !important; text-decoration: none;
+  }
+  & .print-emulate .fmx-item.is-target {
+    background: none; box-shadow: none;
+  }
+  & .print-emulate .fmx-item.picked::before,
+  & .print-emulate .fmx-tab tr.picked .fmx-tname::before {
+    display: none !important;
+  }
+  & .print-emulate .fmx-item {
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  & .print-emulate .fmx-lab {
+    margin-top: 2.4mm;
+  }
+  & .print-emulate .fm-fit {
+    font-size: calc(1em * var(--fp, 1));
+  }
+  & .print-emulate table.fmx-tab {
+    font-size: calc(.93em * var(--fp, 1));
+  }
+  & .print-emulate .fmx-tabwrap {
+    overflow: visible;
+  }
+  & .print-emulate .fmx-tabwrap.fmx-bleed {
+    margin-left: 0; margin-right: 0;
+  }
+  & .print-emulate .fm-foot {
+    display: block; margin-top: 6mm; padding-top: 1.6mm; break-before: avoid;
+    border-top: 0.4pt solid #8a857c; font-size: 7.5pt;
+  }
+}
+
+/* ------------------------------------------------------------
+   IMPRESIÓN — fuera del envoltorio a propósito.
+   Los selectores que empiezan por `html` o `body` quedan verbatim
+   (son ancestros del contenedor); el resto lleva el prefijo
+   `.sinapsis-tool`, que es el mismo acotado con otra sintaxis.
+   ------------------------------------------------------------ */
+@media print {
+  @page { size: A4; margin: 14mm 16mm; }
+  /* El lienzo de la página. Sin esto, con un tema oscuro (claustro declara
+       `color-scheme: dark`) el navegador pinta de negro los márgenes de la hoja. */
+  html:has(.fm-doc),
+  body:has(.fm-doc) {
+    background: #fff !important; color-scheme: light !important;
+  }
+  /* migas y controles flotantes de otros módulos, solo mientras se imprime
+       esta vista: en papel no va nada de la aplicación */
+  body:has(.fm-doc) .crumbs,
+  body:has(.fm-doc) .ql-fab,
+  body:has(.fm-doc) .ql-panel,
+  .sinapsis-tool .fm-bar,
+  .sinapsis-tool .fm-acts,
+  .sinapsis-tool .fm-meta,
+  .sinapsis-tool .fm-pick,
+  .sinapsis-tool .fm-wiki,
+  .sinapsis-tool .fm-empty {
+    display: none !important;
+  }
+  .sinapsis-tool .fm {
+    max-width: none;
+  }
+  .sinapsis-tool .fm-sheet {
+    max-width: none; width: auto; margin: 0; padding: 0;
+    background: #fff;
+    border: 0; border-radius: 0; box-shadow: none;
+  }
+  .sinapsis-tool .fm-sheet::before {
+    display: none;
+  }
+  .sinapsis-tool .fm-sheet + .fm-sheet {
+    break-before: page;
+  }
+  /* Tinta. En bloque y con !important a propósito: styles.css pinta `.katex`
+       con --math-ink, que en el tema claustro es casi blanco, y heredar no
+       alcanza para revertirlo. Todo el documento va en tinta cálida oscura; el
+       gris de las notas se restituye después, con la misma fuerza. */
+  .sinapsis-tool .fm-doc,
+  .sinapsis-tool .fm-doc *,
+  .sinapsis-tool .fm-doc .katex {
+    color: #16130d !important;
+  }
+  .sinapsis-tool .fm-doc .tex-note,
+  .sinapsis-tool .fm-doc .tex-note *,
+  .sinapsis-tool .fm-doc .tex-eqn,
+  .sinapsis-tool .fm-doc .tex-n,
+  .sinapsis-tool .fm-doc .tex-kicker,
+  .sinapsis-tool .fm-doc .tex-meta,
+  .sinapsis-tool .fm-doc .fmx-var,
+  .sinapsis-tool .fm-doc .fmx-tcond,
+  .sinapsis-tool .fm-doc .fmx-tcond *,
+  .sinapsis-tool .fm-doc .fmx-dash,
+  .sinapsis-tool .fm-foot,
+  .sinapsis-tool .fm-foot * {
+    color: #4a463d !important;
+  }
+  .sinapsis-tool .fm-hl {
+    background: none;
+  }
+  .sinapsis-tool .fm-doc a {
+    color: #16130d !important; text-decoration: none;
+  }
+  .sinapsis-tool .fmx-item.is-target {
+    background: none; box-shadow: none;
+  }
+  .sinapsis-tool .fmx-item.picked::before,
+  .sinapsis-tool .fmx-tab tr.picked .fmx-tname::before {
+    display: none !important;
+  }
+  .sinapsis-tool .fmx-item {
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .sinapsis-tool .fmx-lab {
+    margin-top: 2.4mm;
+  }
+  /* el factor de papel manda: en pantalla se midió, aquí ya no corre JS */
+  .sinapsis-tool .fm-fit {
+    font-size: calc(1em * var(--fp, 1));
+  }
+  .sinapsis-tool table.fmx-tab {
+    font-size: calc(.93em * var(--fp, 1));
+  }
+  .sinapsis-tool .fmx-tabwrap {
+    overflow: visible;
+  }
+  .sinapsis-tool .fmx-tabwrap.fmx-bleed {
+    margin-left: 0; margin-right: 0;
+  }
+  /* break-before: avoid evita que el pie caiga solo en una página nueva:
+       se lleva consigo el último bloque de contenido. */
+  .sinapsis-tool .fm-foot {
+    display: block; margin-top: 6mm; padding-top: 1.6mm; break-before: avoid;
+    border-top: 0.4pt solid #8a857c; font-size: 7.5pt;
+  }
+  .sinapsis-tool .fm-tab-n {
+    display: none;
+  }
+}
