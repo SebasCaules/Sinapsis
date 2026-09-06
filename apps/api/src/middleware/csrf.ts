@@ -12,29 +12,10 @@
 import { createMiddleware } from "hono/factory";
 import type { AppBindings } from "../types.js";
 import { httpError } from "../lib/errors.js";
+import { allowedOrigins } from "../env.js";
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const JSON_TYPE = "application/json";
-
-/**
- * Orígenes admitidos además del propio host: los declarados en ALLOWED_ORIGINS
- * (separados por coma) y, fuera de producción, el dev server de Vite (:5173) y
- * el de las pruebas E2E (:5174), que llegan a través del proxy con otro Host.
- */
-function allowedOrigins(): Set<string> {
-  const set = new Set<string>();
-  for (const o of (process.env.ALLOWED_ORIGINS ?? "").split(",")) {
-    const v = o.trim();
-    if (v) set.add(v);
-  }
-  if (process.env.NODE_ENV !== "production") {
-    for (const p of ["5173", "5174"]) {
-      set.add(`http://localhost:${p}`);
-      set.add(`http://127.0.0.1:${p}`);
-    }
-  }
-  return set;
-}
 
 export const csrfGuard = createMiddleware<AppBindings>(async (c, next) => {
   if (!MUTATING.has(c.req.method)) {
@@ -55,7 +36,7 @@ export const csrfGuard = createMiddleware<AppBindings>(async (c, next) => {
     const ok =
       (!!host && originHost === host) ||
       (!!forwardedHost && originHost === forwardedHost) ||
-      allowedOrigins().has(origin);
+      allowedOrigins(c.var.env).has(origin);
     if (!ok) {
       throw httpError(403, "Origen no permitido");
     }

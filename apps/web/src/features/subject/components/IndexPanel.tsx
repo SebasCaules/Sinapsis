@@ -97,6 +97,8 @@ function DivisionRow({ model, division, expanded, onToggle, active, activePage, 
         onClick={onToggle}
         aria-expanded={expanded}
         data-active={active ? "true" : undefined}
+        data-testid="division-row"
+        data-division={division.key}
       >
         <span className={css.dot} aria-hidden="true" />
         <span className={css.divisionLabel} title={division.long}>

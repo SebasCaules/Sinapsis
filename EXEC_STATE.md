@@ -60,6 +60,17 @@ Ver `docs/DECISIONS.md` (N0-1 … N0-19).
 | S-04 | Ids de encabezado: el compilador usa el slugify de build.py y el lector `rehype-slug` (github-slugger); coinciden en la práctica pero no por contrato. Unificar en github-slugger. | packages/markdown, apps/web reader | reporte D | Sprint 2 |
 | S-05 | Guard CSRF: el `Origin` del dev server (:5173) no coincidía con el `Host` del API (:3000) vía proxy → 403 «Origen no permitido» en todo login. Corregido: `ALLOWED_ORIGINS` + `x-forwarded-host` + proxy sin `changeOrigin`. | apps/api csrf, apps/web vite.config | smoke del orquestador | HECHO |
 
+
+## Auditoría final — seguridad (adjudicada por el orquestador)
+
+| # | Hallazgo | Veredicto | Fix |
+|---|---|---|---|
+| SEC-1 | `POST /api/auth/dev` dependía solo de `NODE_ENV !== production`, que ningún script fijaba en producción | CONFIRMADO (alta) | `loadEnv` falla si `AUTH_DEV_BYPASS` + `NODE_ENV=production`; `start` fija `NODE_ENV=production`; README |
+| SEC-2 | `wiki.index/log/root` del config admitían `..` y rutas absolutas → el CLI podía leer archivos fuera del wiki y subirlos | CONFIRMADO (media) | `SafeRelativePath` en el contrato + contención `isInside()` en el compilador |
+| SEC-3 | `target` de ítems `link` sin validar esquema → `javascript:` en el rail/paleta | CONFIRMADO (media) | `ExternalUrl` (http(s)/mailto) en `RailItem`/`Fab` + filtro `isSafeExternalUrl` en la web |
+| SEC-4 | Cookie `Secure` y orígenes CSRF de desarrollo atados a `NODE_ENV` | CONFIRMADO (media) | `COOKIE_SECURE`, `ALLOWED_ORIGINS` en `AppEnv` validado; guard lee de `c.var.env` |
+Descartado por el auditor con evidencia: inyección SQL/FTS5, IDOR, comparación del token, CSRF, XSS en el lector (react-markdown sanea URLs, sin rehype-raw, KaTeX trust=false), traversal en el estático, YAML, verificación del ID token.
+
 ## Veredicto final
 
 Pendiente.

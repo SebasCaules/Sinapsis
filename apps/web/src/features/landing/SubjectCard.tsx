@@ -129,14 +129,20 @@ export function SubjectCard({
 
   if (manage || overlay) {
     return (
-      <div className={className} style={vars}>
+      <div className={className} style={vars} data-testid="subject-card" data-slug={card.slug}>
         {body}
       </div>
     );
   }
 
   return (
-    <Link className={className} style={vars} to={routes.subject(card.slug)}>
+    <Link
+      className={className}
+      style={vars}
+      to={routes.subject(card.slug)}
+      data-testid="subject-card"
+      data-slug={card.slug}
+    >
       {body}
     </Link>
   );

@@ -183,7 +183,7 @@ describe("sinapsis validate", () => {
               label: "G",
               items: [
                 { id: "i1", label: "I1", icon: "home", kind: "builtin", target: "inventada" },
-                { id: "i2", label: "I2", icon: "link", kind: "link", target: "campus.itba.edu.ar" },
+                { id: "i2", label: "I2", icon: "link", kind: "link", target: "https://campus.itba.edu.ar" },
               ],
             },
           ],
@@ -194,7 +194,15 @@ describe("sinapsis validate", () => {
     expect(messages.join("\n")).toContain('divisions: clave repetida "1"');
     expect(messages.join("\n")).toContain('pageTypes: carpeta repetida "a"');
     expect(messages.join("\n")).toContain('vista builtin desconocida "inventada"');
-    expect(messages.join("\n")).toContain("URL absoluta");
+    // Desde la auditoría de seguridad del Sprint 1, una URL relativa en un `link`
+    // la rechaza el propio esquema zod (ExternalUrl), antes de llegar a extraChecks.
+    expect(() =>
+      SubjectConfig.parse({ ...base, rail: [{ id: "g", label: "G", items: [{ id: "i", label: "I", icon: "link", kind: "link", target: "campus.itba.edu.ar" }] }] }),
+    ).toThrow(/http\(s\) o mailto/);
+    expect(() =>
+      SubjectConfig.parse({ ...base, rail: [{ id: "g", label: "G", items: [{ id: "i", label: "I", icon: "link", kind: "link", target: "javascript:alert(1)" }] }] }),
+    ).toThrow(/http\(s\) o mailto/);
+    expect(() => SubjectConfig.parse({ ...base, wiki: { root: "wiki", index: "../../.ssh/id_rsa" } })).toThrow(/\.\./);
   });
 });
 

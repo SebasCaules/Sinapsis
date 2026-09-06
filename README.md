@@ -86,5 +86,9 @@ proyectos: `ln -s "$PWD/skills/sinapsis" ~/.claude/skills/sinapsis`.
 
 ## Producción (adelanto del Sprint 4)
 
-`pnpm build` y luego `node apps/api/dist/index.js` con `WEB_DIST=../web/dist`: el API sirve
-la SPA y `DATABASE_URL` puede apuntar a un archivo o a Turso (`libsql://…`).
+`pnpm build` y luego `pnpm --filter @sinapsis/api start` (fija `NODE_ENV=production`) con
+`WEB_DIST=../web/dist`, `AUTH_DEV_BYPASS=0` y un `GOOGLE_CLIENT_ID` real: el API sirve la SPA y
+`DATABASE_URL` puede apuntar a un archivo o a Turso (`libsql://…`). Con `NODE_ENV=production` el
+API se niega a arrancar si el bypass de desarrollo sigue activo, y la cookie de sesión lleva `Secure`
+(fuera de producción se puede forzar con `COOKIE_SECURE=1`). Si la SPA se sirve desde otro origen,
+declararlo en `ALLOWED_ORIGINS`.

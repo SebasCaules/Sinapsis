@@ -99,15 +99,32 @@ export type PageTypeDef = z.infer<typeof PageTypeDef>;
 export const RailItemKind = z.enum(["builtin", "page", "link", "tool"]);
 export type RailItemKind = z.infer<typeof RailItemKind>;
 
-export const RailItem = z.object({
-  id: z.string().min(1).max(48).regex(/^[a-z][a-z0-9_-]*$/),
-  label: z.string().min(1).max(60),
-  icon: IconName,
-  kind: RailItemKind,
-  target: z.string().min(1).max(400),
-  /** Texto corto del tooltip; si falta se usa `label · grupo`. */
-  hint: z.string().max(120).optional(),
-});
+/** El `target` depende del `kind`: slug para page, id para tool/builtin, URL http(s)/mailto para link. */
+function refineTarget(v: { kind: RailItemKind; target: string }, ctx: z.RefinementCtx) {
+  const ok =
+    v.kind === "link" ? ExternalUrl.safeParse(v.target).success :
+    v.kind === "page" ? Slug.safeParse(v.target).success :
+    /^[a-z][a-z0-9_-]{0,47}$/.test(v.target);
+  if (!ok) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["target"],
+      message: v.kind === "link" ? "link: solo URLs http(s) o mailto" : `target inválido para kind «${v.kind}»`,
+    });
+  }
+}
+
+export const RailItem = z
+  .object({
+    id: z.string().min(1).max(48).regex(/^[a-z][a-z0-9_-]*$/),
+    label: z.string().min(1).max(60),
+    icon: IconName,
+    kind: RailItemKind,
+    target: z.string().min(1).max(400),
+    /** Texto corto del tooltip; si falta se usa `label · grupo`. */
+    hint: z.string().max(120).optional(),
+  })
+  .superRefine(refineTarget);
 export type RailItem = z.infer<typeof RailItem>;
 
 export const RailGroup = z.object({
@@ -118,20 +135,43 @@ export const RailGroup = z.object({
 });
 export type RailGroup = z.infer<typeof RailGroup>;
 
-export const Fab = z.object({
-  icon: IconName,
-  label: z.string().min(1).max(60),
-  kind: RailItemKind,
-  target: z.string().min(1).max(400),
-});
+export const Fab = z
+  .object({
+    icon: IconName,
+    label: z.string().min(1).max(60),
+    kind: RailItemKind,
+    target: z.string().min(1).max(400),
+  })
+  .superRefine(refineTarget);
 export type Fab = z.infer<typeof Fab>;
+
+/**
+ * Ruta relativa segura: sin `..`, sin raíz absoluta, sin `~`. El config de una
+ * materia puede venir de un repositorio ajeno: nunca debe poder apuntar fuera
+ * de su propia carpeta (el CLI la lee y sube el contenido al API).
+ */
+export const SafeRelativePath = z
+  .string()
+  .min(1)
+  .max(200)
+  .refine((v) => !/^([a-zA-Z]:)?[\\/]/.test(v) && !v.startsWith("~"), "ruta: debe ser relativa")
+  .refine((v) => !/(^|[\\/])\.\.([\\/]|$)/.test(v), "ruta: no se admite «..»")
+  .refine((v) => !/\0/.test(v), "ruta: carácter inválido");
+export type SafeRelativePath = z.infer<typeof SafeRelativePath>;
+
+/** URL externa admitida en los ítems `link`: solo http(s) o mailto. */
+export const ExternalUrl = z
+  .string()
+  .min(1)
+  .max(400)
+  .refine((v) => /^(https?:\/\/[^\s]+|mailto:[^\s]+)$/i.test(v), "link: solo URLs http(s) o mailto");
 
 export const WikiSource = z.object({
   /** Carpeta raíz del wiki, relativa al config. */
-  root: z.string().min(1).default("wiki"),
+  root: SafeRelativePath.default("wiki"),
   /** Página índice y registro (rutas relativas a root). Opcionales. */
-  index: z.string().optional(),
-  log: z.string().optional(),
+  index: SafeRelativePath.optional(),
+  log: SafeRelativePath.optional(),
   /** Carpetas a ignorar dentro de root. */
   ignore: z.array(z.string()).default([]),
   /** Campo del frontmatter que indica la división (por compatibilidad: "unidad" en Proba). */

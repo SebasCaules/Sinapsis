@@ -303,6 +303,8 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
       return { item, to: routes.page(cfg.slug, item.target), href: null, external: false };
     }
     if (item.kind === "link") {
+      // Defensa en profundidad (el contrato ya lo exige): solo http(s)/mailto.
+      if (!isSafeExternalUrl(item.target)) return null;
       return { item, to: null, href: item.target, external: true };
     }
     if (item.kind === "tool") {
@@ -371,4 +373,9 @@ export function pad2(n: number): string {
 /** Clave de división que usa la URL para una página (normaliza las desconocidas). */
 export function divisionKeyForUrl(model: SubjectModel, page: PageMeta): DivisionKey {
   return model.divisionOf(page);
+}
+
+/** true si la URL es http(s) o mailto (ningún otro esquema llega a un href). */
+export function isSafeExternalUrl(url: string): boolean {
+  return /^(https?:\/\/[^\s]+|mailto:[^\s]+)$/i.test(url);
 }

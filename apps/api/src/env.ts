@@ -38,6 +38,13 @@ export const EnvSchema = z.object({
     .min(8, "SYNC_TOKEN: al menos 8 caracteres"),
   AUTH_DEV_BYPASS: booleanish,
   WEB_DIST: optionalText,
+  /** Fuerza el atributo Secure de la cookie de sesión (por defecto: solo en producción). */
+  COOKIE_SECURE: booleanish,
+  /** Orígenes adicionales admitidos por el guard CSRF, separados por coma. */
+  ALLOWED_ORIGINS: z
+    .string()
+    .optional()
+    .transform((v) => (v ?? "").split(",").map((o) => o.trim()).filter((o) => o.length > 0)),
 });
 
 export type AppEnv = z.infer<typeof EnvSchema>;
@@ -54,12 +61,19 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     SYNC_TOKEN: source.SYNC_TOKEN,
     AUTH_DEV_BYPASS: source.AUTH_DEV_BYPASS,
     WEB_DIST: source.WEB_DIST,
+    COOKIE_SECURE: source.COOKIE_SECURE,
+    ALLOWED_ORIGINS: source.ALLOWED_ORIGINS,
   });
   if (!parsed.success) {
     const detalle = parsed.error.issues
       .map((i) => `${i.path.join(".") || "(raíz)"}: ${i.message}`)
       .join("; ");
     throw new Error(`Configuración inválida en el entorno — ${detalle}`);
+  }
+  // Fallar temprano, no ignorar en silencio: el bypass de desarrollo jamás debe
+  // convivir con un despliegue de producción (auditoría de seguridad, Sprint 1).
+  if (parsed.data.NODE_ENV === "production" && parsed.data.AUTH_DEV_BYPASS) {
+    throw new Error("Configuración inválida: AUTH_DEV_BYPASS no puede estar activo con NODE_ENV=production");
   }
   return parsed.data;
 }
@@ -69,7 +83,26 @@ export function devBypassEnabled(env: AppEnv): boolean {
   return env.AUTH_DEV_BYPASS && env.NODE_ENV !== "production";
 }
 
-/** true si las cookies deben marcarse Secure. */
 export function isProduction(env: AppEnv): boolean {
   return env.NODE_ENV === "production";
+}
+
+/** true si la cookie de sesión debe llevar Secure: en producción o si se fuerza por env. */
+export function cookieSecure(env: AppEnv): boolean {
+  return isProduction(env) || env.COOKIE_SECURE;
+}
+
+/**
+ * Orígenes admitidos por el guard CSRF además del propio host: los de
+ * ALLOWED_ORIGINS y, fuera de producción, el dev server de Vite y el de E2E.
+ */
+export function allowedOrigins(env: AppEnv): Set<string> {
+  const set = new Set<string>(env.ALLOWED_ORIGINS);
+  if (!isProduction(env)) {
+    for (const p of ["5173", "5174"]) {
+      set.add(`http://localhost:${p}`);
+      set.add(`http://127.0.0.1:${p}`);
+    }
+  }
+  return set;
 }

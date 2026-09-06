@@ -1,4 +1,5 @@
 /** Botón flotante de la materia (región 11 · SLOT): 44 px, abajo a la derecha. */
+import { isSafeExternalUrl } from "../model";
 import { Link } from "react-router-dom";
 import { routes, type Fab as FabDef } from "@sinapsis/contract";
 import { Icon } from "@/components/platform";
@@ -10,7 +11,7 @@ export function Fab({ slug, fab }: { slug: string; fab: FabDef }) {
 
   if (fab.kind === "link") {
     return (
-      <a className={css.fab} href={fab.target} target="_blank" rel="noopener noreferrer" title={label} aria-label={label}>
+      <a className={css.fab} href={isSafeExternalUrl(fab.target) ? fab.target : undefined} target="_blank" rel="noopener noreferrer" title={label} aria-label={label}>
         {icon}
       </a>
     );

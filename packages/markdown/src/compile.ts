@@ -322,6 +322,11 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
   }
 
   const wikiRoot = opts.wikiRoot ? path.resolve(opts.wikiRoot) : path.resolve(rootDir, config.wiki.root);
+  // `--wiki` (opts.wikiRoot) es un flag del usuario y se confía; `config.wiki.root` viene
+  // del config de la materia y debe quedar dentro de la carpeta del config.
+  if (!opts.wikiRoot && !isInside(rootDir, wikiRoot)) {
+    throw new Error(`wiki.root: "${config.wiki.root}" queda fuera de la carpeta del config`);
+  }
 
   const issues: CompileIssue[] = [];
   /** Destinos de wikilink que hubo que normalizar: slug normalizado → texto original. */
@@ -383,6 +388,10 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
   for (const [file, slug] of rootPages) {
     if (!file) continue;
     const full = path.resolve(wikiRoot, file);
+    // Defensa en profundidad además del esquema: nunca leer fuera del wiki.
+    if (!isInside(wikiRoot, full)) {
+      throw new Error(`wiki.${slug === "indice" ? "index" : "log"}: la ruta "${file}" queda fuera de la carpeta del wiki`);
+    }
     const text = await readFileOrNull(full);
     if (text === null) continue;
     const page = compilePage({
@@ -534,4 +543,10 @@ function groupByDetail(issues: readonly CompileIssue[]): Map<string, string[]> {
 function sample(items: readonly string[]): string {
   const head = items.slice(0, MAX_LISTED).join(", ");
   return items.length > MAX_LISTED ? `${head} (+${items.length - MAX_LISTED} más)` : head;
+}
+
+/** true si `target` es `base` o está dentro de `base` (tras resolver). */
+export function isInside(base: string, target: string): boolean {
+  const rel = path.relative(base, target);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }

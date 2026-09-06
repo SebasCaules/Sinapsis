@@ -19,7 +19,7 @@ export function SubjectHeader({ tab, onSearch }: { tab: TabInfo; onSearch: () =>
   const navigate = useNavigate();
 
   return (
-    <header className={css.header}>
+    <header className={css.header} data-testid="subject-header">
       <button type="button" className={css.back} onClick={() => navigate(-1)} aria-label="Atrás" title="Atrás">
         <UiIcon name="chevronLeft" size={14} />
       </button>

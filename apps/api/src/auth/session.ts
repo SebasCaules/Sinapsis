@@ -6,7 +6,7 @@ import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
 import type { Context } from "hono";
 import type { Db } from "../db/client.js";
 import { sessions, users, type UserRow } from "../db/schema.js";
-import { isProduction, type AppEnv } from "../env.js";
+import { cookieSecure, type AppEnv } from "../env.js";
 import { newSessionId, nowIso } from "../lib/ids.js";
 
 export const SESSION_COOKIE = "sinapsis_sid";
@@ -24,7 +24,7 @@ export async function setSessionCookie(c: Context, env: AppEnv, sessionId: strin
   await setSignedCookie(c, SESSION_COOKIE, sessionId, env.SESSION_SECRET, {
     httpOnly: true,
     sameSite: "Lax",
-    secure: isProduction(env),
+    secure: cookieSecure(env),
     path: "/",
     maxAge: SESSION_TTL_SECONDS,
   });
@@ -35,7 +35,7 @@ export function clearSessionCookie(c: Context, env: AppEnv): void {
     path: "/",
     httpOnly: true,
     sameSite: "Lax",
-    secure: isProduction(env),
+    secure: cookieSecure(env),
   });
 }
 
