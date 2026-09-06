@@ -50,6 +50,25 @@ function model(studied: string[] = ["p-b", "p-d"]) {
   return buildSubjectModel(detail);
 }
 
+/* El config real de Proba ya no trae ningún `link` externo (el usuario sacó el
+   campus): para probar ese `kind` se agrega un grupo extra solo en el test. */
+const configConLink = SubjectConfig.parse({
+  ...rawProbaConfig,
+  rail: [
+    ...rawProbaConfig.rail,
+    {
+      id: "material",
+      label: "Material",
+      color: "--accent",
+      items: [{ id: "catedra", label: "Campus de la cátedra", icon: "link", kind: "link", target: "https://campus.itba.edu.ar" }],
+    },
+  ],
+});
+function modelConLink(studied: string[] = ["p-b", "p-d"]) {
+  const detail: SubjectDetail = { config: configConLink, pages, studied, placeholder: false, lastSyncAt: null };
+  return buildSubjectModel(detail);
+}
+
 const slugs = (list: PageMeta[]) => list.map((p) => p.slug);
 
 describe("secuencia pedagógica", () => {
@@ -156,20 +175,24 @@ describe("vecinos", () => {
 
 describe("rail", () => {
   it("intercala los grupos SLOT entre los FIJOS y marca cuál es cuál", () => {
-    const groups = model().railGroups;
+    const groups = modelConLink().railGroups;
     expect(groups.map((g) => g.id)).toEqual(["ruta", "consultar", "practicar", "resolver", "material", "mio"]);
     expect(groups.map((g) => g.slot)).toEqual([false, false, false, true, true, false]);
   });
 
   it("esconde los ítems `page` cuyo slug no existe y los grupos que quedan vacíos", () => {
-    const groups = model().railGroups;
+    const groups = modelConLink().railGroups;
     const material = groups.find((g) => g.id === "material");
     expect(material?.items.map((i) => i.item.id)).toEqual(["catedra"]);
+    /* «Formulario general» apunta a una página que estas fixtures no traen:
+       desaparece del grupo «Resolver», que sigue con sus herramientas. */
+    const resolver = groups.find((g) => g.id === "resolver");
+    expect(resolver?.items.map((i) => i.item.id)).toEqual(["explorador", "taller", "calc", "lab"]);
     expect(groups.find((g) => g.id === "wikimeta")).toBeUndefined();
   });
 
   it("resuelve las rutas de cada `kind`", () => {
-    const groups = model().railGroups;
+    const groups = modelConLink().railGroups;
     const home = groups[0]?.items[0];
     expect(home?.to).toBe("/m/proba");
     const graph = groups[1]?.items[1];

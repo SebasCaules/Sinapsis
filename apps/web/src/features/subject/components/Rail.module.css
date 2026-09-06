@@ -34,7 +34,7 @@
   position: relative;
   width: 100%;
   flex: none;
-  padding: 6px 4px 6px 12px; /* 12 px a la izquierda para el rótulo vertical */
+  padding: 6px 0 6px 16px; /* 16 px a la izquierda: barra activa (1-4) + rótulo vertical (6-16) */
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -46,7 +46,7 @@
    arriba; los grupos de la materia (slot) lo llevan en su color. */
 .groupLabel {
   position: absolute;
-  left: 2px;
+  left: 5px;
   top: 50%;
   transform: translateY(-50%) rotate(180deg);
   writing-mode: vertical-rl;
@@ -87,9 +87,11 @@
   background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
 }
 
+/* La barra del ítem activo sigue pegada al borde IZQUIERDO del rail (1-4 px);
+   el rótulo vertical del grupo va después (6-16 px), sin pisarse. */
 .bar {
   position: absolute;
-  left: -8px;
+  left: -15px;
   width: 3px;
   height: 20px;
   border-radius: 2px;
