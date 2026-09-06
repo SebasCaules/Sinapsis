@@ -134,15 +134,25 @@ export function FlashcardsView() {
 
               <div className={css.cardActions}>
                 {stat.due > 0 ? (
-                  <ActionLink to={session(deck.id, "vencidas")} variant="primary">
+                  <ActionLink
+                    to={session(deck.id, "vencidas")}
+                    variant="primary"
+                    label={`Repasar vencidas (${stat.due}) · ${deck.title}`}
+                  >
                     Repasar vencidas ({stat.due})
                   </ActionLink>
                 ) : stat.fresh > 0 ? (
-                  <ActionLink to={session(deck.id, "nuevas")} variant="primary">
+                  <ActionLink
+                    to={session(deck.id, "nuevas")}
+                    variant="primary"
+                    label={`Estudiar nuevas (${stat.fresh}) · ${deck.title}`}
+                  >
                     Estudiar nuevas ({stat.fresh})
                   </ActionLink>
                 ) : null}
-                <ActionLink to={session(deck.id, "todo")}>Estudiar todo</ActionLink>
+                <ActionLink to={session(deck.id, "todo")} label={`Estudiar todo · ${deck.title}`}>
+                  Estudiar todo
+                </ActionLink>
               </div>
             </article>
           );

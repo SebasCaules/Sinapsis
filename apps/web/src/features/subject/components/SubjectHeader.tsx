@@ -208,7 +208,7 @@ export function SubjectHeader({ tabs, activeId, onSelect, onClose, onNew, onReor
           aria-label="Nueva pestaña"
           title="Nueva pestaña (Inicio)"
         >
-          <UiIcon name="plus" size={13} />
+          <UiIcon name="plus" size={14} />
         </button>
       </div>
 

@@ -117,6 +117,8 @@
   gap: 8px;
   border: 0;
   background: none;
+  /* 24 px: objetivo táctil mínimo del contrato (medido por debajo en la revisión D5). */
+  min-height: 24px;
   padding: 0;
   font: 600 10.5px var(--font-ui);
   letter-spacing: 0.06em;
@@ -124,6 +126,7 @@
   cursor: pointer;
 }
 .sourcesHead:hover { color: var(--text-2); }
+.sourcesHead:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 5px; }
 
 .chev { transform: rotate(-90deg); transition: transform var(--t); }
 .chevOpen { transition: transform var(--t); }
@@ -148,4 +151,14 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 1px 4px;
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .sources {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

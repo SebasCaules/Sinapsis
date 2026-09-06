@@ -40,17 +40,41 @@ const FOCUSABLE = 'input:not([disabled]), button:not([disabled]):not([tabindex="
 /**
  * Deja el snippet del API en prosa legible: fuera los marcadores del resaltado
  * (acá lo hacemos nosotros), fuera la sintaxis del wiki —un `[[slug|texto]]` se
- * lee por su texto— y la matemática se resume en «…», que es más honesto que
- * mostrar el LaTeX crudo en una lista.
+ * lee por su texto—, fuera los marcadores de markdown y la matemática resumida
+ * en «…», que es más honesto que mostrar el LaTeX crudo en una lista.
+ *
+ * El fragmento llega RECORTADO por el API, así que una fórmula puede venir
+ * abierta y sin cerrar: sin tratarla, la paleta mostraba cosas como
+ * «**Qué es:** … $$ F_X(x)=P…» (revisión de diseño D5). Un «$» suelto marca el
+ * comienzo de matemática que ya no se puede leer: de ahí en adelante se resume.
  */
 export function plainSnippet(raw: string): string {
-  return (raw ?? "")
-    .replace(/<\/?(?:b|mark|em|strong)>/gi, "")
-    .replace(/\$\$[^$]*\$\$/g, "…")
-    .replace(/\$[^$\n]+\$/g, "…")
+  let text = (raw ?? "").replace(/<\/?(?:b|mark|em|strong)>/gi, "");
+
+  // matemática emparejada
+  text = text.replace(/\$\$[^$]*\$\$/g, "…").replace(/\$[^$\n]+\$/g, "…");
+  // matemática abierta por el recorte del fragmento
+  const open = text.indexOf("$");
+  if (open >= 0) text = `${text.slice(0, open)}…`;
+
+  text = text
+    // wikilinks: se leen por su texto
     .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_m, target: string, alias?: string) => alias ?? target)
+    // enlaces e imágenes de markdown: se leen por su rótulo
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // negrita, cursiva y código
+    .replace(/(\*\*|__)(.+?)\1/g, "$2")
+    .replace(/(?:^|(?<=\s))([*_])(?=\S)([^*_\n]+?)\1(?=$|[\s.,;:)!?])/g, "$2")
+    .replace(/`+/g, "")
+    // encabezados, citas y viñetas al principio de una línea
+    .replace(/^[ \t]{0,3}#{1,6}[ \t]+/gm, "")
+    .replace(/^[ \t]{0,3}>[ \t]?/gm, "")
+    .replace(/^[ \t]{0,3}[-*+][ \t]+/gm, "")
     .replace(/\s+/g, " ")
     .trim();
+
+  // varios recortes seguidos se leen como uno solo
+  return text.replace(/…(?:\s*…)+/g, "…");
 }
 
 /** Parte un texto por el término buscado (sin distinguir mayúsculas). */

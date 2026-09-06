@@ -92,6 +92,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  /* 24 px: objetivo táctil mínimo del contrato (medido por debajo en la revisión D5). */
+  min-height: 24px;
   padding: 0;
   border: 0;
   background: none;

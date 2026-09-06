@@ -376,7 +376,7 @@ function Phase({
             <article key={milestone.id} className={css.milestone}>
               <header className={css.milestoneHead}>
                 <h3 className={css.milestoneTitle}>{milestone.title}</h3>
-                <DivisionChips model={model} keys={milestone.divisions} />
+                <DivisionChips model={model} keys={milestone.divisions} max={3} />
                 <span className={css.milestoneCount}>
                   {mp.done}/{mp.total}
                 </span>

@@ -60,7 +60,10 @@
 .ghost:hover:not(:disabled) { background: var(--surface-2); box-shadow: var(--relief); }
 
 /* --- IconButton --- */
+/* `flex: none`: dentro de una fila flexible el botón se encogía por debajo de
+   los 24 px del contrato (medido 21,8 px en la cabecera a 390). */
 .icon {
+  flex: none;
   display: inline-grid;
   place-items: center;
   width: 26px;

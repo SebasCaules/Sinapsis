@@ -197,10 +197,13 @@
 
 .milestoneHead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 
+/* `min-width` de verdad: con `min-width: 0` el título se encogía hasta partirse
+   en tres líneas antes de que la fila envolviera, y la insignia, el contador y
+   «Marcar todo el hito» se quedaban colgados a su derecha (visto a 1024). */
 .milestoneTitle {
   margin: 0;
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 150px;
+  min-width: 150px;
   font: 600 14px/1.3 var(--font-ui);
   color: var(--text);
 }
@@ -219,7 +222,7 @@
   white-space: nowrap;
 }
 .bulk:hover:not(:disabled) { color: var(--primary); border-color: var(--primary); }
-.bulk:disabled { opacity: 0.7; cursor: default; }
+.bulk:disabled { opacity: 0.75; cursor: default; }
 .bulk:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* ---------- tareas ---------- */
@@ -347,7 +350,8 @@
 }
 .example .emptyText { padding: 0 14px 14px; font-size: 12.5px; }
 
-@media (max-width: 1000px) {
+/* Dos hitos por fila piden 2 × 300 + 12 de hueco + 44 de relleno de la fase. */
+@container (max-width: 680px) {
   .milestones { grid-template-columns: 1fr; }
   .phaseHead { flex-direction: column; gap: 12px; }
   .phaseAside { width: 100%; align-items: flex-start; }
@@ -355,4 +359,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   .chevron, .box { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .phase,
+:global([data-theme="claustro"]) .milestone,
+:global([data-theme="claustro"]) .scope,
+:global([data-theme="claustro"]) .example,
+:global([data-theme="claustro"]) .segmented {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

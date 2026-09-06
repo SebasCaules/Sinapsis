@@ -103,7 +103,11 @@
   position: relative;
   height: 30px;
   flex: 0 1 auto;
-  min-width: 92px;
+  /* 108 y no 92: la ✕ se reserva 24 px fijos, así que con 92 al rótulo le
+     quedaban 41 px —cinco caracteres— y con nueve pestañas la tira decía
+     «Tod… Pla… Kits… Fla…». Con 108 entran ocho y la tira sigue desbordando
+     igual (para eso están los ‹ ›), sin ensanchar ninguna pestaña que quepa. */
+  min-width: 108px;
   max-width: 220px;
   display: flex;
   align-items: center;
@@ -192,8 +196,11 @@
   opacity: 0;
   transition: opacity var(--t), background var(--t), color var(--t);
 }
+/* 0,6 dejaba la ✕ en 2,7:1 sobre la pestaña: por debajo del 3:1 que pide un
+   componente gráfico (WCAG 1.4.11). Con 0,8 llega a 3,7:1 y sigue siendo más
+   tenue que el rótulo. */
 .tab:hover .tabClose,
-.tab[aria-selected="true"] .tabClose { opacity: 0.6; }
+.tab[aria-selected="true"] .tabClose { opacity: 0.8; }
 .tabClose:hover { opacity: 1; background: var(--surface); color: var(--text-2); }
 .tabClose:focus-visible {
   opacity: 1;

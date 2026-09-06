@@ -130,23 +130,30 @@
 .state[data-state="doing"] { color: var(--warn-text, var(--warn)); }
 .state[data-state="done"] { color: var(--good); }
 
+/* Rejilla de dos filas SIEMPRE (D5): con una fila flexible, la tarjeta que trae
+   la insignia «N para repasar» envolvía y su filete quedaba 30 px más arriba que
+   el de las tarjetas vecinas de la misma fila. Fila 1: datos (meta + vencidas).
+   Fila 2: acciones, a la derecha. */
 .foot {
   margin-top: auto;
   border-top: 1px solid var(--border);
   padding-top: 9px;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
+  gap: 7px 8px;
   min-height: 33px;
 }
+.foot > .meta { grid-column: 1; }
 .meta { font: 500 11px var(--font-mono); color: var(--text-3); white-space: nowrap; }
 
 /* «N para repasar»: cifras, por encima del enlace-capa como los atajos, y con
-   el color de aviso que ya usa la plataforma para lo que vence. El `margin-left`
-   automático lo pone `.study`, que va después: esta insignia queda pegada al
-   recuento de páginas, que es de lo que habla. */
+   el color de aviso que ya usa la plataforma para lo que vence. Vive en la
+   PRIMERA fila del pie, al final, junto al recuento de páginas, que es de lo que
+   habla; las acciones van en la segunda. */
 .due {
+  grid-column: 2;
+  justify-self: end;
   position: relative;
   z-index: 2;
   font: 600 11px/1 var(--font-mono);
@@ -163,9 +170,10 @@
 
 /* Atajos de estudio del pie: discretos y por encima del enlace-capa. */
 .study {
+  grid-column: 1 / -1;
+  justify-self: end;
   position: relative;
   z-index: 2;
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -196,7 +204,7 @@
   white-space: nowrap;
 }
 
-.manageTools { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+.manageTools { grid-column: 1 / -1; justify-self: end; display: flex; align-items: center; gap: 14px; }
 
 .remove {
   font: 600 11px var(--font-ui);
@@ -215,7 +223,9 @@
   border: 1px solid var(--border-2);
   background: var(--surface-2);
   border-radius: var(--r-sm);
-  padding: 3px 20px 3px 8px;
+  /* 24 px de alto: el objetivo mínimo del contrato (medido 22 antes). */
+  min-height: 24px;
+  padding: 4px 20px 4px 8px;
   cursor: pointer;
   appearance: none;
   max-width: 118px;

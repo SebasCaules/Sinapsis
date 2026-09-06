@@ -26,6 +26,22 @@ describe("plainSnippet", () => {
     expect(plainSnippet("  dos    saltos\n  y tabulación\t ")).toBe("dos saltos y tabulación");
   });
 
+  it("resume la matemática que el recorte del API dejó abierta", () => {
+    expect(plainSnippet("Se calcula así: $$ F_X(x)=P")).toBe("Se calcula así: …");
+    expect(plainSnippet("el desvío $X y su")).toBe("el desvío …");
+  });
+
+  it("quita los marcadores de markdown", () => {
+    expect(plainSnippet("**Qué es:** una *medida* de `dispersión`")).toBe("Qué es: una medida de dispersión");
+    expect(plainSnippet("## Función de densidad")).toBe("Función de densidad");
+    expect(plainSnippet("> [!nota]\n> es la más usada")).toBe("[!nota] es la más usada");
+    expect(plainSnippet("ver [la tabla](https://x.test/t) y nada más")).toBe("ver la tabla y nada más");
+  });
+
+  it("no parte palabras con guion bajo ni multiplicaciones", () => {
+    expect(plainSnippet("la variable x_i por a * b")).toBe("la variable x_i por a * b");
+  });
+
   it("tolera un snippet vacío", () => {
     expect(plainSnippet("")).toBe("");
   });

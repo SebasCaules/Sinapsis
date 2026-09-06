@@ -43,9 +43,12 @@
 }
 .searchField:focus-within { border-color: var(--primary); box-shadow: var(--relief), 0 0 0 3px var(--primary-ring); }
 
+/* El input ocupa el alto del casco: si no, el objetivo real eran los 20 px de
+   la línea de texto y el resto del campo no hacía nada al pulsarlo. */
 .searchInput {
   flex: 1;
   min-width: 0;
+  align-self: stretch;
   border: 0;
   background: none;
   outline: none;
@@ -53,11 +56,24 @@
   color: var(--text);
 }
 
-.chipRow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+/* El rótulo se saca del flujo y la fila entera arranca a 62 px: si el rótulo
+   fuera un ítem flexible más, la SEGUNDA línea de chips volvería al margen y
+   quedaría 65 px a la izquierda de la primera (revisión D5). */
+.chipRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 62px;
+  min-height: 28px;
+}
 
 .chipLabel {
-  width: 62px;
-  flex: none;
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 58px;
   font: 600 10.5px var(--font-ui);
   letter-spacing: 0.06em;
   color: var(--text-3);

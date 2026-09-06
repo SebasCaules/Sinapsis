@@ -130,7 +130,15 @@ const DivisionRow = memo(function DivisionRow({
 
       {expanded ? (
         <div className={css.body}>
-          <Link className={css.wholeDivision} to={routes.division(model.slug, division.key)}>
+          {/* El rótulo visible se repite en cada división abierta: sin `aria-label`
+              la lista de enlaces de un lector de pantalla mostraba doce «Ver la
+              unidad completa» idénticos (revisión de diseño D5). El nombre
+              accesible EMPIEZA por el rótulo visible (WCAG 2.5.3). */}
+          <Link
+            className={css.wholeDivision}
+            to={routes.division(model.slug, division.key)}
+            aria-label={`Ver la ${model.config.division.singular.toLowerCase()} completa: ${division.name}`}
+          >
             <UiIcon name="menu" size={13} />
             Ver la {model.config.division.singular.toLowerCase()} completa
           </Link>

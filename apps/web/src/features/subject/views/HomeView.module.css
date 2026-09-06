@@ -7,6 +7,11 @@
   display: flex;
   flex-direction: column;
   gap: 26px;
+  /* Contenedor de consulta (D5): el ancho útil de una vista es la ventana MENOS
+     el rail (52) y el índice (250), así que los cortes por «viewport» saltaban
+     tarde — a 1024 px de ventana esta columna mide 674 y el plan seguía en dos
+     columnas de 300. Los cortes de abajo miden ESTA caja. */
+  container-type: inline-size;
 }
 
 .eyebrow {
@@ -194,7 +199,7 @@
   color: var(--text-3);
 }
 
-@media (max-width: 900px) {
+@container (max-width: 700px) {
   .rowTrack { width: 120px; }
   .startCard { flex-direction: column; align-items: stretch; }
   .startActions { width: auto; }
@@ -280,6 +285,8 @@
   display: flex;
   align-items: center;
   gap: 7px;
+  /* 24 px: objetivo táctil mínimo del contrato (medido por debajo en la revisión D5). */
+  min-height: 24px;
   padding: 2px 0;
   font: 500 12.5px var(--font-ui);
   color: var(--text-2);
@@ -294,13 +301,18 @@
 .todayStar { flex: none; color: var(--warn); fill: currentColor; }
 
 .todayMore {
+  display: inline-flex;
+  align-items: center;
+  /* 24 px: objetivo táctil mínimo del contrato (medido por debajo en la revisión D5). */
+  min-height: 24px;
   font: 600 11.5px var(--font-ui);
   color: var(--text-3);
   text-decoration: none;
 }
+.todayMore:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 .todayMore:hover { color: var(--primary); }
 
-@media (max-width: 760px) {
+@container (max-width: 620px) {
   .todayItem { padding-left: 0; border-left: 0; }
 }
 
@@ -316,7 +328,9 @@
   box-shadow: var(--relief), var(--shadow);
 }
 
-.reviewGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+/* `auto-fit` en vez de tres columnas fijas: la rejilla se adapta sola al ancho
+   real de la columna (a 1024 px de ventana son 674, no 1120). */
+.reviewGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
 
 .reviewCard {
   position: relative;
@@ -338,21 +352,34 @@
   box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
 }
 
-.reviewMeta { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+/* Deja libre la esquina de la numeración: ahora que se lee (ver .reviewNum) hay
+   que reservarle sitio. */
+.reviewMeta { padding-right: 26px; font: 500 10.5px var(--font-mono); color: var(--text-3); }
 .reviewTitle { font: 600 13px/1.35 var(--font-ui); color: var(--text); }
 
+/* La numeración de la página es CONTENIDO, no un filete: con --border-2 medía
+   1,46:1 en claustro y 1,58:1 en pergamino, es decir no se leía. */
 .reviewNum {
   position: absolute;
   right: 12px;
   top: 10px;
   font: 500 10.5px var(--font-mono);
-  color: var(--border-2);
-}
-
-@media (max-width: 900px) {
-  .reviewGrid { grid-template-columns: 1fr; }
+  color: var(--text-3);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .totalFill, .rowFill, .reviewCard, .primaryAction, .secondaryAction, .todayAction { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .startCard,
+:global([data-theme="claustro"]) .today,
+:global([data-theme="claustro"]) .review,
+:global([data-theme="claustro"]) .reviewCard {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

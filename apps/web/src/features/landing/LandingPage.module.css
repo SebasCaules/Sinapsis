@@ -143,3 +143,13 @@
   .head { align-items: flex-start; }
   .actions { width: 100%; }
 }
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .empty {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
+}

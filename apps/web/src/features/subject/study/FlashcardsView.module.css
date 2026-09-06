@@ -31,7 +31,9 @@
   box-shadow: var(--relief), var(--shadow);
 }
 
-.cardHead { display: flex; align-items: center; gap: 8px; }
+/* Alto mínimo = alto de la insignia: sin él, el título de un mazo CON chip de
+   unidad bajaba 7 px respecto del de sus vecinos de la misma fila. */
+.cardHead { display: flex; align-items: center; gap: 8px; min-height: 21px; }
 
 .badge {
   height: 21px;
@@ -101,4 +103,14 @@
   background: var(--surface-2);
   font: 500 11.5px var(--font-mono);
   color: var(--text-2);
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .card {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

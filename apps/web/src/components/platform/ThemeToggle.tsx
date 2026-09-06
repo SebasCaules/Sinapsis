@@ -38,7 +38,7 @@ export function ThemeToggle() {
         onClick={cycleTheme}
         data-theme-toggle={theme}
       >
-        <UiIcon name={ICON[theme]} size={16} />
+        <UiIcon name={ICON[theme]} size={14} />
       </IconButton>
       {/* El cambio de tema no se ve con un lector de pantalla: hay que decirlo. */}
       <span className={css.live} role="status">{`Tema: ${THEME_LABEL[theme]}`}</span>

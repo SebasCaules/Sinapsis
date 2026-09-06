@@ -25,7 +25,7 @@ const GROUPS: Group[] = [
     title: "En toda la materia",
     items: [
       { keys: ["⌘", "K"], what: "Buscar en la materia" },
-      { keys: ["/"], what: "Buscar en la materia" },
+      { keys: ["/"], what: "Buscar en la materia (una sola tecla)" },
       { keys: ["T"], what: "Cambiar de tema" },
       { keys: ["?"], what: "Abrir esta lista" },
       { keys: ["Esc"], what: "Cerrar lo que esté abierto" },

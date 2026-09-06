@@ -5,7 +5,10 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(35, 28, 18, .42);
+  /* El velo es el token del tema (D5): con el literal, en claustro el fondo
+     apenas se oscurecía (medido: 41,38,34 → 39,34,28) y el diálogo flotaba sin
+     separarse de la página. */
+  background: var(--scrim);
   animation: fade var(--t) both;
 }
 .panel {
@@ -79,4 +82,14 @@
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .panel {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

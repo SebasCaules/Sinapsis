@@ -29,7 +29,10 @@
 }
 
 .step { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.sep { color: var(--border-2); }
+/* Decorativo (aria-hidden), pero con --border-2 quedaba en 1,4:1 y las migas se
+   leían como una sola tira de palabras. --track es el token de «trazo que se
+   tiene que ver» y deja el punto en 2,7-3,5:1 sin competir con el texto. */
+.sep { color: var(--track); }
 
 /* El relleno vertical agranda el objetivo del enlace a 24 px sin tocar el alto
    de la línea de migas: en un elemento en línea el relleno no cambia el alto de

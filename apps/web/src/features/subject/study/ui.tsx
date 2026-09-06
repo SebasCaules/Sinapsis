@@ -54,15 +54,44 @@ export function DivisionChip({ division }: { division: DivisionNode | null | und
   );
 }
 
-/** Los chips de una lista de claves de división (las que la materia no declara se omiten). */
-export function DivisionChips({ model, keys }: { model: SubjectModel; keys: readonly string[] }) {
+/**
+ * Los chips de una lista de claves de división (las que la materia no declara se
+ * omiten).
+ *
+ * `max` corta la lista y resume el resto en un «+N» (revisión de diseño D5): en
+ * la grilla de kits, un kit de nueve unidades envolvía los chips en dos líneas y
+ * empujaba su título 27 px por debajo del de las tarjetas vecinas de la misma
+ * fila. El «+N» lleva el nombre completo de las que faltan en su `title` y en su
+ * nombre accesible, así que no se pierde información.
+ */
+export function DivisionChips({
+  model,
+  keys,
+  max,
+}: {
+  model: SubjectModel;
+  keys: readonly string[];
+  max?: number;
+}) {
   const nodes = keys.map((k) => model.division(k)).filter((d): d is DivisionNode => !!d);
   if (!nodes.length) return null;
+  const cut = max !== undefined && nodes.length > max ? max : nodes.length;
+  const shown = nodes.slice(0, cut);
+  const rest = nodes.slice(cut);
+  const restLabel = rest.map((d) => d.long).join(" · ");
   return (
     <span className={css.chips}>
-      {nodes.map((d) => (
+      {shown.map((d) => (
         <DivisionChip key={d.key} division={d} />
       ))}
+      {rest.length ? (
+        <span className={`${css.chip} ${css.chipMore}`} title={restLabel}>
+          +{rest.length}
+          {/* Texto y no `aria-label`: en un `span` sin rol, `aria-label` no se
+              expone de forma fiable. */}
+          <span className={css.srOnly}>{` (${restLabel})`}</span>
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -195,15 +224,23 @@ export function ActionLink({
   children,
   className,
   title,
+  label,
 }: {
   to: string;
   variant?: ActionVariant;
   children: ReactNode;
   className?: string;
   title?: string;
+  /**
+   * Nombre accesible cuando el rótulo visible se repite en la pantalla: en la
+   * lista de mazos hay dieciocho «Estudiar todo» y seis «Estudiar nuevas (11)»
+   * que, sin esto, suenan idénticos en la lista de enlaces de un lector de
+   * pantalla (revisión de diseño D5).
+   */
+  label?: string;
 }) {
   return (
-    <Link className={actionClass(variant, className)} to={to} title={title}>
+    <Link className={actionClass(variant, className)} to={to} title={title} aria-label={label}>
       {children}
     </Link>
   );

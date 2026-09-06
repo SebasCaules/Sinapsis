@@ -7,6 +7,11 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* Contenedor de consulta (D5): el ancho útil de una vista es la ventana MENOS
+     el rail (52) y el índice (250), así que los cortes por «viewport» saltaban
+     tarde — a 1024 px de ventana esta columna mide 674 y el plan seguía en dos
+     columnas de 300. Los cortes de abajo miden ESTA caja. */
+  container-type: inline-size;
 }
 
 .head { display: flex; align-items: center; gap: 14px; }
@@ -26,6 +31,7 @@
   text-decoration: none;
 }
 .back:hover { color: var(--primary); border-color: var(--primary); }
+.back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .headTitle { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 
@@ -150,11 +156,14 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  /* 24 px: objetivo táctil mínimo del contrato (medido por debajo en la revisión D5). */
+  min-height: 24px;
   font: 600 12px var(--font-ui);
   color: var(--link);
   text-decoration: none;
 }
 .wikiLink:hover { text-decoration: underline; }
+.wikiLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
 
 .queueNote { font: 500 11px var(--font-mono); color: var(--text-3); }
 
@@ -175,7 +184,9 @@
   transition: transform var(--t), border-color var(--t), background var(--t);
 }
 .grade:hover:not(:disabled) { transform: translateY(-1px); }
-.grade:disabled { opacity: 0.55; cursor: default; }
+/* N0-25: un control deshabilitado baja a 0,75 y nada más. Con 0,55 las cuatro
+   notas parecían rotas antes de dar vuelta la tarjeta. */
+.grade:disabled { opacity: 0.75; cursor: default; }
 .grade:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -256,7 +267,7 @@
 .repeat:hover { background: var(--primary-2); }
 .repeat:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-@media (max-width: 720px) {
+@container (max-width: 620px) {
   .grades { grid-template-columns: repeat(2, 1fr); }
   .summaryGrid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -264,4 +275,17 @@
 @media (prefers-reduced-motion: reduce) {
   .flip { transition: none; }
   .grade, .flipButton { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .face,
+:global([data-theme="claustro"]) .grade,
+:global([data-theme="claustro"]) .summary,
+:global([data-theme="claustro"]) .summaryCell {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

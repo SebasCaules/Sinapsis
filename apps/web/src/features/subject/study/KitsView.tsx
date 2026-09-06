@@ -78,7 +78,7 @@ export function KitsView() {
               data-kit={kit.id}
             >
               <div className={css.cardHead}>
-                <DivisionChips model={model} keys={kit.divisions} />
+                <DivisionChips model={model} keys={kit.divisions} max={3} />
                 {stat.due > 0 ? <span className={css.due}>{stat.due} por repasar</span> : null}
               </div>
 

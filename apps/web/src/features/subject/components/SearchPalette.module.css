@@ -34,9 +34,12 @@
   color: var(--text-3);
 }
 
+/* Ver CatalogView: el input toma el alto del casco para que todo el campo sea
+   el objetivo. */
 .input {
   flex: 1;
   min-width: 0;
+  align-self: stretch;
   border: 0;
   background: none;
   outline: none;
@@ -134,10 +137,13 @@
   overflow: hidden;
 }
 
+/* El resaltado sube el contraste, no lo baja: heredando --text-3 el fragmento
+   resaltado medía 3,61:1 sobre --hl en claustro, o sea MENOS legible que sin
+   resaltar. Sobre --hl, --text da 13,5 / 12,6 / 8,3 en los tres temas. */
 .rowTitle mark,
 .rowSnippet mark {
   background: var(--hl);
-  color: inherit;
+  color: var(--text);
   border-radius: 3px;
   padding: 0 1px;
 }
@@ -167,4 +173,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .scrim, .palette { animation: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .palette {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

@@ -70,11 +70,23 @@
 /* ---------- filtros ---------- */
 .filters { flex: none; display: flex; flex-direction: column; gap: 7px; }
 
-.chipRow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+/* Ver CatalogView: el rótulo va fuera del flujo para que la segunda línea de
+   chips siga alineada con la primera y no con el margen. */
+.chipRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 62px;
+  min-height: 26px;
+}
 
 .chipLabel {
-  width: 62px;
-  flex: none;
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 58px;
   font: 600 10.5px var(--font-ui);
   letter-spacing: 0.06em;
   color: var(--text-3);
@@ -282,6 +294,9 @@
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
+  /* Hueco para el botón flotante de la materia (44 px abajo a la derecha): sin
+     él tapaba las últimas filas de «Más citadas» sin manera de sacarlas. */
+  padding-bottom: 52px;
 }
 
 .card {
@@ -356,15 +371,38 @@
 }
 .topRow:hover .topTitle { color: var(--primary); }
 
-/* Por debajo de 1100 la columna se va abajo del lienzo: el grafo manda. */
+/* Por debajo de 1100 la columna se va abajo del lienzo: el grafo manda.
+   El lienzo lleva alto propio: `.side` es `flex: none` y en columna se comía
+   todo el alto disponible, así que el lienzo quedaba en 2 px y el grafo —lo
+   único que esta vista tiene que mostrar— desaparecía (medido a 1024 y a 390).
+   Con la columna abajo, la vista deja de caber en una pantalla: pasa a alto
+   automático y hace scroll dentro de `main`, como el resto. */
 @media (max-width: 1100px) {
-  .stage { flex-direction: column; }
-  .side { width: auto; flex-direction: row; overflow-x: auto; }
+  .view { height: auto; min-height: 100%; }
+  .stage { flex-direction: column; min-height: 0; }
+  .canvasWrap { flex: none; height: clamp(300px, 52vh, 460px); }
+  .side { width: auto; flex: none; flex-direction: row; overflow-x: auto; padding-bottom: 0; }
   .card { flex: 1; min-width: 220px; }
+  /* A pantalla completa el lienzo llega al borde y el botón flotante de la
+     materia se sentaba encima de «Centrar»: los controles de zoom se van a la
+     otra esquina, que ahí está libre. */
+  .zoomBar { right: auto; left: 10px; }
   .head { flex-direction: column; align-items: stretch; }
   .searchField { width: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .chip, .zoomReset, .zoomStep, .topMore { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .card,
+:global([data-theme="claustro"]) .tooltip,
+:global([data-theme="claustro"]) .zoomBar {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }

@@ -7,6 +7,11 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  /* Contenedor de consulta (D5): el ancho útil de una vista es la ventana MENOS
+     el rail (52) y el índice (250), así que los cortes por «viewport» saltaban
+     tarde — a 1024 px de ventana esta columna mide 674 y el plan seguía en dos
+     columnas de 300. Los cortes de abajo miden ESTA caja. */
+  container-type: inline-size;
 }
 
 .srOnly {
@@ -83,6 +88,12 @@
   height: 7px;
   border-radius: 50%;
   background: var(--ucol, var(--u0));
+}
+
+/* «+N»: mismo casco que un chip, sin punto de color (no representa una división). */
+.chipMore {
+  padding: 0 8px;
+  color: var(--text-3);
 }
 
 /* ---------- barras y anillo ---------- */
@@ -211,10 +222,23 @@
 
 .emptyActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 
-@media (max-width: 900px) {
+/* La cabecera parte en dos cuando la columna baja de 720: el H1 de una vista
+   de estudio necesita ~440 y las cifras + el anillo ~250. */
+@container (max-width: 720px) {
   .head { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .headAside { flex-wrap: wrap; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fill, .ringFill { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
+   baseline y como ya hacían el rail, el índice, la cabecera, la hoja y las tarjetas del
+   catálogo. Sin esto, la mitad de las tarjetas de la aplicación se veían planas al lado de
+   las otras (revisión de diseño D5). */
+:global([data-theme="claustro"]) .empty {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
 }
