@@ -33,8 +33,8 @@ Workers y verificadores de ola: Opus 5. Auditoría final: modelo N0.
 | S1-11 web lector | DONE | ola1 | 147 nodos KaTeX, 28 wikilinks, callout; H1 duplicado corregido por el orquestador |
 | S1-12 web catálogo + búsqueda | DONE | ola1 | filtros en URL, paleta ⌘K |
 | S1-13 e2e + smoke visual | DONE | ola2 | 24 E2E verdes; smoke manual real; capturas 3 temas |
-| S1-14 auditoría final | DOING | | seguridad 4/4 · corrección 5/5 · UX 35 + simplificación 46 hallazgos → ola 3 de fixers (S, W1, W2) |
-| S1-15 docs | TODO | | ola 3 |
+| S1-14 auditoría final | DONE | dfbd68b | seguridad 4/4 · corrección 5/5 · UX 31/35 (4 diferidos S-08/S-09 y decisiones) · simplificación 44/46 (S-06, S-07 diferidos) |
+| S1-15 docs | DONE | | README, CONTRACT, DECISIONS (N0-1..25), SPRINTS, HANDOFF-sprint1 |
 
 ## Ownership de archivos (ola 1)
 
@@ -98,4 +98,4 @@ UX: 35 hallazgos (4 bloqueantes, 15 importantes, 16 menores). Se corrigen todos 
 
 ## Veredicto final
 
-Pendiente.
+**Sprint 1 (MVP) cerrado el 2026-09-06.** Gates en verde en `dfbd68b`: typecheck, 216 tests unitarios/integración (contract 11 · markdown 52 · api 68 · web 67 · cli 18), build, 24 E2E. Cero hallazgos altos abiertos. Smoke real del orquestador sobre Proba (209 páginas) correcto. Pendiente de revisión del usuario: decisiones N0-1..N0-25 y S-03, S-06..S-09.

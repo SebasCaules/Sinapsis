@@ -3,7 +3,7 @@
 Cada sprint se cierra de punta a punta (código + tests + verificación visual + docs) y el
 usuario lo revisa antes de habilitar el siguiente.
 
-## Sprint 1 — MVP (en ejecución, 2026-09-05)
+## Sprint 1 — MVP (cerrado el 2026-09-06, pendiente de revisión del usuario)
 
 Objetivo: una materia real (Probabilidad y Estadística) sincronizada desde su wiki y
 navegable dentro del shell estándar, más la landing que organiza las materias por
