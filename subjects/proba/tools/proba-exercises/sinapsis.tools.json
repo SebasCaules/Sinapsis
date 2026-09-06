@@ -19,7 +19,7 @@
     "css/formularios.css"
   ],
   "views": [
-    { "id": "ejercicios", "label": "Ejercicios", "icon": "pencil", "layout": "wide" },
+    { "id": "ejercicios", "label": "Ejercicios", "icon": "pencil", "layout": "wide", "frame": "page" },
     { "id": "parcial", "label": "Simulador de parcial", "icon": "timer", "layout": "wide" },
     { "id": "formularios", "label": "Formularios", "icon": "sigma", "layout": "wide" }
   ],

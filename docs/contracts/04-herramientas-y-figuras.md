@@ -54,7 +54,9 @@ hagan falta en tiempo de ejecución**.
 
   "views": [                        // cada vista abre en /m/<materia>/t/<id de vista>
     { "id": "explorador", "label": "Explorador de distribuciones",
-      "icon": "chart", "layout": "wide" }
+      "icon": "chart", "layout": "wide" },
+    { "id": "ejercicios", "label": "Ejercicios", "icon": "pencil",
+      "layout": "wide", "frame": "page" }   // se dibuja dentro de la hoja del lector (§8.1)
   ],
   "figures": true,                  // true si registra figuras para los callouts [!figura]
   "progress": false                 // true si registra proveedores de progreso (§6.5)
@@ -83,6 +85,7 @@ hagan falta en tiempo de ejecución**.
 | `label` | texto | **sí** | — | 1–80 | Nombre de la vista. |
 | `icon` | `IconName` | no | — | registro cerrado | — |
 | `layout` | `"wide"` \| `"full"` | no | `"wide"` | — | `wide` = 1120 px; `full` = todo el ancho del área de contenido. |
+| `frame` | `"page"` | no | — | literal | Envuelve la vista en el **marco de página** de la plataforma: la hoja del lector con su línea de identidad y la barra de la unidad. Solo se aplica cuando el `?arg=` resuelve a un paso de progreso. Ver §8.1. |
 
 ### `ToolFilePath` — las rutas admitidas
 
@@ -461,6 +464,42 @@ Reglas:
   se redibuja al cambiarlos.
 - El host se encarga del ancho (`wide` 1120 · `full`) y de que las imágenes, `canvas` y `svg`
   no desborden. El bundle no fija el ancho del área de contenido.
+
+### 8.1 `frame: "page"` — la vista dentro de la hoja del lector
+
+Una vista que declara `"frame": "page"` en el manifiesto pide que la plataforma la dibuje
+**dentro del mismo marco que una página del wiki** (`PageFrame`, N0-64). Es lo que hace que la
+vista de ejercicios de una unidad se lea como una página más de esa unidad y no como otra
+pantalla.
+
+**Cuándo se aplica.** Solo cuando el `?arg=` de la URL resuelve a un **paso de progreso** de
+una división: el anfitrión busca entre los grupos de todas las unidades el que declaró
+`to: "/m/<materia>/t/<vista>?arg=…"` con ese mismo argumento (§6.5). Si no resuelve —el índice
+de la herramienta, una colección que ya no existe— la vista se dibuja suelta, como siempre. El
+campo nunca cambia una vista que no lo declara.
+
+**Qué provee el marco** (y por lo tanto el bundle NO tiene que dibujar):
+
+| Pieza | Contenido |
+|---|---|
+| La hoja | Ancho (`--sheet-width`, con las asas de redimensionado), fondo, borde teñido con el color de la unidad, relleno. |
+| Línea de identidad | Chip de la división (enlaza a su portada), etiqueta de tipo `EJERCICIOS` y posición: «ejercicios *k* de *M* · *n* ejercicios», donde *k*/*M* cuentan **grupos** de la unidad y *n* los ejercicios del grupo. |
+| Barra de la unidad | Un segmento por página de la unidad y uno por grupo, con el grupo abierto marcado (`data-current="true"`), y el par Anterior/Siguiente a los costados. |
+| Anterior / Siguiente | Sobre la secuencia extendida: atrás el grupo anterior o la última página de la unidad; adelante el grupo siguiente o la primera página de la unidad siguiente. |
+
+**Qué sigue siendo del bundle.** Su contenido y sus controles propios: en la vista de
+ejercicios, la barra de filtros con el semáforo, la búsqueda, el modo práctica y el documento.
+
+**Cómo se entera el bundle.** El contenedor lleva `data-frame="page"` además de
+`data-layout`/`data-tool`/`data-view`. Con ese atributo el bundle debe:
+
+1. dejar de dibujar lo que el marco ya muestra (su antetítulo con la unidad, su conteo, una
+   barra de unidad propia si la tenía);
+2. no volver a pintar la hoja (no aplicar la clase `sheet`) ni acotar el ancho de la página;
+3. conservar su título como primer elemento del documento, que es el de la página.
+
+En CSS, lo propio del modo enmarcado cuelga de `&[data-frame="page"]` dentro del envoltorio
+`.sinapsis-tool`.
 
 ---
 

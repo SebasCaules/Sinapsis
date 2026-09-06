@@ -1,0 +1,376 @@
+/* ============================================================
+   PageFrame — el marco de una página de la plataforma (N0-64).
+
+   Es la piel que comparten el lector del wiki y las vistas de herramienta
+   declaradas con `frame: "page"`: la hoja con sus asas de ancho, la línea de
+   identidad (división · tipo · posición · acciones), la barra de la unidad y el
+   pie de Anterior/Siguiente. Todo lo que hay acá venía del módulo del lector
+   (`views/ReaderView.module.css`), sin un cambio de valor: lo que se movió es la
+   propiedad, no el aspecto.
+
+   Las cuentas: hoja 840 + columna 248, separadas por 34. A 1440 con el índice
+   abierto quedan 1440 - 52 (rail) - 250 (índice) = 1138 de ancho útil, y
+   8 + 840 + 34 + 248 + 8 = 1138. El relleno lateral es de 8: con 24 la hoja se
+   quedaría en 808 y perdería la medida de lectura.
+   ============================================================ */
+
+/* Canaletas iguales a los dos lados (pedido del usuario): la de la derecha es
+   donde vive el botón «PANEL» (28 px + 8 de aire), y la de la izquierda la
+   copia, así la hoja queda centrada entre el índice y el botón. Con la columna
+   abierta, el botón queda a la derecha de la columna, en la misma canaleta. */
+/* Los 840 de N0-20 son el valor de FÁBRICA, no una constante: `--sheet-width` lo
+   fija el lector con las asas de la hoja (`views/sheetWidth.ts`) y se recuerda.
+   El `min(…, 100%)` de abajo es lo que garantiza que un ancho elegido en una
+   pantalla grande nunca desborde la columna en una chica. */
+.layout {
+  --reader-gutter: 36px;
+  --sheet-width: 840px;
+  position: relative;
+  display: flex;
+  gap: 34px;
+  padding: 4px var(--reader-gutter) 60px;
+  align-items: flex-start;
+}
+/* Con la columna abierta el botón «PANEL» ya no vive en la canaleta derecha
+   (va pegado a la columna), así que la columna se arrima al borde derecho
+   (pedido del usuario): solo un respiro de 8 px. Cerrada, vuelve la canaleta
+   donde se apoya el botón. */
+.layout[data-side="open"] { padding-right: 8px; }
+
+.column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ---------- la hoja ---------- */
+/* `position: relative` para alojar las asas de ancho, que van pegadas a sus
+   bordes y ocupan toda la altura. */
+.sheet {
+  position: relative;
+  width: min(var(--sheet-width), 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 40px 40px;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--ucol);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow-lg);
+}
+
+/* ---------- asas de ancho ---------- */
+/* Dos asas contra los bordes de la hoja, de toda su altura: el borde entero es
+   el objetivo, no un tirador de 16 px que hay que cazar. Los 12 px de área son
+   señalables; lo que se VE es un trazo de 3 px centrado, y solo cuando el
+   puntero está encima, mientras se arrastra o cuando el asa tiene el foco: en
+   reposo la hoja se lee como siempre. */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  z-index: 2;
+  cursor: col-resize;
+  /* El navegador no puede quedarse con el gesto: el arrastre es nuestro. */
+  touch-action: none;
+  border-radius: var(--r-sm);
+  /* Para que la agarradera (`::before`) se centre y pueda ser pegajosa. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.handleLeft { left: 0; }
+.handleRight { right: 0; }
+
+.handle::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: var(--border-2);
+  opacity: 0;
+  transition: opacity var(--t), background var(--t);
+}
+.handle:hover::after { opacity: 1; }
+.handle:focus-visible::after,
+.handle[data-dragging="true"]::after { opacity: 1; background: var(--primary); }
+.handle:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+/* Pista permanente de que la hoja se puede ensanchar (pedido del usuario): una
+   agarradera corta centrada en cada borde, siempre visible pero discreta; al
+   pasar el puntero, al enfocar y al arrastrar toma el color primario y la
+   acompaña la guía de toda la altura (`::after`). */
+.handle::before {
+  content: "";
+  /* Pegajosa entre el 40 % superior e inferior de la ventana: en una hoja
+     larga acompaña el desplazamiento y siempre queda a la vista; en una corta
+     se queda en el centro de la hoja. */
+  position: sticky;
+  top: 40vh;
+  bottom: 40vh;
+  flex: none;
+  width: 4px;
+  height: 38px;
+  border-radius: 4px;
+  background: var(--text-3);
+  opacity: 0.5;
+  transform-origin: center;
+  /* Se alarga con `transform`, no con `height`: no dispara un relayout. */
+  transition: opacity var(--t), background var(--t), transform var(--t);
+}
+.handle:hover::before,
+.handle:focus-visible::before,
+.handle[data-dragging="true"]::before {
+  opacity: 1;
+  transform: scaleY(1.5);
+  background: var(--primary);
+}
+
+/* ---------- línea de identidad ---------- */
+.sheetHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.divisionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  border: 1px solid var(--ucol);
+  border-radius: var(--r-sm);
+  font: 600 12px var(--font-ui);
+  color: var(--text);
+  text-decoration: none;
+  transition: background var(--t);
+}
+.divisionChip:hover { background: color-mix(in srgb, var(--ucol) 12%, transparent); }
+
+.divisionDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
+
+.position { font: 500 11.5px var(--font-mono); color: var(--text-3); }
+
+.headSpacer { flex: 1; }
+
+/* ---------- barra de segmentos ---------- */
+.segments { display: flex; flex-direction: column; gap: 6px; }
+
+.segmentsRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  font: 500 11.5px var(--font-ui);
+}
+.segmentsTrack { flex: 1; min-width: 0; display: flex; gap: 4px; align-items: center; }
+
+/* Texto solo para lectores de pantalla: el destino de «← Anterior» y de
+   «Siguiente →», que en pantalla van a secas. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.sidePrev { flex: none; }
+.sideNext { flex: 0 1 auto; max-width: 42%; }
+
+/* El enlace mide 24 de alto —objetivo táctil mínimo del contrato, medido antes
+   en 18,2 × 20—; la barra de 5 la pinta ::after, centrada, así que el segmento
+   se ve exactamente igual: lo que crece es el área señalable. */
+.segment {
+  position: relative;
+  flex: 1;
+  min-height: 24px;
+  height: 24px;
+  display: block;
+  border-radius: 3px;
+}
+.segment::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--track);
+  transform: translateY(-50%);
+  transition: transform var(--t), background var(--t);
+}
+/* Los colores dicen el ESTADO (pista = sin leer, color de la división al 45 % =
+   leída, pleno = actual); el tipo de página lo dice la tarjeta de vista previa
+   con una etiqueta, no el color (decisión del usuario). */
+.segment[data-state="studied"]::after { background: var(--ucol); opacity: 0.45; }
+.segment[data-state="current"]::after { background: var(--ucol); }
+.segment:hover::after { transform: translateY(-50%) scaleY(1.8); }
+.segment:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
+
+/* Un grupo de ejercicios (N0-61): mismo alto y misma caja que un segmento de
+   página, pero el trazo es PUNTEADO —no es una página del wiki— y lo resuelto
+   se pinta como un relleno proporcional (`--fill`), porque un grupo de 16
+   ejercicios rara vez está entero hecho o entero sin hacer. */
+.segmentExtra {
+  position: relative;
+  flex: 1;
+  min-height: 24px;
+  height: 24px;
+  display: block;
+  border-radius: 3px;
+}
+.segmentExtra::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 5px;
+  border-radius: 3px;
+  border: 1px dashed color-mix(in srgb, var(--ucol) 55%, transparent);
+  background:
+    linear-gradient(to right, var(--ucol) 0 var(--fill, 0%), transparent var(--fill, 0%) 100%);
+  transform: translateY(-50%);
+  transition: transform var(--t);
+}
+/* Entero resuelto: se rellena y deja de puntearse, que es lo que dice «listo». */
+.segmentExtra[data-state="done"]::after {
+  border-style: solid;
+  border-color: var(--ucol);
+}
+/* El paso en el que se está: el mismo anillo que marca la página actual, para
+   que la vista de ejercicios se reconozca dentro de la barra de su unidad. */
+.segmentExtra[data-current="true"]::after {
+  border-style: solid;
+  border-color: var(--ucol);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ucol) 30%, transparent);
+}
+.segmentExtra:hover::after { transform: translateY(-50%) scaleY(1.8); }
+.segmentExtra:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
+
+/* ---------- anterior / siguiente ---------- */
+.prevNext {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  font: 500 11.5px var(--font-ui);
+}
+
+/* La copia del pie invierte el filete: cierra la lectura en vez de abrirla. */
+.prevNextFoot {
+  padding: 14px 0 0;
+  border-bottom: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* 24 px de objetivo (medidos 15-17 de alto). `inline-flex` + `align-items` para
+   que el texto siga sentado donde estaba y la fila no cambie de alto. */
+.prev,
+.next {
+  color: var(--text-2);
+  text-decoration: none;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+.prev:hover,
+.next:hover { color: var(--primary); }
+.prev:focus-visible,
+.next:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.next { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Sin `opacity`: --text-3 ya es el gris más claro que la paleta admite como texto. */
+.prevOff { color: var(--text-3); }
+
+/* Al pie los dos vecinos son tarjetas de dos renglones —dirección y título—,
+   como `.prevnext` del baseline (styles.css:774-779): ahí es donde se lee a
+   dónde lleva cada uno, y donde el cruce de división se nombra. */
+.prevNextFoot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+.prevNextFoot .prev,
+.prevNextFoot .next {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  white-space: normal;
+  overflow: visible;
+  transition: border-color var(--t), background var(--t);
+}
+.prevNextFoot .next { align-items: flex-end; text-align: right; }
+.prevNextFoot .prev:hover,
+.prevNextFoot .next:hover { border-color: var(--border-2); background: var(--surface-2); color: var(--text-2); }
+
+.dir {
+  font: 700 11px var(--font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.dirTitle { font: 600 15px var(--font-display); color: var(--text); }
+.prevNextFoot .prev:hover .dirTitle,
+.prevNextFoot .next:hover .dirTitle { color: var(--primary); }
+
+@media (max-width: 900px) {
+  .prevNextFoot { grid-template-columns: 1fr; }
+}
+
+/* ---------- pie de la hoja ---------- */
+.foot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.title {
+  margin: 6px 0 0;
+  font: 600 40px/1.1 var(--font-display);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment::after, .segmentExtra::after, .divisionChip, .handle::after, .handle::before { transition: none; }
+}
+
+/* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */
+:global([data-theme="claustro"]) .sheet {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
+}

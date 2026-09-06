@@ -36,6 +36,12 @@
             ?ej=<id>         deja ese ejercicio a la vista (ancla #ej-<id>);
                              al volver con Atrás manda el scroll memorizado
 
+   MARCO DE PÁGINA: con `frame: "page"` en el manifiesto, la plataforma envuelve
+   la vista de una colección en la hoja del lector (chip de unidad, etiqueta
+   EJERCICIOS, posición y barra de la unidad) y lo avisa con data-frame="page" en
+   el contenedor; ahí la portada propia se queda solo con el título de la
+   colección y la hoja no se vuelve a pintar (N0-64).
+
    BARRA DE UNIDAD: si reader.js expone A.unitStripHtml / A.wireUnitStrip, la
    vista de colección abre con la misma barra que el lector, con la clave
    virtual 'ej:<coleccion>' como posición actual. Si no los expone, no se
@@ -1735,16 +1741,43 @@
       cuerpo = '<section class="ej-group">' + list.map(itemHtml).join("") + "</section>";
     }
 
+    // MARCO DE PÁGINA (N0-64): cuando la plataforma envuelve la vista en la hoja
+    // del lector, lo marca con data-frame="page" en el contenedor. Ahí el chip
+    // de la unidad, la etiqueta EJERCICIOS, la posición («ejercicios 1 de 4 ·
+    // 16 ejercicios»), la barra de la unidad y el Anterior/Siguiente los dibuja
+    // el anfitrión: la vista deja de repetirlos y se queda con su documento y
+    // con la barra de filtros, que sí es suya.
+    var enmarcada = !!(main.getAttribute && main.getAttribute("data-frame") === "page");
+
     // barra de unidad del lector, con la colección como posición actual. Solo
-    // si reader.js la expone: la vista tiene que servir igual sin ella.
+    // si reader.js la expone: la vista tiene que servir igual sin ella. Dentro
+    // del marco no hace falta: la barra ya está arriba.
     var strip = "";
-    if (A.unitStripHtml) {
+    if (!enmarcada && A.unitStripHtml) {
       try { strip = A.unitStripHtml({ unidad: u, current: "ej:" + col }) || ""; } catch (e) { strip = ""; }
     }
 
+    // Portada del documento. Enmarcada se queda con el título de la colección,
+    // que es el título de la página; suelta lleva además el antetítulo con la
+    // unidad y el conteo, porque nadie más los dice.
+    var portada = enmarcada
+      ? '<div class="tex-title"><h1>' + esc(colNombre(col)) + "</h1></div>"
+      : '<div class="tex-title">' +
+          '<div class="tex-kicker">Ejercicios · ' + esc(unidadLarga(u)) + " · " + esc(colKicker(u, col)) + "</div>" +
+          "<h1>" + esc(um.name) + "</h1>" +
+          // El nombre de la colección solo vivía en el antetítulo, que no es un
+          // encabezado: sin esto el árbol de accesibilidad tenía un único H.
+          '<h2 class="sr-only">' + esc(colNombre(col)) + "</h2>" +
+          '<div class="tex-sub">' + list.length + " ejercicio" + (list.length === 1 ? "" : "s") +
+            " · " + hechos(s) + " resuelto" + (hechos(s) === 1 ? "" : "s") + "</div>" +
+        "</div>";
+
     main.innerHTML =
       '<div class="ej-wrap">' +
-        A.backBar("#/ejercicios", "Todas las unidades") +
+        // Enmarcada, el paso a todas las unidades ya está en las migas de pan
+        // («Ejercicios»), y una barra de vuelta dentro de la hoja se leía como
+        // un resto de otra pantalla.
+        (enmarcada ? "" : A.backBar("#/ejercicios", "Todas las unidades")) +
         (strip ? '<div class="ej-strip">' + strip + "</div>" : "") +
         // Una sola fila pegajosa con todo el navegador y el filtrador. En el
         // teléfono (≤ 640 px) deja de ser pegajosa: envuelve en varias líneas y
@@ -1753,20 +1786,13 @@
         // La colección es un documento LaTeX y va sobre la misma hoja que usan el
         // lector y los formularios (.sheet): las tres vistas comparten piel, y
         // sin la hoja la guía quedaba apoyada sobre el fondo de la página.
-        '<div class="ej-list sheet tex-doc' + (practicaPref() === "on" ? " ej-practica" : "") +
+        '<div class="ej-list' + (enmarcada ? "" : " sheet") + ' tex-doc' +
+          (practicaPref() === "on" ? " ej-practica" : "") +
           '" id="ejList" lang="es" style="--ucol:' + um.color + '">' +
           // Portada del documento, dentro de la hoja: es el mismo orden que usan
           // el lector y los formularios (chrome de navegación arriba, título
           // como primer elemento del documento).
-          '<div class="tex-title">' +
-            '<div class="tex-kicker">Ejercicios · ' + esc(unidadLarga(u)) + " · " + esc(colKicker(u, col)) + "</div>" +
-            "<h1>" + esc(um.name) + "</h1>" +
-            // El nombre de la colección solo vivía en el antetítulo, que no es un
-            // encabezado: sin esto el árbol de accesibilidad tenía un único H.
-            '<h2 class="sr-only">' + esc(colNombre(col)) + "</h2>" +
-            '<div class="tex-sub">' + list.length + " ejercicio" + (list.length === 1 ? "" : "s") +
-              " · " + hechos(s) + " resuelto" + (hechos(s) === 1 ? "" : "s") + "</div>" +
-          "</div>" +
+          portada +
           (cuerpo || A.emptyState("No hay ejercicios en esta colección.", "")) + "</div>" +
         '<div class="ej-nores" id="ejVacio" hidden>' +
           A.emptyState("Ningún ejercicio coincide con el filtro.",

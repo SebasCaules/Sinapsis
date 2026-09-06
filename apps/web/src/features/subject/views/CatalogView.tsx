@@ -24,6 +24,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { PAGE_TYPE_META, plural, routes, type PageMeta } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
+import { PageTypeTag } from "../components/TypeTag";
 import { useSubjectCtx } from "../context";
 import { useStudyState } from "../useSubject";
 import type { DivisionNode } from "../model";
@@ -361,7 +362,7 @@ export function CatalogView() {
                     {/* Línea de meta del baseline: «U3 · Distribución · ✓ leída».
                         El estado va con su palabra, no solo con un punto de color. */}
                     <span className={css.cardMeta}>
-                      {division.short} · {model.typeLabel(page.type)}
+                      {division.short} · <PageTypeTag model={model} type={page.type} size="sm" />
                       {model.studied.has(page.slug) ? (
                         <>
                           {" · "}

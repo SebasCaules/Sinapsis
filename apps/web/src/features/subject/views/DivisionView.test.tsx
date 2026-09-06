@@ -117,6 +117,23 @@ describe("DivisionView", () => {
     expect(within(seccion).getByText("1 ejercicio")).toBeTruthy();
   });
 
+  /* La etiqueta de tipo es la única de la plataforma (`TypeTag`): el temario la
+     lleva por página y las tarjetas de ejercicios, la del tipo sintético. La
+     versalita la pone el CSS, así que el texto conserva su capitalización. */
+  it("etiqueta los tipos con la etiqueta compartida, también en los ejercicios", () => {
+    renderDivision("1", [], true);
+    const tipos = [...document.querySelectorAll('[data-type="concepto"]')].map((n) => n.textContent);
+    expect(tipos).toEqual(["Concepto", "Concepto"]);
+    const guia = within(screen.getByRole("heading", { name: "Ejercicios" }).closest("section")!)
+      .getByText("Guía")
+      .closest("a")!;
+    expect(guia.querySelector('[data-type="ejercicios"]')?.textContent).toBe("Ejercicios");
+    expect(guia.getAttribute("data-tip-title")).toBe("Guía");
+    expect(guia.getAttribute("data-tip-kicker")).toBe("U1 · Ejercicios");
+    expect(guia.getAttribute("data-tip-text")).toBe("1 de 2 resueltos");
+    expect(guia.getAttribute("data-tip-meta")).toBe("ejercicios");
+  });
+
   it("un grupo entero resuelto se marca como completo", () => {
     const detail: SubjectDetail = { config, pages, studied: [], placeholder: false, lastSyncAt: null };
     const ctx = {

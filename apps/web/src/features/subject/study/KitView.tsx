@@ -17,6 +17,7 @@ import { kitToolId, kitToolParams, plural, routes, type IconName, type KitTool }
 import { Icon, UiIcon, useToast } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { ErrorCard, WideSkeleton } from "../components/States";
+import { PageTypeTag } from "../components/TypeTag";
 import type { SubjectModel } from "../model";
 import { useToggleStudied } from "../useSubject";
 import { kitDeckParam } from "./session";
@@ -261,7 +262,7 @@ export function KitView() {
                   <Link className={css.row} to={routes.page(slug, page.slug)}>
                     {division ? <DivisionChip division={division} /> : null}
                     <span className={css.rowTitle}>{page.title}</span>
-                    <span className={css.rowMeta}>{model.typeLabel(page.type)}</span>
+                    <PageTypeTag model={model} type={page.type} size="sm" />
                     <UiIcon name="chevronRight" size={15} className={css.chevron} />
                   </Link>
                 </li>

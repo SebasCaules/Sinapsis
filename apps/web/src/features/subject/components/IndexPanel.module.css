@@ -198,6 +198,9 @@
   cursor: pointer;
 }
 .blockLabel:hover { color: var(--text-2); }
+/* El rótulo lleva la etiqueta de tipo de la plataforma y, al lado, el recuento
+   en el mismo tono del bloque. */
+.blockName { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
 /* El rótulo del bloque de ejercicios no pliega nada: es un encabezado, no un
    botón, y no tiene que responder al puntero como si lo fuera. */
 .blockLabel[data-static="true"] { cursor: default; }

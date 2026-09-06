@@ -21,16 +21,27 @@
  *    y delegación de los clics de `[data-nav]` / `[data-go]` hacia `App.go`, que
  *    navega por el router sin recargar;
  *  - la reserva de ~72 px al pie en pantallas angostas, para que el FAB de ⌘J
- *    del bundle no tape los últimos controles (`ToolHost.module.css`).
+ *    del bundle no tape los últimos controles (`ToolHost.module.css`);
+ *  - el MARCO (N0-64): si la vista se declara con `frame: "page"` y su `?arg=`
+ *    resuelve a un paso de progreso de una división (`model.stepForTool`), el
+ *    contenedor del bundle se dibuja dentro de `PageFrame`, el mismo marco que
+ *    usa el lector del wiki: la hoja, la línea de identidad y la barra de la
+ *    unidad con su Anterior/Siguiente. El bundle se entera por el atributo
+ *    `data-frame="page"` de su contenedor y deja de dibujar lo que ya pone el
+ *    marco. Sin `frame`, o con un argumento que no resuelve, la ruta se dibuja
+ *    exactamente como siempre.
  *
  * Sin bundle que declare la vista, la ruta sigue mostrando «Próximamente» con el
  * nombre que la materia le dio en el rail, igual que en el Sprint 2.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
-import { routes } from "@sinapsis/contract";
+import { plural, routes } from "@sinapsis/contract";
 import { useSubjectCtx } from "../context";
 import { ComingSoon, ErrorCard } from "../components/States";
+import { PageFrame, type ReadStep } from "../components/PageFrame";
+import { EXERCISES_TYPE } from "../components/TypeTag";
+import type { SubjectModel, UnitStep } from "../model";
 import { PALETTE_EVENT } from "./runtime";
 import css from "./ToolHost.module.css";
 
@@ -51,6 +62,17 @@ export function ToolHost() {
   const info = runtime.toolForView(tool);
   const view = runtime.viewInfo(tool);
   const toolId = info?.manifest.id ?? null;
+
+  /* ---------- marco de página (N0-64) ---------------------------------------
+     La vista lo pide en su manifiesto (`frame: "page"`), pero solo lo recibe si
+     su argumento resuelve a un paso de una división: el marco necesita saber en
+     qué unidad está para dibujar la barra y los vecinos. Un argumento que no
+     resuelve (el índice de la herramienta, una colección que ya no existe) cae
+     al camino de siempre. */
+  const framed = useMemo(
+    () => (view?.frame === "page" ? frameOf(model, tool, arg) : null),
+    [view?.frame, model, tool, arg],
+  );
   const { ready, unavailable, pending, renderTick } = runtime;
 
   const [status, setStatus] = useState<Status>("idle");
@@ -166,7 +188,11 @@ export function ToolHost() {
       }
       host.replaceChildren();
     };
-  }, [status, toolId, tool, remount, renderTick]);
+    /* `!!framed` es dependencia porque el marco CAMBIA el nodo anfitrión: al
+       resolverse el paso (los proveedores de progreso se registran al cargar el
+       bundle) React reemplaza el contenedor, y la vista tiene que volver a
+       dibujarse sobre el nodo nuevo en vez de quedar atada a uno huérfano. */
+  }, [status, toolId, tool, remount, renderTick, !!framed]);
 
   /* ---------- cambio de sección (`?arg=`) ------------------------------------
      El baseline volvía a llamar a la vista con el argumento nuevo SIN vaciar el
@@ -190,7 +216,7 @@ export function ToolHost() {
       setStatus("failed");
       setError(cause);
     }
-  }, [arg, status, toolId, tool, remount, renderTick]);
+  }, [arg, status, toolId, tool, remount, renderTick, !!framed]);
 
   /* Las migas que pidió la vista son suyas: se borran al dejarla. */
   useEffect(() => () => runtimeRef.current.clearCrumbs(), [tool]);
@@ -233,21 +259,96 @@ export function ToolHost() {
     return <ErrorCard error={error} subject={model.slug} />;
   }
 
+  /* `sinapsis-tool` es GLOBAL a propósito: es la clase contra la que están
+     escritos los estilos de los bundles de la materia. `data-frame` le dice al
+     bundle que la plataforma ya dibuja la hoja y el encabezado: que no los
+     repita (N0-64). */
+  const host = (
+    <div
+      ref={hostRef}
+      className="sinapsis-tool"
+      data-layout={view.layout}
+      data-tool={info.manifest.id}
+      data-view={view.id}
+      data-frame={framed ? "page" : undefined}
+      hidden={status !== "ready"}
+    />
+  );
+
+  if (framed) {
+    return (
+      <PageFrame
+        model={model}
+        subject={model.slug}
+        division={framed.division}
+        type={EXERCISES_TYPE}
+        position={framed.position}
+        steps={framed.steps}
+        current={{ kind: "extra", id: framed.step.id }}
+        prev={framed.prev}
+        next={framed.next}
+      >
+        {status === "ready" ? null : <ToolLoading />}
+        {host}
+      </PageFrame>
+    );
+  }
+
   return (
     <div className={css.frame} data-layout={view.layout} data-testid="tool-host">
       {status === "ready" ? null : <ToolLoading />}
-      {/* `sinapsis-tool` es GLOBAL a propósito: es la clase contra la que están
-          escritos los estilos de los bundles de la materia. */}
-      <div
-        ref={hostRef}
-        className="sinapsis-tool"
-        data-layout={view.layout}
-        data-tool={info.manifest.id}
-        data-view={view.id}
-        hidden={status !== "ready"}
-      />
+      {host}
     </div>
   );
+}
+
+/** Lo que el marco de página necesita saber de un paso de ejercicios. */
+interface FramedStep {
+  division: ReturnType<SubjectModel["division"]>;
+  step: Extract<UnitStep, { kind: "extra" }>;
+  steps: UnitStep[];
+  position: string;
+  prev: ReadStep | null;
+  next: ReadStep | null;
+}
+
+/** Un paso de la secuencia como vecino del marco (una página no cruza de división). */
+function neighbor(step: UnitStep | undefined): ReadStep | null {
+  if (!step) return null;
+  return step.kind === "page" ? { page: step.page, division: null } : step;
+}
+
+/**
+ * El paso de ejercicios al que apunta `?arg=`, con todo lo que el marco dibuja:
+ * la unidad, la barra entera y los dos vecinos.
+ *
+ * El recorrido es el MISMO que el del lector, visto desde el otro lado: antes de
+ * un grupo está el grupo anterior o la última página de la unidad; después, el
+ * grupo siguiente o —si era el último— la primera página de la unidad siguiente,
+ * que es donde el lector retomaría.
+ */
+function frameOf(model: SubjectModel, tool: string, arg: string | undefined): FramedStep | null {
+  const hit = model.stepForTool(tool, arg);
+  if (!hit) return null;
+  const steps = model.unitSteps(hit.division);
+  const at = steps.findIndex((s) => s.kind === "extra" && s.id === hit.step.id);
+  let next = neighbor(steps[at + 1]);
+  if (!next) {
+    const node = model.adjacentDivision(hit.division, 1);
+    const first = node ? model.sequence(node.key)[0] : undefined;
+    if (node && first) next = { page: first, division: node };
+  }
+  return {
+    division: model.division(hit.division),
+    step: hit.step,
+    steps,
+    /* «ejercicios 1 de 4» cuenta GRUPOS, no ejercicios: es el mismo «página k de
+       N» del lector con lo que se recorre en esta unidad. El tamaño del grupo va
+       aparte, como el «+M ejercicios» de la página. */
+    position: `ejercicios ${hit.index} de ${hit.total} · ${hit.step.total} ${plural(hit.step.total, "ejercicio", "ejercicios")}`,
+    prev: at > 0 ? neighbor(steps[at - 1]) : null,
+    next,
+  };
 }
 
 /**

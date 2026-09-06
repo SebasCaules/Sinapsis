@@ -128,6 +128,24 @@ describe("barra de unidad · ejercicios", () => {
     ]);
   });
 
+  /* N0-64: la tarjeta de vista previa cubre también los pasos de ejercicios.
+     El segmento no la conoce: solo declara qué tiene que decir. */
+  it("cada grupo declara su tarjeta de vista previa en atributos", () => {
+    mount("u1-a", true);
+    const guia = screen.getByRole("link", { name: "Ejercicios · Guía · 1 de 2 resueltos" });
+    expect(guia.dataset["tipKicker"]).toBe("U1 · Ejercicios");
+    expect(guia.dataset["tipTitle"]).toBe("Guía");
+    expect(guia.dataset["tipText"]).toBe("1 de 2 resueltos");
+    expect(guia.dataset["tipType"]).toBe("ejercicios");
+    /* El proveedor se llama «ejercicios» y la etiqueta de la tarjeta ya lo dice:
+       el pie se calla en vez de repetirlo. */
+    expect(guia.dataset["tipMeta"]).toBeUndefined();
+
+    /* Sin nada resuelto se dice cuántos hay, que es más útil que «0 de 1». */
+    const parciales = screen.getByRole("link", { name: "Ejercicios · Parciales · 0 de 1 resuelto" });
+    expect(parciales.dataset["tipText"]).toBe("1 ejercicio");
+  });
+
   it("los segmentos de página no cambian", () => {
     mount("u1-a", true);
     const primera = screen.getByRole("link", { name: "1 de 2. Medidas de posición" });

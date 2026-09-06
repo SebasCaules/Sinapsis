@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
+import { PageTypeTag } from "../components/TypeTag";
 import { useSubjectCtx } from "../context";
 import { useStudyState, useToggleBookmark } from "../useSubject";
 import { ErrorCard, WideSkeleton } from "../components/States";
@@ -110,7 +111,7 @@ export function FavoritesView() {
               <div key={page.slug} className={css.row}>
                 <Link className={css.rowMain} to={routes.page(slug, page.slug)}>
                   <span className={css.rowMeta}>
-                    <span className={css.rowType}>{model.typeLabel(page.type).toUpperCase()}</span>
+                    <PageTypeTag model={model} type={page.type} size="sm" />
                     {model.studied.has(page.slug) ? (
                       <span className={css.rowRead}>
                         <UiIcon name="check" size={11} aria-hidden="true" />

@@ -235,18 +235,8 @@
 }
 .read .itemTitle { color: var(--text-2); }
 
-/* El color del tipo lo da `typeColor` del contrato (lo declara la materia), no
-   una tabla de claves de Proba: acá solo se mezcla con la tinta para el texto. */
-.itemType {
-  flex: none;
-  font: 600 10px/1 var(--font-ui);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--tcol) var(--ink-mix), var(--text));
-  border: 1px solid color-mix(in srgb, var(--tcol) 45%, transparent);
-  border-radius: 999px;
-  padding: 3px 7px;
-}
+/* La forma de la etiqueta de tipo la pone `TypeTag` (una sola en toda la
+   plataforma); acá solo queda la regla que la esconde en pantalla angosta. */
 
 .arrow { flex: none; color: var(--text-3); transition: transform var(--t), color var(--t); }
 
@@ -308,7 +298,14 @@
 .sourceBar { width: 4px; flex: none; background: var(--ucol); }
 .sourceBody { display: flex; flex-direction: column; gap: 3px; padding: 11px 13px; min-width: 0; }
 .sourceTitle { font: 600 13.5px/1.25 var(--font-ui); color: var(--text); }
-.sourceMeta { font: 400 11.5px var(--font-ui); color: var(--text-3); }
+.sourceMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font: 400 11.5px var(--font-ui);
+  color: var(--text-3);
+}
 .readMark { color: var(--good-text); white-space: nowrap; }
 .readMark svg { vertical-align: -1px; }
 
@@ -339,7 +336,8 @@ a.group:hover { border-color: var(--border-2); box-shadow: var(--relief), var(--
 a.group:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 a.group:hover .arrow { color: var(--primary); transform: translateX(2px); }
 
-.groupTitle { font: 600 13.5px/1.25 var(--font-ui); color: var(--text); padding-right: 18px; }
+.groupHead { display: flex; align-items: center; gap: 7px; padding-right: 18px; }
+.groupTitle { min-width: 0; font: 600 13.5px/1.25 var(--font-ui); color: var(--text); }
 .groupMeta {
   display: flex;
   align-items: center;

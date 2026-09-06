@@ -49,12 +49,33 @@ tenga.
 
   "views": [                        // cada vista abre en /m/<materia>/t/<id de vista>
     { "id": "explorador", "label": "Explorador de distribuciones",
-      "icon": "chart", "layout": "wide" }   // layout: "wide" (1120) o "full"
+      "icon": "chart", "layout": "wide" },  // layout: "wide" (1120) o "full"
+    { "id": "ejercicios", "label": "Ejercicios", "icon": "pencil",
+      "layout": "wide", "frame": "page" }   // dentro de la hoja del lector (ver abajo)
   ],
   "figures": true,                  // true si registra figuras para los callouts [!figura]
   "progress": false                 // true si registra proveedores de progreso (ver abajo)
 }
 ```
+
+**`frame: "page"` — la vista dentro de la hoja del lector.** Una vista puede pedir que la
+plataforma la envuelva en el **mismo marco que una página del wiki**: la hoja con su ancho y
+sus asas, la línea de identidad (chip de la unidad, etiqueta de tipo, «ejercicios 1 de 4 · 16
+ejercicios») y la barra de la unidad con su Anterior/Siguiente. Es lo que hace que la vista de
+ejercicios de una unidad se lea como una página más de esa unidad.
+
+Solo se aplica cuando el `?arg=` de la URL resuelve a un **grupo de progreso**: el anfitrión
+busca el grupo que declaró `to: "/m/<materia>/t/<vista>?arg=…"` con ese mismo argumento (ver
+«Progreso» más abajo). Si no resuelve —el índice de la herramienta, una colección vacía— la
+vista se dibuja suelta, como cualquier otra.
+
+Del lado del bundle, el contenedor llega con `data-frame="page"`. Con ese atributo la vista
+tiene que: (1) no repetir lo que el marco ya muestra (su antetítulo con la unidad, su conteo,
+una barra de unidad propia); (2) no volver a pintar la hoja —nada de la clase `sheet`— ni
+acotar el ancho de la página; (3) dejar su título como primer elemento del documento, que pasa
+a ser el título de la página. Lo suyo —controles, filtros, contenido— no se toca. En CSS, lo
+del modo enmarcado cuelga de `&[data-frame="page"]` dentro del envoltorio `.sinapsis-tool`.
+El contrato completo está en `docs/contracts/04-herramientas-y-figuras.md` §8.1.
 
 **Rutas (`ToolFilePath`).** Relativas a la carpeta del bundle, sin `..`, sin barra inicial,
 y con una de estas extensiones: `js mjs css json svg png jpg jpeg webp woff woff2 txt md

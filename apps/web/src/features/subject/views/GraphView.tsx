@@ -45,6 +45,7 @@ import { api, qk } from "@/lib/api";
 import { UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { ErrorCard } from "../components/States";
+import { PageTypeTag } from "../components/TypeTag";
 import { useTheme } from "../store";
 import { CONTENT_ONLY_DEFAULT, buildGraphModel, type GraphFilters, type GraphModelNode } from "./graphModel";
 import css from "./GraphView.module.css";
@@ -1019,7 +1020,7 @@ export function GraphView() {
               <span className={css.tipChip}>{hovered.node.divisionShort}</span>
               <span className={css.tipTitle}>{hovered.node.title}</span>
               <span className={css.tipMeta}>
-                {model.typeLabel(hovered.node.type)} · {hovered.node.inDegree}{" "}
+                <PageTypeTag model={model} type={hovered.node.type} size="sm" /> · {hovered.node.inDegree}{" "}
                 {plural(hovered.node.inDegree, "entrada", "entradas")} · {hovered.node.outDegree}{" "}
                 {plural(hovered.node.outDegree, "salida", "salidas")}
               </span>

@@ -46,7 +46,8 @@ import { api, qk } from "@/lib/api";
 import { siteBase } from "@/local/catalog";
 import type { SubjectModel } from "../model";
 import { MathText } from "./MathText";
-import { leadOf, sectionOf, targetOf, type TipTarget } from "./page-tip";
+import { PageTypeTag } from "./TypeTag";
+import { leadOf, sectionOf, targetOf, tipAt, type GenericTip, type TipHit } from "./page-tip";
 import css from "./PageTip.module.css";
 
 /** Id del nodo flotante: es el valor de `aria-describedby` del enlace. */
@@ -72,11 +73,13 @@ const BODY_STALE_MS = 5 * 60_000;
 const MOBILE_CLASS = css.mobile ?? "mobile";
 const ABOVE_CLASS = css.above ?? "above";
 
-interface Shown {
-  host: HTMLElement;
-  slug: string;
-  anchor: string;
-}
+/**
+ * Lo que la tarjeta está mostrando: una PÁGINA de la materia (con su ancla, si
+ * el enlace la traía) o una tarjeta GENÉRICA declarada en atributos (N0-64).
+ */
+type Shown =
+  | { kind: "page"; host: HTMLElement; slug: string; anchor: string }
+  | { kind: "generic"; host: HTMLElement; tip: GenericTip };
 
 /** Cuerpo ya traído de una página (solo cuando hizo falta). */
 interface Body {
@@ -137,8 +140,11 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
     setShown(null);
   }, []);
 
-  const open = useCallback((target: TipTarget) => {
-    const next: Shown = { host: target.el, slug: target.slug, anchor: target.anchor };
+  const open = useCallback((target: TipHit) => {
+    const next: Shown =
+      target.kind === "page"
+        ? { kind: "page", host: target.el, slug: target.slug, anchor: target.anchor }
+        : { kind: "generic", host: target.el, tip: target.tip };
     shownRef.current = next;
     pendingRef.current = null;
     setShown(next);
@@ -146,7 +152,7 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
 
   /** Pide la tarjeta con el retraso que corresponda (ninguno si venimos de otro enlace). */
   const request = useCallback(
-    (target: TipTarget, fromFocus: boolean) => {
+    (target: TipHit, fromFocus: boolean) => {
       viaFocus.current = fromFocus;
       baseXY.current = xyOf(target.el);
       if (shownRef.current?.host === target.el) return;
@@ -170,10 +176,14 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
     const root = rootRef.current;
     if (!root) return;
 
-    /** El enlace bajo el evento, solo si su página existe en la materia. */
-    const hit = (node: EventTarget | null): TipTarget | null => {
-      const target = targetOf(node, subject, siteBase());
-      if (!target || !modelRef.current.bySlug.has(target.slug)) return null;
+    /**
+     * El objetivo bajo el evento. Una página solo cuenta si EXISTE en la
+     * materia; una tarjeta genérica trae su texto puesto y siempre cuenta.
+     */
+    const hit = (node: EventTarget | null): TipHit | null => {
+      const target = tipAt(node, subject, siteBase());
+      if (!target) return null;
+      if (target.kind === "page" && !modelRef.current.bySlug.has(target.slug)) return null;
       return target;
     };
 
@@ -187,7 +197,7 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
       const from = hit(event.target);
       if (!from) return;
       const related = event.relatedTarget;
-      const to = related instanceof Element ? targetOf(related, subject, siteBase()) : null;
+      const to = related instanceof Element ? tipAt(related, subject, siteBase()) : null;
       /* Seguimos dentro del mismo enlace (pasar de su texto a su icono, por
          ejemplo): la tarjeta no parpadea. */
       if (to && to.el === from.el) return;
@@ -376,8 +386,9 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
 
   /* ---------- datos -------------------------------------------------------- */
 
-  const meta: PageMeta | undefined = shown ? model.bySlug.get(shown.slug) : undefined;
-  const bodyText = shown && body?.slug === shown.slug ? body.body : undefined;
+  const page = shown?.kind === "page" ? shown : null;
+  const meta: PageMeta | undefined = page ? model.bySlug.get(page.slug) : undefined;
+  const bodyText = page && body?.slug === page.slug ? body.body : undefined;
 
   /* El enlace lleva `aria-describedby` MIENTRAS la tarjeta está visible: sin eso
      un lector de pantalla no la anuncia (la tarjeta vive en un portal, lejos del
@@ -393,12 +404,12 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
      sin resumen. La consulta es la MISMA del lector, así que abrirla después no
      vuelve a la red. */
   useEffect(() => {
-    if (!shown || !meta) return;
-    const needsBody = shown.anchor !== "" || meta.summary.trim() === "";
+    if (!page || !meta) return;
+    const needsBody = page.anchor !== "" || meta.summary.trim() === "";
     if (!needsBody) return;
-    if (body?.slug === shown.slug) return;
+    if (body?.slug === page.slug) return;
     let alive = true;
-    const wanted = shown.slug;
+    const wanted = page.slug;
     void queryClient
       .fetchQuery({
         queryKey: qk.page(subject, wanted),
@@ -416,7 +427,7 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
     return () => {
       alive = false;
     };
-  }, [shown, meta, body, queryClient, subject]);
+  }, [page, meta, body, queryClient, subject]);
 
   /* Se reubica cuando aparece y cuando el cuerpo la hace crecer (sin parpadeo:
      la medición va antes del pintado). */
@@ -424,7 +435,29 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
     if (shown) position();
   }, [shown, bodyText, position]);
 
-  if (!shown || !meta) return null;
+  if (!shown) return null;
+
+  /* Tarjeta genérica: el nodo trae el texto puesto (N0-64). Misma caja, mismo
+     orden que la de página —antetítulo, título, línea meta con la etiqueta de
+     tipo, y el pie—, para que las dos se lean igual. */
+  if (shown.kind === "generic") {
+    return createPortal(
+      <div className={css.card} id={PAGE_TIP_ID} role="tooltip" data-page-tip-card="" ref={cardRef}>
+        {shown.tip.kicker ? <div className={css.kicker}>{shown.tip.kicker}</div> : null}
+        <div className={css.title}>{shown.tip.title}</div>
+        {shown.tip.type || shown.tip.text ? (
+          <div className={css.meta}>
+            {shown.tip.type ? <PageTypeTag model={model} type={shown.tip.type} size="sm" /> : null}
+            {shown.tip.text ? <span>{shown.tip.text}</span> : null}
+          </div>
+        ) : null}
+        {shown.tip.meta ? <div className={css.foot}>{shown.tip.meta}</div> : null}
+      </div>,
+      document.body,
+    );
+  }
+
+  if (!meta) return null;
 
   const divisionKey = model.divisionOf(meta);
   const division = model.division(divisionKey);
@@ -474,7 +507,7 @@ export function PageTip({ model, subject, rootRef, currentPage }: PageTipProps) 
           style={{ background: division?.color ?? "var(--primary)" }}
         />
         {division && isContent ? <span>{division.short}</span> : null}
-        <span className={css.typeTag}>{model.typeLabel(meta.type)}</span>
+        <PageTypeTag model={model} type={meta.type} size="sm" />
         {format ? <span>{format}</span> : null}
         {posLabel ? <span className={css.position}>{posLabel}</span> : null}
         {state ? (

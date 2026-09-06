@@ -529,6 +529,47 @@ describe("progreso con pasos de bundles", () => {
     expect(conPasos().prevNextSteps("no-existe")).toEqual({ prev: null, next: null });
   });
 
+  /* N0-64: el camino INVERSO de `unitSteps`. El grupo declara su destino y el
+     anfitrión de herramientas, que solo tiene la URL, tiene que poder volver de
+     ella al paso para envolver la vista en el marco de página. */
+  describe("stepForTool", () => {
+    it("resuelve el grupo al que apunta la vista con ese argumento", () => {
+      expect(conPasos().stepForTool("ejercicios", "1/guia")).toMatchObject({
+        division: "1",
+        index: 1,
+        total: 2,
+        step: { kind: "extra", id: "Guía", done: 1, total: 2 },
+      });
+      expect(conPasos().stepForTool("ejercicios", "1/lutzio")).toMatchObject({
+        division: "1",
+        index: 2,
+        total: 2,
+        step: { id: "Lutzio" },
+      });
+    });
+
+    it("el argumento se compara decodificado: «1%2Fguia» y «1/guia» son el mismo paso", () => {
+      /* El bundle escribe el destino con `encodeURIComponent`; la URL llega al
+         anfitrión ya decodificada por `URLSearchParams`. */
+      expect(conPasos().stepForTool("ejercicios", "1%2Fguia")).toBeNull();
+      expect(conPasos().stepForTool("ejercicios", "1/guia")?.step.id).toBe("Guía");
+    });
+
+    it("null cuando no hay paso: otra vista, otro argumento, o sin argumento", () => {
+      const m = conPasos();
+      expect(m.stepForTool("ejercicios", "9/guia")).toBeNull();
+      expect(m.stepForTool("formularios", "1/guia")).toBeNull();
+      expect(m.stepForTool("ejercicios")).toBeNull();
+      expect(m.stepForTool("", "1/guia")).toBeNull();
+      /* Un grupo sin destino declarado no se puede resolver desde la URL. */
+      expect(m.stepForTool("ejercicios", "2/parciales")).toBeNull();
+    });
+
+    it("sin proveedores no hay ningún paso que resolver", () => {
+      expect(model().stepForTool("ejercicios", "1/guia")).toBeNull();
+    });
+  });
+
   it("un proveedor que se rompe deja la división con sus páginas", () => {
     const m = buildSubjectModel(
       { config, pages, studied: ["p-b"], placeholder: false, lastSyncAt: null },

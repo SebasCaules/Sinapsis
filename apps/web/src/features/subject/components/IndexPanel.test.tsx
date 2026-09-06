@@ -64,7 +64,7 @@ afterEach(() => {
 describe("<IndexPanel/> · ejercicios de la unidad", () => {
   it("lista un bloque con una fila por grupo y su avance", () => {
     renderPanel(true);
-    expect(screen.getByText("EJERCICIOS · 3")).toBeTruthy();
+    expect(screen.getByText("Ejercicios").parentElement?.textContent).toBe("Ejercicios · 3");
 
     const guia = screen.getByRole("link", { name: "Guía · 1 de 2 resueltos" });
     expect(guia.getAttribute("href")).toBe("/m/proba/t/ejercicios?arg=1%2Fguia");
@@ -77,6 +77,15 @@ describe("<IndexPanel/> · ejercicios de la unidad", () => {
     expect(within(lutzio).getByTitle("Completo")).toBeTruthy();
   });
 
+  /* La etiqueta de tipo es la única de la plataforma (`TypeTag`): el rótulo del
+     bloque la lleva, y la versalita la pone el CSS, no el texto. */
+  it("los rótulos de bloque usan la etiqueta de tipo compartida", () => {
+    renderPanel(true);
+    const concepto = document.querySelector('[data-type="concepto"]');
+    expect(concepto?.textContent).toBe("Conceptos");
+    expect(document.querySelector('[data-type="ejercicios"]')?.textContent).toBe("Ejercicios");
+  });
+
   it("el badge de la unidad sigue contando páginas y el tooltip nombra los ejercicios", () => {
     renderPanel(true);
     const fila = screen.getByTestId("division-row");
@@ -87,7 +96,7 @@ describe("<IndexPanel/> · ejercicios de la unidad", () => {
 
   it("sin pasos de bundles el índice queda exactamente como estaba", () => {
     renderPanel();
-    expect(screen.queryByText(/^EJERCICIOS/)).toBeNull();
+    expect(document.querySelector('[data-type="ejercicios"]')).toBeNull();
     expect(screen.getByTestId("division-row").getAttribute("title")).toBe(
       "Unidad 1 · Estadística Descriptiva · 2 páginas · 0 leídas",
     );

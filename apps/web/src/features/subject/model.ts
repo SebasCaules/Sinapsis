@@ -115,6 +115,21 @@ export type UnitStep =
     };
 
 /**
+ * Un paso de ejercicios localizado a partir del destino que declaró su bundle
+ * (`stepForTool`): en qué división está, cuál es y qué lugar ocupa entre los
+ * grupos de esa división.
+ */
+export interface ToolStepHit {
+  /** Clave de la división a la que pertenece el grupo. */
+  division: string;
+  step: Extract<UnitStep, { kind: "extra" }>;
+  /** Posición 1..N del grupo entre los grupos de la división. */
+  index: number;
+  /** Cuántos grupos tiene la división. */
+  total: number;
+}
+
+/**
  * El progreso desglosado: qué parte son páginas leídas y qué parte pasos de los
  * bundles. `progress()` suma las dos; esto es lo que necesita quien tiene que
  * nombrarlas por separado (el texto del hero, la cabecera del inicio) o
@@ -236,6 +251,14 @@ export interface SubjectModel {
    * llame, con `adjacentDivision`).
    */
   prevNextSteps: (pageSlug: string) => { prev: UnitStep | null; next: UnitStep | null };
+  /**
+   * El paso de ejercicios que abre una vista de herramienta con ese argumento,
+   * o null si ninguno lo hace. Es el camino INVERSO de `unitSteps`: el grupo
+   * declara su destino (`/m/<materia>/t/<vista>?arg=…`) y esto lo resuelve a
+   * partir de la URL, que es lo que necesita el anfitrión de herramientas para
+   * envolver la vista en el marco de página (N0-64).
+   */
+  stepForTool: (view: string, arg?: string) => ToolStepHit | null;
   /** Las tres para repasar: estudiadas hace más tiempo, o las tres primeras sin leer. */
   reviewPages: () => PageMeta[];
   typeLabel: (key: string) => string;
@@ -592,6 +615,33 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
     return { prev: steps[at - 2] ?? null, next: steps[at] ?? null };
   };
 
+  /**
+   * ¿El destino de un grupo abre ESTA vista con ESTE argumento? El `to` es una
+   * ruta del SPA (`/m/<materia>/t/<vista>?arg=…`) escrita por el bundle, así
+   * que el argumento se compara ya decodificado: `arg=3%2Fguia` y `arg=3/guia`
+   * son el mismo paso.
+   */
+  const opensTool = (to: string | undefined, view: string, arg: string | undefined): boolean => {
+    if (!to) return false;
+    const [path = "", query = ""] = to.split("?");
+    if (path !== routes.tool(cfg.slug, view)) return false;
+    const declared = new URLSearchParams(query).get("arg");
+    return (declared ?? "") === (arg ?? "");
+  };
+
+  const stepForTool = (view: string, arg?: string): ToolStepHit | null => {
+    if (!view) return null;
+    for (const node of nodes) {
+      const groups = unitSteps(node.key).filter(
+        (s): s is Extract<UnitStep, { kind: "extra" }> => s.kind === "extra",
+      );
+      const i = groups.findIndex((g) => opensTool(g.to, view, arg));
+      const step = i >= 0 ? groups[i] : undefined;
+      if (step) return { division: node.key, step, index: i + 1, total: groups.length };
+    }
+    return null;
+  };
+
   /* La cadena de divisiones recorribles: las DECLARADAS con secuencia. Las
      sintéticas («Transversales», «Otras») se ven en el índice pero no encadenan:
      no son la división siguiente de nadie. */
@@ -729,6 +779,7 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
     prevNext,
     unitSteps,
     prevNextSteps,
+    stepForTool,
     reviewPages,
     typeLabel,
     typeColor: (key: string) => typeColor(cfg, key),

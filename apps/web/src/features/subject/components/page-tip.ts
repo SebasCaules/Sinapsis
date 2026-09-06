@@ -38,6 +38,12 @@ export interface TipTarget {
  *     herramientas de la materia (N0-41).
  *  3. `[data-go="#/p/<slug>"]` y `[data-nav="#/p/<slug>"]` — ídem, sin `<a>`.
  *  4. `[data-page-tip="<slug>[#ancla]"]` — marca explícita para cualquier nodo.
+ *
+ * Y una QUINTA que no apunta a ninguna página: `[data-tip-title]`, la tarjeta
+ * GENÉRICA (N0-64). Sirve para lo que no es una página del wiki pero merece la
+ * misma vista previa —los segmentos de ejercicios de la barra de unidad, y lo
+ * que venga—: el nodo declara el texto en atributos y la tarjeta lo dibuja con
+ * los mismos estilos, el mismo retardo y el mismo comportamiento de foco.
  */
 /**
  * `base` es `import.meta.env.BASE_URL` (termina en `/`): en GitHub Pages el
@@ -50,6 +56,9 @@ export function pageRoutePrefix(subject: string, base = "/"): string {
   return `${root}m/${subject}/p/`;
 }
 
+/** Selector del modo genérico: cualquier nodo que declare un título de tarjeta. */
+export const GENERIC_SELECTOR = "[data-tip-title]";
+
 export function tipSelector(subject: string, base = "/"): string {
   return [
     `a[href^="${pageRoutePrefix(subject, base)}"]`,
@@ -57,6 +66,7 @@ export function tipSelector(subject: string, base = "/"): string {
     '[data-go^="#/p/"]',
     '[data-nav^="#/p/"]',
     "[data-page-tip]",
+    GENERIC_SELECTOR,
   ].join(",");
 }
 
@@ -110,6 +120,60 @@ export function targetOf(node: EventTarget | null, subject: string, base = "/"):
   const fromHref = clean[1] ? safeDecode(clean[1]) : "";
   const anchor = (fromHref || attr(el, "data-anchor")).trim();
   return { el, slug, anchor };
+}
+
+/**
+ * Una tarjeta GENÉRICA declarada en atributos. Todo es opcional salvo el
+ * título, que es lo que enciende el modo.
+ *
+ *   data-tip-kicker  línea pequeña de arriba («U3 · Ejercicios»)
+ *   data-tip-title   título de la tarjeta («Guía»)
+ *   data-tip-text    cuerpo («3 de 16 resueltos»)
+ *   data-tip-meta    pie («ejercicios»)
+ *   data-tip-type    clave de tipo para la etiqueta (`TypeTag`)
+ */
+export interface GenericTip {
+  el: HTMLElement;
+  kicker: string;
+  title: string;
+  text: string;
+  meta: string;
+  /** Clave del tipo; vacía si el nodo no declara ninguno. */
+  type: string;
+}
+
+/** La tarjeta genérica del nodo bajo `node`, o null si no declara ninguna. */
+export function genericTargetOf(node: EventTarget | null): GenericTip | null {
+  if (!(node instanceof Element)) return null;
+  const el = node.closest<HTMLElement>(GENERIC_SELECTOR);
+  if (!el || el.closest(EXCLUDED)) return null;
+  const title = attr(el, "data-tip-title").trim();
+  if (!title) return null;
+  return {
+    el,
+    title,
+    kicker: attr(el, "data-tip-kicker").trim(),
+    text: attr(el, "data-tip-text").trim(),
+    meta: attr(el, "data-tip-meta").trim(),
+    type: attr(el, "data-tip-type").trim(),
+  };
+}
+
+/** Lo que la tarjeta puede mostrar: una página de la materia o una tarjeta suelta. */
+export type TipHit =
+  | ({ kind: "page" } & TipTarget)
+  | { kind: "generic"; el: HTMLElement; tip: GenericTip };
+
+/**
+ * El objetivo bajo `node`, del tipo que sea. El modo genérico gana cuando está:
+ * `data-tip-title` es una marca EXPLÍCITA, así que quien la puso ya decidió qué
+ * quiere que se lea, aunque el nodo sea además un enlace.
+ */
+export function tipAt(node: EventTarget | null, subject: string, base = "/"): TipHit | null {
+  const generic = genericTargetOf(node);
+  if (generic) return { kind: "generic", el: generic.el, tip: generic };
+  const page = targetOf(node, subject, base);
+  return page ? { kind: "page", ...page } : null;
 }
 
 /**

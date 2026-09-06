@@ -1207,6 +1207,37 @@
       width: 56px; min-width: 56px;
     }
   }
+
+  /* ============================================================
+     DENTRO DEL MARCO DE PÁGINA DE LA PLATAFORMA  (N0-64)
+     ============================================================
+     Con `frame: "page"` en el manifiesto, el anfitrión envuelve la vista en la
+     hoja del lector: el ancho, el fondo, el borde y el relleno son SUYOS. La
+     vista deja entonces de acotar el ancho y de pintar caja propia; lo que sigue
+     siendo suyo es la fila de filtros con el semáforo, que se estira hasta los
+     bordes de la hoja para que su filete llegue de punta a punta. */
+  &[data-frame="page"] .ej-wrap {
+    max-width: none;
+  }
+  /* La hoja ya la puso el marco: `.ej-list` va sin la clase `sheet` (lo decide
+     `ejercicios.js`) y acá solo se le quita el aire que traía de su portada. */
+  &[data-frame="page"] .ej-list > .tex-title {
+    margin-top: 0;
+  }
+  /* La fila pegajosa se apoya sobre la hoja, no sobre el fondo de la página: con
+     `--bg` se veía un rectángulo de otro tono encima del grano. Los márgenes
+     negativos son los 40 px de relleno lateral de la hoja. */
+  &[data-frame="page"] .ej-toolbar {
+    background: var(--elevated);
+    margin: 0 -40px 10px;
+    padding: 3px 40px;
+  }
+  @media (max-width: 640px) {
+    &[data-frame="page"] .ej-toolbar {
+      margin: 0 0 10px;
+      padding: 3px 0;
+    }
+  }
 }
 
 /* ------------------------------------------------------------
@@ -1366,6 +1397,7 @@
   .sinapsis-tool .ej-doc a {
     text-decoration: none;
   }
+
 }
 @media print {
   .sinapsis-tool #ejList .ej-doc[data-body],

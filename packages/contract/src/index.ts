@@ -960,6 +960,16 @@ export const ToolView = z.object({
   icon: IconName.optional(),
   /** Vista ancha (1120) o a todo el ancho del área de contenido. */
   layout: z.enum(["wide", "full"]).default("wide"),
+  /**
+   * Marco con el que la plataforma envuelve la vista. Con `"page"` la vista se
+   * dibuja dentro del MISMO marco que una página del wiki (`PageFrame`, N0-64):
+   * la hoja con su ancho, la línea de identidad (división · tipo · posición) y
+   * la barra de la unidad con su Anterior/Siguiente. El marco solo se aplica
+   * cuando el `?arg=` de la URL resuelve a un paso de progreso de una división
+   * (`model.stepForTool`); si no resuelve, la vista se dibuja como siempre.
+   * Sin este campo, la vista se dibuja suelta, que es lo de siempre.
+   */
+  frame: z.literal("page").optional(),
 });
 export type ToolView = z.infer<typeof ToolView>;
 

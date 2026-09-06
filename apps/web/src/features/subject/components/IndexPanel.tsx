@@ -12,6 +12,7 @@ import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { pad2, type DivisionNode, type ProgressGroup, type SubjectModel } from "../model";
 import { INDEX_PANEL_ID } from "./SubjectHeader";
+import { EXERCISES_COLOR, EXERCISES_LABEL, EXERCISES_TYPE, TypeTag } from "./TypeTag";
 import { useOpenDivisions, useSubjectUiStore, useTypeCollapsed } from "../store";
 import css from "./IndexPanel.module.css";
 
@@ -188,7 +189,9 @@ const DivisionRow = memo(function DivisionRow({
               bookmarks={bookmarks}
             />
           ))}
-          {groups.length ? <ExerciseBlock groups={groups} total={parts.extras.total} /> : null}
+          {groups.length ? (
+            <ExerciseBlock groups={groups} total={parts.extras.total} divisionShort={division.short} />
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -223,8 +226,14 @@ function TypeBlockRows({
         onClick={() => toggleType(model.slug, divisionKey, block.type.key, block.type.collapsedByDefault)}
         aria-expanded={shown.length > 0}
       >
-        <span title={`${block.count} ${block.type.plural.toLowerCase()}`}>
-          {block.type.plural.toUpperCase()} · {block.count}
+        <span className={css.blockName} title={`${block.count} ${block.type.plural.toLowerCase()}`}>
+          <TypeTag
+            type={block.type.key}
+            label={block.type.plural}
+            color={model.typeColor(block.type.key)}
+            size="sm"
+          />
+          {` · ${block.count}`}
         </span>
         <UiIcon name="chevronDown" size={11} className={shown.length ? css.chevOpen : css.chev} />
       </button>
@@ -249,22 +258,39 @@ function TypeBlockRows({
  * pliega: son cuatro filas como mucho, y plegarlas escondería justamente lo que
  * la barra de la unidad ahora cuenta.
  */
-function ExerciseBlock({ groups, total }: { groups: ProgressGroup[]; total: number }) {
+function ExerciseBlock({
+  groups,
+  total,
+  divisionShort,
+}: {
+  groups: ProgressGroup[];
+  total: number;
+  divisionShort: string;
+}) {
   return (
     <div className={css.block}>
       <div className={css.blockLabel} data-static="true">
-        <span title={`${total} ${plural(total, "ejercicio", "ejercicios")}`}>EJERCICIOS · {total}</span>
+        <span className={css.blockName} title={`${total} ${plural(total, "ejercicio", "ejercicios")}`}>
+          <TypeTag type={EXERCISES_TYPE} label={EXERCISES_LABEL} color={EXERCISES_COLOR} size="sm" />
+          {` · ${total}`}
+        </span>
       </div>
       {groups.map((group) => (
-        <GroupRow key={group.id} group={group} />
+        <GroupRow key={group.id} group={group} divisionShort={divisionShort} />
       ))}
     </div>
   );
 }
 
-function GroupRow({ group }: { group: ProgressGroup }) {
+function GroupRow({ group, divisionShort }: { group: ProgressGroup; divisionShort: string }) {
   const complete = group.total > 0 && group.done === group.total;
   const label = `${group.label} · ${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`;
+  /* Lo que dibuja la tarjeta de vista previa del shell: el mismo recuento que
+     las tarjetas de la portada de la división. */
+  const count =
+    group.done > 0
+      ? `${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`
+      : `${group.total} ${plural(group.total, "ejercicio", "ejercicios")}`;
   const body = (
     <>
       <span className={css.num} aria-hidden="true">
@@ -277,14 +303,21 @@ function GroupRow({ group }: { group: ProgressGroup }) {
       {complete ? <UiIcon name="check" size={12} className={css.groupCheck} title="Completo" /> : null}
     </>
   );
-  /* El destino lo declara el bundle y es una ruta del SPA. Un valor que no lo
-     sea deja la fila sin enlace: la plataforma no navega a donde no sabe. */
+  /* Sin `title`: la fila la cubre la tarjeta de vista previa del shell, igual
+     que las de página. El destino lo declara el bundle y es una ruta del SPA; un
+     valor que no lo sea deja la fila sin enlace. */
+  const tip = {
+    "data-tip-title": group.label,
+    "data-tip-kicker": `${divisionShort} · ${EXERCISES_LABEL}`,
+    "data-tip-text": count,
+    "data-tip-meta": group.source,
+  };
   return group.to && group.to.startsWith("/") ? (
-    <Link className={css.page} to={group.to} title={label} aria-label={label}>
+    <Link className={css.page} to={group.to} aria-label={label} {...tip}>
       {body}
     </Link>
   ) : (
-    <span className={css.page} title={label}>
+    <span className={css.page} aria-label={label} {...tip}>
       {body}
     </span>
   );

@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { countsAsContent, plural, routes, type SearchHit } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import type { RailGroupView, RailItemView, SubjectModel } from "../model";
+import { PageTypeTag } from "./TypeTag";
 import { useSearch } from "../useSubject";
 import css from "./SearchPalette.module.css";
 
@@ -27,7 +28,8 @@ interface Row {
   key: string;
   kind: "page" | "rail";
   label: string;
-  meta: string;
+  /** Renglón de la derecha: texto o, en las páginas, división + etiqueta de tipo. */
+  meta: React.ReactNode;
   snippet: string | null;
   to: string | null;
   href: string | null;
@@ -270,7 +272,11 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
             key: `page:${hit.slug}`,
             kind: "page" as const,
             label: hit.title,
-            meta: `${division?.short ?? hit.division} · ${model.typeLabel(hit.type)}`,
+            meta: (
+              <>
+                {division?.short ?? hit.division} · <PageTypeTag model={model} type={hit.type} size="sm" />
+              </>
+            ),
             snippet: plainSnippet(hit.snippet),
             to: routes.page(model.slug, hit.slug),
             href: null,

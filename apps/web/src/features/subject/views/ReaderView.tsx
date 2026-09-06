@@ -3,6 +3,13 @@
  * la división, la prosa y la columna de 248 (índice de la página y apuntes). Es
  * la vista más pesada del shell: se carga en diferido.
  *
+ * La hoja y lo que la rodea —identidad, barra de la unidad, Anterior/Siguiente y
+ * las asas de ancho— ya no viven acá: son `components/PageFrame`, el marco que el
+ * lector comparte con las vistas de herramienta declaradas con `frame: "page"`
+ * (N0-64). De este módulo son la prosa, los apuntes, las figuras, las acciones
+ * de estudio y el ORDEN DE LECTURA, que es lo único del recorrido que el marco no
+ * decide (el marco dibuja los vecinos que le pasan, no los busca).
+ *
  * Los ids de los encabezados los pone el compilador (`Page.headings[].id`, con
  * `headingId` del contrato) y el plugin de rehype los repite tal cual: el índice
  * de la página no necesita leer el DOM para saber a dónde apunta.
@@ -12,16 +19,7 @@
  * división siguiente, y se lo dice— y una página fuera de la secuencia (una
  * fuente) cae al orden de lectura global en vez de quedarse sin vecinos.
  */
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigationType, useParams } from "react-router-dom";
 import { PAGE_TYPE_META, plural, routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
 import { Dialog, Icon, UiIcon, useToast } from "@/components/platform";
@@ -30,7 +28,8 @@ import { recordActivity, setLastRead } from "../activity";
 import { Markdown } from "../markdown/Markdown";
 import { MathText } from "../components/MathText";
 import { ErrorCard, SheetSkeleton } from "../components/States";
-import type { DivisionNode, SubjectModel, UnitStep } from "../model";
+import { PageFrame, isGroupStep, type Neighbor, type ReadStep } from "../components/PageFrame";
+import type { SubjectModel } from "../model";
 import {
   useDeleteNote,
   usePage,
@@ -39,16 +38,15 @@ import {
   useToggleBookmark,
   useToggleStudied,
 } from "../useSubject";
-import {
-  SHEET_DEFAULT,
-  SHEET_MAX,
-  SHEET_MIN,
-  SHEET_STEP,
-  clampSheetWidth,
-  resizeSheet,
-  useSheetWidth,
-} from "./sheetWidth";
 import css from "./ReaderView.module.css";
+
+/* El marco de la hoja (identidad, barra de unidad, Anterior/Siguiente) es de la
+   plataforma desde N0-64: acá solo queda lo que es del LECTOR —la prosa, los
+   apuntes, las figuras, «Marcar estudiado»— y el orden de lectura, que es lo
+   único del recorrido que el marco no decide. Los tipos se re-exportan porque
+   el orden de lectura sigue siendo de este módulo. */
+export { isGroupStep } from "../components/PageFrame";
+export type { GroupStep, Neighbor, ReadStep } from "../components/PageFrame";
 
 /**
  * A partir de acá la columna lateral cabe al lado de la hoja. Por debajo no
@@ -119,30 +117,6 @@ function defaultSide(): boolean {
   if (saved !== null) return saved;
   const w = typeof window === "undefined" ? 0 : window.innerWidth;
   return !(w >= SIDE_AUTO_MIN && w < SIDE_AUTO_MAX);
-}
-
-/**
- * Vecino de lectura. `division` no es null cuando el paso CRUZA de división: es
- * la división a la que se entra, y el rótulo lo dice («← Unidad anterior: U3»).
- */
-export interface Neighbor {
-  page: PageMeta;
-  division: DivisionNode | null;
-}
-
-/** Un grupo de ejercicios de la división, como paso de la secuencia (N0-61). */
-export type GroupStep = Extract<UnitStep, { kind: "extra" }>;
-
-/**
- * Un vecino del lector: la página de al lado (con su cruce de división) o un
- * grupo de ejercicios de la unidad. Los grupos van SIEMPRE al final: son el
- * último tramo de la unidad, después de la última página.
- */
-export type ReadStep = Neighbor | GroupStep;
-
-/** ¿El paso es un grupo de ejercicios y no una página? */
-export function isGroupStep(step: ReadStep | UnitStep | null): step is GroupStep {
-  return step !== null && "kind" in step && step.kind === "extra";
 }
 
 /**
@@ -264,13 +238,6 @@ export function ReaderView() {
   }, []);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
   const sheetRef = useRef<HTMLElement>(null);
-  /* Ancho de la hoja: preferencia de lectura global, con sus asas (ver
-     `sheetWidth.ts`). `layoutRef` es donde vive la variable —el arrastre la
-     escribe directamente ahí, sin re-renderizar— y `columnRef` da el techo real
-     de la pantalla. */
-  const [sheetWidth, setSheetWidth] = useSheetWidth();
-  const layoutRef = useRef<HTMLDivElement>(null);
-  const columnRef = useRef<HTMLDivElement>(null);
 
   const detail = query.data;
   const page = detail?.page;
@@ -281,14 +248,14 @@ export function ReaderView() {
   const position = model.positionOf(pageSlug);
   const order = useMemo(() => readingOrder(model), [model]);
   const { prev, next } = useMemo(() => readSteps(model, order, pageSlug), [model, order, pageSlug]);
-  /* Los grupos de ejercicios de la unidad: los segmentos que van después de los
-     de las páginas, y el «+M ejercicios» de la posición (N0-61). Salen de la
-     secuencia extendida, que es la MISMA que recorre `prevNextSteps`. */
-  const groups = useMemo<GroupStep[]>(
-    () => (divisionKey ? model.unitSteps(divisionKey).filter(isGroupStep) : []),
+  /* La secuencia EXTENDIDA de la unidad: las páginas y, al final, un paso por
+     grupo de ejercicios (N0-61). Es lo que dibuja la barra del marco, y de ella
+     sale el «+M ejercicios» de la posición. */
+  const steps = useMemo(
+    () => (divisionKey ? model.unitSteps(divisionKey) : []),
     [model, divisionKey],
   );
-  const extrasTotal = groups.reduce((n, g) => n + g.total, 0);
+  const extrasTotal = steps.reduce((n, s) => (isGroupStep(s) ? n + s.total : n), 0);
   /* Callback estable: el pipeline de markdown se rearma solo si cambia la materia. */
   const exists = useCallback((target: string) => model.bySlug.has(target), [model]);
   const headings = useMemo(
@@ -392,9 +359,8 @@ export function ReaderView() {
   if (query.isPending || !detail || !page) return <SheetSkeleton />;
 
   const studied = detail.studied;
-  const color = division?.color ?? "var(--primary)";
-  const unit = model.config.division.singular.toLowerCase();
   const bookmarked = bookmarks.has(pageSlug);
+  const unit = model.config.division.singular.toLowerCase();
   /* El aviso sale del guardado que SÍ ocurrió: el camino de error ya tiene el
      suyo («No se pudo guardar»), en `useSubject`. */
   const onToggleStudied = () => {
@@ -412,11 +378,6 @@ export function ReaderView() {
     );
   };
 
-  /* El cajón transversal no es un recorrido y el baseline no le dibuja la barra
-     (`is-bare`, reader.js:432-445): queda la línea de identidad y nada más. Su
-     navegación viene del orden global, al pie. */
-  const showStrip = sequence.length > 1 && !division?.synthetic;
-
   /* Un solo botón para los dos docks: mismo id de destino, mismos rótulos. */
   const sideTab = (
     <button
@@ -432,346 +393,113 @@ export function ReaderView() {
     </button>
   );
 
-  return (
-    <div
-      className={css.layout}
-      ref={layoutRef}
-      data-side={sideOpen && wide ? "open" : "closed"}
-      style={{ ["--ucol" as string]: color, ["--sheet-width" as string]: `${sheetWidth}px` }}
-    >
-      <div className={css.column} ref={columnRef}>
-        <article className={css.sheet} ref={sheetRef}>
-          <header className={css.sheetHead}>
-            {division ? (
-              <Link className={css.divisionChip} to={routes.division(slug, division.key)}>
-                <span className={css.divisionDot} aria-hidden="true" />
-                {division.label}
-              </Link>
-            ) : null}
-            <span className={css.typeChip}>{model.typeLabel(page.type).toUpperCase()}</span>
-            {/* Fuera de la secuencia se describe el universo, como el baseline
-                («11 páginas + 3 colecciones», reader.js:466-476), en vez de
-                decir lo que la página NO es (§ lector-20). En el cajón
-                transversal no hay posición que contar. */}
-            {division?.synthetic ? null : position ? (
-              <span className={css.position}>
-                página {position} de {sequence.length}
-                {/* Los ejercicios NO entran en «k de N» —eso cuenta páginas—,
-                    pero la unidad tiene más tramo del que dice ese número: se
-                    lo agrega aparte, como en el original. */}
-                {extrasTotal ? ` · +${extrasTotal} ejercicios` : ""}
-              </span>
-            ) : sequence.length ? (
-              <span className={css.position}>
-                {sequence.length} {plural(sequence.length, "página", "páginas")} en la {unit}
-              </span>
-            ) : null}
-            <span className={css.headSpacer} />
-            {/* Las acciones de la página viven en la línea de identidad de la
-                hoja (pedido del usuario): antes iban en una fila propia arriba
-                y acá había «¿Qué sigue?» y «+N fuentes», que el usuario sacó.
-                Las fuentes de la división se leen en su portada. */}
-            <StudyActions
-              studied={studied}
-              onToggle={onToggleStudied}
-              bookmarked={bookmarked}
-              onToggleBookmark={onToggleBookmark}
-              inline
-            />
-          </header>
+  /* Fuera de la secuencia se describe el universo, como el baseline («11 páginas
+     + 3 colecciones», reader.js:466-476), en vez de decir lo que la página NO es
+     (§ lector-20). En el cajón transversal no hay posición que contar. */
+  const positionLabel = division?.synthetic
+    ? null
+    : position
+      ? /* Los ejercicios NO entran en «k de N» —eso cuenta páginas—, pero la
+           unidad tiene más tramo del que dice ese número: se lo agrega aparte,
+           como en el original. */
+        `página ${position} de ${sequence.length}${extrasTotal ? ` · +${extrasTotal} ejercicios` : ""}`
+      : sequence.length
+        ? `${sequence.length} ${plural(sequence.length, "página", "páginas")} en la ${unit}`
+        : null;
 
-          {showStrip ? (
-            <nav className={css.segments} aria-label={`Páginas de la ${unit}`}>
-              {/* Anterior y siguiente flanquean la barra (pedido del usuario): a
-                  secas, sin títulos, que van en el pie. Lo único que se agrega
-                  es el cruce de división, que cambia de destino y hay que
-                  decirlo («Siguiente unidad →»). */}
-              <div className={css.segmentsRow}>
-                <StripLink side="prev" slug={slug} step={prev} unit={unit} />
-                <div className={css.segmentsTrack}>
-                {/* Sin `title`: el segmento lo cubre la tarjeta de vista previa
-                    del shell (N0-50), que muestra el título, el resumen y la
-                    posición «N de M»; el tooltip nativo dibujaría dos a la vez.
-                    El nombre accesible lleva la posición (§ lector-19): con
-                    lector de pantalla la pista era una lista de títulos sin
-                    orden ni total. */}
-                {sequence.map((p, i) => (
-                  <Link
-                    key={p.slug}
-                    to={routes.page(slug, p.slug)}
-                    className={css.segment}
-                    data-seg={i + 1}
-                    data-state={p.slug === pageSlug ? "current" : model.studied.has(p.slug) ? "studied" : "todo"}
-                    aria-label={`${i + 1} de ${sequence.length}. ${p.title}`}
-                    aria-current={p.slug === pageSlug ? "page" : undefined}
-                  />
-                ))}
-                {/* Los grupos de ejercicios cierran la barra: un segmento por
-                    grupo, con el trazo punteado que los distingue de una página
-                    y el relleno proporcional a lo resuelto (N0-61). */}
-                {groups.map((group) => (
-                  <GroupSegment key={group.id} group={group} />
-                ))}
-              </div>
-                <StripLink side="next" slug={slug} step={next} unit={unit} />
-              </div>
-            </nav>
-          ) : null}
-
-          <h1 className={css.title}>{page.title}</h1>
-
-          <Markdown body={page.body} subject={slug} exists={exists} />
-
-          {/* El mismo par de acciones al terminar de leer: nadie tiene que volver
-              arriba para marcar la página o pasar a la siguiente. */}
-          <footer className={css.foot}>
-            <PrevNext slug={slug} prev={prev} next={next} unit={unit} />
-            <StudyActions
-              studied={studied}
-              onToggle={onToggleStudied}
-              bookmarked={bookmarked}
-              onToggleBookmark={onToggleBookmark}
-              foot
-            />
-          </footer>
-
-          {/* Las asas van ÚLTIMAS y absolutas: no entran en el flujo de la hoja,
-              así que no mueven ni un píxel de lo que ya se leía. */}
-          <SheetHandle
-            side="left"
-            width={sheetWidth}
-            onWidth={setSheetWidth}
-            layoutRef={layoutRef}
-            columnRef={columnRef}
-          />
-          <SheetHandle
-            side="right"
-            width={sheetWidth}
-            onWidth={setSheetWidth}
-            layoutRef={layoutRef}
-            columnRef={columnRef}
-          />
-        </article>
-      </div>
-
-      {/* El botón «PANEL» vive en un dock PEGAJOSO (pedido del usuario): con el
-          panel abierto y ancho, pegado al borde izquierdo de la columna y
-          desplazándose con ella; cerrado, en el borde derecho del área de
-          lectura, también pegajoso. Bajo 1280 px el botón es fijo (media query)
-          y el dock no interviene. */}
-      {sideOpen ? (
-        <div className={wide ? css.sideDock : css.sideDockFloating}>
-        <div
-          id="reader-side"
-          className={wide ? css.side : `${css.side} ${css.sideFloating}`}
-          data-floating={wide ? undefined : "true"}
-        >
-          <section className={css.card} aria-labelledby="reader-toc">
-            <div className={css.cardHead} id="reader-toc">
-              <UiIcon name="menu" size={13} />
-              EN ESTA PÁGINA
+  /* El botón «PANEL» vive en un dock PEGAJOSO (pedido del usuario): con el
+     panel abierto y ancho, pegado al borde izquierdo de la columna y
+     desplazándose con ella; cerrado, en el borde derecho del área de lectura,
+     también pegajoso. Bajo 1280 px el botón es fijo (media query) y el dock no
+     interviene. La columna es del LECTOR, no del marco: se la pasa como `aside`. */
+  const aside = sideOpen ? (
+    <div className={wide ? css.sideDock : css.sideDockFloating}>
+      <div
+        id="reader-side"
+        className={wide ? css.side : `${css.side} ${css.sideFloating}`}
+        data-floating={wide ? undefined : "true"}
+      >
+        <section className={css.card} aria-labelledby="reader-toc">
+          <div className={css.cardHead} id="reader-toc">
+            <UiIcon name="menu" size={13} />
+            EN ESTA PÁGINA
+          </div>
+          {headings.length ? (
+            <div className={css.toc}>
+              {headings.map((h: PageHeading, i: number) => (
+                <a
+                  /* Dos encabezados distintos pueden dar el MISMO id —el
+                     compilador es el dueño del algoritmo y no desambigua
+                     (N0-22)—: `formulario-maestro` tiene «Independencia» dos
+                     veces. El ancla se conserva tal cual; lo que se
+                     desambigua es solo la clave de React, con el índice. */
+                  key={`${i}-${h.id}`}
+                  href={`#${h.id}`}
+                  className={h.level === 3 ? css.tocSub : css.tocItem}
+                  data-active={activeHeading === h.id ? "true" : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById(h.id);
+                    if (el) scrollMainTo(el, "smooth");
+                    history.replaceState(null, "", `#${h.id}`);
+                  }}
+                >
+                  <MathText text={tocLabel(h.text)} />
+                </a>
+              ))}
             </div>
-            {headings.length ? (
-              <div className={css.toc}>
-                {headings.map((h: PageHeading, i: number) => (
-                  <a
-                    /* Dos encabezados distintos pueden dar el MISMO id —el
-                       compilador es el dueño del algoritmo y no desambigua
-                       (N0-22)—: `formulario-maestro` tiene «Independencia» dos
-                       veces. El ancla se conserva tal cual; lo que se
-                       desambigua es solo la clave de React, con el índice. */
-                    key={`${i}-${h.id}`}
-                    href={`#${h.id}`}
-                    className={h.level === 3 ? css.tocSub : css.tocItem}
-                    data-active={activeHeading === h.id ? "true" : undefined}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const el = document.getElementById(h.id);
-                      if (el) scrollMainTo(el, "smooth");
-                      history.replaceState(null, "", `#${h.id}`);
-                    }}
-                  >
-                    <MathText text={tocLabel(h.text)} />
-                  </a>
-                ))}
-              </div>
-            ) : (
-              <p className={css.cardEmpty}>Esta página no tiene secciones.</p>
-            )}
-          </section>
+          ) : (
+            <p className={css.cardEmpty}>Esta página no tiene secciones.</p>
+          )}
+        </section>
 
-          <NotesCard slug={slug} page={pageSlug} exists={exists} />
+        <NotesCard slug={slug} page={pageSlug} exists={exists} />
 
-        </div>
-        {sideTab}
-        </div>
-      ) : (
-        <div className={css.tabDock}>{sideTab}</div>
-      )}
+      </div>
+      {sideTab}
     </div>
+  ) : (
+    <div className={css.tabDock}>{sideTab}</div>
   );
-}
-
-const HANDLE_TITLE = `Arrastre para cambiar el ancho de la hoja · doble clic: volver a ${SHEET_DEFAULT}`;
-
-/**
- * Cursor y selección del documento mientras se arrastra: sin esto, salir de los
- * 12 px del asa devolvía la flecha del puntero a mitad del gesto y el arrastre
- * iba seleccionando la prosa a su paso. Se guarda lo que había para reponerlo:
- * el lector no es el dueño del `body`.
- */
-let bodyLock: { cursor: string; userSelect: string } | null = null;
-
-function lockBody(): void {
-  if (typeof document === "undefined" || bodyLock) return;
-  const style = document.body.style;
-  bodyLock = { cursor: style.cursor, userSelect: style.userSelect };
-  style.cursor = "col-resize";
-  style.userSelect = "none";
-}
-
-function unlockBody(): void {
-  if (typeof document === "undefined" || !bodyLock) return;
-  document.body.style.cursor = bodyLock.cursor;
-  document.body.style.userSelect = bodyLock.userSelect;
-  bodyLock = null;
-}
-
-/**
- * Asa de ancho: el borde izquierdo o el derecho de la hoja, de arriba abajo.
- *
- * Arrastrar es lo obvio, pero no es la única manera: el asa se enfoca con el
- * tabulador y ahí las flechas mueven de a `SHEET_STEP` (×4 con Shift), Inicio y
- * Fin van a los extremos, y Entrar, Espacio o un doble clic devuelven la hoja a
- * los 840 de fábrica. El valor se OYE, además de verse (`aria-valuetext`).
- *
- * Mientras dura el gesto la variable se escribe directamente en el nodo de
- * `.layout` dentro de un `requestAnimationFrame`: un `pointermove` puede llegar
- * cien veces por segundo y re-renderizar el lector —con su markdown y su
- * KaTeX— en cada uno era insostenible. El estado se confirma al soltar, que es
- * también donde se persiste.
- */
-function SheetHandle({
-  side,
-  width,
-  onWidth,
-  layoutRef,
-  columnRef,
-}: {
-  side: "left" | "right";
-  width: number;
-  onWidth: (value: number) => void;
-  layoutRef: RefObject<HTMLDivElement>;
-  columnRef: RefObject<HTMLDivElement>;
-}) {
-  const [dragging, setDragging] = useState(false);
-  const drag = useRef<{ startX: number; startWidth: number; value: number } | null>(null);
-  const frame = useRef(0);
-
-  /* Techo del arrastre: los límites del módulo, pero nunca más que el ancho que
-     realmente hay en la columna. La hoja no puede desbordar (el CSS la corta en
-     `100%`), y sin este tope el asa se quedaba clavada mientras el puntero
-     seguía viajando. El valor guardado sí puede ser mayor: en una pantalla más
-     ancha vuelve a valer entero. */
-  const roof = useCallback(() => {
-    const room = columnRef.current?.clientWidth ?? 0;
-    return room > SHEET_MIN ? Math.min(SHEET_MAX, room) : SHEET_MAX;
-  }, [columnRef]);
-
-  const paint = useCallback(
-    (value: number) => layoutRef.current?.style.setProperty("--sheet-width", `${value}px`),
-    [layoutRef],
-  );
-
-  /* Un desmontaje a mitad de gesto (cambio de página con el botón apretado) no
-     puede dejar el documento con el cursor de arrastre para siempre. */
-  useEffect(
-    () => () => {
-      if (frame.current) cancelAnimationFrame(frame.current);
-      unlockBody();
-    },
-    [],
-  );
-
-  const finish = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const state = drag.current;
-    if (!state) return;
-    drag.current = null;
-    setDragging(false);
-    if (frame.current) {
-      cancelAnimationFrame(frame.current);
-      frame.current = 0;
-    }
-    unlockBody();
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {
-      /* el puntero ya se había soltado solo */
-    }
-    paint(state.value);
-    onWidth(state.value);
-  };
-
-  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    const step = event.shiftKey ? SHEET_STEP * 4 : SHEET_STEP;
-    /* En el asa izquierda las flechas van al revés, como si se arrastrara ESE
-       borde: hacia afuera (←) agranda, hacia adentro (→) achica. */
-    const grow = side === "right" ? "ArrowRight" : "ArrowLeft";
-    const shrink = side === "right" ? "ArrowLeft" : "ArrowRight";
-    let next: number | null = null;
-    if (event.key === grow) next = width + step;
-    else if (event.key === shrink) next = width - step;
-    else if (event.key === "Home") next = SHEET_MIN;
-    else if (event.key === "End") next = SHEET_MAX;
-    else if (event.key === "Enter" || event.key === " ") next = SHEET_DEFAULT;
-    if (next === null) return;
-    event.preventDefault();
-    onWidth(clampSheetWidth(next));
-  };
 
   return (
-    <div
-      className={`${css.handle} ${side === "left" ? css.handleLeft : css.handleRight}`}
-      role="separator"
-      aria-orientation="vertical"
-      aria-label="Ancho de la hoja"
-      aria-valuemin={SHEET_MIN}
-      aria-valuemax={SHEET_MAX}
-      aria-valuenow={width}
-      aria-valuetext={`${width} píxeles`}
-      tabIndex={0}
-      title={HANDLE_TITLE}
-      data-side={side}
-      data-dragging={dragging ? "true" : undefined}
-      onPointerDown={(event) => {
-        /* Solo el botón principal: con el secundario se abre el menú del
-           navegador y el gesto quedaba a medias. */
-        if (event.button !== 0) return;
-        event.preventDefault();
-        drag.current = { startX: event.clientX, startWidth: width, value: width };
-        setDragging(true);
-        lockBody();
-        try {
-          event.currentTarget.setPointerCapture(event.pointerId);
-        } catch {
-          /* sin captura el gesto sigue valiendo mientras el puntero esté encima */
-        }
-      }}
-      onPointerMove={(event) => {
-        const state = drag.current;
-        if (!state) return;
-        state.value = Math.min(resizeSheet(state.startWidth, event.clientX - state.startX, side), roof());
-        if (frame.current) return;
-        frame.current = requestAnimationFrame(() => {
-          frame.current = 0;
-          if (drag.current) paint(drag.current.value);
-        });
-      }}
-      onPointerUp={finish}
-      onPointerCancel={finish}
-      onDoubleClick={() => onWidth(SHEET_DEFAULT)}
-      onKeyDown={onKeyDown}
-    />
+    <PageFrame
+      model={model}
+      subject={slug}
+      division={division}
+      type={page.type}
+      position={positionLabel}
+      title={page.title}
+      steps={steps}
+      current={{ kind: "page", slug: pageSlug }}
+      prev={prev}
+      next={next}
+      sheetRef={sheetRef}
+      side={sideOpen && wide ? "open" : "closed"}
+      aside={aside}
+      actions={
+        <StudyActions
+          studied={studied}
+          onToggle={onToggleStudied}
+          bookmarked={bookmarked}
+          onToggleBookmark={onToggleBookmark}
+          inline
+        />
+      }
+      footer={
+        /* El mismo par de acciones al terminar de leer: nadie tiene que volver
+           arriba para marcar la página o pasar a la siguiente. */
+        <StudyActions
+          studied={studied}
+          onToggle={onToggleStudied}
+          bookmarked={bookmarked}
+          onToggleBookmark={onToggleBookmark}
+          foot
+        />
+      }
+    >
+      <Markdown body={page.body} subject={slug} exists={exists} />
+    </PageFrame>
   );
 }
 
@@ -822,158 +550,6 @@ function StudyActions({
   );
 }
 
-/** Primera letra en mayúscula («unidad» → «Unidad»). */
-function cap(text: string): string {
-  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
-}
-
-/**
- * El enlace corto que flanquea la barra. Va a secas (pedido del usuario) salvo
- * cuando el paso CRUZA de división: ahí el rótulo lo dice, porque el destino
- * deja de ser «la página de al lado».
- */
-function StripLink({
-  side,
-  slug,
-  step,
-  unit,
-}: {
-  side: "prev" | "next";
-  slug: string;
-  step: ReadStep | null;
-  unit: string;
-}) {
-  /* Un grupo de ejercicios NO es la página de al lado: el rótulo lo nombra,
-     como el cruce de división, porque el destino cambia de naturaleza. */
-  if (isGroupStep(step)) {
-    const text = `${step.label} →`;
-    const klass = `${css.next} ${css.sideNext}`;
-    const label = `${step.done} de ${step.total} ${plural(step.total, "resuelto", "resueltos")}`;
-    if (!groupHref(step)) return <span className={`${css.prevOff} ${css.sideNext}`}>{text}</span>;
-    return (
-      <Link className={klass} to={groupHref(step) as string}>
-        {text}
-        <span className={css.srOnly}>{`: Ejercicios — ${label}`}</span>
-      </Link>
-    );
-  }
-  const cross = step?.division ?? null;
-  const text =
-    side === "prev"
-      ? cross
-        ? `← ${cap(unit)} anterior`
-        : "← Anterior"
-      : cross
-        ? `${cap(unit)} siguiente →`
-        : "Siguiente →";
-  const klass = side === "prev" ? `${css.prev} ${css.sidePrev}` : `${css.next} ${css.sideNext}`;
-  if (!step) {
-    return <span className={`${css.prevOff} ${side === "prev" ? css.sidePrev : css.sideNext}`}>{text}</span>;
-  }
-  return (
-    <Link className={klass} to={routes.page(slug, step.page.slug)}>
-      {text}
-      {/* El destino se OYE pero no se ve: en pantalla el enlace va a secas
-          (pedido del usuario) y con lector de pantalla dice a dónde lleva, que
-          es lo que el baseline muestra en el `title` del enlace. */}
-      <span className={css.srOnly}>
-        {cross ? `: ${cross.label} — ${step.page.title}` : `: ${step.page.title}`}
-      </span>
-    </Link>
-  );
-}
-
-/**
- * El destino de un grupo, si es una ruta del SPA. Lo declara el bundle: un
- * valor que no empiece por `/` deja el paso sin enlace, porque la plataforma no
- * navega a donde no sabe.
- */
-function groupHref(group: GroupStep): string | null {
-  return group.to && group.to.startsWith("/") ? group.to : null;
-}
-
-/**
- * Un grupo de ejercicios como segmento de la barra. Se distingue de una página
- * por el trazo punteado, y lo resuelto se pinta con un relleno proporcional en
- * vez de un estado de tres valores: un grupo de 16 ejercicios rara vez está
- * entero hecho o entero sin hacer.
- */
-function GroupSegment({ group }: { group: GroupStep }) {
-  const pct = group.total ? Math.round((group.done / group.total) * 100) : 0;
-  const label = `Ejercicios · ${group.label} · ${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`;
-  const state = group.total > 0 && group.done === group.total ? "done" : group.done ? "partial" : "todo";
-  const href = groupHref(group);
-  const style = { ["--fill" as string]: `${pct}%` };
-  if (!href) {
-    return <span className={css.segmentExtra} data-state={state} style={style} aria-label={label} role="img" />;
-  }
-  return (
-    <Link
-      to={href}
-      className={css.segmentExtra}
-      data-extra={group.id}
-      data-state={state}
-      style={style}
-      aria-label={label}
-    />
-  );
-}
-
-/**
- * Anterior / Siguiente al pie, con el título entero de las dos páginas y el
- * cruce de división rotulado, como `prevNextHtml` del baseline
- * (reader.js:826-841): «← Unidad anterior: U3 / Ejercicios de finales».
- */
-function PrevNext({
-  slug,
-  prev,
-  next,
-  unit,
-}: {
-  slug: string;
-  prev: Neighbor | null;
-  next: ReadStep | null;
-  /** Nombre de la división de la materia, en minúscula ("unidad", "semana"). */
-  unit: string;
-}) {
-  if (!prev && !next) return null;
-  return (
-    <nav className={`${css.prevNext} ${css.prevNextFoot}`} aria-label="Páginas vecinas">
-      {prev ? (
-        <Link className={css.prev} data-dir="prev" to={routes.page(slug, prev.page.slug)}>
-          <span className={css.dir}>
-            {prev.division ? `← ${cap(unit)} anterior: ${prev.division.short}` : "← Anterior"}
-          </span>
-          <span className={css.dirTitle}>{prev.page.title}</span>
-        </Link>
-      ) : (
-        <span />
-      )}
-      {isGroupStep(next) ? (
-        groupHref(next) ? (
-          <Link className={css.next} data-dir="next" to={groupHref(next) as string}>
-            <span className={css.dir}>Siguiente: ejercicios →</span>
-            <span className={css.dirTitle}>
-              {next.label} · {next.done} de {next.total}{" "}
-              {plural(next.total, "resuelto", "resueltos")}
-            </span>
-          </Link>
-        ) : (
-          <span />
-        )
-      ) : next ? (
-        <Link className={css.next} data-dir="next" to={routes.page(slug, next.page.slug)}>
-          <span className={css.dir}>
-            {next.division ? `${cap(unit)} siguiente: ${next.division.short} →` : "Siguiente →"}
-          </span>
-          <span className={css.dirTitle}>{next.page.title}</span>
-        </Link>
-      ) : (
-        <span />
-      )}
-    </nav>
-  );
-}
 
 /**
  * Sello del apunte. La HORA sola miente cuando el apunte es de otro día

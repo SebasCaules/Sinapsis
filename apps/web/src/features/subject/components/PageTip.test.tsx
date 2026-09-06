@@ -15,7 +15,19 @@ import { SubjectConfig, type PageHeading, type PageMeta, type SubjectDetail } fr
 import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
 import { PageTip, PAGE_TIP_ID } from "./PageTip";
-import { clip, firstPara, leadOf, pageRoutePrefix, plainish, sectionOf, stripLabel, targetOf, tipSelector } from "./page-tip";
+import {
+  clip,
+  firstPara,
+  genericTargetOf,
+  leadOf,
+  pageRoutePrefix,
+  plainish,
+  sectionOf,
+  stripLabel,
+  targetOf,
+  tipAt,
+  tipSelector,
+} from "./page-tip";
 
 // ---------------------------------------------------------------------------
 // 1 · lógica pura
@@ -225,6 +237,76 @@ describe("targetOf", () => {
   });
 });
 
+describe("modo genérico (data-tip-*)", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  const mount = (html: string): void => {
+    document.body.innerHTML = html;
+  };
+
+  it("lee los cuatro atributos y sube desde el nodo interno", () => {
+    mount(
+      '<a id="g" href="/m/proba/t/ejercicios?arg=3%2Fguia"' +
+        ' data-tip-kicker="U3 · Ejercicios" data-tip-title="Guía"' +
+        ' data-tip-text="3 de 16 resueltos" data-tip-meta="ejercicios"' +
+        ' data-tip-type="ejercicios"><i id="dentro"></i></a>',
+    );
+    expect(genericTargetOf(document.getElementById("dentro"))).toMatchObject({
+      kicker: "U3 · Ejercicios",
+      title: "Guía",
+      text: "3 de 16 resueltos",
+      meta: "ejercicios",
+      type: "ejercicios",
+    });
+  });
+
+  it("sin título no hay tarjeta: el título es lo que enciende el modo", () => {
+    mount('<span id="a" data-tip-text="algo suelto"></span>');
+    expect(genericTargetOf(document.getElementById("a"))).toBeNull();
+    mount('<span id="b" data-tip-title="  "></span>');
+    expect(genericTargetOf(document.getElementById("b"))).toBeNull();
+  });
+
+  it("el resto de los atributos es opcional", () => {
+    mount('<span id="a" data-tip-title="Solo el título"></span>');
+    expect(genericTargetOf(document.getElementById("a"))).toMatchObject({
+      title: "Solo el título",
+      kicker: "",
+      text: "",
+      meta: "",
+      type: "",
+    });
+  });
+
+  it("respeta las mismas exclusiones que la tarjeta de página", () => {
+    mount('<div role="dialog"><span id="a" data-tip-title="Guía"></span></div>');
+    expect(genericTargetOf(document.getElementById("a"))).toBeNull();
+  });
+
+  it("tipAt: el modo genérico gana sobre el enlace a página, que es implícito", () => {
+    mount('<a id="a" href="/m/proba/p/esperanza" data-tip-title="Otra cosa">E</a>');
+    expect(tipAt(document.getElementById("a"), "proba")).toMatchObject({
+      kind: "generic",
+      tip: { title: "Otra cosa" },
+    });
+
+    mount('<a id="b" href="/m/proba/p/esperanza">E</a>');
+    expect(tipAt(document.getElementById("b"), "proba")).toMatchObject({
+      kind: "page",
+      slug: "esperanza",
+    });
+
+    mount('<a id="c" href="https://example.org">fuera</a>');
+    expect(tipAt(document.getElementById("c"), "proba")).toBeNull();
+  });
+
+  it("el selector delegado incluye la marca genérica", () => {
+    expect(tipSelector("proba")).toContain("[data-tip-title]");
+  });
+});
+
 // ---------------------------------------------------------------------------
 // 2 · el componente
 // ---------------------------------------------------------------------------
@@ -272,6 +354,15 @@ function Harness({ model }: { model: ReturnType<typeof buildSubjectModel> }) {
       <a href="/m/proba/p/varianza">Varianza</a>
       <a href="/m/proba/p/no-existe">Fantasma</a>
       <a href="https://example.org">Afuera</a>
+      <a
+        href="/m/proba/t/ejercicios?arg=1%2Fguia"
+        aria-label="Ejercicios · Guía · 3 de 16 resueltos"
+        data-tip-kicker="U1 · Ejercicios"
+        data-tip-title="Guía"
+        data-tip-text="3 de 16 resueltos"
+        data-tip-meta="ejercicios"
+        data-tip-type="ejercicios"
+      />
       <PageTip model={model} subject="proba" rootRef={rootRef} currentPage={null} />
     </div>
   );
@@ -427,6 +518,35 @@ describe("PageTip", () => {
     act(() => {
       vi.advanceTimersByTime(OPEN);
     });
+    expect(tip()).toBeNull();
+  });
+
+  /* N0-64: un paso de ejercicios no es una página, pero merece la misma
+     tarjeta. La dibuja con lo que el nodo declara, sin pasar por el modelo. */
+  it("un nodo con data-tip-* abre la tarjeta genérica, con el mismo retraso", () => {
+    mount();
+    const seg = screen.getByRole("link", { name: "Ejercicios · Guía · 3 de 16 resueltos" });
+
+    fireEvent.mouseOver(seg);
+    expect(tip()).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(OPEN);
+    });
+
+    const card = tip();
+    expect(card).not.toBeNull();
+    expect(card?.getAttribute("role")).toBe("tooltip");
+    expect(card?.textContent).toContain("U1 · Ejercicios");
+    expect(card?.textContent).toContain("Guía");
+    expect(card?.textContent).toContain("3 de 16 resueltos");
+    expect(card?.textContent).toContain("ejercicios");
+    /* La etiqueta de tipo es la de la materia (`TypeTag`), con el tipo
+       sintético de los ejercicios. */
+    expect(card?.querySelector('[data-type="ejercicios"]')?.textContent).toBe("Ejercicios");
+    expect(seg.getAttribute("aria-describedby")).toBe(PAGE_TIP_ID);
+
+    /* Y se cierra como cualquier otra. */
+    fireEvent.keyDown(document, { key: "Escape" });
     expect(tip()).toBeNull();
   });
 });

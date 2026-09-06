@@ -164,6 +164,9 @@
 .rowMeta {
   flex: none;
   align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font: 500 10.5px var(--font-mono);
   color: var(--text-3);
   white-space: nowrap;

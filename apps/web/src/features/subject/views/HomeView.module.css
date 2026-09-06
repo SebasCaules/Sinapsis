@@ -525,7 +525,14 @@
 }
 
 .miniTitle { font: 600 13px/1.35 var(--font-ui); color: var(--text); }
-.miniMeta { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+.miniMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+}
 .miniRead { color: var(--good-text); }
 
 /* ---------- herramientas ---------- */

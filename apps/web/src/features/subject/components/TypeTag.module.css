@@ -1,0 +1,24 @@
+/* Etiqueta de tipo: una sola forma en toda la materia. El color del tipo entra
+   por --tcol y tinta borde y fondo con suavidad, así la etiqueta se reconoce
+   por color sin gritar (WCAG: el texto sigue siendo --text-2 sobre superficie). */
+.tag {
+  --tcol: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  font: 600 10.5px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-2);
+  background: color-mix(in srgb, var(--tcol) 10%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--tcol) 38%, var(--border));
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.sm {
+  font-size: 9.5px;
+  padding: 2px 6px;
+  border-radius: 5px;
+}

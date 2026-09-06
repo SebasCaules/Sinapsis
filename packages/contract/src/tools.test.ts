@@ -48,6 +48,29 @@ describe("ToolManifest", () => {
     });
   });
 
+  it("`frame` es opcional: sin él la vista se dibuja suelta, con «page» va en la hoja", () => {
+    /* N0-64: el marco no se supone, se pide. Una vista que no lo declara sigue
+       dibujándose como siempre, y el campo no aparece en el manifiesto validado. */
+    expect(ToolManifest.parse(manifest).views[0]?.frame).toBeUndefined();
+
+    const enmarcada = ToolManifest.parse({
+      ...manifest,
+      views: [{ id: "ejercicios", label: "Ejercicios", frame: "page" }],
+    });
+    expect(enmarcada.views[0]).toEqual({
+      id: "ejercicios",
+      label: "Ejercicios",
+      layout: "wide",
+      frame: "page",
+    });
+
+    /* «page» es el único marco que hay: cualquier otro valor es un error del
+       manifiesto, no un marco desconocido que se ignora en silencio. */
+    expect(() =>
+      ToolManifest.parse({ ...manifest, views: [{ id: "x", label: "X", frame: "sheet" }] }),
+    ).toThrow();
+  });
+
   it("un manifiesto sin listas es válido: el bundle puede aportar solo figuras", () => {
     const parsed = ToolManifest.parse({ id: "figuras", title: "Figuras", version: "0.1.0", figures: true });
     expect(parsed).toMatchObject({ scripts: [], styles: [], views: [], data: [], figures: true });

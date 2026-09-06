@@ -9,6 +9,13 @@ import { numberedIndex, plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
 import { NotFoundInSubject } from "../components/States";
+import {
+  EXERCISES_COLOR,
+  EXERCISES_LABEL,
+  EXERCISES_TYPE,
+  PageTypeTag,
+  TypeTag,
+} from "../components/TypeTag";
 import { useSubjectCtx } from "../context";
 import { pad2 } from "../model";
 import css from "./DivisionView.module.css";
@@ -132,12 +139,7 @@ export function DivisionView() {
                     {page.title}
                     {page.hub ? <span className={css.hub}>hub</span> : null}
                   </span>
-                  <span
-                    className={css.itemType}
-                    style={{ ["--tcol" as string]: model.typeColor(page.type) }}
-                  >
-                    {model.typeLabel(page.type)}
-                  </span>
+                  <PageTypeTag model={model} type={page.type} size="sm" className={css.itemType} />
                   <UiIcon name="chevronRight" size={14} className={css.arrow} />
                 </Link>
               </li>
@@ -162,13 +164,19 @@ export function DivisionView() {
           <div className={css.groupGrid}>
             {parts.groups.map((group) => {
               const complete = group.total > 0 && group.done === group.total;
+              /* El mismo recuento que muestra la tarjeta viaja al tooltip. */
+              const count =
+                group.done > 0
+                  ? `${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`
+                  : `${group.total} ${plural(group.total, "ejercicio", "ejercicios")}`;
               const body = (
                 <>
-                  <span className={css.groupTitle}>{group.label}</span>
+                  <span className={css.groupHead}>
+                    <span className={css.groupTitle}>{group.label}</span>
+                    <TypeTag type={EXERCISES_TYPE} label={EXERCISES_LABEL} color={EXERCISES_COLOR} size="sm" />
+                  </span>
                   <span className={css.groupMeta}>
-                    {group.done > 0
-                      ? `${group.done} de ${group.total} ${plural(group.total, "resuelto", "resueltos")}`
-                      : `${group.total} ${plural(group.total, "ejercicio", "ejercicios")}`}
+                    {count}
                     {complete ? <span className={css.groupDone}>completo</span> : null}
                   </span>
                   <span className={css.groupTrack} aria-hidden="true">
@@ -183,12 +191,27 @@ export function DivisionView() {
                  que no lo sea deja la tarjeta sin enlace: la plataforma no
                  navega a donde no sabe. */
               return group.to && group.to.startsWith("/") ? (
-                <Link key={group.id} className={css.group} to={group.to}>
+                <Link
+                  key={group.id}
+                  className={css.group}
+                  to={group.to}
+                  data-tip-title={group.label}
+                  data-tip-kicker={`${division.short} · ${EXERCISES_LABEL}`}
+                  data-tip-text={count}
+                  data-tip-meta={group.source}
+                >
                   {body}
                   <UiIcon name="chevronRight" size={14} className={css.arrow} />
                 </Link>
               ) : (
-                <div key={group.id} className={css.group}>
+                <div
+                  key={group.id}
+                  className={css.group}
+                  data-tip-title={group.label}
+                  data-tip-kicker={`${division.short} · ${EXERCISES_LABEL}`}
+                  data-tip-text={count}
+                  data-tip-meta={group.source}
+                >
                   {body}
                 </div>
               );
@@ -222,7 +245,7 @@ export function DivisionView() {
                   <span className={css.sourceBody}>
                     <span className={css.sourceTitle}>{page.title}</span>
                     <span className={css.sourceMeta}>
-                      {division.short} · {model.typeLabel(page.type)}
+                      {division.short} · <PageTypeTag model={model} type={page.type} size="sm" />
                       {page.format ? ` · ${page.format}` : ""}
                       {model.studied.has(page.slug) ? (
                         <span className={css.readMark}>

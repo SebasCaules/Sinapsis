@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { plural, routes, type PageMeta, type PlanPhase } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { localToday, useActivity } from "../activity";
+import { PageTypeTag } from "../components/TypeTag";
 import { useSubjectCtx } from "../context";
 import type { RailGroupView, RailItemView, SubjectModel } from "../model";
 import type { StudyModel } from "../study/model";
@@ -530,7 +531,7 @@ function MiniCard({ model, slug, page }: { model: SubjectModel; slug: string; pa
     >
       <span className={css.miniTitle}>{page.title}</span>
       <span className={css.miniMeta}>
-        {division?.short ?? "—"} · {model.typeLabel(page.type)}
+        {division?.short ?? "—"} · <PageTypeTag model={model} type={page.type} size="sm" />
         {read ? <span className={css.miniRead}> · ✓ leída</span> : null}
       </span>
     </Link>
