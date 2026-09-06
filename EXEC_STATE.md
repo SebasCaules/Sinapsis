@@ -33,7 +33,7 @@ Workers y verificadores de ola: Opus 5. Auditoría final: modelo N0.
 | S1-11 web lector | DONE | ola1 | 147 nodos KaTeX, 28 wikilinks, callout; H1 duplicado corregido por el orquestador |
 | S1-12 web catálogo + búsqueda | DONE | ola1 | filtros en URL, paleta ⌘K |
 | S1-13 e2e + smoke visual | DONE | ola2 | 24 E2E verdes; smoke manual real; capturas 3 temas |
-| S1-14 auditoría final | DOING | | seguridad 4/4 corregidos; corrección 5/5 corregidos; UX pendiente |
+| S1-14 auditoría final | DOING | | seguridad 4/4 · corrección 5/5 · UX 35 + simplificación 46 hallazgos → ola 3 de fixers (S, W1, W2) |
 | S1-15 docs | TODO | | ola 3 |
 
 ## Ownership de archivos (ola 1)
@@ -84,6 +84,17 @@ Descartado por el auditor con evidencia: inyección SQL/FTS5, IDOR, comparación
 ## Auditoría final — E2E
 
 24 pruebas Playwright (auth, landing, shell, lector, catálogo/búsqueda, temas) en verde antes y después de los fixes; 0 bugs de la app detectados por la suite; capturas 1440×1024 en `e2e/shots/`.
+
+## Auditoría final — UX/fidelidad y simplificación (adjudicadas por el orquestador)
+
+UX: 35 hallazgos (4 bloqueantes, 15 importantes, 16 menores). Se corrigen todos salvo los que son decisiones de producto, que quedan en `docs/DECISIONS.md` (N0-20..N0-25) o en S-nn. Simplificación: reutilización 12, simplificación 12, eficiencia 12, altitud 10 → se aplican en la ola 3 (fixers S, W1, W2) salvo los diferidos de abajo.
+
+| # | fix diferido | superficie | origen | cuándo |
+|---|---|---|---|---|
+| S-06 | `pages_fts` con `subject_id UNINDEXED`: el MATCH recorre todas las materias; con 10 materias se puntúan 10× candidatos. Pasar a FTS externa (`content=pages`) filtrando por rowid. | apps/api fts | eficiencia 11 | Sprint 2 (cuando haya ≥ 3 materias) |
+| S-07 | Tabla `page_links(subject_id, from_slug, to_slug)` poblada en el sync para backlinks indexados (hoy: prefiltro LIKE + confirmación en JS). | apps/api | eficiencia 5 | Sprint 2 |
+| S-08 | Botones del hero de Inicio: la implementación dice «Continuar» / «Todo el wiki»; el mockup «Empezar por División 1» / «Ver herramientas de la materia». Decidir si el segundo debe llevar a las herramientas (Sprint 3) o al catálogo. | apps/web HomeView | UX 34 | revisión del usuario |
+| S-09 | Landing y materia comparten el mismo botón ⌘K pero uno filtra en línea y el otro abre una paleta que consulta el API. Confirmar la asimetría (hoy el placeholder de la landing dice «Filtrar materias…»). | apps/web | UX 12 | revisión del usuario |
 
 ## Veredicto final
 
