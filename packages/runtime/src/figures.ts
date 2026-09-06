@@ -208,6 +208,7 @@
      por unidad, que se cargan después de este.
    ============================================================ */
 import type { FigureContext, FigureDraw, FigureMeta } from "@sinapsis/contract";
+import { KATEX_TRUST } from "./markdown.js";
 
 /**
  * Tipo laxo del motor portado. El baseline es JavaScript sin tipos y las 92
@@ -460,7 +461,7 @@ export function createFigures(A: Loose): FiguresEngine {
     if ((window as Loose).katex && typeof (window as Loose).katex.render === "function") {
       try {
         (window as Loose).katex.render(String(str), node, {
-          throwOnError: false, strict: false, trust: true, macros: macros()
+          throwOnError: false, strict: false, trust: KATEX_TRUST, macros: macros()
         });
         return node;
       } catch (e) { /* cae al literal */ }

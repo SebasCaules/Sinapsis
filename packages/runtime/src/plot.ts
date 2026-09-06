@@ -458,7 +458,9 @@ export function createPlot(A: Loose): Record<string, unknown> {
         st = "background:" + (it.alpha != null ? alpha(c, it.alpha) : c) + ";";
       }
       var lbl = A.escapeHtml ? A.escapeHtml(it.label) : String(it.label);
-      return '<span><i class="pw-sw" style="' + st + '"></i>' + lbl + "</span>";
+      // el color también va dentro de un atributo: una comilla lo cerraría (AS S3-A4)
+      var sty = A.escapeHtml ? A.escapeHtml(st) : String(st).replace(/"/g, "&quot;");
+      return '<span><i class="pw-sw" style="' + sty + '"></i>' + lbl + "</span>";
     }).join("");
     return host;
   }

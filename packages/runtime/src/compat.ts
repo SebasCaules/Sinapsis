@@ -220,7 +220,9 @@ function shuffle<T>(a: T[]): T[] {
 
 /** ¿Es una URL externa (se abre en pestaña nueva)? */
 function isExternal(t: string): boolean {
-  return /^(https?:)?\/\//i.test(t) || /^mailto:/i.test(t);
+  /* `//host`, `/\host` y `\/host` resuelven todos a OTRO origen (el router los
+     empujaría con `location.assign`): los tres son externos, no rutas del SPA. */
+  return /^(https?:)?[/\\]{2}/i.test(t) || /^mailto:/i.test(t);
 }
 
 /**

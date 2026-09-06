@@ -211,6 +211,8 @@ describe("bundles de herramientas", () => {
       expect(res.status, path).toBe(200);
       expect(res.headers.get("content-type") ?? "", path).toContain(tipo);
       expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+      // un .svg abierto como documento no puede ejecutar nada en el origen (AS S3-A1)
+      expect(res.headers.get("content-security-policy")).toContain("sandbox");
       expect(res.headers.get("cache-control")).toBe("private, max-age=0, must-revalidate");
       expect(res.headers.get("etag") ?? "").toMatch(/^"[0-9a-f]{32}"$/);
     }

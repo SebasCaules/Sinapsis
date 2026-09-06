@@ -17,6 +17,7 @@
        no del contrato.
    ============================================================ */
 import katex from "katex";
+import type { TrustContext } from "katex";
 import { Marked, type Tokens } from "marked";
 import { headingId, routes } from "@sinapsis/contract";
 
@@ -37,13 +38,24 @@ export function escapeHtml(s: unknown): string {
 }
 
 /** KaTeX con las macros del baseline; si falla, deja el TeX en un `<code>`. */
+/** Política de `trust` de KaTeX compartida por el runtime: `http`, `https` y rutas relativas. */
+export function KATEX_TRUST(ctx: TrustContext): boolean {
+  /* Los comandos con URL (`\url`, `\href`, `\includegraphics`) solo con protocolos que
+     no pueden volverse código; `\htmlClass`/`\htmlId`/`\htmlStyle`/`\htmlData` (sin
+     URL) siguen permitidos como en el baseline. */
+  if (!("url" in ctx)) return true;
+  return ctx.protocol === "http" || ctx.protocol === "https" || ctx.protocol === "_relative";
+}
+
 export function katexRender(tex: string, display?: boolean): string {
   try {
     return katex.renderToString(tex, {
       displayMode: !!display,
       throwOnError: false,
       strict: false,
-      trust: true,
+      /* Solo protocolos que no pueden volverse código: el texto del wiki es dato,
+         no HTML (N0-10). `trust: true` dejaba pasar `\href{javascript:…}`. */
+      trust: KATEX_TRUST,
       macros: KATEX_MACROS,
     });
   } catch {

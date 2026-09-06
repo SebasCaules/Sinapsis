@@ -117,3 +117,11 @@ describe("enhanceDoc", () => {
     expect(root.querySelector(".table-wrap table")).not.toBeNull();
   });
 });
+
+describe("katexRender — política de trust", () => {
+  it("no deja pasar \\href{javascript:…} y sí http(s)", async () => {
+    const { katexRender } = await import("../src/markdown.js");
+    expect(katexRender("\\href{javascript:alert(1)}{p}")).not.toContain('href="javascript:');
+    expect(katexRender("\\href{https://example.org}{p}")).toContain('href="https://example.org"');
+  });
+});

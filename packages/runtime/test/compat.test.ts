@@ -48,6 +48,13 @@ describe("App.go — traducción de rutas del baseline", () => {
     expect(open).toHaveBeenCalledWith("https://example.org/tabla", "_blank", "noopener");
     expect(ctx.navigated).toHaveLength(0);
   });
+  it("trata `/\\host` y `\\/host` como externos (resuelven a otro origen)", () => {
+    expect(translateRoute("proba", "/\\evil.com")).toBeNull();
+    expect(translateRoute("proba", "\\/evil.com")).toBeNull();
+    expect(translateRoute("proba", "//evil.com")).toBeNull();
+    expect(translateRoute("proba", "/m/proba/p/normal")).toBe("/m/proba/p/normal");
+  });
+
   it("translateRoute conserva la query del hash", () => {
     expect(translateRoute("proba", "#/explorador/binomial?n=10")).toBe(
       "/m/proba/t/explorador?arg=binomial&n=10",

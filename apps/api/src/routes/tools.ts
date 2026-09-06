@@ -188,6 +188,11 @@ export function toolRoutes(): Hono<AppBindings> {
       "cache-control": CACHE_CONTROL,
       etag,
       "x-content-type-options": "nosniff",
+      /* Un archivo de bundle nunca es un documento: si alguien navega a un .svg,
+         que no pueda ejecutar nada en el origen de la plataforma. La CSP de una
+         respuesta se ignora al cargarla como subrecurso, así que los .js/.css del
+         manifiesto siguen funcionando igual (auditoría AS S3-A1). */
+      "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
     };
     if (matchesEtag(c.req.header("if-none-match"), etag)) return c.body(null, 304, headers);
 
