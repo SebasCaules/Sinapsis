@@ -35,7 +35,8 @@ test.afterAll(async () => {
 test("el plan dibuja las fases que declara la materia", async ({ page, request }) => {
   const plan = (await studyContent(request, subject.slug)).plan;
   if (!plan) throw new Error("La siembra no trajo plan de estudio");
-  expect(plan.phases.length).toBe(6);
+  // `phases` es la modalidad por defecto (N0-43): con `tracks`, las demás fases viven en su modalidad.
+  expect(plan.phases.length).toBeGreaterThan(0);
 
   await openPlan(page);
 

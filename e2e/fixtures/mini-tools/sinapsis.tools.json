@@ -1,0 +1,11 @@
+{
+  "id": "mini-demo",
+  "title": "Herramientas de Materia Demo",
+  "version": "1.0.0",
+  "description": "Bundle mínimo de la siembra E2E: una vista y una figura.",
+  "runtime": 1,
+  "scripts": ["demo.js"],
+  "styles": ["demo.css"],
+  "views": [{ "id": "demo", "label": "Vista de demostración", "icon": "flask", "layout": "wide" }],
+  "figures": true
+}

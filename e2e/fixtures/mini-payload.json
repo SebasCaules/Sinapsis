@@ -30,6 +30,7 @@
         "label": "Resolver",
         "color": "--accent",
         "items": [
+          { "id": "demo", "label": "Vista de demostración", "icon": "flask", "kind": "tool", "target": "demo" },
           { "id": "calc", "label": "Calculadoras", "icon": "calc", "kind": "tool", "target": "calc" }
         ]
       },
@@ -173,7 +174,7 @@
         { "level": 2, "text": "Semana 02", "id": "semana-02" },
         { "level": 2, "text": "Semana 03", "id": "semana-03" }
       ],
-      "body": "# Repaso general\n\n## Semana 01\n\nVocabulario y la identidad $e^{i\\pi} + 1 = 0$.\n\n## Semana 02\n\nEjemplos y [[demo-tecnica|la técnica]] de cuatro pasos.\n\n## Semana 03\n\nCierre y evaluación.\n\n$$ \\sum_{k=0}^{n-1} e^{2\\pi i k/n} = 0, \\qquad n \\ge 2. $$\n",
+      "body": "# Repaso general\n\n## Semana 01\n\nVocabulario y la identidad $e^{i\\pi} + 1 = 0$.\n\n> [!figura] demo-fig\n> La parábola que dibuja el bundle mínimo de la materia.\n\n## Semana 02\n\nEjemplos y [[demo-tecnica|la técnica]] de cuatro pasos.\n\n## Semana 03\n\nCierre y evaluación.\n\n$$ \\sum_{k=0}^{n-1} e^{2\\pi i k/n} = 0, \\qquad n \\ge 2. $$\n",
       "words": 58
     },
     {

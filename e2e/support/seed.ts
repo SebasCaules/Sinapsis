@@ -17,11 +17,20 @@ export const API_ORIGIN = "http://localhost:3100";
 export const WEB_ORIGIN = "http://localhost:5174";
 export const SYNC_TOKEN = "e2e-token";
 
-/** Vault de Proba en la máquina del autor; si no está, se siembra el fixture. */
-export const PROBA_VAULT = path.join(
-  process.env["HOME"] ?? "",
-  "Desktop/ITBA/26-1C/Proba_Obsidian/wiki",
-);
+/**
+ * Vault de Proba en la máquina del autor; si no está, se siembra el fixture.
+ *
+ * `SINAPSIS_E2E_VAULT` lo reemplaza: apuntándolo a una ruta que no existe se
+ * fuerza el camino del fixture (`mini-payload.json` + `mini-tools/`), que es la
+ * única forma de ejercitarlo en una máquina que sí tiene el vault.
+ */
+export const PROBA_VAULT =
+  process.env["SINAPSIS_E2E_VAULT"] ??
+  path.join(process.env["HOME"] ?? "", "Desktop/ITBA/26-1C/Proba_Obsidian/wiki");
+
+/** Carpeta del bundle de herramientas que sube la siembra en cada modo. */
+export const PROBA_BUNDLE = path.join(REPO_ROOT, "examples/proba/tools/proba-tools");
+export const MINI_BUNDLE = path.join(E2E_DIR, "fixtures/mini-tools");
 
 /** Cuerpo exacto de `POST /api/subjects` con el que se sembró cada tarjeta. */
 export interface CreateSubjectBody {
@@ -32,6 +41,21 @@ export interface CreateSubjectBody {
   semester: string;
   color: string;
   division: { singular: string; abbr: string; plural: string };
+}
+
+/** Bundle de herramientas que publicó la siembra (Sprint 3 · N0-41). */
+export interface SeedTools {
+  /** Id del manifiesto: es el de la URL del bundle. */
+  id: string;
+  title: string;
+  /** Vistas registradas, en el orden del manifiesto. */
+  views: Array<{ id: string; label: string }>;
+  /** La vista que abren las specs (la primera del manifiesto). */
+  view: { id: string; label: string };
+  /** true si el bundle registra figuras para los callouts `[!figura]`. */
+  figures: boolean;
+  /** Archivos que viajaron en el push. */
+  files: number;
 }
 
 export interface SeedManifest {
@@ -63,6 +87,12 @@ export interface SeedManifest {
   filterPage: { slug: string; title: string; term: string; division: string };
   /** Término de la paleta ⌘K y el título que debe encabezar los resultados. */
   palette: { term: string; expected: string };
+  /** Bundle de herramientas publicado en la materia sembrada. */
+  tools: SeedTools;
+  /** Ítems `kind: "tool"` del rail del config, con la vista que abre cada uno. */
+  railTools: Array<{ id: string; label: string; target: string }>;
+  /** Página con un `> [!figura]` y el id de la primera figura que declara. */
+  figurePage: { slug: string; title: string; fig: string };
   /** Materia placeholder creada con POST /api/subjects. */
   placeholder: { slug: string; name: string; semester: string };
   /** Las dos tarjetas de la landing sembrada, para poder reponerlas. */
@@ -93,6 +123,19 @@ const FALLBACK: SeedManifest = {
   catalogDivision: "1",
   filterPage: { slug: "demo-tecnica", title: "Técnica de resolución", term: "técnica", division: "2" },
   palette: { term: "formula", expected: "Fórmula clave" },
+  tools: {
+    id: "mini-demo",
+    title: "Herramientas de Materia Demo",
+    views: [{ id: "demo", label: "Vista de demostración" }],
+    view: { id: "demo", label: "Vista de demostración" },
+    figures: true,
+    files: 2,
+  },
+  railTools: [
+    { id: "demo", label: "Vista de demostración", target: "demo" },
+    { id: "calc", label: "Calculadoras", target: "calc" },
+  ],
+  figurePage: { slug: "demo-repaso", title: "Repaso general", fig: "demo-fig" },
   placeholder: { slug: "demo-b", name: "Materia Demo B", semester: "2025-2C" },
   landing: [],
 };

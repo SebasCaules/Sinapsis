@@ -4,8 +4,9 @@
  * pruebas corren en un solo worker sobre UNA sola base, así que el aislamiento
  * lo da la reposición explícita, no un usuario por prueba.
  */
+import path from "node:path";
 import { request as playwrightRequest, type APIRequestContext, type Page } from "@playwright/test";
-import { API_ORIGIN, STORAGE_STATE, readSeed } from "./seed";
+import { API_ORIGIN, REPO_ROOT, STORAGE_STATE, readSeed } from "./seed";
 
 /**
  * Contexto de API con la cookie sembrada. `beforeAll` / `afterAll` no reciben la
@@ -29,6 +30,8 @@ export interface LandingCard {
   position: number;
   pagesCount: number;
   studiedCount: number;
+  /** Tarjetas SRS vencidas de la materia (Sprint 3): el «N para repasar». */
+  dueCount: number;
   placeholder: boolean;
 }
 
@@ -120,10 +123,23 @@ export interface StudyQuizDto {
   }>;
 }
 
+export interface PlanPhaseDto {
+  id: string;
+  title: string;
+}
+
+/** Modalidad del plan (Sprint 3 · N0-43): su propia lista de fases. */
+export interface PlanTrackDto {
+  id: string;
+  label: string;
+  description?: string;
+  phases: PlanPhaseDto[];
+}
+
 export interface StudyContentDto {
   decks: StudyDeckDto[];
   quizzes: StudyQuizDto[];
-  plan: { title: string; phases: Array<{ id: string; title: string }> } | null;
+  plan: { title: string; phases: PlanPhaseDto[]; tracks?: PlanTrackDto[] } | null;
   kits: Array<{ id: string; title: string }>;
 }
 
@@ -189,4 +205,76 @@ export async function currentTheme(page: Page): Promise<string | null> {
 /** Espera a que el shell de la materia esté dibujado (no el armazón de carga). */
 export async function waitForSubjectShell(page: Page): Promise<void> {
   await page.locator('nav[aria-label="Secciones de la materia"]').waitFor();
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 3 · herramientas y tarjetas vencidas
+// ---------------------------------------------------------------------------
+
+/** `ToolInfo` del contrato, con lo que leen las specs. */
+export interface ToolInfoDto {
+  manifest: {
+    id: string;
+    title: string;
+    version: string;
+    views: Array<{ id: string; label: string; layout: "wide" | "full" }>;
+    figures: boolean;
+    scripts: string[];
+    styles: string[];
+  };
+  bytes: number;
+  updatedAt: string;
+  /** Base de los archivos del bundle, sin barra final. */
+  base: string;
+}
+
+/** `GET /api/subjects/:slug/tools`: los bundles publicados de la materia. */
+export async function subjectTools(request: APIRequestContext, slug: string): Promise<ToolInfoDto[]> {
+  const res = await request.get(url(`/subjects/${slug}/tools`));
+  if (!res.ok()) throw new Error(`GET /api/subjects/${slug}/tools → ${res.status()} ${await res.text()}`);
+  return (await res.json()) as ToolInfoDto[];
+}
+
+/** Archivo SQLite del API de la suite (`DATABASE_URL=file:./data/e2e.db`). */
+const E2E_DB = path.join(REPO_ROOT, "apps/api/data/e2e.db");
+
+/**
+ * Atrasa el vencimiento de TODAS las tarjetas SRS de una materia y devuelve
+ * cuántas filas tocó.
+ *
+ * Es la única cosa de la suite que escribe en la base sin pasar por el API, y no
+ * por comodidad: `PUT .../study/srs/:cardId` corre el SM-2 del contrato, que
+ * SIEMPRE deja la próxima revisión en el futuro —con nota 1, diez minutos—, así
+ * que por HTTP no hay forma de dejar una tarjeta vencida. El `dueCount` de la
+ * landing cuenta `due <= ahora`, de modo que sin esto la única prueba posible
+ * sería esperar diez minutos. Los tests del API hacen lo mismo (insertan filas
+ * con `due` de ayer) por la misma razón.
+ *
+ * Lo que se prueba sigue siendo del producto: el conteo lo calcula el API y la
+ * tarjeta la dibuja la web.
+ */
+export async function expireSrsCards(slug: string, at?: Date): Promise<number> {
+  const due = (at ?? new Date(Date.now() - 24 * 60 * 60 * 1000)).toISOString();
+
+  let DatabaseSync: new (file: string) => {
+    prepare: (sql: string) => { run: (...params: unknown[]) => { changes: number | bigint } };
+    close: () => void;
+  };
+  try {
+    ({ DatabaseSync } = (await import("node:sqlite")) as never);
+  } catch (cause) {
+    throw new Error(
+      `Vencer tarjetas necesita «node:sqlite» (Node ≥ 22.5) y no se pudo cargar: ${String(cause)}`,
+    );
+  }
+
+  const db = new DatabaseSync(E2E_DB);
+  try {
+    const statement = db.prepare(
+      "UPDATE srs_cards SET due = ? WHERE subject_id = (SELECT id FROM subjects WHERE slug = ?)",
+    );
+    return Number(statement.run(due, slug).changes);
+  } finally {
+    db.close();
+  }
 }

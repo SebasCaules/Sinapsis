@@ -24,6 +24,15 @@
  *      usuario dev (el sync NO la agrega: es global, ver N0-6) y para crear la
  *      materia placeholder "Materia Demo B" (slug demo-b, 2025-2C).
  *      Se verifica con GET /api/landing.
+ *   d) Publica el BUNDLE DE HERRAMIENTAS de la materia (Sprint 3 · N0-41):
+ *      · con el vault real, el bundle de verdad de Proba
+ *        (`examples/proba/tools/proba-tools`: 5 vistas y las figuras del wiki);
+ *      · con el fixture, el bundle mínimo `fixtures/mini-tools/` (una vista
+ *        «demo» y una figura «demo-fig»).
+ *      Se construye con el MISMO `buildBundle` que usa `sinapsis tools build`
+ *      —así la siembra falla igual que el CLI si el bundle está roto— y se sube
+ *      con `PUT /api/subjects/:slug/tools/:id` y el token de sync, que es lo que
+ *      hace `tools push`. Se verifica con GET /api/subjects/:slug/tools.
  *
  * Deja `.auth/seed.json` con qué camino se tomó, para que las specs adapten sus
  * aserciones (ver `support/seed.ts`).
@@ -34,6 +43,8 @@ import {
   API_ORIGIN,
   AUTH_DIR,
   E2E_DIR,
+  MINI_BUNDLE,
+  PROBA_BUNDLE,
   PROBA_VAULT,
   REPO_ROOT,
   SEED_FILE,
@@ -42,6 +53,7 @@ import {
   SYNC_TOKEN,
   type CreateSubjectBody,
   type SeedManifest,
+  type SeedTools,
 } from "./support/seed";
 
 /**
@@ -53,6 +65,41 @@ interface SyncPayloadLike {
   config: Record<string, unknown>;
   pages: unknown[];
   study?: { decks: unknown[]; quizzes: unknown[]; plan: unknown; kits: unknown[] };
+}
+
+/** Página del payload, con lo que la siembra mira de adentro. */
+interface PageLike {
+  slug: string;
+  title: string;
+  division?: string;
+  body: string;
+}
+
+/** Lo que la siembra usa del bundle que devuelve `buildBundle` del CLI. */
+interface BuiltBundleLike {
+  manifest: {
+    id: string;
+    title: string;
+    views: Array<{ id: string; label: string }>;
+    figures: boolean;
+  };
+  push: { manifest: unknown; files: Array<{ path: string; content: string }> };
+  bytes: number;
+  /** Código de la carpeta que el manifiesto no declara (no se sube). */
+  ignored: string[];
+  /** Archivos con extensión ajena al contrato (no se suben). */
+  skipped: string[];
+}
+
+type BuildOutcomeLike =
+  | { ok: true; bundle: BuiltBundleLike }
+  | { ok: false; problems: Array<{ where: string; message: string }> };
+
+interface ToolInfoDto {
+  manifest: { id: string; views: Array<{ id: string; label: string }> };
+  bytes: number;
+  updatedAt: string;
+  base: string;
 }
 
 interface SyncResultDto {
@@ -176,6 +223,60 @@ async function compileProba(): Promise<{ payload: SyncPayloadLike; warnings: str
   });
 }
 
+/**
+ * Construye el bundle de herramientas con el MISMO código que `sinapsis tools
+ * build` (`packages/cli/src/tools/bundle.ts`): valida el manifiesto, comprueba
+ * que cada archivo declarado exista y que cada script parsee. Un bundle roto
+ * corta la siembra acá, con el problema que reportaría el CLI.
+ */
+async function buildTools(dir: string): Promise<BuiltBundleLike> {
+  const { buildBundle } = (await import("../packages/cli/src/tools/bundle.js")) as {
+    buildBundle: (dir: string, opts?: { minify?: boolean }) => Promise<BuildOutcomeLike>;
+  };
+
+  const outcome = await buildBundle(dir);
+  if (!outcome.ok) {
+    const detail = outcome.problems.map((p) => `${p.where}: ${p.message}`).join(" · ");
+    throw new Error(`Siembra E2E — el bundle de ${dir} no se puede publicar: ${detail}`);
+  }
+  return outcome.bundle;
+}
+
+/**
+ * Página con la que corre `figures.spec.ts` y el id de su primera figura. El id
+ * sale del propio callout (`> [!figura] <id>`) y se comprueba que algún script
+ * del bundle lo registre: si no, la figura se dibujaría como «no registrada» y
+ * la spec fallaría sin decir por qué.
+ */
+function figurePageOf(
+  pages: PageLike[],
+  slug: string,
+  bundle: BuiltBundleLike,
+): { slug: string; title: string; fig: string } {
+  const page = pages.find((p) => p.slug === slug);
+  if (!page) {
+    throw new Error(`Siembra E2E — la página de figuras «${slug}» no está en el payload sincronizado`);
+  }
+  const found = page.body.match(/^>[ \t]*\[!figura\][ \t]+(\S+)/m);
+  if (!found?.[1]) {
+    throw new Error(`Siembra E2E — «${slug}» ya no trae ningún callout «> [!figura] <id>»`);
+  }
+  const fig = found[1];
+
+  // `registerFigure(` y el id pueden estar en líneas distintas y con comillas
+  // simples o dobles: el bundle lo escribe como quiere.
+  const call = new RegExp(`registerFigure\\(\\s*["']${fig.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`);
+  const registered = bundle.push.files.some(
+    (file) => file.path.endsWith(".js") && call.test(file.content),
+  );
+  if (!registered) {
+    throw new Error(
+      `Siembra E2E — ningún script de «${bundle.manifest.id}» registra la figura «${fig}» que pide ${slug}`,
+    );
+  }
+  return { slug: page.slug, title: page.title, fig };
+}
+
 export default async function globalSetup(): Promise<void> {
   mkdirSync(AUTH_DIR, { recursive: true });
   mkdirSync(SHOTS_DIR, { recursive: true });
@@ -262,9 +363,56 @@ export default async function globalSetup(): Promise<void> {
     }
   }
 
+  // --- (d) bundle de herramientas -------------------------------------------
+  const bundle = await buildTools(useProba ? PROBA_BUNDLE : MINI_BUNDLE);
+  const toolId = bundle.manifest.id;
+  const pushed = await api("PUT", `/subjects/${slug}/tools/${toolId}`, {
+    body: bundle.push,
+    token: SYNC_TOKEN,
+  });
+  // 201 la primera vez, 200 si el bundle ya estaba (base reusada).
+  if (pushed.status !== 200 && pushed.status !== 201) {
+    fail(`PUT /api/subjects/${slug}/tools/${toolId}`, pushed.status, pushed.body);
+  }
+
+  const published = await api("GET", `/subjects/${slug}/tools`, { cookie: cookieHeader });
+  if (published.status !== 200) fail(`GET /api/subjects/${slug}/tools`, published.status, published.body);
+  const infos = published.body as ToolInfoDto[];
+  const info = infos.find((t) => t.manifest.id === toolId);
+  if (!info) {
+    throw new Error(`Siembra E2E — «${toolId}» no quedó publicado: ${JSON.stringify(infos)}`);
+  }
+  /* Sin vistas, `/m/<materia>/t/<vista>` no tendría nada que montar y
+     `tools.spec.ts` probaría el estado «Próximamente» creyendo que prueba una
+     herramienta. */
+  const view = bundle.manifest.views[0];
+  if (!view) throw new Error(`Siembra E2E — el bundle «${toolId}» no declara ninguna vista`);
+
+  const tools: SeedTools = {
+    id: toolId,
+    title: bundle.manifest.title,
+    views: bundle.manifest.views.map((v) => ({ id: v.id, label: v.label })),
+    view: { id: view.id, label: view.label },
+    figures: bundle.manifest.figures,
+    files: bundle.push.files.length,
+  };
+
   // --- manifiesto para las specs --------------------------------------------
   const divisions = config["divisions"] as Array<{ key: string }>;
   const pages = payload.pages as Array<{ division?: string }>;
+  const railGroups = (config["rail"] ?? []) as Array<{
+    items?: Array<{ id: string; label: string; kind: string; target: string }>;
+  }>;
+  const railTools = railGroups
+    .flatMap((group) => group.items ?? [])
+    .filter((item) => item.kind === "tool")
+    .map((item) => ({ id: item.id, label: item.label, target: item.target }));
+
+  const figurePage = figurePageOf(
+    payload.pages as PageLike[],
+    useProba ? "tecnica-derivadas-parciales" : "demo-repaso",
+    bundle,
+  );
   const usedDivisions = new Set(pages.map((p) => p.division ?? "meta"));
   const declaredKeys = new Set(divisions.map((d) => d.key));
   const visible =
@@ -298,6 +446,9 @@ export default async function globalSetup(): Promise<void> {
           division: "7",
         },
         palette: { term: "normal", expected: "Distribución Normal" },
+        tools,
+        railTools,
+        figurePage,
         placeholder: PLACEHOLDER,
         landing: landingBodies,
       }
@@ -319,6 +470,9 @@ export default async function globalSetup(): Promise<void> {
         catalogDivision: "1",
         filterPage: { slug: "demo-tecnica", title: "Técnica de resolución", term: "técnica", division: "2" },
         palette: { term: "formula", expected: "Fórmula clave" },
+        tools,
+        railTools,
+        figurePage,
         placeholder: PLACEHOLDER,
         landing: landingBodies,
       };
@@ -340,6 +494,14 @@ export default async function globalSetup(): Promise<void> {
         `${n(study.quizzes.length, "quiz", "quizzes")}, ${study.plan ? "plan" : "sin plan"}, ` +
         `${n(study.kits.length, "kit", "kits")}.`,
     );
+  }
+  console.log(
+    `[e2e] herramientas: ${toolId} ${bundle.push.files.length} archivos ` +
+      `(${Math.round(bundle.bytes / 1024)} KB) · vistas: ${tools.views.map((v) => v.id).join(", ")} · ` +
+      `figuras: ${tools.figures ? "sí" : "no"}; página con figura: ${figurePage.slug} (${figurePage.fig}).`,
+  );
+  if (bundle.ignored.length) {
+    console.log(`[e2e] scripts del bundle sin declarar (no se suben): ${bundle.ignored.length}`);
   }
   if (warnings.length) console.log(`[e2e] avisos del compilador: ${warnings.length}`);
   if (synced.warnings.length) console.log(`[e2e] avisos del sync: ${synced.warnings.length}`);

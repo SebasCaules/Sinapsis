@@ -19,6 +19,10 @@ const API_ENV = [
   "AUTH_DEV_BYPASS=1",
   "SESSION_SECRET=e2e-secret-e2e-secret-e2e-secret-1234",
   "SYNC_TOKEN=e2e-token",
+  // Los bundles de herramientas se guardan en disco (`TOOLS_DIR`): con una
+  // carpeta propia, la suite no toca la del entorno de desarrollo y el borrado
+  // de abajo la deja limpia en cada corrida.
+  "TOOLS_DIR=./data/e2e-tools",
   "GOOGLE_CLIENT_ID=",
   "WEB_DIST=",
 ].join(" ");
@@ -44,7 +48,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: `rm -f apps/api/data/e2e.db apps/api/data/e2e.db-wal apps/api/data/e2e.db-shm && ${API_ENV} pnpm --filter @sinapsis/api exec tsx src/index.ts`,
+      command: `rm -f apps/api/data/e2e.db apps/api/data/e2e.db-wal apps/api/data/e2e.db-shm && rm -rf apps/api/data/e2e-tools && ${API_ENV} pnpm --filter @sinapsis/api exec tsx src/index.ts`,
       url: `http://localhost:${API_PORT}/api/health`,
       reuseExistingServer: false,
       timeout: 60_000,

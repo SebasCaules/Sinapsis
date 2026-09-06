@@ -1,0 +1,15 @@
+/* Estilos del bundle mínimo: el manifiesto los declara, así que el runtime los
+   inyecta con el bundle y los quita al salir de la materia. */
+.demo {
+  max-width: 1120px;
+}
+
+.demo h2 {
+  margin: 0 0 8px;
+  font: 600 18px var(--font-ui, sans-serif);
+  color: var(--text, inherit);
+}
+
+.demo-plot {
+  margin-block: 16px;
+}
