@@ -165,8 +165,8 @@ Iniciado el 2026-09-06 en autopilot; decisiones N0-40… en `docs/DECISIONS.md`.
 | S3-05 bundle Proba | DONE | | 22 archivos, 912 kB, 5 vistas, 92 figuras |
 | S3-06 web ToolHost/figuras/tracks/dueCount/grafo | DONE | | 217 tests web |
 | S3-07 /sinapsis-review + propuesta de prueba | DOING | 5752f5d | Q5: flujo feliz + 5 casos negativos en un clon, 11 fricciones corregidas (43 tests CLI); falta la propuesta real con el árbol limpio (la hace el orquestador al cierre) |
-| S3-08 E2E + diseño + fidelidad | DOING | 48e78c4 | E5: 60 E2E (13 nuevas) · F5 y D5 en curso; N0-47 (páginas truncadas por `$$`) hallado en el smoke del orquestador |
-| S3-09 auditoría | TODO | | ola 3 |
+| S3-08 E2E + diseño + fidelidad | DONE | 48e78c4 6f42c59 b6b8d60 | E5: 60 E2E (13 nuevas) · D5: 36 pantallas × 3 temas × 4 anchos, 33 fallas (25 corregidas) en `docs/DISENO-sprint3.md` · F5: 20 pantallas pareadas con la app original, 34 diferencias (25 intencionales, 9 defectos) en `docs/FIDELIDAD-sprint3.md`; los 7 defectos fuera de ownership los cierra X5 (ola 3) · N0-47 hallado en el smoke del orquestador |
+| S3-09 auditoría | DOING | | ola 3 · AS (seguridad) y AC (corrección) en paralelo con X5 |
 | S3-10 contratos consolidados + handoff | TODO | | cierre |
 
 Ownership ola 1: A4 `apps/api/**` · B4 `packages/cli/**`, `packages/markdown/**`, `packages/contract/src/*.test.ts`, `skills/**`, `docs/PROPOSALS.md`(no), `examples/proba/estudio/**` · R4 `packages/runtime/**` · P4 `examples/proba/tools/**` · D4 `apps/web/**` salvo `router.tsx` · orquestador: contrato, docs, `proposals/`.
