@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countWords, extractHeadings, extractLinks, firstH1, slugifyAnchor } from "./inline.js";
+import { countWords, extractHeadings, extractLinks, firstH1, normalizeDisplayMath, slugifyAnchor } from "./inline.js";
 
 describe("extractLinks", () => {
   it("lee las tres formas de wikilink", () => {
@@ -83,5 +83,32 @@ describe("firstH1", () => {
   it("devuelve el primer H1 o null", () => {
     expect(firstH1("texto\n# Título\n## Otro")).toBe("Título");
     expect(firstH1("## Solo H2")).toBeNull();
+  });
+});
+
+describe("normalizeDisplayMath", () => {
+  it("pone en líneas propias un $$ que abre con contenido y otro que cierra con contenido", () => {
+    const body = ["texto", "", "$$ \\frac{a}{b}", "\\to c. $$", "**Sigue** $m$."].join("\n");
+    expect(normalizeDisplayMath(body)).toBe(
+      ["texto", "", "$$", "\\frac{a}{b}", "\\to c.", "$$", "**Sigue** $m$."].join("\n"),
+    );
+  });
+
+  it("convierte `$$ x $$` solo en su línea en un bloque display", () => {
+    expect(normalizeDisplayMath("a\n$$ x^2 $$\nb")).toBe("a\n$$\nx^2\n$$\nb");
+    expect(normalizeDisplayMath("$$E[X]=\\mu$$")).toBe("$$\nE[X]=\\mu\n$$");
+  });
+
+  it("deja intactos los bloques ya bien formados, el inline dentro de texto y los bloques de código", () => {
+    const ok = ["$$", "x", "$$", "", "y $$z$$ w", "", "```", "$$ no toca", "```", "", "$a$ y $$b$$ y $$c$$"].join("\n");
+    expect(normalizeDisplayMath(ok)).toBe(ok);
+  });
+
+  it("respeta la sangría del contenido al partir el cierre", () => {
+    expect(normalizeDisplayMath("$$ a\n   b. $$")).toBe("$$\na\n   b.\n$$");
+  });
+
+  it("no confunde un $$ que solo cierra con un cierre inline", () => {
+    expect(normalizeDisplayMath("$$\na\n$$ b $$")).toBe("$$\na\n$$ b $$");
   });
 });

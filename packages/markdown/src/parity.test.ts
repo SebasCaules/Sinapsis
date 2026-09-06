@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { fold } from "@sinapsis/contract";
 import { compileWiki } from "./compile.js";
-import { countWords, splitLines } from "./inline.js";
+import { countWords, extractHeadings, normalizeDisplayMath, splitLines } from "./inline.js";
 
 const VAULT = process.env["SINAPSIS_PROBA_VAULT"] ?? path.join(homedir(), "Desktop/ITBA/26-1C/Proba_Obsidian");
 const DATA_JS = path.join(VAULT, "estudio", "data.js");
@@ -71,6 +71,19 @@ const TITLE_EXCEPTIONS = new Set(["indice", "log"]);
  * Todo lo demás (conjunto de páginas, title, type, division, order, links, ids
  * de encabezado y el resto del cuerpo) sigue siendo idéntico byte a byte.
  */
+/**
+ * Tercera divergencia deliberada (Sprint 3, N0-47): el compilador pone los `$$`
+ * de display en líneas propias (`normalizeDisplayMath`), porque remark-math no
+ * lee `$$ f(x)` ni `g(x) $$` como abre/cierra. `build.py` extraía la tabla de
+ * contenidos con un estado «dentro de $$» que solo cambiaba en líneas que
+ * EMPEZABAN con `$$`: un cierre `g(x) $$` lo dejaba abierto y los encabezados
+ * siguientes desaparecían del índice. Sobre el cuerpo normalizado esos
+ * encabezados vuelven; son exactamente estos.
+ */
+function recoveredHeadings(rawBody: string): number {
+  return extractHeadings(normalizeDisplayMath(rawBody)).length - extractHeadings(rawBody).length;
+}
+
 function h1LineIndex(body: string, title: string): number | null {
   const strip = (t: string) => fold(t).replace(/[*_`]/g, "").trim();
   const wanted = strip(title);
@@ -122,7 +135,7 @@ describe.skipIf(!available)("paridad con build.py (vault de Proba)", () => {
 
       // La única diferencia admitida: el H1 que repetía el título.
       const { removed } = withoutTitleH1(e.body, g.title);
-      const expectedHeadings = e.headings.length - (removed === null ? 0 : 1);
+      const expectedHeadings = e.headings.length - (removed === null ? 0 : 1) + recoveredHeadings(e.body);
       if (g.headings.length !== expectedHeadings) {
         diffs.push(`${slug}: headings ${g.headings.length} ≠ ${expectedHeadings}`);
       }
@@ -152,16 +165,22 @@ describe.skipIf(!available)("paridad con build.py (vault de Proba)", () => {
       if (!e) continue;
       const { body, removed } = withoutTitleH1(e.body, page.title);
       if (removed !== null) trimmed += 1;
-      if (page.body !== body) diffs.push(`${page.slug}: body`);
-      // El H1 recortado es siempre el primero, así que el resto se corre uno.
+      if (page.body !== normalizeDisplayMath(body)) diffs.push(`${page.slug}: body`);
+      // El H1 recortado es siempre el primero, así que el resto se corre uno; los
+      // encabezados que build.py se tragaba (ver `recoveredHeadings`) pueden
+      // aparecer intercalados, así que se comprueba que los de build.py estén
+      // todos, en orden, con el mismo id/texto/nivel.
       const offset = removed === null ? 0 : 1;
-      page.headings.forEach((h, i) => {
-        const expectedHeading = e.headings[i + offset];
-        if (!expectedHeading) return;
-        if (h.id !== expectedHeading.id || h.text !== expectedHeading.text || h.level !== expectedHeading.level) {
-          diffs.push(`${page.slug}: heading[${i}] ${JSON.stringify(h)} ≠ ${JSON.stringify(expectedHeading)}`);
+      let j = 0;
+      for (const expectedHeading of e.headings.slice(offset)) {
+        while (j < page.headings.length && page.headings[j]?.id !== expectedHeading.id) j += 1;
+        const h = page.headings[j];
+        if (!h || h.text !== expectedHeading.text || h.level !== expectedHeading.level) {
+          diffs.push(`${page.slug}: falta o difiere ${JSON.stringify(expectedHeading)}`);
+          break;
         }
-      });
+        j += 1;
+      }
     }
     expect(diffs.slice(0, 20).join("\n")).toBe("");
     // La divergencia es real y masiva: casi todas las páginas repetían el título.

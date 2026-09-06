@@ -7,7 +7,7 @@
 export { parseFrontmatter, parseScalarOrList, splitTopCommas, cleanWikilink } from "./frontmatter.js";
 export type { Frontmatter } from "./frontmatter.js";
 
-export { extractLinks, extractHeadings, slugifyAnchor, countWords, firstH1, firstH1Line, splitLines } from "./inline.js";
+export { extractLinks, extractHeadings, slugifyAnchor, countWords, firstH1, firstH1Line, splitLines, normalizeDisplayMath } from "./inline.js";
 
 /**
  * Normalizadores de texto: viven en `@sinapsis/contract` (una sola

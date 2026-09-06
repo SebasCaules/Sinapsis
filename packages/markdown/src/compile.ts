@@ -25,7 +25,7 @@ import {
   type SyncPayload as SyncPayloadType,
 } from "@sinapsis/contract";
 import { parseFrontmatter } from "./frontmatter.js";
-import { countWords, extractHeadings, extractLinks, firstH1Line } from "./inline.js";
+import { countWords, extractHeadings, extractLinks, firstH1Line, normalizeDisplayMath } from "./inline.js";
 import { compileStudy, isEmptyStudy } from "./study.js";
 import { PACKAGE_VERSION } from "./version.js";
 
@@ -176,7 +176,11 @@ export function compilePage(input: CompilePageInput): PageType {
   // El shell ya dibuja el título de la página: un H1 que solo lo repite sería un
   // segundo encabezado idéntico. Se recorta del cuerpo (y del índice de
   // encabezados) tanto si el título salió de ese H1 como si lo iguala.
-  const body = h1 && sameHeading(h1.text, title) ? dropLine(rawBody, h1.line) : rawBody;
+  // Los `$$` de display van en líneas propias: es lo único que remark-math lee
+  // igual que el baseline (ver `normalizeDisplayMath`).
+  const body = normalizeDisplayMath(
+    h1 && sameHeading(h1.text, title) ? dropLine(rawBody, h1.line) : rawBody,
+  );
 
   // --- orden ----------------------------------------------------------------
   let order: number | undefined;

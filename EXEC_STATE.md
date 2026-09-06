@@ -158,14 +158,14 @@ Iniciado el 2026-09-06 en autopilot; decisiones N0-40… en `docs/DECISIONS.md`.
 | paso | estado | commit | notas |
 |---|---|---|---|
 | F0 contrato + docs + propuestas | DONE | | ToolManifest, runtime types, Plan.tracks, dueCount, PROPOSALS.md |
-| S3-01 contract tests | TODO | | B4 |
-| S3-02 runtime | TODO | | R4 |
+| S3-01 contract tests | DONE | 442560a | 29 tests |
+| S3-02 runtime | DONE | d91a57d | 93 tests; motor de figuras portado 1:1 |
 | S3-03 API tools + dueCount + S-13 | DONE | | 169 tests; S-13 → S-15 (web) |
-| S3-04 CLI tools/propose + tracks + skill | TODO | | B4 |
-| S3-05 bundle Proba | TODO | | P4 |
-| S3-06 web ToolHost/figuras/tracks/dueCount/grafo | TODO | | D4 |
-| S3-07 /sinapsis-review + propuesta de prueba | TODO | | ola 2 |
-| S3-08 E2E + diseño + fidelidad | TODO | | ola 2 |
+| S3-04 CLI tools/propose + tracks + skill | DONE | 442560a | 37 tests CLI; push real del bundle de Proba (913 KB) |
+| S3-05 bundle Proba | DONE | | 22 archivos, 912 kB, 5 vistas, 92 figuras |
+| S3-06 web ToolHost/figuras/tracks/dueCount/grafo | DONE | | 217 tests web |
+| S3-07 /sinapsis-review + propuesta de prueba | DOING | | ola 2 · Q5 |
+| S3-08 E2E + diseño + fidelidad | DOING | | ola 2 · E5, F5, D5; N0-47 (páginas truncadas por `$$`) hallado en el smoke del orquestador |
 | S3-09 auditoría | TODO | | ola 3 |
 | S3-10 contratos consolidados + handoff | TODO | | cierre |
 
@@ -174,4 +174,5 @@ Ownership ola 1: A4 `apps/api/**` · B4 `packages/cli/**`, `packages/markdown/**
 | # | fix diferido | superficie | origen | cuándo |
 |---|---|---|---|---|
 | S-14 | Sandbox por iframe para bundles de herramientas si la plataforma deja de ser personal | runtime, web | N0-41 | cuando haya más de un usuario |
+| S-16 | Runtime: agregar `App.$`/`App.$$`, delegación de `[data-nav]`/`[data-go]` dentro del contenedor de la vista y `App.paletteOpen()` (pedidos de P4) | packages/runtime, web ToolHost | reporte P4 | fixers Sprint 3 |
 | S-15 | S-13 resuelto en diagnóstico (A4): el API conserva la sesión; `useMe()` de la web trata un 500/fallo de red del proxy (API reiniciándose) como «sin sesión» y `RequireAuth` manda a `/login`. Fix: reintentar 5xx/red en `useMe` y distinguir `isError` de «sin sesión» en `RequireAuth`. | apps/web lib/auth.ts, app/RequireAuth.tsx | reporte A4 | fixers Sprint 3 |
