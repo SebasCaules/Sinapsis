@@ -617,19 +617,22 @@ export const Quiz = z.object({
 });
 export type Quiz = z.infer<typeof Quiz>;
 
-export const PlanTaskKind = z.enum(["read", "cards", "quiz", "exercises", "custom"]);
+export const PlanTaskKind = z.enum(["read", "cards", "quiz", "exercises", "tool", "custom"]);
 export const PlanTask = z.object({
   id: StudyId,
   label: z.string().min(1).max(200),
   kind: PlanTaskKind.default("custom"),
-  /** Destino según kind: división (read), id de mazo (cards), id de quiz (quiz), slug de página o URL (exercises/custom). */
+  /** Destino según kind: división (read), id de mazo (cards), id de quiz (quiz), id de ítem del rail (tool), slug de página o URL (exercises/custom). */
   target: z.string().max(400).optional(),
+  /** Detalle corto (costo estimado, cantidad de ejercicios…). */
+  detail: z.string().max(300).optional(),
 });
 export type PlanTask = z.infer<typeof PlanTask>;
 
 export const PlanMilestone = z.object({
   id: StudyId,
   title: z.string().min(1).max(160),
+  icon: IconName.optional(),
   divisions: z.array(DivisionKey).default([]),
   tasks: z.array(PlanTask).max(40),
 });
@@ -639,6 +642,7 @@ export const PlanPhase = z.object({
   id: StudyId,
   title: z.string().min(1).max(160),
   subtitle: z.string().max(300).optional(),
+  icon: IconName.optional(),
   /** Fecha objetivo (AAAA-MM-DD), p. ej. la del parcial. */
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   /** Texto libre «qué cae en este examen». */
