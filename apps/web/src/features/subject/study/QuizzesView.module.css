@@ -57,6 +57,31 @@
 
 .rowMeta { font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
+/* Acción principal y tandas cortas, apiladas a la derecha de la fila. */
+.rowActions { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 7px; }
+
+.runs { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+
+.runsLabel { font: 500 10.5px var(--font-ui); color: var(--text-3); }
+
+/* 24 px de lado: objetivo táctil mínimo del contrato. */
+.run {
+  min-width: 26px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font: 600 11px var(--font-mono);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.run:hover { border-color: var(--primary); color: var(--primary); }
+.run:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
 .text { margin: 0; font: 400 13.5px/1.65 var(--font-ui); color: var(--text-2); }
 
 .code {

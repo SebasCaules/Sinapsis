@@ -101,7 +101,9 @@
   display: block;
   height: 5px;
   border-radius: 3px;
-  background: var(--track);
+  /* El carril es el fondo, no el dato: a 0 % una barra de 712 px con el marrón
+     medio se leía tan rotunda como a 100 %. */
+  background: var(--border-2);
   overflow: hidden;
 }
 

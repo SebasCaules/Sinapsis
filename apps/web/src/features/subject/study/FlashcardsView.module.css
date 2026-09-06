@@ -2,6 +2,12 @@
 
 .totals { display: flex; gap: 20px; }
 
+/* Envoltorio con `title` sobre una cifra (qué cuenta «DOMINADAS»): no cambia la
+   caja, solo cuelga la explicación. */
+.statHint { display: inline-flex; }
+
+.headActions { display: flex; flex-wrap: wrap; gap: 8px; }
+
 .clear {
   display: inline-flex;
   align-items: center;
@@ -14,13 +20,29 @@
   color: var(--good-text);
 }
 
+/* Secciones: los mazos de la materia y los que arma la plataforma. */
+.section { display: flex; flex-direction: column; gap: 12px; }
+
+.sectionHead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+
+.sectionTitle {
+  margin: 0;
+  font: 600 15px/1.2 var(--font-display);
+  color: var(--text);
+}
+
+.sectionMeta { font: 500 11.5px var(--font-ui); color: var(--text-3); }
+
+/* 250 px = cuatro columnas a 1440, la densidad del baseline (styles.css:476 usa
+   220): con 330 entraban tres y dieciocho mazos ocupaban seis filas. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
 }
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -57,9 +79,19 @@
 
 .cardTitle {
   margin: 0;
-  font: 600 18px/1.25 var(--font-display);
+  font: 600 17px/1.25 var(--font-display);
   color: var(--text);
 }
+
+/* Toda la baldosa abre el mazo, con un solo punto de tabulación (el enlace del
+   título): el pseudoelemento se estira sobre la tarjeta y los botones del pie
+   quedan por encima con su propio `position`. */
+.cardLink { color: inherit; text-decoration: none; }
+.cardLink::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-lg); }
+.cardLink:hover { color: var(--primary); }
+.cardLink:focus-visible { outline: none; }
+.cardLink:focus-visible::after { outline: 2px solid var(--primary); outline-offset: 2px; }
+.card:hover { border-color: var(--border-2); }
 
 .cardText {
   margin: 0;
@@ -75,7 +107,6 @@
   display: flex;
   gap: 18px;
   padding: 10px 0 2px;
-  margin-top: auto;
   border-top: 1px solid var(--border);
 }
 
@@ -87,8 +118,9 @@
 }
 .cardBar > :first-child { flex: 1; }
 
-.cardActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
-.cardActions > * { flex: 1; min-width: 130px; }
+/* Por encima del pseudoelemento del título: son otras acciones. */
+.cardActions { position: relative; display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 2px; }
+.cardActions > * { flex: 1; min-width: 120px; }
 
 .emptyText {
   margin: 0;

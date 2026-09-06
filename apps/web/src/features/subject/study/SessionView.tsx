@@ -5,6 +5,9 @@
  * Reglas de la sesión:
  *  - La cola sale del modelo (`cardsOf`) UNA vez, al entrar: calificar no la
  *    rearma, o la tarjeta recién contestada saltaría de lugar bajo el cursor.
+ *  - La cola se BARAJA al armarla, como el baseline (`shuffle(pool)` de
+ *    study.js:101): dos entradas al mismo mazo no dan el mismo orden, y
+ *    «Repetir» tampoco repite la secuencia.
  *  - «Otra vez» (nota 1) devuelve la tarjeta al final de la cola: la sesión no
  *    termina hasta que todas salieron bien al menos una vez.
  *  - El próximo intervalo de cada botón lo calcula `sm2` del contrato, con el
@@ -19,14 +22,21 @@ import { isTypingTarget } from "@/lib/keyboard";
 import { useSubjectCtx } from "../context";
 import { ErrorCard, WideSkeleton } from "../components/States";
 import { Markdown } from "../markdown/Markdown";
+import { recordActivity } from "../activity";
 import { GRADES, GRADE_LABEL, intervalPreview, parseMode, type CardEntry, type SessionMode } from "./model";
+import { shuffle } from "./quizStore";
 import { resolveSession } from "./session";
 import { ActionLink, Bar, DivisionChip, EmptyPanel, Kbd } from "./ui";
 import { useStudy } from "./useStudy";
 import css from "./SessionView.module.css";
 
+/**
+ * El modo «vencidas» abre la cola de hoy, que es vencidas MÁS nuevas (el mismo
+ * criterio del baseline, core.js:1209): llamarla «VENCIDAS» mentía sobre lo que
+ * hay en la cola cuando casi todo es material nunca visto.
+ */
 const MODE_LABEL: Record<SessionMode, string> = {
-  vencidas: "VENCIDAS",
+  vencidas: "PENDIENTES HOY",
   todo: "TODO EL MAZO",
   nuevas: "NUEVAS",
 };
@@ -44,15 +54,46 @@ interface SessionState {
   endedAt: number | null;
 }
 
-function startSession(cards: CardEntry[]): SessionState {
+/**
+ * El orden de la sesión. El baseline baraja el mazo entero; acá se conserva
+ * además el criterio de la cola de hoy —la más atrasada primero— barajando
+ * DENTRO de cada día de atraso, y con las nuevas al final, también barajadas.
+ * En los modos «todo» y «nuevas» no hay criterio que conservar: mezcla llana.
+ */
+function shuffleQueue(cards: readonly CardEntry[], mode: SessionMode): CardEntry[] {
+  if (mode !== "vencidas") return shuffle(cards);
+  const out: CardEntry[] = [];
+  const fresh: CardEntry[] = [];
+  let group: CardEntry[] = [];
+  let day: string | null = null;
+  for (const entry of cards) {
+    /* Sin estado SRS es una tarjeta nueva: va al final, después de las vencidas. */
+    if (!entry.srs) {
+      fresh.push(entry);
+      continue;
+    }
+    const key = entry.srs.due.slice(0, 10);
+    if (key !== day) {
+      out.push(...shuffle(group));
+      group = [];
+      day = key;
+    }
+    group.push(entry);
+  }
+  out.push(...shuffle(group), ...shuffle(fresh));
+  return out;
+}
+
+function startSession(cards: readonly CardEntry[], mode: SessionMode): SessionState {
+  const ordered = shuffleQueue(cards, mode);
   return {
-    cards,
-    queue: cards.slice(),
+    cards: ordered,
+    queue: ordered.slice(),
     at: 0,
     settled: [],
     counts: { 1: 0, 2: 0, 3: 0, 4: 0 },
     startedAt: Date.now(),
-    endedAt: cards.length ? null : Date.now(),
+    endedAt: ordered.length ? null : Date.now(),
   };
 }
 
@@ -128,16 +169,20 @@ export function SessionView() {
 
   useEffect(() => {
     if (!ready) return;
-    setSession(startSession(target ? study.cardsOf(target.deckIds, mode) : []));
+    setSession(startSession(target ? study.cardsOf(target.deckIds, mode) : [], mode));
     setFlipped(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, deckParam, deckKey, mode]);
 
-  /** «Repetir» rehace la MISMA sesión: las tarjetas ya no están vencidas. */
+  /**
+   * «Repetir» rehace la MISMA sesión (las tarjetas ya no están vencidas), pero
+   * vuelve a barajar: repetir el mismo orden es memorizar la secuencia, no el
+   * material — el baseline también rebaraja en `fc-restart` (study.js:166).
+   */
   const repeat = useCallback(() => {
-    setSession((prev) => (prev ? startSession(prev.cards) : prev));
+    setSession((prev) => (prev ? startSession(prev.cards, mode) : prev));
     setFlipped(false);
-  }, []);
+  }, [mode]);
 
   const current: CardEntry | null = session ? (session.queue[session.at] ?? null) : null;
   const done = !!session && session.at >= session.queue.length;
@@ -148,9 +193,10 @@ export function SessionView() {
     (value: SrsGrade) => {
       if (!session || !current || !flipped) return;
       const cardId = current.card.id;
+      const entry = current;
       setSession((prev) => {
         if (!prev) return prev;
-        const queue = value === 1 ? [...prev.queue, current] : prev.queue;
+        const queue = value === 1 ? [...prev.queue, entry] : prev.queue;
         const at = prev.at + 1;
         const settled = value === 1 ? prev.settled : [...new Set([...prev.settled, cardId])];
         return {
@@ -163,9 +209,30 @@ export function SessionView() {
         };
       });
       setFlipped(false);
-      void grade(cardId, value).catch(() => toast("No se pudo guardar la calificación.", "bad"));
+      /* Calificar cuenta como estudiar: es lo que enciende la racha del inicio
+         (el `markActivity()` de core.js:1222). Vive en el navegador hasta que
+         `StudyState` tenga su propio mapa de días. */
+      recordActivity(slug);
+      void grade(cardId, value).catch(() => {
+        /* Si el API rechaza la nota, la tarjeta NO se pierde: vuelve al final de
+           la cola y deja de contar como resuelta. Antes se avisaba con un aviso
+           y la tarjeta desaparecía igual, sin estado SRS. La nota 1 ya volvió a
+           la cola por su cuenta: ahí solo hace falta el aviso. */
+        toast("No se pudo guardar la calificación: la tarjeta vuelve a la cola.", "bad");
+        if (value === 1) return;
+        setSession((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            queue: [...prev.queue, entry],
+            settled: prev.settled.filter((id) => id !== cardId),
+            counts: { ...prev.counts, [value]: Math.max(0, countOf(prev.counts, value) - 1) },
+            endedAt: null,
+          };
+        });
+      });
     },
-    [session, current, flipped, grade, toast],
+    [session, current, flipped, grade, slug, toast],
   );
 
   /* Atajos: Espacio / Intro dan vuelta, 1-4 califican, Esc vuelve a los mazos. */
@@ -196,6 +263,20 @@ export function SessionView() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [answer, current, flipped, navigate, slug]);
+
+  /* El foco vuelve a la tarjeta con cada tarjeta nueva y con cada vuelta, como
+     hace el baseline en cada repintado (`fcCard.focus({preventScroll:true})`,
+     study.js:151). Es lo que hace que un lector de pantalla anuncie la tarjeta
+     que entró —y si está mostrando el anverso o la respuesta, que va en su
+     nombre— y que Espacio y 1-4 funcionen sin ir a buscar el foco. No se usa
+     `aria-live` en el cuerpo: con el foco encima, la tarjeta se leería dos
+     veces. */
+  const cardRef = useRef<HTMLDivElement>(null);
+  const currentId = current?.card.id ?? null;
+  useEffect(() => {
+    if (!currentId) return;
+    cardRef.current?.focus({ preventScroll: true });
+  }, [currentId, flipped]);
 
   const previews = useMemo(() => {
     if (!current) return null;
@@ -229,7 +310,13 @@ export function SessionView() {
 
   const total = session?.cards.length ?? 0;
   const settled = session?.settled.length ?? 0;
-  const position = Math.min(settled + 1, total);
+  /* Dos cifras distintas y a propósito: el CONTADOR es la posición en la cola
+     viva —crece con cualquier nota, también con «Otra vez», que además alarga la
+     cola— y la BARRA mide lo resuelto sobre las tarjetas del mazo. Con una sola
+     cifra, calificar «Otra vez» cambiaba de tarjeta sin mover el contador y la
+     sesión parecía trabada. */
+  const queued = session?.queue.length ?? 0;
+  const position = Math.min((session?.at ?? 0) + 1, queued);
   const division = current?.card.division ? model.division(current.card.division) : null;
 
   /* Cola vacía. Los tres modos vacían por motivos DISTINTOS, y ofrecer
@@ -273,7 +360,7 @@ export function SessionView() {
           <h1 className={css.title}>{target.title}</h1>
         </div>
         <span className={css.counter} data-testid="session-counter">
-          {position} / {total}
+          {position} / {queued}
         </span>
       </header>
 
@@ -296,9 +383,13 @@ export function SessionView() {
             <div
               className={css.flip}
               id="session-card"
+              ref={cardRef}
               data-flipped={flipped ? "true" : "false"}
               role="group"
-              aria-label="Tarjeta de repaso"
+              /* La posición y el lado van en el NOMBRE, como en el baseline
+                 (study.js:125-127): al enfocarse sola con cada tarjeta, eso es
+                 lo que anuncia que cambió algo y qué se está mirando. */
+              aria-label={`Tarjeta ${position} de ${queued}, ${flipped ? "respuesta visible" : "anverso"}`}
               tabIndex={0}
               onClick={() => setFlipped((f) => !f)}
             >
@@ -311,12 +402,15 @@ export function SessionView() {
                   <Markdown body={current.card.front} subject={slug} exists={exists} />
                 </div>
                 <span className={css.hint}>
-                  <Kbd>Espacio</Kbd> para ver la respuesta
+                  Clic o <Kbd>Espacio</Kbd> para ver la respuesta
                 </span>
               </div>
 
               <div className={`${css.face} ${css.faceBack}`} aria-hidden={!flipped} ref={backRef}>
                 <span className={css.faceTag}>
+                  {/* El mismo chip que el anverso: al voltear se perdía de qué
+                      unidad era la tarjeta. */}
+                  {division ? <DivisionChip division={division} /> : null}
                   <span className={css.faceKind}>REVERSO</span>
                 </span>
                 <div className={css.faceBody}>
@@ -338,18 +432,19 @@ export function SessionView() {
               <UiIcon name={flipped ? "close" : "check"} size={14} />
               {flipped ? "Ocultar la respuesta" : "Ver la respuesta"}
             </button>
+            {/* El enlace al wiki y lo que queda en la cola CONVIVEN (en el
+                baseline el enlace va dentro del reverso y el progreso queda
+                arriba): antes se turnaban la misma ranura y en las tarjetas con
+                página no se sabía cuánto faltaba. */}
             {flipped && current.card.page && model.bySlug.has(current.card.page) ? (
               <Link className={css.wikiLink} to={routes.page(slug, current.card.page)}>
                 <Icon name="book" size={14} />
                 Ver en el wiki
               </Link>
-            ) : (
-              <span className={css.queueNote}>
-                {session && session.queue.length - session.at > 1
-                  ? `Quedan ${session.queue.length - session.at - 1} en la cola`
-                  : "Última de la cola"}
-              </span>
-            )}
+            ) : null}
+            <span className={css.queueNote}>
+              {queued - session.at > 1 ? `Quedan ${queued - session.at - 1} en la cola` : "Última de la cola"}
+            </span>
           </div>
 
           <div className={css.grades} role="group" aria-label="Calificar la tarjeta">

@@ -3,6 +3,8 @@
     "id": "parcialito-1",
     "title": "Parcialito 1 · TP1–TP2",
     "description": "Unidades 1 y 2: estadística descriptiva sobre datos agrupados, conteo, probabilidad condicional, independencia y Bayes.",
+    "icon": "timer",
+    "color": "--u1",
     "divisions": [
       "1",
       "2"
@@ -21,14 +23,24 @@
       "definiciones-clave"
     ],
     "tools": [
-      "calc",
-      "formularios"
+      {
+        "target": "calc",
+        "label": "Calculadoras Φ · t · χ²",
+        "icon": "calc"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios (todos)",
+        "icon": "sigma"
+      }
     ]
   },
   {
     "id": "parcialito-2",
     "title": "Parcialito 2 · TP3–TP4",
     "description": "Unidades 3 y 4: variables aleatorias discretas y continuas, PMF y densidad, FDA, esperanza y varianza, y el catálogo de distribuciones. Los parcialitos de este hito tienen enunciado simbólico: la respuesta es una fórmula en los parámetros, no un número.",
+    "icon": "timer",
+    "color": "--u3",
     "divisions": [
       "3",
       "4"
@@ -50,15 +62,34 @@
       "definiciones-clave"
     ],
     "tools": [
-      "explorador",
-      "calc",
-      "formularios"
+      {
+        "target": "asistente",
+        "label": "¿Qué distribución uso?",
+        "icon": "compass"
+      },
+      {
+        "target": "explorador",
+        "label": "Explorador de distribuciones",
+        "icon": "chart"
+      },
+      {
+        "target": "calc",
+        "label": "Calculadoras Φ · t · χ²",
+        "icon": "calc"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios (todos)",
+        "icon": "sigma"
+      }
     ]
   },
   {
     "id": "parcial",
     "title": "Parcial · TP1–TP7",
     "description": "Unidades 1 a 7, con foco en transformaciones, conjuntas, procesos estocásticos y TCL sobre el repaso de lo anterior.",
+    "icon": "timer",
+    "color": "--u5",
     "divisions": [
       "1",
       "2",
@@ -90,15 +121,34 @@
       "procesos-estocasticos"
     ],
     "tools": [
-      "taller",
-      "calc",
-      "formularios"
+      {
+        "target": "taller",
+        "label": "Taller de resolución",
+        "icon": "function"
+      },
+      {
+        "target": "calc",
+        "label": "Calculadoras Φ · t · χ²",
+        "icon": "calc"
+      },
+      {
+        "target": "asistente",
+        "label": "¿Qué distribución uso?",
+        "icon": "compass"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios (todos)",
+        "icon": "sigma"
+      }
     ]
   },
   {
     "id": "parcialito-3",
     "title": "Parcialito 3 · TP8–TP9",
     "description": "Unidades 8 y 9: estimación, intervalos de confianza, tamaño muestral, pruebas de hipótesis, error tipo II y valor p. Los parcialitos de este hito tienen enunciado simbólico: la respuesta es una fórmula en los parámetros, no un número.",
+    "icon": "timer",
+    "color": "--u8",
     "divisions": [
       "8",
       "9"
@@ -119,14 +169,29 @@
       "pruebas-de-hipotesis"
     ],
     "tools": [
-      "calc",
-      "formularios"
+      {
+        "target": "calc",
+        "label": "Calculadoras Φ · t · χ²",
+        "icon": "calc"
+      },
+      {
+        "target": "asistente",
+        "label": "¿Qué prueba de hipótesis?",
+        "icon": "compass"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios (todos)",
+        "icon": "sigma"
+      }
     ]
   },
   {
     "id": "final",
     "title": "Final · todos los TPs",
     "description": "Repaso de todo el programa con foco en EMV, inferencia completa, Markov y conjuntas, más simulacro y quiz.",
+    "icon": "star",
+    "color": "--ueval",
     "divisions": [
       "2",
       "3",
@@ -159,14 +224,29 @@
       "quiz-general"
     ],
     "tools": [
-      "calc",
-      "formularios"
+      {
+        "target": "quiz",
+        "label": "Quiz completo",
+        "icon": "quiz"
+      },
+      {
+        "target": "calc",
+        "label": "Calculadoras Φ · t · χ²",
+        "icon": "calc"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios (todos)",
+        "icon": "sigma"
+      }
     ]
   },
   {
     "id": "distribuciones",
     "title": "Distribuciones",
     "description": "Las 14 distribuciones del programa con su PMF/PDF, E[X] y V(X), el explorador interactivo y el asistente para reconocerlas.",
+    "icon": "chart",
+    "color": "--u3",
     "divisions": [
       "3",
       "4",
@@ -193,14 +273,29 @@
       "distribuciones"
     ],
     "tools": [
-      "explorador",
-      "calc"
+      {
+        "target": "explorador",
+        "label": "Explorador de distribuciones",
+        "icon": "chart"
+      },
+      {
+        "target": "asistente",
+        "label": "¿Qué distribución uso?",
+        "icon": "compass"
+      },
+      {
+        "target": "calc",
+        "label": "Calculadora binomial / Poisson",
+        "icon": "calc"
+      }
     ]
   },
   {
     "id": "inferencia",
     "title": "Inferencia y pruebas de hipótesis",
     "description": "Estimación, intervalos de confianza y pruebas de hipótesis con las calculadoras de fractiles t y χ² y el paso a paso.",
+    "icon": "compass",
+    "color": "--u9",
     "divisions": [
       "8",
       "9"
@@ -222,14 +317,29 @@
       "pruebas-de-hipotesis"
     ],
     "tools": [
-      "calc",
-      "formularios"
+      {
+        "target": "calc",
+        "label": "Calculadoras Φ · t · χ²",
+        "icon": "calc"
+      },
+      {
+        "target": "asistente",
+        "label": "¿Qué prueba de hipótesis?",
+        "icon": "compass"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios (todos)",
+        "icon": "sigma"
+      }
     ]
   },
   {
     "id": "express",
     "title": "Repaso exprés (última semana)",
     "description": "Para la última semana: repaso activo intensivo con flashcards del día, simulacro cronometrado, formularios imprimibles y quiz.",
+    "icon": "sparkle",
+    "color": "--u7",
     "divisions": [
       "1",
       "2",
@@ -254,7 +364,21 @@
       "quiz-general"
     ],
     "tools": [
-      "formularios"
+      {
+        "target": "flashcards",
+        "label": "Repaso de hoy (flashcards)",
+        "icon": "cards"
+      },
+      {
+        "target": "quiz",
+        "label": "Quiz rápido",
+        "icon": "quiz"
+      },
+      {
+        "target": "formularios",
+        "label": "Formularios para imprimir",
+        "icon": "sigma"
+      }
     ]
   }
 ]

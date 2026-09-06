@@ -131,7 +131,9 @@ function taskLink(
     // Herramienta de la materia: un ítem del rail (page, link, tool o builtin).
     const item = model.railItem(target);
     if (!item) return null;
-    if (item.to) return { to: item.to, label: item.item.label };
+    /* `query` recorta la herramienta (el simulacro por unidades: `u=1,2`). */
+    const query = task.query?.trim();
+    if (item.to) return { to: query ? `${item.to}?${query}` : item.to, label: item.item.label };
     if (item.href) return { href: item.href, label: item.item.label };
     return null;
   }

@@ -1,4 +1,6 @@
-/* Grilla de kits · tarjeta enlazada al detalle. */
+/* Grilla de kits · tarjeta enlazada al detalle.
+   `--ucol` es el acento del kit (el que declara la materia o el de su primera
+   división): filete superior, pastilla del icono y barra de lectura. */
 
 .totals { display: flex; gap: 20px; }
 
@@ -15,12 +17,13 @@
   padding: 16px 18px 16px;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--ucol, var(--border));
   border-radius: var(--r-lg);
   box-shadow: var(--relief), var(--shadow);
   text-decoration: none;
   transition: border-color var(--t), transform var(--t);
 }
-.card:hover { border-color: var(--border-2); transform: translateY(-1px); }
+.card:hover { border-color: var(--border-2); border-top-color: var(--ucol, var(--border-2)); transform: translateY(-1px); }
 .card:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -28,9 +31,15 @@
 }
 
 .cardHead { display: flex; align-items: center; gap: 8px; min-height: 21px; }
+.cardHeadRight { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* Porcentaje de lectura: es el número que permite comparar kits de distinto
+   tamaño de un vistazo (8 páginas y 14 no son la misma escala).
+   Como TEXTO, el color de unidad va por `--uink` (tokens.css): el color crudo no
+   llega a 4.5:1 sobre los fondos claros. */
+.pct { font: 600 14px var(--font-mono); color: var(--uink, var(--text-2)); }
 
 .due {
-  margin-left: auto;
   height: 21px;
   display: inline-flex;
   align-items: center;
@@ -43,8 +52,23 @@
   white-space: nowrap;
 }
 
+.cardTitleRow { display: flex; align-items: center; gap: 11px; min-width: 0; }
+
+/* Pastilla del icono del kit: el color del kit al 16 %, como en el baseline. */
+.pill {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r);
+  background: color-mix(in srgb, var(--ucol, var(--primary)) 16%, transparent);
+  color: var(--ucol, var(--primary));
+}
+
 .cardTitle {
   margin: 0;
+  min-width: 0;
   font: 600 18px/1.25 var(--font-display);
   color: var(--text);
 }
@@ -54,7 +78,9 @@
   font: 400 12.5px/1.55 var(--font-ui);
   color: var(--text-2);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* Cuatro líneas: en dos, la advertencia de la cátedra sobre los parcialitos
+     simbólicos se cortaba y solo se veía entrando al kit. */
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -77,6 +103,9 @@
 .cardFoot > :first-child { flex: 1; }
 
 .readLabel { flex: none; font: 500 10.5px var(--font-mono); color: var(--text-3); }
+
+/* Pie de la lista: el par del enlace que el plan tiene hacia los kits. */
+.foot { display: flex; justify-content: center; }
 
 .text { margin: 0; font: 400 13.5px/1.65 var(--font-ui); color: var(--text-2); }
 

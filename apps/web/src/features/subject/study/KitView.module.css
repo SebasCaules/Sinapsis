@@ -1,4 +1,7 @@
-/* Detalle de un kit · cabecera y secciones de filas. */
+/* Detalle de un kit · cabecera y secciones de filas.
+   `--ucol` es el acento del kit (el que declara la materia o el de su primera
+   división): filete de la cabecera, pastilla del icono, anillo y iconos de los
+   lanzadores. */
 
 .head {
   display: flex;
@@ -6,10 +9,27 @@
   justify-content: space-between;
   gap: 28px;
   padding-bottom: 16px;
+  padding-left: 14px;
+  border-left: 3px solid var(--ucol, var(--primary));
   border-bottom: 1px solid var(--border);
 }
 
 .headMain { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+
+.identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.identityText { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+/* Pastilla del icono del kit: el color del kit al 16 %, como en el baseline. */
+.pill {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--ucol, var(--primary)) 16%, transparent);
+  color: var(--ucol, var(--primary));
+}
 
 .back {
   display: inline-flex;
@@ -50,6 +70,7 @@
 }
 
 .headAside { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.asideRow { display: flex; align-items: center; gap: 20px; }
 .totals { display: flex; gap: 20px; }
 
 /* ---------- secciones ---------- */
@@ -82,7 +103,27 @@
   color: var(--text);
 }
 
+.sectionAside { display: flex; align-items: center; gap: 12px; }
 .sectionCount { font: 500 11px var(--font-mono); color: var(--text-3); }
+
+/* «Marcar todas como leídas» / «Desmarcar todas» (objetivo ≥ 24 px de alto). */
+.markAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.markAll:hover:not(:disabled) { color: var(--primary); border-color: var(--primary); }
+.markAll:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.markAll:disabled { opacity: 0.6; cursor: progress; }
 
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
 
@@ -100,18 +141,37 @@
 .row:hover { background: var(--surface-2); }
 .row:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
 
+/* Fila de página: casilla (control propio) + enlace a la página. */
+.pageRow { display: flex; align-items: center; gap: 2px; }
+.pageRow .row { flex: 1; min-width: 0; }
+
+/* La casilla es un botón de verdad: 26 px de objetivo con la caja de 16 px
+   dentro (antes tenía forma de casilla pero abría la página). */
 .check {
   flex: none;
   display: grid;
   place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+}
+.check > svg {
   width: 16px;
   height: 16px;
+  padding: 1px;
   border: 1px solid var(--border-2);
   border-radius: 5px;
   background: var(--surface-2);
   color: transparent;
 }
-.row[data-done="true"] .check {
+.check:hover > svg { border-color: var(--primary); }
+.check:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.pageRow[data-done="true"] .check > svg {
   background: var(--good);
   border-color: var(--good);
   color: var(--on-good);
@@ -126,7 +186,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.row[data-done="true"] .rowTitle { color: var(--text-3); }
+.pageRow[data-done="true"] .rowTitle { color: var(--text-3); }
 
 .rowBar { flex: none; width: 120px; }
 
@@ -140,14 +200,22 @@
 .chevron { flex: none; color: var(--text-3); }
 
 /* ---------- herramientas ---------- */
-.tools { list-style: none; margin: 0; padding: 4px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+/* Lanzadores: grilla de tarjetas altas (icono + rótulo + flecha), no chips. */
+.tools {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
 
 .tool {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 9px;
-  height: 36px;
-  padding: 0 12px;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 12px;
   border: 1px solid var(--border-2);
   border-radius: var(--r-ctrl);
   background: var(--surface-2);
@@ -157,6 +225,11 @@
   text-decoration: none;
 }
 .tool:hover { color: var(--primary); border-color: var(--primary); }
+.tool:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.toolIcon { flex: none; display: grid; place-items: center; color: var(--ucol, var(--primary)); }
+.toolLabel { flex: 1; min-width: 0; line-height: 1.35; }
+.tool .chevron { margin-left: auto; }
 
 .text { margin: 0; font: 400 13.5px/1.65 var(--font-ui); color: var(--text-2); }
 

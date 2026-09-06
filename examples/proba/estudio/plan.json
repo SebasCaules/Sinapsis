@@ -77,8 +77,10 @@
             {
               "id": "fase-1-h3-t1",
               "label": "Simulacro del parcialito 1",
-              "kind": "custom",
-              "detail": "Solo ejercicios de TP1 y TP2, con corrección al final"
+              "kind": "tool",
+              "detail": "Solo ejercicios de TP1 y TP2, con corrección al final",
+              "target": "parcial",
+              "query": "u=1,2"
             },
             {
               "id": "fase-1-h3-t2",
@@ -166,8 +168,10 @@
             {
               "id": "fase-2-h3-t1",
               "label": "Simulacro del parcialito 2",
-              "kind": "custom",
-              "detail": "Solo ejercicios de TP3 y TP4, con corrección al final"
+              "kind": "tool",
+              "detail": "Solo ejercicios de TP3 y TP4, con corrección al final",
+              "target": "parcial",
+              "query": "u=3,4"
             },
             {
               "id": "fase-2-h3-t2",
@@ -319,8 +323,10 @@
             {
               "id": "fase-3-h5-t1",
               "label": "Simulacro del parcial cronometrado",
-              "kind": "custom",
-              "detail": "Solo TP1 a TP7, cronometrado y con corrección al final"
+              "kind": "tool",
+              "detail": "Solo TP1 a TP7, cronometrado y con corrección al final",
+              "target": "parcial",
+              "query": "u=1,2,3,4,5,6,7"
             },
             {
               "id": "fase-3-h5-t2",
@@ -402,8 +408,10 @@
             {
               "id": "fase-4-h3-t1",
               "label": "Simulacro del parcialito 3",
-              "kind": "custom",
-              "detail": "Solo ejercicios de TP8 y TP9, con corrección al final"
+              "kind": "tool",
+              "detail": "Solo ejercicios de TP8 y TP9, con corrección al final",
+              "target": "parcial",
+              "query": "u=8,9"
             },
             {
               "id": "fase-4-h3-t2",
@@ -548,8 +556,9 @@
             {
               "id": "fase-5-h6-t1",
               "label": "Simulacro de final cronometrado",
-              "kind": "custom",
-              "detail": "Todo el banco. Suba la cantidad de ítems para emular el final"
+              "kind": "tool",
+              "detail": "Todo el banco. Suba la cantidad de ítems para emular el final",
+              "target": "parcial"
             },
             {
               "id": "fase-5-h6-t2",
@@ -644,8 +653,10 @@
                 {
                   "id": "fase-1-h3-t1",
                   "label": "Simulacro del parcialito 1",
-                  "kind": "custom",
-                  "detail": "Solo ejercicios de TP1 y TP2, con corrección al final"
+                  "kind": "tool",
+                  "detail": "Solo ejercicios de TP1 y TP2, con corrección al final",
+                  "target": "parcial",
+                  "query": "u=1,2"
                 },
                 {
                   "id": "fase-1-h3-t2",
@@ -733,8 +744,10 @@
                 {
                   "id": "fase-2-h3-t1",
                   "label": "Simulacro del parcialito 2",
-                  "kind": "custom",
-                  "detail": "Solo ejercicios de TP3 y TP4, con corrección al final"
+                  "kind": "tool",
+                  "detail": "Solo ejercicios de TP3 y TP4, con corrección al final",
+                  "target": "parcial",
+                  "query": "u=3,4"
                 },
                 {
                   "id": "fase-2-h3-t2",
@@ -886,8 +899,10 @@
                 {
                   "id": "fase-3-h5-t1",
                   "label": "Simulacro del parcial cronometrado",
-                  "kind": "custom",
-                  "detail": "Solo TP1 a TP7, cronometrado y con corrección al final"
+                  "kind": "tool",
+                  "detail": "Solo TP1 a TP7, cronometrado y con corrección al final",
+                  "target": "parcial",
+                  "query": "u=1,2,3,4,5,6,7"
                 },
                 {
                   "id": "fase-3-h5-t2",
@@ -969,8 +984,10 @@
                 {
                   "id": "fase-4-h3-t1",
                   "label": "Simulacro del parcialito 3",
-                  "kind": "custom",
-                  "detail": "Solo ejercicios de TP8 y TP9, con corrección al final"
+                  "kind": "tool",
+                  "detail": "Solo ejercicios de TP8 y TP9, con corrección al final",
+                  "target": "parcial",
+                  "query": "u=8,9"
                 },
                 {
                   "id": "fase-4-h3-t2",
@@ -1115,8 +1132,9 @@
                 {
                   "id": "fase-5-h6-t1",
                   "label": "Simulacro de final cronometrado",
-                  "kind": "custom",
-                  "detail": "Todo el banco. Suba la cantidad de ítems para emular el final"
+                  "kind": "tool",
+                  "detail": "Todo el banco. Suba la cantidad de ítems para emular el final",
+                  "target": "parcial"
                 },
                 {
                   "id": "fase-5-h6-t2",
@@ -1413,8 +1431,9 @@
                 {
                   "id": "fase-6-h10-t1",
                   "label": "Simulacro de final cronometrado",
-                  "kind": "custom",
-                  "detail": "Todo el programa, cronometrado y con corrección al final"
+                  "kind": "tool",
+                  "detail": "Todo el programa, cronometrado y con corrección al final",
+                  "target": "parcial"
                 },
                 {
                   "id": "fase-6-h10-t2",

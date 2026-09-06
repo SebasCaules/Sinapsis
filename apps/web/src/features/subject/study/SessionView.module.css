@@ -95,6 +95,9 @@
   /* el reverso vive girado: al rotar la tarjeta queda de frente */
   transform: rotateY(180deg);
   border-left: 3px solid var(--primary);
+  /* Otro tono, como en el baseline (`.fc-face.back { background: var(--surface-2) }`,
+     styles.css:821): a media vuelta ya se sabe de qué lado se está. */
+  background: var(--surface-2);
 }
 
 .faceTag { display: flex; align-items: center; gap: 8px; }
@@ -105,17 +108,31 @@
   color: var(--text-3);
 }
 
+/* Una flashcard se lee como una placa, no como un párrafo de prosa: centrada y
+   en la tipografía de lectura, como el `.fc-q` del baseline (styles.css:825,
+   `var(--font-read)` a 20 px centrado). El markdown trae su propio ámbito con la
+   clase ya cifrada, así que el cuerpo de texto se dimensiona por el hijo
+   directo. */
 .faceBody {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  font-size: 16px;
+  text-align: center;
   overflow-y: auto;
   max-height: 46vh;
 }
+.faceBody > * { width: 100%; font: 400 19px/1.5 var(--font-read); }
 .faceBody :global(p) { margin: 0 0 0.6em; }
 .faceBody :global(p:last-child) { margin-bottom: 0; }
+
+/* Lo que se lee en bloque no se centra: listas, código, tablas y citas siguen
+   alineados a la izquierda dentro de la cara centrada. */
+.faceBody :global(ul),
+.faceBody :global(ol),
+.faceBody :global(pre),
+.faceBody :global(table),
+.faceBody :global(blockquote) { text-align: left; }
 
 .hint {
   display: inline-flex;

@@ -1,7 +1,13 @@
 /**
  * Quiz · lista. Cada quiz con sus preguntas, su división, el mejor puntaje y el
  * último intento (los dos salen de `state.attempts` a través del modelo).
+ *
+ * Junto a «Empezar» van las tandas cortas del baseline (study.js:210: 5, 10, 15
+ * o todas): una práctica de dos minutos sin pasar el banco entero. Una tanda
+ * corta no registra intento —lo dice el propio resultado—, porque su puntaje no
+ * es comparable con el del quiz completo.
  */
+import { Link } from "react-router-dom";
 import { plural, routes } from "@sinapsis/contract";
 import { useSubjectCtx } from "../context";
 import { ErrorCard, WideSkeleton } from "../components/States";
@@ -9,6 +15,9 @@ import { relativeSince } from "./model";
 import { ActionLink, Bar, DivisionChip, EmptyPanel, Stat, StudyHead, StudyView } from "./ui";
 import { useStudy } from "./useStudy";
 import css from "./QuizzesView.module.css";
+
+/** Las tandas cortas que ofrece la lista, como el baseline. */
+const SHORT_RUNS = [5, 10, 15] as const;
 
 export function QuizzesView() {
   const { slug, model } = useSubjectCtx();
@@ -56,7 +65,7 @@ export function QuizzesView() {
         icon="quiz"
         eyebrow="PONERSE A PRUEBA"
         title="Quiz"
-        lead="Una pregunta a la vez, con la explicación al descubrir la respuesta. El resultado queda registrado para comparar con el próximo intento."
+        lead="Una pregunta a la vez, con la explicación al descubrir la respuesta. Las preguntas salen mezcladas y puede responder una tanda corta o el quiz entero; el resultado del quiz entero queda registrado para comparar con el próximo intento."
         aside={
           <div className={css.totals}>
             <Stat value={quizzes.length} label="QUIZZES" />
@@ -104,9 +113,26 @@ export function QuizzesView() {
                 )}
               </div>
 
-              <ActionLink to={routes.quizOne(slug, quiz.id)} variant={stat.best ? "secondary" : "primary"}>
-                {stat.best ? "Reintentar" : "Empezar"}
-              </ActionLink>
+              <div className={css.rowActions}>
+                <ActionLink to={routes.quizOne(slug, quiz.id)} variant={stat.best ? "secondary" : "primary"}>
+                  {stat.best ? "Reintentar" : "Empezar"}
+                </ActionLink>
+                {SHORT_RUNS.some((n) => n < stat.questions) ? (
+                  <span className={css.runs}>
+                    <span className={css.runsLabel}>Tanda de</span>
+                    {SHORT_RUNS.filter((n) => n < stat.questions).map((n) => (
+                      <Link
+                        key={n}
+                        className={css.run}
+                        to={`${routes.quizOne(slug, quiz.id)}?n=${n}`}
+                        aria-label={`Tanda de ${n} preguntas · ${quiz.title}`}
+                      >
+                        {n}
+                      </Link>
+                    ))}
+                  </span>
+                ) : null}
+              </div>
             </li>
           );
         })}

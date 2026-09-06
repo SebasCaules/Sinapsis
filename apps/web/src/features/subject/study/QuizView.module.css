@@ -57,6 +57,20 @@
   letter-spacing: -0.02em;
 }
 
+/* Marcador en curso: el «· Aciertos: N» del baseline. Es lo que dice cómo va la
+   partida antes de llegar al resultado. */
+.score {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+  font: 500 11.5px var(--font-ui);
+  color: var(--text-3);
+}
+.scoreValue { font: 600 14px var(--font-mono); color: var(--good-text); letter-spacing: -0.02em; }
+
 .progress { margin-bottom: 6px; }
 
 /* ---------- pregunta ---------- */
@@ -79,7 +93,10 @@
   color: var(--text-3);
 }
 
-.prompt { font-size: 16px; }
+/* El enunciado pesa lo que pesa en el baseline (`.quiz-q` a 20 px, styles.css:836);
+   el markdown trae su propio ámbito, así que se dimensiona por el hijo directo. */
+.prompt { font-size: 19px; }
+.prompt > * { font-size: 19px; line-height: 1.5; }
 .prompt :global(p) { margin: 0 0 0.6em; }
 .prompt :global(p:last-child) { margin-bottom: 0; }
 
@@ -90,7 +107,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 1px solid var(--border-2);
   border-radius: var(--r);
   background: var(--surface-2);
@@ -116,7 +133,7 @@
   color: var(--text-3);
 }
 
-.optionText { flex: 1; font: 500 14px/1.45 var(--font-ui); color: var(--text); }
+.optionText { flex: 1; font: 500 15px/1.45 var(--font-ui); color: var(--text); }
 
 .mark { flex: none; }
 
@@ -125,14 +142,24 @@
   background: var(--good-soft);
   color: var(--good-text);
 }
-.option[data-state="correct"] .letter { border-color: var(--good); color: var(--good-text); }
+/* Relleno sólido, como el baseline (styles.css:842 y :844): la letra de la
+   correcta y la de la errada se leen sin depender del borde. */
+.option[data-state="correct"] .letter {
+  border-color: var(--good);
+  background: var(--good);
+  color: var(--on-good);
+}
 
 .option[data-state="wrong"] {
   border-color: var(--bad);
   background: var(--bad-soft);
   color: var(--bad-text);
 }
-.option[data-state="wrong"] .letter { border-color: var(--bad); color: var(--bad-text); }
+.option[data-state="wrong"] .letter {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: var(--on-bad);
+}
 
 .option[data-state="idle"]:disabled { opacity: 0.75; }
 
@@ -155,6 +182,8 @@
   color: var(--good-text);
 }
 .reveal[data-ok="false"] .revealTag { color: var(--bad-text); }
+
+.revealAnswer { margin: 0; font: 600 13px var(--font-ui); color: var(--bad-text); }
 
 .explanation { font-size: 13.5px; color: var(--text-2); }
 .explanation :global(p) { margin: 0 0 0.5em; }
@@ -233,6 +262,12 @@
   border-radius: var(--r-lg);
   box-shadow: var(--relief), var(--shadow);
 }
+
+/* El filo acompaña al anillo: la escala del baseline (≥70 bien, ≥40 a repasar,
+   por debajo sin ver). */
+.result[data-tone="good"] { border-left-color: var(--good); }
+.result[data-tone="warn"] { border-left-color: var(--warn); }
+.result[data-tone="bad"] { border-left-color: var(--bad); }
 
 .resultHead { display: flex; align-items: center; gap: 24px; }
 .resultText { display: flex; flex-direction: column; gap: 6px; }

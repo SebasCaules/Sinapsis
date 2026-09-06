@@ -183,13 +183,16 @@ export function Stat({
   value,
   label,
   tone = "plain",
+  title,
 }: {
   value: ReactNode;
   label: string;
   tone?: "plain" | "due" | "fresh" | "mastered";
+  /** Explicación de la cifra: qué cuenta. */
+  title?: string;
 }) {
   return (
-    <span className={css.stat} data-tone={tone}>
+    <span className={css.stat} data-tone={tone} title={title}>
       <span className={css.statValue}>{value}</span>
       <span className={css.statLabel}>{label}</span>
     </span>
