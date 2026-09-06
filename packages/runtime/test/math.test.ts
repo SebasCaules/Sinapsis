@@ -34,6 +34,12 @@ describe("M — t de Student y chi cuadrado", () => {
   it("tCDF invierte a tInv", () => {
     close(M.tCDF(M.tInv(0.975, 10), 10), 0.975, 1e-7);
   });
+  it("una cola extrema con pocos grados de libertad NO se corta en ±1000", () => {
+    /* AC-04: el corchete de la bisección era fijo, así que `tInv` devolvía el
+       extremo en silencio. t_{0.9999, 1} (Cauchy) vale 3183.098757. */
+    close(M.tInv(0.9999, 1), 3183.0987578790806, 1e-6);
+    close(M.tInv(1e-4, 1), -3183.0987578790806, 1e-6);
+  });
   it("χ²_{0.95,5} = 11.07", () => {
     expect(M.chi2Inv(0.95, 5)).toBeCloseTo(11.0704976935, 6);
   });

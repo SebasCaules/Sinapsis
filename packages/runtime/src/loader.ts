@@ -35,6 +35,8 @@ interface LoadedBundle {
   promise: Promise<void>;
   views: string[];
   figures: string[];
+  /** Claves de `App.DATA` que puso este bundle. */
+  data: string[];
   nodes: Element[];
 }
 
@@ -137,6 +139,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const json = (await res.json()) as unknown;
     const key = dataKey(file);
     app.DATA[key] = json;
+    entry.data.push(key);
     // `study-data.json` además se funde en `App.STUDY`, como en el baseline.
     if (isStudyData(file) && json && typeof json === "object") {
       Object.assign(app.STUDY, json as Record<string, unknown>);
@@ -148,7 +151,7 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const already = bundles.get(info.id);
     if (already) return already.promise;
 
-    const entry: LoadedBundle = { info, promise: Promise.resolve(), views: [], figures: [], nodes: [] };
+    const entry: LoadedBundle = { info, promise: Promise.resolve(), views: [], figures: [], data: [], nodes: [] };
     const run = async (): Promise<void> => {
       for (const file of info.data || []) {
         await loadData(entry, resolveUrl(info.base, file), file);
@@ -165,9 +168,13 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     const p = queue.then(() => attribute(entry, run));
     queue = p.catch(() => undefined);
     entry.promise = p.catch((e: unknown) => {
-      // un bundle que falló no queda «cargado»: se puede reintentar
+      // Un bundle que falló no queda «cargado»: se puede reintentar. Y como la
+      // entrada desaparece, `unloadBundle` ya no va a poder limpiar lo que
+      // alcanzaron a registrar los scripts anteriores al que reventó: se limpia
+      // acá, igual que en la descarga.
       bundles.delete(info.id);
       removeNodes(entry);
+      forget(entry);
       throw e;
     });
     bundles.set(info.id, entry);
@@ -181,17 +188,28 @@ export function createLoader(app: RuntimeApp): BundleLoader {
     entry.nodes = [];
   }
 
-  function unloadBundle(id: string): void {
-    const entry = bundles.get(id);
-    if (!entry) return;
-    bundles.delete(id);
-    removeNodes(entry);
+  /** Borra del `App` todo lo que registró el bundle: vistas, figuras y datos. */
+  function forget(entry: LoadedBundle): void {
     entry.views.forEach((v) => {
       delete app.VIEWS[v];
     });
     entry.figures.forEach((f) => {
       delete app.FIGURES[f];
     });
+    entry.data.forEach((k) => {
+      delete app.DATA[k];
+    });
+    entry.views = [];
+    entry.figures = [];
+    entry.data = [];
+  }
+
+  function unloadBundle(id: string): void {
+    const entry = bundles.get(id);
+    if (!entry) return;
+    bundles.delete(id);
+    removeNodes(entry);
+    forget(entry);
   }
 
   return {

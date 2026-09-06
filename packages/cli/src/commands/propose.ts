@@ -157,14 +157,14 @@ export async function runPropose(opts: ProposeOptions, ctx: Ctx): Promise<number
   if (added.code !== 0) {
     ctx.err(pc.red("No se pudieron agregar los archivos al índice:"));
     ctx.err(added.output.trim());
-    await back(ctx, root);
+    await undoBranch(ctx, root, branch);
     return 1;
   }
   const committed = await git(root, ["commit", "-m", `Propuesta de ${slug}: ${title}`, "-m", body]);
   if (committed.code !== 0) {
     ctx.err(pc.red("No se pudo commitear la propuesta:"));
     ctx.err(committed.output.trim());
-    await back(ctx, root);
+    await undoBranch(ctx, root, branch);
     return 1;
   }
   ctx.out(pc.green(`propuesta escrita en ${file} y commiteada en ${branch}`));
@@ -431,6 +431,24 @@ export function resolveRepo(ctx: Ctx, flag?: string): string {
   if (flag) return resolveUserPath(ctx, flag);
   const home = (ctx.env["SINAPSIS_HOME"] ?? "").trim();
   return home === "" ? REPO_ROOT : resolveUserPath(ctx, home);
+}
+
+/**
+ * Deshace la rama de un intento que murió entre el `checkout -b` y el commit.
+ *
+ * Sin esto la rama quedaba creada y vacía, y el intento siguiente —el mismo
+ * comando, después de arreglar lo que falló— moría en «Ya existe la rama
+ * proposal/…» sin llegar a hacer nada.
+ */
+async function undoBranch(ctx: Ctx, repo: string, branch: string): Promise<void> {
+  await back(ctx, repo);
+  const dropped = await git(repo, ["branch", "-D", branch]);
+  if (dropped.code === 0) {
+    ctx.err(pc.dim(`Se borró la rama ${branch}: corrija lo anterior y repita el mismo comando.`));
+    return;
+  }
+  ctx.err(pc.yellow(`No se pudo borrar la rama ${branch}: ${tail(dropped.output, 3)}`));
+  ctx.err(pc.dim(`Bórrela con \`git -C ${repo} branch -D ${branch}\` antes de repetir.`));
 }
 
 /** Vuelve a `main` pase lo que pase: la materia nunca deja el repo en otra rama. */

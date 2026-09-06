@@ -380,7 +380,12 @@ export function createMath(): MathLib {
   function tInv(p?: any, df?: any): any {
     if (p <= 0) return -Infinity;
     if (p >= 1) return Infinity;
+    // El corchete se ABRE hasta contener la raíz, como en `chi2Inv`. Con [-1000,
+    // 1000] fijo, una cola extrema de pocos grados de libertad devolvía el
+    // extremo en silencio: t_{0.9999, 1} = 3183.0988 salía 1000.
     let lo = -1000, hi = 1000;
+    while (tCDF(hi, df) < p && hi < 1e300) { hi *= 2; lo = -hi; }
+    while (tCDF(lo, df) > p && lo > -1e300) { lo *= 2; hi = -lo; }
     for (let i = 0; i < 200; i++) {
       const mid = (lo + hi) / 2;
       if (tCDF(mid, df) < p) lo = mid; else hi = mid;

@@ -21,6 +21,7 @@ import {
   writePush,
   type BuildProblem,
   type BuiltBundle,
+  type SkippedPath,
 } from "../tools/bundle.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
 import { resolveApi, resolveToken } from "./sync.js";
@@ -50,30 +51,60 @@ export function toolsDir(ctx: Ctx, configPath: string, flag?: string): string {
   return flag ? resolveUserPath(ctx, flag) : path.join(path.dirname(configPath), "tools");
 }
 
+/** Lo que devuelve `buildAll`: o están todos construidos, o algo impide seguir. */
+export type BuildAllOutcome = { ok: true; bundles: BuiltBundle[] } | { ok: false };
+
+export interface BuildAllOptions {
+  minify?: boolean | undefined;
+  out?: string | undefined;
+  /**
+   * `true` cuando las herramientas son un extra del comando y no su objeto:
+   * `sync --tools` sobre una materia SIN carpeta `tools/` (o sin manifiestos)
+   * avisa y sigue, porque lo que se le pidió es sincronizar el wiki. En
+   * `tools build`/`tools push` la carpeta es el objeto del comando y su
+   * ausencia es un error.
+   */
+  optional?: boolean | undefined;
+}
+
 /**
- * Construye todos los bundles de `base`. Informa cada uno y, si alguno falla,
- * devuelve `null`: un bundle roto no se sube ni deja subir a los demás, para que
- * la materia no quede con la mitad publicada.
+ * Construye todos los bundles de `base`.
+ *
+ * Distingue dos desenlaces que antes eran el mismo:
+ *
+ *   no hay carpeta / no hay manifiestos → no hay nada que construir. Con
+ *     `optional`, es un aviso y la lista vacía;
+ *   un bundle no compila → error: no se sube ninguno, para que la materia no
+ *     quede con la mitad publicada.
  */
-export async function buildAll(
-  ctx: Ctx,
-  base: string,
-  opts: { minify?: boolean | undefined; out?: string | undefined },
-): Promise<BuiltBundle[] | null> {
+export async function buildAll(ctx: Ctx, base: string, opts: BuildAllOptions): Promise<BuildAllOutcome> {
   const dirs = await findBundles(base);
+  const nothing = (headline: string, hint: string): BuildAllOutcome => {
+    if (opts.optional) {
+      ctx.out(pc.yellow(`  ${headline}`));
+      ctx.out(pc.dim(`  ${hint}`));
+      return { ok: true, bundles: [] };
+    }
+    ctx.err(pc.red(headline));
+    ctx.err(pc.dim(hint));
+    return { ok: false };
+  };
+
   if (dirs === null) {
-    ctx.err(pc.red(`No encuentro la carpeta de herramientas: ${base}`));
-    ctx.err(pc.dim(`Cree <materia>/tools/<id>/${MANIFEST_FILE}, o indique otra carpeta con --dir.`));
-    return null;
+    return nothing(
+      `No encuentro la carpeta de herramientas: ${base}`,
+      `Cree <materia>/tools/<id>/${MANIFEST_FILE}, o indique otra carpeta con --dir.`,
+    );
   }
   if (dirs.length === 0) {
-    ctx.err(pc.red(`${base} no tiene ningún bundle.`));
-    ctx.err(pc.dim(`Falta un ${MANIFEST_FILE} en esa carpeta o en alguna de sus subcarpetas.`));
-    return null;
+    return nothing(
+      `${base} no tiene ningún bundle.`,
+      `Falta un ${MANIFEST_FILE} en esa carpeta o en alguna de sus subcarpetas.`,
+    );
   }
   if (dirs.length > 1 && opts.out) {
     ctx.err(pc.red(`--out solo vale con un bundle; ${base} tiene ${dirs.length}.`));
-    return null;
+    return { ok: false };
   }
 
   const built: BuiltBundle[] = [];
@@ -89,7 +120,7 @@ export async function buildAll(
     reportBundle(ctx, outcome.bundle, pushFile);
     built.push(outcome.bundle);
   }
-  return failed ? null : built;
+  return failed ? { ok: false } : { ok: true, bundles: built };
 }
 
 // ---------------------------------------------------------------------------
@@ -102,8 +133,9 @@ export async function runToolsBuild(opts: ToolsBuildOptions, ctx: Ctx): Promise<
 
   heading(ctx, loaded.config);
   const base = toolsDir(ctx, loaded.path, opts.dir);
-  const built = await buildAll(ctx, base, { minify: opts.minify, out: opts.out });
-  if (!built) return 1;
+  const outcome = await buildAll(ctx, base, { minify: opts.minify, out: opts.out });
+  if (!outcome.ok) return 1;
+  const built = outcome.bundles;
 
   ctx.out("");
   ctx.out(
@@ -125,8 +157,9 @@ export async function runToolsPush(opts: ToolsPushOptions, ctx: Ctx): Promise<nu
 
   heading(ctx, loaded.config);
   const base = toolsDir(ctx, loaded.path, opts.dir);
-  const built = await buildAll(ctx, base, { minify: opts.minify, out: opts.out });
-  if (!built) return 1;
+  const outcome = await buildAll(ctx, base, { minify: opts.minify, out: opts.out });
+  if (!outcome.ok) return 1;
+  const built = outcome.bundles;
 
   const api = resolveApi(ctx, opts.api);
   const token = resolveToken(ctx, opts.token);
@@ -272,12 +305,21 @@ function reportBundle(ctx: Ctx, bundle: BuiltBundle, pushFile: string): void {
     );
     ctx.out(pc.dim("      Si el bundle los necesita, agréguelos a `scripts` o `styles`."));
   }
-  if (bundle.skipped.length > 0) {
-    ctx.out(
-      pc.yellow(`    ${bundle.skipped.length} archivo(s) con extensión ajena al contrato (no se suben): ${list(bundle.skipped)}`),
-    );
+  for (const [reason, paths] of groupByReason(bundle.skipped)) {
+    ctx.out(pc.yellow(`    ${paths.length} archivo(s) que no se suben (${reason}): ${list(paths)}`));
   }
   ctx.out(`    push: ${pc.dim(pushFile)}`);
+}
+
+/** Los salteados, agrupados por motivo y en el orden en que aparecieron. */
+function groupByReason(skipped: readonly SkippedPath[]): Array<[string, string[]]> {
+  const groups = new Map<string, string[]>();
+  for (const item of skipped) {
+    const paths = groups.get(item.reason);
+    if (paths) paths.push(item.path);
+    else groups.set(item.reason, [item.path]);
+  }
+  return Array.from(groups.entries());
 }
 
 /** Lista corta para el resumen: hasta 6 rutas y el resto contado. */

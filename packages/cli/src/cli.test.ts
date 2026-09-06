@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { homedir, tmpdir } from "node:os";
@@ -405,6 +405,68 @@ describe("sinapsis sync --dry-run", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  /** Materia mínima con wiki y sin carpeta `tools/`. */
+  async function makeWikiOnly(): Promise<string> {
+    const dir = await mkdtemp(path.join(tmpdir(), "sinapsis-sync-tools-"));
+    await mkdir(path.join(dir, "wiki", "conceptos"), { recursive: true });
+    await writeFile(
+      path.join(dir, "wiki", "conceptos", "uno.md"),
+      "---\ntitulo: Uno\nunidad: 1\nresumen: 'Algo.'\n---\n# Uno\n",
+    );
+    await writeFile(path.join(dir, "sinapsis.config.json"), JSON.stringify(DEMO_CONFIG), "utf8");
+    return dir;
+  }
+
+  it("--tools sin carpeta de herramientas avisa y SINCRONIZA IGUAL (AC-08)", async () => {
+    const dir = await makeWikiOnly();
+    const ctx = testCtx(dir);
+    /* El objeto del comando es el wiki: una materia sin herramientas no puede
+       hacerlo salir 1 ni dejar el wiki sin sincronizar. */
+    expect(await main(["sync", "--tools", "--dry-run"], ctx)).toBe(0);
+    expect(ctx.stderr.join("\n")).toBe("");
+    const stdout = ctx.stdout.join("\n");
+    expect(stdout).toContain("No encuentro la carpeta de herramientas");
+    expect(stdout).toContain("páginas: 1");
+    expect(stdout).toContain("--dry-run: no se llamó al API");
+
+    /* `tools build`, en cambio, SÍ tiene a la carpeta por objeto: sigue saliendo 1. */
+    const build = testCtx(dir);
+    expect(await main(["tools", "build"], build)).toBe(1);
+    expect(build.stderr.join("\n")).toContain("No encuentro la carpeta de herramientas");
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("--tools con la carpeta vacía de manifiestos también sincroniza (AC-08)", async () => {
+    const dir = await makeWikiOnly();
+    await mkdir(path.join(dir, "tools", "borrador"), { recursive: true });
+
+    const ctx = testCtx(dir);
+    expect(await main(["sync", "--tools", "--dry-run"], ctx)).toBe(0);
+    expect(ctx.stderr.join("\n")).toBe("");
+    expect(ctx.stdout.join("\n")).toContain("no tiene ningún bundle");
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it("--tools con un bundle que NO compila sigue cortando el sync (AC-08)", async () => {
+    const dir = await makeWikiOnly();
+    const bundle = path.join(dir, "tools", "demo");
+    await mkdir(bundle, { recursive: true });
+    await writeFile(
+      path.join(bundle, "sinapsis.tools.json"),
+      JSON.stringify({ ...DEMO_MANIFEST, styles: [], data: [] }),
+      "utf8",
+    );
+    await writeFile(path.join(bundle, "demo.js"), "(function () {\n  var x = ;\n})();\n", "utf8");
+
+    const ctx = testCtx(dir);
+    expect(await main(["sync", "--tools", "--dry-run"], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("SyntaxError");
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
   it("sale 1 sin token cuando no es dry-run", async () => {
     const ctx = testCtx(REPO_ROOT, {});
     const code = await main(
@@ -649,6 +711,61 @@ describe("sinapsis tools build", () => {
     await writeFile(path.join(dir, "package.json"), '{ "name": "materia", "type": "module" }\n', "utf8");
     const ctx = testCtx(dir);
     expect(await main(["tools", "build"], ctx)).toBe(0);
+  });
+
+  it("un archivo de texto que NO es UTF-8 viaja en base64 y conserva su tamaño (AC-07)", async () => {
+    const dir = await makeSubject(base);
+    // `ff fe 41`: latin-1, sin bytes nulos y con extensión de texto. Subirlo como
+    // utf8 lo llenaba de U+FFFD y le cambiaba el tamaño.
+    const raw = Buffer.from([0xff, 0xfe, 0x41]);
+    await writeFile(path.join(dir, "tools", "demo", "tabla.csv"), raw);
+
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(0);
+
+    const push = ToolPush.parse(
+      JSON.parse(await readFile(path.join(dir, "tools", "demo", "dist", "tool-push.json"), "utf8")) as unknown,
+    );
+    const csv = push.files.find((f) => f.path === "tabla.csv")!;
+    expect(csv.encoding).toBe("base64");
+    expect(Buffer.from(csv.content, "base64").equals(raw)).toBe(true);
+
+    // Un texto que SÍ es UTF-8 sigue viajando como texto.
+    expect(push.files.find((f) => f.path === "demo.css")!.encoding).toBe("utf8");
+  });
+
+  it("un `.mjs` con `import` no pasa el gate: el runtime lo carga como script clásico (AC-13)", async () => {
+    const dir = await makeSubject(base, { ...DEMO_MANIFEST, scripts: ["demo.js", "modulo.mjs"] });
+    await writeFile(
+      path.join(dir, "tools", "demo", "modulo.mjs"),
+      'import { algo } from "./demo.js";\nexport const x = algo;\n',
+      "utf8",
+    );
+
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(1);
+    const err = ctx.stderr.join("\n");
+    expect(err).toContain("modulo.mjs");
+    expect(err).toContain("SyntaxError");
+    expect(err).toContain("`<script>` clásico");
+  });
+
+  it("lo que queda podado por hondo se informa, no desaparece (AC-14)", async () => {
+    const dir = await makeSubject(base);
+    const hondo = path.join(dir, "tools", "demo", ..."abcdefghi".split(""));
+    await mkdir(hondo, { recursive: true });
+    await writeFile(path.join(hondo, "lejos.txt"), "no viaja\n", "utf8");
+
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(0);
+    const stdout = ctx.stdout.join("\n");
+    expect(stdout).toContain("más de 8 niveles");
+    expect(stdout).toContain("a/b/c/d/e/f/g/h/i/");
+
+    const push = ToolPush.parse(
+      JSON.parse(await readFile(path.join(dir, "tools", "demo", "dist", "tool-push.json"), "utf8")) as unknown,
+    );
+    expect(push.files.some((f) => f.path.includes("lejos.txt"))).toBe(false);
   });
 
   it("rechaza un bundle que supera el tope de 20 MB", async () => {
@@ -905,6 +1022,52 @@ describe("sinapsis propose", () => {
     const { stdout: log } = await run("git", ["log", "--oneline", "-1"], { cwd: repo });
     expect(log).toContain("gates rotos");
   }, 60_000);
+
+  it("si el commit falla, la rama NO queda creada: el intento siguiente pasa (AC-15)", async () => {
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+
+    /* Un `pre-commit` que rechaza: la forma más fiel de «el commit falló después
+       del checkout -b». Sin borrar la rama, el intento siguiente moría en
+       «Ya existe la rama». */
+    const hooks = path.join(repo, ".git", "hooks");
+    const hook = path.join(hooks, "pre-commit");
+    await mkdir(hooks, { recursive: true });
+    await writeFile(hook, "#!/bin/sh\nexit 1\n", "utf8");
+    await chmod(hook, 0o755);
+    await run("git", ["config", "core.hooksPath", hooks], { cwd: repo });
+
+    const args = [
+      "propose",
+      "--repo",
+      repo,
+      "--subject",
+      "proba",
+      "--title",
+      "Commit roto",
+      "--body",
+      "Motivo.",
+      "--skip-gates",
+    ];
+
+    const falla = testCtx(repo);
+    expect(await main(args, falla)).toBe(1);
+    expect(falla.stderr.join("\n")).toContain("No se pudo commitear la propuesta");
+    expect(falla.stderr.join("\n")).toContain("Se borró la rama");
+
+    // Ni rama colgada ni HEAD fuera de main.
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches.trim()).toBe("");
+    const { stdout: head } = await run("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: repo });
+    expect(head.trim()).toBe("main");
+
+    // Arreglado lo que fallaba, el MISMO comando llega hasta el final.
+    await rm(hook, { force: true });
+    const retry = testCtx(repo);
+    expect(await main(args, retry)).toBe(0);
+    expect(retry.stderr.join("\n")).not.toContain("Ya existe la rama");
+    const { stdout: after } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(after).toContain("-commit-roto");
+  });
 
   it("falla si --files nombra un archivo sin cambios", async () => {
     await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");

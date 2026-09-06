@@ -48,6 +48,45 @@ describe("navTargetOf — qué destino pide cada marcado", () => {
     const host = mount('<a class="wikilink" href="/m/proba/p/normal#tabla" data-slug="normal">normal</a>');
     expect(navTargetOf(host.querySelector("a")!)).toBe("/m/proba/p/normal#tabla");
   });
+  it("el wikilink con `data-anchor` lleva TAMBIÉN al encabezado (AC-10)", () => {
+    /* El markdown deja el ancla aparte del `href` (un segundo `#` rompería la
+       ruta); el delegado la vuelve a unir o el enlace cae al tope de la página. */
+    const host = mount(
+      '<a class="wikilink" href="/m/proba/p/normal" data-slug="normal" data-anchor="tabla-z">normal</a>',
+    );
+    expect(navTargetOf(host.querySelector("a")!)).toBe("/m/proba/p/normal#tabla-z");
+  });
+  it("un ancla ya presente en la base no se duplica", () => {
+    const host = mount(
+      '<a class="wikilink" href="/m/proba/p/normal#otra" data-slug="normal" data-anchor="tabla-z">normal</a>',
+    );
+    expect(navTargetOf(host.querySelector("a")!)).toBe("/m/proba/p/normal#otra");
+  });
+  it("sin `href` propio, el ancla se le pega a la forma corta del baseline", () => {
+    /* El `#` inicial de `#/p/slug` no es un ancla: el ancla es la que sigue. */
+    const host = mount('<a class="wikilink" data-slug="normal" data-anchor="tabla-z">normal</a>');
+    expect(navTargetOf(host.querySelector("a")!)).toBe("#/p/normal#tabla-z");
+  });
+
+  it("`data-nav` vacío y sin `href` sigue la cadena en vez de rendirse (AC-11)", () => {
+    const go = mount('<button data-nav data-go="normal">ver</button>');
+    expect(navTargetOf(go.querySelector("button")!)).toBe("#/p/normal");
+
+    const wiki = mount('<a class="wikilink" data-nav href="/m/proba/p/normal" data-slug="normal">normal</a>');
+    /* Con `href` gana el `href` (la forma del baseline), pero el nodo se
+       resuelve igual: lo que no puede pasar es que devuelva `null`. */
+    expect(navTargetOf(wiki.querySelector("a")!)).toBe("/m/proba/p/normal");
+
+    const soloSlug = mount('<span data-nav class="wikilink" data-slug="normal">normal</span>');
+    expect(navTargetOf(soloSlug.querySelector("span")!)).toBe("#/p/normal");
+  });
+
+  it("`data-nav` con `href=\"\"` se frena, no recarga (AC-11)", () => {
+    const host = mount('<a href="" data-nav>sin destino</a>');
+    /* `""` = «es del delegado, pero no lleva a ningún lado». */
+    expect(navTargetOf(host.querySelector("a")!)).toBe("");
+  });
+
   it("se busca hacia arriba desde el nodo clicado, pero sin salir del contenedor", () => {
     const host = mount('<a data-nav="#/calc"><span>texto</span></a>');
     const span = host.querySelector("span")!;
@@ -102,6 +141,43 @@ describe("runtime.bindView — delegación dentro del contenedor de la vista", (
 
     click(host.querySelector("button")!);
     expect(ctx.navigated[0]?.path).toBe("/m/proba/p/normal");
+    unbind();
+  });
+
+  it("un wikilink con ancla navega a la página Y al encabezado (AC-10)", () => {
+    const ctx = makeContext();
+    const rt = installRuntime(ctx);
+    const host = mount(
+      '<a class="wikilink" href="/m/proba/p/normal" data-slug="normal" data-anchor="tabla-z">tabla</a>',
+    );
+    const unbind = rt.bindView(host);
+
+    click(host.querySelector("a")!);
+    expect(ctx.navigated.map((n) => n.path)).toEqual(["/m/proba/p/normal#tabla-z"]);
+    unbind();
+  });
+
+  it("un `[data-nav]` con `href=\"\"` se frena y no recarga ni navega (AC-11)", () => {
+    const ctx = makeContext();
+    const rt = installRuntime(ctx);
+    const host = mount('<a href="" data-nav>sin destino</a>');
+    const unbind = rt.bindView(host);
+
+    const ev = click(host.querySelector("a")!);
+    /* Frenado: sin esto, `href=""` recarga la URL actual y se pierde la vista. */
+    expect(ev.defaultPrevented).toBe(true);
+    expect(ctx.navigated).toHaveLength(0);
+    unbind();
+  });
+
+  it("`data-nav` vacío con `data-go` navega igual (AC-11)", () => {
+    const ctx = makeContext();
+    const rt = installRuntime(ctx);
+    const host = mount('<button data-nav data-go="normal">ver</button>');
+    const unbind = rt.bindView(host);
+
+    click(host.querySelector("button")!);
+    expect(ctx.navigated.map((n) => n.path)).toEqual(["/m/proba/p/normal"]);
     unbind();
   });
 

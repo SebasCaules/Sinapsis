@@ -147,6 +147,42 @@ describe("loadBundle", () => {
     expect(document.head.querySelector('script[data-bundle="tools"]')).toBeNull();
   });
 
+  it("un script que falla NO deja registrado lo de los scripts anteriores", async () => {
+    /* AC-12: al fallar, la entrada del bundle desaparece, así que `unloadBundle`
+       ya no puede limpiar nada. Si el `catch` no borra lo registrado, la vista y
+       la figura del primer script quedan colgadas en el `App` para siempre. */
+    stubFetch({ [BASE + "tablas.json"]: { z: [1.96] } });
+    const { restore } = stubScripts(
+      {
+        [BASE + "ok.js"]: (a) => {
+          a.registerView("explorador", () => undefined);
+          a.registerFigure("u1-dado", () => undefined);
+        },
+      }, // "roto.js" no está: dispara error
+      app,
+    );
+    const loader = createLoader(app);
+    /* Una figura de otro origen: la limpieza no puede llevársela puesta. */
+    app.registerFigure("suelta", () => undefined);
+
+    await expect(
+      loader.loadBundle({
+        id: "tools",
+        base: BASE,
+        data: ["tablas.json"],
+        styles: [],
+        scripts: ["ok.js", "roto.js"],
+      }),
+    ).rejects.toThrow(/roto\.js/);
+    restore();
+
+    expect(Object.keys(app.VIEWS)).not.toContain("explorador");
+    expect(Object.keys(app.FIGURES)).not.toContain("u1-dado");
+    expect(app.view("explorador")).toBeNull();
+    expect(app.DATA["tablas"]).toBeUndefined();
+    expect(app.FIGURES["suelta"]).toBeDefined();
+  });
+
   it("un JSON que responde mal aborta con el status", async () => {
     stubFetch({});
     const loader = createLoader(app);

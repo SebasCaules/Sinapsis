@@ -15,6 +15,7 @@ import {
   webUrl,
 } from "../report.js";
 import { GENERATOR } from "../version.js";
+import type { BuiltBundle } from "../tools/bundle.js";
 import { buildAll, pushAll, toolsDir } from "./tools.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
 
@@ -86,12 +87,19 @@ export async function runSync(opts: SyncOptions, ctx: Ctx): Promise<number> {
   }
 
   // Herramientas: se construyen antes de tocar el API para que un bundle roto
-  // detenga el sync entero en vez de dejar la materia a medio publicar.
-  const bundles = opts.tools
-    ? await buildAll(ctx, toolsDir(ctx, loaded.path, undefined), { minify: opts.minify })
-    : [];
-  if (bundles === null) return 1;
-  if (opts.tools) ctx.out("");
+  // detenga el sync entero en vez de dejar la materia a medio publicar. Una
+  // materia SIN carpeta `tools/` no es un bundle roto: se avisa y el wiki se
+  // sincroniza igual, que es lo que se pidió (`optional`).
+  let bundles: BuiltBundle[] = [];
+  if (opts.tools) {
+    const outcome = await buildAll(ctx, toolsDir(ctx, loaded.path, undefined), {
+      minify: opts.minify,
+      optional: true,
+    });
+    if (!outcome.ok) return 1;
+    bundles = outcome.bundles;
+    ctx.out("");
+  }
 
   if (opts.dryRun) {
     ctx.out(pc.dim("--dry-run: no se llamó al API."));

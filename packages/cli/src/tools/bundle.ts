@@ -13,10 +13,12 @@
  *  2. Cada ruta declarada cumple `ToolFilePath` (sin «..», sin raíz, extensión
  *     conocida), existe, y —resolviendo enlaces simbólicos— queda dentro de la
  *     carpeta del bundle.
- *  3. Cada script parsea: `node --check` sobre una copia temporal. La copia lleva
- *     su propio `package.json` (`"type": "commonjs"`) para que un `package.json`
- *     del repositorio de la materia no haga que un IIFE clásico se lea como
- *     módulo ES y falle sin motivo.
+ *  3. Cada script parsea COMO SCRIPT CLÁSICO: `node --check` sobre una copia
+ *     temporal, siempre con extensión `.js` y con su propio `package.json`
+ *     (`"type": "commonjs"`). Las dos cosas apuntan al mismo lado: el cargador
+ *     inserta un `<script>` clásico, así que ni un `package.json` de la materia
+ *     puede hacer que un IIFE se lea como módulo, ni un `.mjs` puede colar un
+ *     `import` que después revienta en el navegador.
  *  4. El bundle no supera el tope de 20 MB del contrato.
  */
 import { execFile } from "node:child_process";
@@ -47,6 +49,11 @@ export const MAX_BYTES = 20 * 1024 * 1024;
 
 /** Carpetas que nunca forman parte del bundle. */
 const SKIP_DIRS = new Set(["dist", MIN_DIR, "node_modules"]);
+/** Profundidad máxima del recorrido de la carpeta del bundle. */
+const MAX_DEPTH = 8;
+/** Motivos por los que un archivo de la carpeta no viaja. */
+const SKIP_EXT = "extensión ajena al contrato";
+const SKIP_DEPTH = `más de ${MAX_DEPTH} niveles`;
 /** Extensiones que viajan como texto; el resto va en base64. */
 const TEXT = /\.(js|mjs|css|json|svg|txt|md|csv)$/i;
 /** Código: solo se sube si el manifiesto lo declara (el runtime no carga otra cosa). */
@@ -72,14 +79,22 @@ export interface BuiltBundle {
   files: BundleFile[];
   /** Suma de los bytes que se suben. */
   bytes: number;
-  /** Rutas que había en la carpeta y no se pueden subir (extensión ajena al contrato). */
-  skipped: string[];
+  /** Rutas que había en la carpeta y no se suben, cada una con su motivo. */
+  skipped: SkippedPath[];
   /**
    * Código de la carpeta que el manifiesto no declara (`.js`, `.mjs`, `.css`):
    * el runtime solo carga lo que está en `scripts` y `styles`, así que subirlo
    * no serviría de nada y publicaría scripts de construcción o código muerto.
    */
   ignored: string[];
+}
+
+/** Algo que estaba en la carpeta y no viaja en el bundle, y por qué. */
+export interface SkippedPath {
+  /** Ruta relativa a la carpeta del bundle, con barras. */
+  path: string;
+  /** Motivo, en la voz del informe: «extensión ajena al contrato». */
+  reason: string;
 }
 
 export interface BuildProblem {
@@ -205,7 +220,10 @@ export async function buildBundle(dir: string, opts: BuildBundleOptions = {}): P
 
   // --- archivos de la carpeta ----------------------------------------------
   const walked = await walk(dir);
-  const skipped = walked.invalid;
+  const skipped: SkippedPath[] = [
+    ...walked.invalid.map((p) => ({ path: p, reason: SKIP_EXT })),
+    ...walked.pruned.map((p) => ({ path: p, reason: SKIP_DEPTH })),
+  ];
   const declaredPaths = new Set(declared.map((d) => d.path));
   const loose = walked.files.filter((p) => !declaredPaths.has(p));
   // Los archivos sueltos que el manifiesto no declara viajan igual —una fuente o
@@ -240,7 +258,7 @@ export async function buildBundle(dir: string, opts: BuildBundleOptions = {}): P
     const min = minified.get(relative);
     const original = sources.get(relative) ?? (await readFile(path.join(dir, relative)));
     const buffer = min === undefined ? original : Buffer.from(min, "utf8");
-    const text = TEXT.test(relative) && !buffer.includes(0);
+    const text = TEXT.test(relative) && !buffer.includes(0) && isUtf8(buffer);
     const encoding = text ? ("utf8" as const) : ("base64" as const);
     push.push({ path: relative, encoding, content: text ? buffer.toString("utf8") : buffer.toString("base64") });
     files.push({
@@ -304,18 +322,24 @@ export async function writePush(bundle: BuiltBundle, outFile?: string): Promise<
  * no. Los enlaces simbólicos se saltean: solo se sube lo que está de verdad
  * dentro de la carpeta.
  */
-async function walk(dir: string): Promise<{ files: string[]; invalid: string[] }> {
+async function walk(dir: string): Promise<{ files: string[]; invalid: string[]; pruned: string[] }> {
   const files: string[] = [];
   const invalid: string[] = [];
+  const pruned: string[] = [];
 
   const visit = async (current: string, prefix: string, depth: number): Promise<void> => {
-    if (depth > 8) return;
     const entries = await readdir(current, { withFileTypes: true });
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name, "en"))) {
       if (entry.name.startsWith(".") || entry.isSymbolicLink()) continue;
       const relative = prefix === "" ? entry.name : `${prefix}/${entry.name}`;
       if (entry.isDirectory()) {
         if (SKIP_DIRS.has(entry.name)) continue;
+        // La poda se ANOTA: un árbol más hondo que el tope no puede desaparecer
+        // en silencio, porque lo que cuelga de ahí no viaja en el bundle.
+        if (depth + 1 > MAX_DEPTH) {
+          pruned.push(`${relative}/`);
+          continue;
+        }
         await visit(path.join(current, entry.name), relative, depth + 1);
         continue;
       }
@@ -327,7 +351,7 @@ async function walk(dir: string): Promise<{ files: string[]; invalid: string[] }
   };
 
   await visit(dir, "", 0);
-  return { files, invalid };
+  return { files, invalid, pruned };
 }
 
 /**
@@ -344,8 +368,11 @@ async function checkSyntax(scripts: ReadonlyArray<{ path: string; code: string }
 
     const problems: BuildProblem[] = [];
     for (const [i, script] of scripts.entries()) {
-      const ext = script.path.toLowerCase().endsWith(".mjs") ? ".mjs" : ".js";
-      const copy = path.join(work, `check-${i}${ext}`);
+      // SIEMPRE `.js`: el cargador inserta los scripts del bundle como
+      // `<script>` clásico, así que lo que hay que comprobar es que parseen como
+      // script, no como módulo. Con la copia en `.mjs`, un `import`/`export`
+      // pasaba el gate acá y reventaba recién en el navegador.
+      const copy = path.join(work, `check-${i}.js`);
       await writeFile(copy, script.code, "utf8");
       try {
         await run(process.execPath, ["--check", copy]);
@@ -369,7 +396,26 @@ function syntaxMessage(stderr: string, real: string): string {
   const lines = stderr.split("\n").map((l) => l.trim());
   const error = lines.find((l) => /^\w*(Syntax|Reference|Type)Error\b/.test(l));
   const at = lines.map((l) => l.match(/(?:^|\/)check-\d+\.m?js:(\d+)$/)).find((m) => m !== null);
-  return `${error ?? "no parsea"} — ${at ? `${real}:${at[1]}` : real}`;
+  const where = at ? `${real}:${at[1]}` : real;
+  return `${error ?? "no parsea"} — ${where}${isModuleSyntax(stderr) ? MODULE_HINT : ""}`;
+}
+
+/** ¿El script falló por ser un módulo ES y no un script clásico? */
+function isModuleSyntax(stderr: string): boolean {
+  return /Cannot use import statement outside a module|Unexpected token '?export'?|await is only valid/i.test(stderr);
+}
+
+const MODULE_HINT =
+  ". El runtime inserta los scripts del bundle como `<script>` clásico: no admite " +
+  "`import` ni `export`. Envuelva el código en un IIFE y regístrelo contra `window.App`.";
+
+/**
+ * ¿El contenido es UTF-8 válido? Un `.txt`/`.csv`/`.md`/`.css`/`.svg` en latin-1
+ * pasa el filtro de extensión y no tiene bytes nulos, pero subirlo como texto lo
+ * llena de U+FFFD y le cambia el tamaño: eso va en base64.
+ */
+function isUtf8(buffer: Buffer): boolean {
+  return Buffer.compare(Buffer.from(buffer.toString("utf8"), "utf8"), buffer) === 0;
 }
 
 /**

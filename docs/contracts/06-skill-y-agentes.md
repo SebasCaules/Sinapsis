@@ -140,12 +140,15 @@ sync OK · proba: 209 página(s) — 0 creada(s), 4 actualizada(s), 0 borrada(s)
   API.
 - Con `--tools` construye los bundles **antes** de tocar el API: un bundle roto detiene el
   sync entero en vez de dejar la materia a medio publicar. Los sube después del sync del
-  wiki.
+  wiki. Una materia **sin** carpeta `tools/` (o con la carpeta y sin ningún
+  `sinapsis.tools.json`) no es un bundle roto: se avisa en amarillo y el wiki se sincroniza
+  igual. Con `tools build` / `tools push`, en cambio, la carpeta es el objeto del comando y
+  su ausencia sí sale `1`.
 - `--wiki <dir>` sobreescribe `wiki.root`. **No mueve `wiki.study`**, que cuelga del config.
 
 Salida `1` si: el config no carga o no valida · el wiki no compila (rutas fuera de la
-carpeta) · con `--tools`, algún bundle falla · falta el token · el API responde con error o
-no responde.
+carpeta) · con `--tools`, algún bundle **no compila** (no tener bundles no cuenta) · falta el
+token · el API responde con error o no responde.
 
 ### 2.4 `status`
 

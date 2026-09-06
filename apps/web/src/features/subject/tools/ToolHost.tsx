@@ -91,6 +91,13 @@ export function ToolHost() {
     const host = hostRef.current;
     if (!host || status !== "ready") return;
     const rt = runtimeRef.current;
+    /* Pasar a una vista de OTRO bundle: `status` todavía dice «ready» por el
+       bundle anterior —el efecto de carga corre en este mismo commit y su
+       `setStatus("loading")` no se ve hasta el render siguiente—, así que
+       `rt.view(tool)` daría null y se pintaría el error de «no registró la
+       vista» hasta que el bundle nuevo termine de cargar. Se espera: el efecto
+       de carga vuelve con `ready` cuando el bundle esté. */
+    if (toolId && !rt.isLoaded(toolId)) return;
     const fn = rt.view(tool);
     if (!fn) {
       setStatus("failed");
@@ -134,7 +141,7 @@ export function ToolHost() {
       }
       host.replaceChildren();
     };
-  }, [status, tool, arg, remount, renderTick]);
+  }, [status, toolId, tool, arg, remount, renderTick]);
 
   /* Las migas que pidió la vista son suyas: se borran al dejarla. */
   useEffect(() => () => runtimeRef.current.clearCrumbs(), [tool]);

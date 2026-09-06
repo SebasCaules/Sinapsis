@@ -13,7 +13,7 @@ import { useMemo } from "react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Outlet, Route, Routes, useParams } from "react-router-dom";
+import { MemoryRouter, Outlet, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import {
   SubjectConfig,
   type SubjectDetail,
@@ -57,6 +57,24 @@ const tools: ToolInfo[] = [
     updatedAt: "2026-09-05T18:00:00.000Z",
     base: "/api/subjects/proba/tools/demo/files",
   },
+  /* Un SEGUNDO bundle: la materia tiene más de uno y sus vistas viven en
+     distintos scripts. Es el caso de Proba (figuras + taller + calculadoras). */
+  {
+    manifest: {
+      id: "otro",
+      title: "Otras herramientas",
+      version: "0.0.1",
+      runtime: 1,
+      scripts: ["otro.js"],
+      styles: [],
+      views: [{ id: "laboratorio", label: "Laboratorio", layout: "wide" }],
+      figures: false,
+      data: [],
+    },
+    bytes: 128,
+    updatedAt: "2026-09-05T18:00:00.000Z",
+    base: "/api/subjects/proba/tools/otro/files",
+  },
 ];
 
 /* Lo que el «bundle» deja anotado: sirve para comprobar el desmontaje. */
@@ -86,13 +104,13 @@ function fakeModule(): RuntimeModule {
     unmountFigures: () => 0,
   } as unknown as RuntimeApi["App"];
 
-  /* El «script» del bundle: lo mismo que haría un IIFE contra `window.App`. */
-  const runScript = () => {
-    app.registerView("explorador", (main, arg) => {
+  /** El «script» de una vista: lo mismo que haría un IIFE contra `window.App`. */
+  const register = (id: string, heading: string) => {
+    app.registerView(id, (main, arg) => {
       mounted += 1;
       lastArg = arg;
       const title = document.createElement("h1");
-      title.textContent = "Herramienta de prueba";
+      title.textContent = heading;
       main.appendChild(title);
       /* Un enlace del baseline: `href` de hash y `data-nav`. Si el contenedor
          no está atado, esto navega al hash crudo y recarga. */
@@ -106,6 +124,13 @@ function fakeModule(): RuntimeModule {
     });
   };
 
+  /* Cada bundle registra SOLO lo suyo: la vista del segundo no existe hasta que
+     su script corrió. */
+  const runScript = (id: string) => {
+    if (id === "otro") register("laboratorio", "Laboratorio de prueba");
+    else register("explorador", "Herramienta de prueba");
+  };
+
   const runtime: RuntimeApi = {
     version: 1,
     subject: "proba",
@@ -114,7 +139,11 @@ function fakeModule(): RuntimeModule {
     App: app,
     loadBundle: async (info) => {
       loadedBundles.push(`${info.base}/${info.scripts[0] ?? ""}`);
-      runScript();
+      /* Una carga de verdad tarda: el `<script>` se inserta y su `load` llega
+         en otro turno. Sin esa espera, el hueco entre «cambió la vista» y
+         «cargó el bundle» no existe y no se puede probar. */
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      runScript(info.id);
     },
     unloadBundle: () => undefined,
     view: (id) => views.get(id) ?? null,
@@ -182,6 +211,7 @@ afterEach(() => {
 function ShellStub() {
   const { subject = "" } = useParams();
   const runtime = useRuntime(subject, model);
+  const navigate = useNavigate();
   const ctx = useMemo<SubjectCtx>(
     () => ({ slug: subject, model, openSearch: () => void (searchOpened += 1), runtime }),
     [subject, runtime],
@@ -190,6 +220,8 @@ function ShellStub() {
     <>
       <Outlet context={ctx} />
       <span data-testid="crumbs">{(runtime.crumbs ?? []).map((c) => c.label).join(" · ")}</span>
+      {/* El rail, reducido a lo único que importa acá: saltar de una vista a otra. */}
+      <button onClick={() => navigate("/m/proba/t/laboratorio")}>Ir al laboratorio</button>
     </>
   );
 }
@@ -318,6 +350,42 @@ describe("<ToolHost/>", () => {
     view.unmount();
     window.dispatchEvent(new CustomEvent(PALETTE_EVENT));
     expect(searchOpened).toBe(1);
+  });
+
+  it("pasar a la vista de OTRO bundle no pinta «no registró la vista» (AC-05)", async () => {
+    renderTool("/m/proba/t/explorador");
+    await screen.findByText("Herramienta de prueba");
+
+    /* Todo lo que se vio en pantalla mientras el segundo bundle cargaba: el
+       error no puede aparecer NI UN RENDER, aunque después se corrija solo. */
+    const visto: string[] = [];
+    const observer = new MutationObserver(() => {
+      if (document.body.textContent?.includes("no registró la vista")) visto.push("error");
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+    act(() =>
+      void screen
+        .getByText("Ir al laboratorio")
+        .dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })),
+    );
+
+    /* Justo después del salto: el bundle nuevo todavía no cargó, así que se
+       espera con el aviso de carga; el error es del bundle que YA no está. */
+    expect(screen.queryByText(/no registró la vista/)).toBeNull();
+    expect(screen.getByText("Cargando herramienta…")).toBeTruthy();
+
+    expect(await screen.findByText("Laboratorio de prueba")).toBeTruthy();
+    observer.disconnect();
+
+    expect(visto).toEqual([]);
+    expect(loadedBundles).toEqual([
+      "/api/subjects/proba/tools/demo/files/demo.js",
+      "/api/subjects/proba/tools/otro/files/otro.js",
+    ]);
+    /* La vista anterior se limpió y la nueva se montó: dos montajes, una limpieza. */
+    expect(mounted).toBe(2);
+    expect(cleaned).toBe(1);
   });
 
   it("sin bundle que declare la vista, sigue el «Próximamente» del rail", async () => {

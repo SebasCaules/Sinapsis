@@ -33,13 +33,30 @@ export function isPlainClick(ev: MouseEvent): boolean {
 }
 
 /**
- * El destino que pide el nodo clicado, en la gramática de `App.go`, o null si
- * ese clic no es de navegación.
+ * Le pega el ancla al destino, salvo que la base ya traiga una.
+ *
+ * El `#` inicial de la gramática del baseline (`#/p/slug`) NO es un ancla: por
+ * eso se busca el segundo `#`, no el primero.
+ */
+function withAnchor(base: string, anchor: string): string {
+  if (!anchor) return base;
+  if (base.indexOf("#", 1) >= 0) return base;
+  return base + "#" + anchor;
+}
+
+/**
+ * El destino que pide el nodo clicado, en la gramática de `App.go`.
+ *
+ * Devuelve:
+ *   · la ruta, cuando el clic es de navegación;
+ *   · `""` cuando el clic ES del delegado pero no lleva a ningún lado (un
+ *     `[data-nav]` con `href=""`, que sin frenarlo recarga la página entera);
+ *   · `null` cuando el clic no es asunto del delegado.
  *
  * Precedencia: `data-nav` (ruta explícita, o el `href` si viene vacío, que es
  * la forma del baseline: `<a href="#/taller" data-nav>`), después `data-go`
- * (slug de página) y por último el wikilink, que conserva su `href` para no
- * perder el ancla.
+ * (slug de página) y por último el wikilink, que conserva su `href` y le suma
+ * el `data-anchor` para no perder el encabezado.
  */
 export function navTargetOf(start: Element, root?: Element | null): string | null {
   if (typeof start.closest !== "function") return null;
@@ -54,11 +71,13 @@ export function navTargetOf(start: Element, root?: Element | null): string | nul
   }
 
   const nav = el.getAttribute("data-nav");
+  const href = (el.getAttribute("href") ?? "").trim();
   if (nav !== null) {
     const explicit = nav.trim();
     if (explicit) return explicit;
-    const href = (el.getAttribute("href") ?? "").trim();
-    return href || null;
+    if (href) return href;
+    /* `data-nav` sin valor y sin `href`: no dice a dónde ir, así que sigue la
+       cadena en vez de darse por resuelto. */
   }
 
   const go = (el.getAttribute("data-go") ?? "").trim();
@@ -66,9 +85,15 @@ export function navTargetOf(start: Element, root?: Element | null): string | nul
 
   const slug = (el.getAttribute("data-slug") ?? "").trim();
   if (slug) {
-    const href = (el.getAttribute("href") ?? "").trim();
-    return href.startsWith("/") ? href : "#/p/" + slug;
+    /* El ancla viaja aparte (`data-anchor`, nunca en el `href`: un segundo `#`
+       rompería la ruta que arma el markdown). Acá se vuelve a unir. */
+    const anchor = (el.getAttribute("data-anchor") ?? "").trim();
+    return withAnchor(href.startsWith("/") ? href : "#/p/" + slug, anchor);
   }
+
+  /* Nada resolvió. Un `[data-nav]` con `href` vacío recargaría la página: el
+     clic se frena, pero no se navega a ningún lado. */
+  if (nav !== null && el.hasAttribute("href")) return "";
   return null;
 }
 
@@ -86,6 +111,9 @@ export function bindNav(container: HTMLElement, go: (target: string) => void): (
     const target = navTargetOf(from, container);
     if (target === null) return;
     ev.preventDefault();
+    /* `""` es «frenar y quedarse»: `App.go("")` iría a la portada de la
+       materia, que no es lo que pide un enlace sin destino. */
+    if (target === "") return;
     go(target);
   };
   container.addEventListener("click", onClick);
