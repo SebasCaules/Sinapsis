@@ -207,6 +207,7 @@
 .prose :global(.callout[data-type="ejemplo"]) { --callout: var(--accent); }
 .prose :global(.callout[data-type="warn"]) { --callout: var(--warn); }
 .prose :global(.callout[data-type="discrepancia"]) { --callout: var(--bad); }
+.prose :global(.callout[data-type="cita"]) { --callout: var(--u6); }
 .prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface); }
 
 /* ---------- figuras interactivas (N0-42) ----------

@@ -57,6 +57,7 @@ export const CALLOUT_LABELS: Record<string, string> = {
   ejemplo: "Ejemplo",
   warn: "Atención",
   discrepancia: "Discrepancia",
+  cita: "Cita",
   figura: "Figura",
 };
 
@@ -70,6 +71,8 @@ const ALIASES: Record<string, string> = {
   caution: "warn",
   atencion: "warn",
   intuition: "intuicion",
+  quote: "cita",
+  cite: "cita",
   figure: "figura",
 };
 
