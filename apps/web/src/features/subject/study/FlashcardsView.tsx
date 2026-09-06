@@ -15,10 +15,13 @@ import css from "./FlashcardsView.module.css";
 
 export function FlashcardsView() {
   const { slug, model } = useSubjectCtx();
-  const { content, model: study } = useStudy(slug);
+  const { content, state, model: study } = useStudy(slug);
 
   if (content.isPending) return <WideSkeleton />;
   if (content.isError) return <ErrorCard error={content.error} subject={slug} />;
+  /* Vencidas, nuevas y dominadas SON el estado del usuario: si esa consulta
+     falla, la vista mostraba ceros como si estuviera todo al día (bug 12). */
+  if (state.isError) return <ErrorCard error={state.error} subject={slug} />;
 
   const { decks, totals } = study;
   const session = (deck: string, modo: string) => `${routes.deck(slug, deck)}?modo=${modo}`;
@@ -119,7 +122,11 @@ export function FlashcardsView() {
               </div>
 
               <div className={css.cardBar}>
-                <Bar ratio={stat.ratio} color={division?.color} />
+                <Bar
+                  ratio={stat.ratio}
+                  color={division?.color}
+                  label={`${deck.title}: ${stat.mastered} de ${stat.total} tarjetas dominadas`}
+                />
                 <span className={css.cardBarLabel}>
                   {stat.mastered}/{stat.total} dominadas
                 </span>

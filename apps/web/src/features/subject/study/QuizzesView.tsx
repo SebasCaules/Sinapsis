@@ -12,9 +12,12 @@ import css from "./QuizzesView.module.css";
 
 export function QuizzesView() {
   const { slug, model } = useSubjectCtx();
-  const { content, model: study } = useStudy(slug);
+  const { content, state, model: study } = useStudy(slug);
 
   if (content.isError) return <ErrorCard error={content.error} subject={slug} />;
+  /* El mejor puntaje y el último intento salen del estado del usuario: sin él,
+     todos los quizzes decían «Sin intentos» (bug 12). */
+  if (state.isError) return <ErrorCard error={state.error} subject={slug} />;
   if (content.isPending) return <WideSkeleton />;
 
   const { quizzes } = study;
@@ -87,7 +90,11 @@ export function QuizzesView() {
                       {stat.best.score}
                       <span className={css.bestOf}>/{stat.best.total}</span>
                     </span>
-                    <Bar ratio={stat.bestPct === null ? 0 : stat.bestPct / 100} className={css.bestBar} />
+                    <Bar
+                      ratio={stat.bestPct === null ? 0 : stat.bestPct / 100}
+                      className={css.bestBar}
+                      label={`${quiz.title}: mejor puntaje ${stat.bestPct ?? 0} por ciento`}
+                    />
                     <span className={css.rowMeta}>
                       Mejor {stat.bestPct} % · último {relativeSince(stat.last?.at ?? stat.best.at, study.now)}
                     </span>

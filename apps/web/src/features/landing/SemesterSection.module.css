@@ -32,6 +32,21 @@
 .handle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: 0 0 0 5px var(--primary-ring); }
 @media (pointer: coarse) { .handle { padding: 14px; margin: -8px 0 -8px -14px; } }
 
+/* Envoltorio del botón: un <button disabled> no recibe eventos de puntero, así
+   que el globo del `title` lo tiene que dibujar este <span> (U10). */
+.removeSlot { flex: none; display: inline-flex; align-items: center; }
+
+/* Solo para el lector de pantalla: el motivo por el que el botón está apagado. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .removeSemester {
   flex: none;
   font: 600 11px var(--font-ui);
@@ -42,7 +57,17 @@
   padding: 6px 10px;
   cursor: pointer;
 }
-.removeSemester:hover { border-color: var(--bad); }
+.removeSemester:hover:not(:disabled) { border-color: var(--bad); }
+.removeSemester:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* Apagado, no escondido: sigue diciendo qué se puede hacer con el cuatrimestre.
+   0.75 es el piso de opacidad de los controles deshabilitados (N0-25). */
+.removeSemester:disabled {
+  opacity: .75;
+  cursor: not-allowed;
+  color: var(--text-3);
+  border-color: var(--border);
+  background: var(--surface-2);
+}
 
 /* Copia que sigue al puntero al arrastrar un cuatrimestre entero. */
 .overlay {
@@ -114,6 +139,9 @@
   outline-offset: 6px;
 }
 .grid[data-over="true"] { outline-color: var(--accent); }
+/* La grilla no se desmonta al plegar (el `aria-controls` del plegable la
+   referencia siempre): `display: grid` le ganaba al `hidden` del atributo. */
+.grid[hidden] { display: none; }
 
 .empty {
   grid-column: 1 / -1;
@@ -122,8 +150,7 @@
   place-items: center;
   border: 1.5px dashed var(--border-2);
   border-radius: var(--r);
-  font: 600 10.5px var(--font-ui);
-  letter-spacing: .06em;
+  font: 600 12.5px var(--font-ui);
   color: var(--text-3);
 }
 .empty[data-over="true"] { border-color: var(--accent); background: var(--accent-soft); }

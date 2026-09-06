@@ -85,8 +85,20 @@ function renderSession() {
   );
 }
 
+/**
+ * El control con nombre de la tarjeta (U37). Ya no es la tarjeta con un
+ * `aria-label` encima —eso tapaba su contenido— sino un botón hermano que
+ * anuncia el estado con `aria-expanded`.
+ */
 const flipButton = () => screen.getByRole("button", { name: /respuesta/ });
 const gradeButton = (name: RegExp) => screen.getByRole("button", { name }) as HTMLButtonElement;
+
+/** «Ver la respuesta» / «Ocultar la respuesta» + el `aria-expanded` que le toca. */
+function expectFlipState(flipped: boolean): void {
+  const button = flipButton();
+  expect(button.textContent).toContain(flipped ? "Ocultar la respuesta" : "Ver la respuesta");
+  expect(button.getAttribute("aria-expanded")).toBe(String(flipped));
+}
 
 describe("<SessionView/>", () => {
   it("da vuelta la tarjeta y al calificar llama al API y pasa a la siguiente", async () => {
@@ -95,11 +107,14 @@ describe("<SessionView/>", () => {
     /* Primera tarjeta: solo el anverso, y las notas todavía no se pueden usar. */
     expect(await screen.findByText("Anverso uno")).toBeTruthy();
     expect(screen.getByText("1 / 2")).toBeTruthy();
-    expect(flipButton().getAttribute("aria-label")).toBe("Ver la respuesta");
+    expectFlipState(false);
     expect(gradeButton(/Bien/).disabled).toBe(true);
+    /* El anverso es contenido de verdad, no el rótulo de un botón: la tarjeta
+       tiene su propio papel y el texto queda a la vista de un lector. */
+    expect(screen.getByRole("group", { name: "Tarjeta de repaso" }).textContent).toContain("Anverso uno");
 
     fireEvent.click(flipButton());
-    expect(flipButton().getAttribute("aria-label")).toBe("Ocultar la respuesta");
+    expectFlipState(true);
     expect(gradeButton(/Bien/).disabled).toBe(false);
 
     fireEvent.click(gradeButton(/Bien/));
@@ -109,7 +124,23 @@ describe("<SessionView/>", () => {
     expect(screen.queryByText("Anverso uno")).toBeNull();
     expect(screen.getByText("2 / 2")).toBeTruthy();
     /* La siguiente empieza tapada otra vez. */
-    expect(flipButton().getAttribute("aria-label")).toBe("Ver la respuesta");
+    expectFlipState(false);
+  });
+
+  it("Espacio sobre la tarjeta enfocada la da vuelta UNA sola vez", async () => {
+    renderSession();
+    expect(await screen.findByText("Anverso uno")).toBeTruthy();
+
+    /* Bug 2: la tarjeta tenía su propio `onKeyDown` ADEMÁS del atajo global, así
+       que un Espacio real sobre ella la giraba y la volvía a girar. El evento
+       sale del elemento enfocado y sube hasta `window`, como en el navegador. */
+    const card = screen.getByRole("group", { name: "Tarjeta de repaso" });
+    card.focus();
+    fireEvent.keyDown(card, { key: " ", bubbles: true });
+    expectFlipState(true);
+
+    fireEvent.keyDown(card, { key: " ", bubbles: true });
+    expectFlipState(false);
   });
 
   it("«Otra vez» devuelve la tarjeta al final de la cola y el resumen llega al terminar", async () => {

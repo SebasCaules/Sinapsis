@@ -63,6 +63,29 @@
 }
 
 /* ============================================================
+   REGLAS DE USO DE DOS TOKENS (valen para los tres temas)
+
+   --accent  es una MANCHA, nunca texto (U43). Se usa para filetes, bordes,
+             fondos de realce, el aro del sello y el resaltado de un destino de
+             arrastre. Sobre --surface no llega a 4.5:1 en ningún tema, así que
+             cualquier rótulo, cifra o versalita que quiera ese color usa
+             --accent-ink, que es la TINTA equivalente (misma familia, corrida
+             hacia el texto del tema). Misma regla que --warn / --warn-text y
+             que --ucol / --uink (N0-25). Escribir `color: var(--accent)` es un
+             error de contraste, no una preferencia estética.
+
+   --track   es la PISTA de las barras de progreso y es un token propio, no un
+             alias de --border-2 (U16). Un borde puede ser tenue porque siempre
+             tiene contenido al lado; una barra al 0 % es SOLO pista, y si no se
+             ve sola la tarjeta miente («sin comenzar» parece «sin barra»). Por
+             eso se mide contra --surface, que es el fondo de la tarjeta, y se
+             exige ≥ 3:1 (componente gráfico, WCAG 1.4.11):
+                 pergamino  #968769 sobre #faf5ea → 3.24:1
+                 laurel     #8a8d6c sobre #f8f6ec → 3.17:1
+                 claustro   #786a4b sobre #1e1910 → 3.30:1
+   ============================================================ */
+
+/* ============================================================
    THEME · PERGAMINO  (claro, por defecto) — university press:
    papel marfil, óxido de sangre (oxblood) y oro viejo.
    "light" es alias de pergamino.
@@ -72,7 +95,7 @@
   --surface:#faf5ea; --surface-2:#f2ebdb; --surface-3:#eae0cd; --elevated:#fdfaf1;
   --text:#231c12; --text-2:#574b37; --text-3:#6a6150;
   --border:#ddd2bb; --border-2:#c9bca0;
-  --track:#c9bca0;   /* pista de las barras de progreso: tiene que verse al 0 % */
+  --track:#968769;   /* pista de progreso, propia de --border-2: 3.24:1 sobre --surface */
   --ink-mix:68%;     /* cuánto color de unidad sobrevive en la TINTA (ver --uink) */
   --accent-ink:#755c24; --ueval-ink:#74571c; --umeta-ink:#6a6152; --warn-ink:#75521b; --good-ink:#365c33;
   --primary:#7c2230; --primary-2:#641a26; --primary-soft:#f1e0db; --primary-ring:rgba(124,34,48,.26);
@@ -126,7 +149,7 @@
   --surface:#f8f6ec; --surface-2:#eff0df; --surface-3:#e6e6d1; --elevated:#fbf9f0;
   --text:#1b2117; --text-2:#3f4a38; --text-3:#606751;
   --border:#d8dac1; --border-2:#c2c5a5;
-  --track:#c2c5a5;
+  --track:#8a8d6c;   /* pista de progreso, propia de --border-2: 3.17:1 sobre --surface */
   --ink-mix:68%;
   --accent-ink:#735e26; --ueval-ink:#66531d; --umeta-ink:#5f5f4d; --warn-ink:#73531c; --good-ink:#335e35;
   --primary:#1f4d39; --primary-2:#163b2c; --primary-soft:#dde9df; --primary-ring:rgba(31,77,57,.24);
@@ -181,7 +204,7 @@
   --surface:#1e1910; --surface-2:#251f14; --surface-3:#2d2618; --elevated:#332b1b;
   --text:#ece2cd; --text-2:#bcae93; --text-3:#a1957b;
   --border:#322a1a; --border-2:#443a25;
-  --track:#443a25;
+  --track:#786a4b;   /* pista de progreso, propia de --border-2: 3.30:1 sobre --surface */
   /* en el tema oscuro los colores de unidad ya contrastan: la tinta es casi el
      mismo color (el 8 % de --text solo levanta el azul y el rosa) */
   --ink-mix:92%;

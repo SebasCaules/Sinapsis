@@ -120,7 +120,31 @@
 }
 
 /* ---------- bajo la tarjeta ---------- */
-.underCard { display: flex; align-items: center; min-height: 26px; }
+.underCard { display: flex; align-items: center; gap: 12px; min-height: 26px; }
+
+/* El control con nombre de la tarjeta (U37): la tarjeta se sigue pudiendo
+   pulsar entera, pero lo que anuncia el estado —y lo que encuentra quien navega
+   por controles— es este botón. */
+.flipButton {
+  flex: none;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t);
+}
+.flipButton:hover { border-color: var(--primary); color: var(--primary); }
+.flipButton:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.underCard .queueNote { margin-left: auto; }
 
 .wikiLink {
   display: inline-flex;
@@ -239,5 +263,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .flip { transition: none; }
-  .grade { transition: none; }
+  .grade, .flipButton { transition: none; }
 }

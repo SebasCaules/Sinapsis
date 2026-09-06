@@ -11,7 +11,7 @@
  *    estado VIGENTE de la tarjeta (el optimista incluido): lo que promete el
  *    botón es lo que va a guardar el API.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { plural, routes, type SrsGrade } from "@sinapsis/contract";
 import { Icon, UiIcon, useToast } from "@/components/platform";
@@ -59,6 +59,34 @@ function startSession(cards: CardEntry[]): SessionState {
 /** Las notas se guardan en un registro fijo; el acceso indexado va por acá. */
 const countOf = (counts: Record<SrsGrade, number>, grade: SrsGrade): number => counts[grade] ?? 0;
 
+/**
+ * Qué decir cuando la cola sale vacía. Depende del MODO, no del mazo: «no hay
+ * vencidas» y «el mazo no tiene tarjetas» son dos cosas distintas y la acción
+ * que corresponde tampoco es la misma.
+ */
+function emptyForMode(mode: SessionMode): { eyebrow: string; title: string; text: string } {
+  switch (mode) {
+    case "nuevas":
+      return {
+        eyebrow: "NADA NUEVO",
+        title: "No quedan tarjetas nuevas en este mazo",
+        text: "Ya vio todas las tarjetas al menos una vez. Puede repasar el mazo entero cuando quiera.",
+      };
+    case "vencidas":
+      return {
+        eyebrow: "NADA PENDIENTE",
+        title: "No hay tarjetas vencidas en este mazo",
+        text: "El repaso espaciado las vuelve a poner en la cola cuando toque. Mientras tanto puede repasar el mazo entero.",
+      };
+    case "todo":
+      return {
+        eyebrow: "MAZO VACÍO",
+        title: "Este mazo todavía no tiene tarjetas",
+        text: "Las tarjetas se escriben en la carpeta «estudio/» del wiki y llegan con la próxima sincronización.",
+      };
+  }
+}
+
 /** «4 min 12 s» / «48 s». */
 export function formatElapsed(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
@@ -80,6 +108,17 @@ export function SessionView() {
 
   const [session, setSession] = useState<SessionState | null>(null);
   const [flipped, setFlipped] = useState(false);
+
+  /* La cara que está de espaldas se marca `inert`: además de `aria-hidden`, saca
+     del orden de tabulación los enlaces del markdown de la cara oculta, que se
+     podían enfocar aunque no se vieran (U37). El atributo no está en los tipos
+     de React 18, así que se aplica sobre el nodo. */
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    frontRef.current?.toggleAttribute("inert", flipped);
+    backRef.current?.toggleAttribute("inert", !flipped);
+  });
 
   const target = ready ? resolveSession(study, deckParam) : null;
   /* La cola se arma una sola vez por (mazo, modo): `study` cambia de identidad
@@ -140,6 +179,10 @@ export function SessionView() {
       }
       if (!current) return;
       if (event.key === " " || event.key === "Enter") {
+        /* Un botón nativo ya convierte Espacio e Intro en su propio clic: si
+           además corriera este atajo, la tarjeta se daría vuelta dos veces
+           (bug 2). Las notas 1-4 sí valen con el foco en cualquier lado. */
+        if (event.target instanceof HTMLElement && event.target.closest("button")) return;
         event.preventDefault();
         setFlipped((f) => !f);
         return;
@@ -160,7 +203,10 @@ export function SessionView() {
     return GRADES.map((g) => intervalPreview(prev, g, study.now));
   }, [current, study]);
 
+  /* El estado del usuario es tan obligatorio como el material: sin él no se
+     sabe qué está vencido, y tratarlo como «no hay nada» era mentir (bug 12). */
   if (content.isError) return <ErrorCard error={content.error} subject={slug} />;
+  if (state.isError) return <ErrorCard error={state.error} subject={slug} />;
   if (!ready || !session) return <WideSkeleton />;
 
   if (!target) {
@@ -175,7 +221,7 @@ export function SessionView() {
             </ActionLink>
           }
         >
-          <p className={css.text}>Puede que el mazo se haya renombrado en el último sync del wiki.</p>
+          <p className={css.text}>Puede que el mazo se haya renombrado en la última sincronización del wiki.</p>
         </EmptyPanel>
       </div>
     );
@@ -186,29 +232,30 @@ export function SessionView() {
   const position = Math.min(settled + 1, total);
   const division = current?.card.division ? model.division(current.card.division) : null;
 
+  /* Cola vacía. Los tres modos vacían por motivos DISTINTOS, y ofrecer
+     «Estudiar todo igual» estando ya en el modo «todo» —que era lo que pasaba—
+     no lleva a ninguna parte (U38). */
   if (session && !total) {
+    const empty = emptyForMode(mode);
     return (
       <div className={css.view}>
         <EmptyPanel
-          eyebrow="NADA PENDIENTE"
-          title={
-            mode === "nuevas"
-              ? "No quedan tarjetas nuevas en este mazo"
-              : "No hay tarjetas vencidas en este mazo"
-          }
+          eyebrow={empty.eyebrow}
+          title={empty.title}
           actions={
             <>
-              <ActionLink to={`${routes.deck(slug, deckParam)}?modo=todo`} variant="primary">
-                Estudiar todo igual
+              {mode === "todo" ? null : (
+                <ActionLink to={`${routes.deck(slug, deckParam)}?modo=todo`} variant="primary">
+                  Estudiar todo el mazo
+                </ActionLink>
+              )}
+              <ActionLink to={routes.flashcards(slug)} variant={mode === "todo" ? "primary" : "secondary"}>
+                Volver a los mazos
               </ActionLink>
-              <ActionLink to={routes.flashcards(slug)}>Volver a los mazos</ActionLink>
             </>
           }
         >
-          <p className={css.text}>
-            El repaso espaciado las vuelve a poner en la cola cuando toque. Mientras tanto puede repasar el mazo
-            entero.
-          </p>
+          <p className={css.text}>{empty.text}</p>
         </EmptyPanel>
       </div>
     );
@@ -230,28 +277,32 @@ export function SessionView() {
         </span>
       </header>
 
-      <Bar ratio={total ? settled / total : 0} className={css.progress} />
+      <Bar
+        ratio={total ? settled / total : 0}
+        className={css.progress}
+        label={`Tarjetas resueltas: ${settled} de ${total}`}
+      />
 
       {done ? (
         <Summary session={session} slug={slug} onRepeat={repeat} />
       ) : current ? (
         <>
           <div className={css.stage}>
+            {/* La tarjeta NO es un botón: si lo fuera, su `aria-label` sería su
+                único nombre y el anverso —que es todo el contenido— quedaría
+                fuera del alcance de un lector de pantalla (U37). Es un grupo
+                enfocable (Espacio la da vuelta) y quien la manipula por nombre
+                es el botón hermano de abajo. */}
             <div
               className={css.flip}
+              id="session-card"
               data-flipped={flipped ? "true" : "false"}
-              role="button"
+              role="group"
+              aria-label="Tarjeta de repaso"
               tabIndex={0}
-              aria-label={flipped ? "Ocultar la respuesta" : "Ver la respuesta"}
               onClick={() => setFlipped((f) => !f)}
-              onKeyDown={(event) => {
-                if (event.key === " " || event.key === "Enter") {
-                  event.preventDefault();
-                  setFlipped((f) => !f);
-                }
-              }}
             >
-              <div className={css.face} aria-hidden={flipped}>
+              <div className={css.face} aria-hidden={flipped} ref={frontRef}>
                 <span className={css.faceTag}>
                   {division ? <DivisionChip division={division} /> : null}
                   <span className={css.faceKind}>ANVERSO</span>
@@ -264,7 +315,7 @@ export function SessionView() {
                 </span>
               </div>
 
-              <div className={`${css.face} ${css.faceBack}`} aria-hidden={!flipped}>
+              <div className={`${css.face} ${css.faceBack}`} aria-hidden={!flipped} ref={backRef}>
                 <span className={css.faceTag}>
                   <span className={css.faceKind}>REVERSO</span>
                 </span>
@@ -276,6 +327,17 @@ export function SessionView() {
           </div>
 
           <div className={css.underCard}>
+            <button
+              type="button"
+              className={css.flipButton}
+              aria-expanded={flipped}
+              aria-controls="session-card"
+              aria-keyshortcuts="Space"
+              onClick={() => setFlipped((f) => !f)}
+            >
+              <UiIcon name={flipped ? "close" : "check"} size={14} />
+              {flipped ? "Ocultar la respuesta" : "Ver la respuesta"}
+            </button>
             {flipped && current.card.page && model.bySlug.has(current.card.page) ? (
               <Link className={css.wikiLink} to={routes.page(slug, current.card.page)}>
                 <Icon name="book" size={14} />

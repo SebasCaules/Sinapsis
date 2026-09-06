@@ -20,6 +20,14 @@
   letter-spacing: .06em;
   color: var(--accent-ink, var(--text-2));
 }
+/* El rechazo del último guardado, al lado del texto de la barra. */
+.manageError {
+  font: 600 11px var(--font-ui);
+  color: var(--bad-text, var(--bad));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .manageSpacer { flex: 1; }
 
 .main { flex: 1; padding: 34px 0 40px; }

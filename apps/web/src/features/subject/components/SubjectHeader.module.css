@@ -37,6 +37,18 @@
 }
 
 /* ---------- barra de pestañas ---------- */
+/* La zona elástica de la cabecera: los ‹ ›, la tira que desborda y el «+». El
+   «+» vive FUERA del `tablist` (dentro sería un hijo que no es una pestaña) y
+   por lo tanto siempre a la vista, sin depender del desplazamiento. */
+.tabsArea {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 /* Se pega arriba (alto completo de la cabecera) para que el filete de 2 px de la
    pestaña activa nazca del borde, como en Obsidian. */
 .strip {
@@ -53,6 +65,37 @@
   scroll-behavior: smooth;
 }
 .strip::-webkit-scrollbar { height: 0; }
+
+/* Cuando desborda, los bordes se desvanecen: el corte deja de parecer el final
+   de la lista y se ve que hay más pestañas de las que entran. */
+.strip[data-overflow="true"] {
+  mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+
+/* ‹ › : solo existen si la tira desborda. */
+.scrollTabs {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  margin-top: 3px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  font: 600 15px var(--font-ui);
+  line-height: 1;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t);
+}
+.scrollTabs:hover { border-color: var(--border-2); color: var(--text-2); }
+.scrollTabs:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
 
 .tab {
   position: relative;
@@ -130,15 +173,17 @@
 
 /* La ✕ se reserva su sitio siempre (si apareciera al pasar por encima, el
    rótulo saltaría); solo cambia de opacidad. El icono mide 13 y el objetivo
-   táctil llega a 22 con el relleno. */
+   táctil es de 24×24, el mínimo del contrato. */
 .tabClose {
+  width: 24px;
+  height: 24px;
   flex: none;
   display: grid;
   place-items: center;
-  padding: 4px;
-  margin-right: -2px;
+  padding: 0;
+  margin-right: -4px;
   border: 0;
-  border-radius: 5px;
+  border-radius: 6px;
   background: transparent;
   color: var(--text-3);
   cursor: pointer;
@@ -155,8 +200,6 @@
 }
 
 .addTab {
-  position: sticky;
-  right: 0;
   width: 24px;
   height: 24px;
   flex: none;
@@ -179,5 +222,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .strip { scroll-behavior: auto; }
-  .tab, .tabClose, .addTab, .back { transition: none; }
+  .tab, .tabClose, .addTab, .back, .scrollTabs { transition: none; }
 }

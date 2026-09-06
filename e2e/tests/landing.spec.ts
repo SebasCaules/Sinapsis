@@ -80,7 +80,7 @@ test("gestionar: mover una materia de cuatrimestre y guardar sobrevive a la reca
   await mover.selectOption(subject.semester);
 
   await page.getByRole("button", { name: "Guardar" }).click();
-  await expect(page.getByText("Landing guardada.")).toBeVisible();
+  await expect(page.getByText("Se guardaron sus materias.")).toBeVisible();
 
   await page.reload();
   const seccion = page.locator("section").filter({ hasText: subjectSemester }).first();
@@ -95,10 +95,11 @@ test("quitar una materia pide confirmación y la saca de la landing", async ({ p
   await page.getByRole("button", { name: "Gestionar" }).click();
 
   const card = page.locator(cardOf(placeholder.slug));
-  await card.getByRole("button", { name: "Quitar", exact: true }).click();
+  // El nombre accesible del botón dice QUÉ materia se quita (U41).
+  await card.getByRole("button", { name: `Quitar ${placeholder.name}`, exact: true }).click();
 
   const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText("QUITAR DE LA LANDING");
+  await expect(dialog).toContainText("QUITAR DE SUS MATERIAS");
   await expect(dialog).toContainText(placeholder.name);
   await expect(dialog).toContainText("su progreso se conserva");
 
@@ -122,7 +123,7 @@ test("agregar materia desde el diálogo crea la tarjeta", async ({ page, request
   await page.getByRole("button", { name: "Agregar materia" }).first().click();
 
   const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText("CONTRATO DE MATERIA");
+  await expect(dialog).toContainText("NUEVA MATERIA");
 
   await dialog.getByLabel("Nombre").fill(nueva.name);
   await dialog.getByLabel("Código").fill(nueva.code);
@@ -134,7 +135,7 @@ test("agregar materia desde el diálogo crea la tarjeta", async ({ page, request
   await dialog.getByLabel("Plural").fill("Capítulos");
 
   // El slug se deriva del nombre.
-  await expect(dialog.getByLabel("Slug")).toHaveValue(nueva.slug);
+  await expect(dialog.getByLabel("Dirección (/m/…)")).toHaveValue(nueva.slug);
 
   await dialog.getByRole("button", { name: "Agregar materia" }).click();
 

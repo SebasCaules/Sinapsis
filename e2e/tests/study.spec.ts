@@ -1,7 +1,7 @@
 /**
  * «Lo mío»: favoritos y apuntes. Se escriben desde el lector (el botón
- * «Guardar» y la tarjeta APUNTES) y se leen desde `/favorites` y `/notes`, con
- * la exportación a markdown de los apuntes.
+ * «A favoritos» y la tarjeta APUNTES) y se leen desde `/favorites` y `/notes`,
+ * con la exportación a markdown de los apuntes.
  *
  * Ensucia el estado de estudio del usuario: `beforeEach` y `afterAll` lo
  * reponen con los endpoints del contrato (§5).
@@ -41,13 +41,15 @@ test("guardar una página desde el lector la deja en Favoritos y sobrevive a la 
 }) => {
   await openReader(page);
 
-  const guardar = page.getByRole("button", { name: "Guardar", exact: true }).first();
-  await expect(guardar).toHaveAttribute("aria-pressed", "false");
-  await guardar.click();
+  /* U17: el botón se llama siempre igual («Guardar en favoritos») y el estado lo
+     lleva `aria-pressed`; lo que cambia a la vista es el rótulo. */
+  const favorito = page.getByRole("button", { name: "Guardar en favoritos" }).first();
+  await expect(favorito).toHaveAttribute("aria-pressed", "false");
+  await expect(favorito).toHaveText("A favoritos");
+  await favorito.click();
 
-  const guardada = page.getByRole("button", { name: "Guardada", exact: true }).first();
-  await expect(guardada).toBeVisible();
-  await expect(guardada).toHaveAttribute("aria-pressed", "true");
+  await expect(favorito).toHaveAttribute("aria-pressed", "true");
+  await expect(favorito).toHaveText("En favoritos");
 
   await expect
     .poll(async () => (await studyState(request, subject.slug)).bookmarks)
@@ -56,7 +58,7 @@ test("guardar una página desde el lector la deja en Favoritos y sobrevive a la 
   await page.goto(`/m/${subject.slug}/favorites`);
   await waitForSubjectShell(page);
   await expect(page.getByRole("heading", { name: "Favoritos", level: 1 })).toBeVisible();
-  await expect(main(page)).toContainText("1 página guardada");
+  await expect(main(page)).toContainText("1 página en favoritos");
   await expect(main(page).getByRole("link", { name: new RegExp(target.title) })).toBeVisible();
 
   await page.reload();

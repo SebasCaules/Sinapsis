@@ -117,7 +117,14 @@ export function SubjectCard({
         ) : null}
         {manage ? (
           <span className={css.manageTools}>
-            <button type="button" className={css.remove} onClick={() => onRemove?.(card)}>
+            {/* El rótulo visible dice «Quitar» en las N tarjetas del cuatrimestre:
+                el nombre accesible tiene que decir cuál se quita (U41). */}
+            <button
+              type="button"
+              className={css.remove}
+              aria-label={`Quitar ${card.name}`}
+              onClick={() => onRemove?.(card)}
+            >
               Quitar
             </button>
             <select

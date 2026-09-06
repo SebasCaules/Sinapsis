@@ -120,8 +120,8 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 | S2-06 web estudio (flashcards, quiz, plan, kits) | DONE | c4b8787 | 27 tests; smoke real con el material de Proba |
 | S2-07 web landing (S-03) + vitest 3 | DONE | c4b8787 | cuatrimestres persistentes y ordenables; vitest 3.2.7 |
 | S2-08 E2E | DONE | 2c79496 | 47 pruebas (24 + 23); 0 bugs de la app |
-| S2-09 auditoría | DOING | | seguridad 0 hallazgos; corrección 12 bugs; UX 43 (4 bloqueantes) → fixers S4, WS, WL |
-| S2-10 docs | TODO | | cierre |
+| S2-09 auditoría | DONE | | seguridad 0 · corrección 12/12 · UX 43/43 (decisiones N0-33..39) · fixers S4, WS, WL |
+| S2-10 docs | DONE | | CONTRACT §5/§7, DECISIONS N0-26..39, HANDOFF-sprint2, SPRINTS |
 
 ## Ownership (ola 1)
 
@@ -141,3 +141,8 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 | S-10 | FTS: incluir `summary` en el índice externo (A3-5) | apps/api migración 0002 | reporte A3 | HECHO (A3b) |
 | S-11 | `Plan` sin modalidades (cursada vs. final directo): hoy son fases consecutivas; agregar `Plan.tracks` | contrato, compilador, web plan | reporte B3 (contractRequest 2) | Sprint 3 |
 | S-12 | Re-ejecutar `examples/proba/tools/convert-study-data.mjs` para usar `PlanTask.kind = "tool"`, `detail` e `icon` recién agregados al contrato | examples/proba/estudio | reporte B3 | auditoría Sprint 2 |
+
+## Veredicto final (Sprint 2)
+
+**Sprint 2 («Estudio») cerrado el 2026-09-06.** Gates en verde: typecheck, 431 tests unitarios/integración (contract 16 · markdown 70 · api 128 · web 195 · cli 22), build, 47 E2E. Cero hallazgos altos abiertos. Smoke real con el material de estudio de Proba. Pendiente de revisión del usuario: decisiones N0-26..N0-39 y S-11.
+

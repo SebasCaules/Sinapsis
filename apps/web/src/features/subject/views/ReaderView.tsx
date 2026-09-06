@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
-import { Icon, UiIcon } from "@/components/platform";
+import { Dialog, Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { Markdown } from "../markdown/Markdown";
 import { ErrorCard, SheetSkeleton } from "../components/States";
@@ -24,6 +24,27 @@ import {
 } from "../useSubject";
 import css from "./ReaderView.module.css";
 
+/**
+ * A partir de acá la columna lateral cabe al lado de la hoja. Por debajo no
+ * desaparece (N0-36): se vuelve un panel deslizante que abre el botón «PANEL»,
+ * porque apuntes, índice, fuentes y backlinks tienen que seguir accesibles.
+ */
+const WIDE = "(min-width: 1280px)";
+
+function useWideViewport(): boolean {
+  const [wide, setWide] = useState(() =>
+    typeof window === "undefined" ? true : window.matchMedia(WIDE).matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia(WIDE);
+    const onChange = () => setWide(query.matches);
+    query.addEventListener("change", onChange);
+    onChange();
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+  return wide;
+}
+
 export function ReaderView() {
   const { slug, model } = useSubjectCtx();
   const { page: pageSlug = "" } = useParams();
@@ -32,7 +53,11 @@ export function ReaderView() {
   const toggleStudied = useToggleStudied(slug);
   const { bookmarks } = useStudyState(slug);
   const toggleBookmark = useToggleBookmark(slug);
-  const [sideOpen, setSideOpen] = useState(true);
+  const wide = useWideViewport();
+  /* Ancho: la columna está y se puede plegar. Angosto: es un panel que hay que
+     abrir, y por lo tanto arranca cerrado para no tapar la lectura. */
+  const [sideOpen, setSideOpen] = useState(wide);
+  useEffect(() => setSideOpen(wide), [wide]);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
   const sourcesRef = useRef<HTMLElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
@@ -199,7 +224,11 @@ export function ReaderView() {
       </div>
 
       {sideOpen ? (
-        <div className={css.side}>
+        <div
+          id="reader-side"
+          className={wide ? css.side : `${css.side} ${css.sideFloating}`}
+          data-floating={wide ? undefined : "true"}
+        >
           <section className={css.card} aria-labelledby="reader-toc">
             <div className={css.cardHead} id="reader-toc">
               <UiIcon name="menu" size={13} />
@@ -271,6 +300,7 @@ export function ReaderView() {
         className={css.sideTab}
         onClick={() => setSideOpen((v) => !v)}
         aria-expanded={sideOpen}
+        aria-controls={sideOpen ? "reader-side" : undefined}
         aria-label={sideOpen ? "Ocultar el panel de la página" : "Mostrar el panel de la página"}
         title={sideOpen ? "Ocultar el panel" : "Mostrar el panel"}
       >
@@ -280,7 +310,7 @@ export function ReaderView() {
   );
 }
 
-/** «Marcar estudiado / Estudiada» y «Guardar / Guardada». Va arriba y al pie. */
+/** «Marcar estudiado / Estudiada» y «A favoritos / En favoritos». Va arriba y al pie. */
 function StudyActions({
   studied,
   onToggle,
@@ -306,16 +336,19 @@ function StudyActions({
         <UiIcon name="check" size={13} />
         {studied ? "Estudiada" : "Marcar estudiado"}
       </button>
+      {/* «Guardar» no decía dónde: el destino es «Favoritos», el mismo nombre
+          que tiene la vista de «Lo mío» a la que va a parar la página (U17). */}
       <button
         type="button"
         className={css.chipSave}
         data-on={bookmarked ? "true" : undefined}
         onClick={onToggleBookmark}
         aria-pressed={bookmarked}
+        aria-label="Guardar en favoritos"
         title={bookmarked ? "Quitar de favoritos" : "Guardar en favoritos"}
       >
         <UiIcon name="bookmark" size={13} />
-        {bookmarked ? "Guardada" : "Guardar"}
+        {bookmarked ? "En favoritos" : "A favoritos"}
       </button>
     </div>
   );
@@ -368,16 +401,22 @@ const NOTE_ROWS_MAX = 20;
 /** Rebote del guardado automático mientras se escribe. */
 const NOTE_DEBOUNCE = 800;
 
+/** Estado del guardado del apunte: manda sobre el rótulo de la cabecera. */
+type NoteStatus = "idle" | "saving" | "error";
+
 /**
  * Tarjeta «APUNTES»: lo que el usuario escribe sobre ESTA página.
  *
- * Tres reglas, en este orden:
+ * El contrato de guardado es el de N0-35, y en este orden:
  *  1. Nunca se pierde nada: se guarda solo 800 ms después de la última tecla, y
- *     también al salir del campo, con ⌘S y con el botón.
+ *     también al salir del campo, con ⌘S y con «Guardar apunte». Un guardado
+ *     FALLIDO no da el texto por guardado: el borrador sigue sucio, la tarjeta
+ *     dice «No se pudo guardar» y ofrece «Reintentar» (bug 1). Mientras haya
+ *     cambios locales, el valor del servidor nunca los pisa.
  *  2. Al perder el foco se ve el markdown ya compuesto (mismo motor que la
  *     página): el apunte se lee como se va a leer después, no como se escribió.
- *  3. Vaciar el campo BORRA el apunte: no queda una entrada en blanco colgando
- *     en «Mis apuntes».
+ *  3. Vaciar el campo BORRA el apunte —con confirmación si se pide desde
+ *     «Borrar»—: no queda una entrada en blanco colgando en «Mis apuntes».
  */
 function NotesCard({ slug, page, exists }: { slug: string; page: string; exists: (target: string) => boolean }) {
   const { notes } = useStudyState(slug);
@@ -387,68 +426,93 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
 
   const [draft, setDraft] = useState(stored?.body ?? "");
   const [dirty, setDirty] = useState(false);
+  const [status, setStatus] = useState<NoteStatus>("idle");
   const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef(0);
   const dirtyRef = useRef(false);
 
-  /* Cambiar de página cambia de apunte: se descarta el borrador de la anterior
-     (ya se guardó al desmontarse el temporizador o al perder el foco). */
-  useEffect(() => {
-    setDraft(notes.get(page)?.body ?? "");
-    setDirty(false);
-    dirtyRef.current = false;
-    setEditing(false);
-    // El apunte llega con el estado de estudio: solo se sigue al cambiar de página.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
   /* Cuando la consulta responde (o el servidor devuelve la fecha real) se repone
-     el texto, pero SOLO si no hay nada escrito sin guardar. */
+     el texto, pero SOLO si no hay nada escrito sin guardar: un guardado fallido
+     deja `dirtyRef` en true justamente para que esto no vacíe el campo. */
   useEffect(() => {
     if (dirtyRef.current) return;
     setDraft(stored?.body ?? "");
   }, [stored?.body, stored?.updatedAt]);
 
+  /* El mapa de apuntes es de la materia entera, así que `commit` puede volcar
+     el de CUALQUIER página: es lo que necesita el cambio de página, que tiene
+     que guardar el apunte de la que se está dejando. */
+  const notesRef = useRef(notes);
+  notesRef.current = notes;
+
   const commit = useCallback(
-    (body: string) => {
+    (body: string, target: string) => {
       window.clearTimeout(timerRef.current);
       timerRef.current = 0;
-      dirtyRef.current = false;
-      setDirty(false);
+      const previous = notesRef.current.get(target);
+      const settled = () => {
+        dirtyRef.current = false;
+        setDirty(false);
+        setStatus("idle");
+      };
+      const failed = () => setStatus("error");
+
       const trimmed = body.trim();
       if (!trimmed) {
-        if (stored) remove.mutate({ page });
+        if (!previous) {
+          settled();
+          return;
+        }
+        setStatus("saving");
+        remove.mutate({ page: target }, { onSuccess: settled, onError: failed });
         return;
       }
-      if (stored?.body === body) return;
-      save.mutate({ page, body });
+      if (previous?.body === body) {
+        settled();
+        return;
+      }
+      setStatus("saving");
+      save.mutate({ page: target, body }, { onSuccess: settled, onError: failed });
     },
-    [page, remove, save, stored],
+    [remove, save],
   );
 
-  /* Un desmontaje con el temporizador vivo (cerrar la pestaña, ir a otra página)
-     no puede tirar lo escrito. */
   const draftRef = useRef(draft);
   draftRef.current = draft;
   const commitRef = useRef(commit);
   commitRef.current = commit;
-  useEffect(
-    () => () => {
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current);
-        if (dirtyRef.current) commitRef.current(draftRef.current);
-      }
-    },
-    [],
-  );
+
+  /**
+   * Cambiar de página cambia de apunte. La limpieza de este efecto corre ANTES
+   * de que el cuerpo reponga el borrador de la página nueva: ahí se vuelca lo
+   * pendiente de la que se deja y se apaga el temporizador (bug 8). También es
+   * lo que salva el apunte al desmontarse el lector.
+   */
+  useEffect(() => {
+    setDraft(notesRef.current.get(page)?.body ?? "");
+    setDirty(false);
+    dirtyRef.current = false;
+    setStatus("idle");
+    setEditing(false);
+    /* `commitRef` ya apunta al commit de ESTA página; se captura para que la
+       limpieza no use el de la página siguiente. */
+    const flush = commitRef.current;
+    const leaving = page;
+    return () => {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = 0;
+      if (dirtyRef.current) flush(draftRef.current, leaving);
+    };
+  }, [page]);
 
   const onChange = (value: string) => {
     setDraft(value);
     setDirty(true);
     dirtyRef.current = true;
     window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => commit(value), NOTE_DEBOUNCE);
+    timerRef.current = window.setTimeout(() => commit(value, page), NOTE_DEBOUNCE);
   };
 
   const rows = Math.min(NOTE_ROWS_MAX, Math.max(NOTE_ROWS_MIN, draft.split("\n").length + 1));
@@ -459,9 +523,18 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
       <div className={css.cardHead} id="reader-notes">
         <Icon name="pencil" size={13} />
         APUNTES
-        <span className={css.noteState} data-dirty={dirty ? "true" : undefined}>
-          {dirty ? "Sin guardar" : stored ? savedAt(stored.updatedAt) : ""}
-        </span>
+        {status === "error" ? (
+          <span className={css.noteState} data-state="error">
+            No se pudo guardar
+            <button type="button" className={css.noteRetry} onClick={() => commit(draft, page)}>
+              Reintentar
+            </button>
+          </span>
+        ) : (
+          <span className={css.noteState} data-state={dirty ? "dirty" : undefined}>
+            {dirty ? "Sin guardar" : stored ? savedAt(stored.updatedAt) : ""}
+          </span>
+        )}
       </div>
 
       {showPreview ? (
@@ -484,16 +557,17 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
           rows={rows}
           placeholder="Lo que quiera recordar de esta página…"
           aria-label="Apunte de esta página"
+          aria-keyshortcuts="Control+S"
           onChange={(event) => onChange(event.target.value)}
           onFocus={() => setEditing(true)}
           onBlur={() => {
             setEditing(false);
-            if (dirtyRef.current) commit(draft);
+            if (dirtyRef.current) commit(draft, page);
           }}
           onKeyDown={(event) => {
             if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
               event.preventDefault();
-              commit(draft);
+              commit(draft, page);
             }
           }}
         />
@@ -503,25 +577,57 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
         <button
           type="button"
           className={css.noteSave}
-          onClick={() => commit(draft)}
-          disabled={!dirty}
+          onClick={() => commit(draft, page)}
+          disabled={!dirty && status !== "error"}
+          aria-keyshortcuts="Control+S"
           title="Guardar el apunte (⌘S)"
         >
-          Guardar
+          Guardar apunte
         </button>
         {stored ? (
           <button
             type="button"
             className={css.noteDelete}
-            onClick={() => {
-              setDraft("");
-              commit("");
-            }}
+            onClick={() => setConfirmDelete(true)}
+            aria-label="Borrar el apunte de esta página"
           >
             Borrar
           </button>
         ) : null}
       </div>
+
+      {/* Borrar un apunte no tiene deshacer: se pregunta antes (N0-35). */}
+      <Dialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        eyebrow="APUNTES"
+        title="¿Borrar el apunte de esta página?"
+        width={440}
+        footer={
+          <>
+            <button type="button" className={css.dialogCancel} onClick={() => setConfirmDelete(false)}>
+              Conservarlo
+            </button>
+            <button
+              type="button"
+              className={css.dialogDelete}
+              onClick={() => {
+                setConfirmDelete(false);
+                setDraft("");
+                dirtyRef.current = true;
+                setDirty(true);
+                commit("", page);
+              }}
+            >
+              Borrar el apunte
+            </button>
+          </>
+        }
+      >
+        <p className={css.dialogText}>
+          Lo escrito se pierde y la página deja de aparecer en «Mis apuntes». No se puede deshacer.
+        </p>
+      </Dialog>
     </section>
   );
 }

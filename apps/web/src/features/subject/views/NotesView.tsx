@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
-import { ErrorCard } from "../components/States";
+import { ErrorCard, WideSkeleton } from "../components/States";
 import { useDeleteNote, useStudyState } from "../useSubject";
 import { notesFilename, notesMarkdown, sortNotes } from "./notesExport";
 import css from "./mine.module.css";
@@ -57,6 +57,8 @@ export function NotesView() {
   };
 
   if (query.isError) return <ErrorCard error={query.error} subject={slug} />;
+  /* Mientras carga no se puede afirmar que no haya apuntes (U14). */
+  if (query.isPending) return <WideSkeleton />;
 
   return (
     <div className={css.view}>
@@ -87,7 +89,7 @@ export function NotesView() {
           <p className={css.emptyText}>
             En el lector, la tarjeta <strong>APUNTES</strong> de la columna derecha guarda lo que escriba sobre esa
             página: la duda que quedó, el ejemplo que la explicó, el paso que siempre se olvida. Se guarda solo
-            mientras escribe y se puede exportar entero desde acá.
+            mientras escribe y se puede exportar entero desde aquí.
           </p>
           <Link className={css.emptyAction} to={routes.wiki(slug)}>
             <Icon name="book" size={15} />

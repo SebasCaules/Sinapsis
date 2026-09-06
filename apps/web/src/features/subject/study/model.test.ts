@@ -14,6 +14,7 @@ import {
   nextInterval,
   plainText,
   relativeDayLabel,
+  spokenMath,
 } from "./model";
 
 const NOW = new Date("2026-09-05T12:00:00.000Z");
@@ -241,6 +242,27 @@ describe("texto llano de los rótulos compactos", () => {
     );
     expect(plainText("Ver [[distribucion-normal|la normal]] y `codigo`")).toBe("Ver la normal y codigo");
     expect(plainText("## Título\n\ncon *énfasis*")).toBe("Título con énfasis");
+  });
+});
+
+describe("matemática dicha en palabras (U7)", () => {
+  it("traduce los comandos frecuentes y se come los dólares", () => {
+    expect(spokenMath("$\\alpha \\le 0,05$")).toBe("alfa menor o igual que 0,05");
+    expect(spokenMath("$\\sigma^2$")).toBe("sigma elevado a 2");
+    expect(spokenMath("$\\mu \\ge \\lambda$")).toBe("mu mayor o igual que lambda");
+  });
+
+  it("no confunde «\\le» con el principio de «\\lambda» ni de «\\left»", () => {
+    expect(spokenMath("$\\lambda$")).toBe("lambda");
+    expect(spokenMath("$\\left( x \\right)$")).toBe("( x )");
+  });
+
+  it("descarta lo que no sabe traducir en vez de deletrear la barra invertida", () => {
+    expect(spokenMath("$\\operatorname{Var}(X)$")).toBe("Var (X)");
+  });
+
+  it("mezcla prosa y fórmula sin dejar espacios de más", () => {
+    expect(spokenMath("El estimador $\\hat{p}$ es insesgado")).toBe("El estimador estimador de p es insesgado");
   });
 });
 

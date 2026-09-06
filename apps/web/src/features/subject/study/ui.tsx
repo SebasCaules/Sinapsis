@@ -67,11 +67,36 @@ export function DivisionChips({ model, keys }: { model: SubjectModel; keys: read
   );
 }
 
-/** Barra de progreso fina. `ratio` es 0..1. */
-export function Bar({ ratio, color, className }: { ratio: number; color?: string; className?: string }) {
+/**
+ * Barra de progreso fina. `ratio` es 0..1.
+ *
+ * Es un `progressbar` de verdad, con su valor (U23): dibujada solo con dos
+ * `span`, el progreso existía únicamente para quien lo ve. `label` es su nombre
+ * accesible y siempre hay que darlo: una barra sin nombre no dice de QUÉ es el
+ * porcentaje que anuncia.
+ */
+export function Bar({
+  ratio,
+  color,
+  className,
+  label,
+}: {
+  ratio: number;
+  color?: string;
+  className?: string;
+  label: string;
+}) {
   const pct = Math.round(Math.min(1, Math.max(0, ratio)) * 100);
   return (
-    <span className={[css.track, className].filter(Boolean).join(" ")}>
+    <span
+      className={[css.track, className].filter(Boolean).join(" ")}
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct}
+      aria-valuetext={`${pct} %`}
+    >
       <span className={css.fill} style={{ width: `${pct}%`, ...(color ? { background: color } : null) }} />
     </span>
   );
@@ -137,13 +162,18 @@ export interface EmptyPanelProps {
   actions?: ReactNode;
 }
 
-/** Panel de estado vacío: mismo relieve que las tarjetas de estado del shell. */
+/**
+ * Panel de estado vacío: mismo relieve que las tarjetas de estado del shell.
+ *
+ * El título va en `h1` (U39): cuando este panel se dibuja ES la vista entera, y
+ * dejarlo en `h2` hacía que la pantalla no tuviera encabezado de primer nivel.
+ */
 export function EmptyPanel({ eyebrow, title, children, actions }: EmptyPanelProps) {
   return (
     <div className={css.emptyWrap}>
       <div className={css.empty}>
         <span className={css.eyebrow}>{eyebrow}</span>
-        <h2 className={css.emptyTitle}>{title}</h2>
+        <h1 className={css.emptyTitle}>{title}</h1>
         {children}
         {actions ? <div className={css.emptyActions}>{actions}</div> : null}
       </div>

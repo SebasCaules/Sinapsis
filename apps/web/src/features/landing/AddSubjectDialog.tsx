@@ -63,6 +63,7 @@ export function AddSubjectDialog({
   onSubmit,
   submitting = false,
 }: AddSubjectDialogProps) {
+  const nameRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState(EMPTY);
   const [slugTouched, setSlugTouched] = useState(false);
   const [semester, setSemester] = useState(defaultSemester ?? semesters[0] ?? "");
@@ -133,7 +134,7 @@ export function AddSubjectDialog({
           next.form ??= issueText(issue);
         }
       }
-      if (candidate.slug === "") next.slug = "Se deriva del nombre: escriba un nombre o edite el slug.";
+      if (candidate.slug === "") next.slug = "Se deriva del nombre: escriba un nombre o edite la dirección.";
       setErrors(next);
       return;
     }
@@ -146,7 +147,8 @@ export function AddSubjectDialog({
     <Dialog
       open={open}
       onClose={onClose}
-      eyebrow="CONTRATO DE MATERIA"
+      initialFocus={nameRef}
+      eyebrow="NUEVA MATERIA"
       title="Agregar materia"
       footer={
         <>
@@ -170,6 +172,7 @@ export function AddSubjectDialog({
 
         <div className={css.wide}>
           <Field
+            ref={nameRef}
             label="Nombre"
             placeholder="Materia"
             value={form.name}
@@ -180,13 +183,14 @@ export function AddSubjectDialog({
         </div>
 
         <div className={css.wide}>
+          {/* «Slug» es jerga: el usuario ve la dirección de la materia (U31). */}
           <Field
-            label="Slug"
+            label="Dirección (/m/…)"
             mono
             placeholder="materia"
             value={slug}
             error={errors.slug}
-            hint="Se usa en la dirección: /m/…"
+            hint="Se deriva del nombre; se puede editar."
             onChange={(e) => {
               setSlugTouched(true);
               set({ slug: slugify(e.target.value) });

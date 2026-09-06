@@ -54,9 +54,12 @@
 }
 .searchField:focus-within { border-color: var(--primary); box-shadow: var(--relief), 0 0 0 3px var(--primary-ring); }
 
+/* 26 px de alto: el campo mide 34, pero el objetivo real es la caja del input y
+   sin altura propia se quedaba en la línea de texto (U21). */
 .searchInput {
   flex: 1;
   min-width: 0;
+  height: 26px;
   border: 0;
   background: none;
   outline: none;
@@ -142,6 +145,19 @@
 .canvas { display: block; cursor: grab; touch-action: none; }
 .canvas:active { cursor: grabbing; }
 .canvas[data-hover="true"] { cursor: pointer; }
+/* El lienzo es enfocable (U5): el anillo tiene que verse contra el papel. */
+.canvas:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+/* Lo que el aro del cursor de teclado dice en el dibujo, para un lector de
+   pantalla. Vive fuera del flujo, pero NO con `display:none`: eso lo callaría. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 
 /* ---------- capas sobre el lienzo ---------- */
 .overlay {
@@ -225,10 +241,28 @@
   box-shadow: var(--relief), var(--shadow);
 }
 
-.zoomValue { font: 500 10.5px var(--font-mono); color: var(--text-3); }
+.zoomValue { min-width: 40px; text-align: center; font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
+.zoomStep {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font: 600 14px var(--font-ui);
+  line-height: 1;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.zoomStep:hover { border-color: var(--primary); color: var(--primary); }
+.zoomStep:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* 24 px de alto: el mínimo del contrato (U21). */
 .zoomReset {
-  height: 22px;
+  height: 24px;
   padding: 0 10px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -275,17 +309,33 @@
 .legendLabel { flex: 1; min-width: 0; font: 500 12px var(--font-mono); color: var(--text-2); }
 .legendCount { font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
+/* 24 px de alto: cada renglón es un enlace, no una línea de texto (U21). */
 .topRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 9px;
-  padding: 3px 4px;
+  min-height: 24px;
+  padding: 4px;
   margin: 0 -4px;
   border-radius: 6px;
   text-decoration: none;
 }
 .topRow:hover { background: var(--surface-2); }
 .topRow:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+.topMore {
+  min-height: 24px;
+  margin-top: 4px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface-2);
+  font: 600 10.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+}
+.topMore:hover { border-color: var(--primary); color: var(--primary); }
+.topMore:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .topCount {
   flex: none;
@@ -316,5 +366,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chip, .zoomReset { transition: none; }
+  .chip, .zoomReset, .zoomStep, .topMore { transition: none; }
 }

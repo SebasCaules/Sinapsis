@@ -108,9 +108,11 @@
 .institution { font: 500 11px var(--font-ui); color: var(--text-3); }
 
 .progress { display: flex; flex-direction: column; gap: 6px; }
+/* La pista lleva --track también en el borde: al 0 % la barra es SOLO pista y
+   un aro de --border-2 (1.7:1 sobre la tarjeta) la disolvía contra el papel. */
 .track {
   height: 6px;
-  border: 1px solid var(--border-2);
+  border: 1px solid var(--track);
   border-radius: 3px;
   background: var(--track);
   overflow: hidden;
@@ -147,14 +149,18 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
+  margin-right: -8px;
 }
+/* U26: el destino táctil de «Repasar» y «Plan» tiene que llegar a 24 px de alto
+   (12 px de línea + 6 px arriba y abajo = 24). El `gap` de .study baja a 4 px
+   porque el relleno lateral ya separa los dos enlaces. */
 .studyLink {
-  font: 500 12px var(--font-mono);
+  font: 500 12px/1 var(--font-mono);
   color: var(--text-3);
   text-decoration: none;
   border-radius: 4px;
-  padding: 2px 1px;
+  padding: 6px 8px;
 }
 .studyLink:hover { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 .studyLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; color: var(--primary); }

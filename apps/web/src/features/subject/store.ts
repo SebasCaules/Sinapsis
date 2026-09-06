@@ -122,19 +122,36 @@ export function useTheme(): ThemeId {
 // ---------------------------------------------------------------------------
 
 /**
- * Una pestaña de la cabecera. `path` es la ruta del SPA que abre; `title`,
- * `chip` y `color` son lo que se dibuja (los repone la navegación); `scrollY`
- * es la posición de `main` cuando se dejó la pestaña.
+ * Una pestaña de la cabecera. `path` es la ruta del SPA que abre, SIEMPRE sin
+ * ancla: es lo que se compara con `location.pathname`, y guardar el `#seccion`
+ * dentro de `path` hacía que una pestaña abierta con ⌘-clic sobre un wikilink
+ * con ancla no volviera a reconocerse al navegar (bug 4). El ancla viaja aparte
+ * y se vuelve a pegar al activar la pestaña. `title`, `chip` y `color` son lo
+ * que se dibuja (los repone la navegación); `scrollY` es la posición de `main`
+ * cuando se dejó la pestaña.
  */
 export interface SubjectTab {
   id: string;
   path: string;
+  /** Ancla de la ruta («#seccion») o cadena vacía. Nunca forma parte de `path`. */
+  hash: string;
   title: string;
   /** Rótulo corto de la división: solo cuando la pestaña es una página del wiki. */
   chip: string | null;
   /** Color de la división del chip. */
   color: string | null;
   scrollY: number;
+}
+
+/** Parte una dirección del SPA en su pathname y su ancla. */
+export function splitHash(href: string): { path: string; hash: string } {
+  const at = href.indexOf("#");
+  return at === -1 ? { path: href, hash: "" } : { path: href.slice(0, at), hash: href.slice(at) };
+}
+
+/** La dirección completa de una pestaña: lo que hay que navegar para abrirla. */
+export function tabHref(tab: SubjectTab): string {
+  return `${tab.path}${tab.hash}`;
 }
 
 export interface TabsState {
@@ -145,7 +162,10 @@ export interface TabsState {
 
 /** Lo que la ruta activa aporta a una pestaña (sin el id ni el scroll). */
 export interface TabInfo {
+  /** Pathname, sin ancla: quien llame parte la dirección con `splitHash`. */
   path: string;
+  /** Ancla, si la ruta trae una. */
+  hash?: string;
   title: string;
   chip: string | null;
   color: string | null;
@@ -162,7 +182,18 @@ export function newTabId(): string {
 }
 
 function tab(info: TabInfo): SubjectTab {
-  return { id: newTabId(), path: info.path, title: info.title, chip: info.chip, color: info.color, scrollY: 0 };
+  /* Defensa en profundidad: si a alguien se le cuela una dirección con ancla en
+     `path`, se normaliza acá y no dentro del estado. */
+  const split = splitHash(info.path);
+  return {
+    id: newTabId(),
+    path: split.path,
+    hash: info.hash ?? split.hash,
+    title: info.title,
+    chip: info.chip,
+    color: info.color,
+    scrollY: 0,
+  };
 }
 
 /** Pestaña «Inicio» de una materia: el estado al que se vuelve al cerrar la última. */
@@ -182,14 +213,19 @@ function readTabs(slug: string): TabsState | null {
   if (!raw || typeof raw !== "object") return null;
   const parsed = raw as { list?: unknown; active?: unknown };
   if (!Array.isArray(parsed.list)) return null;
-  const list = parsed.list.filter(isTab).slice(0, MAX_TABS).map((t) => ({
-    id: t.id,
-    path: t.path,
-    title: t.title,
-    chip: typeof t.chip === "string" ? t.chip : null,
-    color: typeof t.color === "string" ? t.color : null,
-    scrollY: typeof t.scrollY === "number" && Number.isFinite(t.scrollY) ? t.scrollY : 0,
-  }));
+  const list = parsed.list.filter(isTab).slice(0, MAX_TABS).map((t) => {
+    /* Lo guardado por una versión anterior traía el ancla dentro de `path`. */
+    const split = splitHash(t.path);
+    return {
+      id: t.id,
+      path: split.path,
+      hash: typeof t.hash === "string" && t.hash ? t.hash : split.hash,
+      title: t.title,
+      chip: typeof t.chip === "string" ? t.chip : null,
+      color: typeof t.color === "string" ? t.color : null,
+      scrollY: typeof t.scrollY === "number" && Number.isFinite(t.scrollY) ? t.scrollY : 0,
+    };
+  });
   if (!list.length) return null;
   const active = typeof parsed.active === "string" && list.some((t) => t.id === parsed.active)
     ? parsed.active
@@ -300,7 +336,7 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
       if (!list.length) {
         const fresh = homeTab(slug);
         commit(slug, { list: [fresh], active: fresh.id });
-        return fresh.path;
+        return tabHref(fresh);
       }
       if (state.active !== id) {
         commit(slug, { list, active: state.active });
@@ -309,7 +345,7 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
       /* Se cerró la activa: manda la vecina de la derecha, si no la de la izquierda. */
       const heir = list[Math.min(at, list.length - 1)] as SubjectTab;
       commit(slug, { list, active: heir.id });
-      return heir.path;
+      return tabHref(heir);
     },
 
     moveTab: (slug, from, to) => {
@@ -327,22 +363,33 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
       const state = read(slug);
       const current = state.list.find((t) => t.id === state.active);
       if (!current) return;
+      /* La comparación es SIEMPRE por pathname: el ancla no cambia de vista y no
+         puede decidir si se está navegando o no (bug 4). */
+      const path = splitHash(info.path).path;
+      const hash = info.hash ?? splitHash(info.path).hash;
 
       /* La activa YA está en esa ruta: no se está navegando a ningún lado, así
          que la regla del «ya abierto en otra pestaña» no aplica (si aplicara,
          abrir una pestaña nueva sobre una ruta repetida saltaría a la vieja).
-         Solo se reponen los rótulos, y únicamente si cambiaron. */
-      if (current.path === info.path) {
-        if (current.title === info.title && current.chip === info.chip && current.color === info.color) return;
+         Solo se reponen los rótulos y el ancla, y únicamente si cambiaron. */
+      if (current.path === path) {
+        if (
+          current.title === info.title &&
+          current.chip === info.chip &&
+          current.color === info.color &&
+          current.hash === hash
+        ) {
+          return;
+        }
         const list = state.list.map((t) =>
-          t.id === state.active ? { ...t, title: info.title, chip: info.chip, color: info.color } : t,
+          t.id === state.active ? { ...t, hash, title: info.title, chip: info.chip, color: info.color } : t,
         );
         commit(slug, { ...state, list });
         return;
       }
 
       /* El destino ya está abierto: se activa esa pestaña en vez de mover la actual. */
-      const other = state.list.find((t) => t.path === info.path);
+      const other = state.list.find((t) => t.path === path);
       if (other) {
         commit(slug, { ...withScroll(state, state.active, scrollY), active: other.id });
         return;
@@ -350,7 +397,7 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
 
       const list = state.list.map((t) =>
         t.id === state.active
-          ? { ...t, path: info.path, title: info.title, chip: info.chip, color: info.color, scrollY: 0 }
+          ? { ...t, path, hash, title: info.title, chip: info.chip, color: info.color, scrollY: 0 }
           : t,
       );
       commit(slug, { ...state, list });

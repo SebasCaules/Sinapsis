@@ -110,6 +110,15 @@ describe("unionSemesters", () => {
   it("no repite ni deja rótulos vacíos", () => {
     expect(unionSemesters(["2026-1C", "", "2026-1C"], cards)).toEqual(["2026-1C", "2025-2C"]);
   });
+
+  /* B10: la identidad de un cuatrimestre es su forma canónica. */
+  it("deduplica por forma canónica y devuelve el rótulo canónico", () => {
+    expect(unionSemesters(["2026-1c", " 2026-1C ", "2025-2C"], cards)).toEqual(["2026-1C", "2025-2C"]);
+  });
+
+  it("no abre una sección gemela para una materia guardada en minúscula", () => {
+    expect(unionSemesters(["2026-1C"], [card("a", "2026-1c", 0)])).toEqual(["2026-1C"]);
+  });
 });
 
 describe("groupBySemesters", () => {
@@ -125,6 +134,11 @@ describe("groupBySemesters", () => {
 
   it("descarta las materias de un cuatrimestre que no está en la lista", () => {
     expect(groupBySemesters(["2026-2C"], cards)[0]?.cards).toEqual([]);
+  });
+
+  it("reparte por forma canónica: «2026-1c» cae en la sección «2026-1C»", () => {
+    const groups = groupBySemesters(["2026-1C"], [card("a", "2026-1c", 0)]);
+    expect(groups[0]?.cards.map((c) => c.slug)).toEqual(["a"]);
   });
 });
 

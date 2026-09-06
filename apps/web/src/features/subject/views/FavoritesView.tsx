@@ -9,7 +9,7 @@ import { Icon, UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
 import { useSubjectCtx } from "../context";
 import { useStudyState, useToggleBookmark } from "../useSubject";
-import { ErrorCard } from "../components/States";
+import { ErrorCard, WideSkeleton } from "../components/States";
 import css from "./mine.module.css";
 
 export function FavoritesView() {
@@ -18,6 +18,9 @@ export function FavoritesView() {
   const toggle = useToggleBookmark(slug);
 
   if (query.isError) return <ErrorCard error={query.error} subject={slug} />;
+  /* Sin esto, mientras carga el estado de estudio la vista dibujaba el «todavía
+     no guardó ninguna página» y después lo reemplazaba por la lista (U14). */
+  if (query.isPending) return <WideSkeleton />;
 
   /* El orden lo pone el modelo (divisiones del temario + secuencia dentro de
      cada una); los favoritos solo lo filtran. */
@@ -35,8 +38,10 @@ export function FavoritesView() {
       <header className={css.head}>
         <span className={css.ribbon}>— LO MÍO —</span>
         <h1 className={css.h1}>Favoritos</h1>
+        {/* «en favoritos», no «guardadas»: el mismo nombre que usan el botón
+            del lector, el rail y el bloque del inicio (U30). */}
         <p className={css.sub}>
-          {total} {plural(total, "página guardada", "páginas guardadas")}
+          {total} {plural(total, "página en favoritos", "páginas en favoritos")}
         </p>
       </header>
 
@@ -45,9 +50,9 @@ export function FavoritesView() {
           <Icon name="star" size={26} className={css.emptyIcon} />
           <p className={css.emptyTitle}>Todavía no guardó ninguna página</p>
           <p className={css.emptyText}>
-            En el lector, el botón <strong>Guardar</strong> marca la página como favorita. Sirve para armarse un
-            atajo a lo que se vuelve a consultar todo el tiempo —las tablas, los formularios, el teorema del que
-            uno nunca se acuerda— sin tener que buscarlo cada vez.
+            En el lector, el botón <strong>A favoritos</strong> marca la página. Sirve para armarse un atajo a lo que
+            se vuelve a consultar todo el tiempo —las tablas, los formularios, el teorema del que uno nunca se
+            acuerda— sin tener que buscarlo cada vez.
           </p>
           <Link className={css.emptyAction} to={routes.wiki(slug)}>
             <Icon name="book" size={15} />

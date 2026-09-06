@@ -69,6 +69,10 @@ del usuario, por eso el CLI acepta `--wiki` para apuntar a la carpeta real:
 SINAPSIS_TOKEN=... pnpm sinapsis -- sync --config examples/proba/sinapsis.config.json --wiki ~/Desktop/ITBA/26-1C/Proba_Obsidian/wiki
 ```
 
+El material de estudio (mazos, quizzes, plan y kits) vive en la carpeta `estudio/` junto al wiki;
+el formato está en `docs/CONTRACT.md` §7 y `pnpm sinapsis -- init` deja un ejemplo. Sin mazos
+propios, la plataforma genera uno por división a partir de los resúmenes.
+
 Dentro de cada repo de materia, el agente usa la skill `/sinapsis` (`init`, `validate`,
 `sync`, `status`), que envuelve estos comandos. Para tenerla disponible en todos los
 proyectos: `ln -s "$PWD/skills/sinapsis" ~/.claude/skills/sinapsis`.

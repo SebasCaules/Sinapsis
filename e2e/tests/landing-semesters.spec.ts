@@ -67,7 +67,7 @@ async function manage(page: Page): Promise<void> {
 
 async function save(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Guardar" }).click();
-  await expect(page.getByText("Landing guardada.")).toBeVisible();
+  await expect(page.getByText("Se guardaron sus materias.")).toBeVisible();
 }
 
 /** Agrega un cuatrimestre vacío desde el diálogo del modo gestión (sin guardar). */

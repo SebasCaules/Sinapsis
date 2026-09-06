@@ -68,8 +68,12 @@ const components: Components = {
 };
 
 /* Los ids van ANTES que KaTeX: el encabezado todavía tiene su texto, no el
-   marcado de la fórmula. */
-const REHYPE: PluggableList = [rehypeHeadingIds, [rehypeKatex, { output: "html" }]];
+   marcado de la fórmula.
+
+   `htmlAndMathml` y no `html`: la capa visual de KaTeX es `aria-hidden`, así que
+   con `html` a secas toda la matemática de una página era silencio para un
+   lector de pantalla (U2). */
+const REHYPE: PluggableList = [rehypeHeadingIds, [rehypeKatex, { output: "htmlAndMathml" }]];
 
 export const Markdown = memo(function Markdown({ body, subject, exists }: MarkdownProps) {
   const remarkPlugins = useMemo<PluggableList>(

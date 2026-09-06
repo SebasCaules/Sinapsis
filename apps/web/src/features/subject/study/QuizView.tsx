@@ -8,14 +8,14 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { plural, routes, type QuizQuestion } from "@sinapsis/contract";
+import { plural, routes, type QuizOption, type QuizQuestion } from "@sinapsis/contract";
 import { Icon, UiIcon, useToast } from "@/components/platform";
 import { isTypingTarget } from "@/lib/keyboard";
 import { useSubjectCtx } from "../context";
 import { ErrorCard, WideSkeleton } from "../components/States";
 import { MathText } from "../components/MathText";
 import { Markdown } from "../markdown/Markdown";
-import { plainText } from "./model";
+import { plainText, spokenMath } from "./model";
 import { ActionLink, Bar, DivisionChip, EmptyPanel, Kbd, Ring } from "./ui";
 import { useStudy } from "./useStudy";
 import css from "./QuizView.module.css";
@@ -29,10 +29,30 @@ interface Run {
   at: number;
   /** id de pregunta → índice de la opción elegida. */
   picks: Record<string, number>;
+  /**
+   * Repesca: la partida corre solo sobre las falladas. NO registra intento
+   * (bug 11): su puntaje es sobre un subconjunto elegido para fallar y compararlo
+   * con el del quiz completo —que es lo que muestran la lista y «mejor puntaje»—
+   * no significa nada.
+   */
+  retry: boolean;
 }
 
 const isCorrect = (question: QuizQuestion, pick: number | undefined): boolean =>
   pick !== undefined && question.options[pick]?.correct === true;
+
+/**
+ * Nombre accesible de una opción: la letra, el texto legible y —una vez
+ * revelada— qué papel juega. `alt` del contrato manda sobre cualquier
+ * traducción automática de la matemática: la escribe quien redactó la pregunta.
+ */
+function optionLabel(option: QuizOption, index: number, revealed: boolean, chosen: boolean): string {
+  const text = option.alt?.trim() || spokenMath(option.text);
+  const head = `${LETTERS[index]}. ${text}`;
+  if (!revealed) return head;
+  if (option.correct) return chosen ? `${head} · su respuesta, correcta` : `${head} · correcta`;
+  return chosen ? `${head} · su respuesta, incorrecta` : head;
+}
 
 export function QuizView() {
   const { slug, model } = useSubjectCtx();
@@ -50,7 +70,7 @@ export function QuizView() {
   useEffect(() => {
     if (!content.isSuccess) return;
     const questions = study.quiz(quizId)?.quiz.questions ?? [];
-    setRun({ key: Date.now(), questions, at: 0, picks: {} });
+    setRun({ key: Date.now(), questions, at: 0, picks: {}, retry: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content.isSuccess, quizId]);
 
@@ -81,13 +101,14 @@ export function QuizView() {
     setRun((prev) => (prev ? { ...prev, at: prev.at + 1 } : prev));
   }, []);
 
-  const restart = useCallback((questions: QuizQuestion[]) => {
-    setRun({ key: Date.now(), questions, at: 0, picks: {} });
+  const restart = useCallback((questions: QuizQuestion[], retry: boolean) => {
+    setRun({ key: Date.now(), questions, at: 0, picks: {}, retry });
   }, []);
 
-  /* El intento se registra al terminar, una vez por partida. */
+  /* El intento se registra al terminar, una vez por partida y solo si la partida
+     fue sobre el quiz COMPLETO (bug 11). */
   useEffect(() => {
-    if (!run || !finished || recorded.current === run.key) return;
+    if (!run || !finished || run.retry || recorded.current === run.key) return;
     recorded.current = run.key;
     void recordAttempt(quizId, score, run.questions.length).catch(() =>
       toast("No se pudo registrar el intento.", "bad"),
@@ -140,7 +161,7 @@ export function QuizView() {
             </ActionLink>
           }
         >
-          <p className={css.text}>Puede que se haya renombrado en el último sync del wiki.</p>
+          <p className={css.text}>Puede que se haya renombrado en la última sincronización del wiki.</p>
         </EmptyPanel>
       </div>
     );
@@ -165,7 +186,11 @@ export function QuizView() {
         </span>
       </header>
 
-      <Bar ratio={run.at / total} className={css.progress} />
+      <Bar
+        ratio={run.at / total}
+        className={css.progress}
+        label={`Preguntas respondidas: ${Math.min(run.at, total)} de ${total}`}
+      />
 
       {finished ? (
         <Result
@@ -174,12 +199,16 @@ export function QuizView() {
           total={total}
           wrong={wrong}
           picks={run.picks}
-          onRetryWrong={() => restart(wrong)}
-          onRetryAll={() => restart(stat.quiz.questions)}
+          retry={run.retry}
+          onRetryWrong={() => restart(wrong, true)}
+          onRetryAll={() => restart(stat.quiz.questions, false)}
         />
       ) : current ? (
         <>
-          <section className={css.card} aria-live="polite">
+          {/* El `aria-live` NO va acá: con toda la tarjeta viva, cada pregunta
+              se releía entera al pasar de una a otra. Vive en el panel de
+              revelado, que es lo único que aparece sin que se navegue (U36). */}
+          <section className={css.card}>
             <div className={css.cardHead}>
               {division ? <DivisionChip division={division} /> : null}
               <span className={css.cardKind}>PREGUNTA {run.at + 1}</span>
@@ -207,8 +236,10 @@ export function QuizView() {
                       disabled={revealed}
                       /* KaTeX dibuja la fórmula con `aria-hidden`: sin este
                          rótulo, una opción que es solo matemática no tiene
-                         nombre accesible más allá de su letra. */
-                      aria-label={`${LETTERS[i]}. ${option.text.replace(/\$/g, "")}`}
+                         nombre accesible más allá de su letra. Y tras revelar,
+                         el color es lo único que decía cuál era la correcta y
+                         cuál había marcado el usuario (U6). */
+                      aria-label={optionLabel(option, i, revealed, pick === i)}
                       onClick={() => choose(i)}
                     >
                       <span className={css.letter}>{LETTERS[i]}</span>
@@ -222,7 +253,7 @@ export function QuizView() {
             </ul>
 
             {revealed ? (
-              <div className={css.reveal} data-ok={isCorrect(current, pick) ? "true" : "false"}>
+              <div className={css.reveal} data-ok={isCorrect(current, pick) ? "true" : "false"} aria-live="polite">
                 <span className={css.revealTag}>
                   {isCorrect(current, pick) ? "CORRECTO" : "INCORRECTO"}
                 </span>
@@ -246,7 +277,13 @@ export function QuizView() {
           </section>
 
           <div className={css.foot}>
-            <button type="button" className={css.next} onClick={next} disabled={!revealed}>
+            <button
+              type="button"
+              className={css.next}
+              onClick={next}
+              disabled={!revealed}
+              aria-keyshortcuts="Enter"
+            >
               {run.at + 1 === total ? "Ver el resultado" : "Siguiente"}
               <UiIcon name="chevronRight" size={16} />
             </button>
@@ -263,6 +300,7 @@ function Result({
   total,
   wrong,
   picks,
+  retry,
   onRetryWrong,
   onRetryAll,
 }: {
@@ -271,6 +309,8 @@ function Result({
   total: number;
   wrong: QuizQuestion[];
   picks: Record<string, number>;
+  /** La partida fue una repesca: su puntaje no se registra (bug 11). */
+  retry: boolean;
   onRetryWrong: () => void;
   onRetryAll: () => void;
 }) {
@@ -279,9 +319,9 @@ function Result({
   return (
     <section className={css.result} aria-live="polite">
       <div className={css.resultHead}>
-        <Ring ratio={total ? score / total : 0} size={104} label={`${pct} por ciento`} />
+        <Ring ratio={total ? score / total : 0} size={104} label={`${pct} por ciento de aciertos`} />
         <div className={css.resultText}>
-          <span className={css.eyebrow}>RESULTADO</span>
+          <span className={css.eyebrow}>{retry ? "REPESCA" : "RESULTADO"}</span>
           <h2 className={css.resultTitle}>
             <span className={css.resultScore}>
               {score}
@@ -290,9 +330,11 @@ function Result({
             {plural(score, "respuesta correcta", "respuestas correctas")}
           </h2>
           <p className={css.text}>
-            {pct === 100
-              ? "Sin errores. El intento queda registrado como su mejor puntaje."
-              : `Quedan ${wrong.length} ${plural(wrong.length, "pregunta", "preguntas")} para repasar: cada una enlaza a la página del wiki que la explica.`}
+            {retry
+              ? "Esta repesca no queda registrada: el puntaje se guarda solo cuando responde el quiz completo."
+              : pct === 100
+                ? "Sin errores. El intento queda registrado como su mejor puntaje."
+                : `Quedan ${wrong.length} ${plural(wrong.length, "pregunta", "preguntas")} para repasar: cada una enlaza a la página del wiki que la explica.`}
           </p>
         </div>
       </div>

@@ -34,7 +34,7 @@ Pestañas múltiples estilo Obsidian, grafo de conexiones, flashcards/quiz/SRS, 
 kits, figuras interactivas, herramientas React por materia (plugins), tokens de sync por usuario,
 deploy (Dockerfile + Turso), modo móvil completo.
 
-## Sprint 2 — Estudio (en ejecución, 2026-09-06)
+## Sprint 2 — Estudio (cerrado el 2026-09-06, pendiente de revisión del usuario)
 
 Objetivo: convertir el shell en una mesa de estudio: pestañas, grafo, favoritos y apuntes,
 flashcards con repetición espaciada, quiz, plan de estudio y kits; con el material de
@@ -56,7 +56,9 @@ estudio compilado desde el wiki de cada materia (N0-27). Cierra S-03, S-06 y S-0
 
 ## Sprint 3 — Herramientas por materia (propuesto)
 Sistema de plugins: cada materia publica un bundle React registrado en `rail[].items[kind=tool]`;
-sandbox de carga; contrato de props (`App.registerView` del baseline como referencia).
+sandbox de carga; contrato de props (`App.registerView` del baseline como referencia). Además:
+`Plan.tracks` (S-11), figuras interactivas del wiki (`[!figura]`), `dueCount` en `SubjectCard`,
+desplazamiento del grafo al nodo enfocado por teclado.
 
 ## Sprint 4 — Deploy (propuesto)
 Dockerfile, Turso/libSQL remoto, dominio, Google OAuth de producción, backups.

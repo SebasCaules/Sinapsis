@@ -15,7 +15,15 @@
  * Los colores de las divisiones son tokens CSS (`var(--u3)`), que el canvas no
  * entiende: se resuelven UNA vez por tema con `getComputedStyle`.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { plural, routes } from "@sinapsis/contract";
@@ -50,7 +58,20 @@ interface SimEdge {
 const LABEL_ZOOM = 1.4;
 const LIST_SEP = ",";
 
+/** Un solo texto para la carga del grafo, lo diga el contador o el velo (U35). */
+const LOADING = "Trazando el grafo…";
+
+/** «Más citadas»: cuántas se ven de entrada y hasta cuántas llega «Ver más» (N0-39). */
+const TOP_MIN = 12;
+const TOP_MAX = 30;
+
+/** Cuánto acerca o aleja cada golpe de los botones − / +. */
+const ZOOM_STEP = 1.35;
+
 const parseList = (v: string | null): string[] => (v ? v.split(LIST_SEP).filter(Boolean) : []);
+
+/** «meta» → «Meta»: los tipos llegan en minúscula desde el wiki (U28). */
+const capitalize = (label: string): string => (label ? label[0]?.toUpperCase() + label.slice(1) : label);
 
 /**
  * Resuelve `var(--u3)` al color real del tema activo. Los hex y los `oklch()`
@@ -120,6 +141,16 @@ export function GraphView() {
   const downRef = useRef<{ x: number; y: number } | null>(null);
   const [hovered, setHovered] = useState<{ node: GraphModelNode; x: number; y: number } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+  /**
+   * Nodo bajo el cursor de TECLADO (U5). El lienzo es enfocable y las flechas
+   * recorren los nodos en el mismo orden que la lista «más citadas»: sin esto,
+   * el grafo era estrictamente un dibujo y no había forma de llegar a un nodo
+   * sin apuntarle con el ratón. −1 es «todavía no se movió».
+   */
+  const [cursor, setCursor] = useState(-1);
+  const cursorRef = useRef<string | null>(null);
+  /** «Más citadas» empieza recortada; «Ver más» la lleva hasta 30 (N0-39). */
+  const [topAll, setTopAll] = useState(false);
 
   const ready = query.data !== undefined;
 
@@ -208,17 +239,36 @@ export function GraphView() {
         ctx.arc(node.x, node.y, node.radius + 3.5 / t.k, 0, Math.PI * 2);
         ctx.stroke();
       }
+      /* El nodo que tiene el cursor de teclado lleva su propio aro: es el
+         equivalente en el lienzo del anillo de foco de cualquier control. */
+      if (node.slug === cursorRef.current) {
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 2 / t.k;
+        ctx.strokeStyle = ink;
+        ctx.setLineDash([3 / t.k, 3 / t.k]);
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius + 6 / t.k, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
     ctx.globalAlpha = 1;
 
     // etiquetas: con zoom suficiente, o la del nodo bajo el cursor y sus vecinos
-    if (t.k > LABEL_ZOOM || hover !== null) {
+    if (t.k > LABEL_ZOOM || hover !== null || cursorRef.current !== null) {
       ctx.font = `600 ${11 / t.k}px "Hanken", system-ui, sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       ctx.lineJoin = "round";
       for (const node of nodesRef.current) {
-        if (t.k <= LABEL_ZOOM && node.slug !== hover?.slug && !neighbours.has(node.slug)) continue;
+        if (
+          t.k <= LABEL_ZOOM &&
+          node.slug !== hover?.slug &&
+          node.slug !== cursorRef.current &&
+          !neighbours.has(node.slug)
+        ) {
+          continue;
+        }
         const y = node.y + node.radius + 3 / t.k;
         /* Cerco del color del papel: la etiqueta se lee aunque caiga sobre una arista. */
         ctx.lineWidth = 3 / t.k;
@@ -309,6 +359,12 @@ export function GraphView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodeKey, schedule]);
 
+  /* Cambiar el conjunto de nodos invalida el cursor de teclado: el índice 7 de
+     la lista anterior no es la misma página en la nueva. */
+  useEffect(() => {
+    setCursor(-1);
+  }, [nodeKey]);
+
   /* La búsqueda y el tema no tocan la simulación: solo el color y el redibujo. */
   useEffect(() => {
     if (!graph) return;
@@ -395,6 +451,68 @@ export function GraphView() {
     select(canvas).call(behavior.transform, zoomIdentity);
   };
 
+  /* Acercar y alejar sin rueda ni gesto de pellizco (N0-39): con un trackpad
+     prestado o solo con el teclado, el zoom era inalcanzable. */
+  const zoomBy = (factor: number) => {
+    const canvas = canvasRef.current;
+    const behavior = zoomRef.current;
+    if (!canvas || !behavior) return;
+    select(canvas).call(behavior.scaleBy, factor);
+  };
+
+  /**
+   * El grafo, ordenado por cuántas páginas lo citan. Es el orden de la lista
+   * «más citadas» Y el que recorren las flechas sobre el lienzo: una sola
+   * secuencia, para que el dibujo y su alternativa textual no se contradigan.
+   */
+  const ranked = graph
+    ? [...graph.nodes].sort((a, b) => b.inDegree - a.inDegree || a.title.localeCompare(b.title, "es"))
+    : [];
+
+  const cursorNode = cursor >= 0 ? (ranked[cursor] ?? null) : null;
+  cursorRef.current = cursorNode?.slug ?? null;
+
+  const moveCursor = (delta: number) => {
+    if (!ranked.length) return;
+    setCursor((at) => {
+      const next = at < 0 ? (delta > 0 ? 0 : ranked.length - 1) : at + delta;
+      return Math.min(ranked.length - 1, Math.max(0, next));
+    });
+    schedule();
+  };
+
+  const onCanvasKeyDown = (event: ReactKeyboardEvent<HTMLCanvasElement>) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        event.preventDefault();
+        moveCursor(1);
+        return;
+      case "ArrowLeft":
+      case "ArrowUp":
+        event.preventDefault();
+        moveCursor(-1);
+        return;
+      case "Home":
+        event.preventDefault();
+        setCursor(0);
+        schedule();
+        return;
+      case "End":
+        event.preventDefault();
+        setCursor(ranked.length - 1);
+        schedule();
+        return;
+      case "Enter":
+        if (!cursorNode) return;
+        event.preventDefault();
+        navigate(routes.page(slug, cursorNode.slug));
+        return;
+      default:
+    }
+  };
+
   /* ---------- estados ------------------------------------------------------ */
   if (query.isError) {
     return <ErrorCard error={query.error} notFound="Esta materia no tiene grafo" subject={slug} />;
@@ -402,9 +520,7 @@ export function GraphView() {
 
   const empty = graph !== null && graph.total === 0;
   const filteredOut = graph !== null && graph.total > 0 && graph.nodes.length === 0;
-  const top = graph
-    ? [...graph.nodes].sort((a, b) => b.inDegree - a.inDegree || a.title.localeCompare(b.title, "es")).slice(0, 12)
-    : [];
+  const top = ranked.slice(0, topAll ? TOP_MAX : TOP_MIN);
 
   return (
     <div className={css.view}>
@@ -412,10 +528,13 @@ export function GraphView() {
         <div className={css.headText}>
           <span className={css.ribbon}>— CONEXIONES —</span>
           <h1 className={css.h1}>Grafo de conexiones</h1>
-          <p className={css.sub} data-testid="graph-meta">
+          {/* `status`: el recuento cambia solo al mover un filtro o escribir en
+              la búsqueda, y es la única confirmación de que el filtro hizo algo
+              para quien no ve el lienzo (U34). */}
+          <p className={css.sub} data-testid="graph-meta" role="status">
             {graph
               ? `${graph.nodes.length} de ${graph.total} ${plural(graph.total, "página", "páginas")} · ${graph.edges.length} ${plural(graph.edges.length, "enlace", "enlaces")}`
-              : "Cargando el grafo…"}
+              : LOADING}
             {graph && filters.query
               ? ` · ${graph.matches} ${plural(graph.matches, "coincidencia", "coincidencias")}`
               : ""}
@@ -437,10 +556,13 @@ export function GraphView() {
       <div className={css.filters}>
         <div className={css.chipRow} role="group" aria-label={model.config.division.plural}>
           <span className={css.chipLabel}>{model.config.division.plural.toUpperCase()}</span>
+          {/* Todos los chips son interruptores y todos lo dicen: antes el estado
+              encendido solo existía en el color de fondo (U21). */}
           <button
             type="button"
             className={css.chip}
             data-on={filters.divisions.length === 0 ? "true" : undefined}
+            aria-pressed={filters.divisions.length === 0}
             onClick={() => update("d", [])}
           >
             Todas
@@ -451,6 +573,8 @@ export function GraphView() {
               type="button"
               className={css.chip}
               data-on={filters.divisions.includes(division.key) ? "true" : undefined}
+              aria-pressed={filters.divisions.includes(division.key)}
+              aria-label={division.long}
               style={{ ["--ucol" as string]: division.color }}
               onClick={() => toggleIn("d", filters.divisions, division.key)}
             >
@@ -466,6 +590,7 @@ export function GraphView() {
             type="button"
             className={css.chip}
             data-on={filters.types.length === 0 ? "true" : undefined}
+            aria-pressed={filters.types.length === 0}
             onClick={() => update("t", [])}
           >
             Todos
@@ -476,9 +601,10 @@ export function GraphView() {
               type="button"
               className={css.chip}
               data-on={filters.types.includes(type.key) ? "true" : undefined}
+              aria-pressed={filters.types.includes(type.key)}
               onClick={() => toggleIn("t", filters.types, type.key)}
             >
-              {type.label}
+              {capitalize(type.label)}
               <span className={css.chipCount}>{type.count}</span>
             </button>
           ))}
@@ -498,12 +624,23 @@ export function GraphView() {
 
       <div className={css.stage}>
         <div className={css.canvasWrap} ref={wrapRef}>
+          {/* El lienzo entra en el orden de tabulación y las flechas recorren
+              los nodos, Intro abre el que esté seleccionado (U5). El rótulo dice
+              exactamente eso: el anterior prometía una lista «navegable con el
+              teclado» que no lo era (U12). */}
           <canvas
             ref={canvasRef}
             className={css.canvas}
             data-hover={hovered ? "true" : undefined}
+            tabIndex={0}
             role="img"
-            aria-label={`Grafo de ${graph?.nodes.length ?? 0} páginas y sus enlaces. La lista «más citadas» dice lo mismo y se recorre con el teclado.`}
+            aria-label={`Grafo de ${graph?.nodes.length ?? 0} ${plural(graph?.nodes.length ?? 0, "página", "páginas")} y ${graph?.edges.length ?? 0} ${plural(graph?.edges.length ?? 0, "enlace", "enlaces")}. Con el foco aquí, las flechas recorren las páginas de más a menos citada e Intro abre la seleccionada.`}
+            aria-keyshortcuts="ArrowRight ArrowLeft Enter"
+            onKeyDown={onCanvasKeyDown}
+            onBlur={() => {
+              setCursor(-1);
+              schedule();
+            }}
             onMouseMove={onMove}
             onMouseLeave={() => {
               hoverRef.current = null;
@@ -516,24 +653,31 @@ export function GraphView() {
             onMouseUp={onUp}
           />
 
+          {/* Lo que el aro del cursor dice en el dibujo, dicho en palabras. */}
+          <span className={css.srOnly} role="status">
+            {cursorNode
+              ? `${cursorNode.title}. ${capitalize(model.typeLabel(cursorNode.type))} de ${cursorNode.divisionShort.replace(/\.$/, "")}. ${cursorNode.inDegree} ${plural(cursorNode.inDegree, "página la enlaza", "páginas la enlazan")}. Intro para abrirla.`
+              : ""}
+          </span>
+
           {query.isPending ? (
-            <div className={css.overlay} aria-busy="true">
-              <span className={css.overlayText}>Trazando el grafo…</span>
+            <div className={css.overlay} aria-busy="true" aria-live="polite">
+              <span className={css.overlayText}>{LOADING}</span>
             </div>
           ) : null}
 
           {empty ? (
-            <div className={css.overlay}>
+            <div className={css.overlay} aria-live="polite">
               <p className={css.overlayTitle}>Todavía no hay enlaces</p>
               <p className={css.overlayText}>
                 El grafo se dibuja con los wikilinks entre páginas. En cuanto el wiki tenga enlaces{" "}
-                <code>[[así]]</code> entre sus páginas, aparecen acá.
+                <code>[[así]]</code> entre sus páginas, aparecen aquí.
               </p>
             </div>
           ) : null}
 
           {filteredOut ? (
-            <div className={css.overlay}>
+            <div className={css.overlay} aria-live="polite">
               <p className={css.overlayTitle}>El filtro no deja ninguna página</p>
               <button
                 type="button"
@@ -561,8 +705,29 @@ export function GraphView() {
             </div>
           ) : null}
 
+          {/* Sin rueda ni pellizco el zoom no existía (N0-39). */}
           <div className={css.zoomBar}>
-            <span className={css.zoomValue}>{Math.round(zoomLevel * 100)} %</span>
+            <button
+              type="button"
+              className={css.zoomStep}
+              onClick={() => zoomBy(1 / ZOOM_STEP)}
+              aria-label="Alejar el grafo"
+              title="Alejar"
+            >
+              −
+            </button>
+            <span className={css.zoomValue} role="status">
+              {Math.round(zoomLevel * 100)} %
+            </span>
+            <button
+              type="button"
+              className={css.zoomStep}
+              onClick={() => zoomBy(ZOOM_STEP)}
+              aria-label="Acercar el grafo"
+              title="Acercar"
+            >
+              +
+            </button>
             <button type="button" className={css.zoomReset} onClick={resetZoom}>
               Centrar
             </button>
@@ -591,12 +756,31 @@ export function GraphView() {
               MÁS CITADAS
             </div>
             {top.map((node) => (
-              <Link key={node.slug} className={css.topRow} to={routes.page(slug, node.slug)}>
+              <Link
+                key={node.slug}
+                className={css.topRow}
+                to={routes.page(slug, node.slug)}
+                aria-label={`${node.title}: ${node.inDegree} ${plural(node.inDegree, "página la enlaza", "páginas la enlazan")}`}
+              >
                 <span className={css.topCount}>{node.inDegree}</span>
                 <span className={css.topTitle}>{node.title}</span>
               </Link>
             ))}
             {!top.length ? <p className={css.cardNote}>Sin páginas que mostrar.</p> : null}
+            {/* Doce de doscientas no es «la lista dice lo mismo que el dibujo»:
+                se puede llegar hasta treinta (U13 / N0-39). */}
+            {ranked.length > TOP_MIN ? (
+              <button
+                type="button"
+                className={css.topMore}
+                aria-expanded={topAll}
+                onClick={() => setTopAll((v) => !v)}
+              >
+                {topAll
+                  ? "Ver menos"
+                  : `Ver más (${Math.min(TOP_MAX, ranked.length) - TOP_MIN} ${plural(Math.min(TOP_MAX, ranked.length) - TOP_MIN, "página", "páginas")})`}
+              </button>
+            ) : null}
           </section>
         </aside>
       </div>

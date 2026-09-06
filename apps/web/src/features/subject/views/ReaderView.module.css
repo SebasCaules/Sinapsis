@@ -343,12 +343,31 @@
    letra lo dice antes de que haga falta explicarlo. */
 .noteState {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font: 500 9.5px var(--font-mono);
   letter-spacing: 0;
   color: var(--good-text);
   text-transform: none;
 }
-.noteState[data-dirty="true"] { color: var(--warn-text); }
+.noteState[data-state="dirty"] { color: var(--warn-text); }
+.noteState[data-state="error"] { color: var(--bad-text); }
+
+/* «Reintentar» vive dentro del rótulo de estado: aparece pegado al mensaje que
+   explica por qué hace falta, no suelto en el pie de la tarjeta. */
+.noteRetry {
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--bad);
+  border-radius: var(--r-ctrl);
+  background: var(--bad-soft);
+  font: 600 10px var(--font-ui);
+  color: var(--bad-text);
+  cursor: pointer;
+}
+.noteRetry:hover { background: var(--bad); color: var(--on-bad); }
+.noteRetry:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .noteArea {
   width: 100%;
@@ -396,6 +415,7 @@
 .noteSave {
   height: 26px;
   padding: 0 11px;
+  white-space: nowrap;
   border: 1px solid var(--border-2);
   border-radius: var(--r-ctrl);
   background: var(--surface-2);
@@ -408,17 +428,52 @@
 .noteSave:disabled { opacity: 0.45; cursor: default; }
 .noteSave:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* Objetivo de 24 px de alto (U30): el relleno negativo lo consigue sin mover el
+   pie de la tarjeta ni una fila. */
 .noteDelete {
   margin-left: auto;
+  margin-right: -6px;
+  min-height: 24px;
   border: 0;
-  padding: 0;
+  padding: 0 6px;
+  border-radius: var(--r-ctrl);
   background: none;
   font: 500 11px var(--font-ui);
   color: var(--text-3);
   cursor: pointer;
 }
-.noteDelete:hover { color: var(--bad-text); }
+.noteDelete:hover { color: var(--bad-text); background: var(--bad-soft); }
 .noteDelete:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- confirmación de borrado ---------- */
+.dialogText { margin: 0; font: 400 13.5px/1.6 var(--font-ui); color: var(--text-2); }
+
+.dialogCancel,
+.dialogDelete {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-ctrl);
+  font: 600 12.5px var(--font-ui);
+  cursor: pointer;
+}
+
+.dialogCancel {
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  box-shadow: var(--relief);
+  color: var(--text-2);
+}
+.dialogCancel:hover { border-color: var(--primary); color: var(--primary); }
+.dialogCancel:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.dialogDelete {
+  border: 1px solid var(--bad);
+  background: var(--bad);
+  color: var(--on-bad);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+}
+.dialogDelete:hover { filter: brightness(1.08); }
+.dialogDelete:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .cardMissing {
   font: 500 12px var(--font-mono);
@@ -447,10 +502,33 @@
 }
 .sideTab:hover { color: var(--text-2); }
 
-/* Por debajo de 1280 px la columna se va sola: la hoja manda. */
+/* Por debajo de 1280 px la columna no cabe al lado de la hoja, pero tampoco
+   desaparece (N0-36): se convierte en un panel deslizante que abre y cierra el
+   mismo botón «PANEL», que ahí queda fijo contra el borde de la ventana. Sin
+   esto, apuntes, índice de la página, fuentes y backlinks eran inalcanzables en
+   cualquier pantalla de portátil. */
+.sideFloating {
+  position: fixed;
+  top: 76px;
+  right: 30px;
+  z-index: 30;
+  width: min(320px, calc(100vw - 60px));
+  max-height: calc(100vh - 92px);
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  box-shadow: var(--shadow), var(--relief);
+  overflow-y: auto;
+}
+
 @media (max-width: 1279px) {
-  .side { display: none; }
-  .sideTab { display: none; }
+  .sideTab {
+    position: fixed;
+    top: 76px;
+    right: 0;
+    z-index: 31;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

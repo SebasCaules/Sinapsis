@@ -26,7 +26,12 @@ import { ActionLink, Bar, DivisionChips, EmptyPanel, Ring, StudyHead, StudyView 
 import { useStudy } from "./useStudy";
 import css from "./PlanView.module.css";
 
-const PLAN_EXAMPLE = `{
+/**
+ * El JSON de ejemplo habla el idioma de la materia: si sus divisiones son
+ * «semanas», el ejemplo dice «Leer la semana» y no «Leer la unidad» (U33). Es
+ * el mismo `division.singular` que usa el resto de la pantalla.
+ */
+const planExample = (unit: string): string => `{
   "title": "Plan de estudio",
   "phases": [{
     "id": "parcial-1",
@@ -38,7 +43,7 @@ const PLAN_EXAMPLE = `{
       "title": "Estadística descriptiva",
       "divisions": ["1"],
       "tasks": [
-        { "id": "u1-leer", "label": "Leer la unidad",
+        { "id": "u1-leer", "label": "Leer la ${unit}",
           "kind": "read", "target": "1" },
         { "id": "u1-mazo", "label": "Repasar el mazo",
           "kind": "cards", "target": "u1" }
@@ -69,6 +74,14 @@ function taskLink(
     const quiz = study.quiz(target);
     return quiz ? { to: routes.quizOne(slug, target), label: "Quiz" } : null;
   }
+  if (task.kind === "tool") {
+    // Herramienta de la materia: un ítem del rail (page, link, tool o builtin).
+    const item = model.railItem(target);
+    if (!item) return null;
+    if (item.to) return { to: item.to, label: item.item.label };
+    if (item.href) return { href: item.href, label: item.item.label };
+    return null;
+  }
   if (isExternalUrl(target)) return { href: target, label: "Enlace" };
   const page = model.bySlug.get(target);
   return page ? { to: routes.page(slug, target), label: "Página" } : null;
@@ -77,8 +90,9 @@ function taskLink(
 export function PlanView() {
   const { slug, model } = useSubjectCtx();
   const { toast } = useToast();
-  const { content, model: study, setTask } = useStudy(slug);
+  const { content, state, model: study, setTask } = useStudy(slug);
   const [busy, setBusy] = useState<string | null>(null);
+  const unit = model.config.division.singular.toLowerCase();
 
   const toggle = useCallback(
     (taskId: string, done: boolean) => {
@@ -103,7 +117,10 @@ export function PlanView() {
     [setTask, study, toast],
   );
 
+  /* Las tareas tildadas vienen del estado del usuario: si esa consulta falla,
+     el plan entero se vería como si no hubiera nada hecho (bug 12). */
   if (content.isError) return <ErrorCard error={content.error} subject={slug} />;
+  if (state.isError) return <ErrorCard error={state.error} subject={slug} />;
   if (content.isPending) return <WideSkeleton />;
 
   const plan = study.plan;
@@ -135,11 +152,11 @@ export function PlanView() {
               Ver el formato
             </summary>
             <pre className={css.pre}>
-              <code>{PLAN_EXAMPLE}</code>
+              <code>{planExample(unit)}</code>
             </pre>
             <p className={css.emptyText}>
               Las tareas admiten <code className={css.code}>kind</code>{" "}
-              <code className={css.code}>read</code> (una {model.config.division.singular.toLowerCase()}),{" "}
+              <code className={css.code}>read</code> (una {unit}),{" "}
               <code className={css.code}>cards</code> (un mazo), <code className={css.code}>quiz</code>,{" "}
               <code className={css.code}>exercises</code> y <code className={css.code}>custom</code> (una página del
               wiki o una URL). El contrato completo está documentado en{" "}
@@ -178,9 +195,11 @@ export function PlanView() {
                 {total.done}
                 <span className={css.totalOf}>/{total.total}</span>
               </span>
-              <span className={css.totalLabel}>PASOS COMPLETADOS</span>
+              {/* «Tareas» es como se llaman en el contrato, en el JSON del plan
+                  y en el resto de esta pantalla; «pasos» no existía (U33). */}
+              <span className={css.totalLabel}>TAREAS COMPLETADAS</span>
             </div>
-            <Ring ratio={total.ratio} label={`${Math.round(total.ratio * 100)} por ciento`} />
+            <Ring ratio={total.ratio} label={`${Math.round(total.ratio * 100)} por ciento del plan`} />
           </>
         }
       />
@@ -252,13 +271,19 @@ function Phase({
           <span className={css.phaseCount}>
             {progress.done} / {progress.total}
           </span>
-          <Bar ratio={progress.ratio} className={css.phaseBar} />
+          <Bar
+            ratio={progress.ratio}
+            className={css.phaseBar}
+            label={`${phase.title}: ${progress.done} de ${progress.total} tareas`}
+          />
         </div>
       </header>
 
       {phase.scope ? (
         <details className={css.scope}>
-          <summary className={css.scopeSummary}>
+          {/* Un plan tiene seis «Qué cae» idénticos: el nombre accesible dice de
+              qué fase es cada uno (U22). */}
+          <summary className={css.scopeSummary} aria-label={`Qué cae en ${phase.title}`}>
             <UiIcon name="chevronRight" size={14} className={css.chevron} />
             Qué cae
           </summary>
@@ -284,6 +309,13 @@ function Phase({
                   type="button"
                   className={css.bulk}
                   disabled={busy === milestone.id || mp.total === 0}
+                  /* El mismo hito aparece en varias fases: sin la fase, media
+                     docena de botones comparten nombre (U22). */
+                  aria-label={
+                    allDone
+                      ? `Desmarcar todo el hito «${milestone.title}» de ${phase.title}`
+                      : `Marcar todo el hito «${milestone.title}» de ${phase.title}`
+                  }
                   onClick={() => onToggleMilestone(milestone, !allDone)}
                 >
                   {allDone ? "Desmarcar" : "Marcar todo el hito"}
@@ -297,10 +329,14 @@ function Phase({
                   return (
                     <li key={task.id} className={css.task} data-done={done ? "true" : undefined}>
                       <label className={css.check}>
+                        {/* «Resolver el TP1» se repite entre hitos y el mismo
+                            hito entre fases: hacen falta los dos para que cada
+                            casilla tenga un nombre propio (U22). */}
                         <input
                           type="checkbox"
                           className={css.input}
                           checked={done}
+                          aria-label={`${task.label} · ${milestone.title} · ${phase.title}`}
                           onChange={(event) => onToggle(task.id, event.target.checked)}
                         />
                         <span className={css.box} aria-hidden="true">
@@ -309,7 +345,7 @@ function Phase({
                         <span className={css.taskLabel}>{task.label}</span>
                       </label>
                       {link?.to ? (
-                        <Link className={css.taskLink} to={link.to}>
+                        <Link className={css.taskLink} to={link.to} aria-label={`${link.label}: ${task.label}`}>
                           {link.label}
                           <UiIcon name="chevronRight" size={13} />
                         </Link>
@@ -319,6 +355,7 @@ function Phase({
                           href={link.href}
                           target="_blank"
                           rel="noopener noreferrer"
+                          aria-label={`${link.label}: ${task.label} (se abre en otra pestaña)`}
                         >
                           {link.label}
                           <UiIcon name="external" size={12} />

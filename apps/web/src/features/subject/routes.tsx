@@ -29,8 +29,8 @@ function ToolView() {
   /* El mismo buscador que usa el shell para la pestaña: una sola definición de
      «qué ítem del rail corresponde a /t/:tool». */
   const view = model.railItem(tool);
-  if (!view) return <ComingSoon title="Herramienta de la materia" sprint="Sprint 3" />;
-  return <ComingSoon title={view.item.label} sprint="Sprint 3" />;
+  if (!view) return <ComingSoon title="Herramienta de la materia" />;
+  return <ComingSoon title={view.item.label} />;
 }
 
 function SubjectNotFound() {

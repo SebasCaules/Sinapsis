@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { UiIcon } from "./Icon";
 import css from "./Dialog.module.css";
@@ -15,13 +15,29 @@ export interface DialogProps {
   footer?: ReactNode;
   /** Ancho del panel; 520 px es el del mockup. */
   width?: number;
+  /**
+   * Qué recibe el foco al abrir. Sin esto el primer foco cae en el primer
+   * elemento enfocable del panel, que es la ✕ de la cabecera: un diálogo de un
+   * solo campo abría con el foco en «Cerrar» y el `autoFocus` del campo perdía
+   * contra este efecto. Con `initialFocus` el diálogo apunta al campo (U40).
+   */
+  initialFocus?: RefObject<HTMLElement | null>;
 }
 
 /**
  * Diálogo modal de la plataforma. Cierra con Esc o clic fuera; al abrirse deja
- * el foco en el primer campo y lo devuelve al cerrarse.
+ * el foco en `initialFocus` (o en el primer enfocable) y lo devuelve al cerrarse.
  */
-export function Dialog({ open, onClose, title, eyebrow, children, footer, width = 520 }: DialogProps) {
+export function Dialog({
+  open,
+  onClose,
+  title,
+  eyebrow,
+  children,
+  footer,
+  width = 520,
+  initialFocus,
+}: DialogProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
@@ -29,7 +45,7 @@ export function Dialog({ open, onClose, title, eyebrow, children, footer, width 
   useEffect(() => {
     if (!open) return;
     restoreRef.current = document.activeElement as HTMLElement | null;
-    const first = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+    const first = initialFocus?.current ?? panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
     first?.focus();
 
     function onKey(e: KeyboardEvent) {
@@ -62,7 +78,7 @@ export function Dialog({ open, onClose, title, eyebrow, children, footer, width 
       document.body.style.overflow = prevOverflow;
       restoreRef.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open, onClose, initialFocus]);
 
   if (!open) return null;
 

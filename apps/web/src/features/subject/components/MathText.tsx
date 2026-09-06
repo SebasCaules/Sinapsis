@@ -37,7 +37,10 @@ const rendered = new Map<string, string>();
 function renderMath(tex: string): string {
   let html = rendered.get(tex);
   if (html === undefined) {
-    html = katex.renderToString(tex, { throwOnError: false, output: "html" });
+    /* `htmlAndMathml` y no `html`: la capa visual de KaTeX va con `aria-hidden`,
+       así que sin el MathML de al lado la fórmula NO EXISTE para un lector de
+       pantalla (U2). El coste es un nodo más por fórmula, invisible. */
+    html = katex.renderToString(tex, { throwOnError: false, output: "htmlAndMathml" });
     rendered.set(tex, html);
   }
   return html;

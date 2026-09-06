@@ -146,13 +146,11 @@ function TodayCard({ model, slug }: { model: SubjectModel; slug: string }) {
   const study = useStudy(slug);
   const task = study.nextTask();
 
-  const due = useMemo(() => {
-    const now = Date.now();
-    return state.srs.filter((card) => {
-      const at = Date.parse(card.due);
-      return Number.isFinite(at) && at <= now;
-    }).length;
-  }, [state.srs]);
+  /* Las vencidas salen del modelo de estudio, que es quien sabe qué tarjetas
+     EXISTEN todavía: contarlas sobre `state.srs` crudo incluía el SRS de
+     tarjetas que el último sync se llevó, y el número no coincidía con el que
+     muestra Flashcards ni con el de la sesión (bug 7). */
+  const due = study.model.totals.due;
 
   /* Los últimos guardados primero: el API devuelve los favoritos en el orden en
      que se marcaron. */
@@ -208,7 +206,7 @@ function TodayCard({ model, slug }: { model: SubjectModel; slug: string }) {
 
         {favorites.length ? (
           <div className={css.todayItem}>
-            <span className={css.todayLabel}>GUARDADAS</span>
+            <span className={css.todayLabel}>FAVORITOS</span>
             <div className={css.todayList}>
               {favorites.map((page) => (
                 <Link key={page.slug} className={css.todayLink} to={routes.page(slug, page.slug)}>

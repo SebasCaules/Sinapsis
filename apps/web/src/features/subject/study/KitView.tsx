@@ -18,9 +18,11 @@ import css from "./KitView.module.css";
 export function KitView() {
   const { slug, model } = useSubjectCtx();
   const { kit: kitId = "" } = useParams();
-  const { content, model: study } = useStudy(slug, model.studied);
+  const { content, state, model: study } = useStudy(slug, model.studied);
 
   if (content.isError) return <ErrorCard error={content.error} subject={slug} />;
+  /* Lo vencido de los mazos del kit sale del estado del usuario (bug 12). */
+  if (state.isError) return <ErrorCard error={state.error} subject={slug} />;
   if (content.isPending) return <WideSkeleton />;
 
   const stat = study.kit(kitId);
@@ -37,7 +39,7 @@ export function KitView() {
             </ActionLink>
           }
         >
-          <p className={css.text}>Puede que se haya renombrado en el último sync del wiki.</p>
+          <p className={css.text}>Puede que se haya renombrado en la última sincronización del wiki.</p>
         </EmptyPanel>
       </StudyView>
     );
@@ -121,7 +123,11 @@ export function KitView() {
                     {division ? <DivisionChip division={division} /> : null}
                     <span className={css.rowTitle}>{deck.title}</span>
                     <span className={css.rowBar}>
-                      <Bar ratio={d?.ratio ?? 0} color={division?.color} />
+                      <Bar
+                        ratio={d?.ratio ?? 0}
+                        color={division?.color}
+                        label={`${deck.title}: ${d?.mastered ?? 0} de ${d?.total ?? 0} tarjetas dominadas`}
+                      />
                     </span>
                     <span className={css.rowMeta}>
                       {d ? `${d.due} vencidas · ${d.fresh} nuevas` : ""}
@@ -200,10 +206,12 @@ function Section({
   return (
     <section className={css.section}>
       <header className={css.sectionHead}>
-        <span className={css.sectionTitle}>
+        {/* «Páginas», «Mazos», «Quizzes» y «Herramientas» son las secciones de la
+            vista: en `span` no existían para quien navega por encabezados (U39). */}
+        <h2 className={css.sectionTitle}>
           <Icon name={icon} size={15} />
           {title}
-        </span>
+        </h2>
         <span className={css.sectionCount}>{count}</span>
       </header>
       {children}

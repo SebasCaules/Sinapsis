@@ -24,11 +24,12 @@ import { Fab } from "./components/Fab";
 import { IndexPanel } from "./components/IndexPanel";
 import { Rail } from "./components/Rail";
 import { SearchPalette } from "./components/SearchPalette";
-import { SubjectHeader } from "./components/SubjectHeader";
+import { ShortcutsDialog } from "./components/ShortcutsDialog";
+import { SubjectHeader, tabElementId } from "./components/SubjectHeader";
 import { ErrorCard, WideSkeleton } from "./components/States";
 import type { SubjectCtx } from "./context";
 import { describePath, isSubjectPath, type StudyLabels } from "./route-info";
-import { useCompact, useSubjectTabsStore, useTabs } from "./store";
+import { splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
 import { useStudy } from "./study/useStudy";
 import { useStudyState, useSubject } from "./useSubject";
 import css from "./SubjectShell.module.css";
@@ -41,6 +42,10 @@ export function SubjectShell() {
   const [searchOpen, setSearchOpen] = useState(false);
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
+  /* El mapa de atajos (U19): se abre con «?» y es la única documentación que
+     tiene el teclado del shell. */
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -87,10 +92,27 @@ export function SubjectShell() {
     if (!isSubjectPath(subject, location.pathname)) return;
     syncActive(
       subject,
-      { path: location.pathname, title: route.title, chip: route.chip, color: route.color },
+      {
+        path: location.pathname,
+        hash: location.hash,
+        title: route.title,
+        chip: route.chip,
+        color: route.color,
+      },
       mainRef.current?.scrollTop,
     );
-  }, [subject, location.pathname, route.title, route.chip, route.color, syncActive]);
+  }, [subject, location.pathname, location.hash, route.title, route.chip, route.color, syncActive]);
+
+  /**
+   * Restauración del scroll al cambiar de pestaña (bug 5).
+   *
+   * La vista de la pestaña nueva se monta y desplaza `main` por su cuenta (el
+   * lector, por ejemplo, sube a cero). Esos eventos llegaban ANTES de la
+   * restauración y el anotador de abajo los guardaba como si fueran del usuario:
+   * la pestaña perdía su posición. Por eso hay una bandera, y el anotador no
+   * escribe nada mientras la restauración está en curso.
+   */
+  const restoringRef = useRef(false);
 
   /* Mientras se lee, la pestaña activa va anotando su scroll: al volver a ella
      no hace falta haber pasado por ningún «guardar antes de salir». */
@@ -99,9 +121,10 @@ export function SubjectShell() {
     if (!main) return;
     let raf = 0;
     const onScroll = () => {
-      if (raf) return;
+      if (raf || restoringRef.current) return;
       raf = window.requestAnimationFrame(() => {
         raf = 0;
+        if (restoringRef.current) return;
         setScroll(subject, useSubjectTabsStore.getState().tabsOf(subject).active, main.scrollTop);
       });
     };
@@ -113,21 +136,33 @@ export function SubjectShell() {
   }, [subject, setScroll, model]);
 
   /* Al cambiar de pestaña se repone su scroll (dos cuadros: el primero monta la
-     vista, el segundo ya tiene el alto real para desplazarse). */
+     vista, el segundo ya tiene el alto real para desplazarse). El valor se lee
+     del store en el momento de restaurar, no de la lista que cerró este render:
+     así el efecto depende SOLO de la pestaña activa. */
   const restoredRef = useRef(tabs.active);
   useEffect(() => {
     if (restoredRef.current === tabs.active) return;
     restoredRef.current = tabs.active;
-    const y = tabs.list.find((t) => t.id === tabs.active)?.scrollY ?? 0;
+    restoringRef.current = true;
+    const y = useSubjectTabsStore.getState().tabsOf(subject).list.find((t) => t.id === tabs.active)?.scrollY ?? 0;
     let second = 0;
+    let third = 0;
     const first = window.requestAnimationFrame(() => {
-      second = window.requestAnimationFrame(() => mainRef.current?.scrollTo({ top: y }));
+      second = window.requestAnimationFrame(() => {
+        mainRef.current?.scrollTo({ top: y });
+        /* Un cuadro más: el evento que dispara `scrollTo` llega después. */
+        third = window.requestAnimationFrame(() => {
+          restoringRef.current = false;
+        });
+      });
     });
     return () => {
       window.cancelAnimationFrame(first);
       if (second) window.cancelAnimationFrame(second);
+      if (third) window.cancelAnimationFrame(third);
+      restoringRef.current = false;
     };
-  }, [tabs.active, tabs.list]);
+  }, [tabs.active, subject]);
 
   const selectTab = useCallback(
     (id: string) => {
@@ -136,7 +171,8 @@ export function SubjectShell() {
       if (!target) return;
       saveScroll();
       activateTab(subject, id);
-      navigate(target.path);
+      /* El ancla vive aparte del pathname (bug 4): se vuelve a pegar acá. */
+      navigate(tabHref(target));
     },
     [tabs.active, tabs.list, saveScroll, activateTab, subject, navigate],
   );
@@ -172,12 +208,12 @@ export function SubjectShell() {
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.target === "_blank") return;
       const href = anchor.getAttribute("href") ?? "";
-      if (!href.startsWith("/") || !isSubjectPath(subject, href.split("#")[0] ?? "")) return;
+      const { path, hash } = splitHash(href);
+      if (!href.startsWith("/") || !isSubjectPath(subject, path)) return;
       event.preventDefault();
       event.stopPropagation();
-      const path = anchor.getAttribute("href") ?? "";
-      const info = describePath(model, subject, path.split("#")[0] ?? path, studyLabels);
-      openTab(subject, { path, title: info.title, chip: info.chip, color: info.color });
+      const info = describePath(model, subject, path, studyLabels);
+      openTab(subject, { path, hash, title: info.title, chip: info.chip, color: info.color });
     },
     [subject, model, openTab, studyLabels],
   );
@@ -209,15 +245,22 @@ export function SubjectShell() {
           if (next) selectTab(next.id);
           return;
         }
-      }
-      if (mod && !event.shiftKey && event.key.toLowerCase() === "w") {
-        event.preventDefault();
-        closeTab(useSubjectTabsStore.getState().tabsOf(subject).active);
-        return;
+        /* Cerrar es ⌘⇧W y no ⌘W (N0-34): ⌘W lo reserva el navegador y no se
+           puede interceptar en Chrome. */
+        if (event.key.toLowerCase() === "w") {
+          event.preventDefault();
+          closeTab(useSubjectTabsStore.getState().tabsOf(subject).active);
+          return;
+        }
       }
       if (event.key === "/" && !mod && !event.altKey) {
         event.preventDefault();
         setSearchOpen(true);
+        return;
+      }
+      if (event.key === "?" && !mod && !event.altKey) {
+        event.preventDefault();
+        setShortcutsOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -296,12 +339,22 @@ export function SubjectShell() {
           onSearch={openSearch}
         />
         <Crumbs items={crumbs} />
-        <main className={css.main} id="contenido" data-subject-main="" ref={mainRef}>
+        {/* El contenido es el panel de la pestaña activa (N0-34): el patrón de
+            `tabs` se completa acá, con el `tabpanel` rotulado por su pestaña. */}
+        <main
+          className={css.main}
+          id="contenido"
+          data-subject-main=""
+          ref={mainRef}
+          role="tabpanel"
+          aria-labelledby={tabElementId(tabs.active)}
+        >
           <Outlet context={ctx} />
         </main>
         {model.fab ? <Fab view={model.fab} /> : null}
       </div>
       <SearchPalette model={model} open={searchOpen} onClose={closeSearch} />
+      <ShortcutsDialog open={shortcutsOpen} onClose={closeShortcuts} />
     </div>
   );
 }

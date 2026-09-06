@@ -12,8 +12,16 @@ import {
 } from "@tanstack/react-query";
 import type { Note, PageDetail, SearchHit, StudyState, SubjectDetail } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
+import { useToast } from "@/components/platform";
 import { buildSubjectModel, type SubjectModel } from "./model";
 import { useIsDark } from "./store";
+
+/**
+ * Lo que se le dice al usuario cuando una mutación optimista se deshace sola
+ * (U15). Sin esto, el favorito o el tilde se apagaban en silencio y no había
+ * forma de distinguirlo de un clic que no llegó a registrarse.
+ */
+const SAVE_FAILED = "No se pudo guardar el cambio.";
 
 /* El modo de mentira (`?mock=1`) vive en UNA costura, dentro de `lib/api`: acá
    no hay ramas de desarrollo, solo llamadas al API. */
@@ -54,6 +62,7 @@ export function useSearch(slug: string, q: string, enabled: boolean): UseQueryRe
  */
 export function useToggleStudied(slug: string) {
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ page, studied }: { page: string; studied: boolean }) => {
       if (studied) await api.subject.markStudied(slug, page);
@@ -64,9 +73,12 @@ export function useToggleStudied(slug: string) {
       void qc.invalidateQueries({ queryKey: qk.landing });
     },
     onMutate: async ({ page, studied }) => {
+      /* `exact`: sin él, `qk.subject(slug)` es PREFIJO de `qk.page(slug, …)` y
+         de `qk.studyState(slug)`, así que cancelar la materia cancelaba también
+         la página que se acaba de abrir y las consultas de estudio (bug 6). */
       await Promise.all([
-        qc.cancelQueries({ queryKey: qk.subject(slug) }),
-        qc.cancelQueries({ queryKey: qk.page(slug, page) }),
+        qc.cancelQueries({ queryKey: qk.subject(slug), exact: true }),
+        qc.cancelQueries({ queryKey: qk.page(slug, page), exact: true }),
       ]);
       const prevSubject = qc.getQueryData<SubjectDetail>(qk.subject(slug));
       const prevPage = qc.getQueryData<PageDetail>(qk.page(slug, page));
@@ -81,6 +93,7 @@ export function useToggleStudied(slug: string) {
       return { prevSubject, prevPage, page };
     },
     onError: (_err, _vars, ctx) => {
+      toast(SAVE_FAILED, "bad");
       if (!ctx) return;
       if (ctx.prevSubject) qc.setQueryData(qk.subject(slug), ctx.prevSubject);
       if (ctx.prevPage) qc.setQueryData(qk.page(slug, ctx.page), ctx.prevPage);
@@ -131,6 +144,7 @@ function patchStudyState(
 /** Favorito de una página, en optimista: la ★ se enciende antes que responda el API. */
 export function useToggleBookmark(slug: string) {
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ page, on }: { page: string; on: boolean }) => {
       if (on) await api.study.addBookmark(slug, page);
@@ -145,6 +159,7 @@ export function useToggleBookmark(slug: string) {
       return { prev };
     },
     onError: (_err, _vars, ctx) => {
+      toast(SAVE_FAILED, "bad");
       if (ctx?.prev) qc.setQueryData(qk.studyState(slug), ctx.prev);
     },
   });
@@ -157,6 +172,7 @@ export function useToggleBookmark(slug: string) {
  */
 export function useSaveNote(slug: string) {
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: ({ page, body }: { page: string; body: string }) => api.study.saveNote(slug, page, body),
     onMutate: async ({ page, body }) => {
@@ -178,6 +194,7 @@ export function useSaveNote(slug: string) {
       }));
     },
     onError: (_err, _vars, ctx) => {
+      toast(SAVE_FAILED, "bad");
       if (ctx?.prev) qc.setQueryData(qk.studyState(slug), ctx.prev);
     },
   });
@@ -186,6 +203,7 @@ export function useSaveNote(slug: string) {
 /** Borra el apunte de una página (el textarea vacío no se guarda: se borra). */
 export function useDeleteNote(slug: string) {
   const qc = useQueryClient();
+  const { toast } = useToast();
   return useMutation({
     mutationFn: ({ page }: { page: string }) => api.study.deleteNote(slug, page),
     onMutate: async ({ page }) => {
@@ -194,6 +212,7 @@ export function useDeleteNote(slug: string) {
       return { prev };
     },
     onError: (_err, _vars, ctx) => {
+      toast(SAVE_FAILED, "bad");
       if (ctx?.prev) qc.setQueryData(qk.studyState(slug), ctx.prev);
     },
   });

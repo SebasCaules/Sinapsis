@@ -24,15 +24,16 @@ import {
 } from "@dnd-kit/sortable";
 import {
   LS_KEYS,
+  LandingLayoutInput,
   fold,
   plural,
   type CreateSubjectInput,
-  type LandingLayoutInput,
   type SubjectCard as SubjectCardData,
 } from "@sinapsis/contract";
 import { api, qk } from "@/lib/api";
 import { readJson, writeJson } from "@/lib/store";
 import {
+  canonicalSemester,
   compareSemestersDesc,
   groupBySemesters,
   nextSemesterSuggestion,
@@ -66,14 +67,56 @@ interface SemesterDialog {
 }
 
 /**
+ * Tope del rótulo de cuatrimestre en el contrato
+ * (`LandingLayoutInput.semesters`: `z.string().min(1).max(24)`). Vive acá solo
+ * para el `maxLength` del campo; la validación de verdad la hace el contrato.
+ */
+const SEMESTER_MAX = 24;
+
+/**
+ * Valida el rótulo CONTRA EL CONTRATO en vez de reescribir la regla acá: lo que
+ * el `PUT /api/landing` va a rechazar con 400 se rechaza antes, en el campo,
+ * que es donde el usuario puede arreglarlo (B9).
+ */
+function semesterIssue(label: string): string | undefined {
+  if (!label) return "Escriba un rótulo.";
+  const parsed = LandingLayoutInput.safeParse({ items: [], semesters: [label] });
+  if (parsed.success) return undefined;
+  return parsed.error.issues[0]?.code === "too_big"
+    ? `No puede pasar de ${SEMESTER_MAX} caracteres (lleva ${label.length}).`
+    : "El rótulo no es válido.";
+}
+
+/**
  * Inserta un cuatrimestre nuevo donde lo pondría el orden por rótulo y deja el
  * resto como está: el usuario puede haber ordenado a mano y eso no se pisa.
+ *
+ * La comparación y lo que se guarda van en FORMA CANÓNICA (B10): escribir
+ * "2026-1c" teniendo "2026-1C" no abre una sección gemela, y el rótulo que
+ * queda en la lista es siempre el canónico.
  */
 function insertSemester(list: DraftGroup[], semester: string): DraftGroup[] {
-  if (list.some((g) => g.semester === semester)) return list;
-  const at = list.findIndex((g) => compareSemestersDesc(semester, g.semester) < 0);
-  const group: DraftGroup = { semester, slugs: [] };
+  const label = canonicalSemester(semester);
+  if (!label || list.some((g) => canonicalSemester(g.semester) === label)) return list;
+  const at = list.findIndex((g) => compareSemestersDesc(label, g.semester) < 0);
+  const group: DraftGroup = { semester: label, slugs: [] };
   return at === -1 ? [...list, group] : [...list.slice(0, at), group, ...list.slice(at)];
+}
+
+/** ¿El borrador dice lo mismo que el servidor? (mismo orden, mismos slugs). */
+function sameDraft(a: readonly DraftGroup[], b: readonly DraftGroup[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((g, i) => {
+      const other = b[i];
+      return (
+        !!other &&
+        other.semester === g.semester &&
+        other.slugs.length === g.slugs.length &&
+        other.slugs.every((slug, j) => slug === g.slugs[j])
+      );
+    })
+  );
 }
 
 function readCollapsed(): string[] {
@@ -132,6 +175,11 @@ export function LandingPage() {
   /* Los cuatrimestres del usuario son estado propio (N0-32): vienen con los
      vacíos y con el orden que él eligió, que no tiene por qué ser el del rótulo. */
   const savedSemesters = useQuery({ queryKey: qk.semesters, queryFn: () => api.landing.semesters() });
+  /* Sin la lista guardada no se puede gestionar: el borrador saldría sin los
+     cuatrimestres vacíos y guardarlo los borraría del servidor (B3). Vale para
+     los tres finales de la consulta, no solo para «pendiente»: un error o un
+     `undefined` (una respuesta que nunca llegó) son igual de peligrosos. */
+  const semestersReady = !savedSemesters.isError && savedSemesters.data !== undefined;
 
   /* Un solo estado para el modo gestión: null = no se está gestionando. */
   const [draft, setDraft] = useState<DraftGroup[] | null>(null);
@@ -146,7 +194,14 @@ export function LandingPage() {
   const [addTarget, setAddTarget] = useState<string | undefined>(undefined);
   const [semesterDialog, setSemesterDialog] = useState<SemesterDialog | null>(null);
   const [removing, setRemoving] = useState<SubjectCardData | null>(null);
+  /** Confirmación de salida con cambios sin guardar (N0-38 · U4). */
+  const [confirmExit, setConfirmExit] = useState(false);
+  /** Lo que rechazó el último `PUT`; se muestra en la barra y NO tira el borrador. */
+  const [saveError, setSaveError] = useState<string | null>(null);
+  /** Cuatrimestre al que hay que llevar el foco después del próximo pintado (U10). */
+  const [focusSemester, setFocusSemester] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const semesterFieldRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.title = "Materias · Sinapsis";
@@ -208,12 +263,13 @@ export function LandingPage() {
     });
   }, []);
 
-  /* --- buscador ⌘K --- */
+  /* --- buscador ⌘K ---
+     Abrir el buscador NO cierra la gestión ni descarta el borrador (N0-38 · U4):
+     era el bloqueante de la auditoría, un atajo de lectura borraba trabajo. */
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
-        setDraft(null);
         setSearchOpen(true);
         searchRef.current?.focus();
         searchRef.current?.select();
@@ -228,16 +284,53 @@ export function LandingPage() {
   }, [searchOpen]);
 
   /* --- modo gestión --- */
+  /** El borrador tal como lo dejó el servidor: punto de partida y de comparación. */
+  const serverDraft = useMemo<DraftGroup[]>(
+    () => serverGroups.map((g) => ({ semester: g.semester, slugs: g.cards.map((c) => c.slug) })),
+    [serverGroups],
+  );
+  /** Hay trabajo sin guardar: lo que decide si salir pregunta o no (U4). */
+  const dirty = draft !== null && !sameDraft(draft, serverDraft);
+
   const startManage = useCallback(() => {
     setQuery("");
     setSearchOpen(false);
-    setDraft(serverGroups.map((g) => ({ semester: g.semester, slugs: g.cards.map((c) => c.slug) })));
-  }, [serverGroups]);
+    setSaveError(null);
+    setDraft(serverDraft);
+  }, [serverDraft]);
 
-  const cancelManage = useCallback(() => {
+  /** Sale de la gestión y tira el borrador, sin preguntar. */
+  const discardDraft = useCallback(() => {
     setDraft(null);
     setActiveId(null);
+    setConfirmExit(false);
+    setSaveError(null);
   }, []);
+
+  /**
+   * Salida pedida por el usuario («Gestionar» apagado o «Cancelar»): con cambios
+   * sin guardar pregunta antes, como ya hacía «Quitar materia» (N0-38 · U4).
+   */
+  const cancelManage = useCallback(() => {
+    if (dirty) {
+      setConfirmExit(true);
+      return;
+    }
+    discardDraft();
+  }, [dirty, discardDraft]);
+
+  /* Foco después de agregar o quitar un cuatrimestre (U10): la sección aparece o
+     desaparece bajo el puntero y el teclado se quedaba sin punto de apoyo. */
+  useEffect(() => {
+    if (!focusSemester) return;
+    for (const node of document.querySelectorAll<HTMLElement>("[data-semester-toggle]")) {
+      if (node.dataset.semesterToggle === focusSemester) {
+        node.focus();
+        break;
+      }
+    }
+    setFocusSemester(null);
+  }, [focusSemester, groups]);
 
   const saveLayout = useMutation({
     mutationFn: (input: LandingLayoutInput) => api.landing.saveLayout(input),
@@ -247,19 +340,22 @@ export function LandingPage() {
          haría desaparecer por un instante el cuatrimestre recién agregado. */
       if (input.semesters) qc.setQueryData(qk.semesters, input.semesters);
       setDraft(null);
+      setSaveError(null);
       /* La respuesta trae las materias, no los cuatrimestres: la lista (con los
          vacíos y su orden) se vuelve a pedir. */
       await Promise.all([
         qc.invalidateQueries({ queryKey: qk.semesters }),
         qc.invalidateQueries({ queryKey: qk.landing }),
       ]);
-      toast("Landing guardada.", "good");
+      toast("Se guardaron sus materias.", "good");
     },
-    onError: () => {
-      toast("No se pudo guardar el orden. Se recargó la landing.", "bad");
-      void qc.invalidateQueries({ queryKey: qk.landing });
-      void qc.invalidateQueries({ queryKey: qk.semesters });
-      cancelManage();
+    /* El borrador es trabajo del usuario: un rechazo del servidor (400 por un
+       rótulo que el contrato no acepta, por ejemplo) se MUESTRA y se deja
+       corregir; salir de gestión y recargar lo tiraba entero (B9). */
+    onError: (e: Error) => {
+      const message = e.message || "No se pudo guardar el orden.";
+      setSaveError(message);
+      toast(message, "bad");
     },
   });
 
@@ -282,7 +378,7 @@ export function LandingPage() {
         qc.invalidateQueries({ queryKey: qk.landing }),
         qc.invalidateQueries({ queryKey: qk.semesters }),
       ]);
-      toast(`«${card.name}» se agregó a su landing.`, "good");
+      toast(`«${card.name}» se agregó a sus materias.`, "good");
     },
   });
 
@@ -292,7 +388,7 @@ export function LandingPage() {
       setDraft((prev) => prev && prev.map((g) => ({ ...g, slugs: g.slugs.filter((s) => s !== slug) })));
       setRemoving(null);
       await qc.invalidateQueries({ queryKey: qk.landing });
-      toast("La materia se quitó de su landing. El progreso se conserva.", "good");
+      toast("Se quitó la materia. El progreso se conserva.", "good");
     },
     onError: (e: Error) => {
       setRemoving(null);
@@ -303,8 +399,14 @@ export function LandingPage() {
   function handleSave() {
     const groupsToSave = draft ?? [];
     const items = groupsToSave.flatMap((g) => g.slugs.map((slug, position) => ({ slug, semester: g.semester, position })));
-    /* `semesters` va SIEMPRE: es lo que persiste los vacíos y su orden (N0-32). */
-    saveLayout.mutate({ items, semesters: groupsToSave.map((g) => g.semester) });
+    setSaveError(null);
+    /* `semesters` persiste los vacíos y su orden (N0-32), pero SOLO se manda si
+       la lista guardada llegó: `semesters` reemplaza la lista entera en el
+       servidor, así que mandarla armada sobre una respuesta que nunca llegó
+       borraría los cuatrimestres vacíos del usuario (B3). */
+    saveLayout.mutate(
+      semestersReady ? { items, semesters: groupsToSave.map((g) => g.semester) } : { items },
+    );
   }
 
   function moveToSemester(card: SubjectCardData, semester: string) {
@@ -320,22 +422,35 @@ export function LandingPage() {
   }
 
   function addSemester() {
-    const label = (semesterDialog?.draft ?? "").trim();
-    if (!label) {
-      setSemesterDialog((prev) => prev && { ...prev, error: "Escriba un rótulo." });
+    const typed = (semesterDialog?.draft ?? "").trim();
+    const issue = semesterIssue(typed);
+    if (issue) {
+      setSemesterDialog((prev) => prev && { ...prev, error: issue });
       return;
     }
-    if ((draft ?? []).some((g) => g.semester === label)) {
-      setSemesterDialog((prev) => prev && { ...prev, error: "Ese cuatrimestre ya existe." });
+    /* «2026-1c» y «2026-1C» son el mismo cuatrimestre (B10): se compara y se
+       guarda la forma canónica, no lo que se tecleó. */
+    const label = canonicalSemester(typed);
+    if ((draft ?? []).some((g) => canonicalSemester(g.semester) === label)) {
+      setSemesterDialog((prev) => prev && { ...prev, error: `«${label}» ya está en la lista.` });
       return;
     }
     setDraft((prev) => insertSemester(prev ?? [], label));
     setSemesterDialog(null);
+    setFocusSemester(label);
   }
 
   /** Solo se ofrece con el cuatrimestre vacío; se hace firme al guardar. */
   function removeSemester(semester: string) {
-    setDraft((prev) => prev && prev.filter((g) => g.semester !== semester || g.slugs.length > 0));
+    const list = draft ?? [];
+    const at = list.findIndex((g) => g.semester === semester);
+    if (at === -1 || (list[at]?.slugs.length ?? 0) > 0) return;
+    /* El foco no puede caer al <body>: pasa al encabezado vecino, el de arriba
+       si lo hay y el de abajo si se quitó el primero (U10). */
+    const neighbour = list[at - 1]?.semester ?? list[at + 1]?.semester ?? null;
+    setDraft(list.filter((_, i) => i !== at));
+    setFocusSemester(neighbour);
+    toast("Se quitó el cuatrimestre; use Cancelar para deshacer.");
   }
 
   /* --- arrastrar y soltar --- */
@@ -449,9 +564,10 @@ export function LandingPage() {
   const sections = (
     <SortableContext items={visibleGroups.map((g) => groupId(g.semester))} strategy={verticalListSortingStrategy}>
       {visibleGroups.map((group, index) => {
-        /* La fantasma acompaña al primer cuatrimestre y a los vacíos; en gestión
-           el hueco vacío ya dice «suelte una materia aquí» y no hace falta. */
-        const ghost = !q && (group.cards.length === 0 ? !manage : index === 0);
+        /* La fantasma acompaña al primer cuatrimestre y a los vacíos, también en
+           gestión (U27): el hueco de arrastre solo ofrece mover una materia que
+           ya existe, y un cuatrimestre recién agregado se llena creando una. */
+        const ghost = !q && (group.cards.length === 0 || index === 0);
         return (
           <SemesterSection
             key={group.semester}
@@ -496,8 +612,15 @@ export function LandingPage() {
         <div className={css.manageBar}>
           <span className={css.dot} aria-hidden="true" />
           <span className={css.manageText}>
-            EDITANDO · ARRASTRE LAS MATERIAS Y LOS CUATRIMESTRES DESDE SU ASA ⋮⋮
+            EDITANDO · ARRASTRE DESDE EL ASA ⋮⋮, O CON TAB Y LAS FLECHAS
           </span>
+          {/* El rechazo del servidor se lee acá, al lado de «Guardar», y el
+              borrador sigue en pie para corregirlo (B9). */}
+          {saveError ? (
+            <span className={css.manageError} role="alert">
+              {saveError}
+            </span>
+          ) : null}
           <span className={css.manageSpacer} />
           <Button
             size="sm"
@@ -528,11 +651,11 @@ export function LandingPage() {
                   <UiIcon name="plus" size={15} />
                   Agregar materia
                 </Button>
-                {/* Gestionar con la landing a medio cargar armaría un borrador
-                    vacío y guardarlo borraría materias y cuatrimestres. */}
+                {/* Gestionar con la lista a medio cargar armaría un borrador
+                    vacío y guardarlo borraría materias y cuatrimestres (B3). */}
                 <Button
                   active={manage}
-                  disabled={landing.isPending || savedSemesters.isPending}
+                  disabled={landing.isPending || !semestersReady}
                   onClick={() => (manage ? cancelManage() : startManage())}
                 >
                   <UiIcon name="menu" size={15} />
@@ -546,8 +669,20 @@ export function LandingPage() {
 
           {landing.isError ? (
             <div className={css.retry}>
-              <span className={css.notice}>No se pudo cargar la landing</span>
+              <span className={css.notice}>No se pudieron cargar sus materias</span>
               <Button onClick={() => void landing.refetch()}>Reintentar</Button>
+            </div>
+          ) : null}
+
+          {/* La consulta de cuatrimestres fallaba en silencio: la lista se dibujaba
+              igual (con los que usa alguna materia) y «Gestionar» quedaba apagado
+              sin decir por qué (B3). */}
+          {savedSemesters.isError ? (
+            <div className={css.retry}>
+              <span className={css.notice}>
+                No se pudieron cargar sus cuatrimestres: no se puede gestionar hasta recuperarlos.
+              </span>
+              <Button onClick={() => void savedSemesters.refetch()}>Reintentar</Button>
             </div>
           ) : null}
 
@@ -622,8 +757,10 @@ export function LandingPage() {
       <Dialog
         open={semesterDialog !== null}
         onClose={() => setSemesterDialog(null)}
-        eyebrow="LANDING"
+        eyebrow="SUS MATERIAS"
         title="Agregar cuatrimestre"
+        /* Un diálogo de un solo campo tiene que abrir en el campo, no en la ✕. */
+        initialFocus={semesterFieldRef}
         footer={
           <>
             <Button onClick={() => setSemesterDialog(null)}>Cancelar</Button>
@@ -636,10 +773,14 @@ export function LandingPage() {
         <Field
           label="Rótulo"
           mono
+          autoFocus
+          ref={semesterFieldRef}
           value={semesterDialog?.draft ?? ""}
           error={semesterDialog?.error}
-          hint="Formato sugerido: AAAA-1C o AAAA-2C."
+          /* El `hint` viaja en el `aria-describedby` del campo (ver Field). */
+          hint={`Formato sugerido: AAAA-1C o AAAA-2C. Hasta ${SEMESTER_MAX} caracteres.`}
           placeholder="2026-1C"
+          maxLength={SEMESTER_MAX}
           onChange={(e) => setSemesterDialog({ draft: e.target.value })}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -650,10 +791,32 @@ export function LandingPage() {
         />
       </Dialog>
 
+      {/* Salir de la gestión con cambios sin guardar pregunta antes (N0-38 · U4):
+          el borrador es implícito y hasta acá se perdía sin aviso. */}
+      <Dialog
+        open={confirmExit}
+        onClose={() => setConfirmExit(false)}
+        eyebrow="SALIR DE LA GESTIÓN"
+        title="Hay cambios sin guardar"
+        footer={
+          <>
+            <Button onClick={() => setConfirmExit(false)}>Seguir editando</Button>
+            <Button variant="danger" onClick={discardDraft}>
+              Descartar los cambios
+            </Button>
+          </>
+        }
+      >
+        <p className={css.confirmText}>
+          Hay cambios sin guardar en el orden de sus materias y sus cuatrimestres. Si sale ahora se
+          descartan; lo que ya estaba guardado no se toca.
+        </p>
+      </Dialog>
+
       <Dialog
         open={removing !== null}
         onClose={() => setRemoving(null)}
-        eyebrow="QUITAR DE LA LANDING"
+        eyebrow="QUITAR DE SUS MATERIAS"
         title={removing?.name ?? ""}
         footer={
           <>
@@ -672,7 +835,7 @@ export function LandingPage() {
         }
       >
         <p className={css.confirmText}>
-          Se quita de su landing; su progreso se conserva. Puede volver a agregarla cuando quiera.
+          Se quita de sus materias; su progreso se conserva. Puede volver a agregarla cuando quiera.
         </p>
       </Dialog>
     </div>

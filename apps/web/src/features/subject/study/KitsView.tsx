@@ -13,9 +13,11 @@ import css from "./KitsView.module.css";
 
 export function KitsView() {
   const { slug, model } = useSubjectCtx();
-  const { content, model: study } = useStudy(slug, model.studied);
+  const { content, state, model: study } = useStudy(slug, model.studied);
 
   if (content.isError) return <ErrorCard error={content.error} subject={slug} />;
+  /* «Por repasar» y el progreso de lectura salen del estado del usuario (bug 12). */
+  if (state.isError) return <ErrorCard error={state.error} subject={slug} />;
   if (content.isPending) return <WideSkeleton />;
 
   const { kits } = study;
@@ -105,7 +107,10 @@ export function KitsView() {
               </ul>
 
               <div className={css.cardFoot}>
-                <Bar ratio={stat.readRatio} />
+                <Bar
+                  ratio={stat.readRatio}
+                  label={`${kit.title}: ${stat.read} de ${kit.pages.length} páginas leídas`}
+                />
                 <span className={css.readLabel}>
                   {stat.read}/{kit.pages.length} leídas
                 </span>

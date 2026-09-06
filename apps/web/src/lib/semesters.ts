@@ -5,9 +5,15 @@
  * El usuario puede escribir cualquier cosa: lo que no se puede analizar se
  * conserva tal cual y se ordena al final.
  */
-import { compareSemestersDesc, parseSemester, type SemesterParts, type SubjectCard } from "@sinapsis/contract";
+import {
+  canonicalSemester,
+  compareSemestersDesc,
+  parseSemester,
+  type SemesterParts,
+  type SubjectCard,
+} from "@sinapsis/contract";
 
-export { compareSemestersDesc, parseSemester };
+export { canonicalSemester, compareSemestersDesc, parseSemester };
 export type { SemesterParts };
 
 /** Rótulo largo de la cabecera: "Cuatrimestre 1 · 2026". */
@@ -50,10 +56,24 @@ export const semesterOf = (card: Pick<SubjectCard, "semester">): string => card.
  * el orden por rótulo de antes.
  */
 export function unionSemesters(saved: readonly string[], cards: readonly SubjectCard[]): string[] {
+  /* La identidad de un cuatrimestre es su FORMA CANÓNICA (B10): "2026-1c",
+     " 2026-1C " y "2026-1C" son el mismo cuatrimestre, y si se comparan crudos
+     la lista termina con secciones gemelas que se pisan al guardar. Lo que se
+     muestra y lo que se guarda es siempre la forma canónica. */
+  const seen = new Set<string>();
   const out: string[] = [];
-  for (const s of saved) if (s && !out.includes(s)) out.push(s);
-  const extra = [...new Set(cards.map(semesterOf))].filter((s) => !out.includes(s)).sort(compareSemestersDesc);
-  return [...out, ...extra];
+  const push = (raw: string) => {
+    const label = canonicalSemester(raw);
+    if (!label || seen.has(label)) return;
+    seen.add(label);
+    out.push(label);
+  };
+  for (const s of saved) push(s);
+  const extra = [...new Set(cards.map((c) => canonicalSemester(semesterOf(c))))]
+    .filter((s) => s && !seen.has(s))
+    .sort(compareSemestersDesc);
+  for (const s of extra) push(s);
+  return out;
 }
 
 /**
@@ -61,13 +81,15 @@ export function unionSemesters(saved: readonly string[], cards: readonly Subject
  * los vacíos. Cada grupo se ordena por `position` (empate: por nombre).
  */
 export function groupBySemesters(semesters: readonly string[], cards: readonly SubjectCard[]): SemesterGroup[] {
-  const buckets = new Map<string, SubjectCard[]>(semesters.map((s) => [s, []]));
-  for (const card of cards) buckets.get(semesterOf(card))?.push(card);
+  /* El reparto también va por forma canónica (B10): una materia guardada como
+     "2026-1c" cae en la sección "2026-1C" en vez de desaparecer de la vista. */
+  const buckets = new Map<string, SubjectCard[]>(semesters.map((s) => [canonicalSemester(s), []]));
+  for (const card of cards) buckets.get(canonicalSemester(semesterOf(card)))?.push(card);
   return semesters.map((semester) => ({
     semester,
     label: semesterLabel(semester),
     chip: semesterChip(semester),
-    cards: [...(buckets.get(semester) ?? [])].sort(
+    cards: [...(buckets.get(canonicalSemester(semester)) ?? [])].sort(
       (a, b) => a.position - b.position || a.name.localeCompare(b.name, "es"),
     ),
   }));

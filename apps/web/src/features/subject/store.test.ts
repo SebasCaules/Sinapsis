@@ -5,7 +5,14 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import { LS_KEYS, routes } from "@sinapsis/contract";
-import { MAX_TABS, resetTabsForTests, useSubjectTabsStore, type TabInfo } from "./store";
+import {
+  MAX_TABS,
+  resetTabsForTests,
+  tabHref,
+  useSubjectTabsStore,
+  type SubjectTab,
+  type TabInfo,
+} from "./store";
 
 const SLUG = "proba";
 const home = routes.subject(SLUG);
@@ -137,6 +144,58 @@ describe("navegación (syncActive)", () => {
     store().setScroll(SLUG, only, 300);
     store().syncActive(SLUG, info(page("p-a")));
     expect(tabs().list[0]?.scrollY).toBe(0);
+  });
+});
+
+describe("el ancla viaja aparte del pathname (bug 4)", () => {
+  const conAncla = `${page("p-a")}#estandarizacion`;
+
+  it("⌘-clic sobre un enlace con ancla guarda el ancla fuera de `path`", () => {
+    store().openTab(SLUG, { path: page("p-a"), hash: "#estandarizacion", title: "Página A", chip: null, color: null });
+    const abierta = tabs().list[1];
+    expect(abierta?.path).toBe(page("p-a"));
+    expect(abierta?.hash).toBe("#estandarizacion");
+    expect(tabHref(abierta as SubjectTab)).toBe(conAncla);
+  });
+
+  it("una dirección con ancla en `path` se normaliza igual", () => {
+    store().openTab(SLUG, info(conAncla, "Página A"));
+    expect(tabs().list[1]?.path).toBe(page("p-a"));
+    expect(tabs().list[1]?.hash).toBe("#estandarizacion");
+  });
+
+  it("navegar a la MISMA página sin ancla no abre ni salta de pestaña", () => {
+    const conHash = store().openTab(SLUG, { path: page("p-a"), hash: "#uno", title: "A", chip: null, color: null }, true);
+    /* Lo que hace el shell al llegar: pasa `location.pathname`, sin ancla. */
+    store().syncActive(SLUG, { path: page("p-a"), hash: "", title: "A", chip: null, color: null });
+    expect(tabs().active).toBe(conHash);
+    expect(tabs().list).toHaveLength(2);
+    expect(paths()).toEqual([home, page("p-a")]);
+  });
+
+  it("el destino ya abierto se reconoce aunque la pestaña tenga ancla", () => {
+    const other = store().openTab(SLUG, { path: page("p-a"), hash: "#dos", title: "A", chip: null, color: null });
+    store().syncActive(SLUG, info(page("p-a")));
+    expect(tabs().active).toBe(other);
+    expect(tabs().list).toHaveLength(2);
+  });
+
+  it("cerrar devuelve la dirección con su ancla", () => {
+    const a = store().openTab(SLUG, { path: page("p-a"), hash: "#tres", title: "A", chip: null, color: null });
+    const b = store().openTab(SLUG, info(page("p-b")));
+    store().activateTab(SLUG, b);
+    expect(store().closeTab(SLUG, b)).toBe(`${page("p-a")}#tres`);
+    expect(tabs().active).toBe(a);
+  });
+
+  it("lo persistido por una versión anterior (ancla dentro de `path`) se sanea al releerlo", () => {
+    localStorage.setItem(
+      LS_KEYS.tabs(SLUG),
+      JSON.stringify({ list: [{ id: "viejo", path: conAncla, title: "A", chip: null, color: null, scrollY: 0 }], active: "viejo" }),
+    );
+    resetTabsForTests();
+    expect(tabs().list[0]?.path).toBe(page("p-a"));
+    expect(tabs().list[0]?.hash).toBe("#estandarizacion");
   });
 });
 

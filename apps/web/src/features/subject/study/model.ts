@@ -217,6 +217,81 @@ export function plainText(md: string): string {
     .trim();
 }
 
+/**
+ * Comandos de LaTeX frecuentes en el material de una materia → cómo se leen.
+ *
+ * El orden importa: lo más largo primero (`\leq` antes que `\le`), y el
+ * `(?![a-zA-Z])` evita que `\le` se coma el principio de `\left`. Lo que no esté
+ * en la tabla se descarta al final: es preferible una lectura incompleta a que
+ * un lector de pantalla deletree «barra invertida ce ele ede o te».
+ */
+const MATH_WORDS: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\\alpha(?![a-zA-Z])/g, "alfa"],
+  [/\\beta(?![a-zA-Z])/g, "beta"],
+  [/\\gamma(?![a-zA-Z])/g, "gamma"],
+  [/\\delta(?![a-zA-Z])/g, "delta"],
+  [/\\epsilon(?![a-zA-Z])/g, "épsilon"],
+  [/\\theta(?![a-zA-Z])/g, "theta"],
+  [/\\lambda(?![a-zA-Z])/g, "lambda"],
+  [/\\mu(?![a-zA-Z])/g, "mu"],
+  [/\\pi(?![a-zA-Z])/g, "pi"],
+  [/\\rho(?![a-zA-Z])/g, "rho"],
+  [/\\sigma(?![a-zA-Z])/g, "sigma"],
+  [/\\tau(?![a-zA-Z])/g, "tau"],
+  [/\\phi(?![a-zA-Z])/g, "fi"],
+  [/\\omega(?![a-zA-Z])/g, "omega"],
+  [/\\Sigma(?![a-zA-Z])/g, "sigma mayúscula"],
+  [/\\Omega(?![a-zA-Z])/g, "omega mayúscula"],
+  [/\\leq?(?![a-zA-Z])/g, "menor o igual que"],
+  [/\\geq?(?![a-zA-Z])/g, "mayor o igual que"],
+  [/\\neq(?![a-zA-Z])/g, "distinto de"],
+  [/\\approx(?![a-zA-Z])/g, "aproximadamente"],
+  [/\\sim(?![a-zA-Z])/g, "se distribuye como"],
+  [/\\pm(?![a-zA-Z])/g, "más o menos"],
+  [/\\cdot(?![a-zA-Z])/g, "por"],
+  [/\\times(?![a-zA-Z])/g, "por"],
+  [/\\div(?![a-zA-Z])/g, "dividido"],
+  [/\\infty(?![a-zA-Z])/g, "infinito"],
+  [/\\sum(?![a-zA-Z])/g, "sumatoria de"],
+  [/\\prod(?![a-zA-Z])/g, "productoria de"],
+  [/\\int(?![a-zA-Z])/g, "integral de"],
+  [/\\sqrt(?![a-zA-Z])/g, "raíz de"],
+  [/\\frac(?![a-zA-Z])/g, "fracción"],
+  [/\\binom(?![a-zA-Z])/g, "combinatorio"],
+  [/\\bar(?![a-zA-Z])/g, "media de"],
+  [/\\hat(?![a-zA-Z])/g, "estimador de"],
+  [/\\in(?![a-zA-Z])/g, "pertenece a"],
+  [/\\subset(?![a-zA-Z])/g, "incluido en"],
+  [/\\cup(?![a-zA-Z])/g, "unión"],
+  [/\\cap(?![a-zA-Z])/g, "intersección"],
+  [/\\to(?![a-zA-Z])/g, "tiende a"],
+  [/\\Rightarrow(?![a-zA-Z])/g, "implica"],
+  [/\\forall(?![a-zA-Z])/g, "para todo"],
+  [/\\exists(?![a-zA-Z])/g, "existe"],
+  [/\\mid(?![a-zA-Z])/g, "dado"],
+];
+
+/**
+ * Texto con matemática `$…$` → algo que un lector de pantalla pueda decir.
+ *
+ * Es el respaldo de `QuizOption.alt` del contrato: cuando la materia no escribió
+ * el texto alternativo, esto al menos convierte los comandos más comunes en
+ * palabras. `$\alpha \le 0,05$` deja de leerse «dólar barra alfa barra le cero
+ * coma cero cinco dólar» y pasa a ser «alfa menor o igual que 0,05».
+ */
+export function spokenMath(text: string): string {
+  let out = (text ?? "").replace(/\$/g, " ");
+  for (const [re, word] of MATH_WORDS) out = out.replace(re, ` ${word} `);
+  return out
+    .replace(/\\(left|right|,|;|:|!|quad|qquad)/g, " ")
+    .replace(/\\[a-zA-Z]+/g, " ")
+    .replace(/[{}]/g, " ")
+    .replace(/\^/g, " elevado a ")
+    .replace(/_/g, " sub ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Días enteros entre hoy y una fecha `AAAA-MM-DD` (negativo si ya pasó). */
 export function daysUntil(date: string, now: Date): number | null {
   const target = Date.parse(`${date}T00:00:00`);

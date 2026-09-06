@@ -1,7 +1,7 @@
 /**
  * Estados compartidos de las vistas de materia: cargas discretas (esqueletos que
- * ocupan el sitio del contenido real), errores con el mensaje del API y las
- * vistas «Próximamente» de lo que llega en los sprints 2 y 3.
+ * ocupan el sitio del contenido real), errores con el mensaje del API y la
+ * vista «Próximamente» de lo que todavía no existe.
  */
 import { Link } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
@@ -78,15 +78,20 @@ export function ErrorCard({ error, notFound, subject }: ErrorCardProps) {
   );
 }
 
-export function ComingSoon({ title, sprint = "Sprint 2" }: { title: string; sprint?: string }) {
+/**
+ * «Próximamente». El texto no nombra sprints ni «rail»: son palabras del equipo,
+ * no del estudiante (U32). `sprint` se conserva por compatibilidad de firma y ya
+ * no se muestra.
+ */
+export function ComingSoon({ title }: { title: string }) {
   return (
     <div className={css.center}>
       <div className={css.panel}>
         <span className={css.eyebrow}>PRÓXIMAMENTE</span>
         <h1 className={css.title}>{title}</h1>
         <p className={css.text}>
-          Esta herramienta llega en el {sprint}. El sitio ya está reservado en el rail de la materia: cuando exista,
-          se abre acá mismo sin mover nada.
+          Esta herramienta llega en la próxima entrega. El sitio ya está reservado en la barra lateral de la materia:
+          cuando exista, se abre aquí mismo sin mover nada.
         </p>
       </div>
     </div>

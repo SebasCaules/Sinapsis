@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useId, type CSSProperties, type ReactNode } from "react";
 import { SortableContext, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { plural, type SubjectCard as SubjectCardData } from "@sinapsis/contract";
@@ -52,6 +52,12 @@ export function SemesterSection({
   const style: CSSProperties = manage
     ? { transform: CSS.Transform.toString(transform), transition }
     : {};
+  /* El plegable necesita nombrar lo que pliega y apuntar a la grilla que abre
+     y cierra (U41): el rótulo solo no dice cuántas materias esconde. */
+  const gridId = useId();
+  const count = `${n} ${plural(n, "materia", "materias")}`;
+  const empty = n === 0;
+  const REMOVE_BLOCKED = "Mueva o quite sus materias primero";
 
   return (
     <section
@@ -75,51 +81,79 @@ export function SemesterSection({
           </button>
         ) : null}
         <span className={css.bar} aria-hidden="true" />
-        <button type="button" className={css.toggle} onClick={onToggle} aria-expanded={!collapsed}>
+        <button
+          type="button"
+          className={css.toggle}
+          onClick={onToggle}
+          aria-expanded={!collapsed}
+          aria-controls={gridId}
+          aria-label={`${group.label}, ${count}`}
+          data-semester-toggle={group.semester}
+        >
           <span className={css.chip}>{group.chip}</span>
           <span className={css.title}>{group.label}</span>
           <span className={css.spacer} />
-          <span className={css.count}>{`${n} ${plural(n, "materia", "materias")}`}</span>
+          <span className={css.count}>{count}</span>
           <UiIcon name="chevronDown" size={16} className={css.chev} data-collapsed={collapsed} />
         </button>
-        {/* Solo se puede quitar un cuatrimestre vacío: nunca se pierde una materia por descuido. */}
-        {manage && n === 0 && onRemoveSemester ? (
-          <button
-            type="button"
-            className={css.removeSemester}
-            onClick={() => onRemoveSemester(group.semester)}
-          >
-            Quitar cuatrimestre
-          </button>
+        {/* Solo se puede quitar un cuatrimestre vacío: nunca se pierde una materia
+            por descuido. Con materias el botón NO desaparece (U10): se muestra
+            apagado y dice por qué, que es lo que el usuario vino a averiguar.
+            El motivo va en el `title` del ENVOLTORIO (un <button disabled> no
+            recibe eventos de puntero y el navegador no le dibujaría el globo) y
+            en un `aria-describedby`: puesto en el propio botón, el `title` le
+            reemplazaba el nombre accesible y el rótulo visible dejaba de estar
+            en él (WCAG 2.5.3). */}
+        {manage && onRemoveSemester ? (
+          <span className={css.removeSlot} title={empty ? undefined : REMOVE_BLOCKED}>
+            <button
+              type="button"
+              className={css.removeSemester}
+              disabled={!empty}
+              aria-describedby={empty ? undefined : `${gridId}-block`}
+              onClick={() => onRemoveSemester(group.semester)}
+            >
+              Quitar cuatrimestre
+            </button>
+            {empty ? null : (
+              <span className={css.srOnly} id={`${gridId}-block`}>
+                {REMOVE_BLOCKED}
+              </span>
+            )}
+          </span>
         ) : null}
       </div>
 
-      {collapsed ? null : (
-        <div className={css.grid} data-over={manage && isOver ? "true" : undefined}>
-          <SortableContext items={group.cards.map((c) => c.slug)} strategy={rectSortingStrategy}>
-            {group.cards.map((card) =>
-              manage ? (
-                <SortableSubjectCard
-                  key={card.slug}
-                  card={card}
-                  manage
-                  semesters={semesters}
-                  onRemove={onRemove}
-                  onMove={onMove}
-                />
-              ) : (
-                <SubjectCard key={card.slug} card={card} />
-              ),
-            )}
-          </SortableContext>
-          {n === 0 && manage ? (
-            <div className={css.empty} data-over={isOver ? "true" : undefined}>
-              SUELTE UNA MATERIA AQUÍ
-            </div>
-          ) : null}
-          {children}
-        </div>
-      )}
+      {/* La grilla se oculta con `hidden`, no se desmonta: el `aria-controls` del
+          plegable tiene que apuntar a un elemento que exista siempre. */}
+      <div id={gridId} className={css.grid} hidden={collapsed} data-over={manage && isOver ? "true" : undefined}>
+        {collapsed ? null : (
+          <>
+            <SortableContext items={group.cards.map((c) => c.slug)} strategy={rectSortingStrategy}>
+              {group.cards.map((card) =>
+                manage ? (
+                  <SortableSubjectCard
+                    key={card.slug}
+                    card={card}
+                    manage
+                    semesters={semesters}
+                    onRemove={onRemove}
+                    onMove={onMove}
+                  />
+                ) : (
+                  <SubjectCard key={card.slug} card={card} />
+                ),
+              )}
+            </SortableContext>
+            {empty && manage ? (
+              <div className={css.empty} data-over={isOver ? "true" : undefined}>
+                Suelte o mueva una materia aquí
+              </div>
+            ) : null}
+            {children}
+          </>
+        )}
+      </div>
     </section>
   );
 }

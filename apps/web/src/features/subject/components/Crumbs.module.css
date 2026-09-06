@@ -31,7 +31,11 @@
 .step { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .sep { color: var(--border-2); }
 
+/* El relleno vertical agranda el objetivo del enlace a 24 px sin tocar el alto
+   de la línea de migas: en un elemento en línea el relleno no cambia el alto de
+   la caja de línea, pero sí el área que responde al puntero (U42). */
 .link {
+  padding: 5px 2px;
   color: var(--text-3);
   text-decoration: none;
   overflow: hidden;

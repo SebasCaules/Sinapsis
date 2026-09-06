@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 import css from "./Field.module.css";
 
 const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(" ");
@@ -29,17 +29,24 @@ function FieldShell({ id, label, error, hint, children }: FieldShellProps) {
           {error}
         </span>
       ) : hint ? (
-        <span className={css.hint}>{hint}</span>
+        <span className={css.hint} id={`${id}-hint`}>
+          {hint}
+        </span>
       ) : null}
     </div>
   );
 }
 
-/** Atributos que enlazan el control con su rótulo y con su mensaje de error. */
-const bind = (id: string, error?: string) => ({
+/**
+ * Atributos que enlazan el control con su rótulo y con su línea de apoyo. Abajo
+ * hay UNA sola línea (el error tapa la ayuda mientras existe), así que
+ * `aria-describedby` apunta a la que esté puesta: sin esto, un lector de
+ * pantalla leía el campo sin el formato que se le pide (U40).
+ */
+const bind = (id: string, error?: string, hint?: ReactNode) => ({
   id,
   "aria-invalid": error ? true : undefined,
-  "aria-describedby": error ? `${id}-err` : undefined,
+  "aria-describedby": error ? `${id}-err` : hint ? `${id}-hint` : undefined,
 });
 
 export interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -50,15 +57,27 @@ export interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
   hint?: ReactNode;
 }
 
-export function Field({ label, mono, error, hint, className, id, ...rest }: FieldProps) {
+/**
+ * Reenvía la `ref` al <input>: quien abre un diálogo necesita poder apuntar el
+ * foco inicial a SU campo (`Dialog.initialFocus`), no al primer enfocable.
+ */
+export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
+  { label, mono, error, hint, className, id, ...rest },
+  ref,
+) {
   const auto = useId();
   const fieldId = id ?? auto;
   return (
     <FieldShell id={fieldId} label={label} error={error} hint={hint}>
-      <input className={cx(css.control, mono && css.mono, className)} {...bind(fieldId, error)} {...rest} />
+      <input
+        ref={ref}
+        className={cx(css.control, mono && css.mono, className)}
+        {...bind(fieldId, error, hint)}
+        {...rest}
+      />
     </FieldShell>
   );
-}
+});
 
 export interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
@@ -73,7 +92,7 @@ export function SelectField({ label, options, error, hint, mono, className, id, 
   const fieldId = id ?? auto;
   return (
     <FieldShell id={fieldId} label={label} error={error} hint={hint}>
-      <select className={cx(css.control, css.select, mono && css.mono, className)} {...bind(fieldId, error)} {...rest}>
+      <select className={cx(css.control, css.select, mono && css.mono, className)} {...bind(fieldId, error, hint)} {...rest}>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
