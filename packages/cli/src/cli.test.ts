@@ -8,7 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { SubjectConfig, SyncPayload } from "@sinapsis/contract";
+import { SubjectConfig, SyncPayload, ToolPush } from "@sinapsis/contract";
 import { compileStudy, studyCounts } from "@sinapsis/markdown";
 import { cleanArgv, extractCwd, main } from "./cli.js";
 import { extraChecks } from "./commands/validate.js";
@@ -181,8 +181,8 @@ describe("sinapsis validate", () => {
     const ctx = testCtx(REPO_ROOT);
     expect(await main(["validate", "--config", "examples/proba/sinapsis.config.json"], ctx)).toBe(0);
     expect(ctx.stdout.join("\n")).toContain("Config válido");
-    // El rail de Proba usa herramientas: se avisa que son del Sprint 3.
-    expect(ctx.stdout.join("\n")).toContain("Próximamente");
+    // El material de estudio de Proba trae dos modalidades de plan (S-11).
+    expect(ctx.stdout.join("\n")).toContain("Modalidades: Cursada + final (5 fases) · Final directo (1 fase)");
   });
 
   it("sale 1 con un config roto e indica el campo", async () => {
@@ -352,8 +352,12 @@ describe("sinapsis sync --dry-run", () => {
       phases: 6,
       milestones: 30,
       tasks: 89,
+      tracks: 2,
       kits: 8,
     });
+    // Las dos modalidades del plan (S-11): `phases` repite la de la cursada.
+    expect(study!.plan!.tracks.map((t) => `${t.id}:${t.phases.length}`)).toEqual(["cursada:5", "final-directo:1"]);
+    expect(study!.plan!.phases.map((p) => p.id)).toEqual(study!.plan!.tracks[0]!.phases.map((p) => p.id));
     expect(study!.decks.map((d) => d.id)).toContain("distribuciones");
     expect(study!.kits.map((k) => k.id)).toContain("parcialito-1");
     expect(ctx.stdout.join("\n")).toContain(
@@ -503,4 +507,396 @@ describe("binario compilado", () => {
     const { stdout } = await run(process.execPath, [bin, "--version"]);
     expect(stdout.trim()).toMatch(/^\d+\.\d+\.\d+$/);
   });
+});
+
+// ---------------------------------------------------------------------------
+// Sprint 3 — bundles de herramientas
+// ---------------------------------------------------------------------------
+
+/** Config mínimo de una materia de prueba, con un ítem de rail `kind: "tool"`. */
+const DEMO_CONFIG = {
+  slug: "demo",
+  name: "Demo",
+  code: "0",
+  institution: "ITBA",
+  division: { singular: "Unidad", abbr: "U", plural: "Unidades" },
+  divisions: [{ key: "1", name: "Una" }],
+  pageTypes: [{ key: "concepto", label: "Concepto", plural: "Conceptos", folder: "conceptos" }],
+  rail: [
+    {
+      id: "resolver",
+      label: "Resolver",
+      items: [{ id: "demo", label: "Demo", icon: "flask", kind: "tool", target: "demo" }],
+    },
+  ],
+  wiki: { root: "wiki", divisionField: "unidad", study: "estudio" },
+};
+
+const DEMO_MANIFEST = {
+  id: "demo",
+  title: "Demostración",
+  version: "0.1.0",
+  scripts: ["demo.js"],
+  styles: ["demo.css"],
+  views: [{ id: "demo", label: "Vista de ejemplo", icon: "flask" }],
+  figures: true,
+  data: ["data/demo.json"],
+};
+
+const DEMO_SCRIPT = [
+  "(function () {",
+  '  "use strict";',
+  "  var App = window.App;",
+  '  App.registerView("demo", function (main) {',
+  '    main.innerHTML = "<h1>Demo</h1>";',
+  "    App.mountFigures(main);",
+  "  });",
+  '  App.registerFigure("demo-fig", function (host, ctx) {',
+  '    host.innerHTML = "<svg viewBox=\\"0 0 10 10\\"></svg>" + ctx.cssVar("--primary");',
+  '  }, { caption: "Una figura" });',
+  "})();",
+  "",
+].join("\n");
+
+/** Materia de prueba con un bundle en `tools/demo/`. */
+async function makeSubject(base: string, manifest: Record<string, unknown> = DEMO_MANIFEST): Promise<string> {
+  const dir = path.join(base, "materia");
+  const bundle = path.join(dir, "tools", "demo");
+  await mkdir(path.join(bundle, "data"), { recursive: true });
+  await writeFile(path.join(dir, "sinapsis.config.json"), JSON.stringify(DEMO_CONFIG), "utf8");
+  await writeFile(path.join(bundle, "sinapsis.tools.json"), JSON.stringify(manifest, null, 2), "utf8");
+  await writeFile(path.join(bundle, "demo.js"), DEMO_SCRIPT, "utf8");
+  await writeFile(path.join(bundle, "demo.css"), ".demo { padding: 8px; }\n", "utf8");
+  await writeFile(path.join(bundle, "data", "demo.json"), '{ "n": 1 }\n', "utf8");
+  return dir;
+}
+
+describe("sinapsis tools build", () => {
+  let base = "";
+
+  beforeEach(async () => {
+    base = await mkdtemp(path.join(tmpdir(), "sinapsis-tools-"));
+  });
+
+  afterEach(async () => {
+    await rm(base, { recursive: true, force: true });
+  });
+
+  it("valida, empaqueta y escribe dist/tool-push.json", async () => {
+    const dir = await makeSubject(base);
+    // Un binario y una fuente sueltos: viajan aunque el manifiesto no los declare.
+    await writeFile(path.join(dir, "tools", "demo", "logo.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x01]));
+    // Código sin declarar y un archivo con extensión ajena: no viajan.
+    await writeFile(path.join(dir, "tools", "demo", "build.mjs"), "export const x = 1;\n", "utf8");
+    await writeFile(path.join(dir, "tools", "demo", "notas.yaml"), "a: 1\n", "utf8");
+
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(0);
+    expect(ctx.stderr.join("\n")).toBe("");
+
+    const stdout = ctx.stdout.join("\n");
+    expect(stdout).toContain("Demostración");
+    expect(stdout).toContain("Vista de ejemplo (demo)");
+    expect(stdout).toContain("figuras: sí");
+    expect(stdout).toContain("build.mjs");
+    expect(stdout).toContain("notas.yaml");
+    expect(stdout).toContain("1 bundle listo");
+
+    const pushFile = path.join(dir, "tools", "demo", "dist", "tool-push.json");
+    const push = ToolPush.parse(JSON.parse(await readFile(pushFile, "utf8")) as unknown);
+    expect(push.manifest.id).toBe("demo");
+    expect(push.files.map((f) => f.path).sort()).toEqual(["data/demo.json", "demo.css", "demo.js", "logo.png"]);
+    expect(push.files.find((f) => f.path === "logo.png")!.encoding).toBe("base64");
+    expect(push.files.find((f) => f.path === "demo.js")!.content).toContain("registerFigure");
+  });
+
+  it("sale 1 si un archivo declarado no existe", async () => {
+    const dir = await makeSubject(base, { ...DEMO_MANIFEST, scripts: ["demo.js", "falta.js"] });
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("falta.js");
+    expect(ctx.stderr.join("\n")).toContain("no existe");
+  });
+
+  it("sale 1 con una ruta que se escapa de la carpeta del bundle", async () => {
+    const dir = await makeSubject(base, { ...DEMO_MANIFEST, scripts: ["../../secreto.js"] });
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("«..»");
+  });
+
+  it("sale 1 con una extensión que el contrato no admite", async () => {
+    const dir = await makeSubject(base, { ...DEMO_MANIFEST, scripts: ["demo.js"], data: ["data/demo.yaml"] });
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("extensión no admitida");
+  });
+
+  it("sale 1 si un script no parsea, y nombra el archivo y la línea", async () => {
+    const dir = await makeSubject(base);
+    await writeFile(path.join(dir, "tools", "demo", "demo.js"), "(function () {\n  var x = ;\n})();\n", "utf8");
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(1);
+    const err = ctx.stderr.join("\n");
+    expect(err).toContain("demo.js");
+    expect(err).toContain("SyntaxError");
+    expect(err).toContain("demo.js:2");
+  });
+
+  it("un `package.json` con type module en la materia no invalida los IIFE clásicos", async () => {
+    const dir = await makeSubject(base);
+    await writeFile(path.join(dir, "package.json"), '{ "name": "materia", "type": "module" }\n', "utf8");
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(0);
+  });
+
+  it("rechaza un bundle que supera el tope de 20 MB", async () => {
+    const dir = await makeSubject(base, { ...DEMO_MANIFEST, data: ["data/demo.json", "data/grande.json"] });
+    await writeFile(path.join(dir, "tools", "demo", "data", "grande.json"), "a".repeat(21 * 1024 * 1024), "utf8");
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build"], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("tope del contrato es 20.0 MB");
+  });
+
+  it("--minify deja los scripts en .dist/ y sube esa versión", async () => {
+    const dir = await makeSubject(base);
+    const ctx = testCtx(dir);
+    expect(await main(["tools", "build", "--minify"], ctx)).toBe(0);
+    expect(ctx.stdout.join("\n")).toContain("minificado:");
+
+    const minified = await readFile(path.join(dir, "tools", "demo", ".dist", "demo.js"), "utf8");
+    expect(minified.split("\n").length).toBeLessThan(DEMO_SCRIPT.split("\n").length);
+    const push = ToolPush.parse(
+      JSON.parse(await readFile(path.join(dir, "tools", "demo", "dist", "tool-push.json"), "utf8")) as unknown,
+    );
+    expect(push.files.find((f) => f.path === "demo.js")!.content).toBe(minified);
+  });
+
+  it("avisa en `validate` cuando ningún bundle registra la vista del rail", async () => {
+    const dir = await makeSubject(base, { ...DEMO_MANIFEST, views: [{ id: "otra", label: "Otra" }] });
+    const ctx = testCtx(dir);
+    expect(await main(["validate"], ctx)).toBe(0);
+    expect(ctx.stdout.join("\n")).toContain('ningún bundle de tools/ registra la vista "demo"');
+
+    // Con la vista declarada, el aviso desaparece.
+    const ok = testCtx(await makeSubject(await mkdtemp(path.join(tmpdir(), "sinapsis-tools-ok-"))));
+    expect(await main(["validate"], ok)).toBe(0);
+    expect(ok.stdout.join("\n")).not.toContain("ningún bundle");
+  });
+});
+
+describe("sinapsis tools push", () => {
+  let base = "";
+
+  beforeEach(async () => {
+    base = await mkdtemp(path.join(tmpdir(), "sinapsis-push-"));
+  });
+
+  afterEach(async () => {
+    await rm(base, { recursive: true, force: true });
+  });
+
+  it("sube el bundle con el token y muestra el ToolInfo que devuelve el API", async () => {
+    const dir = await makeSubject(base);
+    const received: Array<{ url: string; auth: string; body: unknown }> = [];
+    const server = createServer((req, res) => {
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk: Buffer) => chunks.push(chunk));
+      req.on("end", () => {
+        const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as { manifest: unknown };
+        received.push({ url: `${req.method} ${req.url}`, auth: req.headers.authorization ?? "", body });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            manifest: body.manifest,
+            bytes: 1234,
+            updatedAt: "2026-09-06T00:00:00.000Z",
+            base: "/api/subjects/demo/tools/demo/files",
+          }),
+        );
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const port = (server.address() as AddressInfo).port;
+
+    try {
+      const ctx = testCtx(dir);
+      const code = await main(["tools", "push", "--api", `http://127.0.0.1:${port}`, "--token", "secreto"], ctx);
+      expect(ctx.stderr.join("\n")).toBe("");
+      expect(code).toBe(0);
+      expect(received).toHaveLength(1);
+      expect(received[0]!.url).toBe("PUT /api/subjects/demo/tools/demo");
+      expect(received[0]!.auth).toBe("Bearer secreto");
+      expect(ctx.stdout.join("\n")).toContain("push OK · demo 0.1.0");
+      expect(ctx.stdout.join("\n")).toContain("/m/demo/t/demo");
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
+
+  it("sale 1 sin token", async () => {
+    const dir = await makeSubject(base);
+    const ctx = testCtx(dir, {});
+    expect(await main(["tools", "push"], ctx)).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("Falta el token de sync");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sprint 3 — propuestas de cambio a la plataforma (N0-44)
+// ---------------------------------------------------------------------------
+
+describe("sinapsis propose", () => {
+  let repo = "";
+
+  /** Repositorio de plataforma de mentira: INBOX, gates que pasan y un commit inicial. */
+  async function makeRepo(): Promise<string> {
+    const dir = await mkdtemp(path.join(tmpdir(), "sinapsis-repo-"));
+    await mkdir(path.join(dir, "proposals"), { recursive: true });
+    await mkdir(path.join(dir, "packages", "contract", "src"), { recursive: true });
+    await writeFile(
+      path.join(dir, "proposals", "INBOX.md"),
+      "# Propuestas pendientes de revisión\n\n| fecha | materia | título | rama | estado |\n|---|---|---|---|---|\n",
+      "utf8",
+    );
+    await writeFile(path.join(dir, "package.json"), '{ "name": "falso", "scripts": { "typecheck": "true" } }\n', "utf8");
+    await writeFile(path.join(dir, "packages", "contract", "src", "index.ts"), "export const x = 1;\n", "utf8");
+
+    const git = (...args: string[]) => run("git", args, { cwd: dir });
+    await git("init", "-q", "-b", "main", ".");
+    await git("config", "user.email", "prueba@sinapsis.local");
+    await git("config", "user.name", "Prueba");
+    await git("add", "-A");
+    await git("commit", "-qm", "inicial");
+    return dir;
+  }
+
+  beforeEach(async () => {
+    repo = await makeRepo();
+  });
+
+  afterEach(async () => {
+    await rm(repo, { recursive: true, force: true });
+  });
+
+  it("crea la rama, escribe la propuesta, anota el INBOX en main y vuelve a main", async () => {
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+
+    const ctx = testCtx(repo);
+    const code = await main(
+      [
+        "propose",
+        "--repo",
+        repo,
+        "--subject",
+        "proba",
+        "--title",
+        "Badge en el rail",
+        "--body",
+        "La materia necesita marcar cuántas tarjetas vencen y eso lo dibuja la plataforma.",
+        "--skip-gates",
+      ],
+      ctx,
+    );
+    expect(ctx.stderr.join("\n")).toBe("");
+    expect(code).toBe(0);
+
+    const today = new Date();
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const branch = `proposal/proba-${iso.replaceAll("-", "")}-badge-en-el-rail`;
+
+    // Termina en main, con la rama creada y la fila del INBOX commiteada ahí.
+    const { stdout: head } = await run("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: repo });
+    expect(head.trim()).toBe("main");
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches).toContain(branch);
+
+    const inbox = await readFile(path.join(repo, "proposals", "INBOX.md"), "utf8");
+    expect(inbox).toContain(`| ${iso} | proba | Badge en el rail | ${branch} | abierta |`);
+    const { stdout: log } = await run("git", ["log", "--oneline", "-1"], { cwd: repo });
+    expect(log).toContain("proposals: proba — Badge en el rail");
+
+    // La propuesta vive en la rama, no en main.
+    const file = `proposals/${iso}-proba-badge-en-el-rail.md`;
+    expect(existsSync(path.join(repo, file))).toBe(false);
+    const { stdout: proposal } = await run("git", ["show", `${branch}:${file}`], { cwd: repo });
+    expect(proposal).toContain(`rama: ${branch}`);
+    expect(proposal).toContain("estado: abierta");
+    expect(proposal).toContain("## Motivo");
+    expect(proposal).toContain("La materia necesita marcar cuántas tarjetas vencen");
+    expect(proposal).toContain("- `packages/contract/src/index.ts` — modificado");
+    expect(proposal).toContain("Contrato afectado: `packages/contract`");
+    expect(proposal).toContain("Omitidos con `--skip-gates`");
+    expect(proposal).toContain("## Revisión");
+
+    // El cambio viaja en el mismo commit de la rama.
+    const { stdout: changed } = await run("git", ["show", "--name-only", "--format=", branch], { cwd: repo });
+    expect(changed).toContain("packages/contract/src/index.ts");
+    expect(changed).toContain(file);
+
+    expect(ctx.stdout.join("\n")).toContain("/sinapsis-review");
+  });
+
+  it("falla si el árbol tiene cambios que --files no declara, y no toca git", async () => {
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+    // Una carpeta nueva: se informa archivo por archivo, no como «suelta/».
+    await mkdir(path.join(repo, "suelta"), { recursive: true });
+    await writeFile(path.join(repo, "suelta", "suelto.txt"), "algo\n", "utf8");
+
+    const ctx = testCtx(repo);
+    const code = await main(
+      [
+        "propose",
+        "--repo",
+        repo,
+        "--subject",
+        "proba",
+        "--title",
+        "Otra cosa",
+        "--body",
+        "Motivo.",
+        "--files",
+        "packages/contract/src/index.ts",
+        "--skip-gates",
+      ],
+      ctx,
+    );
+    expect(code).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("suelta/suelto.txt");
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches.trim()).toBe("");
+  });
+
+  it("falla si no hay nada que proponer o si el repo no está en main", async () => {
+    const limpio = testCtx(repo);
+    expect(
+      await main(["propose", "--repo", repo, "--subject", "proba", "--title", "T", "--body", "B", "--skip-gates"], limpio),
+    ).toBe(1);
+    expect(limpio.stderr.join("\n")).toContain("árbol de la plataforma está limpio");
+
+    await run("git", ["checkout", "-q", "-b", "otra"], { cwd: repo });
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 3;\n", "utf8");
+    const otra = testCtx(repo);
+    expect(
+      await main(["propose", "--repo", repo, "--subject", "proba", "--title", "T", "--body", "B", "--skip-gates"], otra),
+    ).toBe(1);
+    expect(otra.stderr.join("\n")).toContain('está en "otra"');
+  });
+
+  it("corre los gates y no crea nada si fallan", async () => {
+    await writeFile(path.join(repo, "package.json"), '{ "name": "falso", "scripts": { "typecheck": "false" } }\n', "utf8");
+    await run("git", ["commit", "-qam", "gates rotos"], { cwd: repo });
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+
+    const ctx = testCtx(repo);
+    const code = await main(
+      ["propose", "--repo", repo, "--subject", "proba", "--title", "Con gates", "--body", "Motivo."],
+      ctx,
+    );
+    expect(code).toBe(1);
+    expect(ctx.stdout.join("\n")).toContain("pnpm typecheck");
+    expect(ctx.stderr.join("\n")).toContain("Los gates no pasan");
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches.trim()).toBe("");
+  }, 60_000);
 });

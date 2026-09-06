@@ -211,7 +211,32 @@ function iconOf(raw) {
   return ICONS.has(name) ? name : undefined;
 }
 
-const phaseOrder = [...STUDY.ROADMAP.modes.find((m) => m.id === "cursada").phases, "directo"];
+/**
+ * Modalidades (`ROADMAP.modes` → `Plan.tracks`, decisión N0-43). La primera es la
+ * predeterminada: sus fases se repiten en `plan.phases`, que es lo que muestra el
+ * lector mientras el usuario no elija otra.
+ */
+const TRACK_IDS = new Map([
+  ["cursada", "cursada"],
+  ["directo", "final-directo"],
+]);
+const DEFAULT_MODE = "cursada";
+const modes = [
+  STUDY.ROADMAP.modes.find((m) => m.id === DEFAULT_MODE),
+  ...STUDY.ROADMAP.modes.filter((m) => m.id !== DEFAULT_MODE),
+];
+
+/**
+ * Orden global de las fases: primero las de la modalidad por defecto y después
+ * las que agregue cada modalidad restante. La numeración `fase-N` sigue ese orden
+ * único, así que **los ids de tarea no cambian** al agregar modalidades: el
+ * progreso del usuario (`tasksDone`, guardado por id) sobrevive a la conversión.
+ */
+const phaseOrder = [];
+for (const mode of modes) {
+  for (const id of mode.phases) if (!phaseOrder.includes(id)) phaseOrder.push(id);
+}
+
 const phases = phaseOrder.map((id, i) => {
   const phase = STUDY.ROADMAP.phases.find((p) => p.id === id);
   const n = i + 1;
@@ -299,7 +324,23 @@ const phases = phaseOrder.map((id, i) => {
   };
 });
 
-const plan = { title: "Plan de estudio · Probabilidad y Estadística", phases };
+/** Fase compilada por su id en la fuente, para repartirla entre las modalidades. */
+const phaseById = new Map(phaseOrder.map((id, i) => [id, phases[i]]));
+
+const tracks = modes.map((mode) => ({
+  id: TRACK_IDS.get(mode.id) ?? slugify(mode.id),
+  label: mode.label,
+  ...(mode.hint ? { description: cut(mode.hint, 300) } : {}),
+  phases: mode.phases.map((id) => phaseById.get(id)),
+}));
+
+const plan = {
+  title: "Plan de estudio · Probabilidad y Estadística",
+  // `phases` repite la modalidad por defecto: son las mismas fases, con los
+  // mismos ids, así que el compilador no las cuenta ni las valida dos veces.
+  phases: tracks[0].phases,
+  tracks,
+};
 
 // ---------------------------------------------------------------------------
 // 4. Kits
@@ -360,6 +401,14 @@ for (const deck of decks) {
 }
 console.log(`  quizzes:   1 (${quiz.questions.length} preguntas)`);
 console.log(`  plan:      ${phases.length} fases · ${milestones} hitos · ${tasks} tareas`);
+console.log(`  modalidades: ${tracks.length}${tracks[0] ? ` (por defecto «${tracks[0].label}»)` : ""}`);
+for (const track of tracks) {
+  const hitos = track.phases.reduce((n, p) => n + p.milestones.length, 0);
+  const tareas = track.phases.reduce((n, p) => n + p.milestones.reduce((m, h) => m + h.tasks.length, 0), 0);
+  console.log(
+    `    ${track.id.padEnd(16)} ${String(track.phases.length).padStart(2)} ${track.phases.length === 1 ? "fase " : "fases"} · ${String(hitos).padStart(2)} hitos · ${String(tareas).padStart(3)} tareas   ${track.phases.map((p) => p.id).join(", ")}`,
+  );
+}
 console.log(`  kits:      ${kits.length}`);
 if (brokenPages.length) {
   console.log(`  páginas descartadas por no existir en el wiki: ${[...new Set(brokenPages)].join(", ")}`);

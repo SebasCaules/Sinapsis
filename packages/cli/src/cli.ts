@@ -10,8 +10,10 @@
 import { Command, CommanderError } from "commander";
 import pc from "picocolors";
 import { runInit } from "./commands/init.js";
+import { runPropose } from "./commands/propose.js";
 import { runStatus } from "./commands/status.js";
 import { runSync } from "./commands/sync.js";
+import { runToolsBuild, runToolsList, runToolsPush } from "./commands/tools.js";
 import { runValidate } from "./commands/validate.js";
 import { defaultCtx, resolveUserPath, type Ctx } from "./context.js";
 import { VERSION } from "./version.js";
@@ -108,8 +110,62 @@ export async function main(argv: readonly string[], ctx: Ctx = defaultCtx()): Pr
     .option("--dry-run", "compila y muestra el resumen sin llamar al API", false)
     .option("--out <file>", "escribe el SyncPayload compilado en un archivo")
     .option("--web <url>", "base de la web para el enlace final (o SINAPSIS_WEB)")
+    .option("--tools", "construye y sube también los bundles de <config>/tools", false)
+    .option("--minify", "con --tools: minifica los scripts antes de subirlos", false)
     .action(async (opts: Parameters<typeof runSync>[0]) => {
       code = await runSync(opts, ctx);
+    });
+
+  program
+    .command("propose")
+    .description("Propone un cambio a la plataforma en una rama del repo de Sinapsis (docs/PROPOSALS.md).")
+    .requiredOption("--subject <slug>", "materia que propone")
+    .requiredOption("--title <texto>", "qué se propone, en una línea")
+    .requiredOption("--body <texto>", "por qué hace falta y por qué no se resuelve en la materia")
+    .option("--files <a,b>", "archivos cambiados que la materia declara (por defecto, todos los modificados)")
+    .option("--compat <texto>", "texto de la sección «Compatibilidad»")
+    .option("--skip-gates", "no corre typecheck/test/build (solo para propuestas de documentación)", false)
+    .option("--repo <dir>", "repositorio de la plataforma (o SINAPSIS_HOME)")
+    .action(async (opts: Parameters<typeof runPropose>[0]) => {
+      code = await runPropose(opts, ctx);
+    });
+
+  const tools = program
+    .command("tools")
+    .description("Bundles de herramientas y figuras de la materia (<config>/tools).");
+
+  tools
+    .command("build")
+    .description("Valida y empaqueta los bundles; escribe dist/tool-push.json.")
+    .option("--config <file>", "ruta del config", "sinapsis.config.json")
+    .option("--dir <dir>", "carpeta del bundle o de los bundles (por defecto <config>/tools)")
+    .option("--minify", "minifica los scripts en .dist/ y empaqueta esa versión", false)
+    .option("--out <file>", "dónde escribir el ToolPush (solo con un bundle)")
+    .action(async (opts: Parameters<typeof runToolsBuild>[0]) => {
+      code = await runToolsBuild(opts, ctx);
+    });
+
+  tools
+    .command("push")
+    .description("Construye los bundles y los sube al API.")
+    .option("--config <file>", "ruta del config", "sinapsis.config.json")
+    .option("--dir <dir>", "carpeta del bundle o de los bundles (por defecto <config>/tools)")
+    .option("--minify", "minifica los scripts antes de subirlos", false)
+    .option("--api <url>", "base del API (o SINAPSIS_API)")
+    .option("--token <token>", "token de sync (o SINAPSIS_TOKEN / SYNC_TOKEN)")
+    .option("--web <url>", "base de la web para el enlace final (o SINAPSIS_WEB)")
+    .action(async (opts: Parameters<typeof runToolsPush>[0]) => {
+      code = await runToolsPush(opts, ctx);
+    });
+
+  tools
+    .command("list")
+    .description("Muestra los bundles que la materia tiene publicados.")
+    .option("--config <file>", "ruta del config", "sinapsis.config.json")
+    .option("--api <url>", "base del API (o SINAPSIS_API)")
+    .option("--token <token>", "token (o SINAPSIS_TOKEN / SYNC_TOKEN)")
+    .action(async (opts: Parameters<typeof runToolsList>[0]) => {
+      code = await runToolsList(opts, ctx);
     });
 
   program

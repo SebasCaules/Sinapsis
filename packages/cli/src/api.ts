@@ -7,13 +7,16 @@ import {
   StudyContent,
   SubjectDetail,
   SyncResult,
+  ToolInfo,
   errorMessageFromBody,
   type StudyContent as StudyContentType,
   type SubjectDetail as SubjectDetailType,
   type SyncPayload,
   type SyncResult as SyncResultType,
+  type ToolInfo as ToolInfoType,
+  type ToolPush as ToolPushType,
 } from "@sinapsis/contract";
-import type { z } from "zod";
+import { z } from "zod";
 
 export class ApiError extends Error {
   readonly status: number | undefined;
@@ -119,6 +122,41 @@ export async function getSubject(opts: ApiOptions, slug: string): Promise<Subjec
 /** `GET /api/subjects/:slug/study` — material de estudio publicado. Requiere sesión. */
 export async function getStudy(opts: ApiOptions, slug: string): Promise<StudyContentType> {
   return requestJson(opts, "GET", `/subjects/${slug}/study`, StudyContent, { name: "StudyContent" });
+}
+
+/**
+ * `PUT /api/subjects/:slug/tools/:id` con `Authorization: Bearer <SYNC_TOKEN>`.
+ *
+ * Devuelve el `ToolInfo` con el que responde el API; `null` si respondió otra
+ * cosa (un 204 sin cuerpo, o un API anterior al Sprint 3): el bundle ya se subió
+ * y el CLI informa lo que compiló en vez de fallar por el formato de la respuesta.
+ */
+export async function putTool(
+  opts: ApiOptions,
+  slug: string,
+  toolId: string,
+  push: ToolPushType,
+): Promise<ToolInfoType | null> {
+  const target = url(opts, `/subjects/${encodeURIComponent(slug)}/tools/${encodeURIComponent(toolId)}`);
+  const response = await request(target, {
+    method: "PUT",
+    headers: headers(opts, { "Content-Type": "application/json" }),
+    body: JSON.stringify(push),
+  });
+
+  const payload = await readJson(response);
+  if (!response.ok) {
+    throw new ApiError(errorMessageFromBody(payload, response.status, response.statusText), target, response.status);
+  }
+  const parsed = ToolInfo.safeParse(payload);
+  return parsed.success ? parsed.data : null;
+}
+
+/** `GET /api/subjects/:slug/tools` — bundles publicados. Requiere sesión. */
+export async function getTools(opts: ApiOptions, slug: string): Promise<ToolInfoType[]> {
+  return requestJson(opts, "GET", `/subjects/${encodeURIComponent(slug)}/tools`, z.array(ToolInfo), {
+    name: "ToolInfo[]",
+  });
 }
 
 /** `POST /api/auth/dev` — sesión local con `AUTH_DEV_BYPASS=1`. Devuelve la cookie o `null`. */

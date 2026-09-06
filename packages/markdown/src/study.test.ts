@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { StudyContent, SubjectConfig, type SubjectConfig as Cfg } from "@sinapsis/contract";
 import { compileWiki } from "./compile.js";
-import { compileStudy, isEmptyStudy, splitSections, studyCounts } from "./study.js";
+import { compileStudy, isEmptyStudy, planPhases, splitSections, studyCounts } from "./study.js";
 
 const config: Cfg = SubjectConfig.parse({
   slug: "demo",
@@ -372,6 +372,105 @@ describe("compileStudy · plan.json y kits.json", () => {
     const dupes = issues.filter((i) => i.kind === "study-duplicate-id").map((i) => i.detail);
     expect(dupes).toContain('id de mazo "repetido"');
     expect(dupes.join("\n")).toContain('id de tarjeta "fija"');
+  });
+});
+
+describe("compileStudy · modalidades del plan (Plan.tracks)", () => {
+  /** Una fase con un hito y una tarea; `n` distingue los ids. */
+  const phase = (id: string, title: string, task = `${id}-h1-t1`) => ({
+    id,
+    title,
+    milestones: [{ id: `${id}-h1`, title: "Hito", divisions: ["1"], tasks: [{ id: task, label: "Leer", kind: "read", target: "1" }] }],
+  });
+
+  /** Plan con dos modalidades: la primera repite `phases` (la de por defecto). */
+  const conModalidades = (extra: Record<string, unknown> = {}) => ({
+    title: "Plan",
+    phases: [phase("fase-1", "Parcial"), phase("fase-2", "Final")],
+    tracks: [
+      { id: "cursada", label: "Cursada + final", phases: [phase("fase-1", "Parcial"), phase("fase-2", "Final")] },
+      { id: "final-directo", label: "Final directo", phases: [phase("fase-3", "Todo el programa")] },
+    ],
+    ...extra,
+  });
+
+  it("acepta las dos modalidades y no cuenta dos veces la fase compartida", async () => {
+    await write("plan.json", JSON.stringify(conModalidades()));
+    const { study, issues } = await compile();
+
+    expect(issues).toEqual([]);
+    expect(study.plan?.tracks.map((t) => t.label)).toEqual(["Cursada + final", "Final directo"]);
+    expect(study.plan?.phases.map((p) => p.id)).toEqual(["fase-1", "fase-2"]);
+    // 3 fases distintas: las dos de la cursada (que `phases` repite) y la del directo.
+    expect(planPhases(study.plan).map((p) => p.id)).toEqual(["fase-1", "fase-2", "fase-3"]);
+    expect(studyCounts(study)).toMatchObject({ phases: 3, milestones: 3, tasks: 3, tracks: 2 });
+  });
+
+  it("avisa por un id de tarea repetido entre dos modalidades", async () => {
+    const plan = conModalidades();
+    // La fase del final directo reusa el id de tarea de la cursada: al marcarla
+    // hecha en una modalidad se marcaría también en la otra.
+    plan.tracks[1]!.phases = [phase("fase-3", "Todo el programa", "fase-1-h1-t1")];
+    await write("plan.json", JSON.stringify(plan));
+
+    const { issues } = await compile();
+    const dupes = issues.filter((i) => i.kind === "study-duplicate-id").map((i) => i.detail);
+    expect(dupes.join("\n")).toContain('id de tarea "fase-1-h1-t1"');
+  });
+
+  it("una fase repetida con contenido distinto es un error de identificación", async () => {
+    const plan = conModalidades();
+    plan.tracks[0]!.phases = [phase("fase-1", "Parcial con otro título"), phase("fase-2", "Final")];
+    await write("plan.json", JSON.stringify(plan));
+
+    const { issues } = await compile();
+    const detail = issues.map((i) => i.detail).join("\n");
+    expect(detail).toContain('la fase "fase-1" aparece en dos modalidades con contenido distinto');
+  });
+
+  it("avisa si `phases` no repite ninguna modalidad y si se repite un id de modalidad", async () => {
+    const plan = conModalidades({ phases: [phase("fase-9", "Suelta")] });
+    plan.tracks[1]!.id = "cursada";
+    await write("plan.json", JSON.stringify(plan));
+
+    const { issues } = await compile();
+    const detail = issues.map((i) => i.detail).join("\n");
+    expect(detail).toContain('"phases" no coincide con ninguna modalidad');
+    expect(detail).toContain('id de modalidad "cursada"');
+  });
+
+  it("verifica las referencias de las fases que solo existen en una modalidad", async () => {
+    const plan = conModalidades();
+    plan.tracks[1]!.phases = [
+      {
+        id: "fase-3",
+        title: "Todo el programa",
+        milestones: [
+          {
+            id: "fase-3-h1",
+            title: "Hito",
+            divisions: ["7"],
+            tasks: [{ id: "fase-3-h1-t1", label: "Mazo", kind: "cards", target: "no-existe" }],
+          },
+        ],
+      },
+    ];
+    await write("plan.json", JSON.stringify(plan));
+
+    const { issues } = await compile();
+    const broken = issues.filter((i) => i.kind === "study-broken-ref").map((i) => i.detail);
+    expect(broken).toEqual([
+      'la división "7" no está en config.divisions',
+      '«cards» apunta al mazo "no-existe", que no existe',
+    ]);
+  });
+
+  it("un plan sin modalidades sigue valiendo y cuenta 0 modalidades", async () => {
+    await write("plan.json", JSON.stringify({ phases: [phase("fase-1", "Única")] }));
+    const { study, issues } = await compile();
+    expect(issues).toEqual([]);
+    expect(study.plan?.tracks).toEqual([]);
+    expect(studyCounts(study)).toMatchObject({ phases: 1, tracks: 0 });
   });
 });
 

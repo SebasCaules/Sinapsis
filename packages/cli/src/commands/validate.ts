@@ -12,6 +12,7 @@ import {
 import { compileStudy, formatIssues, isInside } from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
 import { studyLine } from "../report.js";
+import { findBundles, readManifest } from "../tools/bundle.js";
 
 export interface ValidateOptions {
   config?: string;
@@ -96,7 +97,44 @@ export async function runValidate(opts: ValidateOptions, ctx: Ctx): Promise<numb
   for (const problem of warnings) {
     ctx.out(pc.yellow(`  aviso · ${problem.field}: ${problem.message}`));
   }
+  for (const line of await checkTools(configDir, loaded.config)) {
+    ctx.out(pc.yellow(`  aviso · ${line}`));
+  }
   return 0;
+}
+
+/**
+ * Herramientas del rail (`kind: "tool"`, Sprint 3): cada `target` tiene que ser
+ * una vista declarada por algún bundle de `<config>/tools`. Es una advertencia,
+ * no un error: la materia puede escribir el rail antes que el bundle.
+ */
+async function checkTools(configDir: string, config: SubjectConfigType): Promise<string[]> {
+  const wanted: Array<{ where: string; target: string }> = [
+    ...config.rail.flatMap((group) =>
+      group.items
+        .filter((item) => item.kind === "tool")
+        .map((item) => ({ where: `rail.${group.id}.${item.id}`, target: item.target })),
+    ),
+    ...(config.fab?.kind === "tool" ? [{ where: "fab", target: config.fab.target }] : []),
+  ];
+  if (wanted.length === 0) return [];
+
+  const dirs = (await findBundles(path.join(configDir, "tools"))) ?? [];
+  const manifests = (await Promise.all(dirs.map((dir) => readManifest(dir)))).filter((m) => m !== null);
+  const views = new Map<string, string>();
+  for (const manifest of manifests) {
+    for (const view of manifest.views) views.set(view.id, manifest.id);
+  }
+
+  return wanted
+    .filter((item) => !views.has(item.target))
+    .map(
+      (item) =>
+        `${item.where}: ningún bundle de tools/ registra la vista "${item.target}"` +
+        (manifests.length === 0
+          ? " (la materia todavía no tiene bundles: la plataforma muestra «Próximamente»)"
+          : ` (vistas disponibles: ${[...views.keys()].join(", ") || "ninguna"})`),
+    );
 }
 
 interface Problem {
@@ -169,13 +207,8 @@ export function extraChecks(config: SubjectConfigType): Problem[] {
         message: `un ítem "link" necesita una URL http(s) o mailto`,
       });
     }
-    if (item.kind === "tool") {
-      problems.push({
-        level: "warning",
-        field: where,
-        message: `las herramientas propias son del Sprint 3; hasta entonces se muestra "Próximamente"`,
-      });
-    }
+    // Los ítems `kind: "tool"` se verifican aparte, contra los manifiestos de
+    // `<config>/tools` (`checkTools`): acá no hay acceso al disco.
   }
 
   const placeholders = (["name", "code", "institution", "semester"] as const).filter(

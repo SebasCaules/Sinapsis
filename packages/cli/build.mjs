@@ -16,6 +16,10 @@ await build({
   target: "node20",
   sourcemap: true,
   legalComments: "none",
+  // esbuild se carga con `import()` y solo cuando `tools build --minify` lo pide:
+  // empaquetarlo metería su binario nativo en el bundle. Queda como dependencia
+  // opcional del CLI; sin ella, todo funciona menos `--minify`.
+  external: ["esbuild"],
   banner: {
     // El shebang ya viene de `src/index.ts`; acá solo va el shim de `require`
     // que necesitan las dependencias CommonJS empaquetadas.

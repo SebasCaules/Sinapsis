@@ -137,6 +137,16 @@ export function studyLine(ctx: Ctx, study: StudyContent): void {
       ` · plan: ${n.phases === 0 ? "no" : `${n.phases} ${plural(n.phases, "fase", "fases")}`}` +
       ` · ${n.kits} ${plural(n.kits, "kit", "kits")}`,
   );
+
+  // Modalidades del plan (`Plan.tracks`): qué ve el usuario en el conmutador y
+  // cuántas fases trae cada una. La primera es la que se muestra por defecto.
+  const tracks = study.plan?.tracks ?? [];
+  if (tracks.length > 0) {
+    const list = tracks
+      .map((t) => `${t.label} (${t.phases.length} ${plural(t.phases.length, "fase", "fases")})`)
+      .join(" · ");
+    ctx.out(`  ${pc.bold("Modalidades")}: ${list}`);
+  }
 }
 
 export function warnings(ctx: Ctx, lines: readonly string[], limit = Number.POSITIVE_INFINITY): void {

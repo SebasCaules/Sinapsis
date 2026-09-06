@@ -15,6 +15,7 @@ import {
   webUrl,
 } from "../report.js";
 import { GENERATOR } from "../version.js";
+import { buildAll, pushAll, toolsDir } from "./tools.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
 
 export interface SyncOptions {
@@ -26,6 +27,9 @@ export interface SyncOptions {
   dryRun?: boolean;
   out?: string;
   web?: string;
+  /** Construye y sube también los bundles de `<carpeta del config>/tools`. */
+  tools?: boolean;
+  minify?: boolean;
 }
 
 export const DEFAULT_API = "http://localhost:3000";
@@ -81,6 +85,14 @@ export async function runSync(opts: SyncOptions, ctx: Ctx): Promise<number> {
     ctx.out(pc.dim(`payload escrito en ${outFile}`));
   }
 
+  // Herramientas: se construyen antes de tocar el API para que un bundle roto
+  // detenga el sync entero en vez de dejar la materia a medio publicar.
+  const bundles = opts.tools
+    ? await buildAll(ctx, toolsDir(ctx, loaded.path, undefined), { minify: opts.minify })
+    : [];
+  if (bundles === null) return 1;
+  if (opts.tools) ctx.out("");
+
   if (opts.dryRun) {
     ctx.out(pc.dim("--dry-run: no se llamó al API."));
     return 0;
@@ -105,6 +117,13 @@ export async function runSync(opts: SyncOptions, ctx: Ctx): Promise<number> {
       ctx.out(pc.bold(pc.yellow(`  el API devolvió ${result.warnings.length} advertencia(s):`)));
       for (const line of result.warnings) ctx.out(pc.yellow(`    ${line}`));
     }
+
+    if (bundles.length > 0) {
+      ctx.out("");
+      const code = await pushAll(ctx, bundles, { api, token }, loaded.config.slug);
+      if (code !== 0) return code;
+    }
+
     ctx.out(`  ${webUrl(ctx, opts.web, loaded.config.slug)}`);
     return 0;
   } catch (cause) {

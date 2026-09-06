@@ -1,6 +1,6 @@
 ---
 name: sinapsis
-description: Conecta el wiki markdown de esta materia con la plataforma Sinapsis — crea o corrige su `sinapsis.config.json`, escribe el material de estudio (mazos de flashcards, quiz, plan y kits en `estudio/`), compila el wiki y lo sincroniza contra el API. Usar cuando el usuario invoque `/sinapsis`, `/sinapsis init`, `/sinapsis sync`, `/sinapsis status` o `/sinapsis validate`, o cuando pida "sincronizar la materia con Sinapsis", "subir el wiki a Sinapsis", "generar el config de Sinapsis", "ver el estado de la materia en Sinapsis", "agregar flashcards / quiz / plan de estudio a la materia" o "revisar los wikilinks rotos del wiki". No usar para editar contenido del wiki que el usuario no haya pedido cambiar.
+description: Conecta el wiki markdown de esta materia con la plataforma Sinapsis — crea o corrige su `sinapsis.config.json`, escribe el material de estudio (mazos de flashcards, quiz, plan y kits en `estudio/`), publica las herramientas y figuras de la materia (bundles de `tools/`), compila el wiki y lo sincroniza contra el API, y propone cambios a la plataforma cuando la materia necesita algo común. Usar cuando el usuario invoque `/sinapsis`, `/sinapsis init`, `/sinapsis sync`, `/sinapsis status`, `/sinapsis validate`, `/sinapsis tools` o `/sinapsis propose`, o cuando pida "sincronizar la materia con Sinapsis", "subir el wiki a Sinapsis", "generar el config de Sinapsis", "ver el estado de la materia en Sinapsis", "agregar flashcards / quiz / plan de estudio a la materia", "publicar las herramientas o las figuras de la materia", "proponer un cambio a la plataforma" o "revisar los wikilinks rotos del wiki". No usar para editar contenido del wiki que el usuario no haya pedido cambiar.
 ---
 
 # `/sinapsis` — el agente de materia
@@ -16,9 +16,10 @@ Sos el agente de **esta** materia. Tu alcance:
 
 - **Sí**: leer y editar el wiki de la materia, su `sinapsis.config.json`, y correr el CLI de
   Sinapsis en modo lectura/sync.
-- **No**: tocar el repositorio de la plataforma (`$SINAPSIS_HOME`). Si algo del CLI, del API
-  o del contrato está mal, reportalo al usuario con el mensaje literal del error; no lo
-  arregles desde acá.
+- **No**: parchear el repositorio de la plataforma (`$SINAPSIS_HOME`) por las suyas. Si algo
+  del CLI, del API o del contrato está mal o le falta algo a la materia, hay un camino
+  formal: `sinapsis propose` (ver «Proponer un cambio a la plataforma»). Nunca commitee en
+  `main` de la plataforma ni edite sus archivos sin proponer.
 - **No**: reescribir contenido del wiki por tu cuenta. Los arreglos de `resumen` faltantes o
   wikilinks rotos se **proponen** y se aplican solo si el usuario los autoriza.
 - **Siempre**: cerrar con un reporte de qué se sincronizó (páginas, divisiones) y qué
@@ -44,8 +45,12 @@ Comandos:
 |---|---|
 | `init [--wiki <dir>] [--out <file>] [--slug <slug>] [--force]` | Propone un `sinapsis.config.json` a partir del wiki y deja lista la carpeta `estudio/`. |
 | `validate [--config <file>]` | Valida el config contra el contrato y el formato del material de estudio. Sale 1 solo si el config falla. |
-| `sync [--config <file>] [--wiki <dir>] [--api <url>] [--token <t>] [--dry-run] [--out <file>]` | Compila y sincroniza. |
+| `sync [--config <file>] [--wiki <dir>] [--api <url>] [--token <t>] [--dry-run] [--out <file>] [--tools]` | Compila y sincroniza; con `--tools`, también publica los bundles de herramientas. |
 | `status [--config <file>] [--api <url>]` | Estado de la materia en la plataforma. |
+| `tools build [--dir <carpeta>] [--minify]` | Valida y empaqueta los bundles de `tools/`. |
+| `tools push [--dir <carpeta>] [--api <url>] [--token <t>]` | Construye y sube los bundles. |
+| `tools list [--api <url>]` | Bundles que la materia tiene publicados. |
+| `propose --subject <slug> --title "<qué>" --body "<por qué>"` | Propone un cambio a la **plataforma** en una rama de su repositorio. |
 
 Variables de entorno: `SINAPSIS_API` (por defecto `http://localhost:3000`),
 `SINAPSIS_TOKEN` o `SYNC_TOKEN` (token de sync), `SINAPSIS_WEB` (por defecto
@@ -106,10 +111,10 @@ lector. La materia solo aporta **datos** (hero, nomenclatura, divisiones, tipos)
 
 | `kind` | `target` | Qué abre |
 |---|---|---|
-| `builtin` | `home` · `wiki` · `graph` · `flashcards` · `quiz` · `notes` · `favorites` | Una vista de la plataforma. Hoy solo `home` y `wiki` existen; el resto muestra "Próximamente". |
+| `builtin` | `home` · `plan` · `kits` · `wiki` · `graph` · `flashcards` · `quiz` · `notes` · `favorites` | Una vista de la plataforma. No hace falta declararlas: los grupos fijos del rail ya las traen. |
 | `page` | slug de una página | Esa página en el lector. |
 | `link` | URL absoluta | Pestaña nueva. |
-| `tool` | id de la herramienta | Sprint 3. Hoy muestra "Próximamente". |
+| `tool` | id de una **vista** de algún bundle de `tools/` | Esa herramienta de la materia (`/m/<slug>/t/<vista>`). Sin bundle que la registre, "Próximamente". |
 
 ### 2. Frontmatter de cada página
 
@@ -238,6 +243,54 @@ puede llevar `detail` (una línea corta: «41 ejercicios · 14–16 h»), y las 
 ```
 
 Referencia completa, con todas las verificaciones: `reference/contrato.md` §7.
+
+El plan puede tener **modalidades** (`tracks`): «Cursada + final» y «Final directo», por
+ejemplo. Cada una trae sus propias fases; `phases` repite las de la modalidad por defecto
+(es lo que se ve mientras el usuario no elija otra). Los ids de tarea son **globales al
+plan**: dos tareas distintas no pueden compartirlo (el progreso del usuario se guarda por
+id), pero una fase que aparece en dos modalidades es la misma fase y conserva sus ids.
+
+### 5. Herramientas y figuras (`tools/`)
+
+Referencia completa, con un bundle mínimo listo para copiar: `reference/herramientas.md`.
+
+Una herramienta es una **vista propia de la materia** (un explorador, una calculadora) y una
+figura es un **dibujo interactivo** dentro de una página del wiki. Las dos salen del mismo
+lugar: un bundle de scripts clásicos que el CLI empaqueta y el API sirve.
+
+```
+tools/<id>/
+  sinapsis.tools.json    # manifiesto: id, title, version, scripts[], styles[], views[], figures, data[]
+  tools.js               # IIFE contra window.App / window.M (nada de módulos ES)
+  css/tools.css
+  data/datos.json
+```
+
+- Los **scripts se cargan en orden**, después del runtime de la plataforma, y registran lo
+  suyo: `App.registerView(id, fn)` para una vista, `App.registerFigure(id, draw, meta)` para
+  una figura. Los estilos se inyectan y se quitan con el bundle.
+- El runtime garantiza, además del registro: los datos de la materia (`App.SUBJECT`,
+  `App.PAGES`, `App.BY_SLUG`, `App.UNITS`, `App.isStudied`, `App.DATA`), navegación
+  (`App.go`, `App.setCrumbs`, `App.toast`), render (`App.renderMarkdown`, `App.rich`,
+  `App.katex`, `App.icon`, `App.escapeHtml`, `App.cssVar`) y dibujo (`App.Fig`, `App.Plot`,
+  `window.M`). Es la superficie `CompatApp` del contrato. Cada figura recibe además su
+  propio `api`: `state`/`setState` para los controles, `cleanup(fn)`, `theme`, `cssVar` y
+  `redraw()`.
+- Las rutas del manifiesto son relativas a la carpeta del bundle, sin `..`, y con extensión
+  conocida (`js mjs css json svg png jpg jpeg webp woff woff2 txt md csv`). Tope: 20 MB.
+- Un ítem del rail con `kind: "tool"` apunta al **id de la vista**, no al del bundle.
+- Un callout `> [!figura] <id>` del wiki monta la figura de ese id; sin bundle, se ve el
+  epígrafe y nada más.
+
+```bash
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build          # valida y empaqueta
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push           # construye y sube
+pnpm --dir "$SINAPSIS_HOME" sinapsis -- sync --tools         # wiki + estudio + herramientas
+```
+
+`tools build` no confía en que el bundle esté bien: valida el manifiesto, comprueba que cada
+archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** (`node
+--check`). Un script que el manifiesto no declara no se sube: el runtime no lo cargaría.
 
 ---
 
@@ -377,6 +430,84 @@ También revisa el **formato** del material de estudio (`estudio/`) y resume qu�
 único que no puede verificar sin compilar el wiki son las referencias a slugs de páginas, que
 salen en `sync --dry-run`.
 
+### `/sinapsis tools` — publicar las herramientas
+
+1. **Construir y leer el resumen:**
+
+   ```bash
+   pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools build
+   ```
+
+   Informa, por bundle: archivos y bytes, vistas registradas, si aporta figuras, y qué
+   quedó afuera. Sale 1 —sin subir nada— si el manifiesto no cumple el contrato, si falta
+   un archivo declarado, si una ruta se escapa de la carpeta o si un script no parsea.
+
+2. **Revisar los avisos.** Los dos habituales:
+
+   | Aviso | Qué significa | Arreglo |
+   |---|---|---|
+   | `N script/estilo que el manifiesto no declara (no se suben)` | Hay `.js` o `.css` en la carpeta que nadie carga | Agregarlos a `scripts`/`styles`, o dejarlos (son de construcción) |
+   | `N archivo(s) con extensión ajena al contrato` | `.yaml`, `.html`, `.ts`… | Convertirlos o sacarlos de la carpeta |
+
+3. **Comprobar el rail.** `sinapsis validate` avisa si un ítem `kind: "tool"` apunta a una
+   vista que ningún bundle registra. Los `target` son ids de **vista**.
+
+4. **Subir**, con el API corriendo y el token:
+
+   ```bash
+   pnpm --dir "$SINAPSIS_HOME" sinapsis -- tools push
+   ```
+
+   o, junto con el wiki y el material de estudio, `sinapsis sync --tools`.
+
+5. **Verificar**: `sinapsis tools list` y, en el navegador, `/m/<slug>/t/<vista>` y una
+   página con `[!figura]`. Reportá qué vistas quedaron publicadas y con qué versión.
+
+### `/sinapsis propose` — proponer un cambio a la plataforma
+
+**Cuándo.** Solo cuando lo que falta es **común a varias materias** y no se puede resolver
+dentro del repositorio de la materia: un `kind` nuevo del rail, un campo del contrato, un
+helper del runtime, un comportamiento del lector, un arreglo de un bug de la plataforma.
+
+**Cuándo no.** Si se resuelve con un bundle propio, con el config, o cambiando el wiki: eso
+es trabajo de la materia y no ocupa a la plataforma. Tampoco se propone «de paso» algo que
+no estaba en el pedido del usuario.
+
+1. **Pedirle el visto bueno al usuario.** Una propuesta crea una rama y un commit en el
+   repositorio de la plataforma: no se hace sin que lo pida o lo autorice.
+
+2. **Implementar el cambio en el repositorio de la plataforma**, mínimo y coherente: un
+   cambio por propuesta. Si toca `packages/contract`, el campo nuevo va **opcional y con
+   default**, con sus tests, para que las materias ya sincronizadas sigan validando.
+
+3. **Proponer:**
+
+   ```bash
+   pnpm --dir "$SINAPSIS_HOME" sinapsis -- propose \
+     --subject <slug> \
+     --title "Qué se propone, en una línea" \
+     --body "Por qué lo necesita la materia y por qué no se resuelve en su repo" \
+     [--files packages/contract/src/index.ts,apps/web/src/…] \
+     [--compat "Qué pasa con las demás materias y con lo ya sincronizado"]
+   ```
+
+   El CLI comprueba que la plataforma esté en `main` y que lo único modificado sea lo que
+   `--files` declara; corre los gates (`pnpm typecheck`, `pnpm test`, y `pnpm build` si toca
+   `apps/`) **antes** de tocar git; crea la rama `proposal/<slug>-<fecha>-<titulo>`; escribe
+   `proposals/<fecha>-<slug>-<titulo>.md` con motivo, alcance (la lista real de archivos),
+   compatibilidad y la salida literal de los gates; commitea todo en la rama; abre el PR si
+   hay remoto en GitHub y `gh` autenticado, y si no anota la propuesta en
+   `proposals/INBOX.md` de `main`; y vuelve a `main`.
+
+   Si los gates fallan **no crea nada**: corrija y vuelva a ejecutar el mismo comando.
+   `--skip-gates` es solo para propuestas que no cambian código ejecutable.
+
+4. **Cerrar con la instrucción para el usuario**, que es la que imprime el CLI:
+
+   > Abra una sesión de Claude Code en `<repo de Sinapsis>` y ejecute `/sinapsis-review`.
+
+   La materia **no** revisa ni mergea su propia propuesta. Decide la plataforma.
+
 ---
 
 ## Checklist de calidad del wiki
@@ -403,9 +534,17 @@ Antes de dar por buena una sincronización:
       apuntan a algo que existe.
 - [ ] **Los ids de las tarjetas son estables.** Si hubo que reordenar un mazo, las tarjetas
       que ya se venían repasando llevan `{#id}` para no perder su progreso de SRS.
+- [ ] **Los ids de tarea del plan son únicos** entre todas las modalidades, y una fase que
+      aparece en dos modalidades es idéntica en las dos.
+- [ ] **Cada ítem `kind: "tool"` del rail abre una vista que existe.** Cero avisos «ningún
+      bundle de tools/ registra la vista …» en `validate`.
+- [ ] **Los bundles construyen limpio.** `tools build` sale 0 y no deja scripts sin declarar
+      que el bundle necesite.
 
 ## Referencias
 
 - `reference/contrato.md` — el contrato completo: config, frontmatter, `Page`, sync y API.
 - `reference/config-ejemplo.md` — el `sinapsis.config.json` de Probabilidad y Estadística,
   comentado campo por campo.
+- `reference/herramientas.md` — bundles de herramientas y figuras: manifiesto, qué garantiza
+  el runtime (`window.App`), un bundle mínimo completo y los comandos `tools build/push/list`.

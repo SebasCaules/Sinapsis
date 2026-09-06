@@ -549,290 +549,855 @@
           ]
         }
       ]
+    }
+  ],
+  "tracks": [
+    {
+      "id": "cursada",
+      "label": "Cursada + final",
+      "description": "Parcialito 1 → Parcialito 2 → Parcial → Parcialito 3 → Final",
+      "phases": [
+        {
+          "id": "fase-1",
+          "title": "Parcialito 1",
+          "subtitle": "TP1 y TP2 · Unidades 1 y 2",
+          "scope": "Estadística descriptiva (TP1) y cálculo de probabilidades (TP2): datos agrupados, conteo, probabilidad condicional, independencia y Bayes.\n\n**Qué cae:**\n- **Mediana de datos agrupados** (U1) — Interpolación sobre el extremo derecho del bin. En el parcialito TP1–TP2 (Com. B) una de las frecuencias venía como parámetro $k$.\n- **Descriptiva completa de una muestra** (U1) — Media, mediana y modo por datos agrupados, $s$ con denominador $n-1$, histograma y polígono de frecuencias acumuladas (TP1 ej. 4 y 5).\n- **Conteo y regla de Laplace** (U2) — Casos favorables sobre casos posibles, con y sin reposición. El parcialito TP1–TP2 pidió «al menos 2 enfermas entre 3 elegidas» contando sobre $\\binom{N}{3}$.\n- **Probabilidad total y Bayes** (U2) — Identificar bien la partición y no confundir $P(A\\mid B)$ con $P(B\\mid A)$; conviene armar el árbol de probabilidades.\n- **Independencia vs. incompatibilidad** (U2) — $P(A\\cap B)=P(A)P(B)$ solo bajo independencia; incompatibles significa $A\\cap B=\\varnothing$, que es otra cosa.\n- **Dispersión y forma** (U1) — Rango, IQR, varianza, desvío y MAD; asimetría leída sobre el boxplot.",
+          "milestones": [
+            {
+              "id": "fase-1-h1",
+              "title": "Unidad 1 · Estadística Descriptiva",
+              "divisions": [
+                "1"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-1-h1-t1",
+                  "label": "Leer la teoría de la Unidad 1 · Estadística Descriptiva",
+                  "kind": "read",
+                  "target": "1"
+                },
+                {
+                  "id": "fase-1-h1-t2",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-1-h1-t3",
+                  "label": "Resolver el TP1",
+                  "kind": "exercises",
+                  "detail": "7 ejercicios · 4–5 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-1-h2",
+              "title": "Unidad 2 · Introducción a la Probabilidad",
+              "divisions": [
+                "2"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-1-h2-t1",
+                  "label": "Leer la teoría de la Unidad 2 · Introducción a la Probabilidad",
+                  "kind": "read",
+                  "target": "2"
+                },
+                {
+                  "id": "fase-1-h2-t2",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-1-h2-t3",
+                  "label": "Repasar las flashcards de «Teoremas»",
+                  "kind": "cards",
+                  "target": "teoremas"
+                },
+                {
+                  "id": "fase-1-h2-t4",
+                  "label": "Resolver el TP2",
+                  "kind": "exercises",
+                  "detail": "40 ejercicios · 12–15 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-1-h3",
+              "title": "Simulacro y autoevaluación",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-1-h3-t1",
+                  "label": "Simulacro del parcialito 1",
+                  "kind": "custom",
+                  "detail": "Solo ejercicios de TP1 y TP2, con corrección al final"
+                },
+                {
+                  "id": "fase-1-h3-t2",
+                  "label": "Quiz conceptual de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fase-2",
+          "title": "Parcialito 2",
+          "subtitle": "TP3 y TP4 · Unidades 3 y 4",
+          "scope": "Variables aleatorias discretas (TP3) y continuas (TP4): PMF, densidad, FDA, esperanza y varianza, y el catálogo de distribuciones de cada tipo.\n\n**Qué cae:**\n- **PMF, FDA y esperanza de una discreta** (U3) — Constante de normalización, $E[X]$, $V(X)$ y $E[g(X)]$ por LOTUS; árbol de probabilidad para armar la PMF (TP3 ej. 2 y 5).\n- **Esperanza de una v.a.d. armada a mano** (U3) — El parcialito TP3–TP4 (Com. A y F) dio el mismo relato con y sin reposición: hay que armar el recorrido, calcular cada $p_X(k)$ por Laplace condicional (o por independencia, si hay reposición) y recién ahí $E[X]$.\n- **Binomial vs. hipergeométrica: reconocer con o sin reposición** (U3) — El parcialito TP3–TP4 pidió $P(X\\ge 5)$ con reposición (Com. C, $\\mathrm{Bi}(7,p)$) y $P(X\\le 2)$ sin reposición (Com. E, hipergeométrica) sobre el MISMO cajón.\n- **Densidad sin nombre: normalizar y después integrar** (U4) — $f_T(t)=m\\,t$ en $(a,b)$: primero $m$ desde $\\int f=1$, después la cola pedida. El parcialito TP3–TP4 lo pidió en las dos direcciones ($P(T<10)$ en Com. C, $P(T>12)$ en Com. E).\n- **Normal: estandarizar y usar la simetría de $\\Phi$** (U4) — El parcialito TP3–TP4 (Com. A) pidió $P(m-2{,}56\\,s\\le T\\le m+1{,}34\\,s)$: $\\Phi(1{,}34)-(1-\\Phi(2{,}56))=0{,}9047$. Ojo: el segundo parámetro es el DESVÍO, no la varianza.\n- **Exponencial: media $L\\Rightarrow\\lambda=1/L$ y falta de memoria** (U4) — El parcialito TP3–TP4 (Com. F) pidió $P(T<b\\mid T>a)$ resolviendo por definición de condicional sobre la FDA; el resultado $1-e^{-(b-a)/L}$ es la falta de memoria.",
+          "milestones": [
+            {
+              "id": "fase-2-h1",
+              "title": "Unidad 3 · Variables Aleatorias Discretas",
+              "divisions": [
+                "3"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-2-h1-t1",
+                  "label": "Leer la teoría de la Unidad 3 · Variables Aleatorias Discretas",
+                  "kind": "read",
+                  "target": "3"
+                },
+                {
+                  "id": "fase-2-h1-t2",
+                  "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
+                  "kind": "cards",
+                  "target": "distribuciones"
+                },
+                {
+                  "id": "fase-2-h1-t3",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-2-h1-t4",
+                  "label": "Resolver el TP3",
+                  "kind": "exercises",
+                  "detail": "41 ejercicios · 14–16 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-2-h2",
+              "title": "Unidad 4 · Variables Aleatorias Continuas",
+              "divisions": [
+                "4"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-2-h2-t1",
+                  "label": "Leer la teoría de la Unidad 4 · Variables Aleatorias Continuas",
+                  "kind": "read",
+                  "target": "4"
+                },
+                {
+                  "id": "fase-2-h2-t2",
+                  "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
+                  "kind": "cards",
+                  "target": "distribuciones"
+                },
+                {
+                  "id": "fase-2-h2-t3",
+                  "label": "Resolver el TP4",
+                  "kind": "exercises",
+                  "detail": "33 ejercicios · 16–18 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-2-h3",
+              "title": "Simulacro y autoevaluación",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-2-h3-t1",
+                  "label": "Simulacro del parcialito 2",
+                  "kind": "custom",
+                  "detail": "Solo ejercicios de TP3 y TP4, con corrección al final"
+                },
+                {
+                  "id": "fase-2-h3-t2",
+                  "label": "Quiz conceptual de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fase-3",
+          "title": "Parcial",
+          "subtitle": "TP1 a TP7 · foco en las unidades 5 a 7",
+          "scope": "Integra TP1 a TP7. Lo nuevo son las unidades 5 a 7 —transformaciones, conjuntas, procesos estocásticos y TCL— sobre un repaso de todo lo anterior.\n\n**Qué cae:**\n- **Transformación Y=g(X) de una continua** (U5) — Jacobiano para $g$ monótona; caso no monótono ($Z=X^2$) partiendo el soporte; LOTUS para $E[g(X)]$.\n- **Densidad conjunta continua** (U5) — Marginales, condicional, independencia y el caso jerárquico $f_{XY}=f_X\\,f_{Y\\mid X}$. Cuidar los límites de integración.\n- **Poisson + Erlang y cadenas de Markov** (U6) — El $k$-ésimo evento es Erlang; $P(S_k>t)=P(N(t)<k)$. Markov regular ⇒ $\\pi P=\\pi$; absorbente ⇒ tiempo medio a absorción con $(I-Q)^{-1}$.\n- **TCL: distribución de X̄ y de la suma** (U7) — Exacto (discreto chico) vs. aproximado; corrección por continuidad al aproximar una discreta.\n- **Confiabilidad serie / paralelo con Exponencial** (U4) — Armar $F_T$ (paralelo = producto de FDAs; serie = producto de confiabilidades), derivar $f_T$, calcular $E[T]$ y $P(T>E[T])$.\n- **Repaso de TP1 a TP4 dentro del enunciado** (U1) — Datos agrupados, Bayes, binomial «al menos k» por complemento y Normal despejando $\\sigma$ aparecen como parte de ejercicios más largos.",
+          "milestones": [
+            {
+              "id": "fase-3-h1",
+              "title": "Unidad 5 · Función de V.A. y Bidimensionales",
+              "divisions": [
+                "5"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-3-h1-t1",
+                  "label": "Leer la teoría de la Unidad 5 · Función de V.A. y Bidimensionales",
+                  "kind": "read",
+                  "target": "5"
+                },
+                {
+                  "id": "fase-3-h1-t2",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-3-h1-t3",
+                  "label": "Resolver el TP5",
+                  "kind": "exercises",
+                  "detail": "24 ejercicios · 14–16 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-3-h2",
+              "title": "Unidad 6 · Procesos Estocásticos",
+              "divisions": [
+                "6"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-3-h2-t1",
+                  "label": "Leer la teoría de la Unidad 6 · Procesos Estocásticos",
+                  "kind": "read",
+                  "target": "6"
+                },
+                {
+                  "id": "fase-3-h2-t2",
+                  "label": "Repasar las flashcards de «Procesos estocásticos»",
+                  "kind": "cards",
+                  "target": "procesos-estocasticos"
+                },
+                {
+                  "id": "fase-3-h2-t3",
+                  "label": "Resolver el TP6",
+                  "kind": "exercises",
+                  "detail": "25 ejercicios · 14–16 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-3-h3",
+              "title": "Unidad 7 · Suma de Variables Aleatorias",
+              "divisions": [
+                "7"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-3-h3-t1",
+                  "label": "Leer la teoría de la Unidad 7 · Suma de Variables Aleatorias",
+                  "kind": "read",
+                  "target": "7"
+                },
+                {
+                  "id": "fase-3-h3-t2",
+                  "label": "Repasar las flashcards de «Teoremas»",
+                  "kind": "cards",
+                  "target": "teoremas"
+                },
+                {
+                  "id": "fase-3-h3-t3",
+                  "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
+                  "kind": "cards",
+                  "target": "distribuciones"
+                },
+                {
+                  "id": "fase-3-h3-t4",
+                  "label": "Resolver el TP7",
+                  "kind": "exercises",
+                  "detail": "24 ejercicios · 12–14 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-3-h4",
+              "title": "Repaso de U1, U2, U3, U4",
+              "divisions": [
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-3-h4-t1",
+                  "label": "Repasar la Unidad 1 · Estadística Descriptiva",
+                  "kind": "read",
+                  "target": "1"
+                },
+                {
+                  "id": "fase-3-h4-t2",
+                  "label": "Repasar la Unidad 2 · Introducción a la Probabilidad",
+                  "kind": "read",
+                  "target": "2"
+                },
+                {
+                  "id": "fase-3-h4-t3",
+                  "label": "Repasar la Unidad 3 · Variables Aleatorias Discretas",
+                  "kind": "read",
+                  "target": "3"
+                },
+                {
+                  "id": "fase-3-h4-t4",
+                  "label": "Repasar la Unidad 4 · Variables Aleatorias Continuas",
+                  "kind": "read",
+                  "target": "4"
+                }
+              ]
+            },
+            {
+              "id": "fase-3-h5",
+              "title": "Simulacro y autoevaluación",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-3-h5-t1",
+                  "label": "Simulacro del parcial cronometrado",
+                  "kind": "custom",
+                  "detail": "Solo TP1 a TP7, cronometrado y con corrección al final"
+                },
+                {
+                  "id": "fase-3-h5-t2",
+                  "label": "Quiz conceptual de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fase-4",
+          "title": "Parcialito 3",
+          "subtitle": "TP8 y TP9 · Unidades 8 y 9",
+          "scope": "Estimación de parámetros (TP8) y pruebas de hipótesis (TP9): estimadores, intervalos de confianza, tamaño muestral, tests, error tipo II y valor p.\n\n**Qué cae:**\n- **IC para la media con TCL** (U8) — El parcialito TP8–TP9 pidió el límite superior de un IC del 88% (Com. B) y el límite inferior de uno del 92% (Com. F), siempre con $\\sigma$ desconocido y $n$ grande: $\\bar x \\pm z\\,s/\\sqrt{n}$.\n- **IC para una proporción, deducido desde el TCL** (U8) — El parcialito TP8–TP9 (Com. A) pidió el límite inferior de un IC del 94% para $p$: TCL sobre $\\mathrm{Bi}(n,p)$ y $\\hat p$ en lugar de $p$ dentro de la raíz, $a=\\hat p-z_{0{,}97}\\sqrt{\\hat p(1-\\hat p)/n}$.\n- **Valor crítico de un test t (las dos colas por separado)** (U9) — Con $\\sigma$ desconocido se usa $t_{n-1}$: el parcialito TP8–TP9 pidió el crítico de cola izquierda con $n=10$ (Com. B) y el de cola derecha con $n=12$ (Com. F). Se fija ANTES de muestrear.\n- **Valor crítico con $\\sigma$ conocido** (U9) — El parcialito TP8–TP9 (Com. A) pidió $x_c=\\mu_0+z_{0{,}98}\\,\\sigma/\\sqrt{n}$: con el desvío poblacional dado se trabaja con $Z$, no con $t$.\n- **IC y test para la proporción, despejar n** (U8) — Peor caso $p=1/2$; saber invertir un IC para recuperar $\\hat p$ y $n$.\n- **Test para la media: Z o t según el caso** (U9) — $\\sigma$ conocido o $n$ grande ⇒ $Z$; $\\sigma$ desconocido con $n$ chico ⇒ $t_{n-1}$. Dos colas, cola derecha o cola izquierda.\n- **Error tipo II, potencia y valor p** (U9) — $\\beta$ se calcula bajo una alternativa concreta; potencia $=1-\\beta$; el valor p se compara contra $\\alpha$.\n- **Estimación puntual: EMV, momentos e insesgadez** (U8) — EMV con máximo en el soporte (TP8 ej. 1), método de los momentos (ej. 2) y estimador insesgado de mínima varianza (ej. 6).",
+          "milestones": [
+            {
+              "id": "fase-4-h1",
+              "title": "Unidad 8 · Inferencia Estadística",
+              "divisions": [
+                "8"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-4-h1-t1",
+                  "label": "Leer la teoría de la Unidad 8 · Inferencia Estadística",
+                  "kind": "read",
+                  "target": "8"
+                },
+                {
+                  "id": "fase-4-h1-t2",
+                  "label": "Repasar las flashcards de «Inferencia»",
+                  "kind": "cards",
+                  "target": "inferencia"
+                },
+                {
+                  "id": "fase-4-h1-t3",
+                  "label": "Resolver el TP8",
+                  "kind": "exercises",
+                  "detail": "24 ejercicios · 14–16 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-4-h2",
+              "title": "Unidad 9 · Pruebas de Hipótesis",
+              "divisions": [
+                "9"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-4-h2-t1",
+                  "label": "Leer la teoría de la Unidad 9 · Pruebas de Hipótesis",
+                  "kind": "read",
+                  "target": "9"
+                },
+                {
+                  "id": "fase-4-h2-t2",
+                  "label": "Repasar las flashcards de «Pruebas de hipótesis»",
+                  "kind": "cards",
+                  "target": "pruebas-de-hipotesis"
+                },
+                {
+                  "id": "fase-4-h2-t3",
+                  "label": "Resolver el TP9",
+                  "kind": "exercises",
+                  "detail": "20 ejercicios · 12–14 h"
+                }
+              ]
+            },
+            {
+              "id": "fase-4-h3",
+              "title": "Simulacro y autoevaluación",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-4-h3-t1",
+                  "label": "Simulacro del parcialito 3",
+                  "kind": "custom",
+                  "detail": "Solo ejercicios de TP8 y TP9, con corrección al final"
+                },
+                {
+                  "id": "fase-4-h3-t2",
+                  "label": "Quiz conceptual de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fase-5",
+          "title": "Final integrador",
+          "subtitle": "Todos los TPs",
+          "scope": "El final encadena las unidades 2 a 9 bajo un solo relato. Aparece la máxima verosimilitud (EMV) y se combinan varias unidades en un mismo ejercicio.\n\n**Qué cae:**\n- **EMV de exponencial / Poisson (ej. 1)** (U8) — Exclusivo del final. $L\\to\\ln L\\to$ derivar. Poisson: $\\hat\\lambda=\\bar x$; exponencial: $\\hat\\lambda=n/\\sum x_i$. Suele venir con descriptiva (boxplot, asimetría).\n- **Inferencia completa: error tipo II + valor p exacto** (U9) — En el mismo ejercicio, con interpretación («¿qué concluye?»). t de Student cuando $n$ es chico.\n- **Poisson process: condicional + Gamma + TCL para t** (U6) — $N(s)\\mid N(t)\\sim\\mathrm{Bin}(N(t),s/t)$; Gamma vía Poisson; «¿cuántos minutos?» con TCL (raíz positiva).\n- **Markov (absorbente / regular) + Bayes temporal** (U6) — Absorbente ⇒ estacionaria trivial. Para «el pasado dado el futuro» se usa Bayes, no $P$.\n- **Conjuntas: continua con log / discreta con covarianza** (U5) — Dibujar la región; condicionales e integrales/sumas dobles; $\\mathrm{Cov}=E[XY]-E[X]E[Y]$.\n- **Hipergeométrica vs Binomial vs Binomial Negativa** (U3) — Con/sin reposición; la binomial negativa cuenta fracasos ($\\mathbb{N}_0$). Máximo/mínimo de uniformes: $F^n$.",
+          "milestones": [
+            {
+              "id": "fase-5-h1",
+              "title": "Estimación y EMV",
+              "icon": "function",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-5-h1-t1",
+                  "label": "Repasar Estimación puntual (incluye EMV)",
+                  "kind": "custom",
+                  "target": "estimacion-puntual",
+                  "detail": "EMV de exponencial y de Poisson"
+                },
+                {
+                  "id": "fase-5-h1-t2",
+                  "label": "Flashcards de Inferencia",
+                  "kind": "cards",
+                  "target": "inferencia"
+                },
+                {
+                  "id": "fase-5-h1-t3",
+                  "label": "Repasar Estadística descriptiva (boxplot, asimetría)",
+                  "kind": "custom",
+                  "target": "estadistica-descriptiva"
+                }
+              ]
+            },
+            {
+              "id": "fase-5-h2",
+              "title": "Inferencia completa (IC + tests)",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-5-h2-t1",
+                  "label": "Intervalos de confianza y Pruebas de hipótesis",
+                  "kind": "custom",
+                  "target": "intervalos-de-confianza"
+                },
+                {
+                  "id": "fase-5-h2-t2",
+                  "label": "Error tipo I/II y valor p",
+                  "kind": "custom",
+                  "target": "error-tipo-i-y-tipo-ii"
+                },
+                {
+                  "id": "fase-5-h2-t3",
+                  "label": "Flashcards de Pruebas de hipótesis",
+                  "kind": "cards",
+                  "target": "pruebas-de-hipotesis"
+                },
+                {
+                  "id": "fase-5-h2-t4",
+                  "label": "Practicar con las calculadoras Φ · t · χ²",
+                  "kind": "tool",
+                  "target": "calc"
+                }
+              ]
+            },
+            {
+              "id": "fase-5-h3",
+              "title": "Procesos y Markov",
+              "icon": "layers",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-5-h3-t1",
+                  "label": "Proceso de Poisson y Cadenas de Markov",
+                  "kind": "custom",
+                  "target": "proceso-de-poisson"
+                },
+                {
+                  "id": "fase-5-h3-t2",
+                  "label": "Flashcards de Procesos estocásticos",
+                  "kind": "cards",
+                  "target": "procesos-estocasticos"
+                }
+              ]
+            },
+            {
+              "id": "fase-5-h4",
+              "title": "Conjuntas y transformaciones",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-5-h4-t1",
+                  "label": "Bidimensionales, covarianza y función de v.a.",
+                  "kind": "custom",
+                  "target": "variables-aleatorias-bidimensionales"
+                },
+                {
+                  "id": "fase-5-h4-t2",
+                  "label": "Asistente: ¿qué distribución uso?",
+                  "kind": "tool",
+                  "target": "explorador"
+                }
+              ]
+            },
+            {
+              "id": "fase-5-h5",
+              "title": "Repaso general",
+              "icon": "layers",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-5-h5-t1",
+                  "label": "Repasar todos los formularios",
+                  "kind": "custom",
+                  "target": "formulario-maestro"
+                },
+                {
+                  "id": "fase-5-h5-t2",
+                  "label": "Quiz completo de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
+            },
+            {
+              "id": "fase-5-h6",
+              "title": "Simulacro y autoevaluación",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-5-h6-t1",
+                  "label": "Simulacro de final cronometrado",
+                  "kind": "custom",
+                  "detail": "Todo el banco. Suba la cantidad de ítems para emular el final"
+                },
+                {
+                  "id": "fase-5-h6-t2",
+                  "label": "Quiz conceptual de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "fase-6",
-      "title": "Final directo",
-      "subtitle": "Todo el programa · orden sugerido",
-      "scope": "Una sola fase con el programa completo, en un orden de estudio pensado para rendir el final sin haber seguido la cursada: probabilidad primero, descriptiva más adelante.\n\n**Qué cae:**\n- **EMV de exponencial / Poisson (ej. 1)** (U8) — Exclusivo del final. $L\\to\\ln L\\to$ derivar. Poisson: $\\hat\\lambda=\\bar x$; exponencial: $\\hat\\lambda=n/\\sum x_i$. Suele venir con descriptiva (boxplot, asimetría).\n- **Inferencia completa: error tipo II + valor p exacto** (U9) — En el mismo ejercicio, con interpretación («¿qué concluye?»). t de Student cuando $n$ es chico.\n- **Poisson process: condicional + Gamma + TCL para t** (U6) — $N(s)\\mid N(t)\\sim\\mathrm{Bin}(N(t),s/t)$; Gamma vía Poisson; «¿cuántos minutos?» con TCL (raíz positiva).\n- **Markov (absorbente / regular) + Bayes temporal** (U6) — Absorbente ⇒ estacionaria trivial. Para «el pasado dado el futuro» se usa Bayes, no $P$.\n- **Conjuntas: continua con log / discreta con covarianza** (U5) — Dibujar la región; condicionales e integrales/sumas dobles; $\\mathrm{Cov}=E[XY]-E[X]E[Y]$.\n- **Hipergeométrica vs Binomial vs Binomial Negativa** (U3) — Con/sin reposición; la binomial negativa cuenta fracasos ($\\mathbb{N}_0$). Máximo/mínimo de uniformes: $F^n$.\n\n**Orden de estudio sugerido:**\n- **Empezar por probabilidad (U2), no por descriptiva** — Conteo, condicional, independencia y Bayes son la base de todo lo que sigue; la U1 es corta y se entiende mejor después.\n- **Discretas y continuas seguidas (U3 y U4)** — Mismo esquema en las dos: PMF o densidad, FDA, $E[X]$ y $V(X)$, y solo después el catálogo de distribuciones.\n- **Transformaciones y conjuntas (U5)** — Jacobiano, caso no monótono, marginales y condicionales; es la puerta de entrada a covarianza y correlación.\n- **Procesos y suma de variables (U6 y U7)** — Poisson y Markov por un lado; TCL por el otro, que es el puente hacia la inferencia.\n- **Inferencia completa (U8 y U9)** — Estimación puntual y EMV, intervalos de confianza, tests, error tipo II y valor p.\n- **Ejercicios que cruzan unidades** — Propio del final: un enunciado encadena descriptiva, una distribución y una decisión de inferencia.",
-      "milestones": [
+      "id": "final-directo",
+      "label": "Final directo",
+      "description": "Una sola fase con todo el programa",
+      "phases": [
         {
-          "id": "fase-6-h1",
-          "title": "Unidad 2 · Introducción a la Probabilidad",
-          "divisions": [
-            "2"
-          ],
-          "tasks": [
+          "id": "fase-6",
+          "title": "Final directo",
+          "subtitle": "Todo el programa · orden sugerido",
+          "scope": "Una sola fase con el programa completo, en un orden de estudio pensado para rendir el final sin haber seguido la cursada: probabilidad primero, descriptiva más adelante.\n\n**Qué cae:**\n- **EMV de exponencial / Poisson (ej. 1)** (U8) — Exclusivo del final. $L\\to\\ln L\\to$ derivar. Poisson: $\\hat\\lambda=\\bar x$; exponencial: $\\hat\\lambda=n/\\sum x_i$. Suele venir con descriptiva (boxplot, asimetría).\n- **Inferencia completa: error tipo II + valor p exacto** (U9) — En el mismo ejercicio, con interpretación («¿qué concluye?»). t de Student cuando $n$ es chico.\n- **Poisson process: condicional + Gamma + TCL para t** (U6) — $N(s)\\mid N(t)\\sim\\mathrm{Bin}(N(t),s/t)$; Gamma vía Poisson; «¿cuántos minutos?» con TCL (raíz positiva).\n- **Markov (absorbente / regular) + Bayes temporal** (U6) — Absorbente ⇒ estacionaria trivial. Para «el pasado dado el futuro» se usa Bayes, no $P$.\n- **Conjuntas: continua con log / discreta con covarianza** (U5) — Dibujar la región; condicionales e integrales/sumas dobles; $\\mathrm{Cov}=E[XY]-E[X]E[Y]$.\n- **Hipergeométrica vs Binomial vs Binomial Negativa** (U3) — Con/sin reposición; la binomial negativa cuenta fracasos ($\\mathbb{N}_0$). Máximo/mínimo de uniformes: $F^n$.\n\n**Orden de estudio sugerido:**\n- **Empezar por probabilidad (U2), no por descriptiva** — Conteo, condicional, independencia y Bayes son la base de todo lo que sigue; la U1 es corta y se entiende mejor después.\n- **Discretas y continuas seguidas (U3 y U4)** — Mismo esquema en las dos: PMF o densidad, FDA, $E[X]$ y $V(X)$, y solo después el catálogo de distribuciones.\n- **Transformaciones y conjuntas (U5)** — Jacobiano, caso no monótono, marginales y condicionales; es la puerta de entrada a covarianza y correlación.\n- **Procesos y suma de variables (U6 y U7)** — Poisson y Markov por un lado; TCL por el otro, que es el puente hacia la inferencia.\n- **Inferencia completa (U8 y U9)** — Estimación puntual y EMV, intervalos de confianza, tests, error tipo II y valor p.\n- **Ejercicios que cruzan unidades** — Propio del final: un enunciado encadena descriptiva, una distribución y una decisión de inferencia.",
+          "milestones": [
             {
-              "id": "fase-6-h1-t1",
-              "label": "Leer la teoría de la Unidad 2 · Introducción a la Probabilidad",
-              "kind": "read",
-              "target": "2"
+              "id": "fase-6-h1",
+              "title": "Unidad 2 · Introducción a la Probabilidad",
+              "divisions": [
+                "2"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h1-t1",
+                  "label": "Leer la teoría de la Unidad 2 · Introducción a la Probabilidad",
+                  "kind": "read",
+                  "target": "2"
+                },
+                {
+                  "id": "fase-6-h1-t2",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-6-h1-t3",
+                  "label": "Repasar las flashcards de «Teoremas»",
+                  "kind": "cards",
+                  "target": "teoremas"
+                },
+                {
+                  "id": "fase-6-h1-t4",
+                  "label": "Resolver el TP2",
+                  "kind": "exercises",
+                  "detail": "40 ejercicios · 12–15 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h1-t2",
-              "label": "Repasar las flashcards de «Definiciones clave»",
-              "kind": "cards",
-              "target": "definiciones-clave"
+              "id": "fase-6-h2",
+              "title": "Unidad 3 · Variables Aleatorias Discretas",
+              "divisions": [
+                "3"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h2-t1",
+                  "label": "Leer la teoría de la Unidad 3 · Variables Aleatorias Discretas",
+                  "kind": "read",
+                  "target": "3"
+                },
+                {
+                  "id": "fase-6-h2-t2",
+                  "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
+                  "kind": "cards",
+                  "target": "distribuciones"
+                },
+                {
+                  "id": "fase-6-h2-t3",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-6-h2-t4",
+                  "label": "Resolver el TP3",
+                  "kind": "exercises",
+                  "detail": "41 ejercicios · 14–16 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h1-t3",
-              "label": "Repasar las flashcards de «Teoremas»",
-              "kind": "cards",
-              "target": "teoremas"
+              "id": "fase-6-h3",
+              "title": "Unidad 4 · Variables Aleatorias Continuas",
+              "divisions": [
+                "4"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h3-t1",
+                  "label": "Leer la teoría de la Unidad 4 · Variables Aleatorias Continuas",
+                  "kind": "read",
+                  "target": "4"
+                },
+                {
+                  "id": "fase-6-h3-t2",
+                  "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
+                  "kind": "cards",
+                  "target": "distribuciones"
+                },
+                {
+                  "id": "fase-6-h3-t3",
+                  "label": "Resolver el TP4",
+                  "kind": "exercises",
+                  "detail": "33 ejercicios · 16–18 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h1-t4",
-              "label": "Resolver el TP2",
-              "kind": "exercises",
-              "detail": "40 ejercicios · 12–15 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h2",
-          "title": "Unidad 3 · Variables Aleatorias Discretas",
-          "divisions": [
-            "3"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h2-t1",
-              "label": "Leer la teoría de la Unidad 3 · Variables Aleatorias Discretas",
-              "kind": "read",
-              "target": "3"
+              "id": "fase-6-h4",
+              "title": "Unidad 5 · Función de V.A. y Bidimensionales",
+              "divisions": [
+                "5"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h4-t1",
+                  "label": "Leer la teoría de la Unidad 5 · Función de V.A. y Bidimensionales",
+                  "kind": "read",
+                  "target": "5"
+                },
+                {
+                  "id": "fase-6-h4-t2",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-6-h4-t3",
+                  "label": "Resolver el TP5",
+                  "kind": "exercises",
+                  "detail": "24 ejercicios · 14–16 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h2-t2",
-              "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
-              "kind": "cards",
-              "target": "distribuciones"
+              "id": "fase-6-h5",
+              "title": "Unidad 1 · Estadística Descriptiva",
+              "divisions": [
+                "1"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h5-t1",
+                  "label": "Leer la teoría de la Unidad 1 · Estadística Descriptiva",
+                  "kind": "read",
+                  "target": "1"
+                },
+                {
+                  "id": "fase-6-h5-t2",
+                  "label": "Repasar las flashcards de «Definiciones clave»",
+                  "kind": "cards",
+                  "target": "definiciones-clave"
+                },
+                {
+                  "id": "fase-6-h5-t3",
+                  "label": "Resolver el TP1",
+                  "kind": "exercises",
+                  "detail": "7 ejercicios · 4–5 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h2-t3",
-              "label": "Repasar las flashcards de «Definiciones clave»",
-              "kind": "cards",
-              "target": "definiciones-clave"
+              "id": "fase-6-h6",
+              "title": "Unidad 6 · Procesos Estocásticos",
+              "divisions": [
+                "6"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h6-t1",
+                  "label": "Leer la teoría de la Unidad 6 · Procesos Estocásticos",
+                  "kind": "read",
+                  "target": "6"
+                },
+                {
+                  "id": "fase-6-h6-t2",
+                  "label": "Repasar las flashcards de «Procesos estocásticos»",
+                  "kind": "cards",
+                  "target": "procesos-estocasticos"
+                },
+                {
+                  "id": "fase-6-h6-t3",
+                  "label": "Resolver el TP6",
+                  "kind": "exercises",
+                  "detail": "25 ejercicios · 14–16 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h2-t4",
-              "label": "Resolver el TP3",
-              "kind": "exercises",
-              "detail": "41 ejercicios · 14–16 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h3",
-          "title": "Unidad 4 · Variables Aleatorias Continuas",
-          "divisions": [
-            "4"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h3-t1",
-              "label": "Leer la teoría de la Unidad 4 · Variables Aleatorias Continuas",
-              "kind": "read",
-              "target": "4"
+              "id": "fase-6-h7",
+              "title": "Unidad 7 · Suma de Variables Aleatorias",
+              "divisions": [
+                "7"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h7-t1",
+                  "label": "Leer la teoría de la Unidad 7 · Suma de Variables Aleatorias",
+                  "kind": "read",
+                  "target": "7"
+                },
+                {
+                  "id": "fase-6-h7-t2",
+                  "label": "Repasar las flashcards de «Teoremas»",
+                  "kind": "cards",
+                  "target": "teoremas"
+                },
+                {
+                  "id": "fase-6-h7-t3",
+                  "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
+                  "kind": "cards",
+                  "target": "distribuciones"
+                },
+                {
+                  "id": "fase-6-h7-t4",
+                  "label": "Resolver el TP7",
+                  "kind": "exercises",
+                  "detail": "24 ejercicios · 12–14 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h3-t2",
-              "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
-              "kind": "cards",
-              "target": "distribuciones"
+              "id": "fase-6-h8",
+              "title": "Unidad 8 · Inferencia Estadística",
+              "divisions": [
+                "8"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h8-t1",
+                  "label": "Leer la teoría de la Unidad 8 · Inferencia Estadística",
+                  "kind": "read",
+                  "target": "8"
+                },
+                {
+                  "id": "fase-6-h8-t2",
+                  "label": "Repasar las flashcards de «Inferencia»",
+                  "kind": "cards",
+                  "target": "inferencia"
+                },
+                {
+                  "id": "fase-6-h8-t3",
+                  "label": "Resolver el TP8",
+                  "kind": "exercises",
+                  "detail": "24 ejercicios · 14–16 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h3-t3",
-              "label": "Resolver el TP4",
-              "kind": "exercises",
-              "detail": "33 ejercicios · 16–18 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h4",
-          "title": "Unidad 5 · Función de V.A. y Bidimensionales",
-          "divisions": [
-            "5"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h4-t1",
-              "label": "Leer la teoría de la Unidad 5 · Función de V.A. y Bidimensionales",
-              "kind": "read",
-              "target": "5"
+              "id": "fase-6-h9",
+              "title": "Unidad 9 · Pruebas de Hipótesis",
+              "divisions": [
+                "9"
+              ],
+              "tasks": [
+                {
+                  "id": "fase-6-h9-t1",
+                  "label": "Leer la teoría de la Unidad 9 · Pruebas de Hipótesis",
+                  "kind": "read",
+                  "target": "9"
+                },
+                {
+                  "id": "fase-6-h9-t2",
+                  "label": "Repasar las flashcards de «Pruebas de hipótesis»",
+                  "kind": "cards",
+                  "target": "pruebas-de-hipotesis"
+                },
+                {
+                  "id": "fase-6-h9-t3",
+                  "label": "Resolver el TP9",
+                  "kind": "exercises",
+                  "detail": "20 ejercicios · 12–14 h"
+                }
+              ]
             },
             {
-              "id": "fase-6-h4-t2",
-              "label": "Repasar las flashcards de «Definiciones clave»",
-              "kind": "cards",
-              "target": "definiciones-clave"
-            },
-            {
-              "id": "fase-6-h4-t3",
-              "label": "Resolver el TP5",
-              "kind": "exercises",
-              "detail": "24 ejercicios · 14–16 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h5",
-          "title": "Unidad 1 · Estadística Descriptiva",
-          "divisions": [
-            "1"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h5-t1",
-              "label": "Leer la teoría de la Unidad 1 · Estadística Descriptiva",
-              "kind": "read",
-              "target": "1"
-            },
-            {
-              "id": "fase-6-h5-t2",
-              "label": "Repasar las flashcards de «Definiciones clave»",
-              "kind": "cards",
-              "target": "definiciones-clave"
-            },
-            {
-              "id": "fase-6-h5-t3",
-              "label": "Resolver el TP1",
-              "kind": "exercises",
-              "detail": "7 ejercicios · 4–5 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h6",
-          "title": "Unidad 6 · Procesos Estocásticos",
-          "divisions": [
-            "6"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h6-t1",
-              "label": "Leer la teoría de la Unidad 6 · Procesos Estocásticos",
-              "kind": "read",
-              "target": "6"
-            },
-            {
-              "id": "fase-6-h6-t2",
-              "label": "Repasar las flashcards de «Procesos estocásticos»",
-              "kind": "cards",
-              "target": "procesos-estocasticos"
-            },
-            {
-              "id": "fase-6-h6-t3",
-              "label": "Resolver el TP6",
-              "kind": "exercises",
-              "detail": "25 ejercicios · 14–16 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h7",
-          "title": "Unidad 7 · Suma de Variables Aleatorias",
-          "divisions": [
-            "7"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h7-t1",
-              "label": "Leer la teoría de la Unidad 7 · Suma de Variables Aleatorias",
-              "kind": "read",
-              "target": "7"
-            },
-            {
-              "id": "fase-6-h7-t2",
-              "label": "Repasar las flashcards de «Teoremas»",
-              "kind": "cards",
-              "target": "teoremas"
-            },
-            {
-              "id": "fase-6-h7-t3",
-              "label": "Repasar las flashcards de «Distribuciones · E[X] y V(X)»",
-              "kind": "cards",
-              "target": "distribuciones"
-            },
-            {
-              "id": "fase-6-h7-t4",
-              "label": "Resolver el TP7",
-              "kind": "exercises",
-              "detail": "24 ejercicios · 12–14 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h8",
-          "title": "Unidad 8 · Inferencia Estadística",
-          "divisions": [
-            "8"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h8-t1",
-              "label": "Leer la teoría de la Unidad 8 · Inferencia Estadística",
-              "kind": "read",
-              "target": "8"
-            },
-            {
-              "id": "fase-6-h8-t2",
-              "label": "Repasar las flashcards de «Inferencia»",
-              "kind": "cards",
-              "target": "inferencia"
-            },
-            {
-              "id": "fase-6-h8-t3",
-              "label": "Resolver el TP8",
-              "kind": "exercises",
-              "detail": "24 ejercicios · 14–16 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h9",
-          "title": "Unidad 9 · Pruebas de Hipótesis",
-          "divisions": [
-            "9"
-          ],
-          "tasks": [
-            {
-              "id": "fase-6-h9-t1",
-              "label": "Leer la teoría de la Unidad 9 · Pruebas de Hipótesis",
-              "kind": "read",
-              "target": "9"
-            },
-            {
-              "id": "fase-6-h9-t2",
-              "label": "Repasar las flashcards de «Pruebas de hipótesis»",
-              "kind": "cards",
-              "target": "pruebas-de-hipotesis"
-            },
-            {
-              "id": "fase-6-h9-t3",
-              "label": "Resolver el TP9",
-              "kind": "exercises",
-              "detail": "20 ejercicios · 12–14 h"
-            }
-          ]
-        },
-        {
-          "id": "fase-6-h10",
-          "title": "Simulacro y autoevaluación",
-          "divisions": [],
-          "tasks": [
-            {
-              "id": "fase-6-h10-t1",
-              "label": "Simulacro de final cronometrado",
-              "kind": "custom",
-              "detail": "Todo el programa, cronometrado y con corrección al final"
-            },
-            {
-              "id": "fase-6-h10-t2",
-              "label": "Quiz conceptual de autoevaluación",
-              "kind": "quiz",
-              "target": "quiz-general"
+              "id": "fase-6-h10",
+              "title": "Simulacro y autoevaluación",
+              "divisions": [],
+              "tasks": [
+                {
+                  "id": "fase-6-h10-t1",
+                  "label": "Simulacro de final cronometrado",
+                  "kind": "custom",
+                  "detail": "Todo el programa, cronometrado y con corrección al final"
+                },
+                {
+                  "id": "fase-6-h10-t2",
+                  "label": "Quiz conceptual de autoevaluación",
+                  "kind": "quiz",
+                  "target": "quiz-general"
+                }
+              ]
             }
           ]
         }

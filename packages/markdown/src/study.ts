@@ -30,6 +30,7 @@ import {
   type Deck as DeckType,
   type Kit as KitType,
   type Plan as PlanType,
+  type PlanPhase as PlanPhaseType,
   type Page as PageType,
   type Quiz as QuizType,
   type QuizQuestion as QuizQuestionType,
@@ -61,20 +62,45 @@ export interface CompileStudyResult {
   issues: CompileIssue[];
 }
 
+/**
+ * Fases distintas del plan, en orden: primero las de `plan.phases` (la modalidad
+ * por defecto) y después las que agregue cada modalidad de `plan.tracks`.
+ *
+ * Una fase que aparece en más de una modalidad **es la misma fase** (decisión
+ * B4-2): se cuenta una sola vez, y sus ids de tarea no se leen como repetidos.
+ * Eso es lo que permite que `phases` duplique a la modalidad por defecto sin que
+ * el plan quede inválido, y que el progreso del usuario (`tasksDone`, guardado
+ * por id de tarea) valga en las dos modalidades que comparten una fase.
+ */
+export function planPhases(plan: PlanType | null | undefined): PlanPhaseType[] {
+  if (!plan) return [];
+  const out: PlanPhaseType[] = [];
+  const seen = new Set<string>();
+  for (const phase of [...plan.phases, ...plan.tracks.flatMap((t) => t.phases)]) {
+    if (seen.has(phase.id)) continue;
+    seen.add(phase.id);
+    out.push(phase);
+  }
+  return out;
+}
+
 /** Conteos del material de estudio: los imprime el CLI y los usan los tests. */
 export interface StudyCounts {
   decks: number;
   cards: number;
   quizzes: number;
   questions: number;
+  /** Fases distintas de todo el plan (`planPhases`), no solo las de la modalidad por defecto. */
   phases: number;
   milestones: number;
   tasks: number;
+  /** Modalidades declaradas (`Plan.tracks`); 0 si el plan tiene una sola. */
+  tracks: number;
   kits: number;
 }
 
 export function studyCounts(study: StudyContentType): StudyCounts {
-  const phases = study.plan?.phases ?? [];
+  const phases = planPhases(study.plan);
   const milestones = phases.flatMap((p) => p.milestones);
   return {
     decks: study.decks.length,
@@ -84,6 +110,7 @@ export function studyCounts(study: StudyContentType): StudyCounts {
     phases: phases.length,
     milestones: milestones.length,
     tasks: milestones.reduce((n, m) => n + m.tasks.length, 0),
+    tracks: study.plan?.tracks.length ?? 0,
     kits: study.kits.length,
   };
 }
@@ -457,8 +484,12 @@ function crossCheck(
     for (const question of quiz.questions) checkPage(`quiz "${quiz.id}"`, question.page);
   }
 
+  // --- plan: modalidades e ids ----------------------------------------------
+  const phases = planPhases(study.plan);
+  if (study.plan) checkPlanIds(study.plan, phases, issues);
+
   // --- plan -----------------------------------------------------------------
-  for (const phase of study.plan?.phases ?? []) {
+  for (const phase of phases) {
     for (const milestone of phase.milestones) {
       const where = `${PLAN_FILE} · ${phase.id}/${milestone.id}`;
       for (const key of milestone.divisions) {
@@ -500,6 +531,74 @@ function crossCheck(
     }
     for (const id of kit.tools) {
       if (!railIds.has(id)) broken(where, `la herramienta "${id}" no es un ítem del rail del config`);
+    }
+  }
+}
+
+/**
+ * Ids del plan cuando hay más de una modalidad (`Plan.tracks`, decisión N0-43).
+ *
+ * Tres reglas, todas por el mismo motivo: el estado del usuario se guarda por id
+ * de tarea (`StudyState.tasksDone`) y es global a la materia, así que dos tareas
+ * distintas con el mismo id se marcarían como hechas juntas.
+ *
+ *  1. Los ids de modalidad, de fase (dentro de una misma modalidad), de hito y de
+ *     tarea no se repiten. Los de tarea se miran **a través de todas las
+ *     modalidades**, no dentro de cada una.
+ *  2. Una fase repetida en dos modalidades tiene que ser idéntica: si comparte el
+ *     id pero cambia el contenido, son dos fases distintas mal identificadas.
+ *  3. `phases` (lo que se muestra sin elegir modalidad) debería coincidir con
+ *     alguna de las modalidades declaradas; si no, el lector abre un plan que
+ *     ningún conmutador puede volver a mostrar.
+ */
+function checkPlanIds(plan: PlanType, phases: readonly PlanPhaseType[], issues: CompileIssue[]): void {
+  const dupe = (detail: string) => issues.push({ kind: "study-duplicate-id", page: PLAN_FILE, detail });
+
+  for (const id of duplicates(plan.tracks.map((t) => t.id))) dupe(`id de modalidad "${id}"`);
+  for (const id of duplicates(plan.phases.map((p) => p.id))) dupe(`id de fase "${id}" en "phases"`);
+  for (const track of plan.tracks) {
+    for (const id of duplicates(track.phases.map((p) => p.id))) {
+      dupe(`id de fase "${id}" en la modalidad "${track.id}"`);
+    }
+  }
+  for (const id of duplicates(phases.flatMap((p) => p.milestones.map((m) => m.id)))) {
+    dupe(`id de hito "${id}"`);
+  }
+  for (const id of duplicates(phases.flatMap((p) => p.milestones.flatMap((m) => m.tasks.map((t) => t.id))))) {
+    dupe(`id de tarea "${id}" (los ids son globales al plan y el progreso del usuario se guarda por id)`);
+  }
+
+  // Regla 2: misma fase en dos modalidades ⇒ mismo contenido.
+  const byId = new Map<string, string>();
+  const origins: Array<{ phase: PlanPhaseType; where: string }> = [
+    ...plan.phases.map((phase) => ({ phase, where: "phases" })),
+    ...plan.tracks.flatMap((t) => t.phases.map((phase) => ({ phase, where: `tracks.${t.id}` }))),
+  ];
+  for (const { phase, where } of origins) {
+    const serialized = JSON.stringify(phase);
+    const first = byId.get(phase.id);
+    if (first === undefined) byId.set(phase.id, serialized);
+    else if (first !== serialized) {
+      issues.push({
+        kind: "study-invalid",
+        page: `${PLAN_FILE} · ${where}`,
+        detail: `la fase "${phase.id}" aparece en dos modalidades con contenido distinto: use ids distintos o repita la misma fase`,
+      });
+    }
+  }
+
+  // Regla 3: `phases` es la modalidad por defecto.
+  if (plan.tracks.length > 0) {
+    const key = (list: readonly PlanPhaseType[]) => list.map((p) => p.id).join(" ");
+    const defaultKey = key(plan.phases);
+    if (!plan.tracks.some((t) => key(t.phases) === defaultKey)) {
+      issues.push({
+        kind: "study-invalid",
+        page: PLAN_FILE,
+        detail:
+          `"phases" no coincide con ninguna modalidad de "tracks": es lo que se muestra mientras el usuario no elija una, ` +
+          `así que debería repetir las fases de la modalidad por defecto (${plan.tracks.map((t) => `"${t.id}"`).join(", ")})`,
+      });
     }
   }
 }
