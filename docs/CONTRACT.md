@@ -147,6 +147,20 @@ pnpm sinapsis sync --config /ruta/a/sinapsis.config.json --api http://localhost:
 | `PUT` / `DELETE /api/subjects/:slug/progress/:page` | sesión | Marcar / desmarcar como estudiada. |
 | `PUT /api/subjects/:slug/sync` | `SYNC_TOKEN` | Ver §4. |
 
+### Rutas del Sprint 2 (estudio)
+
+| Método y ruta | Auth | Qué |
+|---|---|---|
+| `GET /api/landing/semesters` | sesión | Cuatrimestres del usuario en orden (incluye vacíos). `PUT /api/landing` acepta `semesters?: string[]`. |
+| `GET /api/subjects/:slug/graph` | sesión | `GraphData`: páginas y wikilinks resueltos (`page_links`). |
+| `GET /api/subjects/:slug/study` | sesión | `StudyContent`: mazos, quizzes, plan y kits del wiki + mazos automáticos por división. |
+| `GET /api/subjects/:slug/study/state` | sesión | `StudyState`: SRS, favoritos, apuntes, tareas hechas, intentos. |
+| `POST /api/subjects/:slug/study/srs/:cardId` `{grade}` | sesión | Califica una tarjeta (SM-2, `sm2` del contrato) → `SrsState`. `DELETE` reinicia. |
+| `PUT` / `DELETE /api/subjects/:slug/bookmarks/:page` | sesión | Favorito. |
+| `PUT /api/subjects/:slug/notes/:page` `{body}` / `DELETE` | sesión | Apunte markdown por página. |
+| `PUT` / `DELETE /api/subjects/:slug/tasks/:taskId` | sesión | Tarea del plan hecha / deshecha. |
+| `POST /api/subjects/:slug/quiz/:quizId/attempts` `{score,total}` | sesión | Registra un intento. |
+
 ## 6. Skill `/sinapsis` (agente por materia)
 
 - `/sinapsis init` — lee el wiki de la materia, propone `sinapsis.config.json` (divisiones a
