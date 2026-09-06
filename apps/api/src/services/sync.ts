@@ -166,6 +166,7 @@ function pageValues(page: Page) {
     order: page.order ?? null,
     summary: page.summary,
     format: page.format ?? null,
+    hub: page.hub ?? null,
     tagsJson: page.tags,
     sourcesJson: page.sources,
     updatedAtSrc: page.updatedAt ?? null,

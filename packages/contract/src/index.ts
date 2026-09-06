@@ -670,6 +670,8 @@ export const PlanTask = z.object({
   target: z.string().max(400).optional(),
   /** Detalle corto (costo estimado, cantidad de ejercicios…). */
   detail: z.string().max(300).optional(),
+  /** Parámetros del destino de una tarea `tool` (`u=1,2` → `/m/<s>/t/<target>?u=1,2`), sin el `?`. */
+  query: z.string().max(200).optional(),
 });
 export type PlanTask = z.infer<typeof PlanTask>;
 
@@ -763,6 +765,8 @@ export type Plan = z.infer<typeof Plan>;
  * el 29 de febrero solo pasa en año bisiesto. Los dos mensajes son propios: el
  * del `regex` de zod es «Invalid» y no dice qué formato se esperaba.
  */
+const DATE_FORMAT = /^\d{4}-\d{2}-\d{2}$/;
+
 const isCalendarDate = (value: string): boolean => {
   const [y, m, d] = value.split("-").map(Number) as [number, number, number];
   /* `Date.UTC(y, …)` interpreta los años de dos cifras como 19xx; con
@@ -774,8 +778,11 @@ const isCalendarDate = (value: string): boolean => {
 
 export const PlanDate = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "debe tener el formato AAAA-MM-DD")
-  .refine(isCalendarDate, "no es una fecha del calendario");
+  .regex(DATE_FORMAT, "debe tener el formato AAAA-MM-DD")
+  /* El `refine` corre igual aunque el `regex` haya fallado, así que se saltea
+     cuando el formato ya está mal: si no, «15/04/2026» devolvía los dos
+     mensajes pegados. */
+  .refine((v) => !DATE_FORMAT.test(v) || isCalendarDate(v), "no es una fecha del calendario");
 export const PlanDateInput = z.object({ date: PlanDate });
 export type PlanDateInput = z.infer<typeof PlanDateInput>;
 

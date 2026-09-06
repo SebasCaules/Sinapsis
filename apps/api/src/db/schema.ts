@@ -86,6 +86,8 @@ export const pages = sqliteTable(
     order: integer("order"),
     summary: text("summary").notNull().default(""),
     format: text("format"),
+    /** Portada de la división (`Page.hub`): 1 o NULL. */
+    hub: integer("hub", { mode: "boolean" }),
     tagsJson: text("tags_json", { mode: "json" }).$type<string[]>().notNull(),
     sourcesJson: text("sources_json", { mode: "json" }).$type<string[]>().notNull(),
     updatedAtSrc: text("updated_at_src"),

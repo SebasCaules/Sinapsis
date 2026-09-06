@@ -18,3 +18,5 @@ test-results/
 # Capturas masivas de las revisiones del Sprint 3: solo se versionan las que citan los docs (git add -f)
 design/referencias/sprint3/
 design/referencias/sprint3-diseno/
+design/referencias/brechas/
+design/referencias/brechas-fix/
