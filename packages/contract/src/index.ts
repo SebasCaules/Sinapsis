@@ -256,6 +256,12 @@ export const Page = z.object({
   tags: z.array(z.string().max(60)).default([]),
   /** Slugs de las fuentes citadas en el frontmatter. */
   sources: z.array(z.string().max(120)).default([]),
+  /**
+   * Página «hub» de su división (frontmatter `hub: true`): la portada o el panorama
+   * de la unidad. La vista de la división la muestra como tarjeta de panorama y va
+   * primera en la secuencia; el grafo la etiqueta de forma permanente.
+   */
+  hub: z.boolean().optional(),
   updatedAt: z.string().max(40).optional(),
   links: z.array(PageLink).default([]),
   headings: z.array(PageHeading).default([]),
@@ -505,6 +511,9 @@ export function errorMessageFromBody(body: unknown, status: number, statusText =
  * no declarados en el config cuentan; solo `countsAsContent: false` excluye.
  */
 export function countsAsContent(cfg: Pick<SubjectConfigLoose, "pageTypes">, type: string): boolean {
+  /* Las páginas meta del wiki (índice, registro) nunca son contenido: no entran
+     en el progreso, la secuencia, el catálogo ni el grafo por defecto. */
+  if (type === PAGE_TYPE_META) return false;
   return cfg.pageTypes.find((t) => t.key === type)?.countsAsContent !== false;
 }
 
@@ -770,16 +779,46 @@ export const PlanDate = z
 export const PlanDateInput = z.object({ date: PlanDate });
 export type PlanDateInput = z.infer<typeof PlanDateInput>;
 
+/**
+ * Lanzador de un kit: el id de un ítem del rail (forma corta) o un objeto con
+ * rótulo propio, destino con parámetros e icono, como los del baseline
+ * («Simulador acotado a U1–U2» → `parcial?u=1,2`).
+ */
+export const KitTool = z.union([
+  z.string().max(48),
+  z.object({
+    /** Id de un ítem del rail o vista de herramienta (`target` del ítem `kind: "tool"`), con `?parámetros` opcionales. */
+    target: z.string().min(1).max(160),
+    label: z.string().min(1).max(80).optional(),
+    icon: IconName.optional(),
+  }),
+]);
+export type KitTool = z.infer<typeof KitTool>;
+/** Id del ítem del rail al que apunta un lanzador (sin los `?parámetros`). */
+export function kitToolId(tool: KitTool): string {
+  const raw = typeof tool === "string" ? tool : tool.target;
+  return raw.split("?")[0] ?? raw;
+}
+/** Parámetros del lanzador (`?u=1,2` → "u=1,2"), o "" si no lleva. */
+export function kitToolParams(tool: KitTool): string {
+  const raw = typeof tool === "string" ? tool : tool.target;
+  const at = raw.indexOf("?");
+  return at >= 0 ? raw.slice(at + 1) : "";
+}
+
 export const Kit = z.object({
   id: StudyId,
   title: z.string().min(1).max(120),
   description: z.string().max(600).optional(),
+  icon: IconName.optional(),
+  /** Color del kit (hex o token); sin declarar, el de su primera división. */
+  color: ColorRef.optional(),
   divisions: z.array(DivisionKey).default([]),
   pages: z.array(Slug).default([]),
   decks: z.array(StudyId).default([]),
   quizzes: z.array(StudyId).default([]),
-  /** Ids de ítems del rail (herramientas de la materia). */
-  tools: z.array(z.string().max(48)).default([]),
+  /** Lanzadores del kit (ver `KitTool`). */
+  tools: z.array(KitTool).default([]),
 });
 export type Kit = z.infer<typeof Kit>;
 

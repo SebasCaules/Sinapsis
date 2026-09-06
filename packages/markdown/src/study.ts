@@ -36,6 +36,7 @@ import {
   type QuizQuestion as QuizQuestionType,
   type StudyContent as StudyContentType,
   type SubjectConfig as SubjectConfigType,
+  kitToolId,
 } from "@sinapsis/contract";
 import type { CompileIssue } from "./compile.js";
 import { parseFrontmatter } from "./frontmatter.js";
@@ -529,7 +530,8 @@ function crossCheck(
     for (const id of kit.quizzes) {
       if (!quizIds.has(id)) broken(where, `el quiz "${id}" no existe`);
     }
-    for (const id of kit.tools) {
+    for (const tool of kit.tools) {
+      const id = kitToolId(tool);
       if (!railIds.has(id)) broken(where, `la herramienta "${id}" no es un ítem del rail del config`);
     }
   }
@@ -550,6 +552,14 @@ function crossCheck(
  *  3. `phases` (lo que se muestra sin elegir modalidad) debería coincidir con
  *     alguna de las modalidades declaradas; si no, el lector abre un plan que
  *     ningún conmutador puede volver a mostrar.
+ *
+ * Y una cuarta, por el mismo motivo pero sobre las instancias evaluatorias
+ * (`Plan.instances`, S-13): la fecha que carga el usuario se guarda por clave de
+ * instancia (`StudyState.planDates`), así que dos instancias con la misma clave
+ * compartirían fecha, y una fase que nombra una instancia no declarada se queda
+ * sin campo de fecha en el lector. El recuperatorio, además, es otra instancia
+ * que la principal: con `instance === retake` la fase tendría un solo campo
+ * dibujado dos veces.
  */
 function checkPlanIds(plan: PlanType, phases: readonly PlanPhaseType[], issues: CompileIssue[]): void {
   const dupe = (detail: string) => issues.push({ kind: "study-duplicate-id", page: PLAN_FILE, detail });
@@ -589,7 +599,7 @@ function checkPlanIds(plan: PlanType, phases: readonly PlanPhaseType[], issues: 
 
   // Regla 3: `phases` es la modalidad por defecto.
   if (plan.tracks.length > 0) {
-    const key = (list: readonly PlanPhaseType[]) => list.map((p) => p.id).join(" ");
+    const key = (list: readonly PlanPhaseType[]) => list.map((p) => p.id).join("\0");
     const defaultKey = key(plan.phases);
     if (!plan.tracks.some((t) => key(t.phases) === defaultKey)) {
       issues.push({
@@ -598,6 +608,31 @@ function checkPlanIds(plan: PlanType, phases: readonly PlanPhaseType[], issues: 
         detail:
           `"phases" no coincide con ninguna modalidad de "tracks": es lo que se muestra mientras el usuario no elija una, ` +
           `así que debería repetir las fases de la modalidad por defecto (${plan.tracks.map((t) => `"${t.id}"`).join(", ")})`,
+      });
+    }
+  }
+
+  // Regla 4: instancias evaluatorias (claves únicas y referencias vivas).
+  for (const key of duplicates(plan.instances.map((i) => i.key))) {
+    dupe(`clave de instancia "${key}" (la fecha del usuario se guarda por clave)`);
+  }
+  const instanceKeys = new Set(plan.instances.map((i) => i.key));
+  for (const phase of phases) {
+    for (const field of ["instance", "retake"] as const) {
+      const key = phase[field];
+      if (key !== undefined && !instanceKeys.has(key)) {
+        issues.push({
+          kind: "study-broken-ref",
+          page: `${PLAN_FILE} · ${phase.id}`,
+          detail: `«${field}» apunta a la instancia "${key}", que no está declarada en "instances"`,
+        });
+      }
+    }
+    if (phase.instance !== undefined && phase.instance === phase.retake) {
+      issues.push({
+        kind: "study-invalid",
+        page: `${PLAN_FILE} · ${phase.id}`,
+        detail: `«instance» y «retake» son la misma instancia ("${phase.instance}"): el recuperatorio necesita su propia clave`,
       });
     }
   }

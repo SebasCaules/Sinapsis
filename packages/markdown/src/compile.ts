@@ -201,6 +201,8 @@ export function compilePage(input: CompilePageInput): PageType {
   }
 
   const format = scalar(meta, "formato", "format").slice(0, 40);
+  const hubRaw = scalar(meta, "hub").trim().toLowerCase();
+  const hub = hubRaw === "true" || hubRaw === "sí" || hubRaw === "si" || hubRaw === "yes" || hubRaw === "1";
   const updatedAt = scalar(meta, "actualizado", "updatedAt", "updated").slice(0, 40);
   const tags = list(meta, "tags").map((t) => t.slice(0, 60));
   const sources = list(meta, "fuentes", "sources").map((s) => s.slice(0, 120));
@@ -222,6 +224,7 @@ export function compilePage(input: CompilePageInput): PageType {
     ...(order !== undefined ? { order } : {}),
     summary,
     ...(format ? { format } : {}),
+    ...(hub ? { hub } : {}),
     tags,
     sources,
     ...(updatedAt ? { updatedAt } : {}),

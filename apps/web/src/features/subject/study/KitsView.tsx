@@ -4,7 +4,7 @@
  * La lista muestra de qué está hecho cada kit y cuánto de su lectura va hecha.
  */
 import { Link } from "react-router-dom";
-import { plural, routes } from "@sinapsis/contract";
+import { kitToolId, plural, routes } from "@sinapsis/contract";
 import { useSubjectCtx } from "../context";
 import { ErrorCard, WideSkeleton } from "../components/States";
 import { ActionLink, Bar, DivisionChips, EmptyPanel, Stat, StudyHead, StudyView } from "./ui";
@@ -68,7 +68,7 @@ export function KitsView() {
           const { kit } = stat;
           /* Solo se cuentan las herramientas que el rail sabe abrir: es lo que
              después dibuja el detalle del kit. */
-          const tools = kit.tools.filter((id) => model.railItem(id));
+          const tools = kit.tools.filter((tool) => model.railItem(kitToolId(tool)));
           return (
             <Link
               key={kit.id}

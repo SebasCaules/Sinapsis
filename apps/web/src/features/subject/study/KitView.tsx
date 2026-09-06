@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
-import { plural, routes, type IconName } from "@sinapsis/contract";
+import { kitToolId, plural, routes, type IconName } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { ErrorCard, WideSkeleton } from "../components/States";
@@ -47,7 +47,7 @@ export function KitView() {
 
   const { kit } = stat;
   const pages = kit.pages.map((s) => model.bySlug.get(s)).filter((p): p is NonNullable<typeof p> => !!p);
-  const tools = kit.tools.map((id) => model.railItem(id)).filter((t): t is NonNullable<typeof t> => !!t);
+  const tools = kit.tools.map((tool) => model.railItem(kitToolId(tool))).filter((t): t is NonNullable<typeof t> => !!t);
 
   return (
     <StudyView>

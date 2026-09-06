@@ -18,6 +18,7 @@
  */
 import {
   SRS_DEFAULT,
+  plural,
   sm2,
   type Card,
   type Deck,
@@ -33,6 +34,7 @@ import {
   type SrsState,
   type StudyContent,
   type StudyState,
+  type KitTool,
 } from "@sinapsis/contract";
 
 /** Intervalo (en días) a partir del cual una tarjeta se considera dominada. */
@@ -106,8 +108,8 @@ export interface KitStat {
   due: number;
   cards: number;
   questions: number;
-  /** Ids de herramientas del rail declaradas por el kit. */
-  tools: string[];
+  /** Lanzadores declarados por el kit (id del rail o `{target, label, icon}`, ver `KitTool`). */
+  tools: KitTool[];
 }
 
 export interface Progress {
@@ -300,12 +302,27 @@ export function spokenMath(text: string): string {
     .trim();
 }
 
+/**
+ * `AAAA-MM-DD` → número de día desde la época, o null si no es una fecha.
+ *
+ * Se arma con `Date.UTC` a propósito: dos fechas separadas por un cambio de
+ * horario de verano distan 24 h ± 1 en hora local, y la resta daría 0,96 o 1,04
+ * días. En UTC la diferencia siempre es entera.
+ */
+export function dayNum(date: string | null | undefined): number | null {
+  const m = String(date ?? "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) / 86_400_000 : null;
+}
+
+/** El día LOCAL de `now` en la misma escala que `dayNum` (nunca el día UTC). */
+function todayNum(now: Date): number {
+  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86_400_000;
+}
+
 /** Días enteros entre hoy y una fecha `AAAA-MM-DD` (negativo si ya pasó). */
 export function daysUntil(date: string, now: Date): number | null {
-  const target = Date.parse(`${date}T00:00:00`);
-  if (Number.isNaN(target)) return null;
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  return Math.round((target - today) / 86_400_000);
+  const target = dayNum(date);
+  return target === null ? null : Math.round(target - todayNum(now));
 }
 
 /** «hoy», «mañana», «en 12 días», «hace 3 días». */
@@ -323,6 +340,222 @@ export function formatDate(date: string): string {
   const parsed = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return date;
   return parsed.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" });
+}
+
+/* ==========================================================================
+   Instancias evaluatorias y fechas del plan
+   ──────────────────────────────────────────
+   Las fechas de los parcialitos, el parcial, su recuperatorio y el final NO son
+   del wiki: las carga cada usuario y viven en su cuenta (`StudyState.planDates`,
+   por clave de `Plan.instances`). `PlanPhase.date` es solo el valor por defecto
+   del cronograma de la cátedra: la fecha del usuario lo pisa.
+
+   Todo lo de acá es PURO y toma la hora por parámetro, como el resto del módulo.
+   ========================================================================== */
+
+/** Las fechas cargadas por el usuario, por clave de instancia. */
+export type PlanDates = Readonly<Record<string, string>>;
+
+/** Rótulo de una instancia; si el plan no la declara, su propia clave. */
+export function instanceLabel(plan: Plan | null | undefined, key: string): string {
+  return plan?.instances.find((i) => i.key === key)?.label ?? key;
+}
+
+/**
+ * La fecha vigente de la instancia PRINCIPAL de una fase: la que cargó el
+ * usuario y, si no cargó ninguna, la del cronograma (`PlanPhase.date`).
+ */
+export function phaseMainDate(phase: PlanPhase, dates: PlanDates): string | null {
+  const own = phase.instance ? dates[phase.instance] : undefined;
+  return own ?? phase.date ?? null;
+}
+
+/** La fecha del recuperatorio de la fase (solo la del usuario: no tiene default). */
+export function phaseRetakeDate(phase: PlanPhase, dates: PlanDates): string | null {
+  return (phase.retake ? dates[phase.retake] : undefined) ?? null;
+}
+
+export interface PhaseDeadline {
+  /** Clave de instancia, o null si la fecha es la del cronograma y la fase no declara instancia. */
+  key: string | null;
+  date: string;
+  /** Días hasta esa fecha (negativo si ya pasó). */
+  days: number;
+  /** true si es la del recuperatorio. */
+  retake: boolean;
+}
+
+/** Las fechas de la fase en orden: primero la instancia principal, después el recuperatorio. */
+function phaseDates(phase: PlanPhase, dates: PlanDates): PhaseDeadline[] {
+  const out: PhaseDeadline[] = [];
+  const main = phaseMainDate(phase, dates);
+  if (main) out.push({ key: phase.instance ?? null, date: main, days: 0, retake: false });
+  const rec = phaseRetakeDate(phase, dates);
+  if (rec && phase.retake) out.push({ key: phase.retake, date: rec, days: 0, retake: true });
+  return out;
+}
+
+/**
+ * La fecha que manda en una fase: la PRIMERA futura entre su instancia y su
+ * recuperatorio; si ya pasaron todas, la última cargada. Null si no hay ninguna.
+ */
+export function phaseDeadline(phase: PlanPhase, dates: PlanDates, now: Date): PhaseDeadline | null {
+  let best: PhaseDeadline | null = null;
+  let last: PhaseDeadline | null = null;
+  for (const entry of phaseDates(phase, dates)) {
+    const days = daysUntil(entry.date, now);
+    if (days === null) continue;
+    const item: PhaseDeadline = { ...entry, days };
+    last = item;
+    if (days >= 0 && (best === null || days < best.days)) best = item;
+  }
+  return best ?? last;
+}
+
+export type CountTone = "plain" | "soon" | "past";
+
+export interface CountChip {
+  days: number;
+  /** `soon` a siete días o menos; `past` cuando ya pasó. */
+  tone: CountTone;
+  text: string;
+}
+
+/** «faltan 12 días» · «falta 1 día» · «es hoy» · «pasó hace 3 días». Null sin fecha. */
+export function countChip(date: string | null | undefined, now: Date): CountChip | null {
+  const days = date ? daysUntil(date, now) : null;
+  if (days === null) return null;
+  const text =
+    days > 0
+      ? days === 1
+        ? "falta 1 día"
+        : `faltan ${days} días`
+      : days === 0
+        ? "es hoy"
+        : `pasó hace ${-days === 1 ? "1 día" : `${-days} días`}`;
+  return { days, tone: days < 0 ? "past" : days <= 7 ? "soon" : "plain", text };
+}
+
+export interface Pace {
+  /** Días hasta la fecha de la fase (negativo si ya pasó). */
+  days: number;
+  weeks: number;
+  /** Tareas de la fase sin marcar. */
+  pending: number;
+  /** Hitos de la fase con algo pendiente. */
+  msPending: number;
+  tasksPerWeek: number;
+  msPerWeek: number;
+  tasksPerDay: number;
+}
+
+/** Ritmo sugerido para llegar a la fecha de la fase. Null si la fase no tiene fecha. */
+export function paceFor(
+  phase: PlanPhase,
+  dates: PlanDates,
+  pending: number,
+  msPending: number,
+  now: Date,
+): Pace | null {
+  const deadline = phaseDeadline(phase, dates, now);
+  if (!deadline) return null;
+  const left = Math.max(deadline.days, 0);
+  const weeks = Math.max(1, Math.ceil(left / 7));
+  return {
+    days: deadline.days,
+    weeks,
+    pending,
+    msPending,
+    tasksPerWeek: Math.ceil(pending / weeks),
+    msPerWeek: Math.ceil(msPending / weeks),
+    /* Con menos de una semana por delante el ritmo semanal no ayuda a repartir
+       lo que queda: se informa por día. */
+    tasksPerDay: Math.ceil(pending / Math.max(left, 1)),
+  };
+}
+
+/**
+ * La línea de ritmo de una fase, con los textos del baseline. La única palabra
+ * que cambia es «pasos» → «tareas»: es como se llaman en el contrato y en el
+ * resto de esta pantalla (U33).
+ */
+export function paceLabel(pace: Pace | null): string {
+  if (!pace) return "";
+  if (pace.pending <= 0) return "Fase completa.";
+  if (pace.days < 0) return `La fecha cargada ya pasó: quedan ${pace.pending} tareas sin marcar.`;
+  if (pace.days < 7) {
+    const cola =
+      pace.days === 0 ? "el examen es hoy" : pace.days === 1 ? "queda 1 día" : `quedan ${pace.days} días`;
+    return `~${pace.tasksPerDay} ${plural(pace.tasksPerDay, "tarea", "tareas")} por día · ${cola}`;
+  }
+  return (
+    `~${pace.tasksPerWeek} ${plural(pace.tasksPerWeek, "tarea", "tareas")} por semana · ` +
+    `${pace.msPending} ${plural(pace.msPending, "hito restante", "hitos restantes")}`
+  );
+}
+
+export interface InstanceRef {
+  key: string;
+  label: string;
+  date: string;
+  days: number;
+  phaseId: string;
+}
+
+/** Las instancias con fecha de las fases dadas, en el orden en que aparecen. */
+function instanceRefs(
+  phases: readonly PlanPhase[],
+  plan: Plan | null | undefined,
+  dates: PlanDates,
+  now: Date,
+): InstanceRef[] {
+  const out: InstanceRef[] = [];
+  for (const phase of phases) {
+    for (const entry of phaseDates(phase, dates)) {
+      if (!entry.key) continue;
+      const days = daysUntil(entry.date, now);
+      if (days === null) continue;
+      out.push({ key: entry.key, label: instanceLabel(plan, entry.key), date: entry.date, days, phaseId: phase.id });
+    }
+  }
+  return out;
+}
+
+/** La próxima instancia con fecha futura entre las fases activas. */
+export function nextInstance(
+  phases: readonly PlanPhase[],
+  plan: Plan | null | undefined,
+  dates: PlanDates,
+  now: Date,
+): InstanceRef | null {
+  return instanceRefs(phases, plan, dates, now)
+    .filter((i) => i.days >= 0)
+    .reduce<InstanceRef | null>((best, i) => (best === null || i.days < best.days ? i : best), null);
+}
+
+/**
+ * La última instancia YA pasada entre las fases activas: sirve para no invitar a
+ * «cargar las fechas» cuando en realidad están todas cargadas y vencidas.
+ */
+export function lastInstance(
+  phases: readonly PlanPhase[],
+  plan: Plan | null | undefined,
+  dates: PlanDates,
+  now: Date,
+): InstanceRef | null {
+  return instanceRefs(phases, plan, dates, now)
+    .filter((i) => i.days < 0)
+    .reduce<InstanceRef | null>((best, i) => (best === null || i.days > best.days ? i : best), null);
+}
+
+/**
+ * Cuántos ítems de lista trae un texto markdown: el contador del panel «Qué cae
+ * en este examen», que en el baseline era el largo de un array.
+ */
+export function countListItems(markdown: string | null | undefined): number {
+  return String(markdown ?? "")
+    .split(/\r?\n/)
+    .filter((line) => /^\s{0,3}(?:[-*+]|\d+[.)])\s+\S/.test(line)).length;
 }
 
 /** «hace 2 días» / «hoy» a partir de un instante ISO (intentos de quiz). */
