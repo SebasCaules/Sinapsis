@@ -94,6 +94,27 @@ describe("avisos heredados (§ lector-06)", () => {
     expect(callout(root)?.textContent).not.toContain("⚠");
   });
 
+  it("«cita» distingue la voz citada de la nota del autor", () => {
+    const conTitulo = html("> [!cita] De la transcripción (cues pt2 583-589)\n> *«La segunda forma de construir un MAC es a partir de una función de hash.»*");
+    expect(callout(conTitulo)?.getAttribute("data-type")).toBe("cita");
+    /* Con título, la versalita es el título; el rótulo del tipo aparece cuando
+       la cita no lo trae. */
+    cleanup();
+    const root = html("> [!cita]\n> *«…es a partir de una función de hash.»*");
+    expect(callout(root)?.getAttribute("data-type")).toBe("cita");
+    expect(label(root)).toBe("Cita");
+  });
+
+  it("«quote» y «cite» son alias de «cita»", () => {
+    /* `quote` es lo que escribe Obsidian solo, y es lo que trae el wiki de
+       Cripto en sus 418 citas de transcripción. Sin el alias caía en `nota`. */
+    for (const tipo of ["quote", "cite", "Quote", "CITA"]) {
+      cleanup();
+      const root = html(`> [!${tipo}] Título\n> Cuerpo.`);
+      expect(callout(root)?.getAttribute("data-type")).toBe("cita");
+    }
+  });
+
   it("«⚠ … discrepancia …» es un aviso de discrepancia", () => {
     const root = html("> ⚠ Discrepancia con el raw: la diapositiva usa n−1.");
     expect(callout(root)?.getAttribute("data-type")).toBe("discrepancia");

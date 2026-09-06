@@ -384,6 +384,7 @@ Se renderizan como `<aside class="callout" data-type="<tipo>">` con un rótulo e
 | `ejemplo` | Ejemplo | `example` |
 | `warn` | Atención | `warning`, `caution`, `atencion` |
 | `discrepancia` | Discrepancia | — |
+| `cita` | Cita | `quote`, `cite` |
 | `figura` | Figura | `figure` |
 
 El tipo se compara con acentos y mayúsculas plegados (`fold`), así que `[!Intuición]`,
