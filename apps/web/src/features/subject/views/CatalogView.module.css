@@ -1,4 +1,4 @@
-/* Catálogo: cabecera editorial, barra de filtros y tarjetas por división. */
+/* Catálogo: cabecera editorial, barra de filtros y tarjetas por división y tipo. */
 
 .view {
   width: min(1120px, 100%);
@@ -28,13 +28,19 @@
 /* ---------- filtros ---------- */
 .filters { display: flex; flex-direction: column; gap: 10px; }
 
+/* El casco del buscador es relativo para colgarle el botón de limpiar sin que
+   entre en el flujo del campo (y sin que el campo cambie de ancho al aparecer). */
+.searchWrap { position: relative; width: min(520px, 100%); }
+
 .searchField {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: min(520px, 100%);
+  width: 100%;
   height: 40px;
-  padding: 0 14px;
+  /* El hueco de la derecha está SIEMPRE reservado: si dependiera de que haya
+     texto, el cursor saltaría al escribir la primera letra. */
+  padding: 0 42px 0 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r);
@@ -54,6 +60,32 @@
   outline: none;
   font: 400 13.5px var(--font-ui);
   color: var(--text);
+}
+
+/* La × nativa solo existe en Chromium y no se puede tematizar: manda la propia. */
+.searchInput::-webkit-search-cancel-button { display: none; }
+
+.clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: var(--surface-3);
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+.clear:hover { background: var(--border-2); color: var(--text); }
+.clear:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--primary-ring);
 }
 
 /* El rótulo se saca del flujo y la fila entera arranca a 62 px: si el rótulo
@@ -91,7 +123,7 @@
   font: 500 12px var(--font-ui);
   color: var(--text-2);
   cursor: pointer;
-  transition: border-color var(--t), background var(--t), color var(--t);
+  transition: border-color var(--t), background var(--t), color var(--t), opacity var(--t);
 }
 .chip:hover { border-color: var(--border-2); }
 .chip[data-on="true"] {
@@ -106,15 +138,38 @@
   box-shadow: 0 0 0 5px var(--primary-ring);
 }
 
+/* Chip que, con los otros filtros puestos, no dejaría nada: se apaga y no se
+   puede pulsar. Prometer «3» y llevar a «Sin resultados» es un callejón. */
+.chip[data-empty="true"] {
+  opacity: 0.45;
+  border-style: dashed;
+  cursor: default;
+}
+.chip[data-empty="true"]:hover {
+  background: var(--surface);
+  color: var(--text-2);
+  border-color: var(--border);
+}
+
 .chipDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
 
-.chipCount { font: 500 10.5px var(--font-mono); color: var(--text-3); }
-.chip[data-on="true"] .chipCount { color: var(--primary); }
+/* El número es una etiqueta aparte, no parte del rótulo: píldora mono. */
+.chipCount {
+  font: 600 10px var(--font-mono);
+  color: var(--text-3);
+  background: var(--surface-3);
+  padding: 0 5px;
+  border-radius: 5px;
+}
+.chip[data-on="true"] .chipCount {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary);
+}
 
 .resultCount { margin: 0; font: 500 11.5px var(--font-mono); color: var(--text-3); }
 
 /* ---------- grupos ---------- */
-.group { display: flex; flex-direction: column; gap: 12px; }
+.group { display: flex; flex-direction: column; gap: 14px; }
 
 .groupHead {
   display: flex;
@@ -126,7 +181,25 @@
 
 .groupBar { width: 3px; height: 24px; border-radius: 2px; background: var(--ucol); }
 
+.groupTitle { flex: 1; min-width: 0; margin: 0; font-weight: 400; }
+
+/* El encabezado del grupo lleva a la vista de la división: desde el catálogo se
+   salta al panorama de la unidad con un clic. */
+.groupLink {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+  text-decoration: none;
+}
+.groupLink:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 .groupChip {
+  flex: none;
   font: 600 10.5px var(--font-mono);
   color: var(--uink, var(--ucol));
   border: 1px solid var(--ucol);
@@ -134,15 +207,28 @@
   padding: 2px 6px;
 }
 
-.groupTitle {
-  flex: 1;
+.groupName {
   min-width: 0;
-  margin: 0;
   font: 600 22px/1.2 var(--font-display);
   color: var(--text);
+  transition: color var(--t);
+}
+.groupLink:hover .groupName { color: var(--primary); }
+
+.groupCount { flex: none; font: 500 11.5px var(--font-mono); color: var(--text-3); }
+
+/* ---------- subgrupos por tipo ---------- */
+.typeBlock { display: flex; flex-direction: column; gap: 9px; }
+
+.typeLabel {
+  margin: 0 0 0 1px;
+  font: 700 10.5px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
 }
 
-.groupCount { font: 500 11.5px var(--font-mono); color: var(--text-3); }
+.typeCount { font-family: var(--font-mono); opacity: 0.7; margin-left: 3px; }
 
 .grid {
   display: grid;
@@ -151,11 +237,10 @@
 }
 
 .card {
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 12px 14px;
+  gap: 4px;
+  padding: 11px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--ucol);
@@ -171,51 +256,75 @@
   box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
 }
 
-.cardType { font: 500 10.5px var(--font-mono); color: var(--text-3); letter-spacing: 0.04em; }
+.cardTitle { font: 600 13px/1.35 var(--font-ui); color: var(--text); }
 
-.cardTitle {
-  font: 600 13px/1.35 var(--font-ui);
-  color: var(--text);
-  padding-right: 40px;
-}
-
-.cardSummary {
-  font: 400 12px/1.5 var(--font-ui);
-  color: var(--text-3);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Marcas de la tarjeta: ★ favorita y ✓ estudiada, en la esquina, en fila. */
-.cardMarks {
-  position: absolute;
-  right: 12px;
-  top: 12px;
+.cardMeta {
   display: flex;
   align-items: center;
-  gap: 5px;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+  letter-spacing: 0.02em;
 }
 
-.cardStar { color: var(--warn); fill: currentColor; }
-.cardCheck { color: var(--good); stroke-width: 2; }
+.markRead { display: inline-flex; align-items: center; gap: 3px; color: var(--good); }
+.markFav { display: inline-flex; align-items: center; gap: 3px; color: var(--warn); }
 
-.empty { margin: 20px 0; font: 400 13px var(--font-ui); color: var(--text-3); }
+.cardStar { fill: currentColor; }
+.cardCheck { stroke-width: 2.4; }
+
+/* Una sola línea, con el alto FIJADO: el resumen trae LaTeX y KaTeX levanta la
+   altura de la línea, así que sin el tope las tarjetas quedaban dispares y la
+   grilla perdía la densidad del baseline. */
+.cardSummary {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 1.55em;
+  font: 400 12px/1.55 var(--font-ui);
+  color: var(--text-3);
+}
+.cardSummary :global(.katex) { font-size: 1em; }
+
+/* ---------- estado vacío ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-3);
+}
+
+.empty svg { color: var(--border-2); margin-bottom: 6px; }
+
+.emptyTitle { margin: 0; font: 700 16px var(--font-ui); color: var(--text-2); }
+.emptyHint { margin: 0; font: 400 13.5px var(--font-ui); color: var(--text-3); }
 
 .reset {
+  margin-top: 8px;
+  min-height: 24px;
   border: 0;
   background: none;
-  padding: 0;
+  padding: 0 4px;
   font: 600 13px var(--font-ui);
   color: var(--primary);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.reset:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .card { transition: none; }
+  .card, .chip, .clear, .groupName { transition: none; }
 }
 
 /* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */

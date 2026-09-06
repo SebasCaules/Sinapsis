@@ -100,7 +100,8 @@ las capturas.
 | inicio | pista de progreso vacía | beige claro, 7 px, muy redondeada | oliva más oscura, 4 px | INTENCIONAL — tokens de la plataforma. Se anota que a 0/11 la pista lee como barra llena; es del CSS del inicio (D5), no del lector | anotado |
 | catálogo | tarjeta de página | título + `U1 · Concepto`, agrupadas por tipo dentro de la unidad | tipo + título + **resumen con matemática compuesta**, sin subgrupos por tipo | **INTENCIONAL** — el resumen es dato del contrato y el artboard dibuja tarjetas de resumen | — |
 | plan | modalidades | conmutador cursada/final | conmutador cursada/final | — (cierra N0-37 con `Plan.tracks`, N0-43) | — |
-| kits · flashcards · quiz · grafo | — | vistas propias del Sprint 2 | — | **INTENCIONAL** — no existen como tales en el baseline o cambian de contrato | — |
+| kits · flashcards · quiz | — | vistas propias del Sprint 2 | — | **INTENCIONAL** — no existen como tales en el baseline o cambian de contrato | — |
+| grafo | vista completa | **SÍ existe en el baseline** (`reader.js:1262-1650`, `styles.css:867-870`, `reader.css:488-525`): arrastre de nodos, encuadre automático y botón «Encajar a la vista», seis hubs rotulados, etiquetas con placa y descarte por colisión, exclusión de fuentes y metas por omisión, pista de uso, leyenda agrupada y lista textual completa | canvas con `d3-force` (N0-31 / N0-39) | **BRECHA** — la fila anterior lo daba por «sin baseline» y lo dejó fuera de la comparación; ninguna decisión N0 declara intencional suprimir arrastre, encuadre, hubs ni lista textual | 17 brechas verificadas, 16 cerradas (arrastre, encaje, hubs, etiquetas, aristas sin dirección, fuerzas, siembra determinista, lista textual, pista de uso); queda abierta la leyenda agrupada por bloques temáticos, que necesita `divisionGroups` en el contrato |
 
 ### 2.5 Temas y anchos
 

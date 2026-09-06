@@ -239,6 +239,20 @@
 .tipTitle { font: 600 13px/1.3 var(--font-ui); color: var(--text); }
 .tipMeta { font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
+/* Pista de uso: dentro del lienzo, abajo a la izquierda y sin capturar el ratón
+   (si lo hiciera, el arrastre que empieza ahí no llegaría al canvas). */
+.hint {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 2;
+  margin: 0;
+  max-width: min(72%, 460px);
+  font: 500 11px/1.4 var(--font-mono);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
 .zoomBar {
   position: absolute;
   right: 10px;
@@ -371,6 +385,96 @@
 }
 .topRow:hover .topTitle { color: var(--primary); }
 
+/* ---------- lista textual completa ----------
+   El equivalente declarado del lienzo. Va plegada: abierta no cabe en una
+   pantalla, así que la vista deja de tener alto fijo y hace scroll dentro de
+   `main`, igual que en anchos chicos. Dos columnas, como en el baseline. */
+.alt { flex: none; }
+
+.altSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 24px;
+  padding: 2px 6px;
+  margin-left: -6px;
+  border-radius: 6px;
+  font: 600 12px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+  list-style: none;
+}
+.altSummary::-webkit-details-marker { display: none; }
+/* Marcador propio: el de la plataforma es un triángulo del navegador que no
+   sigue los tokens. Gira al abrir. */
+.altSummary::before {
+  content: "›";
+  font: 600 14px var(--font-mono);
+  line-height: 1;
+  color: var(--text-3);
+  transition: transform var(--t);
+}
+.alt[open] > .altSummary::before { transform: rotate(90deg); }
+.altSummary:hover { color: var(--primary); }
+.altSummary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.altBody {
+  columns: 2;
+  column-gap: 28px;
+  padding: 10px 0 4px;
+}
+
+.altGroup { break-inside: avoid; margin: 0 0 12px; }
+
+.altTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 4px;
+  font: 600 11px var(--font-ui);
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+.altTitle::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ucol);
+}
+
+.altList { margin: 0; padding: 0; list-style: none; }
+
+.altItem {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.altLink {
+  flex: 1;
+  min-width: 0;
+  font: 400 12px/1.5 var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.altLink:hover { color: var(--primary); text-decoration: underline; }
+.altLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+
+.altCount { flex: none; font: 500 10px var(--font-mono); color: var(--text-3); }
+
+/* Con la lista abierta la vista deja de caber: pasa a alto automático. El
+   lienzo pasa a llevar alto propio, como en anchos chicos — sin eso el alto del
+   canvas y el de su contenedor se persiguen y el escenario nunca se asienta. */
+.view[data-alt="true"] { height: auto; min-height: 100%; }
+.view[data-alt="true"] .stage { min-height: 0; }
+.view[data-alt="true"] .canvasWrap { flex: none; height: clamp(360px, 56vh, 620px); }
+
 /* Por debajo de 1100 la columna se va abajo del lienzo: el grafo manda.
    El lienzo lleva alto propio: `.side` es `flex: none` y en columna se comía
    todo el alto disponible, así que el lienzo quedaba en 2 px y el grafo —lo
@@ -387,12 +491,15 @@
      materia se sentaba encima de «Centrar»: los controles de zoom se van a la
      otra esquina, que ahí está libre. */
   .zoomBar { right: auto; left: 10px; }
+  /* La barra se fue a la izquierda: la pista se corre a la otra esquina. */
+  .hint { left: auto; right: 12px; text-align: right; }
   .head { flex-direction: column; align-items: stretch; }
   .searchField { width: auto; }
+  .altBody { columns: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chip, .zoomReset, .zoomStep, .topMore { transition: none; }
+  .chip, .zoomReset, .zoomStep, .topMore, .altSummary::before { transition: none; }
 }
 
 /* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el

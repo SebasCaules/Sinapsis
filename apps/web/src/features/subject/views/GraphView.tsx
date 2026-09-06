@@ -9,8 +9,10 @@
  * Por qué canvas y no SVG: con 400 nodos y sus aristas, el SVG mete miles de
  * elementos en el DOM y cada tick de la simulación los toca todos. En canvas
  * cada tick es un dibujo y nada más. El precio es que la accesibilidad no puede
- * salir del lienzo: al lado va una lista de las páginas más citadas, navegable
- * con teclado, que dice lo mismo que el dibujo.
+ * salir del lienzo: al lado va la lista de las páginas más citadas, el lienzo
+ * mismo se recorre con las flechas, y debajo va el equivalente textual COMPLETO
+ * —todas las páginas dibujadas, agrupadas por división y con su cantidad de
+ * enlaces—, que es lo que el baseline llama «Lista de páginas y sus enlaces».
  *
  * Los colores de las divisiones son tokens CSS (`var(--u3)`), que el canvas no
  * entiende: se resuelven UNA vez por tema con `getComputedStyle`.
@@ -27,7 +29,16 @@ import {
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { plural, routes } from "@sinapsis/contract";
-import { forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, type Simulation } from "d3-force";
+import {
+  forceCenter,
+  forceCollide,
+  forceLink,
+  forceManyBody,
+  forceSimulation,
+  forceX,
+  forceY,
+  type Simulation,
+} from "d3-force";
 import { select } from "d3-selection";
 import { zoom, zoomIdentity, type D3ZoomEvent, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import { api, qk } from "@/lib/api";
@@ -35,7 +46,7 @@ import { UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { ErrorCard } from "../components/States";
 import { useTheme } from "../store";
-import { buildGraphModel, type GraphFilters, type GraphModelNode } from "./graphModel";
+import { CONTENT_ONLY_DEFAULT, buildGraphModel, type GraphFilters, type GraphModelNode } from "./graphModel";
 import css from "./GraphView.module.css";
 
 /** Nodo con la posición que le pone la simulación. */
@@ -45,8 +56,19 @@ interface SimNode extends GraphModelNode {
   vx?: number;
   vy?: number;
   index?: number;
+  /** Posición fijada por el arrastre: el nodo se queda donde se lo soltó. */
+  fx?: number | null;
+  fy?: number | null;
   /** Color ya resuelto a un valor que el canvas entiende. */
   ink: string;
+}
+
+/** Rectángulo en píxeles de pantalla (para el reparto de etiquetas). */
+interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 interface SimEdge {
@@ -67,6 +89,31 @@ const TOP_MAX = 30;
 
 /** Cuánto acerca o aleja cada golpe de los botones − / +. */
 const ZOOM_STEP = 1.35;
+
+/** Margen del encuadre automático, en píxeles de pantalla. */
+const FIT_PAD = 48;
+/** Cada cuántos cuadros de la simulación se vuelve a encuadrar. */
+const FIT_EVERY = 6;
+/** Un rótulo más largo que esto se corta: dos nombres enteros no entran en el mapa. */
+const LABEL_MAX = 30;
+
+/** Pista de uso: se retira en la primera interacción con el lienzo. */
+const HINT = "Arrastre un nodo o el fondo · rueda para acercar · clic para abrir";
+
+/**
+ * Reparto de fuerzas del baseline (reader.js): repulsión larga y sin techo,
+ * colisión aparte, gravedad suave al centro y un resorte flojo. Con la
+ * repulsión corta y la colisión dura de antes, doscientos nodos se estabilizaban
+ * como un empaquetado de círculos que se tocan y las aristas desaparecían.
+ */
+const REPULSION = -420;
+const REPULSION_MAX = 900;
+const LINK_LEN = 64;
+const LINK_STRENGTH = 0.05;
+const COLLIDE_PAD = 6;
+const GRAVITY = 0.02;
+/** Ángulo áureo: la espiral de Fermat con la que se siembran los nodos. */
+const GOLDEN_ANGLE = 2.399963;
 
 const parseList = (v: string | null): string[] => (v ? v.split(LIST_SEP).filter(Boolean) : []);
 
@@ -102,7 +149,9 @@ export function GraphView() {
     () => ({
       divisions: parseList(params.get("d")),
       types: parseList(params.get("t")),
-      contentOnly: params.get("c") === "1",
+      /* Nace ENCENDIDO (como el «Solo temas» del baseline): el parámetro sirve
+         para APAGARLO, no para encenderlo. */
+      contentOnly: params.get("c") === "0" ? false : CONTENT_ONLY_DEFAULT,
       query: params.get("q") ?? "",
     }),
     [params],
@@ -139,6 +188,19 @@ export function GraphView() {
   const rafRef = useRef(0);
   const zoomRef = useRef<ZoomBehavior<HTMLCanvasElement, unknown> | null>(null);
   const downRef = useRef<{ x: number; y: number } | null>(null);
+  /** Nodo que se está arrastrando (null = nadie). */
+  const dragRef = useRef<SimNode | null>(null);
+  /**
+   * El lector ya movió la vista (arrastre, rueda, botones o cursor de teclado):
+   * el encuadre automático deja de intervenir hasta que cambie el conjunto de
+   * nodos. Sin esto, la simulación le corregía el encuadre por debajo.
+   */
+  const viewLockedRef = useRef(false);
+  const tickRef = useRef(0);
+  /* Los controles flotantes se pintan ENCIMA del lienzo: las etiquetas los
+     esquivan, así que el dibujo necesita saber dónde están. */
+  const zoomBarRef = useRef<HTMLDivElement>(null);
+  const hintRef = useRef<HTMLParagraphElement>(null);
   const [hovered, setHovered] = useState<{ node: GraphModelNode; x: number; y: number } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   /**
@@ -151,6 +213,13 @@ export function GraphView() {
   const cursorRef = useRef<string | null>(null);
   /** «Más citadas» empieza recortada; «Ver más» la lleva hasta 30 (N0-39). */
   const [topAll, setTopAll] = useState(false);
+  /** La pista de uso ocupa la esquina hasta la primera interacción. */
+  const [hintOn, setHintOn] = useState(true);
+  /**
+   * La lista textual abierta no cabe en una pantalla: la vista deja de tener
+   * alto fijo y pasa a hacer scroll dentro de `main`, como en anchos chicos.
+   */
+  const [altOpen, setAltOpen] = useState(false);
 
   const ready = query.data !== undefined;
 
@@ -169,8 +238,9 @@ export function GraphView() {
     const ink = styles.getPropertyValue("--text").trim() || "#222";
     const faint = styles.getPropertyValue("--border-2").trim() || "#999";
     const paper = styles.getPropertyValue("--bg").trim() || "#fff";
-    const halo = styles.getPropertyValue("--elevated").trim() || "#fff";
+    const surface = styles.getPropertyValue("--surface").trim() || "#fff";
     const hot = styles.getPropertyValue("--primary").trim() || "#c00";
+    const mono = styles.getPropertyValue("--font-mono").trim() || 'ui-monospace, monospace';
 
     ctx.save();
     ctx.fillStyle = paper;
@@ -178,57 +248,81 @@ export function GraphView() {
     ctx.translate(t.x, t.y);
     ctx.scale(t.k, t.k);
 
-    // aristas
+    const hover = hoverRef.current;
+    /* Vecinos del nodo bajo el ratón: mandan el atenuado y el color de acento. */
+    const neighbours = new Set<string>();
+    /* Vecinos del foco (ratón O cursor de teclado): mandan las etiquetas. */
+    const near = new Set<string>();
+    const focus = new Set<string>();
+    if (hover) focus.add(hover.slug);
+    if (cursorRef.current) focus.add(cursorRef.current);
+    if (focus.size) {
+      for (const edge of edgesRef.current) {
+        const a = edge.source as SimNode;
+        const b = edge.target as SimNode;
+        if (typeof a !== "object" || typeof b !== "object") continue;
+        if (focus.has(a.slug)) near.add(b.slug);
+        if (focus.has(b.slug)) near.add(a.slug);
+        if (hover && a.slug === hover.slug) neighbours.add(b.slug);
+        if (hover && b.slug === hover.slug) neighbours.add(a.slug);
+      }
+    }
+
+    /* Aristas: con el ratón sobre un nodo, TODA la maraña ajena baja a 0.12 y
+       solo se leen sus conexiones (si no, el resaltado se pierde en el fondo). */
     ctx.lineWidth = 0.7 / t.k;
     ctx.strokeStyle = faint;
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = hover ? 0.12 : 0.5;
     ctx.beginPath();
     for (const edge of edgesRef.current) {
       const a = edge.source as SimNode;
       const b = edge.target as SimNode;
       if (typeof a !== "object" || typeof b !== "object") continue;
+      if (hover && (a.slug === hover.slug || b.slug === hover.slug)) continue;
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
     }
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    const hover = hoverRef.current;
-    const neighbours = new Set<string>();
     if (hover) {
-      for (const edge of edgesRef.current) {
-        const a = edge.source as SimNode;
-        const b = edge.target as SimNode;
-        if (a.slug === hover.slug) neighbours.add(b.slug);
-        if (b.slug === hover.slug) neighbours.add(a.slug);
-      }
       /* La vecindad del nodo bajo el cursor, por encima de todo lo demás. */
       ctx.lineWidth = 1.4 / t.k;
       ctx.strokeStyle = hot;
+      ctx.globalAlpha = 0.95;
       ctx.beginPath();
       for (const edge of edgesRef.current) {
         const a = edge.source as SimNode;
         const b = edge.target as SimNode;
+        if (typeof a !== "object" || typeof b !== "object") continue;
         if (a.slug !== hover.slug && b.slug !== hover.slug) continue;
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
       }
       ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     for (const node of nodesRef.current) {
       const dim = node.source || (hover !== null && node.slug !== hover.slug && !neighbours.has(node.slug));
-      ctx.globalAlpha = dim ? 0.34 : 1;
+      ctx.globalAlpha = dim ? 0.22 : 1;
       ctx.beginPath();
       ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
       ctx.fillStyle = node.ink;
       ctx.fill();
-      /* Las fuentes van con aro: se distinguen del contenido sin necesidad de
-         otro color (el color ya significa «división»). */
-      if (node.source) {
-        ctx.globalAlpha = 0.8;
-        ctx.lineWidth = 1.2 / t.k;
-        ctx.strokeStyle = node.ink;
+      /* Aro del color del papel: sin él, dos nodos que se tocan se leen como una
+         sola mancha (es lo que hacía que el grafo pareciera una bola). */
+      ctx.lineWidth = 1.5 / t.k;
+      ctx.strokeStyle = node.source ? node.ink : surface;
+      ctx.stroke();
+      /* Páginas troncales: aro de acento. Son los puntos de orientación del
+         mapa y se ven aunque no haya nada bajo el ratón. */
+      if (node.hub) {
+        ctx.globalAlpha = dim ? 0.3 : 1;
+        ctx.lineWidth = 2 / t.k;
+        ctx.strokeStyle = hot;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius + 2.5 / t.k, 0, Math.PI * 2);
         ctx.stroke();
       }
       if (node.match) {
@@ -254,30 +348,98 @@ export function GraphView() {
     }
     ctx.globalAlpha = 1;
 
-    // etiquetas: con zoom suficiente, o la del nodo bajo el cursor y sus vecinos
-    if (t.k > LABEL_ZOOM || hover !== null || cursorRef.current !== null) {
-      ctx.font = `600 ${11 / t.k}px "Hanken", system-ui, sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.lineJoin = "round";
-      for (const node of nodesRef.current) {
-        if (
-          t.k <= LABEL_ZOOM &&
-          node.slug !== hover?.slug &&
-          node.slug !== cursorRef.current &&
-          !neighbours.has(node.slug)
-        ) {
-          continue;
-        }
-        const y = node.y + node.radius + 3 / t.k;
-        /* Cerco del color del papel: la etiqueta se lee aunque caiga sobre una arista. */
-        ctx.lineWidth = 3 / t.k;
-        ctx.strokeStyle = halo;
-        ctx.strokeText(node.title, node.x, y);
-        ctx.fillStyle = ink;
-        ctx.fillText(node.title, node.x, y);
-      }
+    /* ---- etiquetas ------------------------------------------------------
+       Prioridad: 0 el nodo enfocado, 1 sus vecinos, 2 las páginas troncales
+       (solo en reposo) y 3 el resto, que aparece recién con zoom. El rótulo que
+       se superpone a otro NO se dibuja: dos nombres encimados no se leen ni
+       valen más que uno solo. */
+    const canvasBox = canvas.getBoundingClientRect();
+    const reserved: Rect[] = [];
+    for (const el of [zoomBarRef.current, hintRef.current]) {
+      if (!el || el.hidden) continue;
+      const box = el.getBoundingClientRect();
+      if (!box.width) continue;
+      reserved.push({ x: box.left - canvasBox.left, y: box.top - canvasBox.top, w: box.width, h: box.height });
     }
+
+    const hits = (a: Rect, b: Rect): boolean =>
+      a.x < b.x + b.w + 2 && b.x < a.x + a.w + 2 && a.y < b.y + b.h + 2 && b.y < a.y + a.h + 2;
+
+    const placed: Rect[] = [];
+    const paintLabel = (node: SimNode): void => {
+      const raw = node.title;
+      const text = raw.length > LABEL_MAX ? `${raw.slice(0, LABEL_MAX - 2)}…` : raw;
+      ctx.font = `600 ${11 / t.k}px ${mono}`;
+      const ph = 15 / t.k;
+      const pw = ctx.measureText(text).width + 12 / t.k;
+      const pad = 6 / t.k;
+      /* Recuadro visible en coordenadas de mundo: el lienzo recorta, así que la
+         etiqueta se acota a él en vez de salirse por el borde. */
+      const vx0 = -t.x / t.k + pad;
+      let vx1 = (w - t.x) / t.k - pad;
+      const vy0 = -t.y / t.k + pad;
+      let vy1 = (h - t.y) / t.k - pad;
+      if (node.x < vx0 - node.radius || node.x > vx1 + node.radius) return;
+      if (node.y < vy0 - node.radius || node.y > vy1 + node.radius) return;
+
+      let lx = node.x - pw / 2;
+      let ly = node.y - node.radius - ph - 4 / t.k;
+      /* Los controles flotantes (zoom, pista) están ENCIMA del lienzo: en su
+         franja el borde útil se corre para adentro. */
+      for (const box of reserved) {
+        const top = (box.y - t.y) / t.k;
+        const bottom = (box.y + box.h - t.y) / t.k;
+        if (ly + ph < top || ly > bottom) continue;
+        const left = (box.x - t.x) / t.k;
+        /* Un control pegado al borde derecho corre el borde útil hacia adentro;
+           uno pegado al izquierdo sube el piso, que es lo único que le queda. */
+        if (box.x + box.w / 2 > w / 2) vx1 = Math.min(vx1, left - pad);
+        else vy1 = Math.min(vy1, top - pad);
+      }
+      lx = Math.max(vx0, Math.min(lx, Math.max(vx0, vx1 - pw)));
+      if (ly < vy0) ly = node.y + node.radius + 4 / t.k;
+      ly = Math.max(vy0, Math.min(ly, Math.max(vy0, vy1 - ph)));
+
+      const rect: Rect = { x: lx * t.k + t.x, y: ly * t.k + t.y, w: pw * t.k, h: ph * t.k };
+      for (const other of placed) if (hits(rect, other)) return;
+      for (const box of reserved) if (hits(rect, box)) return;
+      placed.push(rect);
+
+      /* Placa opaca: sobre el amontonamiento de nodos un simple cerco no separa
+         el texto del fondo. */
+      const r = 5 / t.k;
+      ctx.beginPath();
+      ctx.moveTo(lx + r, ly);
+      ctx.arcTo(lx + pw, ly, lx + pw, ly + ph, r);
+      ctx.arcTo(lx + pw, ly + ph, lx, ly + ph, r);
+      ctx.arcTo(lx, ly + ph, lx, ly, r);
+      ctx.arcTo(lx, ly, lx + pw, ly, r);
+      ctx.closePath();
+      ctx.globalAlpha = 0.92;
+      ctx.fillStyle = surface;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = ink;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, lx + pw / 2, ly + ph / 2);
+    };
+
+    const labels: Array<{ node: SimNode; prio: number }> = [];
+    for (const node of nodesRef.current) {
+      const prio = focus.has(node.slug)
+        ? 0
+        : near.has(node.slug)
+          ? 1
+          : focus.size === 0 && node.hub
+            ? 2
+            : t.k > LABEL_ZOOM
+              ? 3
+              : -1;
+      if (prio >= 0) labels.push({ node, prio });
+    }
+    labels.sort((a, b) => a.prio - b.prio || b.node.radius - a.node.radius);
+    for (const item of labels) paintLabel(item.node);
 
     ctx.restore();
   }, []);
@@ -289,6 +451,42 @@ export function GraphView() {
       draw();
     });
   }, [draw]);
+
+  /**
+   * Encaja el grafo entero en el lienzo: la caja de todos los nodos —INCLUIDO
+   * su radio, o los grandes del borde quedan cortados— con margen, y de ahí la
+   * escala y la traslación. Es lo que hace «Encajar» y lo que corre solo
+   * mientras la simulación enfría.
+   */
+  const fitToNodes = useCallback(() => {
+    const canvas = canvasRef.current;
+    const behavior = zoomRef.current;
+    const nodes = nodesRef.current;
+    const { w, h } = sizeRef.current;
+    if (!canvas || !behavior || !nodes.length || !w || !h) return;
+    let x0 = Infinity;
+    let y0 = Infinity;
+    let x1 = -Infinity;
+    let y1 = -Infinity;
+    for (const node of nodes) {
+      x0 = Math.min(x0, node.x - node.radius);
+      y0 = Math.min(y0, node.y - node.radius);
+      x1 = Math.max(x1, node.x + node.radius);
+      y1 = Math.max(y1, node.y + node.radius);
+    }
+    const bw = x1 - x0 || 1;
+    const bh = y1 - y0 || 1;
+    const k = Math.max(0.25, Math.min(1.6, Math.min((w - FIT_PAD * 2) / bw, (h - FIT_PAD * 2) / bh)));
+    const cx = (x0 + x1) / 2;
+    const cy = (y0 + y1) / 2;
+    select(canvas).call(behavior.transform, zoomIdentity.translate(w / 2 - cx * k, h / 2 - cy * k).scale(k));
+  }, []);
+
+  /** El encuadre automático: se calla en cuanto el lector movió la vista. */
+  const autoFit = useCallback(() => {
+    if (viewLockedRef.current) return;
+    fitToNodes();
+  }, [fitToNodes]);
 
   /* Tamaño real del lienzo (con densidad de pantalla) y redibujo al cambiar. */
   useEffect(() => {
@@ -307,6 +505,8 @@ export function GraphView() {
       const sim = simRef.current;
       if (sim) {
         sim.force("center", forceCenter(rect.width / 2, rect.height / 2));
+        sim.force("x", forceX<SimNode>(rect.width / 2).strength(GRAVITY));
+        sim.force("y", forceY<SimNode>(rect.height / 2).strength(GRAVITY));
         sim.alpha(0.35).restart();
       }
       schedule();
@@ -324,18 +524,28 @@ export function GraphView() {
     const resolve = makeResolver();
     const { w, h } = sizeRef.current;
     const previous = new Map(nodesRef.current.map((n) => [n.slug, n]));
-    const nodes: SimNode[] = graph.nodes.map((node) => {
+    const nodes: SimNode[] = graph.nodes.map((node, i) => {
       const old = previous.get(node.slug);
+      /* Espiral de Fermat en vez de posiciones al azar: la simulación arranca
+         siempre del mismo estado y el mapa converge a un dibujo reconocible
+         entre sesiones (con posiciones al azar no había «mi mapa»). */
+      const angle = i * GOLDEN_ANGLE;
+      const rad = 16 * Math.sqrt(i + 1);
       return {
         ...node,
         ink: resolve(node.color),
-        x: old?.x ?? w / 2 + (Math.random() - 0.5) * 280,
-        y: old?.y ?? h / 2 + (Math.random() - 0.5) * 280,
+        x: old?.x ?? w / 2 + Math.cos(angle) * rad,
+        y: old?.y ?? h / 2 + Math.sin(angle) * rad,
+        fx: old?.fx ?? null,
+        fy: old?.fy ?? null,
       };
     });
     const edges: SimEdge[] = graph.edges.map((e) => ({ source: e.from, target: e.to }));
     nodesRef.current = nodes;
     edgesRef.current = edges;
+    /* Conjunto nuevo de nodos: el encuadre automático vuelve a mandar. */
+    viewLockedRef.current = false;
+    tickRef.current = 0;
 
     simRef.current?.stop();
     const sim = forceSimulation<SimNode>(nodes)
@@ -343,15 +553,27 @@ export function GraphView() {
         "link",
         forceLink<SimNode, SimEdge>(edges)
           .id((d) => d.slug)
-          .distance(54)
-          .strength(0.28),
+          .distance(LINK_LEN)
+          .strength(LINK_STRENGTH),
       )
-      .force("charge", forceManyBody<SimNode>().strength(-150).distanceMax(440))
+      .force("charge", forceManyBody<SimNode>().strength(REPULSION).distanceMax(REPULSION_MAX))
       .force("center", forceCenter(w / 2, h / 2))
-      .force("collide", forceCollide<SimNode>((d) => d.radius + 4).strength(0.85))
+      .force("x", forceX<SimNode>(w / 2).strength(GRAVITY))
+      .force("y", forceY<SimNode>(h / 2).strength(GRAVITY))
+      .force("collide", forceCollide<SimNode>((d) => d.radius + COLLIDE_PAD).strength(0.7))
       .alphaDecay(0.035)
-      .on("tick", schedule)
-      .on("end", schedule);
+      .on("tick", () => {
+        /* La simulación sigue expandiéndose después del primer cuadro: si el
+           encuadre se calculara una sola vez, los nodos terminarían fuera del
+           lienzo. Se reencuadra cada pocos cuadros y al enfriarse del todo. */
+        tickRef.current += 1;
+        if (tickRef.current % FIT_EVERY === 0) autoFit();
+        schedule();
+      })
+      .on("end", () => {
+        autoFit();
+        schedule();
+      });
     simRef.current = sim;
     return () => {
       sim.stop();
@@ -379,26 +601,6 @@ export function GraphView() {
     schedule();
   }, [graph, theme, schedule]);
 
-  /* Zoom con la rueda y panorámica con el arrastre. */
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const behavior = zoom<HTMLCanvasElement, unknown>()
-      .scaleExtent([0.25, 5])
-      .on("zoom", (event: D3ZoomEvent<HTMLCanvasElement, unknown>) => {
-        transformRef.current = event.transform;
-        setZoomLevel(event.transform.k);
-        schedule();
-      });
-    zoomRef.current = behavior;
-    const selection = select(canvas);
-    selection.call(behavior);
-    selection.on("dblclick.zoom", null);
-    return () => {
-      selection.on(".zoom", null);
-    };
-  }, [schedule, ready]);
-
   /** Nodo bajo un punto del lienzo (coordenadas de pantalla). */
   const nodeAt = useCallback((px: number, py: number): SimNode | null => {
     const t = transformRef.current;
@@ -419,10 +621,80 @@ export function GraphView() {
     return best;
   }, []);
 
+  /** La pista de uso cumplió en cuanto el lector interactúa: se retira. */
+  const dismissHint = useCallback(() => {
+    setHintOn((on) => (on ? false : on));
+  }, []);
+
+  /* Zoom con la rueda y panorámica con el arrastre DEL FONDO. */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const behavior = zoom<HTMLCanvasElement, unknown>()
+      .scaleExtent([0.25, 5])
+      /* El arrastre que empieza sobre un nodo es del NODO, no de la vista: el
+         zoom solo se queda con los gestos que nacen en el fondo. El resto
+         reproduce el filtro por omisión de d3-zoom. */
+      .filter((event: MouseEvent & { button?: number }) => {
+        if (event.ctrlKey && event.type !== "wheel") return false;
+        if (event.button) return false;
+        if (event.type === "mousedown") {
+          const rect = canvas.getBoundingClientRect();
+          if (nodeAt(event.clientX - rect.left, event.clientY - rect.top)) return false;
+        }
+        return true;
+      })
+      .on("zoom", (event: D3ZoomEvent<HTMLCanvasElement, unknown>) => {
+        /* Solo un gesto del lector bloquea el encuadre automático: las
+           transformaciones que aplica la propia vista llegan sin `sourceEvent`.
+           La rueda no llega al `onWheel` de React —d3-zoom corta la propagación—
+           así que la pista de uso también se retira desde acá. */
+        if (event.sourceEvent) {
+          viewLockedRef.current = true;
+          dismissHint();
+        }
+        transformRef.current = event.transform;
+        setZoomLevel(event.transform.k);
+        schedule();
+      });
+    zoomRef.current = behavior;
+    const selection = select(canvas);
+    selection.call(behavior);
+    selection.on("dblclick.zoom", null);
+    return () => {
+      selection.on(".zoom", null);
+    };
+  }, [schedule, ready, nodeAt, dismissHint]);
+
+  /**
+   * Soltar el nodo arrastrado. Va en `window`: el ratón puede levantarse fuera
+   * del lienzo y el nodo quedaría pegado al puntero.
+   */
+  useEffect(() => {
+    const release = () => {
+      if (!dragRef.current) return;
+      dragRef.current = null;
+      simRef.current?.alphaTarget(0);
+    };
+    window.addEventListener("mouseup", release);
+    return () => window.removeEventListener("mouseup", release);
+  }, []);
+
   const onMove = (event: ReactMouseEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const px = event.clientX - rect.left;
     const py = event.clientY - rect.top;
+    /* Arrastre de un nodo: es el gesto que separa un tema de la maraña. */
+    const dragged = dragRef.current;
+    if (dragged) {
+      const t = transformRef.current;
+      dragged.fx = (px - t.x) / t.k;
+      dragged.fy = (py - t.y) / t.k;
+      dragged.x = dragged.fx;
+      dragged.y = dragged.fy;
+      schedule();
+      return;
+    }
     const node = nodeAt(px, py);
     if (node?.slug !== hoverRef.current?.slug) {
       hoverRef.current = node;
@@ -431,24 +703,30 @@ export function GraphView() {
     setHovered(node ? { node, x: px, y: py } : null);
   };
 
+  const onDown = (event: ReactMouseEvent<HTMLCanvasElement>) => {
+    downRef.current = { x: event.clientX, y: event.clientY };
+    dismissHint();
+    const rect = event.currentTarget.getBoundingClientRect();
+    const node = nodeAt(event.clientX - rect.left, event.clientY - rect.top);
+    if (!node) return;
+    /* Fijar el nodo y recalentar la simulación: los vecinos lo siguen. El nodo
+       se queda donde se lo suelta, como en el baseline. */
+    dragRef.current = node;
+    viewLockedRef.current = true;
+    node.fx = node.x;
+    node.fy = node.y;
+    simRef.current?.alphaTarget(0.25).restart();
+  };
+
   const onUp = (event: ReactMouseEvent<HTMLCanvasElement>) => {
     const start = downRef.current;
     downRef.current = null;
     if (!start) return;
-    /* Un arrastre de más de 4 px era una panorámica, no un clic. */
+    /* Un arrastre de más de 4 px era una panorámica o un nodo movido, no un clic. */
     if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const node = nodeAt(event.clientX - rect.left, event.clientY - rect.top);
     if (node) navigate(routes.page(slug, node.slug));
-  };
-
-  const resetZoom = () => {
-    const canvas = canvasRef.current;
-    const behavior = zoomRef.current;
-    if (!canvas || !behavior) return;
-    /* Sin `transition()`: eso pediría `d3-transition`, una dependencia entera
-       para animar un único salto de 200 ms. Se centra de golpe. */
-    select(canvas).call(behavior.transform, zoomIdentity);
   };
 
   /* Acercar y alejar sin rueda ni gesto de pellizco (N0-39): con un trackpad
@@ -457,6 +735,7 @@ export function GraphView() {
     const canvas = canvasRef.current;
     const behavior = zoomRef.current;
     if (!canvas || !behavior) return;
+    viewLockedRef.current = true;
     select(canvas).call(behavior.scaleBy, factor);
   };
 
@@ -494,6 +773,9 @@ export function GraphView() {
     /* Margen: el aro y la etiqueta del nodo también tienen que entrar. */
     const margin = Math.min(64, Math.max(24, Math.min(w, h) * 0.12));
     if (px >= margin && px <= w - margin && py >= margin && py <= h - margin) return;
+    /* Mover la vista con el teclado también apaga el encuadre automático: si no,
+       la simulación se la devolvía al centro en el cuadro siguiente. */
+    viewLockedRef.current = true;
     select(canvas).call(behavior.translateTo, node.x, node.y);
   };
 
@@ -515,6 +797,7 @@ export function GraphView() {
 
   const onCanvasKeyDown = (event: ReactKeyboardEvent<HTMLCanvasElement>) => {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
+    dismissHint();
     switch (event.key) {
       case "ArrowRight":
       case "ArrowDown":
@@ -555,7 +838,7 @@ export function GraphView() {
   const top = ranked.slice(0, topAll ? TOP_MAX : TOP_MIN);
 
   return (
-    <div className={css.view}>
+    <div className={css.view} data-alt={altOpen ? "true" : undefined}>
       <header className={css.head}>
         <div className={css.headText}>
           <span className={css.ribbon}>— CONEXIONES —</span>
@@ -645,7 +928,7 @@ export function GraphView() {
             className={`${css.chip} ${css.chipToggle}`}
             data-on={filters.contentOnly ? "true" : undefined}
             aria-pressed={filters.contentOnly}
-            onClick={() => update("c", filters.contentOnly ? "" : "1")}
+            onClick={() => update("c", filters.contentOnly ? "0" : "")}
             title="Deja fuera las fuentes: las páginas que no cuentan en el progreso"
           >
             <UiIcon name="check" size={12} />
@@ -679,11 +962,17 @@ export function GraphView() {
               setHovered(null);
               schedule();
             }}
-            onMouseDown={(event) => {
-              downRef.current = { x: event.clientX, y: event.clientY };
-            }}
+            onMouseDown={onDown}
             onMouseUp={onUp}
+            onWheel={dismissHint}
           />
+
+          {/* Pista de uso: la única indicación visible de que los nodos se
+              arrastran, se acercan y se abren. Se retira en la primera
+              interacción y le devuelve la esquina a las etiquetas. */}
+          <p className={css.hint} ref={hintRef} hidden={!hintOn} aria-hidden="true">
+            {HINT}
+          </p>
 
           {/* Lo que el aro del cursor dice en el dibujo, dicho en palabras. */}
           <span className={css.srOnly} role="status">
@@ -738,7 +1027,7 @@ export function GraphView() {
           ) : null}
 
           {/* Sin rueda ni pellizco el zoom no existía (N0-39). */}
-          <div className={css.zoomBar}>
+          <div className={css.zoomBar} ref={zoomBarRef}>
             <button
               type="button"
               className={css.zoomStep}
@@ -748,7 +1037,7 @@ export function GraphView() {
             >
               −
             </button>
-            <span className={css.zoomValue} role="status">
+            <span className={css.zoomValue} role="status" data-testid="graph-zoom">
               {Math.round(zoomLevel * 100)} %
             </span>
             <button
@@ -760,8 +1049,15 @@ export function GraphView() {
             >
               +
             </button>
-            <button type="button" className={css.zoomReset} onClick={resetZoom}>
-              Centrar
+            {/* «Encajar», no «Centrar»: devolver la escala 1 no era un encaje y
+                dejaba el grafo desbordado igual que al entrar. */}
+            <button
+              type="button"
+              className={css.zoomReset}
+              onClick={fitToNodes}
+              title="Encajar el grafo entero en la vista"
+            >
+              Encajar
             </button>
           </div>
         </div>
@@ -779,7 +1075,8 @@ export function GraphView() {
               </div>
             ))}
             <p className={css.cardNote}>
-              El tamaño del círculo mide cuántas páginas enlazan a esa. Las fuentes van atenuadas y con aro.
+              El tamaño del círculo mide cuántos enlaces tiene la página. Las páginas troncales llevan aro de acento
+              y etiqueta fija; las fuentes van atenuadas.
             </p>
           </section>
 
@@ -816,6 +1113,34 @@ export function GraphView() {
           </section>
         </aside>
       </div>
+
+      {/* El equivalente textual COMPLETO del lienzo (el canvas no se puede
+          recorrer): las mismas páginas que se dibujan, agrupadas por división y
+          con su cantidad de enlaces. «Más citadas» llega a treinta; esto, a
+          todas. */}
+      <details className={css.alt} onToggle={(event) => setAltOpen(event.currentTarget.open)}>
+        <summary className={css.altSummary}>Lista de páginas y sus enlaces</summary>
+        <div className={css.altBody}>
+          {(graph?.alt ?? []).map((group) => (
+            <section key={group.key} className={css.altGroup} style={{ ["--ucol" as string]: group.color }}>
+              <h2 className={css.altTitle}>{group.label}</h2>
+              <ul className={css.altList}>
+                {group.nodes.map((node) => (
+                  <li key={node.slug} className={css.altItem}>
+                    <Link className={css.altLink} to={routes.page(slug, node.slug)}>
+                      {node.title}
+                    </Link>
+                    <span className={css.altCount}>
+                      {node.degree} {plural(node.degree, "enlace", "enlaces")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+          {!graph?.alt.length ? <p className={css.cardNote}>Sin páginas que mostrar.</p> : null}
+        </div>
+      </details>
     </div>
   );
 }

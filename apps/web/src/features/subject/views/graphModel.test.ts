@@ -6,11 +6,11 @@ import { describe, expect, it } from "vitest";
 import { SubjectConfig, type GraphData, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
 import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
-import { EMPTY_FILTERS, buildGraphModel, nodeRadius, type GraphFilters } from "./graphModel";
+import { CONTENT_ONLY_DEFAULT, EMPTY_FILTERS, HUB_COUNT, buildGraphModel, nodeRadius, type GraphFilters } from "./graphModel";
 
 const config = SubjectConfig.parse(rawProbaConfig);
 
-function meta(slug: string, type: string, division: string, title = slug): PageMeta {
+function meta(slug: string, type: string, division: string, title = slug, hub = false): PageMeta {
   return {
     slug,
     title,
@@ -21,6 +21,7 @@ function meta(slug: string, type: string, division: string, title = slug): PageM
     tags: [],
     sources: [],
     words: 100,
+    ...(hub ? { hub: true } : {}),
   };
 }
 
@@ -67,7 +68,8 @@ describe("sin filtros", () => {
     expect(graph.nodes).toHaveLength(5);
     expect(graph.total).toBe(5);
     expect(graph.hidden).toBe(0);
-    expect(graph.edges).toHaveLength(3);
+    /* `varianza → media` y `media → varianza` son UNA conexión, no dos. */
+    expect(graph.edges).toHaveLength(2);
     expect(graph.edges.some((e) => e.to === "fantasma")).toBe(false);
   });
 
@@ -90,10 +92,89 @@ describe("sin filtros", () => {
     expect(graph.nodes.find((n) => n.slug === "media")?.source).toBe(false);
   });
 
-  it("el radio crece con el grado de entrada y tiene tope", () => {
+  it("el radio crece con el grado y tiene tope", () => {
     expect(nodeRadius(0)).toBeLessThan(nodeRadius(4));
     expect(nodeRadius(4)).toBeLessThan(nodeRadius(30));
     expect(nodeRadius(100_000)).toBeLessThanOrEqual(19);
+  });
+
+  it("el grado es SIN dirección: entradas y salidas, sin repetir", () => {
+    const graph = buildGraphModel(data, model, filters());
+    const by = new Map(graph.nodes.map((n) => [n.slug, n]));
+    /* media: vecinos varianza y normal (la ida y la vuelta con varianza no
+       cuentan dos veces); normal solo enlaza a media. */
+    expect(by.get("media")?.degree).toBe(2);
+    expect(by.get("varianza")?.degree).toBe(1);
+    expect(by.get("normal")?.degree).toBe(1);
+    expect(by.get("teorica-01")?.degree).toBe(0);
+  });
+
+  it("el radio sale del grado, no de las entradas", () => {
+    const graph = buildGraphModel(data, model, filters());
+    const by = new Map(graph.nodes.map((n) => [n.slug, n]));
+    /* `normal` no la cita nadie (inDegree 0) pero enlaza a `media`: en el
+       baseline es un nodo con enlaces, no el mínimo. */
+    expect(by.get("normal")?.inDegree).toBe(0);
+    expect(by.get("normal")?.radius).toBeGreaterThan(by.get("teorica-01")?.radius ?? 0);
+  });
+});
+
+describe("páginas meta", () => {
+  const conMeta: GraphData = {
+    nodes: [...data.nodes, node("indice", "meta", "meta", 0, 2)],
+    edges: [...data.edges, { from: "indice", to: "media" }],
+  };
+
+  it("el índice del wiki no es parte del mapa", () => {
+    const graph = buildGraphModel(conMeta, model, filters());
+    expect(slugs(graph.nodes)).not.toContain("indice");
+    /* El total sigue siendo el grafo completo: lo que baja es lo dibujado. */
+    expect(graph.total).toBe(6);
+    expect(graph.hidden).toBe(1);
+    expect(graph.edges.some((e) => e.from === "indice" || e.to === "indice")).toBe(false);
+  });
+
+  it("entra solo si el filtro de tipo la pide por su nombre", () => {
+    const graph = buildGraphModel(conMeta, model, filters({ types: ["meta"] }));
+    expect(slugs(graph.nodes)).toEqual(["indice"]);
+  });
+});
+
+describe("páginas troncales", () => {
+  it("sin `hub: true` en la materia, son las de mayor grado (y nunca una fuente)", () => {
+    const graph = buildGraphModel(data, model, filters());
+    const hubs = graph.nodes.filter((n) => n.hub).map((n) => n.slug);
+    expect(hubs).toContain("media");
+    expect(hubs).not.toContain("teorica-01");
+  });
+
+  it("nunca marca más de HUB_COUNT y prefiere las de más grado", () => {
+    /* Diez conceptos en cadena: el grado baja de la primera a la última. */
+    const muchas: PageMeta[] = Array.from({ length: 10 }, (_, i) => meta(`c${i}`, "concepto", "1", `Concepto ${i}`));
+    const modelo = buildSubjectModel({ config, pages: muchas, studied: [], placeholder: false, lastSyncAt: null });
+    const nodos = muchas.map((p, i) => node(p.slug, "concepto", "1", i, 0));
+    const aristas = muchas.flatMap((p, i) => muchas.slice(0, i).map((q) => ({ from: q.slug, to: p.slug })));
+    const graph = buildGraphModel({ nodes: nodos, edges: aristas }, modelo, filters());
+    const hubs = graph.nodes.filter((n) => n.hub);
+    expect(hubs).toHaveLength(HUB_COUNT);
+    /* La troncal es más grande que una llana del mismo grado no lo es. */
+    const troncal = hubs[0];
+    const llana = graph.nodes.find((n) => !n.hub);
+    expect(troncal && llana ? troncal.radius > nodeRadius(troncal.degree) : false).toBe(true);
+    expect(llana ? llana.radius === nodeRadius(llana.degree) : false).toBe(true);
+  });
+
+  it("si la materia declara `hub: true`, manda la declaración", () => {
+    const declaradas: PageMeta[] = [
+      meta("media", "concepto", "1", "Media aritmética"),
+      meta("varianza", "concepto", "1", "Varianza"),
+      meta("normal", "distribucion", "3", "Distribución Normal", true),
+      meta("teorica-01", "fuente", "1", "Teórica 01"),
+      meta("suelta", "concepto", "77", "Página de otra división"),
+    ];
+    const conHub = buildSubjectModel({ config, pages: declaradas, studied: [], placeholder: false, lastSyncAt: null });
+    const graph = buildGraphModel(data, conHub, filters());
+    expect(graph.nodes.filter((n) => n.hub).map((n) => n.slug)).toEqual(["normal"]);
   });
 });
 
@@ -107,8 +188,8 @@ describe("filtros", () => {
   it("filtra por división y se lleva puestas las aristas que pierden una punta", () => {
     const graph = buildGraphModel(data, model, filters({ divisions: ["1"] }));
     expect(slugs(graph.nodes).sort()).toEqual(["media", "teorica-01", "varianza"]);
-    /* normal → media desaparece: `normal` es de la U3. */
-    expect(graph.edges).toHaveLength(2);
+    /* normal → media desaparece: `normal` es de la U3. Queda media↔varianza. */
+    expect(graph.edges).toHaveLength(1);
   });
 
   it("filtra por tipo, y varios tipos se suman", () => {
@@ -136,6 +217,28 @@ describe("búsqueda", () => {
     const graph = buildGraphModel(data, model, filters());
     expect(graph.matches).toBe(0);
     expect(graph.nodes.every((n) => !n.match)).toBe(true);
+  });
+});
+
+describe("lista textual", () => {
+  it("dice lo MISMO que el lienzo: todas las páginas dibujadas, ni una menos", () => {
+    const graph = buildGraphModel(data, model, filters());
+    const enLista = graph.alt.flatMap((g) => g.nodes.map((n) => n.slug));
+    expect(enLista.sort()).toEqual(slugs(graph.nodes).sort());
+  });
+
+  it("agrupa por división en el orden del temario, con el rótulo del índice", () => {
+    const graph = buildGraphModel(data, model, filters());
+    expect(graph.alt.map((g) => g.key)).toEqual(["1", "3", "otras"]);
+    expect(graph.alt[0]?.label).toContain("U1");
+    /* Dentro del grupo, por título. */
+    expect(graph.alt[0]?.nodes.map((n) => n.title)).toEqual(["Media aritmética", "Teórica 01", "Varianza"]);
+  });
+
+  it("«solo contenido» nace encendido y es lo que el grafo dibuja de entrada", () => {
+    expect(CONTENT_ONLY_DEFAULT).toBe(true);
+    const graph = buildGraphModel(data, model, filters({ contentOnly: CONTENT_ONLY_DEFAULT }));
+    expect(slugs(graph.nodes)).not.toContain("teorica-01");
   });
 });
 
