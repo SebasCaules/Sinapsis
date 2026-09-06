@@ -3,10 +3,12 @@
  * plataforma, grupos SLOT de la materia y el botón de plegar el índice.
  * Los grupos slot llevan `data-slot="true"`; los fijos, `false`.
  */
+import { useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
 import { Icon, Seal, UiIcon } from "@/components/platform";
 import type { RailGroupView, RailItemView } from "../model";
+import { railScale } from "./rail-fit";
 import css from "./Rail.module.css";
 
 export interface RailProps {
@@ -35,11 +37,19 @@ export function railItemActive(pathname: string, item: RailItemView, slug: strin
 
 export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
   const { pathname } = useLocation();
+  const navRef = useRef<HTMLElement>(null);
+  const scale = useRailScale(navRef, groups.map((g) => g.items.length));
   // una página del rail gana sobre "Todo el wiki" cuando es exactamente esa página
   const exact = groups.some((g) => g.items.some((i) => i.item.kind === "page" && i.to === pathname));
 
   return (
-    <nav className={css.rail} aria-label="Secciones de la materia">
+    <nav
+      className={css.rail}
+      aria-label="Secciones de la materia"
+      ref={navRef}
+      style={{ ["--rs" as string]: scale }}
+      data-scaled={scale < 1 ? "true" : undefined}
+    >
       <div className={css.sealRow}>
         <Link className={css.seal} to={routes.landing()} aria-label="Volver a Sinapsis" title="Volver a Sinapsis">
           <Seal size={34} />
@@ -135,4 +145,26 @@ function RailButton({ view, group, active }: { view: RailItemView; group: RailGr
       {body}
     </Link>
   );
+}
+
+/**
+ * Escala del rail según la altura disponible: se recalcula al montar, al cambiar
+ * la cantidad de ítems y al redimensionar la ventana (ResizeObserver sobre el
+ * propio rail). Usa medidas naturales, así que aplicar la escala no la cambia.
+ */
+function useRailScale(ref: React.RefObject<HTMLElement | null>, itemsPerGroup: number[]): number {
+  const [scale, setScale] = useState(1);
+  const key = itemsPerGroup.join(",");
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const counts = key ? key.split(",").map(Number) : [];
+    const measure = () => setScale(railScale(el.clientHeight, counts));
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref, key]);
+  return scale;
 }

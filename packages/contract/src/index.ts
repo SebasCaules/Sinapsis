@@ -746,8 +746,27 @@ export const Plan = z.object({
 });
 export type Plan = z.infer<typeof Plan>;
 
-/** Fecha de una instancia (AAAA-MM-DD), tal como la carga el usuario. */
-export const PlanDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+/**
+ * Fecha de una instancia (AAAA-MM-DD), tal como la carga el usuario.
+ *
+ * El formato no alcanza: `2026-13-45` lo cumple y no existe en el calendario.
+ * Se comprueba además que el mes y el día sean los que devuelve `Date`, así que
+ * el 29 de febrero solo pasa en año bisiesto. Los dos mensajes son propios: el
+ * del `regex` de zod es «Invalid» y no dice qué formato se esperaba.
+ */
+const isCalendarDate = (value: string): boolean => {
+  const [y, m, d] = value.split("-").map(Number) as [number, number, number];
+  /* `Date.UTC(y, …)` interpreta los años de dos cifras como 19xx; con
+     `setUTCFullYear` el año va literal y «0002-04-15» sigue siendo válido. */
+  const at = new Date(0);
+  at.setUTCFullYear(y, m - 1, d);
+  return at.getUTCFullYear() === y && at.getUTCMonth() === m - 1 && at.getUTCDate() === d;
+};
+
+export const PlanDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "debe tener el formato AAAA-MM-DD")
+  .refine(isCalendarDate, "no es una fecha del calendario");
 export const PlanDateInput = z.object({ date: PlanDate });
 export type PlanDateInput = z.infer<typeof PlanDateInput>;
 
@@ -973,6 +992,19 @@ export const BUILTIN_VIEWS = ["home", "plan", "kits", "wiki", "graph", "flashcar
 export type BuiltinView = (typeof BUILTIN_VIEWS)[number];
 
 /** Grupos FIJOS del rail (regiones 02 del contrato). Los dibuja la plataforma, no la materia. */
+/**
+ * Ítems que la plataforma recomienda como máximo en los grupos SLOT de una
+ * materia. El rail fijo ya lleva 11 (Mi ruta 3 · Consultar 2 · Practicar 2 ·
+ * Lo mío 2 · Wiki 2); con más de 6 de la materia el rail deja de entrar a 36 px
+ * por ítem en una pantalla de portátil y la web lo achica (nunca desborda). Es
+ * una recomendación: `validate` avisa, no rechaza.
+ */
+export const RAIL_SLOT_ITEMS_RECOMMENDED = 6 as const;
+/** Ítems declarados por la materia en sus grupos slot. */
+export function railSlotItemCount(cfg: Pick<SubjectConfigLoose, "rail">): number {
+  return cfg.rail.reduce((n, g) => n + g.items.length, 0);
+}
+
 export const FIXED_RAIL: readonly RailGroup[] = [
   {
     id: "ruta",

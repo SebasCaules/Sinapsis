@@ -7,8 +7,7 @@ import {
   DIVISION_NONE,
   SubjectConfig,
   isExternalUrl,
-  type SubjectConfig as SubjectConfigType,
-} from "@sinapsis/contract";
+  type SubjectConfig as SubjectConfigType, RAIL_SLOT_ITEMS_RECOMMENDED, railSlotItemCount } from "@sinapsis/contract";
 import { compileStudy, formatIssues, isInside } from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
 import { studyLine } from "../report.js";
@@ -160,6 +159,15 @@ export function extraChecks(config: SubjectConfigType): Problem[] {
       }
       seen.add(key);
     }
+  }
+
+  const slotItems = railSlotItemCount(config);
+  if (slotItems > RAIL_SLOT_ITEMS_RECOMMENDED) {
+    problems.push({
+      level: "warning",
+      field: "rail",
+      message: `${slotItems} ítems de la materia en el rail; se recomiendan hasta ${RAIL_SLOT_ITEMS_RECOMMENDED} (con más, el rail se achica en pantallas bajas para que entren todos)`,
+    });
   }
 
   if (config.divisions.some((d) => d.key === DIVISION_NONE)) {

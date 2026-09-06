@@ -1,6 +1,7 @@
 /* Rail 52 · ítems 36×36 radio 10 · icono 18 · barra activa 3×20 pegada al borde. */
 
 .rail {
+  --rs: 1; /* escala del rail (rail-fit.ts): 1 = medidas naturales; baja hasta 0,55 si no entra */
   position: relative;
   z-index: 3;
   width: 52px;
@@ -34,12 +35,12 @@
   position: relative;
   width: 100%;
   flex: none;
-  padding: 6px 0 6px 16px; /* 16 px a la izquierda: barra activa (1-4) + rótulo vertical (6-16) */
+  padding: calc(6px * var(--rs)) 0 calc(6px * var(--rs)) 16px; /* 16 px a la izquierda: barra activa (1-4) + rótulo vertical (6-16) */
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: calc(2px * var(--rs));
 }
 
 /* Rótulo vertical del grupo, pegado al borde izquierdo y leído de abajo hacia
@@ -50,7 +51,7 @@
   top: 50%;
   transform: translateY(-50%) rotate(180deg);
   writing-mode: vertical-rl;
-  font: 600 8px var(--font-mono);
+  font: 600 calc(8px * max(var(--rs), 0.85)) var(--font-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-3);
@@ -63,8 +64,8 @@
 
 .item {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: calc(36px * var(--rs));
+  height: calc(36px * var(--rs));
   flex: none;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -172,3 +173,6 @@
   background-size: 140px 140px;
   background-blend-mode: screen;
 }
+
+/* Con el rail achicado, los iconos acompañan a su caja. */
+.item > svg { width: calc(18px * var(--rs)); height: calc(18px * var(--rs)); }

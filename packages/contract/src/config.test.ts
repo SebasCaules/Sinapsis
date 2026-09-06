@@ -16,7 +16,7 @@ import {
   numberedIndex,
   type SubjectConfig as SubjectConfigType,
 } from "./index.js";
-import { typeColor } from "./index.js";
+import { RAIL_SLOT_ITEMS_RECOMMENDED, railSlotItemCount, typeColor } from "./index.js";
 
 const EXAMPLE = path.resolve(
   fileURLToPath(new URL("../../../examples/proba/sinapsis.config.json", import.meta.url)),
@@ -156,5 +156,20 @@ describe("typeColor", () => {
     expect(typeColor(cfg, "tecnica")).toBe("var(--u1)");
     expect(typeColor(cfg, "fuente")).toBe("var(--u0)");
     expect(typeColor(cfg, "desconocido")).toBe("var(--u0)");
+  });
+});
+
+describe("railSlotItemCount", () => {
+  it("cuenta los ítems de todos los grupos slot", () => {
+    expect(railSlotItemCount({ rail: [] })).toBe(0);
+    expect(
+      railSlotItemCount({
+        rail: [
+          { id: "a", label: "A", items: [{ id: "x", label: "X", icon: "book", kind: "builtin", target: "wiki" }, { id: "y", label: "Y", icon: "book", kind: "builtin", target: "wiki" }] },
+          { id: "b", label: "B", items: [{ id: "z", label: "Z", icon: "book", kind: "builtin", target: "wiki" }] },
+        ],
+      }),
+    ).toBe(3);
+    expect(RAIL_SLOT_ITEMS_RECOMMENDED).toBe(6);
   });
 });

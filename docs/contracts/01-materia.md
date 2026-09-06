@@ -124,6 +124,12 @@ Rótulos que derivan de esto (`divisionShort`, `divisionLong` del contrato):
 El rail tiene dos mitades. La plataforma dibuja los **grupos fijos** (N0-11) y la materia
 aporta hasta 6 **grupos slot** entre medio.
 
+**Cuántos ítems.** La plataforma recomienda **hasta 6 ítems en total** en los grupos slot
+(`RAIL_SLOT_ITEMS_RECOMMENDED`): el rail fijo ya lleva 11, y con más de 17 en total el rail
+no entra a 36 px por ítem en una pantalla de portátil. No es un error: `sinapsis validate`
+avisa, y la web **nunca desborda**: si no entran, achica ítems, iconos y separaciones hasta un
+55 % para que quepan todos.
+
 ### 5.1 Grupos fijos (los dibuja la plataforma, no se declaran)
 
 `FIXED_RAIL` — antes de los slots de la materia:

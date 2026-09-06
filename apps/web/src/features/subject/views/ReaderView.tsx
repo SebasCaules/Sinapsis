@@ -235,8 +235,8 @@ export function ReaderView() {
                 ))}
               </div>
                 {next ? (
-                  <Link className={`${css.next} ${css.sideNext}`} to={routes.page(slug, next.slug)}>
-                    Siguiente: {next.title} →
+                  <Link className={`${css.next} ${css.sideNext}`} to={routes.page(slug, next.slug)} aria-label={`Siguiente: ${next.title}`}>
+                    Siguiente →
                   </Link>
                 ) : (
                   <span className={`${css.prevOff} ${css.sideNext}`}>Última de la {unit}</span>
