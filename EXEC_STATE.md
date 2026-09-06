@@ -140,7 +140,8 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 |---|---|---|---|---|
 | S-10 | FTS: incluir `summary` en el índice externo (A3-5) | apps/api migración 0002 | reporte A3 | HECHO (A3b) |
 | S-11 | `Plan` sin modalidades (cursada vs. final directo): hoy son fases consecutivas; agregar `Plan.tracks` | contrato, compilador, web plan | reporte B3 (contractRequest 2) | Sprint 3 |
-| S-12 | Re-ejecutar `examples/proba/tools/convert-study-data.mjs` para usar `PlanTask.kind = "tool"`, `detail` e `icon` recién agregados al contrato | examples/proba/estudio | reporte B3 | auditoría Sprint 2 |
+| S-12 | Re-ejecutar `examples/proba/tools/convert-study-data.mjs` para usar `PlanTask.kind = "tool"`, `detail` e `icon` recién agregados al contrato | examples/proba/estudio | reporte B3 | HECHO (S4) |
+| S-13 | Reiniciar el API de desarrollo obliga a volver a iniciar sesión en el navegador aunque `sessions` persiste en la base: diagnosticar (¿cookie firmada con secreto distinto? ¿`Set-Cookie` sin `Max-Age` en el proxy?) | apps/api auth | smoke del orquestador | Sprint 3 |
 
 ## Veredicto final (Sprint 2)
 
