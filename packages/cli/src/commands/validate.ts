@@ -31,7 +31,7 @@ export async function loadConfig(
     raw = await readFile(configPath, "utf8");
   } catch {
     ctx.err(pc.red(`No encuentro el config: ${configPath}`));
-    ctx.err(pc.dim("Indicá otro con --config <file>, o creá uno con `sinapsis init`."));
+    ctx.err(pc.dim("Indique otro con --config <file>, o cree uno con `sinapsis init`."));
     return null;
   }
 

@@ -18,7 +18,7 @@ export async function runInit(opts: InitOptions, ctx: Ctx): Promise<number> {
   const wikiDir = resolveUserPath(ctx, opts.wiki ?? "wiki");
   if (!(await isDirectory(wikiDir))) {
     ctx.err(pc.red(`No encuentro la carpeta del wiki: ${wikiDir}`));
-    ctx.err(pc.dim("Indicá otra con --wiki <dir>."));
+    ctx.err(pc.dim("Indique otra con --wiki <dir>."));
     return 1;
   }
 
@@ -210,7 +210,7 @@ tipo: flashcards
 titulo: Mazo de ejemplo
 id: ejemplo
 # division: "1"                 # descomentar para atarlo a una división del config
-descripcion: Borrá este archivo cuando tengas mazos de verdad.
+descripcion: Borre este archivo cuando tenga mazos de verdad.
 ---
 
 <!-- Cada "## …" abre una tarjeta: el encabezado es el anverso; lo que sigue, el reverso. -->

@@ -1,5 +1,5 @@
 /**
- * Cliente HTTP del API de Sinapsis (ver `docs/CONTRACT.md` §4 y §5).
+ * Cliente HTTP del API de Sinapsis (ver `docs/contracts/05-sync-y-api.md`).
  * Sin dependencias: usa el `fetch` de Node.
  */
 import {

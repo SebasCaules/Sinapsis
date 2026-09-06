@@ -1,5 +1,5 @@
 /**
- * Sync idempotente de una materia (contrato §4).
+ * Sync idempotente de una materia (contrato: `docs/contracts/05-sync-y-api.md`).
  *
  * Reemplaza el conjunto entero de páginas: las que ya no vienen se borran. El
  * progreso del usuario se guarda por slug y en su propia tabla, así que

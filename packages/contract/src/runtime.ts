@@ -103,6 +103,7 @@ export interface CompatApp {
   fmt(n: number, digits?: number): string;
   cssVar(name: string): string;
   withAlpha(color: string, alpha: number): string;
+  /** NO lo provee el runtime: lo instala el bundle de Proba (`lookup.js`) y solo existe si un bundle lo define. */
   quickLookup?(kind: string, params: Record<string, number>): void; // compat: burbuja de valores
 
   // --- dibujo (portados del baseline: figures.js / plot.js) ---

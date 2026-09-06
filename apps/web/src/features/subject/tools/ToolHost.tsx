@@ -13,7 +13,7 @@
  *  - el tema: si la vista registró un redibujo propio, el runtime se encarga; si
  *    no, se la vuelve a montar (decisión D4-2);
  *  - `App.render()`, que es la forma que tiene una vista del baseline de pedir
- *    «volvé a dibujarme»;
+ *    «vuelva a dibujarme»;
  *  - atar el contenedor al runtime (`bindView`, S-16): ámbito de `App.$`/`App.$$`
  *    y delegación de los clics de `[data-nav]` / `[data-go]` hacia `App.go`, que
  *    navega por el router sin recargar;

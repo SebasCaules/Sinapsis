@@ -78,7 +78,7 @@ confundirlos:
 (obligatorio), `pages` (obligatorio), `study` (opcional), `generatedAt` (string libre) y
 `generator` (opcional, ≤ 80 caracteres). La compatibilidad hacia atrás se resuelve con
 campos opcionales, no con un número: la **ausencia** de `study` es lo que el API interpreta
-como «CLI anterior al Sprint 2: dejá el material que ya tenías».
+como «CLI anterior al Sprint 2: deje el material que ya tenía».
 
 ---
 

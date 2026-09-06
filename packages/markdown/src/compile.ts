@@ -489,7 +489,7 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
   // `study` viaja siempre, aunque esté vacío: el sync reemplaza el material de
   // estudio igual que reemplaza las páginas, así borrar la carpeta lo borra de
   // la plataforma. La ausencia del campo queda reservada para un CLI anterior al
-  // Sprint 2, y el API la interpreta como "dejá lo que ya tenías".
+  // Sprint 2, y el API la interpreta como "deje lo que ya tenía".
   const payload: SyncPayloadType = SyncPayload.parse({
     config,
     pages,

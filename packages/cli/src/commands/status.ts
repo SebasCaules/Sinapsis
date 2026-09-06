@@ -66,7 +66,7 @@ export async function runStatus(opts: StatusOptions, ctx: Ctx): Promise<number> 
 
     const local = loaded.config;
     if (JSON.stringify(local) !== JSON.stringify(detail.config)) {
-      ctx.out(pc.yellow("  el config local difiere del que tiene la plataforma: corré `sinapsis sync`."));
+      ctx.out(pc.yellow("  el config local difiere del que tiene la plataforma: ejecute `sinapsis sync`."));
     }
     ctx.out(`  ${webUrl(ctx, opts.web, detail.config.slug)}`);
     return 0;

@@ -7,7 +7,7 @@ del usuario; todas las decisiones nuevas están numeradas en `docs/DECISIONS.md`
 
 | Pieza | Qué hace | Dónde |
 |---|---|---|
-| Material de estudio en el wiki | Carpeta `wiki.study` (por defecto `estudio/`): mazos y quizzes en markdown, `plan.json` y `kits.json`; se compila y viaja en `SyncPayload.study`. Sin mazos propios, la plataforma genera uno por división con título → resumen. | `packages/markdown/src/study.ts`, `docs/CONTRACT.md` §7 |
+| Material de estudio en el wiki | Carpeta `wiki.study` (por defecto `estudio/`): mazos y quizzes en markdown, `plan.json` y `kits.json`; se compila y viaja en `SyncPayload.study`. Sin mazos propios, la plataforma genera uno por división con título → resumen. | `packages/markdown/src/study.ts`, `docs/contracts/03-estudio.md` |
 | Contenido real de Proba | 6 mazos (46 tarjetas), 1 quiz (15 preguntas, opciones matemáticas con `alt`), plan de 6 fases / 30 hitos / 89 tareas (2 apuntan a herramientas del rail), 8 kits. Conversor reejecutable desde `study-data.js`. | `examples/proba/estudio/`, `examples/proba/tools/convert-study-data.mjs` |
 | API | Grafo (`page_links`), estudio (`/study`, `/study/state`, SRS SM-2 con `sm2` del contrato, favoritos, apuntes, tareas, intentos), cuatrimestres del usuario, FTS5 externa por materia con título+resumen+cuerpo. Migración `0002_study.sql` con backfill de enlaces. | `apps/api` (128 tests) |
 | Shell de materia | Pestañas múltiples (hasta 20, ⌘-clic, arrastre, teclado, persistentes), grafo de conexiones (`d3-force` en canvas, filtros, lista «Más citadas»), favoritos y apuntes (lector + vistas propias + exportación markdown), «PARA HOY» en Inicio, diálogo de atajos (`?`). | `apps/web/src/features/subject` |

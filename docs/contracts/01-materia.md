@@ -341,7 +341,7 @@ puede expresar, en `extraChecks` y `checkTools`.
 | `color: hex #rrggbb o token --nombre` | Se escribió `var(--u9)`, `#abc` o `red`. | `--u9` o `#7c2230`. |
 | `link: solo URLs http(s) o mailto` | Un `kind: "link"` con `//cdn…`, una ruta relativa o `javascript:`. | URL absoluta con esquema. |
 | `target inválido para kind «page»` | El `target` de un `page` no es un `Slug` (mayúsculas, acentos). | Usar el nombre del archivo `.md` sin extensión, ya normalizado. |
-| `vista builtin desconocida "estudio"` | Se inventó una vista builtin. | Elegir una de `BUILTIN_VIEWS`; recordá que los builtin ya están en los grupos fijos. |
+| `vista builtin desconocida "estudio"` | Se inventó una vista builtin. | Elegir una de `BUILTIN_VIEWS`; recuerde que los builtin ya están en los grupos fijos. |
 | El rail muestra «Próximamente» | El ítem es `kind: "tool"` y ningún bundle registra esa vista, o el `target` es el id del bundle en vez del de la vista. | Publicar el bundle (`sinapsis tools push`) o corregir el `target`. |
 | Las divisiones salen en un orden raro | Se mezcló `order` en algunas divisiones y no en otras. | Poner `order` en todas o en ninguna. |
 | Todas las páginas caen en «Otras» | `wiki.divisionField` no coincide con el campo real del frontmatter. | Ajustar `divisionField` (Proba usa `unidad`). |

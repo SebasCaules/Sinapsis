@@ -17,7 +17,7 @@ apps/web         SPA React + Vite (landing y shell de materia)
 apps/api         API Hono + Drizzle + SQLite (libsql), auth Google, sync
 packages/contract  esquemas zod y helpers compartidos (SubjectConfig, Page, DTOs)
 packages/markdown  compilador del wiki: frontmatter, wikilinks, headings → Page[]
-packages/cli       `sinapsis init | validate | sync | status`
+packages/cli       `sinapsis init | validate | sync | status | tools build|push|list | propose`
 skills/sinapsis    skill /sinapsis para el agente de cada materia
 examples/proba     configuración de la primera materia real (Probabilidad y Estadística)
 e2e/               pruebas Playwright de punta a punta
@@ -70,7 +70,7 @@ SINAPSIS_TOKEN=... pnpm sinapsis -- sync --config examples/proba/sinapsis.config
 ```
 
 El material de estudio (mazos, quizzes, plan y kits) vive en la carpeta `estudio/` junto al wiki;
-el formato está en `docs/CONTRACT.md` §7 y `pnpm sinapsis -- init` deja un ejemplo. Sin mazos
+el formato está en `docs/contracts/03-estudio.md` y `pnpm sinapsis -- init` deja un ejemplo. Sin mazos
 propios, la plataforma genera uno por división a partir de los resúmenes.
 
 Dentro de cada repo de materia, el agente usa la skill `/sinapsis` (`init`, `validate`,

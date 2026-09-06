@@ -1,6 +1,6 @@
 /**
  * Extracción de wikilinks, encabezados y métricas del cuerpo markdown.
- * Todo replica el comportamiento de `build.py` (ver `docs/CONTRACT.md` §3).
+ * Todo replica el comportamiento de `build.py` (ver `docs/contracts/02-paginas.md`).
  */
 import { headingId, type PageLink, type PageHeading } from "@sinapsis/contract";
 

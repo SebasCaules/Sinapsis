@@ -57,7 +57,7 @@ function readWiki(): { pages: RawPage[] } {
   return JSON.parse(json) as { pages: RawPage[] };
 }
 
-/** Traduce el contrato de `build.py` al `Page` de Sinapsis (docs/CONTRACT.md §3). */
+/** Traduce el contrato de `build.py` al `Page` de Sinapsis (docs/contracts/02-paginas.md). */
 function toPage(raw: RawPage): PageInput {
   const division = (raw.unidad ?? "").trim();
   const links = (raw.links ?? []).filter((link) => Slug.safeParse(link.slug).success);

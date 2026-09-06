@@ -460,7 +460,7 @@ re-sincronización. Sus ids son estables mientras no cambie el slug de la págin
 **El campo viaja siempre, aunque esté vacío.** Es lo que hace que el sync reemplace el
 material igual que reemplaza las páginas: borrar la carpeta `estudio/` lo borra de la
 plataforma. La **ausencia** del campo queda reservada para un CLI anterior al Sprint 2, y el
-API la interpreta como «dejá lo que ya tenías».
+API la interpreta como «deje lo que ya tenía».
 
 ---
 

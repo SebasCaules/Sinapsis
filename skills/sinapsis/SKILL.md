@@ -12,7 +12,7 @@ advertencias.
 
 ## Persona y límites
 
-Sos el agente de **esta** materia. Tu alcance:
+Usted es el agente de **esta** materia. Su alcance:
 
 - **Sí**: leer y editar el wiki de la materia, su `sinapsis.config.json`, y correr el CLI de
   Sinapsis en modo lectura/sync.
@@ -320,7 +320,7 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
 
 4. **Revisar las divisiones.** `init` deja nombres provisorios ("Unidad 1", "Unidad 2"…).
    Reemplazalos por los **nombres reales del programa** de la cátedra. Buscalos en el
-   `index.md` del wiki, en el programa de la materia o preguntá al usuario. Marcá como
+   `index.md` del wiki, en el programa de la materia o pregunte al usuario. Marque como
    `"kind": "extra"` las que no llevan número (complementos, evaluaciones, transversales).
 
 5. **Revisar la nomenclatura.** `division` debe decir cómo llama la cátedra a sus
@@ -346,7 +346,7 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
    pnpm --dir "$SINAPSIS_HOME" sinapsis -- validate --config sinapsis.config.json
    ```
 
-   Mostrale al usuario el config final (o el diff contra el generado) y pedile el visto
+   Muestre al usuario el config final (o el diff contra el generado) y pídale el visto
    bueno antes de sincronizar.
 
 ### `/sinapsis sync` — publicar el wiki
@@ -357,7 +357,7 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
    pnpm --dir "$SINAPSIS_HOME" sinapsis -- validate --config sinapsis.config.json
    ```
 
-   Si sale 1, arreglá el config antes de seguir. Los errores vienen con la ruta del campo.
+   Si sale 1, corrija el config antes de seguir. Los errores vienen con la ruta del campo.
 
 2. **Dry-run y leer las advertencias:**
 
@@ -385,9 +385,9 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
    publicar. Si dice «sin material propio», la materia no tiene carpeta `estudio/` (o está
    vacía) y la plataforma va a autogenerar un mazo por división: es válido.
 
-3. **Corregir**, si el usuario lo autoriza. Presentá la lista concreta ("estos 4 wikilinks
+3. **Corregir**, si el usuario lo autoriza. Presente la lista concreta ("estos 4 wikilinks
    apuntan a `distribucion-uniforme`, que no existe; ¿lo cambio por `distribucion-uniforme-continua`
-   o creo la página?") y esperá su respuesta. No edites páginas del wiki sin permiso.
+   o creo la página?") y espere su respuesta. No edites páginas del wiki sin permiso.
 
 4. **Sync real:**
 
@@ -416,7 +416,7 @@ instalación es anterior al Sprint 2: el sync sigue funcionando, pero el materia
 
 `status` necesita **sesión**, no token: el CLI intenta primero `POST /api/auth/dev`, que
 funciona con el API levantado con `AUTH_DEV_BYPASS=1` (decisión N0-5 de la plataforma). Si
-responde 401, decíselo al usuario tal cual: hay que levantar el API con esa variable o
+responde 401, dígaselo al usuario tal cual: hay que levantar el API con esa variable o
 iniciar sesión en la web. No intentes rodear la autenticación.
 
 ### `/sinapsis validate` — solo el config

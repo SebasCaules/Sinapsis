@@ -155,7 +155,7 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- status --config sinapsis.config.json
 
 Muestra lo que tiene **la plataforma**: última sync, páginas, estudiadas, conteos por tipo y
 por división, material de estudio publicado, y un aviso si el config local difiere del
-publicado (`el config local difiere del que tiene la plataforma: corré \`sinapsis sync\`.`).
+publicado (`el config local difiere del que tiene la plataforma: ejecute \`sinapsis sync\`.`).
 
 `status` necesita **sesión**, no token: el CLI intenta primero `POST /api/auth/dev`, que
 funciona con el API levantado con `AUTH_DEV_BYPASS=1` (N0-5). Ante un `401` o `403` dice qué

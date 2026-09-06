@@ -132,7 +132,7 @@ export async function runToolsPush(opts: ToolsPushOptions, ctx: Ctx): Promise<nu
   const token = resolveToken(ctx, opts.token);
   if (!token) {
     ctx.err(pc.red("Falta el token de sync."));
-    ctx.err(pc.dim("Pasalo con --token, o exportá SINAPSIS_TOKEN (o SYNC_TOKEN)."));
+    ctx.err(pc.dim("Páselo con --token, o exporte SINAPSIS_TOKEN (o SYNC_TOKEN)."));
     return 1;
   }
 

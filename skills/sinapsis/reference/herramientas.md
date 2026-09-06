@@ -99,6 +99,18 @@ contenido), `App.BY_SLUG`, `App.UNITS`, `App.TYPES`, `App.unitShort(key)`,
 `App.go(destino, { replace })` (acepta rutas del baseline `#/p/slug` y del SPA `/m/…`),
 `App.setCrumbs([{ label, href }])`, `App.render()`, `App.toast(mensaje, "ok" | "bad")`.
 
+Dentro del contenedor de la vista, los clics en `[data-nav="ruta"]`, `[data-go="slug"]` y
+`a.wikilink[data-slug]` navegan por `App.go` sin recargar la página (⌘/Ctrl-clic y
+`target="_blank"` pasan de largo): no hace falta atar listeners propios para navegar.
+
+**DOM y paleta**
+
+`App.$(sel, root?)` y `App.$$(sel, root?)` consultan el DOM acotados al contenedor de la vista
+montada (`$$` devuelve un array). `App.paletteOpen()` responde si la paleta ⌘K del shell está
+abierta (es una pregunta, como la usa el baseline con Escape); `App.openPalette()` la abre.
+`App.quickLookup` NO lo provee el runtime: es un miembro que instala el propio bundle de Proba
+y solo existe si ese bundle lo define.
+
 **Render**
 
 `App.escapeHtml`, `App.icon(nombre, size)`, `App.katex(tex, display)` (también
