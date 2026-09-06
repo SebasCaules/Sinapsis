@@ -501,6 +501,12 @@ export function parseSemester(raw: string): SemesterParts | null {
   return { year, term };
 }
 
+/** Forma canónica de un rótulo de cuatrimestre: "2026-1c" → "2026-1C"; los libres se recortan. */
+export function canonicalSemester(raw: string): string {
+  const p = parseSemester(raw);
+  return p ? `${p.year}-${p.term}C` : (raw ?? "").trim();
+}
+
 /** Descendente: el más reciente primero; los rótulos libres al final (alfabético descendente). */
 export function compareSemestersDesc(a: string, b: string): number {
   const pa = parseSemester(a);
@@ -593,7 +599,12 @@ export const Deck = z.object({
 });
 export type Deck = z.infer<typeof Deck>;
 
-export const QuizOption = z.object({ text: z.string().min(1).max(600), correct: z.boolean() });
+export const QuizOption = z.object({
+  text: z.string().min(1).max(600),
+  correct: z.boolean(),
+  /** Texto alternativo para lectores de pantalla cuando `text` es solo matemática (p. ej. «alfa»). */
+  alt: z.string().max(300).optional(),
+});
 export type QuizOption = z.infer<typeof QuizOption>;
 
 export const QuizQuestion = z
