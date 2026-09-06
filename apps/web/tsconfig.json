@@ -2,7 +2,14 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true, "jsx": "react-jsx", "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"], "baseUrl": ".", "paths": { "@/*": ["src/*"] }
+    "types": ["vite/client"], "baseUrl": ".", "paths": { "@/*": ["src/*"] },
+    /* En macOS el sistema de archivos no distingue mayúsculas, así que
+       `import "./DatePicker"` encuentra primero `datePicker.ts` (la lógica pura,
+       que TS prueba antes que el .tsx) y falla con TS1261. Los dos nombres los
+       fija el contrato del componente, de modo que quien importe el COMPONENTE
+       lo hace con la extensión explícita `./DatePicker.tsx`; esto es lo único
+       que hace falta para permitirlo (no emitimos, así que no cambia la salida). */
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "vite.config.ts"]
 }

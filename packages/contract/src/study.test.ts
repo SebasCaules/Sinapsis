@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   Plan,
+  PlanDate,
   SRS_DEFAULT,
   SubjectConfig,
   autoDecks,
@@ -135,5 +136,36 @@ describe("Plan.tracks", () => {
 
   it("sin modalidades, `tracks` queda vacío por defecto", () => {
     expect(Plan.parse({ phases: [fase("fase-1", "t-1")] }).tracks).toEqual([]);
+  });
+});
+
+describe("PlanDate", () => {
+  it("acepta AAAA-MM-DD del calendario, bisiesto incluido", () => {
+    for (const date of ["2026-04-15", "2028-02-29", "2026-12-31", "0002-04-15"]) {
+      expect(PlanDate.parse(date)).toBe(date);
+    }
+  });
+
+  it("rechaza lo que no tiene el formato, y lo dice", () => {
+    for (const date of ["15/04/2026", "2026-4-15", "2026-04-15T00:00:00Z", ""]) {
+      const res = PlanDate.safeParse(date);
+      expect(res.success).toBe(false);
+      /* Un solo mensaje: el del calendario no se suma al del formato. */
+      if (!res.success) {
+        expect(res.error.issues.map((i) => i.message)).toEqual(["debe tener el formato AAAA-MM-DD"]);
+      }
+    }
+  });
+
+  /**
+   * El formato solo no alcanza: «2026-13-45» lo cumple y no existe. Antes se
+   * guardaba tal cual y volvía en el estado del usuario.
+   */
+  it("rechaza las fechas que el calendario no tiene", () => {
+    for (const date of ["2026-13-45", "2026-02-30", "2025-02-29", "2026-00-10", "2026-04-31"]) {
+      const res = PlanDate.safeParse(date);
+      expect(res.success).toBe(false);
+      if (!res.success) expect(res.error.issues[0]?.message).toBe("no es una fecha del calendario");
+    }
   });
 });

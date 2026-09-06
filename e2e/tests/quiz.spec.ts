@@ -6,6 +6,11 @@
  * (`GET /api/subjects/:slug/study`), así que la prueba sigue valiendo si el wiki
  * reordena las opciones.
  *
+ * Y qué pregunta está en pantalla tampoco se supone por su posición: la partida
+ * MEZCLA las preguntas en cada entrada, así que la vista publica el id de la
+ * pregunta actual (`[data-testid="quiz-card"][data-question]`) y la prueba busca
+ * su material por ese id.
+ *
  * Los intentos NO se pueden borrar (el contrato §5 no expone un DELETE), así que
  * la aserción sobre `state.attempts` es «al menos uno».
  */
@@ -21,6 +26,9 @@ const QUIZ = "quiz-general";
 const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 
 const counter = (page: Page) => page.getByTestId("quiz-counter");
+/** El id de la pregunta que está en pantalla (la partida sale mezclada). */
+const currentId = async (page: Page): Promise<string> =>
+  (await page.getByTestId("quiz-card").getAttribute("data-question")) ?? "";
 /** El bloque que se revela al elegir: `data-ok` dice si la elección era correcta. */
 const reveal = (page: Page) => page.locator("main#contenido [data-ok]");
 
@@ -60,8 +68,9 @@ test("responder revela CORRECTO o INCORRECTO con su explicación", async ({ page
   await openQuiz(page);
 
   for (let i = 0; i < 3; i += 1) {
-    const pregunta = preguntas[i];
-    if (!pregunta) throw new Error(`Falta la pregunta ${i + 1}`);
+    const id = await currentId(page);
+    const pregunta = preguntas.find((q) => q.id === id);
+    if (!pregunta) throw new Error(`La vista muestra una pregunta que no está en el material: «${id}»`);
     const correcta = pregunta.options.findIndex((o) => o.correct);
     // La segunda se falla a propósito: hay que ver los dos revelados.
     const elegida = i === 1 ? (correcta === 0 ? 1 : 0) : correcta;

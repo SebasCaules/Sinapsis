@@ -14,6 +14,14 @@ Equivale a `pnpm --filter @sinapsis/web run e2e`, que es
 `playwright test -c ../../e2e/playwright.config.ts`. Playwright levanta y baja los dos
 servidores por su cuenta (`webServer`), así que no hace falta tener nada corriendo antes.
 
+**`cd e2e && pnpm exec playwright test …` NO funciona** («unknown command 'test'»): esta
+carpeta no tiene `package.json` ni `node_modules`, y el binario de Playwright vive en
+`apps/web`. Un archivo suelto se corre así:
+
+```bash
+cd apps/web && pnpm exec playwright test -c ../../e2e/playwright.config.ts tests/plan-dates.spec.ts
+```
+
 Variantes útiles:
 
 ```bash

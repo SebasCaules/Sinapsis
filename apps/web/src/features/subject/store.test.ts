@@ -21,6 +21,11 @@ const page = (p: string) => routes.page(SLUG, p);
 const info = (path: string, title = path): TabInfo => ({ path, title, chip: null, color: null });
 
 const store = () => useSubjectTabsStore.getState();
+/** `openTab` ahora puede devolver null (tope de 20); en estas pruebas siempre abre. */
+const opened = (id: string | null): string => {
+  if (!id) throw new Error("se esperaba una pestaña nueva");
+  return id;
+};
 const tabs = () => store().tabsOf(SLUG);
 const paths = () => tabs().list.map((t) => t.path);
 const activePath = () => tabs().list.find((t) => t.id === tabs().active)?.path;
@@ -55,30 +60,32 @@ describe("abrir", () => {
     expect(activePath()).toBe(home);
   });
 
-  it("al pasarse de 20 cierra la primera que no esté activa", () => {
+  it("en el tope de 20 no abre nada y lo dice devolviendo null", () => {
     for (let i = 0; i < MAX_TABS - 1; i += 1) store().openTab(SLUG, info(page(`p-${i}`)));
     expect(tabs().list).toHaveLength(MAX_TABS);
-    /* La activa sigue siendo la primera («Inicio»): la víctima es la segunda. */
-    const victim = tabs().list[1]?.path;
-    store().openTab(SLUG, info(page("p-nueva")));
+    const antes = paths();
+
+    /* El baseline corta antes de crear nada: ninguna pestaña abierta se pierde. */
+    expect(store().openTab(SLUG, info(page("p-nueva")))).toBeNull();
+    expect(paths()).toEqual(antes);
+    expect(paths()).not.toContain(page("p-nueva"));
+    expect(store().newTab(SLUG)).toBeNull();
     expect(tabs().list).toHaveLength(MAX_TABS);
-    expect(paths()).not.toContain(victim);
-    expect(paths()).toContain(page("p-nueva"));
     expect(activePath()).toBe(home);
   });
 });
 
 describe("activar y cerrar", () => {
   it("activar guarda el scroll con el que se deja la anterior", () => {
-    const id = store().openTab(SLUG, info(page("p-a")));
+    const id = opened(store().openTab(SLUG, info(page("p-a"))));
     store().activateTab(SLUG, id, 420);
     expect(tabs().list[0]?.scrollY).toBe(420);
     expect(tabs().active).toBe(id);
   });
 
   it("cerrar la activa pasa a la vecina de la derecha y devuelve su ruta", () => {
-    const a = store().openTab(SLUG, info(page("p-a")));
-    const b = store().openTab(SLUG, info(page("p-b")));
+    const a = opened(store().openTab(SLUG, info(page("p-a"))));
+    const b = opened(store().openTab(SLUG, info(page("p-b"))));
     store().activateTab(SLUG, a);
     const next = store().closeTab(SLUG, a);
     expect(next).toBe(page("p-b"));
@@ -87,7 +94,7 @@ describe("activar y cerrar", () => {
   });
 
   it("cerrar una que no está activa no navega", () => {
-    const a = store().openTab(SLUG, info(page("p-a")));
+    const a = opened(store().openTab(SLUG, info(page("p-a"))));
     expect(store().closeTab(SLUG, a)).toBeNull();
     expect(activePath()).toBe(home);
   });
@@ -181,8 +188,8 @@ describe("el ancla viaja aparte del pathname (bug 4)", () => {
   });
 
   it("cerrar devuelve la dirección con su ancla", () => {
-    const a = store().openTab(SLUG, { path: page("p-a"), hash: "#tres", title: "A", chip: null, color: null });
-    const b = store().openTab(SLUG, info(page("p-b")));
+    const a = opened(store().openTab(SLUG, { path: page("p-a"), hash: "#tres", title: "A", chip: null, color: null }));
+    const b = opened(store().openTab(SLUG, info(page("p-b"))));
     store().activateTab(SLUG, b);
     expect(store().closeTab(SLUG, b)).toBe(`${page("p-a")}#tres`);
     expect(tabs().active).toBe(a);
