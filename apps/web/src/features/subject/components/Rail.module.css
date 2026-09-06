@@ -34,7 +34,7 @@
   position: relative;
   width: 100%;
   flex: none;
-  padding: 6px 0 6px 19px; /* rótulo vertical (0-10) · barra activa (11-14) · aire (5) · caja del icono (19-52) */
+  padding: 6px 0 6px 16px; /* 16 px a la izquierda: barra activa (1-4) + rótulo vertical (6-16) */
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -46,11 +46,11 @@
    arriba; los grupos de la materia (slot) lo llevan en su color. */
 .groupLabel {
   position: absolute;
-  left: 0;
+  left: 5px;
   top: 50%;
   transform: translateY(-50%) rotate(180deg);
   writing-mode: vertical-rl;
-  font: 600 7.5px var(--font-mono);
+  font: 600 8px var(--font-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-3);
@@ -62,7 +62,7 @@
 
 .item {
   position: relative;
-  width: 33px; /* 36 de alto; 33 de ancho para dejar aire entre la barra activa y la caja */
+  width: 36px;
   height: 36px;
   flex: none;
   border: 1px solid transparent;
@@ -87,12 +87,11 @@
   background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
 }
 
-/* Orden de izquierda a derecha (pedido del usuario): rótulo vertical del
-   grupo pegado al borde, después la barra del ítem activo y, con aire, el
-   icono. La barra no toca ni el rótulo ni la caja del icono. */
+/* La barra del ítem activo sigue pegada al borde IZQUIERDO del rail (1-4 px);
+   el rótulo vertical del grupo va después (6-16 px), sin pisarse. */
 .bar {
   position: absolute;
-  left: -8px;
+  left: -15px;
   width: 3px;
   height: 20px;
   border-radius: 2px;
@@ -111,7 +110,7 @@
 .toggleRow {
   width: 100%;
   flex: none;
-  padding: 6px 0 6px 19px; /* alineado con la caja de los iconos de los grupos */
+  padding: 6px 0;
   display: grid;
   place-items: center;
   border-bottom: 1px solid var(--border);
