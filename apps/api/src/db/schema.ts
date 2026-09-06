@@ -7,8 +7,16 @@
  * guardan como JSON en columnas `*_json`.
  */
 import { sql } from "drizzle-orm";
-import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import type { DivisionLabel, PageHeading, PageLink, SubjectConfig, ThemeId } from "@sinapsis/contract";
+import { index, integer, primaryKey, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import type {
+  DivisionLabel,
+  PageHeading,
+  PageLink,
+  SrsGrade,
+  StudyContent,
+  SubjectConfig,
+  ThemeId,
+} from "@sinapsis/contract";
 
 export const users = sqliteTable(
   "users",
@@ -134,6 +142,160 @@ export const progress = sqliteTable(
   }),
 );
 
+// ---------------------------------------------------------------------------
+// Sprint 2 · material de estudio y grafo de la materia (los pobla el sync)
+// ---------------------------------------------------------------------------
+
+/**
+ * `StudyContent` autoral de la materia: lo que vino en `SyncPayload.study`, sin
+ * los mazos automáticos (esos los calcula el contrato en cada lectura, así
+ * siguen a las páginas sin necesidad de re-sincronizar).
+ */
+export const subjectStudy = sqliteTable("subject_study", {
+  subjectId: text("subject_id")
+    .primaryKey()
+    .references(() => subjects.id, { onDelete: "cascade" }),
+  studyJson: text("study_json", { mode: "json" }).$type<StudyContent>().notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+/**
+ * Wikilinks resueltos de la materia (S-07): solo los que apuntan a una página
+ * que existe. Alimenta los backlinks del lector y el grafo de conexiones. Se
+ * guarda por slug (no por id) para que el sync la pueda reconstruir entera.
+ */
+export const pageLinks = sqliteTable(
+  "page_links",
+  {
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    fromSlug: text("from_slug").notNull(),
+    toSlug: text("to_slug").notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.subjectId, t.fromSlug, t.toSlug] }),
+    toIdx: index("page_links_to_idx").on(t.subjectId, t.toSlug),
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// Sprint 2 · estado de estudio por usuario y materia
+// ---------------------------------------------------------------------------
+
+/** Favoritos del lector. Por slug, como el progreso: sobrevive a los syncs. */
+export const bookmarks = sqliteTable(
+  "bookmarks",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    pageSlug: text("page_slug").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.userId, t.subjectId, t.pageSlug] }) }),
+);
+
+/** Apunte del usuario sobre una página (markdown crudo, ≤ 50 000 caracteres). */
+export const notes = sqliteTable(
+  "notes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    pageSlug: text("page_slug").notNull(),
+    body: text("body").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.userId, t.subjectId, t.pageSlug] }) }),
+);
+
+/**
+ * Estado SM-2 de cada tarjeta (N0-28). `card_id` no tiene clave foránea: los
+ * mazos automáticos no están en la base y las tarjetas autorales viven dentro
+ * del JSON de `subject_study`.
+ */
+export const srsCards = sqliteTable(
+  "srs_cards",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    cardId: text("card_id").notNull(),
+    ease: real("ease").notNull(),
+    intervalDays: real("interval_days").notNull(),
+    due: text("due").notNull(),
+    reps: integer("reps").notNull().default(0),
+    lapses: integer("lapses").notNull().default(0),
+    lastGrade: integer("last_grade").$type<SrsGrade | null>(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.userId, t.subjectId, t.cardId] }) }),
+);
+
+/** Tareas del plan de estudio marcadas como hechas. */
+export const tasks = sqliteTable(
+  "tasks",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    taskId: text("task_id").notNull(),
+    doneAt: text("done_at").notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.userId, t.subjectId, t.taskId] }) }),
+);
+
+/** Historial de intentos de quiz (se conservan todos; la vista lee los últimos). */
+export const quizAttempts = sqliteTable(
+  "quiz_attempts",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    quizId: text("quiz_id").notNull(),
+    score: integer("score").notNull(),
+    total: integer("total").notNull(),
+    at: text("at").notNull(),
+  },
+  (t) => ({
+    userSubjectQuizIdx: index("quiz_attempts_user_subject_quiz_idx").on(t.userId, t.subjectId, t.quizId),
+  }),
+);
+
+/**
+ * Cuatrimestres declarados por el usuario en su landing (S-03, N0-32). Existen
+ * aunque no tengan materias: es la única forma de conservar un cuatrimestre
+ * vacío y el orden elegido.
+ */
+export const userSemesters = sqliteTable(
+  "user_semesters",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    label: text("label").notNull(),
+    position: integer("position").notNull().default(0),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.userId, t.label] }) }),
+);
+
 /** Tabla de control de migraciones aplicadas. */
 export const migrationsApplied = sqliteTable("_migrations", {
   name: text("name").primaryKey(),
@@ -144,3 +306,4 @@ export type UserRow = typeof users.$inferSelect;
 export type SubjectRow = typeof subjects.$inferSelect;
 export type PageRow = typeof pages.$inferSelect;
 export type SessionRow = typeof sessions.$inferSelect;
+export type SrsCardRow = typeof srsCards.$inferSelect;

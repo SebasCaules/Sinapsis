@@ -1,9 +1,17 @@
 /**
  * Búsqueda de texto completo por materia (FTS5) con reordenamiento propio.
  *
- * `services/sync.ts` mantiene el índice `pages_fts` (solo las páginas que
- * cambiaron), así que acá hay lectura, saneamiento de la consulta y ranking,
- * más las primitivas de escritura que usa el sync.
+ * `pages_fts` es un índice FTS5 de contenido externo sobre `pages`
+ * (`content='pages'`, S-06): no guarda una copia del texto y lo mantienen los
+ * triggers `pages_ai/ad/au` de la migración `0002_study.sql`. Este módulo solo
+ * lee: saneamiento de la consulta, filtro por materia y ranking.
+ *
+ * El índice cubre las tres columnas de texto de la tabla: `title`, `summary` y
+ * `body`. El MATCH corre sobre las tres (una página cuyo resumen menciona el
+ * término es candidata aunque el cuerpo no lo diga); el `snippet()` se pide solo
+ * sobre el cuerpo, que es de donde sale un fragmento legible, y cuando no hay
+ * fragmento se cae al resumen. El resumen además sigue pesando en el ranking
+ * propio: `scoreHit` lo mira sobre la fila de `pages`.
  *
  * Por qué no alcanza con BM25 solo: en un wiki de una materia el vocabulario es
  * muy repetitivo ("normal" aparece en casi todas las páginas de Proba), la IDF
@@ -12,7 +20,7 @@
  * decide `scoreHit`, que mira dónde cayó cada término (título, slug, resumen) y
  * si la página es material propio o una fuente citada.
  */
-import { sql, type SQL } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { fold, type SearchHit } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
 
@@ -20,6 +28,11 @@ import type { Db } from "../db/client.js";
 export const SEARCH_LIMIT = 20;
 /** Candidatos que pide a FTS5 antes de reordenar. */
 const CANDIDATE_LIMIT = 120;
+/**
+ * Posición de `body` en `pages_fts` (title = 0, summary = 1, body = 2). La
+ * necesita `snippet()`, que se pide por índice de columna.
+ */
+const BODY_COLUMN = 2;
 
 /**
  * Minúsculas sin acentos: "Distribución" y "distribucion" son lo mismo. Es el
@@ -127,14 +140,12 @@ export async function searchPages(
              p.type AS type,
              p.division AS division,
              p.summary AS summary,
-             snippet(pages_fts, 1, '', '', '…', 14) AS snip,
-             bm25(pages_fts, 10.0, 1.0) AS rank
+             snippet(pages_fts, ${sql.raw(String(BODY_COLUMN))}, '', '', '…', 14) AS snip,
+             bm25(pages_fts, 10.0, 3.0, 1.0) AS rank
         FROM pages_fts
-        JOIN pages p
-          ON p.slug = pages_fts.slug
-         AND p.subject_id = pages_fts.subject_id
+        JOIN pages p ON p.rowid = pages_fts.rowid
        WHERE pages_fts MATCH ${match}
-         AND pages_fts.subject_id = ${subjectId}
+         AND pages_fts.rowid IN (SELECT rowid FROM pages WHERE subject_id = ${subjectId})
        ORDER BY rank
        LIMIT ${CANDIDATE_LIMIT}
     `);
@@ -158,42 +169,3 @@ export async function searchPages(
     }));
 }
 
-/** Filas del índice, en lotes: `pages_fts` no tiene índices, conviene tocarla poco. */
-const FTS_BATCH = 100;
-
-/** Página tal como entra al índice. */
-export interface IndexablePage {
-  slug: string;
-  title: string;
-  body: string;
-  summary: string;
-}
-
-/** Borra del índice solo los slugs indicados (los que cambiaron o se borraron). */
-export async function removeFromFts(db: Db, subjectId: string, slugs: readonly string[]): Promise<void> {
-  for (const batch of chunks(slugs, FTS_BATCH)) {
-    const list: SQL = sql.join(
-      batch.map((slug) => sql`${slug}`),
-      sql`, `,
-    );
-    await db.run(sql`DELETE FROM pages_fts WHERE subject_id = ${subjectId} AND slug IN (${list})`);
-  }
-}
-
-/** Inserta páginas en el índice, en lotes de a `FTS_BATCH`. */
-export async function indexPages(db: Db, subjectId: string, list: readonly IndexablePage[]): Promise<void> {
-  for (const batch of chunks(list, FTS_BATCH)) {
-    const rows: SQL = sql.join(
-      batch.map((p) => sql`(${p.title}, ${`${p.summary}\n${p.body}`}, ${p.slug}, ${subjectId})`),
-      sql`, `,
-    );
-    await db.run(sql`INSERT INTO pages_fts (title, body, slug, subject_id) VALUES ${rows}`);
-  }
-}
-
-/** Parte una lista en tandas de a `size` (la última puede ser más corta). */
-export function chunks<T>(list: readonly T[], size: number): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
-  return out;
-}

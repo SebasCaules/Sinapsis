@@ -5,10 +5,10 @@
  * `subjects` es global y `user_subjects` guarda cuatrimestre y posición por
  * usuario (N0-6).
  */
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { compareSemestersDesc, type SubjectCard } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
-import { pages, progress, subjects, userSubjects, type SubjectRow } from "../db/schema.js";
+import { pages, progress, subjects, userSemesters, userSubjects, type SubjectRow } from "../db/schema.js";
 import { contentTypePredicate, resolveConfig } from "./subjects.js";
 
 /** Color de reserva cuando la materia no declara ninguno. */
@@ -130,6 +130,50 @@ export async function landingCard(db: Db, userId: string, slug: string): Promise
 
   const { pageCounts, studiedCounts } = await countsFor(db, userId, [row.subject.id]);
   return buildCard(row.subject, row.semester, row.position, pageCounts, studiedCounts);
+}
+
+// ---------------------------------------------------------------------------
+// Cuatrimestres del usuario (S-03, N0-32)
+// ---------------------------------------------------------------------------
+
+/**
+ * Cuatrimestres de la landing: primero los que el usuario declaró y ordenó
+ * (`user_semesters`, que es lo único que conserva los vacíos), después los que
+ * aparecen en sus materias y todavía no estaban declarados, en el orden
+ * canónico del contrato (el más reciente primero).
+ */
+export async function landingSemesters(db: Db, userId: string): Promise<string[]> {
+  const declared = await db
+    .select({ label: userSemesters.label })
+    .from(userSemesters)
+    .where(eq(userSemesters.userId, userId))
+    .orderBy(asc(userSemesters.position), asc(userSemesters.label));
+
+  const used = await db
+    .select({ semester: userSubjects.semester })
+    .from(userSubjects)
+    .where(eq(userSubjects.userId, userId));
+
+  const out = declared.map((row) => row.label);
+  const known = new Set(out);
+  const extra = [...new Set(used.map((row) => row.semester))]
+    .filter((label) => !known.has(label))
+    .sort(compareSemestersDesc);
+
+  return [...out, ...extra];
+}
+
+/**
+ * Reemplaza la lista de cuatrimestres del usuario: `position` es el índice en
+ * el array recibido. Se llama dentro de la transacción de `PUT /api/landing`.
+ */
+export async function replaceSemesters(db: Db, userId: string, labels: string[]): Promise<void> {
+  await db.delete(userSemesters).where(eq(userSemesters.userId, userId));
+  const unique = [...new Set(labels)];
+  if (unique.length === 0) return;
+  await db
+    .insert(userSemesters)
+    .values(unique.map((label, position) => ({ userId, label, position })));
 }
 
 /** Siguiente posición libre dentro de un cuatrimestre. */

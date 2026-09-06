@@ -1,19 +1,12 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import type { PageDetail, PageLink } from "@sinapsis/contract";
+import type { PageDetail } from "@sinapsis/contract";
 import { requireSession } from "../auth/middleware.js";
-import { pages, progress } from "../db/schema.js";
+import { pageLinks, pages, progress } from "../db/schema.js";
 import { notFound } from "../lib/errors.js";
 import { loadSubject } from "../middleware/subject.js";
 import { pageMetaColumns, rowToPage, rowToPageMeta } from "../services/subjects.js";
 import type { AppBindings } from "../types.js";
-
-/** Comodín LIKE que solo pueden satisfacer los `links_json` que citan este slug. */
-function backlinkPattern(pageSlug: string): string {
-  // `links_json` se guarda con `JSON.stringify`, sin espacios: `{"slug":"x",…}`.
-  const escaped = pageSlug.replace(/[\\%_]/g, (ch) => `\\${ch}`);
-  return `%"slug":"${escaped}"%`;
-}
 
 export function pageRoutes(): Hono<AppBindings> {
   const app = new Hono<AppBindings>();
@@ -34,25 +27,19 @@ export function pageRoutes(): Hono<AppBindings> {
     )[0];
     if (!row) throw notFound("La página no existe");
 
-    // Backlinks: las páginas de la materia cuyos wikilinks apuntan a esta. El
-    // LIKE descarta en SQL casi todo el wiki; el `some` de abajo confirma sobre
-    // el JSON ya parseado (un slug puede aparecer como texto y no como destino).
-    const candidates = await db
-      .select({ ...pageMetaColumns, linksJson: pages.linksJson })
-      .from(pages)
-      .where(
-        and(
-          eq(pages.subjectId, subject.id),
-          sql`${pages.linksJson} LIKE ${backlinkPattern(pageSlug)} ESCAPE '\\'`,
-        ),
-      );
+    // Backlinks: `page_links` ya tiene los wikilinks resueltos de la materia
+    // (solo los que apuntan a una página que existe, S-07), así que alcanza con
+    // un índice — antes había que prefiltrar con LIKE y confirmar sobre el JSON.
+    const backlinkRows = await db
+      .select(pageMetaColumns)
+      .from(pageLinks)
+      .innerJoin(
+        pages,
+        and(eq(pages.subjectId, pageLinks.subjectId), eq(pages.slug, pageLinks.fromSlug)),
+      )
+      .where(and(eq(pageLinks.subjectId, subject.id), eq(pageLinks.toSlug, pageSlug)));
 
-    const backlinks = candidates
-      .filter((candidate) => {
-        if (candidate.slug === pageSlug) return false;
-        const links: PageLink[] = candidate.linksJson ?? [];
-        return links.some((link) => link.slug === pageSlug);
-      })
+    const backlinks = backlinkRows
       .map(rowToPageMeta)
       .sort((a, b) => a.title.localeCompare(b.title, "es"));
 

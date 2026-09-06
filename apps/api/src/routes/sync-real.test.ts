@@ -9,8 +9,16 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { Slug, type PageInput, type SearchHit, type SubjectConfigInput, type SyncResult } from "@sinapsis/contract";
+import {
+  Slug,
+  type GraphData,
+  type PageInput,
+  type SearchHit,
+  type SubjectConfigInput,
+  type SyncResult,
+} from "@sinapsis/contract";
 import { createHarness, type Harness } from "../test/harness.js";
 
 const DATA_JS = join(homedir(), "Desktop/ITBA/26-1C/Proba_Obsidian/estudio/data.js");
@@ -110,10 +118,30 @@ describe.skipIf(!available)("sync del wiki real de Proba", () => {
     expect(result.deleted).toBe(0);
 
     await h.login();
-    const hits = (await (
-      await h.request("/api/subjects/proba/search?q=normal")
-    ).json()) as SearchHit[];
-    expect(hits.slice(0, 5).map((hit) => hit.slug)).toContain("distribucion-normal");
+    const buscar = async (q: string): Promise<string[]> =>
+      (
+        (await (
+          await h.request(`/api/subjects/proba/search?q=${encodeURIComponent(q)}`)
+        ).json()) as SearchHit[]
+      ).map((hit) => hit.slug);
+
+    // El término más repetido del wiki tiene que dar la página del concepto, no
+    // una teórica que lo menciona: es el caso que justifica el reordenamiento.
+    expect((await buscar("normal"))[0]).toBe("distribucion-normal");
+    // Y la página propia le gana a la fuente que la cita ("teorica-markov-chebyshev").
+    expect((await buscar("chebyshev"))[0]).toBe("desigualdad-de-chebyshev");
+
+    // El grafo de la materia (S-07): un wiki real teje cientos de wikilinks.
+    const links = (
+      await h.db.all<{ n: number }>(sql`SELECT count(*) AS n FROM page_links`)
+    )[0];
+    console.log(`[sync real] page_links = ${links?.n ?? 0}`);
+    expect(Number(links?.n ?? 0)).toBeGreaterThan(500);
+
+    const graph = (await (await h.request("/api/subjects/proba/graph")).json()) as GraphData;
+    expect(graph.nodes.length).toBe(result.pages);
+    expect(graph.edges.length).toBe(Number(links?.n ?? 0));
+    expect(graph.nodes.some((node) => node.inDegree > 0 && node.outDegree > 0)).toBe(true);
   });
 
   it("un segundo sync idéntico no toca nada", async () => {

@@ -5,9 +5,9 @@
  * progreso del usuario se guarda por slug y en su propia tabla, así que
  * sobrevive a los borrados (si la página vuelve, la marca sigue ahí).
  *
- * Un sync que no cambia nada no escribe nada: ni `pages` ni el índice FTS. Y
- * cuando sí hay cambios, solo se reindexan las páginas creadas, modificadas o
- * borradas — no las 200 de la materia.
+ * Un sync que no cambia nada no escribe nada: ni `pages`, ni `page_links`, ni
+ * el índice FTS (que desde el Sprint 2 mantienen los triggers de la migración
+ * `0002_study.sql` sobre `pages`, no este servicio).
  */
 import { createHash } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
@@ -15,15 +15,16 @@ import {
   DIVISION_NONE,
   PAGE_TYPE_META,
   type Page,
+  type StudyContent,
   type SubjectConfig,
   type SyncResult,
 } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
 import { withTransaction } from "../db/client.js";
-import { pages, subjects, type SubjectRow } from "../db/schema.js";
+import { pageLinks, pages, subjects, subjectStudy, type SubjectRow } from "../db/schema.js";
+import { chunks } from "../lib/chunks.js";
 import { newId, nowIso } from "../lib/ids.js";
 import { badRequest } from "../lib/errors.js";
-import { chunks, indexPages, removeFromFts, type IndexablePage } from "./search.js";
 
 /** Tope de warnings devueltos; el resto se resume en una línea final. */
 const MAX_WARNINGS = 120;
@@ -31,29 +32,98 @@ const MAX_WARNINGS = 120;
 /** Filas por sentencia en los `INSERT` masivos. */
 const INSERT_BATCH = 100;
 
-/** Filas por sentencia en los `DELETE ... IN (…)`. */
+/** Filas por sentencia en los `DELETE ... IN (…)` y en el alta de `page_links`. */
 const DELETE_BATCH = 200;
 
-function collectWarnings(config: SubjectConfig, list: Page[]): string[] {
+/** Acumulador de warnings con tope: el resto se resume en una sola línea. */
+function warningSink() {
+  const list: string[] = [];
+  let extra = 0;
+  return {
+    push(message: string): void {
+      if (list.length < MAX_WARNINGS) list.push(message);
+      else extra += 1;
+    },
+    drain(): string[] {
+      if (extra > 0) list.push(`…y ${extra} advertencia(s) más`);
+      return list;
+    },
+  };
+}
+
+type Sink = ReturnType<typeof warningSink>;
+
+function pageWarnings(config: SubjectConfig, list: Page[], sink: Sink): void {
   const divisions = new Set(config.divisions.map((d) => d.key));
   const types = new Set(config.pageTypes.map((t) => t.key));
-  const warnings: string[] = [];
-  let extra = 0;
-  const push = (message: string) => {
-    if (warnings.length < MAX_WARNINGS) warnings.push(message);
-    else extra += 1;
-  };
   for (const page of list) {
     if (page.division !== DIVISION_NONE && !divisions.has(page.division)) {
-      push(`página "${page.slug}": la división "${page.division}" no está declarada en el config`);
+      sink.push(`página "${page.slug}": la división "${page.division}" no está declarada en el config`);
     }
     // "meta" es el tipo reservado de las páginas índice/registro: nunca se declara en pageTypes.
     if (page.type !== PAGE_TYPE_META && !types.has(page.type)) {
-      push(`página "${page.slug}": el tipo "${page.type}" no está declarado en pageTypes`);
+      sink.push(`página "${page.slug}": el tipo "${page.type}" no está declarado en pageTypes`);
     }
   }
-  if (extra > 0) warnings.push(`…y ${extra} advertencia(s) más`);
-  return warnings;
+}
+
+/**
+ * Referencias rotas del material de estudio: tarjetas y preguntas que citan una
+ * página inexistente, kits que arman su combo con ids que no existen y tareas
+ * del plan cuyo destino no se puede resolver.
+ */
+function studyWarnings(
+  config: SubjectConfig,
+  study: StudyContent,
+  pageSlugs: ReadonlySet<string>,
+  sink: Sink,
+): void {
+  const deckIds = new Set(study.decks.map((d) => d.id));
+  const quizIds = new Set(study.quizzes.map((q) => q.id));
+  const divisions = new Set([...config.divisions.map((d) => d.key), DIVISION_NONE]);
+
+  for (const deck of study.decks) {
+    for (const card of deck.cards) {
+      if (card.page !== undefined && !pageSlugs.has(card.page)) {
+        sink.push(`mazo "${deck.id}": la tarjeta "${card.id}" cita la página "${card.page}", que no existe`);
+      }
+    }
+  }
+  for (const quiz of study.quizzes) {
+    for (const question of quiz.questions) {
+      if (question.page !== undefined && !pageSlugs.has(question.page)) {
+        sink.push(
+          `quiz "${quiz.id}": la pregunta "${question.id}" cita la página "${question.page}", que no existe`,
+        );
+      }
+    }
+  }
+  for (const kit of study.kits) {
+    for (const slug of kit.pages) {
+      if (!pageSlugs.has(slug)) sink.push(`kit "${kit.id}": la página "${slug}" no existe`);
+    }
+    for (const id of kit.decks) {
+      if (!deckIds.has(id)) sink.push(`kit "${kit.id}": el mazo "${id}" no existe`);
+    }
+    for (const id of kit.quizzes) {
+      if (!quizIds.has(id)) sink.push(`kit "${kit.id}": el quiz "${id}" no existe`);
+    }
+  }
+  for (const phase of study.plan?.phases ?? []) {
+    for (const milestone of phase.milestones) {
+      for (const task of milestone.tasks) {
+        const target = task.target ?? "";
+        if (target.length === 0) continue;
+        if (task.kind === "read" && !divisions.has(target)) {
+          sink.push(`plan · tarea "${task.id}": la división "${target}" no está declarada en el config`);
+        } else if (task.kind === "cards" && !deckIds.has(target)) {
+          sink.push(`plan · tarea "${task.id}": el mazo "${target}" no existe`);
+        } else if (task.kind === "quiz" && !quizIds.has(target)) {
+          sink.push(`plan · tarea "${task.id}": el quiz "${target}" no existe`);
+        }
+      }
+    }
+  }
 }
 
 async function upsertSubject(db: Db, config: SubjectConfig, now: string): Promise<SubjectRow> {
@@ -115,8 +185,27 @@ export function pageHash(values: ReturnType<typeof pageValues>): string {
   return createHash("sha1").update(JSON.stringify(values)).digest("hex");
 }
 
+/**
+ * Aristas del grafo de la materia (S-07): un wikilink por par distinto, y solo
+ * cuando el destino es una página de la misma materia. Los enlaces rotos
+ * (destino inexistente) y los que apuntan a la propia página no entran: la
+ * tabla es a la vez el índice de backlinks y el grafo de conexiones.
+ */
+export function resolveLinks(list: readonly Page[], slugs: ReadonlySet<string>): Array<{ fromSlug: string; toSlug: string }> {
+  const out: Array<{ fromSlug: string; toSlug: string }> = [];
+  for (const page of list) {
+    const seen = new Set<string>();
+    for (const link of page.links) {
+      if (link.slug === page.slug || seen.has(link.slug) || !slugs.has(link.slug)) continue;
+      seen.add(link.slug);
+      out.push({ fromSlug: page.slug, toSlug: link.slug });
+    }
+  }
+  return out;
+}
+
 export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike): Promise<SyncResult> {
-  const { config, pages: incoming } = payload;
+  const { config, pages: incoming, study } = payload;
 
   if (config.slug !== slug) {
     throw badRequest(
@@ -132,7 +221,10 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
     seen.add(page.slug);
   }
 
-  const warnings = collectWarnings(config, incoming);
+  const sink = warningSink();
+  pageWarnings(config, incoming, sink);
+  if (study) studyWarnings(config, study, seen, sink);
+  const warnings = sink.drain();
 
   return withTransaction(db, async () => {
     const now = nowIso();
@@ -144,8 +236,6 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
       .where(eq(pages.subjectId, subject.id));
     const currentBySlug = new Map(current.map((row) => [row.slug, row]));
 
-    /** Altas y modificaciones: son las que hay que volver a indexar. */
-    const reindex: IndexablePage[] = [];
     const inserts: Array<
       { id: string; subjectId: string; contentHash: string } & ReturnType<typeof pageValues>
     > = [];
@@ -160,12 +250,11 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
       } else if (existing.contentHash !== hash) {
         await db.update(pages).set({ ...values, contentHash: hash }).where(eq(pages.id, existing.id));
         updated += 1;
-      } else {
-        continue;
       }
-      reindex.push({ slug: page.slug, title: page.title, body: page.body, summary: page.summary });
     }
 
+    // Los triggers `pages_ai/au/ad` mantienen `pages_fts` con cada una de estas
+    // escrituras: el sync no vuelve a tocar el índice.
     for (const batch of chunks(inserts, INSERT_BATCH)) {
       await db.insert(pages).values(batch);
     }
@@ -178,11 +267,26 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
     const created = inserts.length;
     const deleted = stale.length;
 
-    // Índice FTS: nada que hacer si el sync no movió una sola página.
+    // El grafo solo puede haber cambiado si cambió alguna página (los enlaces
+    // viven en la propia fila) o si cambió el conjunto de destinos válidos.
     if (created + updated + deleted > 0) {
-      const touched = [...reindex.map((p) => p.slug), ...stale.map((row) => row.slug)];
-      await removeFromFts(db, subject.id, touched);
-      await indexPages(db, subject.id, reindex);
+      await db.delete(pageLinks).where(eq(pageLinks.subjectId, subject.id));
+      const edges = resolveLinks(incoming, seen);
+      for (const batch of chunks(edges, DELETE_BATCH)) {
+        await db.insert(pageLinks).values(batch.map((edge) => ({ subjectId: subject.id, ...edge })));
+      }
+    }
+
+    // El material de estudio se reemplaza entero cuando viene; un payload sin
+    // `study` (CLI viejo) deja el que ya estaba guardado.
+    if (study) {
+      await db
+        .insert(subjectStudy)
+        .values({ subjectId: subject.id, studyJson: study, updatedAt: now })
+        .onConflictDoUpdate({
+          target: subjectStudy.subjectId,
+          set: { studyJson: study, updatedAt: now },
+        });
     }
 
     return {
@@ -200,4 +304,5 @@ export async function syncSubject(db: Db, slug: string, payload: SyncPayloadLike
 export interface SyncPayloadLike {
   config: SubjectConfig;
   pages: Page[];
+  study?: StudyContent;
 }

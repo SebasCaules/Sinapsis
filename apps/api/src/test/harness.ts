@@ -6,12 +6,24 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Hono } from "hono";
+import { serializeSigned } from "hono/utils/cookie";
 import type { User } from "@sinapsis/contract";
 import { createApp } from "../app.js";
+import { createSession, SESSION_COOKIE } from "../auth/session.js";
 import { closeDb, createDb, type Db } from "../db/client.js";
 import { runMigrations } from "../db/migrate.js";
+import { users } from "../db/schema.js";
 import { EnvSchema, type AppEnv } from "../env.js";
+import { newId, nowIso } from "../lib/ids.js";
 import type { AppBindings, AppDeps } from "../types.js";
+
+/** Cliente HTTP de otro usuario: mismas firmas que el harness, otra cookie. */
+export interface UserClient {
+  id: string;
+  email: string;
+  request(path: string, init?: RequestInit): Promise<Response>;
+  json(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<Response>;
+}
 
 export interface Harness {
   app: Hono<AppBindings>;
@@ -23,6 +35,12 @@ export interface Harness {
   json(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<Response>;
   /** Abre sesión con el bypass de desarrollo. */
   login(): Promise<User>;
+  /**
+   * Segundo usuario con sesión abierta: la fila se inserta directo en `users` y
+   * la sesión con el mismo helper que usa el API, así el aislamiento entre
+   * usuarios se puede probar sin un segundo bypass de desarrollo.
+   */
+  otherUser(options?: { email?: string; name?: string }): Promise<UserClient>;
   cookies: Map<string, string>;
   close(): void;
 }
@@ -104,6 +122,48 @@ export async function createHarness(options: HarnessOptions = {}): Promise<Harne
     return (await res.json()) as User;
   }
 
+  async function otherUser(options: { email?: string; name?: string } = {}): Promise<UserClient> {
+    const id = newId();
+    const email = options.email ?? `otro-${id.slice(0, 8)}@sinapsis.local`;
+    const now = nowIso();
+    await db.insert(users).values({
+      id,
+      email,
+      name: options.name ?? "Otra persona",
+      picture: null,
+      googleSub: null,
+      theme: "pergamino",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    const session = await createSession(db, id);
+    const setCookie = await serializeSigned(SESSION_COOKIE, session.id, env.SESSION_SECRET, {
+      path: "/",
+    });
+    const cookie = setCookie.split(";")[0] ?? "";
+
+    async function requestAs(path: string, init: RequestInit = {}): Promise<Response> {
+      const headers = new Headers(init.headers);
+      if (!headers.has("cookie")) headers.set("cookie", cookie);
+      return app.request(path, { ...init, headers });
+    }
+
+    return {
+      id,
+      email,
+      request: requestAs,
+      json(method, path, body, extra = {}) {
+        const init: RequestInit = { method, headers: { ...extra } };
+        if (body !== undefined) {
+          init.body = JSON.stringify(body);
+          init.headers = { "content-type": "application/json", ...extra };
+        }
+        return requestAs(path, init);
+      },
+    };
+  }
+
   return {
     app,
     db,
@@ -111,6 +171,7 @@ export async function createHarness(options: HarnessOptions = {}): Promise<Harne
     request,
     json,
     login,
+    otherUser,
     cookies,
     close() {
       closeDb(db);

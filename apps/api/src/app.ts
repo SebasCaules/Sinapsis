@@ -15,11 +15,13 @@ import { createGoogleVerifier } from "./auth/google.js";
 import { csrfGuard } from "./middleware/csrf.js";
 import { authRoutes } from "./routes/auth.js";
 import { configRoutes } from "./routes/config.js";
+import { graphRoutes } from "./routes/graph.js";
 import { landingRoutes } from "./routes/landing.js";
 import { meRoutes } from "./routes/me.js";
 import { pageRoutes } from "./routes/pages.js";
 import { progressRoutes } from "./routes/progress.js";
 import { searchRoutes } from "./routes/search.js";
+import { studyRoutes } from "./routes/study.js";
 import { subjectRoutes } from "./routes/subjects.js";
 import { syncRoutes } from "./routes/sync.js";
 import type { AppBindings, AppDeps } from "./types.js";
@@ -61,6 +63,8 @@ export function createApp(deps: AppDeps): Hono<AppBindings> {
   app.route(API_PREFIX, pageRoutes());
   app.route(API_PREFIX, searchRoutes());
   app.route(API_PREFIX, progressRoutes());
+  app.route(API_PREFIX, graphRoutes());
+  app.route(API_PREFIX, studyRoutes());
   app.route(API_PREFIX, subjectRoutes());
 
   mountWebDist(app, env.WEB_DIST);

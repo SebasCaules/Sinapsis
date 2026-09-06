@@ -138,6 +138,16 @@ describe("sync de una materia", () => {
     expect(hits.map((hit) => hit.slug)).toContain("teorema-central");
   });
 
+  it("la búsqueda encuentra por una palabra que solo está en el resumen", async () => {
+    // "estudia" solo aparece en el `summary` de `intro` (el cuerpo habla de
+    // muestreo): el índice cubre title + summary + body, no solo dos columnas.
+    const hits = (await (
+      await h.request("/api/subjects/demo/search?q=estudia")
+    ).json()) as SearchHit[];
+    expect(hits.map((hit) => hit.slug)).toEqual(["intro"]);
+    expect(hits[0]?.snippet.length).toBeGreaterThan(0);
+  });
+
   it("la búsqueda con q vacío devuelve una lista vacía", async () => {
     expect(await (await h.request("/api/subjects/demo/search?q=")).json()).toEqual([]);
     expect(await (await h.request("/api/subjects/demo/search")).json()).toEqual([]);
@@ -208,7 +218,7 @@ describe("sync de una materia", () => {
   });
 });
 
-describe("el sync solo reindexa lo que cambió", () => {
+describe("el índice FTS lo mantienen los triggers", () => {
   let h: Harness;
 
   beforeAll(async () => {
@@ -224,12 +234,14 @@ describe("el sync solo reindexa lo que cambió", () => {
     });
 
   /**
-   * Huella del índice FTS: slug + rowid. Un `INSERT` en `pages_fts` siempre
-   * estrena rowid, así que si una fila conserva el suyo es que nadie la tocó.
+   * Huella del índice: `pages_fts` es de contenido externo (S-06), así que no
+   * guarda el texto y no se puede listar. Lo que sí delata cualquier escritura
+   * son sus segmentos internos: si `pages_fts_data` no cambió, nadie tocó el
+   * índice.
    */
-  const ftsRows = () =>
-    h.db.all<{ rowid: number; slug: string }>(
-      sql`SELECT rowid AS rowid, slug AS slug FROM pages_fts ORDER BY slug`,
+  const ftsFingerprint = () =>
+    h.db.all<{ id: number; n: number }>(
+      sql`SELECT id AS id, length(block) AS n FROM pages_fts_data ORDER BY id`,
     );
 
   const buscar = async (q: string): Promise<string[]> => {
@@ -239,46 +251,100 @@ describe("el sync solo reindexa lo que cambió", () => {
 
   it("el primer sync indexa las tres páginas", async () => {
     expect((await sync()).status).toBe(200);
-    expect((await ftsRows()).map((r) => r.slug)).toEqual(["apunte-clase", "intro", "teorema-central"]);
     expect(await buscar("campana")).toContain("teorema-central");
+    expect(await buscar("muestreo")).toContain("intro");
+    expect(await buscar("convergencia")).toContain("apunte-clase");
   });
 
   it("un segundo sync idéntico no toca el índice", async () => {
-    const antes = await ftsRows();
+    const antes = await ftsFingerprint();
     const result = (await (await sync()).json()) as SyncResult;
     expect(result).toMatchObject({ created: 0, updated: 0, deleted: 0 });
-    // Mismos rowids: no hubo ni un DELETE ni un INSERT sobre pages_fts.
-    expect(await ftsRows()).toEqual(antes);
+    // Sin UPDATE sobre `pages` no se dispara ningún trigger: mismos segmentos.
+    expect(await ftsFingerprint()).toEqual(antes);
   });
 
-  it("un sync incremental reindexa solo la página modificada y deja buscable el resto", async () => {
-    const antes = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
+  it("un sync incremental actualiza por trigger la fila de la página modificada", async () => {
+    const antes = await ftsFingerprint();
 
-    const modificada = { ...pageTeorema, body: "Ahora habla de convergencia en distribución." };
+    const modificada = { ...pageTeorema, body: "Ahora habla de martingalas en distribución." };
     const result = (await (await sync([pageIntro, modificada, pageApunte])).json()) as SyncResult;
     expect(result).toMatchObject({ created: 0, updated: 1, deleted: 0 });
-
-    const despues = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
-    expect(despues.get("intro")).toBe(antes.get("intro"));
-    expect(despues.get("apunte-clase")).toBe(antes.get("apunte-clase"));
-    expect(despues.get("teorema-central")).not.toBe(antes.get("teorema-central"));
+    expect(await ftsFingerprint()).not.toEqual(antes);
 
     // El índice quedó coherente: el cuerpo viejo ya no está y el nuevo sí.
     expect(await buscar("campana")).not.toContain("teorema-central");
-    expect(await buscar("convergencia")).toContain("teorema-central");
+    expect(await buscar("martingalas")).toContain("teorema-central");
     // Y las páginas que no se tocaron siguen buscándose.
     expect(await buscar("muestreo")).toContain("intro");
   });
 
-  it("una página borrada sale del índice sin reconstruir las demás", async () => {
-    const antes = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
-
+  it("una página borrada sale del índice", async () => {
     const result = (await (await sync([pageIntro, pageApunte])).json()) as SyncResult;
     expect(result).toMatchObject({ created: 0, updated: 0, deleted: 1 });
 
-    const despues = new Map((await ftsRows()).map((r) => [r.slug, r.rowid]));
-    expect([...despues.keys()].sort()).toEqual(["apunte-clase", "intro"]);
-    expect(despues.get("intro")).toBe(antes.get("intro"));
-    expect(await buscar("convergencia")).not.toContain("teorema-central");
+    expect(await buscar("martingalas")).not.toContain("teorema-central");
+    expect(await buscar("muestreo")).toContain("intro");
+  });
+
+  it("cambiar solo el resumen reindexa esa columna", async () => {
+    // El resumen es una columna del índice: el trigger `pages_au` tiene que
+    // borrar la fila vieja y escribir la nueva también cuando lo único que
+    // cambió es `summary`.
+    expect(await buscar("estudia")).toContain("intro");
+
+    const modificada = { ...pageIntro, summary: "Panorama del cuatrimestre." };
+    const result = (await (await sync([modificada, pageApunte])).json()) as SyncResult;
+    expect(result).toMatchObject({ created: 0, updated: 1, deleted: 0 });
+
+    expect(await buscar("panorama")).toContain("intro");
+    expect(await buscar("estudia")).not.toContain("intro");
+  });
+
+  it("el índice queda íntegro contra la tabla de páginas", async () => {
+    await expect(
+      h.db.run(sql`INSERT INTO pages_fts (pages_fts) VALUES ('integrity-check')`),
+    ).resolves.toBeDefined();
+  });
+});
+
+describe("page_links: el grafo de la materia lo llena el sync", () => {
+  let h: Harness;
+
+  beforeAll(async () => {
+    h = await createHarness();
+  });
+
+  afterAll(() => h.close());
+
+  const edges = async (): Promise<string[]> =>
+    (
+      await h.db.all<{ from_slug: string; to_slug: string }>(
+        sql`SELECT from_slug, to_slug FROM page_links ORDER BY from_slug, to_slug`,
+      )
+    ).map((row) => `${row.from_slug}->${row.to_slug}`);
+
+  const sync = (pages = [pageIntro, pageTeorema, pageApunte]) =>
+    h.json("PUT", "/api/subjects/demo/sync", demoPayload(pages), {
+      authorization: `Bearer ${h.env.SYNC_TOKEN}`,
+    });
+
+  it("guarda solo los wikilinks cuyo destino existe", async () => {
+    const rota = {
+      ...pageTeorema,
+      links: [{ slug: "pagina-fantasma" }, { slug: "intro" }, { slug: "teorema-central" }],
+    };
+    expect((await sync([pageIntro, rota, pageApunte])).status).toBe(200);
+    // `pagina-fantasma` no existe y el enlace a sí misma no es una arista.
+    expect(await edges()).toEqual([
+      "apunte-clase->teorema-central",
+      "intro->teorema-central",
+      "teorema-central->intro",
+    ]);
+  });
+
+  it("se reconstruye cuando una página se borra", async () => {
+    expect((await sync([pageIntro, pageTeorema])).status).toBe(200);
+    expect(await edges()).toEqual(["intro->teorema-central"]);
   });
 });
