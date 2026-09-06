@@ -173,6 +173,21 @@
   font: 500 11.5px var(--font-ui);
 }
 .segmentsTrack { flex: 1; min-width: 0; display: flex; gap: 4px; align-items: center; }
+
+/* Texto solo para lectores de pantalla: el destino de «← Anterior» y de
+   «Siguiente →», que en pantalla van a secas. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .sidePrev { flex: none; }
 .sideNext { flex: 0 1 auto; max-width: 42%; }
 
@@ -245,6 +260,47 @@
 .next { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Sin `opacity`: --text-3 ya es el gris más claro que la paleta admite como texto. */
 .prevOff { color: var(--text-3); }
+
+/* Al pie los dos vecinos son tarjetas de dos renglones —dirección y título—,
+   como `.prevnext` del baseline (styles.css:774-779): ahí es donde se lee a
+   dónde lleva cada uno, y donde el cruce de división se nombra. */
+.prevNextFoot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+.prevNextFoot .prev,
+.prevNextFoot .next {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  white-space: normal;
+  overflow: visible;
+  transition: border-color var(--t), background var(--t);
+}
+.prevNextFoot .next { align-items: flex-end; text-align: right; }
+.prevNextFoot .prev:hover,
+.prevNextFoot .next:hover { border-color: var(--border-2); background: var(--surface-2); color: var(--text-2); }
+
+.dir {
+  font: 700 11px var(--font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.dirTitle { font: 600 15px var(--font-display); color: var(--text); }
+.prevNextFoot .prev:hover .dirTitle,
+.prevNextFoot .next:hover .dirTitle { color: var(--primary); }
+
+@media (max-width: 900px) {
+  .prevNextFoot { grid-template-columns: 1fr; }
+}
 
 /* ---------- pie de la hoja ---------- */
 .foot {
@@ -378,22 +434,45 @@
   background: var(--elevated);
 }
 
-/* La vista previa es un botón: pulsarla (con el ratón o con el teclado) vuelve
-   al editor, así el apunte nunca queda encerrado en modo lectura. */
+/* Pestañas «Escribir» / «Vista» (§ lector-03 de la tarjeta): el modo se pide,
+   no se deduce de dónde está el foco. */
+.noteTabs { display: flex; gap: 2px; }
+.noteTab {
+  min-height: 24px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--surface-2);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-3);
+  cursor: pointer;
+}
+.noteTab:hover { color: var(--text-2); }
+.noteTab[data-on="true"] { background: var(--primary-soft); color: var(--primary); }
+.noteTab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* La vista compuesta es un `div` (§ lector-04): adentro hay wikilinks, y un
+   enlace dentro de un botón no es marcado válido ni se puede usar. Se vuelve a
+   escribir con la pestaña o con un doble clic. */
 .notePreview {
   display: block;
   width: 100%;
-  text-align: left;
   padding: 8px 10px;
   border: 1px dashed var(--border);
   border-radius: var(--r-sm);
   background: var(--surface-2);
-  cursor: text;
-  font: inherit;
-  color: inherit;
 }
 .notePreview:hover { border-color: var(--border-2); }
-.notePreview:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* Con el apunte vacío la vista lo dice, en vez de quedar en blanco. */
+.noteEmpty {
+  margin: 0;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: var(--r-sm);
+  font: 400 12px var(--font-ui);
+  color: var(--text-3);
+}
 .notePreview :global(p) { margin: 0 0 6px; font-size: 12.5px; line-height: 1.6; }
 .notePreview :global(p:last-child) { margin-bottom: 0; }
 .notePreview :global(h1),
@@ -401,6 +480,22 @@
 .notePreview :global(h3) { font-size: 13.5px; margin: 6px 0 4px; }
 
 .noteFoot { display: flex; align-items: center; gap: 8px; }
+
+/* Cuánto se escribió, sin tener que contar renglones (baseline: «14 car.»). */
+.noteCount { font: 400 11px var(--font-mono); color: var(--text-3); }
+
+/* Un paso desde la página a la colección entera de apuntes. */
+.noteAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-3);
+  text-decoration: none;
+}
+.noteAll:hover { color: var(--primary); }
+.noteAll:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .noteSave {
   height: 26px;

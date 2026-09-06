@@ -274,18 +274,6 @@
 }
 .prose :global(.figura figcaption p) { margin: 0 0 6px; }
 .prose :global(.figura figcaption > :last-child) { margin-bottom: 0; }
-/* El rótulo del epígrafe usa `--text-3`, no `--u0`: a 10,5 px no es texto grande,
-   así que le corre el 4,5:1 de AA y `--u0` sobre `--surface` medía 4,46 en
-   pergamino. Con `--text-3` los tres temas quedan arriba del umbral —pergamino
-   5,62 · laurel 5,45 · claustro 5,91 sobre `--surface`; 5,85 / 5,60 / 4,73 sobre
-   `--elevated`— y sigue siendo la tinta apagada del sistema, no un color nuevo. */
-.prose :global(.figura .figLabel) {
-  font: 600 10.5px var(--font-ui);
-  font-style: normal;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-3);
-}
 .prose :global(.figura .calloutTitle) {
   font: 600 13.5px var(--font-ui);
   font-style: normal;
@@ -311,3 +299,61 @@
   font-style: italic;
   color: var(--text-3);
 }
+
+/* ---------- placas de ejercicio (§ lector-05) ----------
+   `rehypeExercisePlates` envuelve el ejercicio entero: el encabezado lleva el
+   antetítulo «EJERCICIO» y la resolución se separa con una línea punteada, como
+   en el baseline (styles.css:674-702). El color es `--ueval`, el de las
+   evaluaciones, en los tres temas. */
+.prose :global(.exercise-plate) {
+  margin: 26px 0;
+  padding: 20px 24px;
+  background: color-mix(in srgb, var(--ueval) 6%, var(--surface));
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ueval);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+.prose :global(.exercise-plate) > :first-child { margin-top: 0; }
+.prose :global(.exercise-plate) > :last-child { margin-bottom: 0; }
+/* El encabezado del ejercicio abre la placa: sin filete propio y con el
+   antetítulo encima, que es el que dice de qué se trata la caja. */
+.prose :global(.exercise-plate) > h2,
+.prose :global(.exercise-plate) > h3,
+.prose :global(.exercise-plate) > h4 {
+  margin-top: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+  font: 600 15.5px var(--font-ui);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+.prose :global(.exercise-plate) > h2::before,
+.prose :global(.exercise-plate) > h3::before,
+.prose :global(.exercise-plate) > h4::before {
+  content: "Ejercicio";
+  display: block;
+  margin-bottom: 6px;
+  font: 700 10.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ueval-ink);
+}
+.prose :global(.exercise-plate .katex-display) { background: var(--surface-2); }
+
+.prose :global(.exercise-plate .solucion) {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-2);
+}
+.prose :global(.exercise-plate .solucion)::before {
+  content: "Resolución";
+  display: block;
+  margin-bottom: 6px;
+  font: 700 10.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.prose :global(.exercise-plate .solucion) > :last-child { margin-bottom: 0; }

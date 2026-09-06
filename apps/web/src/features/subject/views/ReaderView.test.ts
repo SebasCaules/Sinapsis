@@ -10,8 +10,10 @@
  * 34 páginas, 18 de ellas en `formulario-maestro`).
  */
 import { describe, expect, it } from "vitest";
-import { headingId } from "@sinapsis/contract";
-import { tocLabel } from "./ReaderView";
+import { SubjectConfig, headingId, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
+import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.json";
+import { buildSubjectModel } from "../model";
+import { neighborsOf, readingOrder, savedAt, tocLabel } from "./ReaderView";
 
 describe("tocLabel", () => {
   it("un wikilink con etiqueta muestra la etiqueta", () => {
@@ -68,5 +70,143 @@ describe("tocLabel", () => {
       expect(headingId(tocLabel(crudo)), crudo).toBe(headingId(crudo));
     }
     expect(headingId("[[independencia|Independencia]]")).toBe("independencia");
+  });
+});
+
+
+/* ---------------------------------------------------------------------------
+ * Recorrido del lector (§ lector-01, lector-02, lector-08 y lector-22).
+ *
+ * La config es la REAL de Proba (divisiones 1..9, 0 y `eval`) y las páginas son
+ * sintéticas: dos divisiones con secuencia, una fuente suelta y el cajón
+ * transversal, que es donde estaban los tres callejones sin salida.
+ * ------------------------------------------------------------------------- */
+const config = SubjectConfig.parse(rawProbaConfig);
+
+function page(slug: string, type: string, division: string, extra: Partial<PageMeta> = {}): PageMeta {
+  return {
+    slug,
+    title: slug.toUpperCase(),
+    type,
+    folder: type,
+    division,
+    summary: "",
+    tags: [],
+    sources: [],
+    words: 100,
+    ...extra,
+  };
+}
+
+const pages: PageMeta[] = [
+  page("u1-a", "concepto", "1", { order: 1 }),
+  page("u1-b", "concepto", "1", { order: 2 }),
+  page("u1-fuente", "fuente", "1"),
+  page("u2-a", "concepto", "2", { order: 1 }),
+  page("u2-b", "concepto", "2", { order: 2 }),
+  page("u3-a", "concepto", "3", { order: 1 }),
+  page("transv", "formulario", "meta"),
+  page("indice", "meta", "meta"),
+];
+
+function model() {
+  const detail: SubjectDetail = { config, pages, studied: [], placeholder: false, lastSyncAt: null };
+  return buildSubjectModel(detail);
+}
+
+const order = () => readingOrder(model());
+const vecinos = (slug: string) => neighborsOf(model(), order(), slug);
+
+describe("orden de lectura global", () => {
+  it("recorre las divisiones en orden y deja las fuentes al final de la suya", () => {
+    expect(order().map((p) => p.slug)).toEqual([
+      "u1-a",
+      "u1-b",
+      "u1-fuente",
+      "u2-a",
+      "u2-b",
+      "u3-a",
+      "transv",
+    ]);
+  });
+
+  it("las páginas del tipo reservado `meta` quedan afuera", () => {
+    /* El índice y el registro del wiki no son lectura: el baseline los saca de
+       `CONTENT` y con eso del orden, del progreso y de «última leída». */
+    expect(order().some((p) => p.slug === "indice")).toBe(false);
+  });
+});
+
+describe("vecinos del lector", () => {
+  it("dentro de la división, el vecino es la página de al lado y no se rotula el cruce", () => {
+    const { prev, next } = vecinos("u1-a");
+    expect(prev).toBeNull();
+    expect(next?.page.slug).toBe("u1-b");
+    expect(next?.division).toBeNull();
+  });
+
+  it("la última de la división sigue en la primera de la siguiente, y lo dice", () => {
+    /* § lector-01: acá la lectura moría («Última de la unidad»). */
+    const { next } = vecinos("u1-b");
+    expect(next?.page.slug).toBe("u2-a");
+    expect(next?.division?.key).toBe("2");
+  });
+
+  it("la primera de la división vuelve a la última de la anterior", () => {
+    const { prev } = vecinos("u2-a");
+    expect(prev?.page.slug).toBe("u1-b");
+    expect(prev?.division?.key).toBe("1");
+  });
+
+  it("la primera página de la materia no tiene anterior", () => {
+    expect(vecinos("u1-a").prev).toBeNull();
+  });
+
+  it("la última página de la materia no tiene siguiente", () => {
+    expect(vecinos("u3-a").next).toBeNull();
+  });
+
+  it("una fuente cae al orden global en vez de quedarse sin vecinos", () => {
+    /* § lector-02: `positionOf` da 0 y el lector mostraba «← Anterior» inerte y
+       un «Última de la unidad» que además era falso. */
+    const { prev, next } = vecinos("u1-fuente");
+    expect(prev?.page.slug).toBe("u1-b");
+    expect(prev?.division).toBeNull();
+    expect(next?.page.slug).toBe("u2-a");
+    expect(next?.division?.key).toBe("2");
+  });
+
+  it("el cajón transversal no es un recorrido: sus vecinos salen del orden global", () => {
+    /* § lector-08: «Transversales» se trataba como una división más. */
+    const { prev, next } = vecinos("transv");
+    expect(prev?.page.slug).toBe("u3-a");
+    expect(next).toBeNull();
+  });
+
+  it("una página `meta` no tiene vecinos", () => {
+    expect(vecinos("indice")).toEqual({ prev: null, next: null });
+  });
+
+  it("una página que no existe no tiene vecinos", () => {
+    expect(vecinos("no-existe")).toEqual({ prev: null, next: null });
+  });
+});
+
+describe("sello del apunte", () => {
+  const hoy = new Date("2026-09-06T18:00:00");
+
+  it("el apunte de hoy muestra solo la hora", () => {
+    expect(savedAt("2026-09-06T14:32:00", hoy)).toMatch(/^Guardado · \d{2}:\d{2}$/);
+  });
+
+  it("el de otro día antepone el día (§ lector-02 de la tarjeta)", () => {
+    /* «Guardado · 23:22» se leía como si fuera de hoy. */
+    const sello = savedAt("2026-09-03T23:22:00", hoy);
+    expect(sello).toContain("sept");
+    expect(sello.split("·")).toHaveLength(3);
+  });
+
+  it("una fecha ilegible no inventa nada", () => {
+    expect(savedAt("no es una fecha")).toBe("Guardado");
   });
 });

@@ -98,9 +98,16 @@ test("«Siguiente» avanza dentro de la división", async ({ page }) => {
   // Migas: casita · materia · división · página; la división es el último enlace.
   const divisionAntes = await migas.getByRole("link").last().innerText();
 
-  const siguiente = page.getByRole("link", { name: /^Siguiente: / }).first();
+  /* El paso al pie es el que lleva el título entero de la página siguiente (el
+     de la barra de unidad va a secas, por decisión del usuario): dirección en el
+     primer renglón, título en el segundo. */
+  const siguiente = page.locator('nav[aria-label="Páginas vecinas"] a[data-dir="next"]');
   await expect(siguiente).toBeVisible();
-  const rotulo = (await siguiente.innerText()).replace(/^Siguiente:\s*/, "").replace(/\s*→$/, "").trim();
+  const renglones = (await siguiente.innerText())
+    .split("\n")
+    .map((linea) => linea.trim())
+    .filter(Boolean);
+  const rotulo = renglones[renglones.length - 1] ?? "";
 
   await siguiente.click();
   await expect(page).toHaveURL(new RegExp(`/m/${subject.slug}/p/`));

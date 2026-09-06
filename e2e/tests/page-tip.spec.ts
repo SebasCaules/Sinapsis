@@ -135,7 +135,9 @@ test("un segmento de la barra de unidad muestra la posición y el estado", async
   test.skip(total < 2, "la división de la página del lector no tiene barra de unidad");
 
   const segment = segments.first();
-  const titulo = (await segment.getAttribute("aria-label")) ?? "";
+  /* El nombre accesible del segmento abre con la posición («1 de 11. Título»,
+     § lector-19), que es lo que el baseline anuncia: el título es lo que sigue. */
+  const titulo = ((await segment.getAttribute("aria-label")) ?? "").replace(/^\d+ de \d+\.\s*/, "");
   await segment.hover();
 
   await expect(tip(page)).toBeVisible();

@@ -1,20 +1,27 @@
 /**
  * Lector de una página del wiki (regiones 09 y 10): hoja de 840 con la barra de
- * la división, la prosa y la columna de 248 (índice de la página y
- * backlinks). Es la vista más pesada del shell: se carga en diferido.
+ * la división, la prosa y la columna de 248 (índice de la página y apuntes). Es
+ * la vista más pesada del shell: se carga en diferido.
  *
  * Los ids de los encabezados los pone el compilador (`Page.headings[].id`, con
  * `headingId` del contrato) y el plugin de rehype los repite tal cual: el índice
  * de la página no necesita leer el DOM para saber a dónde apunta.
+ *
+ * El recorrido es el del baseline (`neighborsOf`, reader.js:791-824): la lectura
+ * NO se corta al final de la división —el vecino es la primera página de la
+ * división siguiente, y se lo dice— y una página fuera de la secuencia (una
+ * fuente) cae al orden de lectura global en vez de quedarse sin vecinos.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
-import { routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
-import { Dialog, Icon, UiIcon } from "@/components/platform";
+import { Link, useLocation, useNavigationType, useParams } from "react-router-dom";
+import { PAGE_TYPE_META, plural, routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
+import { Dialog, Icon, UiIcon, useToast } from "@/components/platform";
 import { useSubjectCtx } from "../context";
+import { recordActivity, setLastRead } from "../activity";
 import { Markdown } from "../markdown/Markdown";
 import { MathText } from "../components/MathText";
 import { ErrorCard, SheetSkeleton } from "../components/States";
+import type { DivisionNode, SubjectModel } from "../model";
 import {
   useDeleteNote,
   usePage,
@@ -28,9 +35,21 @@ import css from "./ReaderView.module.css";
 /**
  * A partir de acá la columna lateral cabe al lado de la hoja. Por debajo no
  * desaparece (N0-36): se vuelve un panel deslizante que abre el botón «PANEL»,
- * porque apuntes, índice, fuentes y backlinks tienen que seguir accesibles.
+ * porque el índice de la página y los apuntes tienen que seguir accesibles.
  */
 const WIDE = "(min-width: 1280px)";
+
+/**
+ * Franja en la que la columna le roba ancho a la lectura (§ lector-10). El
+ * baseline arranca PLEGADO entre 1081 y 1366 px por la misma razón
+ * (`railDefaultOpen`, reader.js:855-860): ahí la hoja baja de 700 px y las
+ * fórmulas largas dejan de entrar. Es solo el valor INICIAL: en cuanto el lector
+ * elige, manda su elección, que se recuerda.
+ */
+const SIDE_AUTO_MIN = 1280;
+const SIDE_AUTO_MAX = 1400;
+/** Preferencia del panel lateral, como el `pe.railOpen` del baseline. */
+const SIDE_KEY = "sinapsis.reader.side";
 
 /**
  * Un encabezado del wiki puede traer wikilinks: el índice muestra la ETIQUETA,
@@ -58,19 +77,137 @@ function useWideViewport(): boolean {
   return wide;
 }
 
+/** Preferencia guardada del panel (null si el lector todavía no eligió). */
+function storedSide(): boolean | null {
+  try {
+    const raw = localStorage.getItem(SIDE_KEY);
+    return raw === null ? null : raw === "true";
+  } catch {
+    return null;
+  }
+}
+
+function rememberSide(open: boolean): void {
+  try {
+    localStorage.setItem(SIDE_KEY, String(open));
+  } catch {
+    /* sin almacenamiento: la elección vale para esta sesión */
+  }
+}
+
+/** Estado inicial del panel en pantalla ancha: elección guardada o la franja. */
+function defaultSide(): boolean {
+  const saved = storedSide();
+  if (saved !== null) return saved;
+  const w = typeof window === "undefined" ? 0 : window.innerWidth;
+  return !(w >= SIDE_AUTO_MIN && w < SIDE_AUTO_MAX);
+}
+
+/**
+ * Vecino de lectura. `division` no es null cuando el paso CRUZA de división: es
+ * la división a la que se entra, y el rótulo lo dice («← Unidad anterior: U3»).
+ */
+export interface Neighbor {
+  page: PageMeta;
+  division: DivisionNode | null;
+}
+
+/**
+ * Orden de lectura GLOBAL (`A.READING_ORDER` del baseline, core.js:284-289):
+ * las divisiones en orden y, dentro de cada una, su secuencia y después sus
+ * fuentes. Es el respaldo de las páginas que no están en ninguna secuencia —las
+ * 112 fuentes de Proba—, que sin él quedan sin «Anterior» ni «Siguiente».
+ *
+ * Las páginas del tipo reservado `meta` (índice y registro del wiki) quedan
+ * afuera de todo, como en el baseline (`CONTENT`, core.js:266).
+ */
+export function readingOrder(model: SubjectModel): PageMeta[] {
+  const out: PageMeta[] = [];
+  for (const node of model.visibleDivisions) {
+    for (const page of model.sequence(node.key)) out.push(page);
+    for (const page of model.sources(node.key)) if (page.type !== PAGE_TYPE_META) out.push(page);
+  }
+  return out;
+}
+
+/**
+ * Vecinos de lectura de una página, con cruce de división en los extremos.
+ * Devuelve `{prev, next}` ya resueltos: dentro de la secuencia de la división,
+ * o —si la página no está en ninguna— sobre el orden global.
+ */
+export function neighborsOf(
+  model: SubjectModel,
+  order: PageMeta[],
+  pageSlug: string,
+): { prev: Neighbor | null; next: Neighbor | null } {
+  const page = model.bySlug.get(pageSlug);
+  if (!page) return { prev: null, next: null };
+  const key = model.divisionOf(page);
+  /* El cajón sintético («Transversales», «Otras») no es un recorrido: sus
+     páginas caen al orden global, como en el baseline (`neighborsOf` solo mira
+     los pasos de la unidad cuando es una unidad DEL PROGRAMA). */
+  const inSequence = !model.division(key)?.synthetic;
+  const at = inSequence ? model.positions(key).get(pageSlug) : undefined;
+
+  /* Primera o última página de la división vecina, con el cruce rotulado. */
+  const edge = (dir: -1 | 1): Neighbor | null => {
+    const node = model.adjacentDivision(key, dir);
+    if (!node) return null;
+    const seq = model.sequence(node.key);
+    const target = dir === -1 ? seq[seq.length - 1] : seq[0];
+    return target ? { page: target, division: node } : null;
+  };
+
+  if (at !== undefined) {
+    const seq = model.sequence(key);
+    const before = seq[at - 2];
+    const after = seq[at];
+    return {
+      prev: before ? { page: before, division: null } : edge(-1),
+      next: after ? { page: after, division: null } : edge(1),
+    };
+  }
+
+  /* Fuera de la secuencia (una fuente, o el cajón transversal): orden global.
+     Si el vecino pertenece a OTRA división recorrible, se entra por su primera
+     o su última página, no por la fuente suelta que quedó al lado. */
+  const i = order.findIndex((p) => p.slug === pageSlug);
+  if (i < 0) return { prev: null, next: null };
+  const cross = (target: PageMeta | undefined, which: "first" | "last"): Neighbor | null => {
+    if (!target) return null;
+    const other = model.divisionOf(target);
+    if (other === key) return { page: target, division: null };
+    const node = model.division(other);
+    if (!node || node.synthetic) return { page: target, division: null };
+    const seq = model.sequence(other);
+    const entry = which === "first" ? seq[0] : seq[seq.length - 1];
+    return { page: entry ?? target, division: node };
+  };
+  return { prev: cross(order[i - 1], "last"), next: cross(order[i + 1], "first") };
+}
+
 export function ReaderView() {
   const { slug, model, runtime } = useSubjectCtx();
   const { page: pageSlug = "" } = useParams();
   const location = useLocation();
+  const navigationType = useNavigationType();
   const query = usePage(slug, pageSlug);
   const toggleStudied = useToggleStudied(slug);
   const { bookmarks } = useStudyState(slug);
   const toggleBookmark = useToggleBookmark(slug);
+  const { toast } = useToast();
   const wide = useWideViewport();
-  /* Ancho: la columna está y se puede plegar. Angosto: es un panel que hay que
-     abrir, y por lo tanto arranca cerrado para no tapar la lectura. */
-  const [sideOpen, setSideOpen] = useState(wide);
-  useEffect(() => setSideOpen(wide), [wide]);
+  /* Ancho: la columna está y se puede plegar, con la elección recordada (§
+     lector-10). Angosto: es un panel que hay que abrir, y por lo tanto arranca
+     cerrado para no tapar la lectura. */
+  const [sideOpen, setSideOpen] = useState(() => (wide ? defaultSide() : false));
+  useEffect(() => setSideOpen(wide ? defaultSide() : false), [wide]);
+  const toggleSide = useCallback(() => {
+    setSideOpen((open) => {
+      rememberSide(!open);
+      return !open;
+    });
+  }, []);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
   const sheetRef = useRef<HTMLElement>(null);
 
@@ -81,7 +218,11 @@ export function ReaderView() {
   const division = divisionKey ? model.division(divisionKey) : undefined;
   const sequence = divisionKey ? model.sequence(divisionKey) : [];
   const position = model.positionOf(pageSlug);
-  const { prev, next } = model.prevNext(pageSlug);
+  const order = useMemo(() => readingOrder(model), [model]);
+  const { prev, next } = useMemo(
+    () => neighborsOf(model, order, pageSlug),
+    [model, order, pageSlug],
+  );
   /* Callback estable: el pipeline de markdown se rearma solo si cambia la materia. */
   const exists = useCallback((target: string) => model.bySlug.has(target), [model]);
   const headings = useMemo(
@@ -89,7 +230,13 @@ export function ReaderView() {
     [page?.headings],
   );
 
-  /* Al cambiar de página: arriba de todo, salvo que la URL traiga un ancla. */
+  /**
+   * Al cambiar de página: arriba de todo, salvo que la URL traiga un ancla.
+   *
+   * Volver con Atrás es la excepción (§ lector-03): ahí la posición la repone el
+   * armazón, que la guarda por entrada del historial, y subir a cero acá borraba
+   * esa restauración en una página de 4000 px.
+   */
   useEffect(() => {
     if (!detail) return;
     const scroller = document.querySelector<HTMLElement>("main[data-subject-main]");
@@ -99,8 +246,21 @@ export function ReaderView() {
       scrollMainTo(target, "auto");
       return;
     }
+    if (navigationType === "POP") return;
     scroller?.scrollTo({ top: 0 });
-  }, [detail, pageSlug, location.hash]);
+  }, [detail, pageSlug, location.hash, navigationType]);
+
+  /**
+   * Última página leída y día de actividad (§ lector-11), como el
+   * `A.setLastRead(slug)` del final del render del baseline (reader.js:995): es
+   * lo que el inicio usa para «Continuar leyendo» y para la racha. Las páginas
+   * del tipo reservado `meta` no cuentan como lectura.
+   */
+  useEffect(() => {
+    if (!detail || !page || page.type === PAGE_TYPE_META) return;
+    setLastRead(slug, pageSlug);
+    recordActivity(slug);
+  }, [detail, page, slug, pageSlug]);
 
   /**
    * Figuras interactivas (N0-42). El markdown deja el hueco
@@ -169,8 +329,27 @@ export function ReaderView() {
   const color = division?.color ?? "var(--primary)";
   const unit = model.config.division.singular.toLowerCase();
   const bookmarked = bookmarks.has(pageSlug);
-  const onToggleStudied = () => toggleStudied.mutate({ page: pageSlug, studied: !studied });
-  const onToggleBookmark = () => toggleBookmark.mutate({ page: pageSlug, on: !bookmarked });
+  /* El aviso sale del guardado que SÍ ocurrió: el camino de error ya tiene el
+     suyo («No se pudo guardar»), en `useSubject`. */
+  const onToggleStudied = () => {
+    const on = !studied;
+    toggleStudied.mutate(
+      { page: pageSlug, studied: on },
+      { onSuccess: () => toast(on ? "Marcada como estudiada" : "Quitada de estudiadas", on ? "good" : "info") },
+    );
+  };
+  const onToggleBookmark = () => {
+    const on = !bookmarked;
+    toggleBookmark.mutate(
+      { page: pageSlug, on },
+      { onSuccess: () => toast(on ? "Guardada en favoritos" : "Quitada de favoritos", on ? "good" : "info") },
+    );
+  };
+
+  /* El cajón transversal no es un recorrido y el baseline no le dibuja la barra
+     (`is-bare`, reader.js:432-445): queda la línea de identidad y nada más. Su
+     navegación viene del orden global, al pie. */
+  const showStrip = sequence.length > 1 && !division?.synthetic;
 
   return (
     <div className={css.layout} style={{ ["--ucol" as string]: color }}>
@@ -184,18 +363,24 @@ export function ReaderView() {
               </Link>
             ) : null}
             <span className={css.typeChip}>{model.typeLabel(page.type).toUpperCase()}</span>
-            {position ? (
+            {/* Fuera de la secuencia se describe el universo, como el baseline
+                («11 páginas + 3 colecciones», reader.js:466-476), en vez de
+                decir lo que la página NO es (§ lector-20). En el cajón
+                transversal no hay posición que contar. */}
+            {division?.synthetic ? null : position ? (
               <span className={css.position}>
                 página {position} de {sequence.length}
               </span>
-            ) : (
-              <span className={css.position}>fuera de la secuencia</span>
-            )}
+            ) : sequence.length ? (
+              <span className={css.position}>
+                {sequence.length} {plural(sequence.length, "página", "páginas")} en la {unit}
+              </span>
+            ) : null}
             <span className={css.headSpacer} />
             {/* Las acciones de la página viven en la línea de identidad de la
                 hoja (pedido del usuario): antes iban en una fila propia arriba
-                y acá había «¿Qué sigue?» y «+N fuentes» (las fuentes siguen en
-                la columna lateral y al pie). */}
+                y acá había «¿Qué sigue?» y «+N fuentes», que el usuario sacó.
+                Las fuentes de la división se leen en su portada. */}
             <StudyActions
               studied={studied}
               onToggle={onToggleStudied}
@@ -205,47 +390,37 @@ export function ReaderView() {
             />
           </header>
 
-          {sequence.length > 1 ? (
-            <div className={css.segments}>
+          {showStrip ? (
+            <nav className={css.segments} aria-label={`Páginas de la ${unit}`}>
               {/* Anterior y siguiente flanquean la barra (pedido del usuario): a
-                  la izquierda el enlace corto, a la derecha el título de la
-                  página que sigue, recortado; el pie repite los dos completos. */}
+                  secas, sin títulos, que van en el pie. Lo único que se agrega
+                  es el cruce de división, que cambia de destino y hay que
+                  decirlo («Siguiente unidad →»). */}
               <div className={css.segmentsRow}>
-                {prev ? (
-                  <Link className={`${css.prev} ${css.sidePrev}`} to={routes.page(slug, prev.slug)}>
-                    ← Anterior
-                  </Link>
-                ) : (
-                  <span className={`${css.prevOff} ${css.sidePrev}`}>← Anterior</span>
-                )}
+                <StripLink side="prev" slug={slug} step={prev} unit={unit} />
                 <div className={css.segmentsTrack}>
                 {/* Sin `title`: el segmento lo cubre la tarjeta de vista previa
                     del shell (N0-50), que muestra el título, el resumen y la
                     posición «N de M»; el tooltip nativo dibujaría dos a la vez.
-                    El nombre accesible y `aria-current` se conservan. */}
-                {sequence.map((p) => (
+                    El nombre accesible lleva la posición (§ lector-19): con
+                    lector de pantalla la pista era una lista de títulos sin
+                    orden ni total. */}
+                {sequence.map((p, i) => (
                   <Link
                     key={p.slug}
                     to={routes.page(slug, p.slug)}
                     className={css.segment}
+                    data-seg={i + 1}
                     data-state={p.slug === pageSlug ? "current" : model.studied.has(p.slug) ? "studied" : "todo"}
-                    aria-label={p.title}
+                    aria-label={`${i + 1} de ${sequence.length}. ${p.title}`}
                     aria-current={p.slug === pageSlug ? "page" : undefined}
                   />
                 ))}
               </div>
-                {next ? (
-                  <Link className={`${css.next} ${css.sideNext}`} to={routes.page(slug, next.slug)} aria-label={`Siguiente: ${next.title}`}>
-                    Siguiente →
-                  </Link>
-                ) : (
-                  <span className={`${css.prevOff} ${css.sideNext}`}>Última de la {unit}</span>
-                )}
+                <StripLink side="next" slug={slug} step={next} unit={unit} />
               </div>
-            </div>
-          ) : (
-            <PrevNext slug={slug} prev={prev} next={next} unit={unit} />
-          )}
+            </nav>
+          ) : null}
 
           <h1 className={css.title}>{page.title}</h1>
 
@@ -254,7 +429,7 @@ export function ReaderView() {
           {/* El mismo par de acciones al terminar de leer: nadie tiene que volver
               arriba para marcar la página o pasar a la siguiente. */}
           <footer className={css.foot}>
-            <PrevNext slug={slug} prev={prev} next={next} unit={unit} foot />
+            <PrevNext slug={slug} prev={prev} next={next} unit={unit} />
             <StudyActions
               studied={studied}
               onToggle={onToggleStudied}
@@ -314,7 +489,7 @@ export function ReaderView() {
       <button
         type="button"
         className={css.sideTab}
-        onClick={() => setSideOpen((v) => !v)}
+        onClick={toggleSide}
         aria-expanded={sideOpen}
         aria-controls={sideOpen ? "reader-side" : undefined}
         aria-label={sideOpen ? "Ocultar el panel de la página" : "Mostrar el panel de la página"}
@@ -373,46 +548,113 @@ function StudyActions({
   );
 }
 
-/** Anterior / Siguiente dentro de la secuencia de la división. */
+/** Primera letra en mayúscula («unidad» → «Unidad»). */
+function cap(text: string): string {
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+}
+
+/**
+ * El enlace corto que flanquea la barra. Va a secas (pedido del usuario) salvo
+ * cuando el paso CRUZA de división: ahí el rótulo lo dice, porque el destino
+ * deja de ser «la página de al lado».
+ */
+function StripLink({
+  side,
+  slug,
+  step,
+  unit,
+}: {
+  side: "prev" | "next";
+  slug: string;
+  step: Neighbor | null;
+  unit: string;
+}) {
+  const cross = step?.division ?? null;
+  const text =
+    side === "prev"
+      ? cross
+        ? `← ${cap(unit)} anterior`
+        : "← Anterior"
+      : cross
+        ? `${cap(unit)} siguiente →`
+        : "Siguiente →";
+  const klass = side === "prev" ? `${css.prev} ${css.sidePrev}` : `${css.next} ${css.sideNext}`;
+  if (!step) {
+    return <span className={`${css.prevOff} ${side === "prev" ? css.sidePrev : css.sideNext}`}>{text}</span>;
+  }
+  return (
+    <Link className={klass} to={routes.page(slug, step.page.slug)}>
+      {text}
+      {/* El destino se OYE pero no se ve: en pantalla el enlace va a secas
+          (pedido del usuario) y con lector de pantalla dice a dónde lleva, que
+          es lo que el baseline muestra en el `title` del enlace. */}
+      <span className={css.srOnly}>
+        {cross ? `: ${cross.label} — ${step.page.title}` : `: ${step.page.title}`}
+      </span>
+    </Link>
+  );
+}
+
+/**
+ * Anterior / Siguiente al pie, con el título entero de las dos páginas y el
+ * cruce de división rotulado, como `prevNextHtml` del baseline
+ * (reader.js:826-841): «← Unidad anterior: U3 / Ejercicios de finales».
+ */
 function PrevNext({
   slug,
   prev,
   next,
   unit,
-  foot = false,
 }: {
   slug: string;
-  prev: PageMeta | null;
-  next: PageMeta | null;
+  prev: Neighbor | null;
+  next: Neighbor | null;
   /** Nombre de la división de la materia, en minúscula ("unidad", "semana"). */
   unit: string;
-  foot?: boolean;
 }) {
+  if (!prev && !next) return null;
   return (
-    <nav className={foot ? `${css.prevNext} ${css.prevNextFoot}` : css.prevNext} aria-label="Páginas vecinas">
+    <nav className={`${css.prevNext} ${css.prevNextFoot}`} aria-label="Páginas vecinas">
       {prev ? (
-        <Link className={css.prev} to={routes.page(slug, prev.slug)}>
-          ← Anterior
+        <Link className={css.prev} data-dir="prev" to={routes.page(slug, prev.page.slug)}>
+          <span className={css.dir}>
+            {prev.division ? `← ${cap(unit)} anterior: ${prev.division.short}` : "← Anterior"}
+          </span>
+          <span className={css.dirTitle}>{prev.page.title}</span>
         </Link>
       ) : (
-        <span className={css.prevOff}>← Anterior</span>
+        <span />
       )}
       {next ? (
-        <Link className={css.next} to={routes.page(slug, next.slug)}>
-          Siguiente: {next.title} →
+        <Link className={css.next} data-dir="next" to={routes.page(slug, next.page.slug)}>
+          <span className={css.dir}>
+            {next.division ? `${cap(unit)} siguiente: ${next.division.short} →` : "Siguiente →"}
+          </span>
+          <span className={css.dirTitle}>{next.page.title}</span>
         </Link>
       ) : (
-        <span className={css.prevOff}>Última de la {unit}</span>
+        <span />
       )}
     </nav>
   );
 }
 
-/** Rótulo del estado del apunte: «Guardado · 14:32». */
-function savedAt(value: string): string {
+/**
+ * Sello del apunte. La HORA sola miente cuando el apunte es de otro día
+ * («Guardado · 23:22» en algo escrito hace tres días, § lector-02): fuera de
+ * hoy se antepone el día, con el mismo criterio que la lista de «Mis apuntes».
+ */
+export function savedAt(value: string, now = new Date()): string {
   const at = Date.parse(value);
   if (Number.isNaN(at)) return "Guardado";
-  return `Guardado · ${new Date(at).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}`;
+  const date = new Date(at);
+  const hora = date.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+  const sameDay =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+  if (sameDay) return `Guardado · ${hora}`;
+  return `Guardado · ${date.toLocaleDateString("es", { day: "numeric", month: "short" })} · ${hora}`;
 }
 
 const NOTE_ROWS_MIN = 6;
@@ -432,8 +674,11 @@ type NoteStatus = "idle" | "saving" | "error";
  *     FALLIDO no da el texto por guardado: el borrador sigue sucio, la tarjeta
  *     dice «No se pudo guardar» y ofrece «Reintentar» (bug 1). Mientras haya
  *     cambios locales, el valor del servidor nunca los pisa.
- *  2. Al perder el foco se ve el markdown ya compuesto (mismo motor que la
- *     página): el apunte se lee como se va a leer después, no como se escribió.
+ *  2. La composición se pide: «Escribir» y «Vista» son dos botones, como en el
+ *     baseline (reader.js:962-963), y no dependen de dónde esté el foco (§
+ *     lector-03 de la tarjeta). La vista es un `div`, no un botón: adentro hay
+ *     wikilinks, y un enlace dentro de un botón no es marcado válido ni se puede
+ *     usar (§ lector-04).
  *  3. Vaciar el campo BORRA el apunte —con confirmación si se pide desde
  *     «Borrar»—: no queda una entrada en blanco colgando en «Mis apuntes».
  */
@@ -446,7 +691,7 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
   const [draft, setDraft] = useState(stored?.body ?? "");
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState<NoteStatus>("idle");
-  const [editing, setEditing] = useState(false);
+  const [mode, setMode] = useState<"edit" | "view">("edit");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef(0);
@@ -514,7 +759,7 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
     setDirty(false);
     dirtyRef.current = false;
     setStatus("idle");
-    setEditing(false);
+    setMode("edit");
     /* `commitRef` ya apunta al commit de ESTA página; se captura para que la
        limpieza no use el de la página siguiente. */
     const flush = commitRef.current;
@@ -534,8 +779,13 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
     timerRef.current = window.setTimeout(() => commit(value, page), NOTE_DEBOUNCE);
   };
 
+  const write = () => {
+    setMode("edit");
+    window.requestAnimationFrame(() => areaRef.current?.focus());
+  };
+
   const rows = Math.min(NOTE_ROWS_MAX, Math.max(NOTE_ROWS_MIN, draft.split("\n").length + 1));
-  const showPreview = !editing && draft.trim().length > 0;
+  const chars = draft.length;
 
   return (
     <section className={css.card} aria-labelledby="reader-notes">
@@ -556,18 +806,42 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
         )}
       </div>
 
-      {showPreview ? (
+      {/* Dos modos explícitos, como el baseline: se puede ver el markdown
+          compuesto sin dejar de escribir, y volver a la fuente sin tocar nada. */}
+      <div className={css.noteTabs} role="group" aria-label="Modo del apunte">
         <button
           type="button"
-          className={css.notePreview}
-          onClick={() => {
-            setEditing(true);
-            window.requestAnimationFrame(() => areaRef.current?.focus());
-          }}
-          title="Editar el apunte"
+          className={css.noteTab}
+          data-on={mode === "edit" ? "true" : undefined}
+          aria-pressed={mode === "edit"}
+          onClick={write}
         >
-          <Markdown body={draft} subject={slug} exists={exists} />
+          Escribir
         </button>
+        <button
+          type="button"
+          className={css.noteTab}
+          data-on={mode === "view" ? "true" : undefined}
+          aria-pressed={mode === "view"}
+          onClick={() => {
+            if (dirtyRef.current) commit(draft, page);
+            setMode("view");
+          }}
+        >
+          Vista
+        </button>
+      </div>
+
+      {mode === "view" ? (
+        draft.trim() ? (
+          /* Un `div`, no un botón: adentro hay wikilinks (§ lector-04). Se
+             vuelve a escribir con la pestaña o con un doble clic. */
+          <div className={css.notePreview} onDoubleClick={write}>
+            <Markdown body={draft} subject={slug} exists={exists} />
+          </div>
+        ) : (
+          <p className={css.noteEmpty}>Sin apuntes todavía.</p>
+        )
       ) : (
         <textarea
           ref={areaRef}
@@ -578,9 +852,7 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
           aria-label="Apunte de esta página"
           aria-keyshortcuts="Control+S"
           onChange={(event) => onChange(event.target.value)}
-          onFocus={() => setEditing(true)}
           onBlur={() => {
-            setEditing(false);
             if (dirtyRef.current) commit(draft, page);
           }}
           onKeyDown={(event) => {
@@ -603,6 +875,9 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
         >
           Guardar apunte
         </button>
+        {/* El contador del baseline: dice cuánto se escribió sin tener que
+            contar renglones (reader.js:1035). */}
+        <span className={css.noteCount}>{chars ? `${chars} car.` : ""}</span>
         {stored ? (
           <button
             type="button"
@@ -614,6 +889,13 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
           </button>
         ) : null}
       </div>
+
+      {/* Desde donde uno acaba de escribir hay un paso a la colección entera
+          (reader.js:969), que antes solo se alcanzaba por el rail. */}
+      <Link className={css.noteAll} to={routes.notes(slug)}>
+        <Icon name="notebook" size={13} />
+        Todos mis apuntes
+      </Link>
 
       {/* Borrar un apunte no tiene deshacer: se pregunta antes (N0-35). */}
       <Dialog

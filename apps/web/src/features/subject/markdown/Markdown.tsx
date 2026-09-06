@@ -14,6 +14,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import type { PluggableList } from "unified";
+import { rehypeExercisePlates } from "./rehypeExercisePlates";
 import { rehypeHeadingIds } from "./rehypeHeadingIds";
 import { remarkCallouts } from "./remarkCallouts";
 import { remarkWikilinks } from "./remarkWikilinks";
@@ -74,7 +75,14 @@ const components: Components = {
    `htmlAndMathml` y no `html`: la capa visual de KaTeX es `aria-hidden`, así que
    con `html` a secas toda la matemática de una página era silencio para un
    lector de pantalla (U2). */
-const REHYPE: PluggableList = [rehypeHeadingIds, [rehypeKatex, { output: "htmlAndMathml" }]];
+/* Las placas de ejercicio se arman ANTES que KaTeX (§ lector-05): el criterio
+   del baseline mira el TEXTO de los encabezados y de los párrafos, y una vez
+   compuesta la fórmula ese texto ya no está. */
+const REHYPE: PluggableList = [
+  rehypeHeadingIds,
+  rehypeExercisePlates,
+  [rehypeKatex, { output: "htmlAndMathml" }],
+];
 
 export const Markdown = memo(function Markdown({ body, subject, exists }: MarkdownProps) {
   const host = useRef<HTMLDivElement>(null);
