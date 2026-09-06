@@ -33,7 +33,7 @@ test("?d= recorta el catálogo a una sola división", async ({ page }) => {
   const filtradas = await cards(page).count();
   expect(filtradas).toBeGreaterThan(0);
   expect(filtradas).toBeLessThan(total);
-  await expect(page.getByText(new RegExp(`^${filtradas} páginas?$`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`^${filtradas} entradas?$`))).toBeVisible();
 });
 
 test("el filtro de texto deja la tarjeta buscada", async ({ page }) => {
@@ -48,7 +48,7 @@ test("el filtro de texto deja la tarjeta buscada", async ({ page }) => {
 
   const filtradas = await cards(page).count();
   expect(filtradas).toBeLessThan(total);
-  await expect(page.getByText(new RegExp(`^${filtradas} páginas?$`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`^${filtradas} entradas?$`))).toBeVisible();
 
   // El filtro viaja en la URL para poder compartir el recorte.
   await expect(page).toHaveURL(/[?&]q=/);
@@ -64,7 +64,7 @@ test("⌘K abre la paleta y Enter navega al lector", async ({ page }) => {
 
   await dialog.getByLabel("Buscar páginas").fill(paleta.term);
 
-  const primera = dialog.getByRole("button").first();
+  const primera = dialog.getByRole("option").first();
   await expect(primera).toContainText(paleta.expected);
 
   await page.keyboard.press("Enter");

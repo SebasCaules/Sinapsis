@@ -25,7 +25,9 @@ export function DivisionView() {
   /* Qué cuenta como fuente lo decide el modelo (una sola vez, con la regla del
      contrato): la vista no vuelve a mirar `countsAsContent`. */
   const sources = model.sources(key);
-  const unit = model.config.division.singular.toLowerCase();
+  /* Una división «extra» (Complementos, Evaluaciones) no es una unidad del
+     programa: se la nombra como lo que dice el epígrafe de arriba. */
+  const unit = division.kind === "extra" ? "sección" : model.config.division.singular.toLowerCase();
 
   return (
     <div className={css.view} style={{ ["--ucol" as string]: division.color }}>

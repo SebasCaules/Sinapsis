@@ -6,7 +6,8 @@
  * Carga la materia UNA vez y la reparte por el Outlet; el resto de las vistas no
  * vuelven a pedirla. Es también quien conoce la ruta activa: de ahí salen la
  * pestaña, las migas, el título del documento, la división abierta en el índice
- * y el ítem activo del rail. Todo eso lo resuelve UNA función (`resolveRoute`).
+ * y el ítem activo del rail. Todo eso sale de UN solo cálculo (`route`): antes
+ * la pestaña y las migas resolvían la misma ruta por separado y se contradecían.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useMatch, useParams } from "react-router-dom";

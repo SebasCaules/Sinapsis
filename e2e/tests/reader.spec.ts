@@ -67,11 +67,11 @@ test("la columna derecha trae el índice de la página y los backlinks", async (
 test("marcar estudiado se refleja en el índice, en el progreso y tras recargar", async ({ page }) => {
   await openReader(page);
 
-  const boton = page.getByRole("button", { name: "Marcar estudiado" });
+  const boton = page.getByRole("button", { name: "Marcar estudiado" }).first();
   await expect(boton).toHaveAttribute("aria-pressed", "false");
   await boton.click();
 
-  const estudiada = page.getByRole("button", { name: "Estudiada" });
+  const estudiada = page.getByRole("button", { name: "Estudiada" }).first();
   await expect(estudiada).toBeVisible();
   await expect(estudiada).toHaveAttribute("aria-pressed", "true");
 
@@ -81,7 +81,7 @@ test("marcar estudiado se refleja en el índice, en el progreso y tras recargar"
 
   await page.reload();
   await waitForSubjectShell(page);
-  await expect(page.getByRole("button", { name: "Estudiada" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Estudiada" }).first()).toHaveAttribute("aria-pressed", "true");
 
   // El inicio de la materia cuenta 1 página leída.
   await page.goto(`/m/${subject.slug}`);
@@ -96,7 +96,7 @@ test("«Siguiente» avanza dentro de la división", async ({ page }) => {
   // Migas: casita · materia · división · página; la división es el último enlace.
   const divisionAntes = await migas.getByRole("link").last().innerText();
 
-  const siguiente = page.getByRole("link", { name: /^Siguiente: / });
+  const siguiente = page.getByRole("link", { name: /^Siguiente: / }).first();
   await expect(siguiente).toBeVisible();
   const rotulo = (await siguiente.innerText()).replace(/^Siguiente:\s*/, "").replace(/\s*→$/, "").trim();
 
