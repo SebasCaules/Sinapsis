@@ -57,6 +57,7 @@
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+  z-index: 1; /* por encima del tinte extendido del ítem activo */
 }
 .group[data-slot="true"] .groupLabel { color: var(--gcol, var(--text-3)); }
 
@@ -85,6 +86,21 @@
 .item[data-active="true"] {
   color: var(--gcol, var(--primary));
   background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+/* El resaltado del activo se extiende hacia la izquierda hasta la barra, por
+   debajo del rótulo vertical: barra + tinte + icono se leen como una sola
+   franja seleccionada. */
+.item[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -12px;
+  width: 12px;
+  background: color-mix(in srgb, var(--gcol, var(--primary)) 14%, transparent);
+  pointer-events: none;
 }
 
 /* La barra del ítem activo sigue pegada al borde IZQUIERDO del rail (1-4 px);
