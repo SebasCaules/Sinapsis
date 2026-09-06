@@ -138,6 +138,11 @@ const DD = /\$\$/g;
 export function normalizeDisplayMath(body: string): string {
   const out: string[] = [];
   let inMath = false;
+  /* Prefijo de la línea que abrió el bloque: la cerca de cierre lo repite, no
+     el de la línea de continuación (una fórmula sangrada 9 espacios para
+     alinearla convertiría el `$$` de cierre en código sangrado y el bloque no
+     cerraría nunca). */
+  let openPre = "";
   let fence: string | null = null;
 
   const push = (pre: string, text: string): void => {
@@ -162,7 +167,7 @@ export function normalizeDisplayMath(body: string): string {
       const before = t.slice(0, at).trimEnd();
       const after = t.slice(at + 2).trim();
       if (before) push(pre, before);
-      push(pre, "$$");
+      push(openPre, "$$");
       inMath = false;
       if (after) emit(pre, after, null);
       return;
@@ -180,6 +185,7 @@ export function normalizeDisplayMath(body: string): string {
       if (before) push(pre, before);
       push(pre, "$$");
       inMath = true;
+      openPre = pre;
       if (rest) push(pre, rest);
       return;
     }
@@ -194,7 +200,10 @@ export function normalizeDisplayMath(body: string): string {
       const last = k === n - 1;
       if (open) {
         if (seg) push(pre, seg);
-        if (last) inMath = true;
+        if (last) {
+          inMath = true;
+          openPre = pre;
+        }
       } else if (seg) {
         // texto suelto entre un cierre y la próxima apertura (o al final)
         push(pre, seg);

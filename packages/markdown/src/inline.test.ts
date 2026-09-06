@@ -105,7 +105,10 @@ describe("normalizeDisplayMath", () => {
   });
 
   it("respeta la sangría del contenido al partir el cierre", () => {
-    expect(normalizeDisplayMath("$$ a\n   b. $$")).toBe("$$\na\n   b.\n   $$");
+    expect(normalizeDisplayMath("$$ a\n   b. $$")).toBe("$$\na\n   b.\n$$");
+    // la cerca de cierre repite el prefijo de la apertura, no la sangría de la continuación
+    expect(normalizeDisplayMath("$$ a\n         b. $$\n\n## T")).toBe("$$\na\n         b.\n$$\n\n## T");
+    expect(normalizeDisplayMath("- item\n  $$ a\n        b $$\n- otro")).toBe("- item\n  $$\n  a\n        b\n  $$\n- otro");
   });
 
   it("conserva el marcador de cita: el bloque sigue dentro de la cita (AC-01)", () => {
