@@ -1,0 +1,228 @@
+/* ============================================================
+   DatePicker · calendario de la plataforma.
+   Solo tokens: ningún color literal. La tinta del día elegido es --on-primary,
+   que ya existe para eso mismo (chips, marcas, botón primario) y está medida
+   contra --primary en los tres temas (WCAG 1.4.3, mínimo 4,5:1):
+
+     pergamino  #ffffff sobre #7c2230 →  9.83:1
+     laurel     #ffffff sobre #1f4d39 →  9.59:1
+     claustro   #1a1408 sobre #c79a4e →  7.09:1
+
+   El anillo de foco lo dibuja --primary (≥ 3:1 como componente gráfico) y sobre
+   el día elegido pasa a --on-primary, porque un aro --primary encima de un
+   fondo --primary no se vería.
+   ============================================================ */
+
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+/* ---------- disparador ---------- */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  min-width: 132px;
+  border-radius: var(--r-ctrl);
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: var(--text-2);
+  font: 600 12.5px/1 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  transition: background var(--t), border-color var(--t), color var(--t), box-shadow var(--t);
+}
+.wrap[data-size="sm"] .trigger {
+  height: 26px;
+  padding: 0 10px;
+  min-width: 118px;
+  font-size: 12px;
+  gap: 6px;
+}
+.trigger:hover:not(:disabled) { background: var(--surface-2); }
+.trigger:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
+}
+.trigger:disabled { opacity: .75; cursor: not-allowed; }
+.wrap[data-open="true"] .trigger { border-color: var(--primary); }
+/* Sin fecha el texto es un marcador de posición, no un dato. */
+.trigger[data-empty="true"] .text { color: var(--text-3); font-weight: 500; }
+.ico { flex: none; color: var(--text-3); }
+.trigger:hover:not(:disabled) .ico, .wrap[data-open="true"] .ico { color: var(--primary); }
+.text { display: inline-block; }
+
+/* Rótulo solo para lectores de pantalla: el disparador no tiene <label>. */
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* «Quitar fecha»: destino de clic de 24 px, el mínimo del contrato. */
+.clear {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+.clear:hover { background: var(--surface-2); color: var(--text); }
+.clear:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+/* ---------- calendario ---------- */
+.pop {
+  position: fixed;
+  z-index: 70;
+  width: 272px;
+  padding: 10px 12px 12px;
+  background: var(--elevated);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow-lg);
+  font: 500 12.5px/1 var(--font-ui);
+  color: var(--text);
+  animation: dpIn 130ms cubic-bezier(.4, 0, .2, 1) both;
+}
+@keyframes dpIn { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) {
+  .pop { animation: none; }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.month {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font: 600 13.5px/1.2 var(--font-display);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: pointer;
+  box-shadow: var(--relief);
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.nav:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
+.nav:disabled { opacity: .4; cursor: not-allowed; }
+.today {
+  flex: none;
+  height: 26px;
+  padding: 0 9px;
+  margin-left: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font: 600 11.5px/1 var(--font-ui);
+  cursor: pointer;
+  box-shadow: var(--relief);
+  transition: background var(--t), color var(--t);
+}
+.today:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
+.today:disabled { opacity: .4; cursor: not-allowed; }
+.nav:focus-visible, .today:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 2px;
+}
+.week abbr {
+  text-align: center;
+  font: 600 10.5px/1 var(--font-ui);
+  letter-spacing: .04em;
+  color: var(--text-3);
+  text-decoration: none;
+  padding: 4px 0 6px;
+}
+
+.grid { display: grid; gap: 1px; }
+.row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+
+.cell {
+  position: relative;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text);
+  font: 500 12.5px/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+.cell[data-weekend="true"] { color: var(--text-3); }
+.cell[data-outside="true"] { opacity: .5; }
+.cell:hover:not(:disabled) { background: var(--surface-2); }
+.cell:disabled { opacity: .28; cursor: not-allowed; }
+/* Hoy: anillo interior de --primary (el aro suave --primary-ring por fuera
+   chocaría con las celdas vecinas, que están a 1 px). */
+.cell[data-today="true"] { box-shadow: inset 0 0 0 1.5px var(--primary); font-weight: 600; }
+.cell[data-selected="true"] {
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+  box-shadow: none;
+}
+.cell[data-selected="true"]:hover:not(:disabled) { background: var(--primary-2); }
+.cell:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  z-index: 1;
+}
+.cell[data-selected="true"]:focus-visible {
+  outline-color: var(--on-primary);
+  outline-offset: -3px;
+}
+
+/* Claustro: la superficie elevada lleva el mismo grano que el resto de los
+   paneles del tema (mezcla screen), como el Dialog. */
+:global([data-theme="claustro"]) .pop {
+  background-image: var(--grain-22);
+  background-size: 140px 140px;
+  background-blend-mode: screen;
+}

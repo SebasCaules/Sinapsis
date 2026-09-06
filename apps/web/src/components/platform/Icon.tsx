@@ -91,6 +91,8 @@ export const UI_PATHS = {
   sidebar: "M4 5h16v14H4z M9 5v14",
   /* Cuadrícula con un hueco a completar: estado vacío de la landing. */
   gridPlus: "M5 5h6v6H5z M13 5h6v6h-6z M5 13h6v6H5z M16 13v6 M13 16h6",
+  /* Calendario de pared: hoja, anillas y el filete bajo la cabecera (DatePicker). */
+  calendar: "M4 6h16v14H4z M4 10h16 M8 3.5v4 M16 3.5v4",
 } as const;
 export type UiIconName = keyof typeof UI_PATHS;
 
