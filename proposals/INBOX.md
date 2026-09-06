@@ -10,6 +10,7 @@ Una fila por propuesta pendiente. La agrega `sinapsis propose`; la mueve `/sinap
 
 | fecha | materia | título | rama | estado |
 |---|---|---|---|---|
+| 2026-09-06 | cripto | Publicar los adjuntos de imagen del wiki | proposal/cripto-20260906-publicar-los-adjuntos-de-imagen-del-wiki | cambios-pedidos |
 
 ## Cerradas
 
