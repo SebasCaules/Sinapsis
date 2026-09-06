@@ -316,6 +316,8 @@ export const SubjectCard = z.object({
   /** true si la materia todavía no recibió ningún sync (creada a mano desde la landing). */
   placeholder: z.boolean(),
   lastSyncAt: z.string().nullable(),
+  /** Tarjetas SRS vencidas para este usuario (Sprint 3). */
+  dueCount: z.number().int().min(0).default(0),
 });
 export type SubjectCard = z.infer<typeof SubjectCard>;
 
@@ -662,9 +664,25 @@ export const PlanPhase = z.object({
 });
 export type PlanPhase = z.infer<typeof PlanPhase>;
 
+/** Modalidad alternativa del plan (S-11): p. ej. «Cursada + final» vs. «Final directo». */
+export const PlanTrack = z.object({
+  id: StudyId,
+  label: z.string().min(1).max(80),
+  description: z.string().max(300).optional(),
+  phases: z.array(PlanPhase).min(1).max(20),
+});
+export type PlanTrack = z.infer<typeof PlanTrack>;
+
 export const Plan = z.object({
   title: z.string().max(160).default("Plan de estudio"),
+  /** Fases de la modalidad por defecto (o del plan único). */
   phases: z.array(PlanPhase).min(1).max(20),
+  /**
+   * Modalidades alternativas (opcional). La primera es la predeterminada si el usuario
+   * no eligió otra; `phases` sigue siendo válida como modalidad «principal» cuando
+   * `tracks` está vacío. Los ids de tarea son globales al plan.
+   */
+  tracks: z.array(PlanTrack).max(6).default([]),
 });
 export type Plan = z.infer<typeof Plan>;
 
@@ -796,6 +814,87 @@ export type GraphNode = z.infer<typeof GraphNode>;
 export type GraphEdge = z.infer<typeof GraphEdge>;
 export type GraphData = z.infer<typeof GraphData>;
 
+// ---------------------------------------------------------------------------
+// Sprint 3 — herramientas por materia (plugins) y figuras interactivas
+// ---------------------------------------------------------------------------
+
+/** Versión del runtime del navegador que la plataforma expone a los bundles. */
+export const RUNTIME_VERSION = 1 as const;
+
+/** Ruta relativa de un archivo dentro de un bundle: sin `..`, sin raíz, extensión conocida. */
+export const ToolFilePath = z
+  .string()
+  .min(1)
+  .max(200)
+  .regex(/^[a-zA-Z0-9_][a-zA-Z0-9_./-]*$/, "ruta de bundle: caracteres inválidos")
+  .refine((v) => !/(^|\/)\.\.(\/|$)/.test(v) && !v.startsWith("/"), "ruta de bundle: debe ser relativa y sin «..»")
+  .refine((v) => /\.(js|mjs|css|json|svg|png|jpg|jpeg|webp|woff|woff2|txt|md|csv)$/i.test(v), "ruta de bundle: extensión no admitida");
+export type ToolFilePath = z.infer<typeof ToolFilePath>;
+
+/** Vista que un bundle registra con `App.registerView(id, fn)`; el rail la abre en `/m/:s/t/:id`. */
+export const ToolView = z.object({
+  id: z.string().min(1).max(48).regex(/^[a-z][a-z0-9_-]*$/),
+  label: z.string().min(1).max(80),
+  icon: IconName.optional(),
+  /** Vista ancha (1120) o a todo el ancho del área de contenido. */
+  layout: z.enum(["wide", "full"]).default("wide"),
+});
+export type ToolView = z.infer<typeof ToolView>;
+
+/**
+ * Manifiesto de un bundle de herramientas (`sinapsis.tools.json` en la carpeta del
+ * bundle). Los scripts son clásicos (IIFE contra `window.App`/`window.M`, como el
+ * baseline) y se cargan en orden después de que la plataforma instala el runtime;
+ * los estilos se inyectan y quitan con el bundle. Un bundle puede aportar vistas,
+ * figuras (`App.registerFigure`) o ambas.
+ */
+export const ToolManifest = z.object({
+  id: z.string().min(1).max(48).regex(/^[a-z][a-z0-9_-]*$/),
+  title: z.string().min(1).max(120),
+  version: z.string().min(1).max(40),
+  description: z.string().max(600).optional(),
+  /** Runtime mínimo que necesita. */
+  runtime: z.literal(RUNTIME_VERSION).default(RUNTIME_VERSION),
+  scripts: z.array(ToolFilePath).max(64).default([]),
+  styles: z.array(ToolFilePath).max(32).default([]),
+  views: z.array(ToolView).max(32).default([]),
+  /** true si registra figuras para los callouts `[!figura]` del wiki. */
+  figures: z.boolean().default(false),
+  /** Datos JSON que el bundle puede leer con `App.STUDY`/`App.DATA` (p. ej. `study-data.json`). */
+  data: z.array(ToolFilePath).max(16).default([]),
+});
+export type ToolManifest = z.infer<typeof ToolManifest>;
+export type ToolManifestInput = z.input<typeof ToolManifest>;
+
+export const ToolFile = z.object({
+  path: ToolFilePath,
+  encoding: z.enum(["utf8", "base64"]).default("utf8"),
+  content: z.string(),
+});
+export type ToolFile = z.infer<typeof ToolFile>;
+
+/** Cuerpo de `PUT /api/subjects/:slug/tools/:id` (token de sync). Tope 20 MB por bundle. */
+export const ToolPush = z.object({
+  manifest: ToolManifest,
+  files: z.array(ToolFile).min(1).max(400),
+});
+export type ToolPush = z.infer<typeof ToolPush>;
+
+/** Lo que la web recibe en `GET /api/subjects/:slug/tools`. */
+export const ToolInfo = z.object({
+  manifest: ToolManifest,
+  bytes: z.number().int().min(0),
+  updatedAt: z.string(),
+  /** URL base de los archivos del bundle: `${base}/${path}`. */
+  base: z.string(),
+});
+export type ToolInfo = z.infer<typeof ToolInfo>;
+
+/** URL de un archivo de bundle servida por el API. */
+export function toolFileUrl(subject: string, toolId: string, path: string): string {
+  return `${API_PREFIX}/subjects/${encodeURIComponent(subject)}/tools/${encodeURIComponent(toolId)}/files/${path}`;
+}
+
 /** Vistas builtin que la plataforma garantiza en el Sprint 1. */
 export const BUILTIN_VIEWS = ["home", "plan", "kits", "wiki", "graph", "flashcards", "quiz", "notes", "favorites"] as const;
 export type BuiltinView = (typeof BUILTIN_VIEWS)[number];
@@ -886,3 +985,6 @@ export const routes = {
 
 /** Prefijo de la API HTTP. */
 export const API_PREFIX = "/api" as const;
+
+/** Tipos del runtime del navegador para bundles de herramientas (Sprint 3). */
+export type * from "./runtime.js";

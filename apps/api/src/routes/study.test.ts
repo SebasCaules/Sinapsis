@@ -194,6 +194,7 @@ describe("el sync avisa de las referencias rotas del material", () => {
       ],
       plan: {
         title: "Plan roto",
+        tracks: [],
         phases: [
           {
             id: "fase-1",

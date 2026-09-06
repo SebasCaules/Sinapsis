@@ -57,6 +57,7 @@ function buildCard(
     semester,
     position,
     placeholder: row.placeholder,
+    dueCount: 0, // TODO Sprint 3 (A4): tarjetas SRS vencidas del usuario en esta materia
     lastSyncAt: row.lastSyncAt,
   };
 }

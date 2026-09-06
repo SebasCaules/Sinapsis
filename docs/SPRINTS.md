@@ -54,11 +54,24 @@ estudio compilado desde el wiki de cada materia (N0-27). Cierra S-03, S-06 y S-0
 | S2-10 | Docs: CONTRACT §7 (formato de estudio), README, HANDOFF-sprint2, DECISIONS | docs | — |
 
 
-## Sprint 3 — Herramientas por materia (propuesto)
-Sistema de plugins: cada materia publica un bundle React registrado en `rail[].items[kind=tool]`;
-sandbox de carga; contrato de props (`App.registerView` del baseline como referencia). Además:
-`Plan.tracks` (S-11), figuras interactivas del wiki (`[!figura]`), `dueCount` en `SubjectCard`,
-desplazamiento del grafo al nodo enfocado por teclado.
+## Sprint 3 — Herramientas (en ejecución, 2026-09-06)
+
+Objetivo: que cada materia traiga sus propias herramientas y figuras (plugins), que el plan
+admita modalidades, que las materias puedan proponer cambios a la plataforma con un flujo de
+revisión, y que Proba en Sinapsis se vea igual que su app original.
+
+| # | Unidad | Paquete | Done-test |
+|---|---|---|---|
+| S3-01 | Contrato: `ToolManifest`/`ToolPush`/`ToolInfo`, tipos del runtime (`CompatApp`, `SinapsisRuntime`), `Plan.tracks`, `SubjectCard.dueCount` | packages/contract | tests de validación del manifiesto |
+| S3-02 | Runtime del navegador (`packages/runtime`): compat `window.App`/`window.M` con el motor de figuras (`figures.js`, `plot.js`, `lib-math.js` portados), `renderMarkdown` compatible, loader de bundles | packages/runtime | tests: `Fig`/`Plot`/`M` numéricos (Φ, t, χ², binomial) y `loadBundle` en jsdom |
+| S3-03 | API: `PUT/GET /api/subjects/:slug/tools[/:id]`, archivos servidos con MIME y caché, tope 20 MB, `dueCount` en landing, diagnóstico S-13 | apps/api | tests de push/serve/borrado; landing con vencidas |
+| S3-04 | CLI: `sinapsis tools build` (manifiesto + esbuild opcional), `sinapsis tools push`, `sinapsis propose`; compilador con `Plan.tracks`; skill con herramientas, figuras y propuestas | packages/cli, packages/markdown, skills | build+push de Proba; propose crea rama y archivo |
+| S3-05 | Bundle real de Proba: explorador, calculadoras, asistente, taller, laboratorio, buscador de valores y 92 figuras, con su CSS acotado | examples/proba/tools | `sinapsis tools build` sin errores; las vistas registran; figuras montan |
+| S3-06 | Web: `ToolHost` (`/m/:s/t/:id`), figuras en callouts, `Plan.tracks` con conmutador, `dueCount` en tarjetas, grafo que sigue al nodo enfocado | apps/web | E2E: explorador abre y dibuja; figura montada en `distribucion-normal`; conmutador de modalidad |
+| S3-07 | Skill `/sinapsis-review` del orquestador y flujo de propuestas de punta a punta con una propuesta de prueba | skills, proposals | propose → review → merge en un caso real |
+| S3-08 | E2E + revisión de diseño con el navegador + comparación con la app original de Proba (3 temas) | e2e, docs | tabla de diferencias con veredicto |
+| S3-09 | Auditoría (seguridad, corrección, UX) + fixes | — | cero altas |
+| S3-10 | Contratos consolidados en `docs/contracts/`, handoff, decisiones | docs | — |
 
 ## Sprint 4 — Deploy (propuesto)
 Dockerfile, Turso/libSQL remoto, dominio, Google OAuth de producción, backups.

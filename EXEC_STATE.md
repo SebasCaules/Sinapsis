@@ -147,3 +147,30 @@ Iniciado el 2026-09-06 en autopilot; decisiones acumuladas en `docs/DECISIONS.md
 
 **Sprint 2 («Estudio») cerrado el 2026-09-06.** Gates en verde: typecheck, 431 tests unitarios/integración (contract 16 · markdown 70 · api 128 · web 195 · cli 22), build, 47 E2E. Cero hallazgos altos abiertos. Smoke real con el material de estudio de Proba. Pendiente de revisión del usuario: decisiones N0-26..N0-39 y S-11.
 
+
+
+---
+
+# EXEC_STATE — Sprint 3 (Herramientas)
+
+Iniciado el 2026-09-06 en autopilot; decisiones N0-40… en `docs/DECISIONS.md`.
+
+| paso | estado | commit | notas |
+|---|---|---|---|
+| F0 contrato + docs + propuestas | DONE | | ToolManifest, runtime types, Plan.tracks, dueCount, PROPOSALS.md |
+| S3-01 contract tests | TODO | | B4 |
+| S3-02 runtime | TODO | | R4 |
+| S3-03 API tools + dueCount + S-13 | TODO | | A4 |
+| S3-04 CLI tools/propose + tracks + skill | TODO | | B4 |
+| S3-05 bundle Proba | TODO | | P4 |
+| S3-06 web ToolHost/figuras/tracks/dueCount/grafo | TODO | | D4 |
+| S3-07 /sinapsis-review + propuesta de prueba | TODO | | ola 2 |
+| S3-08 E2E + diseño + fidelidad | TODO | | ola 2 |
+| S3-09 auditoría | TODO | | ola 3 |
+| S3-10 contratos consolidados + handoff | TODO | | cierre |
+
+Ownership ola 1: A4 `apps/api/**` · B4 `packages/cli/**`, `packages/markdown/**`, `packages/contract/src/*.test.ts`, `skills/**`, `docs/PROPOSALS.md`(no), `examples/proba/estudio/**` · R4 `packages/runtime/**` · P4 `examples/proba/tools/**` · D4 `apps/web/**` salvo `router.tsx` · orquestador: contrato, docs, `proposals/`.
+
+| # | fix diferido | superficie | origen | cuándo |
+|---|---|---|---|---|
+| S-14 | Sandbox por iframe para bundles de herramientas si la plataforma deja de ser personal | runtime, web | N0-41 | cuando haya más de un usuario |
