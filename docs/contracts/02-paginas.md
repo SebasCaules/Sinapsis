@@ -86,6 +86,7 @@ listas `[a, b]`, comillas simples o dobles) por paridad con el `build.py` del ba
 | `orden` · `order` | `order` | entero > 0 | no | — | — | Orden pedagógico dentro de la división. |
 | `resumen` · `summary` | `summary` | texto | no (pero se avisa si falta) | `""` | 1200 | Una o dos frases. Alimenta tooltips, tarjetas y los mazos automáticos. |
 | `formato` · `format` | `format` | texto libre | no | — | 40 | `apunte`, `pdf`, `guia`, `video`, `slides`… |
+| `hub` | `hub` | booleano | no | ausente | — | Marca la página como **portada de su división**. Ver «El hub de una división», abajo. |
 | `tags` | `tags` | lista de texto | no | `[]` | 60 por elemento | Etiquetas. Un escalar se parte por comas. |
 | `fuentes` · `sources` | `sources` | lista de texto | no | `[]` | 120 por elemento | Fuentes citadas. Un `[[wikilink]]` se reduce a su destino sin ancla. |
 | `actualizado` · `updatedAt` · `updated` | `updatedAt` | texto | no | — | 40 | Fecha declarada por el autor. Es texto libre: una fecha YAML se serializa como `AAAA-MM-DD`. |
@@ -100,6 +101,7 @@ unidad: 4                     # el campo que declare wiki.divisionField
 orden: 8                      # entero positivo, opcional
 resumen: 'La campana: densidad simétrica definida por media y desvío.'
 formato: apunte
+hub: true                     # solo en la portada de la división, opcional
 tags: [continua, normal]
 fuentes: ["[[teorica-va-normal]]", "[[tp4]]"]
 actualizado: 2026-09-04
@@ -120,6 +122,27 @@ actualizado: 2026-09-04
 - **Orden inválido**: `orden: cero`, `orden: -1` o `orden: 0` → advertencia
   `orden inválido en "<slug>": orden "<valor>" (se ignora)` y el campo no se emite.
 
+### El hub de una división
+
+`hub: true` marca **la portada de la división**: la página que la presenta entera y desde la
+cual se empieza a leerla. Se acepta `true`, `sí`, `si`, `yes` o `1` (sin distinguir
+mayúsculas); cualquier otro valor, o la ausencia de la clave, deja el campo fuera de `Page`.
+
+Efecto en la plataforma:
+
+- **La secuencia de la división la abre el hub**, aunque su `orden` lo pusiera más adelante:
+  `sequence(division)` lo adelanta a la primera posición. Todo lo que se apoya en la
+  secuencia hereda ese orden: la numeración del temario, «Empezar a leer», los vecinos
+  anterior/siguiente del lector y el orden de lectura global.
+- **La vista de la división lo muestra como tarjeta de panorama**, con el epígrafe «Panorama
+  de la unidad» y una insignia `hub` junto al título (en el temario y en el panorama). Sin
+  ninguna página marcada, el panorama cae a la primera página del primer tipo de contenido
+  declarado en `pageTypes` y el epígrafe pasa a «Para empezar».
+
+Se espera **como mucho un hub por división**; si hay varios, manda el primero de la
+secuencia. Una página de un tipo que no cuenta como contenido (una fuente) no puede ser hub:
+no está en la secuencia.
+
 ---
 
 ## 4. `Page` — lo que emite el compilador
@@ -134,6 +157,7 @@ actualizado: 2026-09-04
 | `order` | entero > 0 | — | — | Opcional. |
 | `summary` | texto | `""` | ≤ 1200 | — |
 | `format` | texto | — | ≤ 40 | Opcional. |
+| `hub` | booleano | — | — | Opcional. Solo se emite cuando es `true`; ver §3. |
 | `tags` | texto[] | `[]` | 60 por elemento | — |
 | `sources` | texto[] | `[]` | 120 por elemento | Slugs (no se verifican contra las páginas). |
 | `updatedAt` | texto | — | ≤ 40 | Opcional. |

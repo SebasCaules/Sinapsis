@@ -1,11 +1,12 @@
 /**
- * Una división completa: su progreso, la secuencia numerada de páginas de
- * contenido y, al final, el bloque de fuentes (plegado, como en el índice).
+ * Una división completa, como portada del tramo: barra de vuelta al catálogo,
+ * hero con filete de color y progreso, acción primaria de lectura, tarjeta de
+ * panorama, temario numerado, fuentes en grilla y salto a la división vecina.
  */
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { plural, routes } from "@sinapsis/contract";
-import { UiIcon } from "@/components/platform";
+import { numberedIndex, plural, routes } from "@sinapsis/contract";
+import { Icon, UiIcon } from "@/components/platform";
 import { MathText } from "../components/MathText";
 import { NotFoundInSubject } from "../components/States";
 import { useSubjectCtx } from "../context";
@@ -17,6 +18,7 @@ export function DivisionView() {
   const { division: key = "" } = useParams();
   const division = model.division(key);
   const [showSources, setShowSources] = useState(false);
+  const headings = useId();
 
   if (!division) return <NotFoundInSubject subject={slug} />;
 
@@ -25,77 +27,175 @@ export function DivisionView() {
   /* Qué cuenta como fuente lo decide el modelo (una sola vez, con la regla del
      contrato): la vista no vuelve a mirar `countsAsContent`. */
   const sources = model.sources(key);
-  /* Una división «extra» (Complementos, Evaluaciones) no es una unidad del
-     programa: se la nombra como lo que dice el epígrafe de arriba. */
-  const unit = division.kind === "extra" ? "sección" : model.config.division.singular.toLowerCase();
+  const overview = model.overview(key);
+  const prev = model.adjacentDivision(key, -1);
+  const next = model.adjacentDivision(key, 1);
+  const pct = Math.round(progress.ratio * 100);
+
+  /* Una división «extra» (Complementos, Evaluaciones) o sintética (Transversales)
+     no es una unidad del programa: se la nombra como lo que dice el epígrafe. */
+  const singular = model.config.division.singular;
+  const number = division.synthetic ? null : numberedIndex(model.config, key);
+  const unit = number === null ? "sección" : singular.toLowerCase();
+  /* El epígrafe nombra el tramo, sin jerga de plataforma ni el nombre recortado:
+     «Unidad 6» en las numeradas, «Complementos Matemáticos» en las demás. */
+  const eyebrow = number === null ? division.name : `${singular} ${number}`;
+
+  /* La acción primaria es una sola: empezar la división o retomarla donde quedó.
+     El original siempre manda a la primera página; acá, con progreso, manda a la
+     primera sin leer, que es lo que el lector espera de una portada de curso. */
+  const pending = sequence.find((page) => !model.studied.has(page.slug));
+  const target = progress.done > 0 && pending ? pending : sequence[0];
+  const ctaLabel = progress.done > 0 && pending ? "Continuar leyendo" : "Empezar a leer";
 
   return (
     <div className={css.view} style={{ ["--ucol" as string]: division.color }}>
+      <Link className={css.back} to={routes.wiki(slug)}>
+        <UiIcon name="chevronLeft" size={15} />
+        Todo el wiki
+      </Link>
+
       <header className={css.head}>
         <div className={css.eyebrow}>
           <span className={css.dot} aria-hidden="true" />
-          <span className={css.short}>{division.short}</span>
-          <span className={css.kind}>
-            {division.kind === "extra" ? "Sección extra" : model.config.division.singular}
-          </span>
+          {eyebrow}
         </div>
         <h1 className={css.h1}>{division.name}</h1>
-        <div className={css.progress}>
-          <span className={css.track}>
-            <span className={css.fill} style={{ width: `${Math.round(progress.ratio * 100)}%` }} />
-          </span>
-          <span className={css.count}>
-            {progress.done} / {progress.total} {plural(progress.total, "página leída", "páginas leídas")}
-          </span>
+        <div className={css.heroRow}>
+          <div className={css.progress}>
+            <span className={css.track}>
+              <span className={css.fill} style={{ width: `${pct}%` }} />
+            </span>
+            <span className={css.count}>
+              {progress.done} / {progress.total} {plural(progress.total, "página leída", "páginas leídas")}
+            </span>
+            <span className={css.pct}>{pct}%</span>
+          </div>
+          {target ? (
+            <Link className={css.cta} to={routes.page(slug, target.slug)}>
+              {ctaLabel}
+            </Link>
+          ) : null}
         </div>
       </header>
 
-      <ol className={css.list}>
-        {sequence.map((page, i) => (
-          <li key={page.slug}>
-            <Link className={css.item} to={routes.page(slug, page.slug)}>
-              <span className={css.num}>{pad2(i + 1)}</span>
-              <span className={css.body}>
-                <span className={css.itemTitle}>{page.title}</span>
-                {page.summary ? <MathText className={css.itemSummary} text={page.summary} /> : null}
-              </span>
-              <span className={css.itemType}>{model.typeLabel(page.type).toUpperCase()}</span>
-              {model.studied.has(page.slug) ? (
-                <UiIcon name="check" size={14} className={css.check} title="Estudiada" />
-              ) : (
-                <span className={css.checkOff} aria-hidden="true" />
-              )}
-            </Link>
-          </li>
-        ))}
-        {!sequence.length ? (
-          <li className={css.empty}>Esta {unit} todavía no tiene páginas de contenido.</li>
-        ) : null}
-      </ol>
+      {overview ? (
+        <section className={css.overview} aria-labelledby={`${headings}-panorama`}>
+          <div className={css.overviewKick} id={`${headings}-panorama`}>
+            {overview.hub ? `Panorama de la ${unit}` : "Para empezar"}
+          </div>
+          <Link className={css.overviewTitle} to={routes.page(slug, overview.slug)}>
+            {overview.title}
+            {overview.hub ? <span className={css.hub}>hub</span> : null}
+          </Link>
+          {overview.summary ? <MathText className={css.overviewText} text={overview.summary} /> : null}
+        </section>
+      ) : null}
+
+      <section className={css.block}>
+        <h2 className={css.h2} id={`${headings}-temario`}>
+          <Icon name="list" size={16} />
+          Temario
+        </h2>
+        <div className={css.listLabel}>
+          <span>Páginas en orden de aparición</span>
+          <span className={css.listN}>{sequence.length}</span>
+        </div>
+        <ol className={css.list} aria-labelledby={`${headings}-temario`}>
+          {sequence.map((page, i) => {
+            const read = model.studied.has(page.slug);
+            return (
+              <li key={page.slug}>
+                <Link
+                  className={read ? `${css.item} ${css.read}` : css.item}
+                  to={routes.page(slug, page.slug)}
+                >
+                  <span className={css.num}>
+                    {read ? <UiIcon name="check" size={14} title="Leída" /> : pad2(i + 1)}
+                  </span>
+                  <span className={css.itemTitle}>
+                    {page.title}
+                    {page.hub ? <span className={css.hub}>hub</span> : null}
+                  </span>
+                  <span
+                    className={css.itemType}
+                    style={{ ["--tcol" as string]: model.typeColor(page.type) }}
+                  >
+                    {model.typeLabel(page.type)}
+                  </span>
+                  <UiIcon name="chevronRight" size={14} className={css.arrow} />
+                </Link>
+              </li>
+            );
+          })}
+          {!sequence.length ? (
+            <li className={css.empty}>Esta {unit} todavía no tiene páginas de contenido.</li>
+          ) : null}
+        </ol>
+      </section>
 
       {sources.length ? (
-        <section className={css.sources}>
+        <section className={css.sources} aria-labelledby={`${headings}-fuentes`}>
           <button
             type="button"
+            id={`${headings}-fuentes`}
             className={css.sourcesHead}
             onClick={() => setShowSources((v) => !v)}
             aria-expanded={showSources}
           >
-            <UiIcon name="chevronDown" size={13} className={showSources ? css.chevOpen : css.chev} />
-            {plural(sources.length, "FUENTE", "FUENTES")} · {sources.length}
+            <Icon name="book" size={15} />
+            <span className={css.sourcesTitle}>
+              Fuentes de esta {unit} ({sources.length})
+            </span>
+            <span className={css.sourcesSign} aria-hidden="true">
+              {showSources ? "−" : "+"}
+            </span>
           </button>
           {showSources ? (
-            <div className={css.sourceList}>
+            <div className={css.sourceGrid}>
               {sources.map((page) => (
                 <Link key={page.slug} className={css.source} to={routes.page(slug, page.slug)}>
-                  <UiIcon name="file" size={13} />
-                  {page.title}
-                  {page.format ? <span className={css.format}>{page.format}</span> : null}
+                  <span className={css.sourceBar} aria-hidden="true" />
+                  <span className={css.sourceBody}>
+                    <span className={css.sourceTitle}>{page.title}</span>
+                    <span className={css.sourceMeta}>
+                      {division.short} · {model.typeLabel(page.type)}
+                      {page.format ? ` · ${page.format}` : ""}
+                      {model.studied.has(page.slug) ? (
+                        <span className={css.readMark}>
+                          {" · "}
+                          <UiIcon name="check" size={11} />
+                          leída
+                        </span>
+                      ) : null}
+                    </span>
+                  </span>
                 </Link>
               ))}
             </div>
           ) : null}
         </section>
+      ) : null}
+
+      {prev || next ? (
+        <nav className={css.prevNext} aria-label={`Navegación entre ${model.config.division.plural.toLowerCase()}`}>
+          {prev ? (
+            <Link className={css.pnPrev} to={routes.division(slug, prev.key)}>
+              <span className={css.pnDir}>← {singular} anterior</span>
+              <span className={css.pnTitle}>{prev.label}</span>
+            </Link>
+          ) : (
+            <span />
+          )}
+          {next ? (
+            <Link className={css.pnNext} to={routes.division(slug, next.key)}>
+              <span className={css.pnDir}>Siguiente {singular.toLowerCase()} →</span>
+              <span className={css.pnTitle}>{next.label}</span>
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
       ) : null}
     </div>
   );

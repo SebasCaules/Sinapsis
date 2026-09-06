@@ -16,6 +16,7 @@
 import {
   FIXED_RAIL,
   FIXED_RAIL_TAIL,
+  PAGE_TYPE_META,
   countsAsContent,
   cssColor,
   divisionColor,
@@ -116,8 +117,20 @@ export interface SubjectModel {
   sources: (key: string) => PageMeta[];
   /** ¿Esta página cuenta como contenido (progreso, numeración de lectura)? */
   isContent: (page: PageMeta) => boolean;
-  /** Páginas de contenido de la división en orden pedagógico. */
+  /** Páginas de contenido de la división en orden pedagógico (el hub primero). */
   sequence: (key: string) => PageMeta[];
+  /**
+   * Página de panorama de la división: la que el wiki marca como `hub`
+   * (frontmatter `hub: true`) o, si no hay ninguna, la primera de la secuencia
+   * del primer tipo de contenido declarado (en Proba, el primer concepto).
+   */
+  overview: (key: string) => PageMeta | null;
+  /**
+   * División contigua entre las recorribles de punta a punta: las declaradas
+   * (incluidas las `extra`) que tienen secuencia. Las sintéticas quedan afuera:
+   * un cajón transversal no es la unidad siguiente de nadie.
+   */
+  adjacentDivision: (key: string, dir: -1 | 1) => DivisionNode | null;
   /** slug → posición 1..N dentro de la secuencia de la división (mapa memorizado). */
   positions: (key: string) => ReadonlyMap<string, number>;
   /** Bloques por tipo (en el orden de `pageTypes`) dentro de una división. */
@@ -263,10 +276,14 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     return out;
   };
 
+  /* Las fuentes no tienen orden pedagógico (no traen `order`): se listan por
+     título, que es como se las busca en el estante. */
   const sources = (key: string): PageMeta[] => {
     let out = sourcesCache.get(key);
     if (!out) {
-      out = pagesByDivision(key).filter((p) => !isContent(p));
+      out = pagesByDivision(key)
+        .filter((p) => !isContent(p))
+        .sort((a, b) => a.title.localeCompare(b.title, "es"));
       sourcesCache.set(key, out);
     }
     return out;
@@ -276,9 +293,25 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     let out = sequenceCache.get(key);
     if (!out) {
       out = contentPages(key).slice().sort(compare);
+      /* El hub abre la división aunque su `order` no lo ponga primero: es el
+         panorama, y leer la unidad empieza por él. */
+      const at = out.findIndex((p) => p.hub);
+      if (at > 0) out.unshift(out.splice(at, 1)[0] as PageMeta);
       sequenceCache.set(key, out);
     }
     return out;
+  };
+
+  /* Primer tipo de CONTENIDO declarado por la materia: el respaldo del panorama
+     cuando ninguna página de la división se declara hub. */
+  const firstContentType = cfg.pageTypes.find((t) => t.countsAsContent !== false)?.key;
+
+  const overview = (key: string): PageMeta | null => {
+    const seq = sequence(key);
+    const hub = seq.find((p) => p.hub);
+    if (hub) return hub;
+    if (!firstContentType) return null;
+    return seq.find((p) => p.type === firstContentType) ?? null;
   };
 
   /* El mapa de posiciones se arma UNA vez por división: el índice lo usa en cada
@@ -347,6 +380,31 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     return { prev: seq[at - 2] ?? null, next: seq[at] ?? null };
   };
 
+  /* La cadena de divisiones recorribles: las DECLARADAS con secuencia. Las
+     sintéticas («Transversales», «Otras») se ven en el índice pero no encadenan:
+     no son la división siguiente de nadie. */
+  let chain: DivisionNode[] | null = null;
+  const divisionChain = (): DivisionNode[] => {
+    if (!chain) chain = nodes.filter((n) => !n.synthetic && sequence(n.key).length > 0);
+    return chain;
+  };
+
+  const adjacentDivision = (key: string, dir: -1 | 1): DivisionNode | null => {
+    const list = divisionChain();
+    const i = list.findIndex((n) => n.key === key);
+    if (i === -1) return null;
+    return list[i + dir] ?? null;
+  };
+
+  /* El contrato RESERVA el tipo `meta` (índice y registro del wiki): una materia
+     no lo puede declarar en `pageTypes`, así que el rótulo lo pone la plataforma
+     en vez de caer en la clave cruda («META»). */
+  const typeLabel = (key: string): string => {
+    const declared = typeByKey.get(key)?.label;
+    if (declared) return declared;
+    return key === PAGE_TYPE_META ? "Wiki" : key;
+  };
+
   const reviewPages = (): PageMeta[] => {
     const oldest = studiedOrder
       .map((slug) => bySlug.get(slug))
@@ -395,14 +453,21 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
   ].filter((g): g is RailGroupView => g !== null);
 
   const railItem = (key: string): RailItemView | null => {
+    /* Los ítems `page` y `link` no tienen un `target` que se pueda nombrar desde
+       fuera (es un slug o una URL entera): se los busca por su `id`, que es como
+       los nombran los kits. La búsqueda por `target` manda igual, así que una
+       herramienta NO se encuentra por su id (un kit que declare «calc» sigue
+       abriendo la herramienta «calc», no un enlace que se llame así). */
+    let byId: RailItemView | null = null;
     for (const group of railGroups) {
       for (const view of group.items) {
         const { item } = view;
         if (item.kind === "tool" && item.target === key) return view;
         if (item.kind === "builtin" && item.id === key) return view;
+        if (!byId && (item.kind === "page" || item.kind === "link") && item.id === key) byId = view;
       }
     }
-    return null;
+    return byId;
   };
 
   /* El fab pasa por el MISMO resolutor que el rail: una página inexistente o un
@@ -437,6 +502,8 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     sources,
     isContent,
     sequence,
+    overview,
+    adjacentDivision,
     positions,
     typeBlocks,
     progress,
@@ -447,7 +514,7 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     nextUnread,
     prevNext,
     reviewPages,
-    typeLabel: (key: string) => typeByKey.get(key)?.label ?? key,
+    typeLabel,
     typeColor: (key: string) => typeColor(cfg, key),
     railGroups,
     railItem,

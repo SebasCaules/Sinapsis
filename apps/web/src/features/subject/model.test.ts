@@ -173,6 +173,87 @@ describe("vecinos", () => {
   });
 });
 
+/* ---------------------------------------------------------------------------
+ * Portada de división: hub, panorama, orden de las fuentes y cadena de
+ * divisiones. Va con su propio juego de páginas porque el de arriba lo comparte
+ * media docena de pruebas y agregarle páginas les movería todos los totales.
+ * ------------------------------------------------------------------------- */
+
+const unitPages: PageMeta[] = [
+  page("u1-fuente-b", "fuente", "1", { title: "02 - General" }),
+  page("u1-fuente-a", "fuente", "1", { title: "01 - Introducción" }),
+  page("u1-teorema", "teorema", "1", { order: 2 }),
+  page("u1-hub", "concepto", "1", { order: 3, hub: true }),
+  page("u1-concepto", "concepto", "1", { order: 1 }),
+  page("u2-dist", "distribucion", "2", { order: 1 }),
+  page("u2-concepto", "concepto", "2", { order: 2 }),
+  page("eval-1", "concepto", "eval", { order: 1 }),
+  page("transversal", "formulario", DIVISION_NONE),
+  page("indice", "meta", DIVISION_NONE),
+];
+
+function unitModel(studied: string[] = []) {
+  const detail: SubjectDetail = { config, pages: unitPages, studied, placeholder: false, lastSyncAt: null };
+  return buildSubjectModel(detail);
+}
+
+describe("portada de división", () => {
+  it("pone el hub primero en la secuencia aunque su `order` no lo ponga ahí", () => {
+    expect(slugs(unitModel().sequence("1"))).toEqual(["u1-hub", "u1-concepto", "u1-teorema"]);
+  });
+
+  it("el panorama es el hub de la división", () => {
+    expect(unitModel().overview("1")?.slug).toBe("u1-hub");
+  });
+
+  it("sin hub, el panorama es la primera página del primer tipo de contenido", () => {
+    /* En la división 2 manda `order` (la distribución va primera), pero el
+       panorama es el primer concepto, como en el original. */
+    expect(slugs(unitModel().sequence("2"))).toEqual(["u2-dist", "u2-concepto"]);
+    expect(unitModel().overview("2")?.slug).toBe("u2-concepto");
+  });
+
+  it("una división sin páginas de contenido no tiene panorama", () => {
+    expect(unitModel().overview("3")).toBeNull();
+  });
+
+  it("ordena las fuentes por título", () => {
+    expect(slugs(unitModel().sources("1"))).toEqual(["u1-fuente-a", "u1-fuente-b"]);
+  });
+
+  it("deja las páginas meta fuera de la secuencia y del progreso", () => {
+    const m = unitModel();
+    expect(slugs(m.pagesByDivision(DIVISION_NONE))).toContain("indice");
+    expect(slugs(m.sequence(DIVISION_NONE))).toEqual(["transversal"]);
+    expect(m.progress(DIVISION_NONE)).toMatchObject({ done: 0, total: 1 });
+  });
+
+  it("encadena las divisiones declaradas que tienen secuencia", () => {
+    const m = unitModel();
+    expect(m.adjacentDivision("1", -1)).toBeNull();
+    expect(m.adjacentDivision("1", 1)?.key).toBe("2");
+    expect(m.adjacentDivision("2", -1)?.key).toBe("1");
+    /* Las declaradas sin páginas (3…9, 0) no están en la cadena. */
+    expect(m.adjacentDivision("2", 1)?.key).toBe("eval");
+    expect(m.adjacentDivision("eval", 1)).toBeNull();
+  });
+
+  it("rotula el tipo reservado «meta» como «Wiki» en vez de la clave cruda", () => {
+    /* El contrato reserva `meta`: la materia no lo puede declarar en `pageTypes`,
+       así que el rótulo lo pone la plataforma. */
+    expect(unitModel().typeLabel("meta")).toBe("Wiki");
+    expect(unitModel().typeLabel("concepto")).toBe("Concepto");
+    expect(unitModel().typeLabel("inventado")).toBe("inventado");
+  });
+
+  it("las divisiones sintéticas no encadenan: no son la siguiente de nadie", () => {
+    const m = unitModel();
+    expect(m.adjacentDivision(DIVISION_NONE, -1)).toBeNull();
+    expect(m.adjacentDivision(DIVISION_NONE, 1)).toBeNull();
+    expect(m.adjacentDivision("no-existe", 1)).toBeNull();
+  });
+});
+
 describe("rail", () => {
   it("intercala los grupos SLOT entre los FIJOS y marca cuál es cuál", () => {
     const groups = modelConLink().railGroups;
@@ -184,10 +265,19 @@ describe("rail", () => {
     const groups = modelConLink().railGroups;
     const material = groups.find((g) => g.id === "material");
     expect(material?.items.map((i) => i.item.id)).toEqual(["catedra"]);
-    /* «Formulario general» apunta a una página que estas fixtures no traen:
-       desaparece del grupo «Resolver», que sigue con sus herramientas. */
+    /* El grupo «Resolver» de Proba es todo `kind: "tool"`: ninguna herramienta
+       depende de que exista una página, así que el grupo entero sobrevive. */
     const resolver = groups.find((g) => g.id === "resolver");
-    expect(resolver?.items.map((i) => i.item.id)).toEqual(["explorador", "taller", "calc", "lab"]);
+    expect(resolver?.items.map((i) => i.item.id)).toEqual([
+      "formularios",
+      "explorador",
+      "taller",
+      "calc",
+      "asistente",
+      "lab",
+      "ejercicios",
+      "parcial",
+    ]);
     expect(groups.find((g) => g.id === "wikimeta")).toBeUndefined();
   });
 
@@ -197,7 +287,7 @@ describe("rail", () => {
     expect(home?.to).toBe("/m/proba");
     const graph = groups[1]?.items[1];
     expect(graph?.to).toBe("/m/proba/graph");
-    const explorador = groups[3]?.items[0];
+    const explorador = groups[3]?.items[1];
     expect(explorador?.to).toBe("/m/proba/t/explorador");
     const campus = groups[4]?.items[0];
     expect(campus?.external).toBe(true);
@@ -244,12 +334,16 @@ describe("rail", () => {
     expect(explorador?.to).toBe(routes.tool("proba", "explorador"));
     expect(explorador?.href).toBeNull();
     expect(explorador?.external).toBe(false);
-    /* Los cuatro que declara Proba, en el orden del config. */
+    /* Las ocho herramientas que declara Proba, en el orden del config. */
     expect(
       m.railGroups
         .find((g) => g.id === "resolver")
         ?.items.map((v) => v.to),
-    ).toEqual(["explorador", "taller", "calc", "lab"].map((id) => routes.tool("proba", id)));
+    ).toEqual(
+      ["formularios", "explorador", "taller", "calc", "asistente", "lab", "ejercicios", "parcial"].map(
+        (id) => routes.tool("proba", id),
+      ),
+    );
   });
 
   it("`railItem` busca las herramientas por su `target`, no por su id", () => {
@@ -276,6 +370,38 @@ describe("rail", () => {
     expect(m.railItem("calculadora")?.item.label).toBe("La calculadora");
     expect(m.railItem("calculadora")?.to).toBe(routes.tool("proba", "calculadora"));
     expect(m.railItem("atajo")).toBeNull();
+  });
+
+  /* Los kits nombran los ítems del rail por su id. Un ítem `page` o `link` no
+     tiene un `target` que se pueda nombrar desde fuera (es un slug o una URL),
+     así que hay que encontrarlo por su id: sin esto, los siete kits de Proba
+     que declaran «formularios» perdían ese lanzador en silencio. */
+  it("`railItem` encuentra las páginas y los enlaces del rail por su id", () => {
+    const detail: SubjectDetail = {
+      config: {
+        ...config,
+        rail: [
+          {
+            id: "propias",
+            label: "Propias",
+            items: [
+              { id: "formularios", label: "Formulario general", icon: "sigma", kind: "page", target: "p-a" },
+              { id: "catedra", label: "Campus", icon: "link", kind: "link", target: "https://campus.itba.edu.ar" },
+            ],
+          },
+        ],
+      },
+      pages,
+      studied: [],
+      placeholder: false,
+      lastSyncAt: null,
+    };
+    const m = buildSubjectModel(detail);
+    expect(m.railItem("formularios")?.to).toBe(routes.page("proba", "p-a"));
+    expect(m.railItem("catedra")?.href).toBe("https://campus.itba.edu.ar");
+    expect(m.railItem("catedra")?.external).toBe(true);
+    /* El slug NO es una llave: el id es el nombre público del ítem. */
+    expect(m.railItem("p-a")).toBeNull();
   });
 
   it("una vista builtin que la plataforma no conoce cae en «Próximamente» (/t/:id)", () => {
