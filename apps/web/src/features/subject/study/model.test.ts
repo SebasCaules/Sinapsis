@@ -6,12 +6,23 @@
  */
 import { describe, expect, it } from "vitest";
 import { SRS_DEFAULT, type SrsState, type StudyContent, type StudyState } from "@sinapsis/contract";
+import type { Plan, PlanPhase } from "@sinapsis/contract";
 import {
   buildStudyModel,
+  countChip,
+  countListItems,
+  dayNum,
   daysUntil,
   formatInterval,
+  instanceLabel,
   intervalPreview,
+  lastInstance,
+  nextInstance,
   nextInterval,
+  paceFor,
+  paceLabel,
+  phaseDeadline,
+  phaseMainDate,
   plainText,
   relativeDayLabel,
   spokenMath,
@@ -344,6 +355,139 @@ describe("fechas del plan", () => {
     expect(relativeDayLabel("2026-09-06", NOW)).toBe("mañana");
     expect(relativeDayLabel("2026-09-08", NOW)).toBe("en 3 días");
     expect(relativeDayLabel("2026-09-02", NOW)).toBe("hace 3 días");
+  });
+});
+
+/* ==========================================================================
+   Instancias evaluatorias y fechas del plan (Sprint 3 · D7)
+   ========================================================================== */
+
+/** Una fase de prueba: dos hitos de dos tareas cada uno. */
+function fase(over: Partial<PlanPhase> = {}): PlanPhase {
+  return {
+    id: "fase-1",
+    title: "Parcialito 1",
+    milestones: [
+      {
+        id: "h1",
+        title: "Hito 1",
+        divisions: [],
+        tasks: [
+          { id: "t1", label: "Uno", kind: "custom" },
+          { id: "t2", label: "Dos", kind: "custom" },
+        ],
+      },
+      {
+        id: "h2",
+        title: "Hito 2",
+        divisions: [],
+        tasks: [
+          { id: "t3", label: "Tres", kind: "custom" },
+          { id: "t4", label: "Cuatro", kind: "custom" },
+        ],
+      },
+    ],
+    ...over,
+  };
+}
+
+const planConInstancias: Plan = {
+  title: "Plan",
+  instances: [
+    { key: "parcial", label: "Parcial (TP1–TP7)", optional: false },
+    { key: "recparcial", label: "Recuperatorio del parcial", optional: true },
+  ],
+  phases: [fase({ instance: "parcial", retake: "recparcial" })],
+  tracks: [],
+};
+
+describe("fechas de las instancias", () => {
+  it("dayNum cuenta días enteros y descarta lo que no sea una fecha", () => {
+    expect(dayNum("1970-01-01")).toBe(0);
+    expect(dayNum("2026-09-06")! - dayNum("2026-09-05")!).toBe(1);
+    /* A caballo del cambio de horario de verano del sur: en hora local esos dos
+       días distan 23 h, y con una resta ingenua darían 0,96. */
+    expect(dayNum("2026-10-19")! - dayNum("2026-10-18")!).toBe(1);
+    expect(dayNum("2026-9-5")).toBeNull();
+    expect(dayNum(null)).toBeNull();
+  });
+
+  it("el chip de cuenta regresiva dice cuánto falta y con qué tono", () => {
+    expect(countChip("2026-09-20", NOW)).toEqual({ days: 15, tone: "plain", text: "faltan 15 días" });
+    expect(countChip("2026-09-11", NOW)).toEqual({ days: 6, tone: "soon", text: "faltan 6 días" });
+    expect(countChip("2026-09-06", NOW)).toEqual({ days: 1, tone: "soon", text: "falta 1 día" });
+    expect(countChip("2026-09-05", NOW)).toEqual({ days: 0, tone: "soon", text: "es hoy" });
+    expect(countChip("2026-09-04", NOW)).toEqual({ days: -1, tone: "past", text: "pasó hace 1 día" });
+    expect(countChip("2026-09-01", NOW)).toEqual({ days: -4, tone: "past", text: "pasó hace 4 días" });
+    expect(countChip(undefined, NOW)).toBeNull();
+  });
+
+  it("la fecha del usuario pisa la del cronograma", () => {
+    const phase = fase({ instance: "parcial", date: "2026-10-01" });
+    expect(phaseMainDate(phase, {})).toBe("2026-10-01");
+    expect(phaseMainDate(phase, { parcial: "2026-10-08" })).toBe("2026-10-08");
+    /* Una fase sin instancia no tiene fecha editable: manda el cronograma. */
+    expect(phaseMainDate(fase({ date: "2026-10-01" }), { parcial: "2026-10-08" })).toBe("2026-10-01");
+    expect(phaseMainDate(fase(), {})).toBeNull();
+  });
+
+  it("la fecha vigente de la fase es la primera futura entre instancia y recuperatorio", () => {
+    const phase = fase({ instance: "parcial", retake: "recparcial" });
+    expect(phaseDeadline(phase, { parcial: "2026-09-20" }, NOW)).toEqual({
+      key: "parcial",
+      date: "2026-09-20",
+      days: 15,
+      retake: false,
+    });
+    /* El parcial ya pasó y el recuperatorio no: manda el recuperatorio. */
+    expect(phaseDeadline(phase, { parcial: "2026-09-01", recparcial: "2026-09-15" }, NOW)).toEqual({
+      key: "recparcial",
+      date: "2026-09-15",
+      days: 10,
+      retake: true,
+    });
+    /* Si pasaron las dos, la última cargada (para poder decir «ya pasó»). */
+    expect(phaseDeadline(phase, { parcial: "2026-08-20", recparcial: "2026-09-01" }, NOW)?.key).toBe("recparcial");
+    expect(phaseDeadline(phase, {}, NOW)).toBeNull();
+  });
+
+  it("el ritmo se informa por semana y, con menos de una semana, por día", () => {
+    const phase = fase({ instance: "parcial" });
+    const semanal = paceFor(phase, { parcial: "2026-09-26" }, 8, 2, NOW);
+    expect(semanal).toMatchObject({ days: 21, weeks: 3, tasksPerWeek: 3, msPending: 2 });
+    expect(paceLabel(semanal)).toBe("~3 tareas por semana · 2 hitos restantes");
+
+    const diario = paceFor(phase, { parcial: "2026-09-08" }, 6, 2, NOW);
+    expect(paceLabel(diario)).toBe("~2 tareas por día · quedan 3 días");
+    expect(paceLabel(paceFor(phase, { parcial: "2026-09-06" }, 1, 1, NOW))).toBe("~1 tarea por día · queda 1 día");
+    expect(paceLabel(paceFor(phase, { parcial: "2026-09-05" }, 4, 1, NOW))).toBe("~4 tareas por día · el examen es hoy");
+  });
+
+  it("el ritmo avisa cuando la fase está completa o la fecha ya pasó", () => {
+    const phase = fase({ instance: "parcial" });
+    expect(paceLabel(paceFor(phase, { parcial: "2026-09-26" }, 0, 0, NOW))).toBe("Fase completa.");
+    expect(paceLabel(paceFor(phase, { parcial: "2026-09-01" }, 5, 2, NOW))).toBe(
+      "La fecha cargada ya pasó: quedan 5 tareas sin marcar.",
+    );
+    expect(paceLabel(paceFor(phase, {}, 5, 2, NOW))).toBe("");
+  });
+
+  it("nombra las instancias y encuentra la próxima y la última", () => {
+    const phases = planConInstancias.phases;
+    const dates = { parcial: "2026-09-01", recparcial: "2026-09-15" };
+    expect(instanceLabel(planConInstancias, "parcial")).toBe("Parcial (TP1–TP7)");
+    expect(instanceLabel(planConInstancias, "inventada")).toBe("inventada");
+    expect(nextInstance(phases, planConInstancias, dates, NOW)).toMatchObject({ key: "recparcial", days: 10 });
+    expect(lastInstance(phases, planConInstancias, dates, NOW)).toMatchObject({ key: "parcial", days: -4 });
+    expect(nextInstance(phases, planConInstancias, {}, NOW)).toBeNull();
+    expect(lastInstance(phases, planConInstancias, {}, NOW)).toBeNull();
+  });
+
+  it("cuenta los ítems de un «qué cae» en markdown", () => {
+    expect(countListItems("Texto suelto.\n\n- **Uno** — algo\n- Dos\n  - anidado\n\nCierre.")).toBe(3);
+    expect(countListItems("1. Uno\n2) Dos")).toBe(2);
+    expect(countListItems("Sin lista.")).toBe(0);
+    expect(countListItems(undefined)).toBe(0);
   });
 });
 

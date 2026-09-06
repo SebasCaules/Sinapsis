@@ -302,12 +302,21 @@ const phases = phaseOrder.map((id, i) => {
   });
 
   const phaseIcon = iconOf(phase.icon);
+  const scope = scopeOf(phase);
+  const guide = guideOf(phase);
   return {
     id: `fase-${n}`,
     title: phase.title,
     ...(phase.kicker ? { subtitle: phase.kicker } : {}),
     ...(phaseIcon ? { icon: phaseIcon } : {}),
-    scope: scopeOf(phase),
+    // Instancia evaluatoria de la fase y su recuperatorio: son las claves a las
+    // que el usuario le carga la fecha (`StudyState.planDates`). La fuente las
+    // llama `dateKey` y `recKey`, contra `ROADMAP.instances`.
+    ...(phase.dateKey ? { instance: phase.dateKey } : {}),
+    ...(phase.recKey ? { retake: phase.recKey } : {}),
+    ...(phase.blurb ? { description: cut(phase.blurb, 600) } : {}),
+    ...(scope ? { scope } : {}),
+    ...(guide ? { guide } : {}),
     milestones: milestones.map((m, mi) => ({
       id: `fase-${n}-h${mi + 1}`,
       title: m.title,
@@ -334,13 +343,36 @@ const tracks = modes.map((mode) => ({
   phases: mode.phases.map((id) => phaseById.get(id)),
 }));
 
+/**
+ * Instancias evaluatorias reales de la cursada (`ROADMAP.instances`): a cada una
+ * el usuario le carga su fecha desde el plan, y esa fecha vive en su cuenta
+ * (`StudyState.planDates`), no acá. El JSON solo declara qué instancias existen,
+ * cómo se llaman y cuáles son opcionales (los recuperatorios).
+ */
+const instances = (STUDY.ROADMAP.instances ?? []).map((inst) => ({
+  key: inst.key,
+  label: inst.label,
+  ...(inst.optional ? { optional: true } : {}),
+}));
+
 const plan = {
-  title: "Plan de estudio · Probabilidad y Estadística",
+  /* Solo «Plan de estudio», como el baseline: el nombre de la materia ya está
+     en la barra lateral y en las migas, y repetirlo partía el h1 en dos líneas. */
+  title: "Plan de estudio",
   // `phases` repite la modalidad por defecto: son las mismas fases, con los
   // mismos ids, así que el compilador no las cuenta ni las valida dos veces.
   phases: tracks[0].phases,
   tracks,
+  instances,
 };
+
+/** Instancias que alguna fase nombra pero `instances` no declara (el compilador también avisa). */
+const instanceKeys = new Set(instances.map((i) => i.key));
+const unknownInstances = [
+  ...new Set(
+    phases.flatMap((phase) => [phase.instance, phase.retake].filter((key) => key && !instanceKeys.has(key))),
+  ),
+];
 
 // ---------------------------------------------------------------------------
 // 4. Kits
@@ -401,6 +433,13 @@ for (const deck of decks) {
 }
 console.log(`  quizzes:   1 (${quiz.questions.length} preguntas)`);
 console.log(`  plan:      ${phases.length} fases · ${milestones} hitos · ${tasks} tareas`);
+console.log(`  instancias: ${instances.length} (${instances.map((i) => i.key + (i.optional ? " (opcional)" : "")).join(", ")})`);
+const conFechas = phases.filter((p) => p.instance).length;
+const conGuia = phases.filter((p) => p.guide).length;
+console.log(`    fases con instancia: ${conFechas}/${phases.length} · con recuperatorio: ${phases.filter((p) => p.retake).length} · con guía: ${conGuia}`);
+if (unknownInstances.length) {
+  console.log(`  ¡ojo! fases que apuntan a instancias no declaradas: ${unknownInstances.join(", ")}`);
+}
 console.log(`  modalidades: ${tracks.length}${tracks[0] ? ` (por defecto «${tracks[0].label}»)` : ""}`);
 for (const track of tracks) {
   const hitos = track.phases.reduce((n, p) => n + p.milestones.length, 0);
@@ -473,15 +512,26 @@ function quizMarkdown(q) {
 // Auxiliares
 // ---------------------------------------------------------------------------
 
+/**
+ * «Qué cae en este examen»: SOLO la lista de `expect`. El blurb de la fase no va
+ * acá —es `PlanPhase.description`, que el lector muestra bajo el título— y el
+ * orden de estudio tampoco: ese es `PlanPhase.guide` (ver `guideOf`).
+ */
 function scopeOf(phase) {
-  const parts = [phase.blurb];
-  if (phase.expect?.length) {
-    parts.push("", "**Qué cae:**", ...phase.expect.map((e) => `- **${e.t}** (U${e.u}) — ${e.d}`));
-  }
-  if (phase.guide?.length) {
-    parts.push("", "**Orden de estudio sugerido:**", ...phase.guide.map((g) => `- **${g.t}** — ${g.d}`));
-  }
-  return cut(parts.join("\n"), 4000);
+  if (!phase.expect?.length) return "";
+  return cut(phase.expect.map((e) => `- **${e.t}** (U${e.u}) — ${e.d}`).join("\n"), 4000);
+}
+
+/**
+ * «Cómo recorrer el programa»: el orden de estudio sugerido de la fase, si la
+ * fuente lo trae (hoy solo la modalidad «Final directo»). Sin `guide` en el
+ * ROADMAP no se inventa ninguno. A diferencia de `expect`, el título de cada
+ * paso ya nombra sus unidades («Discretas y continuas seguidas (U3 y U4)»): la
+ * unidad de referencia repetida sobraría.
+ */
+function guideOf(phase) {
+  if (!phase.guide?.length) return "";
+  return cut(phase.guide.map((g) => `- **${g.t}** — ${g.d}`).join("\n"), 4000);
 }
 
 function unitLabel(unit) {

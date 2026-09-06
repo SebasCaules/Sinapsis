@@ -18,6 +18,7 @@
  */
 import {
   SRS_DEFAULT,
+  cssColor,
   plural,
   sm2,
   type Card,
@@ -30,6 +31,7 @@ import {
   type PlanTrack,
   type Quiz,
   type QuizAttempt,
+  type IconName,
   type SrsGrade,
   type SrsState,
   type StudyContent,
@@ -97,6 +99,13 @@ export interface QuizStat {
 
 export interface KitStat {
   kit: Kit;
+  /** Icono declarado por el kit; «grid» cuando no declara ninguno. */
+  icon: IconName;
+  /**
+   * Color declarado por el kit, ya listo para CSS (`--u3` → `var(--u3)`), o null.
+   * Sin él, la vista tiñe el kit con el color de su primera división.
+   */
+  color: string | null;
   decks: Deck[];
   quizzes: Quiz[];
   /** Slugs de página declarados por el kit (tal cual: la vista resuelve cuáles existen). */
@@ -764,6 +773,11 @@ export function buildStudyModel(
     const due = kitDecks.reduce((n, d) => n + (statById.get(d.id)?.pending ?? 0), 0);
     return {
       kit,
+      /* Color e icono del kit: los declara la materia (el baseline le daba a
+         cada kit los suyos) y, si no, manda el «grid» de la vista y el color de
+         la primera división del kit, que resuelve el shell. */
+      icon: kit.icon ?? "grid",
+      color: kit.color ? cssColor(kit.color) : null,
       decks: kitDecks,
       quizzes: kitQuizzes,
       pages: kit.pages,

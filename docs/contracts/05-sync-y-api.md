@@ -231,10 +231,20 @@ Leyenda de la columna **Auth**: `—` sin autenticación · `sesión` cookie · 
 | `DELETE /api/subjects/:slug/notes/:page` | sesión | — | `204` (idempotente) |
 | `PUT /api/subjects/:slug/tasks/:taskId` | sesión | — | `204` · `400 El id de la tarea no tiene un formato válido` |
 | `DELETE /api/subjects/:slug/tasks/:taskId` | sesión | — | `204` (idempotente) |
+| `DELETE /api/subjects/:slug/tasks` | sesión | — | `204` («Reiniciar el plan»: destilda todas las tareas de la materia; idempotente) |
+| `PUT /api/subjects/:slug/study/plan-dates/:key` | sesión | `{ date: "AAAA-MM-DD" }` | `204` (upsert) · `400 Fecha inválida — …` · `400 El id de la instancia no tiene un formato válido` |
+| `DELETE /api/subjects/:slug/study/plan-dates/:key` | sesión | — | `204` (idempotente) |
+| `DELETE /api/subjects/:slug/study/plan-dates` | sesión | — | `204` («Borrar fechas»: todas las de la materia; idempotente) |
 | `POST /api/subjects/:slug/quiz/:quizId/attempts` | sesión | `{ score, total }` con `score ≤ total` | `201 QuizAttempt` · `400 Intento inválido — …` |
 
-- Los ids de la URL (`:cardId`, `:taskId`, `:quizId`) se validan con `StudyId`
+- Los ids de la URL (`:cardId`, `:taskId`, `:quizId`, `:key`) se validan con `StudyId`
   (`^[a-z0-9][a-z0-9._:-]*$`, ≤ 160).
+- Las fechas de las instancias evaluatorias del plan (`Plan.instances[].key` → `AAAA-MM-DD`)
+  vuelven en `StudyState.planDates` y viven en la cuenta, no en el navegador. Son
+  **independientes del progreso**: «Reiniciar el plan» (`DELETE …/tasks`) no las toca, y
+  «Borrar fechas» (`DELETE …/study/plan-dates`) no toca las tareas. Como la clave tampoco se
+  valida contra el material, una instancia que hoy no está en el plan conserva su fecha si
+  vuelve en un sync posterior.
 - Nada de este estado exige que la tarjeta, la tarea o el quiz existan en el material: los
   mazos automáticos se calculan al vuelo y el material autoral vive dentro de un JSON. Lo
   único que se valida contra la base son los slugs de página (favoritos y apuntes).
@@ -297,7 +307,8 @@ Prefijos del `400` de esquema, por ruta: `Payload de sync inválido`, `Bundle in
 | `PUT …/bookmarks/:page` | **Sí** | Alta sin conflicto. |
 | `PUT …/notes/:page` | **Sí** | Upsert del apunte. |
 | `PUT …/tasks/:taskId` | **Sí** | Alta sin conflicto. |
-| `DELETE …` (bookmarks, notes, tasks, srs) | **Sí** | — |
+| `PUT …/study/plan-dates/:key` | **Sí** | Upsert de la fecha de esa instancia. |
+| `DELETE …` (bookmarks, notes, tasks, srs, plan-dates) | **Sí** | Incluye los borrados totales `DELETE …/tasks` y `DELETE …/study/plan-dates`. |
 | `PUT /api/landing` | **Sí** | Reemplaza la disposición del usuario. |
 | `POST …/study/srs/:cardId` | **No** | Cada llamada **avanza el calendario** de esa tarjeta (SM-2). Repetir una nota no es inocuo. |
 | `POST …/quiz/:quizId/attempts` | **No** | Agrega una fila de intento por llamada. |

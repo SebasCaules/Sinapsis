@@ -277,3 +277,174 @@ describe("el SRS del estado se recorta al material vigente (bug 7)", () => {
     expect(vieja).toMatchObject({ reps: 1, lastGrade: 3 });
   });
 });
+
+describe("fechas de las instancias del plan", () => {
+  let h: Harness;
+
+  const state = async (): Promise<StudyState> =>
+    (await (await h.request("/api/subjects/demo/study/state")).json()) as StudyState;
+
+  const put = (key: string, body: unknown) =>
+    h.json("PUT", `/api/subjects/demo/study/plan-dates/${key}`, body);
+
+  beforeAll(async () => {
+    h = await createHarness();
+    const res = await h.json(
+      "PUT",
+      "/api/subjects/demo/sync",
+      demoPayload([pageIntro, pageTeorema], demoStudy()),
+      { authorization: `Bearer ${h.env.SYNC_TOKEN}` },
+    );
+    expect(res.status).toBe(200);
+    await h.login();
+  });
+
+  afterAll(() => h.close());
+
+  it("se cargan, se pisan y vuelven en el estado", async () => {
+    expect((await put("parcialito1", { date: "2026-04-15" })).status).toBe(204);
+    expect((await put("parcial", { date: "2026-06-02" })).status).toBe(204);
+    expect((await state()).planDates).toEqual({ parcial: "2026-06-02", parcialito1: "2026-04-15" });
+
+    // El upsert pisa la fecha anterior, no agrega una fila.
+    expect((await put("parcialito1", { date: "2026-04-22" })).status).toBe(204);
+    expect((await state()).planDates).toEqual({ parcial: "2026-06-02", parcialito1: "2026-04-22" });
+  });
+
+  it("borrar una instancia es idempotente y no toca a las demás", async () => {
+    expect(
+      (await h.request("/api/subjects/demo/study/plan-dates/parcial", { method: "DELETE" })).status,
+    ).toBe(204);
+    expect((await state()).planDates).toEqual({ parcialito1: "2026-04-22" });
+
+    // Borrar algo que no está tampoco falla.
+    expect(
+      (await h.request("/api/subjects/demo/study/plan-dates/parcial", { method: "DELETE" })).status,
+    ).toBe(204);
+    expect((await state()).planDates).toEqual({ parcialito1: "2026-04-22" });
+  });
+
+  it("«Reiniciar el plan» borra las tareas y deja las fechas", async () => {
+    expect((await put("final", { date: "2026-07-30" })).status).toBe(204);
+    expect((await h.request("/api/subjects/demo/tasks/tarea-leer", { method: "PUT" })).status).toBe(204);
+    expect((await h.request("/api/subjects/demo/tasks/tarea-quiz", { method: "PUT" })).status).toBe(204);
+    expect((await state()).tasksDone).toEqual(["tarea-leer", "tarea-quiz"]);
+
+    expect((await h.request("/api/subjects/demo/tasks", { method: "DELETE" })).status).toBe(204);
+
+    const despues = await state();
+    expect(despues.tasksDone).toEqual([]);
+    expect(despues.planDates).toEqual({ final: "2026-07-30", parcialito1: "2026-04-22" });
+
+    // Y es idempotente.
+    expect((await h.request("/api/subjects/demo/tasks", { method: "DELETE" })).status).toBe(204);
+    expect((await state()).tasksDone).toEqual([]);
+  });
+
+  it("«Borrar fechas» borra todas las de la materia y deja el resto del estado", async () => {
+    expect((await h.request("/api/subjects/demo/tasks/tarea-leer", { method: "PUT" })).status).toBe(204);
+    expect((await h.request("/api/subjects/demo/study/plan-dates", { method: "DELETE" })).status).toBe(204);
+
+    const despues = await state();
+    expect(despues.planDates).toEqual({});
+    expect(despues.tasksDone).toEqual(["tarea-leer"]);
+
+    // Idempotente: borrar cuando ya no hay nada sigue siendo 204.
+    expect((await h.request("/api/subjects/demo/study/plan-dates", { method: "DELETE" })).status).toBe(204);
+  });
+
+  it("400 si la clave o la fecha no tienen formato válido", async () => {
+    for (const key of ["clave%20con%20espacios", "-arranca-con-guion"]) {
+      const res = await h.json("PUT", `/api/subjects/demo/study/plan-dates/${key}`, {
+        date: "2026-04-15",
+      });
+      expect(res.status).toBe(400);
+      expect((await res.json()) as { error: string }).toEqual({
+        error: "El id de la instancia no tiene un formato válido",
+      });
+      expect(
+        (await h.request(`/api/subjects/demo/study/plan-dates/${key}`, { method: "DELETE" })).status,
+      ).toBe(400);
+    }
+
+    for (const date of ["15/04/2026", "2026-4-15", "2026-04-15T00:00:00Z", "", 20260415, null]) {
+      const res = await put("parcial", { date });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { error: string }).error).toMatch(/^Fecha inválida — /);
+    }
+    expect((await put("parcial", {})).status).toBe(400);
+
+    // El mensaje del formato dice CUÁL es el formato: «Invalid» a secas no
+    // servía para corregir la llamada.
+    const malFormato = await put("parcial", { date: "15/04/2026" });
+    expect(((await malFormato.json()) as { error: string }).error).toContain("AAAA-MM-DD");
+
+    // El estado no cambió con ninguno de los rechazos.
+    expect((await state()).planDates).toEqual({});
+  });
+
+  /**
+   * El formato no alcanza: `2026-13-45` cumple el patrón y no existe. Antes se
+   * guardaba con 204 y volvía tal cual en el estado.
+   */
+  it("400 si la fecha tiene formato válido pero no existe en el calendario", async () => {
+    for (const date of ["2026-13-45", "2026-02-30", "2025-02-29", "2026-00-10", "2026-04-31"]) {
+      const res = await put("parcial", { date });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { error: string }).error).toMatch(/calendario/);
+    }
+    expect((await state()).planDates).toEqual({});
+
+    // El bisiesto sí pasa, y el 31 de un mes de 31 también.
+    expect((await put("parcial", { date: "2028-02-29" })).status).toBe(204);
+    expect((await put("final", { date: "2026-12-31" })).status).toBe(204);
+    expect((await state()).planDates).toEqual({ final: "2026-12-31", parcial: "2028-02-29" });
+    expect((await h.request("/api/subjects/demo/study/plan-dates", { method: "DELETE" })).status).toBe(204);
+  });
+
+  it("exige sesión y 404 si la materia no existe", async () => {
+    const anon = await createHarness();
+    expect(
+      (await anon.json("PUT", "/api/subjects/demo/study/plan-dates/parcial", { date: "2026-06-02" }))
+        .status,
+    ).toBe(401);
+    expect(
+      (await anon.request("/api/subjects/demo/study/plan-dates/parcial", { method: "DELETE" })).status,
+    ).toBe(401);
+    expect((await anon.request("/api/subjects/demo/study/plan-dates", { method: "DELETE" })).status).toBe(401);
+    expect((await anon.request("/api/subjects/demo/tasks", { method: "DELETE" })).status).toBe(401);
+    anon.close();
+
+    expect(
+      (await h.json("PUT", "/api/subjects/nada/study/plan-dates/parcial", { date: "2026-06-02" }))
+        .status,
+    ).toBe(404);
+    expect(
+      (await h.request("/api/subjects/nada/study/plan-dates/parcial", { method: "DELETE" })).status,
+    ).toBe(404);
+    expect((await h.request("/api/subjects/nada/study/plan-dates", { method: "DELETE" })).status).toBe(404);
+    expect((await h.request("/api/subjects/nada/tasks", { method: "DELETE" })).status).toBe(404);
+  });
+
+  it("las fechas no se filtran entre usuarios", async () => {
+    const otro = await h.otherUser({ email: "fechas@sinapsis.local", name: "Otra cursada" });
+
+    expect((await put("parcial", { date: "2026-06-02" })).status).toBe(204);
+    expect(
+      (await otro.json("PUT", "/api/subjects/demo/study/plan-dates/parcial", { date: "2026-06-09" }))
+        .status,
+    ).toBe(204);
+
+    expect((await state()).planDates).toEqual({ parcial: "2026-06-02" });
+    const ajeno = (await (
+      await otro.request("/api/subjects/demo/study/state")
+    ).json()) as StudyState;
+    expect(ajeno.planDates).toEqual({ parcial: "2026-06-09" });
+
+    // Y el borrado total del otro no toca las mías.
+    expect(
+      (await otro.request("/api/subjects/demo/study/plan-dates", { method: "DELETE" })).status,
+    ).toBe(204);
+    expect((await state()).planDates).toEqual({ parcial: "2026-06-02" });
+  });
+});

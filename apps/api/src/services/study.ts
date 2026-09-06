@@ -21,6 +21,7 @@ import {
   bookmarks,
   notes,
   pages,
+  planDates,
   quizAttempts,
   srsCards,
   subjectStudy,
@@ -137,6 +138,12 @@ export async function readStudyState(
     .where(and(eq(tasks.userId, userId), eq(tasks.subjectId, subjectId)))
     .orderBy(asc(tasks.taskId));
 
+  const planDateRows = await db
+    .select({ key: planDates.key, date: planDates.date })
+    .from(planDates)
+    .where(and(eq(planDates.userId, userId), eq(planDates.subjectId, subjectId)))
+    .orderBy(asc(planDates.key));
+
   const attemptRows = await db
     .select({
       quizId: quizAttempts.quizId,
@@ -159,6 +166,6 @@ export async function readStudyState(
     attempts: attemptRows.map(
       (row): QuizAttempt => ({ quizId: row.quizId, score: row.score, total: row.total, at: row.at }),
     ),
-    planDates: {},
+    planDates: Object.fromEntries(planDateRows.map((row) => [row.key, row.date])),
   };
 }

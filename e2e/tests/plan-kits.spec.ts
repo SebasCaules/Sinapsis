@@ -95,15 +95,51 @@ test("los kits listan su material y llevan a repasar sus mazos", async ({ page, 
   await expect(page.getByRole("heading", { name: kit.title, level: 1 })).toBeVisible();
 
   const main = page.locator("main#contenido");
-  await expect(main.getByText("Páginas", { exact: true })).toBeVisible();
+  /* «Páginas clave»: el kit trae una SELECCIÓN de páginas, no todas las de sus
+     unidades (el adjetivo es el del baseline). */
+  await expect(main.getByText("Páginas clave", { exact: true })).toBeVisible();
   await expect(main.getByText("Mazos", { exact: true })).toBeVisible();
+  await expect(main.getByText("Herramientas", { exact: true })).toBeVisible();
   const paginas = main.locator(`a[href^="/m/${subject.slug}/p/"]`);
   const mazos = main.locator(`a[href^="/m/${subject.slug}/flashcards/"]`);
   expect(await paginas.count()).toBeGreaterThan(0);
   expect(await mazos.count()).toBeGreaterThan(1);
+  /* Los lanzadores que declara el kit, resueltos contra el rail. */
+  expect(kit.tools.length).toBeGreaterThan(0);
+  await expect(main.getByRole("link", { name: "Calculadoras Φ · t · χ²" })).toBeVisible();
 
   await page.getByRole("link", { name: "Repasar los mazos del kit" }).click();
   await expect(page).toHaveURL(new RegExp(`/m/${subject.slug}/flashcards/kit:${kitId}\\?modo=`));
   await expect(page.getByTestId("session-counter")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: kit.title })).toBeVisible();
+});
+
+test("el kit marca sus páginas como leídas, de a una y todas juntas", async ({ page, request }) => {
+  const content = await studyContent(request, subject.slug);
+  const kit = content.kits.find((k) => k.id === "parcialito-1");
+  if (!kit) throw new Error("La siembra no trajo el kit «parcialito-1»");
+
+  await page.goto(`${kitsUrl}/${kit.id}`);
+  await waitForSubjectShell(page);
+
+  const main = page.locator("main#contenido");
+  const casillas = main.getByRole("button", { name: /^Marcar como (no )?leída: / });
+  await expect(casillas.first()).toHaveAttribute("aria-pressed", "false");
+
+  await casillas.first().click();
+  await expect(casillas.first()).toHaveAttribute("aria-pressed", "true");
+
+  await main.getByRole("button", { name: "Marcar todas como leídas" }).click();
+  await expect(main.getByRole("button", { name: "Desmarcar todas" })).toBeVisible();
+  await expect(main.getByText(`${kit.pages.length} de ${kit.pages.length} leídas`)).toBeVisible();
+
+  /* El tilde es el MISMO que el del lector: viaja al progreso de la materia. */
+  await expect
+    .poll(async () => (await page.request.get(`/api/subjects/${subject.slug}`).then((r) => r.json())).studied.length, {
+      message: "el API no registró las páginas leídas del kit",
+    })
+    .toBeGreaterThanOrEqual(kit.pages.length);
+
+  await main.getByRole("button", { name: "Desmarcar todas" }).click();
+  await expect(main.getByRole("button", { name: "Marcar todas como leídas" })).toBeVisible();
 });

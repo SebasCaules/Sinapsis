@@ -20,7 +20,7 @@
  */
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import {
+import { FIXED_RAIL, FIXED_RAIL_TAIL,
   Kit,
   Plan,
   StudyContent,
@@ -449,7 +449,14 @@ function crossCheck(
   const deckIds = new Set(study.decks.map((d) => d.id));
   const quizIds = new Set(study.quizzes.map((q) => q.id));
   const divisions = new Set(config.divisions.map((d) => d.key));
-  const railIds = new Set(config.rail.flatMap((g) => g.items.map((item) => item.id)));
+  /* Un lanzador o una tarea `tool` puede apuntar a un ítem del rail de la
+     materia o a una vista fija de la plataforma (flashcards, quiz, plan…): las
+     dos cosas están en el rail que ve el usuario. */
+  const railIds = new Set([
+    ...config.rail.flatMap((g) => g.items.map((item) => item.id)),
+    ...FIXED_RAIL.flatMap((g) => g.items.map((item) => item.id)),
+    ...FIXED_RAIL_TAIL.flatMap((g) => g.items.map((item) => item.id)),
+  ]);
 
   const broken = (where: string, detail: string) => issues.push({ kind: "study-broken-ref", page: where, detail });
   const checkPage = (where: string, slug: string | undefined) => {

@@ -131,13 +131,30 @@ export function Bar({
   );
 }
 
-/** Anillo de progreso con el porcentaje en el centro (el del plan del baseline). */
-export function Ring({ ratio, size = 92, label }: { ratio: number; size?: number; label?: string }) {
+/**
+ * Anillo de progreso con el porcentaje en el centro (el del plan del baseline).
+ *
+ * `color` tiñe el arco: en el plan, el color de la fase. Sin él manda `--primary`.
+ */
+export function Ring({
+  ratio,
+  size = 92,
+  label,
+  color,
+}: {
+  ratio: number;
+  size?: number;
+  label?: string;
+  color?: string;
+}) {
   const pct = Math.round(Math.min(1, Math.max(0, ratio)) * 100);
   const r = (size - 10) / 2;
   const c = 2 * Math.PI * r;
   return (
-    <div className={css.ring} style={{ width: size, height: size }}>
+    <div
+      className={css.ring}
+      style={{ width: size, height: size, ...(color ? { ["--ring-col" as string]: color } : null) }}
+    >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
         <circle cx={size / 2} cy={size / 2} r={r} className={css.ringTrack} strokeWidth={5} fill="none" />
         <circle

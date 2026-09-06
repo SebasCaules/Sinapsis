@@ -259,6 +259,30 @@ export const tasks = sqliteTable(
   (t) => ({ pk: primaryKey({ columns: [t.userId, t.subjectId, t.taskId] }) }),
 );
 
+/**
+ * Fechas de las instancias evaluatorias del plan (`Plan.instances[].key`), tal
+ * como las carga cada persona. Son por usuario y materia, y viven aparte del
+ * progreso a propósito: «Reiniciar el plan» borra `tasks` y deja estas filas
+ * intactas. La clave no se valida contra el material —el plan es un JSON que
+ * se re-sincroniza—, solo su formato (`StudyId`) y el de la fecha (AAAA-MM-DD).
+ */
+export const planDates = sqliteTable(
+  "plan_dates",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    /** Fecha local en AAAA-MM-DD (no un instante: es el día del examen). */
+    date: text("date").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.userId, t.subjectId, t.key] }) }),
+);
+
 /** Historial de intentos de quiz (se conservan todos; la vista lee los últimos). */
 export const quizAttempts = sqliteTable(
   "quiz_attempts",

@@ -42,7 +42,7 @@ test("el conmutador ofrece las modalidades que trae el plan", async ({ page, req
   test.skip(tracks.length === 0, "el plan de esta materia no declara modalidades");
 
   await openPlan(page);
-  await expect(page.getByText("MODALIDAD")).toBeVisible();
+  await expect(page.getByText("MODALIDAD", { exact: true })).toBeVisible();
   await expect(picker(page)).toBeVisible();
 
   const opciones = picker(page).getByRole("radio");
@@ -94,13 +94,45 @@ test("cambiar de modalidad cambia las fases y la elección sobrevive a la recarg
   expect(await visiblePhases(page)).toEqual(otra.phases.map((p) => p.id));
 });
 
+/**
+ * En un `radiogroup` el foco SIGUE a la selección (APG). Con el tabindex
+ * rotativo del conmutador, quedarse sobre el botón anterior dejaba el foco en un
+ * radio recién desmarcado: quien navega con lector de pantalla oía que se
+ * desmarcó, nunca cuál quedó activa.
+ */
+test("la flecha cambia la modalidad y se lleva el foco", async ({ page, request }) => {
+  const tracks = (await studyContent(request, subject.slug)).plan?.tracks ?? [];
+  test.skip(tracks.length < 2, "hacen falta dos modalidades para poder moverse con las flechas");
+  const primera = tracks[0] as PlanTrackDto;
+  const otra = tracks[1] as PlanTrackDto;
+
+  await openPlan(page);
+  const radioPrimera = picker(page).getByRole("radio", { name: primera.label, exact: true });
+  const radioOtra = picker(page).getByRole("radio", { name: otra.label, exact: true });
+
+  await radioPrimera.focus();
+  await expect(radioPrimera).toBeFocused();
+
+  await page.keyboard.press("ArrowRight");
+
+  await expect(radioOtra).toHaveAttribute("aria-checked", "true");
+  await expect(radioOtra).toBeFocused();
+  await expect(radioOtra).toHaveAttribute("tabindex", "0");
+  await expect(radioPrimera).toHaveAttribute("tabindex", "-1");
+
+  // Y vuelve: la flecha contraria devuelve selección Y foco.
+  await page.keyboard.press("ArrowLeft");
+  await expect(radioPrimera).toHaveAttribute("aria-checked", "true");
+  await expect(radioPrimera).toBeFocused();
+});
+
 test("un plan sin modalidades no dibuja el conmutador", async ({ page, request }) => {
   const plan = (await studyContent(request, subject.slug)).plan;
   test.skip((plan?.tracks ?? []).length > 0, "el plan de esta materia sí declara modalidades");
 
   await openPlan(page);
   await expect(picker(page)).toHaveCount(0);
-  await expect(page.getByText("MODALIDAD")).toHaveCount(0);
+  await expect(page.getByText("MODALIDAD", { exact: true })).toHaveCount(0);
 
   // Sin modalidades manda `plan.phases`; sin plan, el estado vacío.
   if (plan?.phases.length) {

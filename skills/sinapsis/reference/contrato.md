@@ -308,10 +308,18 @@ pantalla: se le agrega el texto alternativo al final de la línea, `- [x] $\alph
 
 ```jsonc
 { "title": "Plan de estudio",
+  // Instancias evaluatorias reales de la cursada. La FECHA no va acá: la carga
+  // cada usuario y vive en su cuenta (`StudyState.planDates`, clave → AAAA-MM-DD).
+  "instances": [{ "key": "parcial", "label": "Parcial (TP1–TP7)" },
+                { "key": "recparcial", "label": "Recuperatorio del parcial", "optional": true }],
   "phases": [{
     "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
-    "date": "2026-10-01",             // opcional, AAAA-MM-DD
+    "instance": "parcial",            // opcional, clave de `instances`: la fecha de la fase
+    "retake": "recparcial",           // opcional, clave de `instances`: el recuperatorio
+    "date": "2026-10-01",             // opcional, AAAA-MM-DD: fecha por defecto, la pisa la del usuario
+    "description": "Una o dos oraciones bajo el título.",  // opcional
     "scope": "Qué cae (markdown)",    // opcional
+    "guide": "Cómo recorrer el programa (markdown)",       // opcional
     "icon": "map",                    // opcional, un IconName del registro cerrado
     "milestones": [{
       "id": "fase-1-h1", "title": "Unidad 1", "icon": "book", "divisions": ["1"],
@@ -335,6 +343,15 @@ pantalla: se le agrega el texto alternativo al final de la línea, `- [x] $\alph
 Los ids son la clave del progreso del usuario («tarea hecha»): conviene que sean estables
 (`fase-1`, `fase-1-h2-t3`).
 
+**Instancias y fechas.** `instances` es la lista de instancias evaluatorias: `key` (id
+estable), `label` y `optional` (`true` para los recuperatorios, que el lector pliega
+mientras no tengan fecha). La fase apunta a la suya con `instance` y a su recuperatorio con
+`retake`; sin `instance`, la fase no lleva campo de fecha. Las fechas las carga el usuario,
+se guardan en su cuenta por clave de instancia (`StudyState.planDates`) y **no** se borran
+al reiniciar el progreso del plan ni al volver a sincronizar la materia. `description` es
+el texto corto bajo el título de la fase; `scope` («qué cae en este examen») y `guide`
+(«cómo recorrer el programa») son markdown, normalmente una lista.
+
 ### `kits.json` (`Kit[]`)
 
 ```jsonc
@@ -350,7 +367,9 @@ Los ids son la clave del progreso del usuario («tarea hecha»): conviene que se
 `sinapsis sync --dry-run` avisa (sin fallar) por: página / mazo / quiz / división / herramienta
 inexistente, `target` de una tarea `read` que no es una división o de una tarea `tool` que no
 es un id de ítem del `rail`, id repetido (mazo, quiz,
-tarjeta, pregunta, kit), tarjeta sin reverso, pregunta con menos de 2 opciones o sin correcta,
+tarjeta, pregunta, kit), clave de instancia repetida, fase que apunta a una instancia que
+`instances` no declara, fase cuyo `retake` es la misma instancia que su `instance`,
+tarjeta sin reverso, pregunta con menos de 2 opciones o sin correcta,
 y JSON que no cumple el contrato (con la ruta del campo).
 
 `sinapsis validate` corre lo mismo salvo lo que necesita las páginas del wiki (no lo compila).

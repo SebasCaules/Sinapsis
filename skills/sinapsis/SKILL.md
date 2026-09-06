@@ -235,14 +235,27 @@ puede llevar `detail` (una línea corta: «41 ejercicios · 14–16 h»), y las 
 ```jsonc
 // plan.json
 { "title": "Plan de estudio",
+  "instances": [{ "key": "parcial", "label": "Parcial (TP1–TP7)" },
+                { "key": "recparcial", "label": "Recuperatorio del parcial", "optional": true }],
   "phases": [{ "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
-    "date": "2026-10-01", "scope": "Qué cae en este examen (markdown)",
+    "instance": "parcial", "retake": "recparcial",
+    "description": "Una o dos oraciones bajo el título.",
+    "scope": "Qué cae en este examen (markdown)",
+    "guide": "Cómo recorrer el programa (markdown, opcional)",
     "milestones": [{ "id": "fase-1-h1", "title": "Unidad 1", "icon": "book", "divisions": ["1"],
       "tasks": [{ "id": "fase-1-h1-t1", "label": "Resolver el TP1", "kind": "exercises",
                   "detail": "7 ejercicios · 4–5 h" }] }] }] }
 ```
 
 Referencia completa, con todas las verificaciones: `reference/contrato.md` §7.
+
+**Fechas de las instancias.** `instances` declara las instancias evaluatorias reales de la
+cursada (parcialitos, parcial, recuperatorio, final): `key`, `label` y `optional` (los
+recuperatorios, que el lector muestra plegados mientras no tengan fecha). Cada fase nombra
+la suya en `instance` y, si la hay, su recuperatorio en `retake`. **La fecha no va en el
+JSON**: la carga cada usuario desde el plan y vive en su cuenta (`StudyState.planDates`),
+así que no se pierde al resincronizar ni al reiniciar el progreso. `date` en la fase es
+solo una fecha por defecto del cronograma, y la del usuario la pisa.
 
 El plan puede tener **modalidades** (`tracks`): «Cursada + final» y «Final directo», por
 ejemplo. Cada una trae sus propias fases; `phases` repite las de la modalidad por defecto

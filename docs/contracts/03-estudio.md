@@ -289,12 +289,17 @@ JSON validado contra `Plan`. Los errores se informan con la ruta del campo:
 | `Plan.title` | texto | no | `"Plan de estudio"` | ≤ 160 |
 | `Plan.phases` | `PlanPhase[]` | **sí** | — | **1**–20 |
 | `Plan.tracks` | `PlanTrack[]` | no | `[]` | ≤ 6 |
+| `Plan.instances` | `PlanInstance[]` | no | `[]` | ≤ 20 · ver §4.4 |
 | `PlanPhase.id` | `StudyId` | sí | — | 1–160 |
 | `PlanPhase.title` | texto | sí | — | 1–160 |
 | `PlanPhase.subtitle` | texto | no | — | ≤ 300 |
+| `PlanPhase.description` | texto | no | — | ≤ 600 |
 | `PlanPhase.icon` | `IconName` | no | — | registro cerrado |
 | `PlanPhase.date` | texto | no | — | exactamente `^\d{4}-\d{2}-\d{2}$` |
+| `PlanPhase.instance` | `StudyId` | no | — | clave de `Plan.instances` |
+| `PlanPhase.retake` | `StudyId` | no | — | clave de `Plan.instances` |
 | `PlanPhase.scope` | markdown | no | — | ≤ 4000 |
+| `PlanPhase.guide` | markdown | no | — | ≤ 4000 |
 | `PlanPhase.milestones` | `PlanMilestone[]` | sí | — | ≤ 40 |
 | `PlanMilestone.id` | `StudyId` | sí | — | 1–160 |
 | `PlanMilestone.title` | texto | sí | — | 1–160 |
@@ -309,6 +314,11 @@ JSON validado contra `Plan`. Los errores se informan con la ruta del campo:
 
 `detail` es una línea corta aparte del `label` («41 ejercicios · 14–16 h»): la plataforma la
 muestra separada, no dentro del nombre de la tarea.
+
+Los tres textos de la fase se dibujan en lugares distintos y no son intercambiables:
+`subtitle` es el **antetítulo** (en versalita, sobre el título, con el color de la fase),
+`description` es la **bajada** (una o dos oraciones bajo el título) y `scope` es el panel
+plegable «Qué cae en este examen». `guide` es el segundo panel, «Cómo recorrer el programa».
 
 ### 4.2 `kind` de una tarea y qué es su `target`
 
@@ -333,6 +343,74 @@ juntas. El compilador avisa:
 ```
 id de tarea "<id>" (los ids son globales al plan y el progreso del usuario se guarda por id) repetido
 ```
+
+---
+
+### 4.4 Instancias y fechas
+
+Las fases del plan son las **instancias evaluatorias** de la materia, pero la FECHA de cada
+una no es contenido del wiki: la carga el usuario y vive en su cuenta. El wiki declara qué
+instancias existen; la plataforma les pone la fecha.
+
+```jsonc
+{
+  "instances": [
+    { "key": "parcialito1", "label": "Parcialito 1 (TP1–TP2)" },
+    { "key": "parcial",     "label": "Parcial (TP1–TP7)" },
+    { "key": "recparcial",  "label": "Recuperatorio del parcial", "optional": true },
+    { "key": "final",       "label": "Final" }
+  ],
+  "phases": [
+    { "id": "fase-3", "title": "Parcial",
+      "instance": "parcial",        // su instancia principal
+      "retake": "recparcial",       // su recuperatorio, si lo hay
+      "date": "2026-10-01",         // opcional: la del cronograma de la cátedra
+      "milestones": [ /* … */ ] }
+  ]
+}
+```
+
+| Campo | Tipo | Obligatorio | Default | Límite |
+|---|---|---|---|---|
+| `PlanInstance.key` | `StudyId` | sí | — | 1–160 |
+| `PlanInstance.label` | texto | sí | — | 1–120 |
+| `PlanInstance.optional` | booleano | no | `false` | — |
+
+**Reglas**
+
+1. `PlanPhase.instance` y `PlanPhase.retake` son **claves de `Plan.instances`**. Una fase sin
+   `instance` no tiene fecha editable.
+2. Varias fases pueden apuntar a la misma instancia (es lo que pasa entre modalidades: la
+   cursada y el final directo comparten el `final`): la fecha se carga una vez y se ve en las
+   dos.
+3. `PlanPhase.date` es la fecha **por defecto** —la del cronograma de la cátedra— y la del
+   usuario la pisa. Sin `instance`, esa fecha se muestra pero no se puede editar.
+4. `optional: true` es para los recuperatorios: se dibujan plegados hasta que tienen fecha.
+5. Las fechas del usuario viajan en `StudyState.planDates` (`clave de instancia` →
+   `AAAA-MM-DD`) y se guardan con:
+
+   | Verbo | Ruta | Qué hace |
+   |---|---|---|
+   | `PUT` | `/api/subjects/:slug/study/plan-dates/:key` | Carga o cambia la fecha (`{ "date": "AAAA-MM-DD" }`). |
+   | `DELETE` | `/api/subjects/:slug/study/plan-dates/:key` | Borra la de esa instancia (vaciar el campo). |
+   | `DELETE` | `/api/subjects/:slug/study/plan-dates` | Borra todas («Borrar fechas»). |
+
+6. **Reiniciar el progreso del plan NO borra las fechas.** `DELETE
+   /api/subjects/:slug/tasks` destilda las tareas y no toca `planDates`; son dos acciones
+   separadas, con su propia confirmación, como en el baseline.
+7. Una fecha guardada con una clave que el plan ya no declara **no se borra**: deja de
+   mostrarse y vuelve a aparecer si la materia repone esa instancia. Es la misma regla que
+   `tasksDone` (§4.3).
+
+**Qué muestra la plataforma con esto**
+
+- Un panel «Fechas de las instancias» en la cabecera del plan, con un campo por instancia.
+  Sin `instances`, el panel no se dibuja.
+- Un **chip de cuenta regresiva** por fecha: «faltan 12 días», «falta 1 día», «es hoy»,
+  «pasó hace 3 días». Se cuenta contra el día **local** del usuario.
+- En cada fase, su campo de fecha y una **línea de ritmo** que reparte lo pendiente hasta la
+  primera fecha futura entre su instancia y su recuperatorio: «~4 tareas por semana · 5 hitos
+  restantes», o por día cuando falta menos de una semana.
 
 ---
 
@@ -515,6 +593,7 @@ Lo devuelve `GET /api/subjects/:slug/study/state`. Es **por usuario y por materi
 | `bookmarks` | `Slug[]` | Favoritos, por orden de alta. |
 | `notes` | `Note[]` | Apuntes por página: `{ page, body (≤ 50000), updatedAt }`. |
 | `tasksDone` | `StudyId[]` | Tareas del plan hechas, por id. |
+| `planDates` | `Record<StudyId, "AAAA-MM-DD">` | Fecha de cada instancia evaluatoria, cargada por el usuario (§4.4). Reiniciar el plan no la toca. |
 | `attempts` | `QuizAttempt[]` | `{ quizId, score, total, at }`, los **50** más recientes. |
 
 Nada de lo que se guarda depende de que la tarjeta, la tarea o el quiz existan en el

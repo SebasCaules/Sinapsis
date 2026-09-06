@@ -1,4 +1,16 @@
-/* Plan de estudio · fases apiladas, hitos con tareas tildables. */
+/* Plan de estudio · fases apiladas, hitos con tareas tildables.
+   La forma es la del baseline (hero con anillo, chips de fase, tarjeta de fase
+   con filete de color, fechas por instancia, hitos y tareas), dibujada con los
+   tokens de Sinapsis: ni un color literal. */
+
+/* ---------- controles del hero (modalidad + fechas) ---------- */
+.heroControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
 
 /* ---------- modalidades (N0-43) ----------
    Un conmutador de dos o tres vías sobre el mismo plan: parece un juego de
@@ -24,6 +36,7 @@
 }
 
 .segment {
+  min-height: 24px;
   padding: 7px 14px;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -53,6 +66,119 @@
   color: var(--text-3);
 }
 
+/* ---------- panel de fechas del hero ---------- */
+.datePanel {
+  width: min(520px, 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--relief);
+}
+
+.datePanelSummary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 8px 12px;
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-2);
+  cursor: pointer;
+  list-style: none;
+}
+.datePanelSummary::-webkit-details-marker { display: none; }
+.datePanelSummary:hover { color: var(--primary); }
+.datePanelSummary:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.datePanel[open] > .datePanelSummary { border-bottom: 1px solid var(--border); }
+
+.datePanelGrid { display: flex; flex-direction: column; gap: 9px; padding: 12px; }
+
+/* En el panel global los rótulos van a la izquierda y los campos, alineados. */
+.datePanelGrid .dfield {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 10px;
+}
+
+.datePanelNote {
+  margin: 0 12px 12px;
+  font: 400 11px/1.45 var(--font-ui);
+  color: var(--text-3);
+}
+
+/* ---------- campos de fecha y cuenta regresiva ---------- */
+.dates { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 10px; }
+.dateRow { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.dfield { display: inline-flex; align-items: center; gap: 8px; }
+.dlabel { font: 600 11.5px var(--font-ui); color: var(--text-3); }
+
+.date {
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font: 500 12.5px var(--font-mono);
+  color: var(--text);
+  /* `color-scheme` lo fija :root por tema: el selector nativo del navegador se
+     hereda y acompaña a pergamino / laurel / claustro. */
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.date:hover { border-color: var(--text-3); }
+.date:focus-visible {
+  outline: none;
+  border-color: var(--pcol, var(--primary));
+  box-shadow: 0 0 0 3px var(--primary-ring);
+}
+
+.dateStatic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  font: 500 12px var(--font-mono);
+  color: var(--text-2);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  padding: 2px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.count svg { color: var(--text-3); }
+.count[data-tone="soon"] { border-color: var(--accent); color: var(--text); }
+.count[data-tone="soon"] svg { color: var(--accent-ink); }
+.count[data-tone="past"] { border-color: var(--bad); color: var(--bad-text); }
+.count[data-tone="past"] svg { color: var(--bad-text); }
+
+.retake { font-size: 12px; }
+.retakeSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-3);
+  cursor: pointer;
+  list-style: none;
+}
+.retakeSummary::-webkit-details-marker { display: none; }
+.retakeSummary:hover { color: var(--text-2); }
+.retakeSummary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.retake .dateRow { margin-top: 6px; }
+
+.pace { margin: 0; font: 400 11.5px/1.45 var(--font-ui); color: var(--text-3); }
+
 /* ---------- cabecera ---------- */
 .totalText { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 
@@ -72,83 +198,93 @@
 
 .nextTask { color: var(--text); font-weight: 600; }
 
+/* ---------- navegación por fases ---------- */
+.phaseNav { display: flex; flex-wrap: wrap; gap: 9px; margin: -6px 0 -4px; }
+
+.pn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 6px 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+  box-shadow: var(--relief);
+  transition: border-color var(--t), color var(--t), transform var(--t);
+}
+.pn:hover { border-color: var(--pcol); color: var(--text); transform: translateY(-1px); }
+.pn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pnDot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--pcol); }
+.pnTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* El porcentaje es texto: va en un token de texto. El color de la fase queda en
+   el punto y en el filete de la tarjeta. */
+.pnPct { font: 500 11.5px var(--font-mono); color: var(--text-3); }
+
 /* ---------- fase ---------- */
 .phase {
+  /* Misma fórmula que --uink (tokens.css): el color de la unidad es para
+     manchas; como TEXTO se corre hacia la tinta del tema para llegar a AA. */
+  --pink: color-mix(in srgb, var(--pcol) var(--ink-mix), var(--text));
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 20px 22px 22px;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 3px solid transparent;
+  border-left: 4px solid var(--pcol);
   border-radius: var(--r-lg);
   box-shadow: var(--relief), var(--shadow);
+  scroll-margin-top: 74px;
 }
-.phase[data-current="true"] { border-left-color: var(--primary); }
 
 .phaseHead {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
+  padding: 20px 22px 18px;
+  background: color-mix(in srgb, var(--pcol) 6%, var(--surface));
+  border-bottom: 1px solid var(--border);
 }
 
-.phaseMain { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.phaseMain { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 
-.phaseEyebrow {
-  font: 600 10px var(--font-ui);
+.phaseKicker {
+  font: 700 10.5px var(--font-ui);
   letter-spacing: 0.09em;
-  color: var(--text-3);
+  color: var(--pink);
 }
-.phase[data-current="true"] .phaseEyebrow { color: var(--primary); }
 
 .phaseTitle {
-  margin: 0;
+  margin: 2px 0 0;
   font: 600 22px/1.2 var(--font-display);
   color: var(--text);
 }
 
-.phaseSubtitle {
-  margin: 0;
-  max-width: 640px;
+.phaseBlurb {
+  margin: 2px 0 0;
+  max-width: 62ch;
   font: 400 13px/1.55 var(--font-ui);
   color: var(--text-2);
 }
 
 .phaseAside {
   flex: none;
-  width: 230px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-.date {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font: 500 11.5px var(--font-mono);
-  color: var(--text-2);
+  gap: 7px;
 }
 
-.dateRelative {
-  padding: 1px 7px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--text-3);
-  font-size: 10.5px;
-}
+.phaseCount { font: 500 11.5px var(--font-mono); color: var(--text-3); }
 
-.phaseCount { font: 600 12px var(--font-mono); color: var(--text-3); }
-.phaseBar { width: 100%; }
-
-/* ---------- qué cae ---------- */
+/* ---------- «qué cae» y «cómo recorrer el programa» ---------- */
 .scope {
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  background: var(--surface-2);
+  margin: 0 22px;
+  border-bottom: 1px dashed var(--border);
 }
 
 .scopeSummary,
@@ -157,23 +293,38 @@
   align-items: center;
   gap: 8px;
   min-height: 24px;
-  padding: 10px 14px;
-  font: 600 12px var(--font-ui);
-  color: var(--text-2);
+  padding: 12px 0;
+  font: 700 13px var(--font-ui);
+  color: var(--text);
   cursor: pointer;
   list-style: none;
 }
 .scopeSummary::-webkit-details-marker,
 .exampleSummary::-webkit-details-marker { display: none; }
 .scopeSummary:hover, .exampleSummary:hover { color: var(--primary); }
+.scopeSummary:focus-visible, .exampleSummary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.scopeSummary .chevron { color: var(--pink); }
+.guide .scopeSummary { color: var(--text-2); }
+.guide .scopeSummary .chevron { color: var(--text-3); }
 
-.chevron { transition: transform var(--t); }
-.scope[open] .chevron,
+.scopeCount {
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font: 600 10.5px var(--font-mono);
+  color: var(--text-3);
+}
+
+.chevron { flex: none; transition: transform var(--t); }
+.scope[open] > .scopeSummary .chevron,
+.datePanel[open] > .datePanelSummary .chevron,
+.retake[open] > .retakeSummary .chevron,
 .example[open] .chevron { transform: rotate(90deg); }
 
 .scopeBody {
-  padding: 0 16px 14px;
-  font-size: 13.5px;
+  padding: 0 2px 14px;
+  font-size: 13px;
   color: var(--text-2);
 }
 .scopeBody :global(p) { margin: 0 0 0.6em; }
@@ -181,65 +332,82 @@
 .scopeBody :global(ul) { margin: 0.4em 0; padding-left: 1.2em; }
 .scopeBody :global(li) { margin: 0.25em 0; }
 
-/* ---------- hitos ---------- */
-.milestones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+/* ---------- hitos ----------
+   Una columna, como el baseline: cada hito es una ficha con su cabecera y sus
+   tareas. En dos columnas los renglones de tarea quedaban demasiado cortos. */
+.milestones { display: flex; flex-direction: column; gap: 6px; padding: 8px 22px 20px; }
 
 .milestone {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px 12px;
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  box-shadow: var(--relief);
+  overflow: hidden;
 }
 
-.milestoneHead { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.milestoneHead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 13px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.milestoneIcon { flex: none; color: var(--pink); }
 
 /* `min-width` de verdad: con `min-width: 0` el título se encogía hasta partirse
    en tres líneas antes de que la fila envolviera, y la insignia, el contador y
-   «Marcar todo el hito» se quedaban colgados a su derecha (visto a 1024). */
+   «Marcar todo» se quedaban colgados a su derecha (visto a 1024). */
 .milestoneTitle {
   margin: 0;
   flex: 1 1 150px;
   min-width: 150px;
-  font: 600 14px/1.3 var(--font-ui);
+  font: 700 13.5px/1.3 var(--font-ui);
   color: var(--text);
 }
 
-.milestoneCount { font: 500 11px var(--font-mono); color: var(--text-3); }
+.milestoneCount { margin-left: auto; font: 500 11.5px var(--font-mono); color: var(--text-3); }
 
-.bulk {
-  height: 24px;
-  padding: 0 9px;
+.bulk,
+.bulkLg {
+  min-height: 24px;
+  padding: 0 10px;
   border: 1px solid var(--border-2);
-  border-radius: 7px;
+  border-radius: 999px;
   background: var(--surface);
-  font: 600 10.5px var(--font-ui);
-  color: var(--text-3);
+  font: 600 11px var(--font-ui);
+  color: var(--text-2);
   cursor: pointer;
   white-space: nowrap;
+  transition: color var(--t), border-color var(--t), background var(--t);
 }
-.bulk:hover:not(:disabled) { color: var(--primary); border-color: var(--primary); }
-.bulk:disabled { opacity: 0.75; cursor: default; }
-.bulk:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.bulkLg { min-height: 28px; padding: 0 13px; font-size: 12px; }
+.bulk:hover:not(:disabled), .bulkLg:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--text-3);
+}
+.bulk:disabled, .bulkLg:disabled { opacity: 0.75; cursor: default; }
+.bulk:focus-visible, .bulkLg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* ---------- tareas ---------- */
-.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 
-/* La fila entera es el objetivo de la casilla (el `input` la cubre): 28 px de
+/* La fila entera es el objetivo de la casilla (el `input` la cubre): 34 px de
    alto mínimo para que ese objetivo pase los 24 del contrato (U11). */
 .task {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 28px;
-  padding: 4px 6px;
-  margin: 0 -6px;
-  border-radius: var(--r-sm);
+  gap: 10px;
+  min-height: 34px;
+  padding: 6px 13px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
-.task:hover { background: var(--surface-3); }
+.tasks > .task:first-child { border-top: none; }
+.task:hover { background: var(--surface-2); }
 
 .check {
   position: relative;
@@ -248,7 +416,7 @@
   min-height: 24px;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   cursor: pointer;
 }
 
@@ -287,34 +455,37 @@
   outline-offset: 2px;
 }
 
-.taskLabel {
-  min-width: 0;
-  font: 500 12.5px/1.4 var(--font-ui);
-  color: var(--text-2);
-}
+.taskIcon { flex: none; color: var(--text-3); }
+.taskBody { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+
+.taskLabel { font: 600 13px/1.35 var(--font-ui); color: var(--text); }
+.taskHint { font: 400 11.5px var(--font-ui); color: var(--text-3); }
+
 .task[data-done="true"] .taskLabel {
   color: var(--text-3);
   text-decoration: line-through;
   text-decoration-color: var(--border-2);
 }
+.task[data-done="true"] .taskIcon { opacity: 0.5; }
 
 .taskLink {
   flex: none;
-  min-height: 24px;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 8px 2px 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  font: 600 10.5px var(--font-ui);
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   color: var(--text-3);
   text-decoration: none;
-  white-space: nowrap;
+  transition: color var(--t), background var(--t);
 }
-.taskLink:hover { color: var(--primary); border-color: var(--primary); }
+.taskLink:hover { color: var(--primary); background: var(--surface-3); }
 .taskLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- pie ---------- */
+.foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+.dialogText { margin: 0; font: 400 13.5px/1.6 var(--font-ui); color: var(--text-2); }
 
 /* ---------- estado vacío ---------- */
 .emptyText {
@@ -337,6 +508,7 @@
   border-radius: var(--r);
   background: var(--surface-2);
 }
+.example .exampleSummary { padding: 10px 14px; font-size: 12px; color: var(--text-2); }
 
 .pre {
   margin: 0;
@@ -350,15 +522,23 @@
 }
 .example .emptyText { padding: 0 14px 14px; font-size: 12.5px; }
 
-/* Dos hitos por fila piden 2 × 300 + 12 de hueco + 44 de relleno de la fase. */
+/* La cabecera de la fase se apila cuando la columna se angosta: el anillo y su
+   botón no entran al lado de un título de dos renglones. */
 @container (max-width: 680px) {
-  .milestones { grid-template-columns: 1fr; }
-  .phaseHead { flex-direction: column; gap: 12px; }
-  .phaseAside { width: 100%; align-items: flex-start; }
+  .phaseHead { flex-direction: column; gap: 14px; }
+  .phaseAside { flex-direction: row; align-self: stretch; justify-content: space-between; }
+  .dfield { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .datePanelGrid .dfield { grid-template-columns: minmax(0, 1fr); }
+  .datePanel { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chevron, .box { transition: none; }
+  .chevron, .box, .pn { transition: none; }
+}
+
+/* Impresión: el plan se lleva en papel sin los controles, pero con las fechas. */
+@media print {
+  .heroControls, .phaseNav, .foot, .taskLink, .bulk, .bulkLg { display: none !important; }
 }
 
 /* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el
@@ -367,8 +547,9 @@
    las otras (revisión de diseño D5). */
 :global([data-theme="claustro"]) .phase,
 :global([data-theme="claustro"]) .milestone,
-:global([data-theme="claustro"]) .scope,
+:global([data-theme="claustro"]) .datePanel,
 :global([data-theme="claustro"]) .example,
+:global([data-theme="claustro"]) .pn,
 :global([data-theme="claustro"]) .segmented {
   background-image: var(--grain-22);
   background-size: 140px 140px;

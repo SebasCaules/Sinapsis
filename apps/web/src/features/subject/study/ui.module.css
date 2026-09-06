@@ -116,7 +116,7 @@
 .ring { position: relative; display: grid; place-items: center; flex: none; }
 
 .ringTrack { stroke: var(--track); }
-.ringFill { stroke: var(--primary); transition: stroke-dasharray var(--t-slow); }
+.ringFill { stroke: var(--ring-col, var(--primary)); transition: stroke-dasharray var(--t-slow); }
 
 .ringPct {
   position: absolute;

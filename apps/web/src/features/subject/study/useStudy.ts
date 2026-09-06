@@ -57,6 +57,14 @@ export interface UseStudyResult {
   grade: (cardId: string, grade: SrsGrade) => Promise<SrsState>;
   /** Tilda o destilda una tarea del plan. */
   setTask: (taskId: string, done: boolean) => Promise<void>;
+  /** Destilda TODAS las tareas del plan de la materia («Reiniciar el plan»). */
+  resetTasks: () => Promise<void>;
+  /** Carga la fecha de una instancia evaluatoria (AAAA-MM-DD). */
+  setPlanDate: (key: string, date: string) => Promise<void>;
+  /** Borra la fecha de una instancia (vaciar el campo). */
+  clearPlanDate: (key: string) => Promise<void>;
+  /** Borra las fechas de todas las instancias («Borrar fechas»). */
+  resetPlanDates: () => Promise<void>;
   /** Registra el resultado de un quiz. */
   recordAttempt: (quizId: string, score: number, total: number) => Promise<QuizAttempt>;
 }
@@ -90,6 +98,28 @@ export function useStudy(slug: string, studied?: ReadonlySet<string>): UseStudyR
   /* La hora se fija al montar: si fuese `new Date()` en cada render, el modelo
      (y con él la cola de repaso) se rearmaría a cada tecla. */
   const [now] = useState(() => new Date());
+
+  /**
+   * Las mutaciones del plan (tareas y fechas) comparten clave para poder
+   * contarlas: un solo gesto dispara varias —el segmento de año del campo de
+   * fecha emite un `change` por dígito, «Completar fase» tilda tarea por
+   * tarea—, y cuando se solapan cada una guarda en `ctx.prev` una foto que YA
+   * trae el parche optimista de la anterior. Sin volver a pedir el estado, la
+   * última vuelta atrás restauraría esa foto vieja y la pantalla quedaría
+   * mintiendo hasta recargar.
+   */
+  const planMutationKey = useMemo(() => ["study", slug, "plan"] as const, [slug]);
+
+  /**
+   * Vuelve a pedir el estado cuando termina la ÚLTIMA mutación del plan en
+   * vuelo (en `onSettled` la propia mutación todavía cuenta, de ahí el 1). Si
+   * quedara alguna, su respuesta —o su vuelta atrás— es la que manda, y
+   * refrescar en el medio pisaría un optimista todavía válido.
+   */
+  const settleState = useCallback(() => {
+    if (qc.isMutating({ mutationKey: planMutationKey }) > 1) return;
+    void qc.invalidateQueries({ queryKey: qk.studyState(slug) });
+  }, [qc, planMutationKey, slug]);
 
   const trackId = usePlanTrack(slug);
   const setPlanTrack = useSubjectUiStore((s) => s.setPlanTrack);
@@ -142,6 +172,57 @@ export function useStudy(slug: string, studied?: ReadonlySet<string>): UseStudyR
     },
   });
 
+  /* «Reiniciar el plan»: destilda todo de una. Optimista como el tilde suelto,
+     y las fechas NO se tocan (son otra tabla y otra acción). */
+  const resetTasksMutation = useMutation({
+    mutationKey: planMutationKey,
+    mutationFn: () => api.study.resetTasks(slug),
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: qk.studyState(slug) });
+      return { prev: patchState(qc, slug, (s) => ({ ...s, tasksDone: [] })) };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(qk.studyState(slug), ctx.prev);
+    },
+    onSettled: settleState,
+  });
+
+  /* Fechas de las instancias. Una sola mutación para cargar y borrar: el campo
+     vacío ES el borrado, y así dos cambios seguidos sobre la misma instancia no
+     compiten entre dos mutaciones distintas. */
+  const planDateMutation = useMutation({
+    mutationKey: planMutationKey,
+    mutationFn: ({ key, date }: { key: string; date: string | null }) =>
+      date === null ? api.study.clearPlanDate(slug, key) : api.study.setPlanDate(slug, key, date),
+    onMutate: async ({ key, date }) => {
+      await qc.cancelQueries({ queryKey: qk.studyState(slug) });
+      const prev = patchState(qc, slug, (s) => {
+        const next = { ...s.planDates };
+        if (date === null) delete next[key];
+        else next[key] = date;
+        return { ...s, planDates: next };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(qk.studyState(slug), ctx.prev);
+    },
+    onSettled: settleState,
+  });
+
+  const resetPlanDatesMutation = useMutation({
+    mutationKey: planMutationKey,
+    mutationFn: () => api.study.resetPlanDates(slug),
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: qk.studyState(slug) });
+      return { prev: patchState(qc, slug, (s) => ({ ...s, planDates: {} })) };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(qk.studyState(slug), ctx.prev);
+    },
+    onSettled: settleState,
+  });
+
   const attemptMutation = useMutation({
     mutationFn: ({ quizId, score, total }: { quizId: string; score: number; total: number }) =>
       api.study.recordAttempt(slug, quizId, score, total),
@@ -181,8 +262,40 @@ export function useStudy(slug: string, studied?: ReadonlySet<string>): UseStudyR
     (quizId: string, score: number, total: number) => attemptMutation.mutateAsync({ quizId, score, total }),
     [attemptMutation],
   );
+  const resetTasks = useCallback(async () => {
+    await resetTasksMutation.mutateAsync();
+  }, [resetTasksMutation]);
+  const setPlanDate = useCallback(
+    async (key: string, date: string) => {
+      await planDateMutation.mutateAsync({ key, date });
+    },
+    [planDateMutation],
+  );
+  const clearPlanDate = useCallback(
+    async (key: string) => {
+      await planDateMutation.mutateAsync({ key, date: null });
+    },
+    [planDateMutation],
+  );
+  const resetPlanDates = useCallback(async () => {
+    await resetPlanDatesMutation.mutateAsync();
+  }, [resetPlanDatesMutation]);
 
-  return { content, state, model, dueCards, nextTask, setTrack, grade, setTask, recordAttempt };
+  return {
+    content,
+    state,
+    model,
+    dueCards,
+    nextTask,
+    setTrack,
+    grade,
+    setTask,
+    resetTasks,
+    setPlanDate,
+    clearPlanDate,
+    resetPlanDates,
+    recordAttempt,
+  };
 }
 
 /**

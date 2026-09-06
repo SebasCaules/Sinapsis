@@ -10,6 +10,11 @@
  * cambio, el SRS se recorta al material vigente: una tarjeta que ya no existe
  * conserva su fila pero no vuelve en el estado (bug 7).
  *
+ * El plan tiene dos estados independientes a propósito: las tareas tildadas
+ * (`tasks`) y las fechas de las instancias evaluatorias (`plan_dates`).
+ * «Reiniciar el plan» borra las primeras y «Borrar fechas» las segundas;
+ * ninguna de las dos toca a la otra.
+ *
  * Los cuerpos JSON se validan con los esquemas del contrato (`SrsGradeInput`,
  * `NoteInput`, `QuizAttemptInput`), que son los mismos que tipa la web: si el
  * límite del apunte o la regla `score <= total` cambian, cambian en un solo
@@ -19,6 +24,7 @@ import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import {
   NoteInput,
+  PlanDateInput,
   QuizAttemptInput,
   SRS_DEFAULT,
   SrsGradeInput,
@@ -29,7 +35,7 @@ import {
   type SrsState,
 } from "@sinapsis/contract";
 import { requireSession } from "../auth/middleware.js";
-import { bookmarks, notes, pages, quizAttempts, srsCards, tasks } from "../db/schema.js";
+import { bookmarks, notes, pages, planDates, quizAttempts, srsCards, tasks } from "../db/schema.js";
 import { badRequest, notFound } from "../lib/errors.js";
 import { newId, nowIso } from "../lib/ids.js";
 import { jsonBody } from "../lib/validate.js";
@@ -64,6 +70,7 @@ export function studyRoutes(): Hono<AppBindings> {
   app.use("/subjects/:slug/study/*", requireSession, loadSubject);
   app.use("/subjects/:slug/bookmarks/:page", requireSession, loadSubject);
   app.use("/subjects/:slug/notes/:page", requireSession, loadSubject);
+  app.use("/subjects/:slug/tasks", requireSession, loadSubject);
   app.use("/subjects/:slug/tasks/:taskId", requireSession, loadSubject);
   app.use("/subjects/:slug/quiz/:quizId/attempts", requireSession, loadSubject);
 
@@ -267,6 +274,75 @@ export function studyRoutes(): Hono<AppBindings> {
           eq(tasks.taskId, taskId),
         ),
       );
+    return c.body(null, 204);
+  });
+
+  /**
+   * «Reiniciar el plan»: destilda todas las tareas de la materia. NO toca las
+   * fechas de las instancias, que son un dato aparte del progreso (para eso
+   * está «Borrar fechas»).
+   */
+  app.delete("/subjects/:slug/tasks", async (c) => {
+    await c.var.db
+      .delete(tasks)
+      .where(and(eq(tasks.userId, c.var.user.id), eq(tasks.subjectId, c.var.subject.id)));
+    return c.body(null, 204);
+  });
+
+  // -------------------------------------------------------------------------
+  // Fechas de las instancias del plan
+  // -------------------------------------------------------------------------
+
+  /**
+   * Upsert de la fecha de una instancia. La clave no se valida contra el
+   * material (el plan vive dentro de un JSON que se re-sincroniza), solo su
+   * formato; la fecha la valida `PlanDateInput` (AAAA-MM-DD).
+   */
+  app.put(
+    "/subjects/:slug/study/plan-dates/:key",
+    jsonBody(PlanDateInput, "Fecha inválida"),
+    async (c) => {
+      const key = studyId(c.req.param("key"), "de la instancia");
+      const { date } = c.req.valid("json");
+      const updatedAt = nowIso();
+
+      await c.var.db
+        .insert(planDates)
+        .values({
+          userId: c.var.user.id,
+          subjectId: c.var.subject.id,
+          key,
+          date,
+          updatedAt,
+        })
+        .onConflictDoUpdate({
+          target: [planDates.userId, planDates.subjectId, planDates.key],
+          set: { date, updatedAt },
+        });
+
+      return c.body(null, 204);
+    },
+  );
+
+  app.delete("/subjects/:slug/study/plan-dates/:key", async (c) => {
+    const key = studyId(c.req.param("key"), "de la instancia");
+    await c.var.db
+      .delete(planDates)
+      .where(
+        and(
+          eq(planDates.userId, c.var.user.id),
+          eq(planDates.subjectId, c.var.subject.id),
+          eq(planDates.key, key),
+        ),
+      );
+    return c.body(null, 204);
+  });
+
+  /** «Borrar fechas»: todas las de la materia, sin tocar el progreso. */
+  app.delete("/subjects/:slug/study/plan-dates", async (c) => {
+    await c.var.db
+      .delete(planDates)
+      .where(and(eq(planDates.userId, c.var.user.id), eq(planDates.subjectId, c.var.subject.id)));
     return c.body(null, 204);
   });
 

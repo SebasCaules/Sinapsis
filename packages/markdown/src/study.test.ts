@@ -1,5 +1,6 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { StudyContent, SubjectConfig, type SubjectConfig as Cfg } from "@sinapsis/contract";
@@ -474,6 +475,114 @@ describe("compileStudy · modalidades del plan (Plan.tracks)", () => {
   });
 });
 
+describe("compileStudy · instancias evaluatorias del plan (Plan.instances)", () => {
+  /** Fase con una tarea; `extra` agrega `instance`, `retake`… */
+  const phase = (id: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    title: "Parcial",
+    milestones: [
+      { id: `${id}-h1`, title: "Hito", divisions: ["1"], tasks: [{ id: `${id}-h1-t1`, label: "Leer", kind: "read", target: "1" }] },
+    ],
+    ...extra,
+  });
+
+  it("compila las instancias y las fechas que la fase les asocia", async () => {
+    await write(
+      "plan.json",
+      JSON.stringify({
+        phases: [phase("fase-1", { instance: "parcial", retake: "recparcial", description: "Integra todo." })],
+        instances: [
+          { key: "parcial", label: "Parcial (TP1–TP7)" },
+          { key: "recparcial", label: "Recuperatorio del parcial", optional: true },
+        ],
+      }),
+    );
+
+    const { study, issues } = await compile();
+    expect(issues).toEqual([]);
+    expect(study.plan?.instances).toEqual([
+      { key: "parcial", label: "Parcial (TP1–TP7)", optional: false },
+      { key: "recparcial", label: "Recuperatorio del parcial", optional: true },
+    ]);
+    expect(study.plan?.phases[0]).toMatchObject({
+      instance: "parcial",
+      retake: "recparcial",
+      description: "Integra todo.",
+    });
+  });
+
+  it("un plan sin instancias no avisa nada (la materia puede no tener fechas)", async () => {
+    await write("plan.json", JSON.stringify({ phases: [phase("fase-1")] }));
+    const { study, issues } = await compile();
+    expect(issues).toEqual([]);
+    expect(study.plan?.instances).toEqual([]);
+  });
+
+  it("avisa si una fase apunta a una instancia que «instances» no declara", async () => {
+    await write(
+      "plan.json",
+      JSON.stringify({
+        phases: [phase("fase-1", { instance: "parcial", retake: "recparcial" })],
+        instances: [{ key: "parcial", label: "Parcial" }],
+      }),
+    );
+
+    const { issues } = await compile();
+    const broken = issues.filter((i) => i.kind === "study-broken-ref");
+    expect(broken.map((i) => i.detail)).toEqual([
+      '«retake» apunta a la instancia "recparcial", que no está declarada en "instances"',
+    ]);
+    expect(broken[0]!.page).toBe("plan.json · fase-1");
+  });
+
+  it("avisa por una clave de instancia repetida", async () => {
+    await write(
+      "plan.json",
+      JSON.stringify({
+        phases: [phase("fase-1", { instance: "parcial" })],
+        instances: [
+          { key: "parcial", label: "Parcial" },
+          { key: "parcial", label: "Parcial (otra vez)" },
+        ],
+      }),
+    );
+
+    const { issues } = await compile();
+    const dupes = issues.filter((i) => i.kind === "study-duplicate-id").map((i) => i.detail);
+    expect(dupes.join("\n")).toContain('clave de instancia "parcial"');
+  });
+
+  it("avisa si el recuperatorio es la misma instancia que la principal", async () => {
+    await write(
+      "plan.json",
+      JSON.stringify({
+        phases: [phase("fase-1", { instance: "parcial", retake: "parcial" })],
+        instances: [{ key: "parcial", label: "Parcial" }],
+      }),
+    );
+
+    const { issues } = await compile();
+    const detail = issues.map((i) => i.detail).join("\n");
+    expect(detail).toContain('«instance» y «retake» son la misma instancia ("parcial")');
+  });
+
+  it("una instancia declarada que ninguna fase usa no es un problema", async () => {
+    await write(
+      "plan.json",
+      JSON.stringify({
+        phases: [phase("fase-1", { instance: "parcial" })],
+        instances: [
+          { key: "parcial", label: "Parcial" },
+          { key: "final", label: "Final" },
+        ],
+      }),
+    );
+
+    const { issues } = await compile();
+    expect(issues).toEqual([]);
+  });
+});
+
 describe("splitSections", () => {
   it("no abre sección dentro de un bloque de código ni de un bloque $$", () => {
     const sections = splitSections(
@@ -540,5 +649,18 @@ describe("splitSections — cercas largas (AC-06)", () => {
   it("una cerca de cuatro acentos graves no se cierra con una de tres", () => {
     const body = ["## A", "````markdown", "```", "## NO ES UNA TARJETA", "```", "````", "cuerpo"].join("\n");
     expect(splitSections(body).map((s) => s.heading.text)).toEqual(["A"]);
+  });
+});
+
+/**
+ * El separador de la regla 3 se escribía con el byte NUL crudo dentro del
+ * string en vez del escape `\0`: `file` clasificaba el módulo como «data» y
+ * `grep` sin `-a` lo salteaba sin avisar, así que cualquier búsqueda de texto
+ * sobre este archivo quedaba ciega.
+ */
+describe("el módulo no lleva bytes de control crudos", () => {
+  it("study.ts se puede grepear como texto", async () => {
+    const src = await readFile(fileURLToPath(new URL("./study.ts", import.meta.url)), "utf8");
+    expect(src.includes("\u0000")).toBe(false);
   });
 });
