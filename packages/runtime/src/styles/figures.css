@@ -1,3 +1,13 @@
+/* La hoja de KaTeX es una DEPENDENCIA de esta: `Fig.tex` monta fórmulas de
+   KaTeX sobre el dibujo, y sin ella el bloque `.katex-mathml` —que KaTeX emite
+   para los lectores de pantalla y esa hoja esconde— se ve como texto plano
+   pegado a la fórmula. En el baseline la traía `index.html` para todo el
+   documento; en la plataforma la cargaba solo el lector (`Markdown.tsx`), así
+   que al entrar directo a una vista de herramienta la matemática salía
+   DUPLICADA y sin tipografía (F5-1). Va primero: `@import` tiene que preceder a
+   cualquier regla. Vite la deduplica con la que ya importa el lector.  [F5] */
+@import "katex/dist/katex.min.css";
+
 /* ============================================================
    figures.css — estilos del CONTENIDO de una figura interactiva.
 
@@ -8,6 +18,9 @@
 
    Todos los colores salen de los tokens --* de styles.css, así que los tres
    temas (pergamino, laurel, claustro) quedan cubiertos sin colores nuevos.
+
+   Única divergencia respecto del `figures.css` del baseline: el `@import` de
+   arriba (el baseline no lo necesita porque su `index.html` carga KaTeX).
    ============================================================ */
 
 /* ---------- lienzo ---------- */
@@ -71,6 +84,22 @@
   white-space: nowrap;
 }
 .fig-tex .katex { font-size: 1em; }
+/* Repliegue de `putTex` cuando no puede componer la fórmula: deja el LaTeX
+   crudo en un <code>. Como overlay —posicionado en absoluto, `nowrap` y
+   centrado sobre un punto del dibujo— una línea larga se iba muy afuera de la
+   hoja del lector (medido: 1585 px de ancho de contenido en una hoja de 840).
+   Un rótulo que ya no es una fórmula tampoco tiene por qué seguir apoyado sobre
+   una coordenada del dibujo, así que vuelve al flujo, debajo del lienzo, donde
+   se lee entero y no desborda nada. `:has(> code)` acota la regla EXACTAMENTE
+   al repliegue: con KaTeX disponible el hijo es `.katex` y esto no aplica.  [F5] */
+.fig-tex:has(> code) {
+  position: static;
+  transform: none;
+  max-width: 100%;
+  margin: 4px 0 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 /* paneles apilados que comparten el eje x */
 .fig-panels {

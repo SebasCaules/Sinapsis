@@ -119,18 +119,57 @@
 /* ---------- matemática ---------- */
 .prose :global(.katex) { font-size: calc(1em * var(--math-scale)); color: var(--math-ink); }
 
+/* La placa de fórmula. Geometría del artboard del lector (`SubjectBoard.dc.html`:
+   `border-radius:12px`, `border-left:3px solid {{activeColor}}`, `padding:22px 26px`).
+
+   Lo que se le agregó es el gobierno del DESBORDE. Medido contra la app
+   original: en 8 páginas del wiki el baseline no deja desbordar NI UNA placa
+   (encoge hasta 0.78 del cuerpo con `refitFormulas` y recién después desplaza),
+   mientras que acá 10 fórmulas se salían entre 33 y 106 px y quedaban cortadas
+   sin ningún aviso. Dos medidas, las dos de la hoja de estilos:
+
+     · `--plate-bleed` — la placa se sale de la medida de lectura hacia los
+       márgenes de la hoja, igual que en `reader.css` del baseline
+       (`margin-inline: calc(-1 * clamp(8px,1.2vw,17px))`). Recupera 34 px de
+       ancho útil sin tocar la medida del texto y sin ensanchar la hoja: la
+       sangría entra holgada en los 40 px de relleno lateral de `.sheet`. Solo
+       para las placas que cuelgan directo de la prosa; una fórmula dentro de un
+       callout o de una figura se quedaría sin caja.
+
+     · el degradado de borde — cuando aun así sobra, la placa se desplaza y un
+       degradado avisa por qué lado sigue la fórmula. Es el mismo aviso que da
+       `.katex-display.is-wide` en el baseline, pero resuelto sin JavaScript:
+       dos capas `local` (se corren con el contenido) tapan dos capas `scroll`
+       (fijas a la caja), así que la señal aparece solo del lado que todavía
+       tiene fórmula por ver. El orden importa: en `background` la primera capa
+       es la de arriba.
+
+   El encogido previo no se puede hacer desde CSS. `refitFormulas` ya está
+   portado en `@sinapsis/runtime`; engancharlo en `Markdown.tsx` devuelve la
+   paridad completa y no choca con esto (si la fórmula entra, el degradado
+   nunca llega a verse). El diff está pedido en `docs/FIDELIDAD-sprint3.md`. */
 .prose :global(.katex-display) {
+  --plate-bg: var(--surface-2);
   margin: 20px 0;
   padding: 22px 26px;
-  background: var(--surface-2);
   border: 1px solid var(--border);
   border-left: 3px solid var(--ucol, var(--primary));
   border-radius: var(--r);
   box-shadow: var(--relief);
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  background:
+    linear-gradient(to right, var(--plate-bg) 60%, transparent) 0 0 / 26px 100% no-repeat local,
+    linear-gradient(to left, var(--plate-bg) 60%, transparent) 100% 0 / 26px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--math-ink), transparent) 0 0 / 13px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--math-ink), transparent) 100% 0 / 13px 100% no-repeat scroll,
+    var(--plate-bg);
 }
-:global([data-theme="claustro"]) .prose :global(.katex-display) { background: var(--bg-2); }
+.prose > :global(.katex-display) { margin-inline: calc(-1 * clamp(8px, 1.2vw, 17px)); }
+
+:global([data-theme="claustro"]) .prose :global(.katex-display) { --plate-bg: var(--bg-2); }
 
 .prose :global(.katex-error) { font-family: var(--font-mono); font-size: 13px; }
 
