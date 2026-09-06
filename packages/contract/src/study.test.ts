@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  Plan,
   SRS_DEFAULT,
   SubjectConfig,
   autoDecks,
@@ -108,5 +109,31 @@ describe("autoDecks", () => {
   it("sin páginas con resumen no genera ningún mazo", () => {
     expect(autoDecks(config, [page("x", "1", "concepto", "")])).toEqual([]);
     expect(autoDecks(config, [])).toEqual([]);
+  });
+});
+
+describe("Plan.tracks", () => {
+  const fase = (id: string, tarea: string) => ({
+    id,
+    title: `Fase ${id}`,
+    milestones: [{ id: `hito-${id}`, title: "Hito", tasks: [{ id: tarea, label: "Tarea" }] }],
+  });
+
+  it("una modalidad puede compartir una fase con `phases` (misma fase, mismos ids de tarea)", () => {
+    const compartida = fase("fase-1", "t-1");
+    const plan = Plan.parse({
+      phases: [compartida],
+      tracks: [
+        { id: "cursada", label: "Cursada + final", phases: [compartida, fase("fase-2", "t-2")] },
+        { id: "final-directo", label: "Final directo", phases: [fase("fase-3", "t-3")] },
+      ],
+    });
+    expect(plan.tracks).toHaveLength(2);
+    expect(plan.tracks[0]?.phases[0]).toEqual(plan.phases[0]);
+    expect(plan.tracks[0]?.phases[0]?.milestones[0]?.tasks[0]?.id).toBe("t-1");
+  });
+
+  it("sin modalidades, `tracks` queda vacío por defecto", () => {
+    expect(Plan.parse({ phases: [fase("fase-1", "t-1")] }).tracks).toEqual([]);
   });
 });

@@ -681,6 +681,12 @@ export const Plan = z.object({
    * Modalidades alternativas (opcional). La primera es la predeterminada si el usuario
    * no eligió otra; `phases` sigue siendo válida como modalidad «principal» cuando
    * `tracks` está vacío. Los ids de tarea son globales al plan.
+   *
+   * Una fase con el mismo `id` en dos modalidades (o en `phases` y en una modalidad)
+   * ES LA MISMA FASE: su contenido tiene que ser idéntico y sus ids de tarea no
+   * cuentan como repetidos; así una modalidad puede compartir fases con otra sin
+   * duplicar tareas ni perder el progreso (`tasksDone`) al cambiar de modalidad.
+   * Cualquier otro id de tarea repetido en el plan es un error del compilador.
    */
   tracks: z.array(PlanTrack).max(6).default([]),
 });
