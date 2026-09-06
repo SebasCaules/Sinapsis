@@ -3,8 +3,8 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Agregar el callout de cita al registro"
 rama: proposal/cripto-20260906-agregar-el-callout-de-cita-al-registro
-estado: abierta
-pr: null
+estado: aprobada
+pr: https://github.com/SebasCaules/Sinapsis/pull/3
 ---
 
 ## Motivo
@@ -126,4 +126,24 @@ apps/web build: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-06
+**Commit de merge:** `a7f9754`
+
+### Gates en la rama
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — contract 44, markdown 97, runtime 178, web 681, cli 55 + 2 omitidas (57). Las dos omitidas son las que exigen `packages/cli/dist` compilado (`it.skipIf(!existsSync(dist))`), que el worktree no tiene: no es una baja respecto de la propuesta.
+- `pnpm build`: OK
+- `pnpm e2e`: OK (94 pruebas, 3 omitidas)
+
+### Hallazgos
+1. **(bajo)** `packages/runtime/src/markdown.ts:173-187` — el runtime de los bundles tiene su propio registro de callouts (`CALLOUT_TYPE`, `CALLOUT_DEFAULT_TITLE`) y no conoce `cita`: un `[!quote]` dentro del markdown de una herramienta sale como `callout-quote` sin rótulo, mientras que el lector lo rotula «Cita». La duplicación es anterior a esta propuesta y Cripto no publica bundles; queda anotada como deuda de la plataforma (unificar los dos registros), no se le cobra a la propuesta.
+2. **(bajo)** `docs/PROMPT-migracion-materia.md:99` y `.claude/skills/sinapsis/reference/contrato.md:160` — listan el registro de callouts y no se actualizaron. Arreglo trivial aplicado al mergear: se agregó `cita` en los dos.
+3. **(bajo)** frontmatter `pr:` — la rama empujada decía `pr: null` porque el CLI estampa la URL con `--amend` después de empujar (`packages/cli/src/commands/propose.ts`, `stampPr` y `openPullRequest`) y no vuelve a empujar; la copia local sí la tenía. Se estampó en `main` al cerrar. El orden del CLI es un defecto de la plataforma, no de la propuesta.
+
+Sin hallazgos de corrección ni de seguridad. Se buscó: que `fold` pliegue «Quote» y «CITA» (lo cubre el test nuevo), que el marcador de plegado `[!quote]-` se descarte como en los demás tipos (misma regex `HEAD`), que el color `--u6` exista en los tres temas de `tokens.css` (sí: líneas 51, 196 y 263) y que Proba no tuviera ningún `[!quote]` ni `[!cite]` que cambiara de rótulo (cero).
+
+Sin fila en `docs/DECISIONS.md`: agregar un valor a un enum de salida es un cambio compatible del contrato 00 §4.1 y el registro sigue cerrado; N0-10 ya cubre el plugin de callouts.
+
+### Efecto en las materias
+- Ninguna acción: el rótulo lo pone el lector al renderizar, no el compilador. Las 418 citas de Cripto se leen como «Cita» apenas se despliegue `main`; Proba no cambia.

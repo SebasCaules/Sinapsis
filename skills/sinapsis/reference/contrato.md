@@ -157,7 +157,7 @@ siga funcionando, pero conviene entrecomillarlo igual.
 normaliza (minúsculas, sin acentos, espacios → guiones) y se levanta una advertencia.
 
 **Cuerpo.** Markdown crudo. La plataforma lo renderiza en el cliente con KaTeX, tablas GFM,
-wikilinks y callouts de Obsidian `> [!info|nota|tip|intuicion|ejemplo|warn|discrepancia|figura]`.
+wikilinks y callouts de Obsidian `> [!info|nota|tip|intuicion|ejemplo|warn|discrepancia|cita|figura]`.
 El callout `[!figura] <id>` monta la figura de ese id si la materia tiene un bundle de
 figuras; sin bundle, se ve el epígrafe y nada más.
 

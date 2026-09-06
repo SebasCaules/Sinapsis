@@ -97,7 +97,7 @@ Con autorización del usuario, y en un commit propio de este repositorio:
 - Slugs válidos (`^[a-z0-9][a-z0-9-]*$`): renombra archivos y actualiza sus wikilinks.
 - Cero wikilinks rotos (los verifica el `publish --dry-run`).
 - Callouts con los tipos que la plataforma entiende (`info`, `nota`, `tip`, `intuicion`,
-  `ejemplo`, `warn`, `discrepancia`) y `> [!figura] id` solo si hay bundle de figuras.
+  `ejemplo`, `warn`, `discrepancia`, `cita`) y `> [!figura] id` solo si hay bundle de figuras.
 - Matemática: `$…$` inline y `$$…$$` en display (el compilador normaliza los `$$`, pero no
   arregla LaTeX inválido: revisa los avisos de KaTeX en el navegador).
 
