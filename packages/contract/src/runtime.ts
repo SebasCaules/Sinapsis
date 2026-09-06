@@ -14,20 +14,41 @@ import type { PageMeta, SubjectConfigLoose, ThemeId } from "./index.js";
 /** Función de vista del baseline: escribe en `main` y ata sus propios listeners. */
 export type ViewFn = (main: HTMLElement, arg?: string) => void | (() => void);
 
-/** Figura interactiva: dibuja dentro de `host` (SVG/canvas) y puede devolver un limpiador. */
-export type FigureDraw = (host: HTMLElement, ctx: FigureContext) => void | (() => void);
+/**
+ * Figura interactiva: dibuja dentro de `host` (SVG/canvas) y puede devolver un limpiador.
+ * Firma del baseline: `draw(host, api, meta)`.
+ */
+export type FigureDraw = (host: HTMLElement, ctx: FigureContext, meta?: FigureMeta) => void | (() => void);
 export interface FigureMeta {
   /** Epígrafe por defecto si el callout no trae texto. */
   caption?: string;
   /** Alto sugerido en px. */
   height?: number;
+  [extra: string]: unknown;
 }
+/** `api` que recibe cada figura (el del baseline más tema, tokens y redibujo). */
 export interface FigureContext {
+  id: string;
+  host: HTMLElement;
+  figure: HTMLElement;
+  /** Helpers de dibujo (`App.Fig`). */
+  Fig: Record<string, unknown>;
+  /** Estado por instancia de figura (controles interactivos). */
+  state: Record<string, unknown>;
+  setState(patch: Record<string, unknown>): void;
+  /** Registra un limpiador (listeners, timers) que corre al desmontar. */
+  cleanup(fn: () => void): void;
   theme: ThemeId;
   /** Lee un token CSS resuelto (`--primary` → "#7c2230"). */
   cssVar(name: string): string;
   /** Vuelve a dibujar (p. ej. tras cambiar el tema). */
   redraw(): void;
+}
+
+/** `App.katex`: invocable como en el baseline (`katex(tex, display)`) y con `renderToString`. */
+export interface KatexLike {
+  (tex: string, display?: boolean): string;
+  renderToString(tex: string, opts?: Record<string, unknown>): string;
 }
 
 /**
@@ -40,8 +61,8 @@ export interface CompatApp {
   registerView(id: string, fn: ViewFn): void;
   registerAction(name: string, fn: (el: HTMLElement, ev: Event) => void): void; // compat: data-action
   registerFigure(id: string, draw: FigureDraw, meta?: FigureMeta): void;
-  mountFigures(container: HTMLElement): number;
-  unmountFigures(container: HTMLElement): number;
+  mountFigures(container: HTMLElement | Document): number;
+  unmountFigures(container: HTMLElement | Document): number;
   setRedraw(fn: (() => void) | null): void; // compat: la vista pide redibujo al cambiar tema
   FIGURES: Record<string, { draw: FigureDraw; meta: FigureMeta }>;
 
@@ -69,7 +90,7 @@ export interface CompatApp {
   // --- render ---
   escapeHtml(s: string): string;
   icon(name: string, size?: number): string;
-  katex: { renderToString(tex: string, opts?: Record<string, unknown>): string };
+  katex: KatexLike;
   KATEX_MACROS: Record<string, string>;
   /** Markdown → HTML (math, wikilinks, callouts), como el baseline. */
   renderMarkdown(md: string, currentSlug?: string): string;
@@ -87,7 +108,8 @@ export interface CompatApp {
   // --- dibujo (portados del baseline: figures.js / plot.js) ---
   Fig: Record<string, unknown>;
   Plot: Record<string, unknown>;
-  M: Record<string, (...args: number[]) => number> & Record<string, unknown>;
+  /** Biblioteca numérica (`lib-math.js` portada): funciones escalares y de matrices. */
+  M: Record<string, unknown>;
 }
 
 /** Lo que la plataforma instala en `window.SinapsisRuntime`. */

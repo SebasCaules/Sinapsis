@@ -16,6 +16,7 @@ import {
   ToolManifest,
   ToolPush,
   toolFileUrl,
+  toolFilesBase,
   type ToolManifestInput,
 } from "./index.js";
 
@@ -102,6 +103,15 @@ describe("ToolFilePath", () => {
     }
   });
 
+  it("exige rutas normalizadas: sin «./», sin «//» y sin barra final", () => {
+    for (const bad of ["a/./b.js", "a//b.js", "css/", "a/b/", "./a.js"]) {
+      expect(ToolFilePath.safeParse(bad).success, bad).toBe(false);
+    }
+    // La normalización es de forma, no de contenido: un punto dentro del nombre vale.
+    expect(ToolFilePath.safeParse("lib/math.min.js").success).toBe(true);
+    expect(ToolFilePath.safeParse("a/b.c/d.js").success).toBe(true);
+  });
+
   it("rechaza las extensiones que no están en el contrato (y la ausencia de extensión)", () => {
     for (const bad of [
       "index.html",
@@ -140,14 +150,21 @@ describe("ToolPush y ToolInfo", () => {
       manifest,
       bytes: 12_345,
       updatedAt: "2026-09-06T12:00:00.000Z",
-      base: toolFileUrl("proba", "proba-tools", "").replace(/\/$/, ""),
+      base: toolFilesBase("proba", "proba-tools"),
     });
     expect(info.manifest.id).toBe("proba-tools");
     expect(info.bytes).toBe(12_345);
   });
 });
 
-describe("toolFileUrl", () => {
+describe("toolFilesBase y toolFileUrl", () => {
+  it("la base no lleva barra final: la web compone `${base}/${path}`", () => {
+    const base = toolFilesBase("proba", "proba-tools");
+    expect(base).toBe(`${API_PREFIX}/subjects/proba/tools/proba-tools/files`);
+    expect(base.endsWith("/")).toBe(false);
+    expect(`${base}/views/explorador.js`).toBe(toolFileUrl("proba", "proba-tools", "views/explorador.js"));
+  });
+
   it("arma la URL del archivo bajo el prefijo del API", () => {
     expect(toolFileUrl("proba", "proba-tools", "views/explorador.js")).toBe(
       `${API_PREFIX}/subjects/proba/tools/proba-tools/files/views/explorador.js`,

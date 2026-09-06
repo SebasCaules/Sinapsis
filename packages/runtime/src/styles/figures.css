@@ -1,0 +1,404 @@
+/* ============================================================
+   figures.css — estilos del CONTENIDO de una figura interactiva.
+
+   Alcance: solo lo que figures.js inyecta dentro del host de la figura
+   (el <div class="fig-host"> del bloque <figure class="doc-figure">).
+   El marco exterior (.doc-figure, .fig-host, figcaption) y el placeholder
+   .fig-missing se estilan en styles.css / reader.css — NO aquí.
+
+   Todos los colores salen de los tokens --* de styles.css, así que los tres
+   temas (pergamino, laurel, claustro) quedan cubiertos sin colores nuevos.
+   ============================================================ */
+
+/* ---------- lienzo ---------- */
+
+/* envoltorio EXTERIOR: el único que puede desplazarse en horizontal (ver el
+   bloque responsive). Nunca lleva el `position: relative` de los overlays. */
+.fig-scroll { width: 100%; }
+
+/* envoltorio posicionado: sostiene el SVG y los overlays de KaTeX. Su ancho
+   es SIEMPRE el del dibujo, porque Fig.tex posiciona los overlays en % sobre
+   él: si se achicara por debajo del SVG, las fórmulas quedarían corridas. */
+.fig-plot {
+  position: relative;
+  width: 100%;
+  margin: 0 0 6px;
+}
+.fig-plot + .fig-plot { margin-top: 2px; }
+
+.fig-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-ui);
+  --fig-scale: 1;                     /* factor de tamaño de texto (ver responsive) */
+}
+/* touch-action: none SOLO donde hay arrastre. Fig.drag marca con .fig-hit el
+   elemento al que engancha los pointer events (a veces el <svg> entero), así
+   que la regla cubre los dos casos. Fuera de esos objetivos el dedo queda
+   libre para desplazar .fig-scroll en pantallas angostas: si se declarara
+   sobre todo .fig-svg, en un teléfono no habría manera de ver la mitad
+   derecha de un dibujo que desborda. */
+.fig-svg.fig-hit,
+.fig-svg .fig-hit,
+.fig-svg .fig-cell { touch-action: none; }
+/* IMPORTANTE — en SVG los atributos de presentación (fill, font-size) tienen
+   especificidad cero frente a CUALQUIER regla de hoja de estilo, así que una
+   declaración aquí anularía en silencio las opciones {fill} y {size} de
+   Fig.text. Por eso esta regla NO declara fill ni font-size: los dos los
+   escribe Fig.text como estilo en línea, que sí le gana a la hoja.
+   Solo quedan aquí las propiedades que deben valer para todo texto del SVG. */
+.fig-svg text {
+  paint-order: stroke fill;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* mismo motivo: solo font-family, que Fig.text no siempre fija en línea */
+.fig-svg text.mono { font-family: var(--font-mono); }
+.fig-svg .fig-hit { cursor: grab; }
+.fig-svg .fig-hit:active { cursor: grabbing; }
+.fig-svg .fig-cell { cursor: pointer; }
+
+/* overlay de fórmulas (KaTeX) posicionado sobre el SVG */
+.fig-tex {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text);
+  white-space: nowrap;
+}
+.fig-tex .katex { font-size: 1em; }
+
+/* paneles apilados que comparten el eje x */
+.fig-panels {
+  display: block;
+  width: 100%;
+}
+.fig-panels .fig-plot { margin-bottom: 0; }
+
+/* ---------- controles ---------- */
+
+.fig-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 18px;
+  margin: 10px 0 2px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.fig-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 150px;
+  min-width: 140px;
+}
+.fig-ctl label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-2);
+  letter-spacing: .01em;
+}
+.fig-ctl .v {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* deslizadores tokenizados */
+.fig-ctl input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.fig-ctl input[type="range"]:focus-visible {
+  outline: 2px solid var(--primary-ring);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+.fig-ctl input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-2);
+}
+.fig-ctl input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  box-shadow: var(--shadow-ctrl);
+}
+.fig-ctl input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-2);
+}
+.fig-ctl input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--surface);
+  box-shadow: var(--shadow-ctrl);
+}
+
+/* selector y casilla comparten la caja de .fig-ctl */
+.fig-ctl select {
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.fig-ctl select:focus-visible {
+  outline: 2px solid var(--primary-ring);
+  outline-offset: 1px;
+}
+.fig-ctl.fig-toggle {
+  flex: 0 0 auto;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+}
+.fig-ctl.fig-toggle label {
+  justify-content: flex-start;
+  cursor: pointer;
+}
+.fig-ctl.fig-toggle input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ---------- botones ---------- */
+
+.fig-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 2px;
+}
+.fig-buttons .btn {
+  font-size: 12.5px;
+  padding: 6px 11px;
+}
+
+/* ---------- lecturas numéricas ---------- */
+
+.fig-readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 9px 0 2px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.fig-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 12px;
+}
+.fig-readout .k {
+  color: var(--text-3);
+  font-family: var(--font-ui);
+}
+.fig-readout .k .katex { font-size: 1.02em; color: var(--text-2); }
+.fig-readout .v {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- leyenda ---------- */
+
+.fig-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 8px 0 2px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.fig-legend .it {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.fig-legend .sw {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top-width: 3px;
+  border-top-style: solid;
+  border-radius: 2px;
+}
+.fig-legend .sw.dash { border-top-style: dashed; }
+.fig-legend .sw.fill {
+  height: 11px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  opacity: .55;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 640px) {
+  .fig-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+    padding: 9px 10px;
+  }
+  .fig-ctl { flex: 1 1 auto; min-width: 0; }
+  .fig-readouts { flex-direction: column; gap: 5px; }
+  .fig-tex { font-size: 11.5px; }
+  /* El SVG se escala al ancho disponible, así que en un teléfono un rótulo de
+     11 px del viewBox termina viéndose a ~6 px. Fig.text escribe el tamaño
+     como calc(Npx * var(--fig-scale)), de modo que subir el factor aquí agranda
+     todo el texto del dibujo sin tocar la geometría.
+     EL FACTOR TIENE TECHO: como la geometría no crece, pasado cierto punto los
+     números de un eje se comen el rótulo del eje: las figuras separan sus
+     renglones por unos 15 puntos del viewBox, que es justo la altura de un
+     rótulo de 11.5 px con este factor. El umbral es de unidades del viewBox, o
+     sea que no depende del ancho de pantalla: subirlo exige antes agrandar los
+     márgenes y las separaciones de cada dibujo. Por eso el ancho mínimo de
+     abajo, y no un factor más grande, es lo que resuelve la legibilidad en un
+     teléfono; 1.3 se conserva tal como estaba. */
+  .fig-svg { --fig-scale: 1.3; }
+}
+
+/* Ancho mínimo legible en teléfonos.
+   Los viewBox de estas figuras miden 640-700 unidades. En una pantalla de
+   375 px el hueco del lector mide ~289 px, o sea una escala de 0.44: con el
+   factor de texto en su techo (1.3) un rótulo de 12 px del viewBox se ve a
+   6.8 px, que no se puede leer. Con un piso de 520 px la escala no baja de
+   0.79 y ese mismo rótulo llega a ~12 px; lo que sobra del ancho se desplaza
+   dentro de .fig-scroll, que es el ÚNICO elemento que se corre: los controles,
+   los botones y las lecturas cuelgan del host y siguen entrando enteros.
+   El piso lo lleva .fig-plot (y .fig-panels, para que los paneles que comparten
+   el eje x se desplacen juntos), nunca .fig-scroll: es .fig-plot el que le
+   marca el ancho a los overlays de Fig.tex. */
+@media (max-width: 480px) {
+  .fig-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;               /* obligado: con overflow-x auto el eje y no puede quedar visible */
+    overscroll-behavior-x: contain;   /* que el rebote no arrastre a la página */
+    /* .fig-svg tiene overflow: visible y varias figuras apoyan un rótulo unos
+       píxeles por fuera del viewBox (medido: hasta 4 arriba y 11 abajo). El
+       relleno les deja ese aire para que el recorte del eje y no los corte, y
+       el margen negativo lo descuenta para no mover nada de sitio. */
+    padding: 8px 0 16px;
+    margin: -8px 0 -16px;
+    /* la barra deja a la vista que el dibujo sigue hacia la derecha */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-2) transparent;
+  }
+  .fig-plot,
+  .fig-panels { min-width: 520px; }
+}
+
+@media print {
+  .fig-controls,
+  .fig-buttons { display: none; }
+}
+
+/* ---------- placeholder: una sola línea de mensaje ----------
+   El marco del placeholder lo estila styles.css, y esta hoja NO lo redefine.
+   Única excepción: styles.css agrega el texto del mensaje por `::after`, y
+   figures.js ya lo inserta como nodo del DOM (así lo pide el contrato de la
+   figura, y así sobrevive a un fallo de CSS). Sin esta regla el mensaje sale
+   DUPLICADO; peor todavía, cuando la figura sí está registrada pero su dibujo
+   lanza, figures.js escribe "error al dibujar la figura" y el `::after` le
+   agrega debajo "figura no registrada", que es falso. figures.css se carga
+   después de styles.css, así que esta declaración gana y deja un solo mensaje,
+   siempre el correcto. */
+.fig-missing::after { content: none; }
+
+/* ============================================================
+   LECTURA AL PASAR EL PUNTERO (ola 14)
+   Una sola capa por figura, montada por figures.js a partir de las series que
+   los ayudantes de dibujo registran. El blanco de puntero es un rectángulo
+   transparente que va ABAJO de todo el dibujo, así que los controles y los
+   tiradores de la figura siguen recibiendo sus propios eventos.
+   ============================================================ */
+.fig-plot.fig-hoverable { position: relative; }
+.fig-svg .fig-hit { pointer-events: all; }
+.fig-svg .fig-hover { pointer-events: none; }
+.fig-svg .fig-hover-rule {
+  stroke: var(--plot-axis);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.fig-tip {
+  position: absolute;
+  display: none;
+  z-index: 3;
+  pointer-events: none;
+  min-width: 74px;
+  max-width: 220px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--elevated);
+  box-shadow: var(--shadow-ctrl);
+  color: var(--text);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.fig-tip .hd {
+  margin-bottom: 3px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.fig-tip .row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.fig-tip .row + .row { margin-top: 2px; }
+.fig-tip .row i {
+  flex: none;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.fig-tip .row .lb { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; }
+.fig-tip .row b { margin-left: auto; font-family: var(--font-mono); font-weight: 600; }
+/* lectura de un solo valor (serie sin nombre): el número va pegado a la clave
+   de color, sin el hueco que deja el empuje hacia la derecha. */
+.fig-tip .row i + b { margin-left: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fig-tip { transition: none !important; }
+}
