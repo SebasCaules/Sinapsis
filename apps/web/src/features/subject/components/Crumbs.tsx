@@ -20,8 +20,11 @@ export function Crumbs({ items }: { items: Crumb[] }) {
         const last = i === items.length - 1;
         return (
           <span key={`${item.label}-${i}`} className={css.step}>
+            {/* «›» y no «·»: los propios rótulos llevan puntos («U3 · Variables
+                Aleatorias Discretas») y con el mismo signo la cadena se leía
+                como una sola tira. El baseline usa la flecha (core.js:1443). */}
             <span className={css.sep} aria-hidden="true">
-              ·
+              ›
             </span>
             {item.to && !last ? (
               <Link to={item.to} className={css.link} title={item.label}>

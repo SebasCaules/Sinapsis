@@ -11,9 +11,9 @@
  */
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { plural, routes, type SearchHit } from "@sinapsis/contract";
+import { countsAsContent, plural, routes, type SearchHit } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
-import type { SubjectModel } from "../model";
+import type { RailGroupView, RailItemView, SubjectModel } from "../model";
 import { useSearch } from "../useSubject";
 import css from "./SearchPalette.module.css";
 
@@ -32,6 +32,65 @@ interface Row {
   to: string | null;
   href: string | null;
   icon: React.ReactNode;
+}
+
+/** Una tanda de resultados con su encabezado («Herramientas», «Páginas (9)»). */
+interface Section {
+  title: string;
+  rows: Row[];
+}
+
+/** Sin tildes y en minúsculas: es con lo que se compara, no con lo que se muestra. */
+export function norm(text: string): string {
+  return (text ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+const reEsc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** ¿El término aparece al PRINCIPIO de una palabra? (core.js:2159-2161). */
+function wordStart(hay: string, term: string): boolean {
+  return new RegExp(`(?:^|[^a-z0-9])${reEsc(term)}`).test(hay);
+}
+
+/**
+ * Sustantivo genérico inicial del título: lo que queda es el NOMBRE de la página
+ * («Distribución Binomial» → «binomial»). Es la lista del baseline
+ * (core.js:2062-2066) y sirve para reconocer la página canónica de un término y
+ * ponerla primera.
+ */
+const GENERIC_HEAD = /^(?:distribucion|proceso|teorema|prueba|funcion|variable)\s+(?:de\s+la\s+|de\s+los\s+|del\s+|de\s+)?/;
+export function coreTitle(tn: string): string {
+  return tn.replace(GENERIC_HEAD, "").trim() || tn;
+}
+
+/**
+ * Puntaje de una página, con el criterio de core.js:2170-2185: manda la
+ * coincidencia al principio de una palabra del título, el contenido va antes que
+ * las fuentes y la página que SE LLAMA como lo escrito sube a la cabeza.
+ */
+export function scorePage(
+  input: { title: string; hay: string; content: boolean },
+  needle: string,
+  terms: string[],
+): number {
+  const tn = norm(input.title);
+  const core = coreTitle(tn);
+  let sc = 0;
+  for (const term of terms) {
+    if (tn.startsWith(term)) sc += 6;
+    else if (wordStart(tn, term)) sc += 4;
+    else if (tn.includes(term)) sc += 2;
+    if (input.hay.includes(term)) sc += 1;
+  }
+  if (input.content) sc += 3;
+  if (core.startsWith(needle)) {
+    sc += 5;
+    if (core.split(/\s+/).length === terms.length) sc += 3;
+  }
+  return sc;
 }
 
 /* Las filas de resultado no se tabulan: se recorren con las flechas. */
@@ -151,42 +210,85 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
 
   const search = useSearch(model.slug, debounced, open);
 
-  const rows = useMemo<Row[]>(() => {
-    const needle = debounced.trim().toLowerCase();
-    if (!needle) return [];
+  const railRow = useCallback(
+    (group: RailGroupView, view: RailItemView): Row => ({
+      key: `rail:${group.id}:${view.item.id}`,
+      kind: "rail",
+      label: view.item.label,
+      meta: group.label,
+      snippet: null,
+      to: view.to,
+      href: view.href,
+      icon: <Icon name={view.item.icon} size={15} />,
+    }),
+    [],
+  );
+
+  /**
+   * Las tandas de la paleta, con su encabezado. Es el «ir a» de la materia: con
+   * la consulta VACÍA lista todas las herramientas agrupadas por intención
+   * (core.js:2150-2157), y con consulta emite «Herramientas» y «Páginas (N)»
+   * como el baseline (core.js:2151-2214).
+   */
+  const sections = useMemo<Section[]>(() => {
+    const raw = debounced.trim();
+    const needle = norm(raw);
+
+    /* Sin escribir nada: el menú entero, por secciones. Abrir ⌘K y pulsar Enter
+       lleva a Inicio, que es la primera fila. */
+    if (!needle) {
+      return model.railGroups
+        .map((group) => ({ title: group.label, rows: group.items.map((view) => railRow(group, view)) }))
+        .filter((s) => s.rows.length > 0);
+    }
+
+    const terms = needle.split(/\s+/).filter(Boolean);
+    const out: Section[] = [];
+
+    /* Los ítems del rail se buscan también por su sección y por su ruta
+       (`NAV_INDEX`, core.js:2075-2079), a principio de palabra y sin tope. */
     const railRows: Row[] = [];
     for (const group of model.railGroups) {
       for (const view of group.items) {
-        if (!view.item.label.toLowerCase().includes(needle)) continue;
-        railRows.push({
-          key: `rail:${group.id}:${view.item.id}`,
-          kind: "rail",
-          label: view.item.label,
-          meta: `Ir a · ${group.label}`,
-          snippet: null,
-          to: view.to,
-          href: view.href,
-          icon: <Icon name={view.item.icon} size={15} />,
-        });
+        const hay = norm(`${view.item.label} ${group.label} ${view.to ?? view.href ?? ""}`);
+        if (!terms.every((t) => wordStart(hay, t))) continue;
+        railRows.push(railRow(group, view));
       }
     }
+    if (railRows.length) out.push({ title: "Herramientas", rows: railRows });
+
     const hits: SearchHit[] = search.data ?? [];
-    const pageRows: Row[] = hits.map((hit) => {
-      const known = model.bySlug.get(hit.slug);
-      const division = model.division(known ? model.divisionOf(known) : hit.division);
-      return {
-        key: `page:${hit.slug}`,
-        kind: "page",
-        label: hit.title,
-        meta: `${division?.short ?? hit.division} · ${model.typeLabel(hit.type)}`,
-        snippet: plainSnippet(hit.snippet),
-        to: routes.page(model.slug, hit.slug),
-        href: null,
-        icon: <UiIcon name="file" size={15} />,
-      };
-    });
-    return [...railRows.slice(0, 4), ...pageRows];
-  }, [debounced, model, search.data]);
+    const pageRows: Row[] = hits
+      .map((hit) => {
+        const known = model.bySlug.get(hit.slug);
+        const division = model.division(known ? model.divisionOf(known) : hit.division);
+        const content = known ? model.isContent(known) : countsAsContent(model.config, hit.type);
+        return {
+          hit,
+          score: scorePage({ title: hit.title, hay: norm(`${hit.title} ${hit.slug}`), content }, needle, terms),
+          row: {
+            key: `page:${hit.slug}`,
+            kind: "page" as const,
+            label: hit.title,
+            meta: `${division?.short ?? hit.division} · ${model.typeLabel(hit.type)}`,
+            snippet: plainSnippet(hit.snippet),
+            to: routes.page(model.slug, hit.slug),
+            href: null,
+            icon: <UiIcon name="file" size={15} />,
+          },
+        };
+      })
+      /* A igualdad de puntaje gana el título más corto: la página más general. */
+      .sort((a, b) => b.score - a.score || a.hit.title.length - b.hit.title.length)
+      .map((x) => x.row);
+    if (pageRows.length) out.push({ title: `Páginas (${pageRows.length})`, rows: pageRows });
+
+    return out;
+  }, [debounced, model, search.data, railRow]);
+
+  /* La lista plana: es la que recorren las flechas y la que nombra
+     `aria-activedescendant`. */
+  const rows = useMemo<Row[]>(() => sections.flatMap((s) => s.rows), [sections]);
 
   useEffect(() => {
     setCursor((c) => (c < rows.length ? c : 0));
@@ -230,6 +332,10 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
   };
 
   const searched = debounced.trim();
+  /* Posición de cada fila en la lista plana: las tandas se dibujan anidadas pero
+     el cursor y `aria-activedescendant` cuentan corrido. */
+  const flatIndex = new Map(rows.map((row, i) => [row.key, i]));
+  const index = (key: string): number => flatIndex.get(key) ?? 0;
 
   return (
     <div className={css.scrim} onMouseDown={onClose} role="presentation">
@@ -254,8 +360,8 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
             aria-activedescendant={rows.length ? optionId(cursor) : undefined}
             aria-autocomplete="list"
             value={term}
-            placeholder="Buscar páginas…"
-            aria-label="Buscar páginas"
+            placeholder="Buscar páginas y herramientas…"
+            aria-label="Buscar páginas y herramientas de la materia"
             autoComplete="off"
             spellCheck={false}
             onChange={(e) => setTerm(e.target.value)}
@@ -269,45 +375,56 @@ export function SearchPalette({ model, open, onClose }: SearchPaletteProps) {
         </p>
 
         <div className={css.results}>
-          {!searched ? (
-            <p className={css.hint}>Escriba para buscar páginas, fórmulas o herramientas de la materia.</p>
-          ) : search.isFetching && !rows.length ? (
+          {searched && search.isFetching && !rows.length ? (
             <p className={css.hint}>Buscando…</p>
-          ) : !rows.length ? (
+          ) : searched && !rows.length ? (
             <p className={css.hint}>Sin resultados para «{searched}».</p>
           ) : null}
 
+          {/* Las tandas se anuncian como `group` dentro de la `listbox`: el
+              índice de las filas sigue siendo plano (`aria-activedescendant`) y
+              el encabezado dice cuánto hay antes de recorrerlo. */}
           <div className={css.list} id={listId} role="listbox" aria-label="Resultados de la búsqueda">
-            {rows.map((row, i) => (
-              <button
-                key={row.key}
-                id={optionId(i)}
-                type="button"
-                role="option"
-                tabIndex={-1}
-                aria-selected={i === cursor}
-                className={css.row}
-                data-active={i === cursor ? "true" : undefined}
-                onMouseEnter={() => setCursor(i)}
-                onClick={() => go(row)}
-              >
-                <span className={css.rowIcon}>{row.icon}</span>
-                <span className={css.rowBody}>
-                  <span className={css.rowTitle}>
-                    {highlight(row.label, debounced).map((part, k) =>
-                      part.hit ? <mark key={k}>{part.text}</mark> : <span key={k}>{part.text}</span>,
-                    )}
-                  </span>
-                  {row.snippet ? (
-                    <span className={css.rowSnippet}>
-                      {highlight(row.snippet, debounced).map((part, k) =>
-                        part.hit ? <mark key={k}>{part.text}</mark> : <span key={k}>{part.text}</span>,
-                      )}
-                    </span>
-                  ) : null}
-                </span>
-                <span className={css.rowMeta}>{row.meta}</span>
-              </button>
+            {sections.map((section) => (
+              <div key={section.title} className={css.section} role="group" aria-label={section.title}>
+                <div className={css.groupHead} aria-hidden="true">
+                  {section.title}
+                </div>
+                {section.rows.map((row) => {
+                  const i = index(row.key);
+                  return (
+                    <button
+                      key={row.key}
+                      id={optionId(i)}
+                      type="button"
+                      role="option"
+                      tabIndex={-1}
+                      aria-selected={i === cursor}
+                      className={css.row}
+                      data-active={i === cursor ? "true" : undefined}
+                      onMouseEnter={() => setCursor(i)}
+                      onClick={() => go(row)}
+                    >
+                      <span className={css.rowIcon}>{row.icon}</span>
+                      <span className={css.rowBody}>
+                        <span className={css.rowTitle}>
+                          {highlight(row.label, debounced).map((part, k) =>
+                            part.hit ? <mark key={k}>{part.text}</mark> : <span key={k}>{part.text}</span>,
+                          )}
+                        </span>
+                        {row.snippet ? (
+                          <span className={css.rowSnippet}>
+                            {highlight(row.snippet, debounced).map((part, k) =>
+                              part.hit ? <mark key={k}>{part.text}</mark> : <span key={k}>{part.text}</span>,
+                            )}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className={css.rowMeta}>{row.meta}</span>
+                    </button>
+                  );
+                })}
+              </div>
             ))}
           </div>
         </div>

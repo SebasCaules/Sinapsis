@@ -14,7 +14,14 @@
 }
 .shell:focus-within { border-color: var(--primary); background: var(--surface); }
 
-.button { cursor: pointer; text-align: left; }
+/* El ancho deseado (`--sb-w`) es la base de un flex que puede encoger: nunca se
+   lleva el ancho que necesita la barra de pestañas. */
+.button {
+  cursor: pointer;
+  text-align: left;
+  flex: 0 1 var(--sb-w, 300px);
+  max-width: var(--sb-w, 300px);
+}
 .button:hover { background: var(--surface-3); }
 .button:focus-visible {
   outline: 2px solid var(--primary);
@@ -68,3 +75,18 @@
   cursor: pointer;
 }
 .clear:hover { background: var(--surface-3); color: var(--text); }
+
+
+/* Ancho angosto: solo la lupa (nav.css:328-329). El rótulo y el ⌘K se van, pero
+   el nombre accesible sigue en el `title` del botón. */
+@media (max-width: 900px) {
+  .button {
+    flex: none;
+    width: 28px;
+    max-width: 28px;
+    padding: 0;
+    justify-content: center;
+  }
+  .button .label,
+  .button .kbd { display: none; }
+}

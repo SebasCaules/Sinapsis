@@ -71,13 +71,20 @@
   border-radius: 10px;
   display: grid;
   place-items: center;
-  color: var(--text-3);
+  /* El icono lleva el color de SU sección, no solo el activo: es lo que
+     distingue «Practicar» de «Resolver» de un vistazo (nav.css:500-504). El
+     `--gcol` lo publica el grupo; los controles del rail que no pertenecen a
+     ninguno (sello, plegar) caen en --text-3. */
+  color: color-mix(in srgb, var(--gcol, var(--text-3)) 90%, var(--text));
   background: transparent;
   cursor: pointer;
   transition: background var(--t), color var(--t);
 }
 
-.item:hover { background: var(--surface-2); color: var(--text-2); }
+.item:hover {
+  background: var(--surface-2);
+  color: color-mix(in srgb, var(--gcol, var(--text-2)) 96%, var(--text));
+}
 .item:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -85,7 +92,7 @@
 }
 
 .item[data-active="true"] {
-  color: var(--gcol, var(--primary));
+  color: color-mix(in srgb, var(--gcol, var(--primary)) 96%, var(--text));
   /* El tinte lo pinta ::before como UNA sola caja continua desde la barra hasta
      el borde derecho del ítem (con el fondo propio y una extensión aparte
      quedaba una costura). */
@@ -176,3 +183,9 @@
 
 /* Con el rail achicado, los iconos acompañan a su caja. */
 .item > svg { width: calc(18px * var(--rs)); height: calc(18px * var(--rs)); }
+
+
+/* El rail no se imprime (nav.css:557). */
+@media print {
+  .rail { display: none !important; }
+}

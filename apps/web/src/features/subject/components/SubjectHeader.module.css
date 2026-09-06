@@ -135,13 +135,15 @@
   padding: 1px 4px;
 }
 
-/* Punto --primary: las vistas de la plataforma (Inicio, wiki, grafo, apuntes…). */
+/* Punto con el color del GRUPO del rail al que pertenece la ruta (`tabMark` del
+   baseline): «Practicar» verde, «Resolver» acento, «Lo mío» aviso… Sin grupo
+   conocido cae en --primary. */
 .tabDot {
   width: 7px;
   height: 7px;
   flex: none;
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--ucol, var(--primary));
   opacity: 0.45;
 }
 .tab[aria-selected="true"] .tabDot { opacity: 1; }
@@ -223,4 +225,47 @@
   background-image: var(--grain-22);
   background-size: 140px 140px;
   background-blend-mode: screen;
+}
+
+
+/* ---------- ancho angosto ---------- */
+/* Botón de menú: primer control de la cabecera, con el objetivo táctil de 24 px
+   del contrato (el baseline usa 40 px de alto de cabecera; acá la cabecera sigue
+   midiendo 40 y el botón se queda en 28). */
+.menu {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t);
+}
+.menu:hover { border-color: var(--border-2); color: var(--text); }
+.menu:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
+.menu svg { display: block; }
+
+/* El buscador deja de robarse el ancho de la tira de pestañas: baja a la lupa
+   sola (nav.css:328-329) y la barra vuelve a tener sitio para la activa. */
+@media (max-width: 900px) {
+  .header { gap: 6px; padding: 0 8px; }
+  /* La pestaña activa se lleva el ancho libre; las demás guardan un mínimo que
+     alcanza para la marca y unas letras (nav.css:334-341). */
+  .tab { min-width: 84px; flex: 0 1 96px; padding: 0 6px; gap: 5px; }
+  .tab[aria-selected="true"] { flex: 1 1 140px; min-width: 120px; }
+}
+
+
+/* La cabecera no se imprime (nav.css:145-150). */
+@media print {
+  .header { display: none !important; }
 }

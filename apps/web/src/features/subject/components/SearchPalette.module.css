@@ -70,6 +70,19 @@
 /* La `listbox` de verdad: solo filas, sin los avisos de estado. */
 .list { display: flex; flex-direction: column; gap: 2px; }
 
+.section { display: flex; flex-direction: column; gap: 2px; }
+
+/* Encabezado de cada tanda («Herramientas», «Páginas (9)»): el recuento dice
+   cuánto hay antes de recorrer la lista (.pr-group del baseline). */
+.groupHead {
+  padding: 10px 10px 4px;
+  font: 600 9.5px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.section:first-child .groupHead { padding-top: 4px; }
+
 /* Lo que solo se escucha (el recuento de resultados). */
 .srOnly {
   position: absolute;

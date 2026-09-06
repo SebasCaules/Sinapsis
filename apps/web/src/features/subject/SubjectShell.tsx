@@ -15,9 +15,9 @@
  * recuerda el scroll de `main`.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
-import { Seal } from "@/components/platform";
+import { Seal, useToast } from "@/components/platform";
 import { isTypingTarget } from "@/lib/keyboard";
 import { Crumbs, type Crumb } from "./components/Crumbs";
 import { Fab } from "./components/Fab";
@@ -30,12 +30,35 @@ import { SubjectHeader, tabElementId } from "./components/SubjectHeader";
 import { ErrorCard, WideSkeleton } from "./components/States";
 import type { SubjectCtx } from "./context";
 import { describePath, isSubjectPath, type StudyLabels } from "./route-info";
-import { splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
+import { MAX_TABS, splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
 import { useRuntime } from "./tools/useRuntime";
 import { PALETTE_EVENT } from "./tools/runtime";
 import { useStudy } from "./study/useStudy";
 import { useStudyState, useSubject } from "./useSubject";
 import css from "./SubjectShell.module.css";
+
+/**
+ * Ancho angosto (`NARROW_Q` del baseline, core.js:1584-1585): por debajo de este
+ * ancho el índice deja de ser una columna y pasa a ser un cajón que se abre
+ * desde la cabecera, con su velo. La consulta es la MISMA que la de
+ * `IndexPanel.module.css`, así el JS y el CSS no se pueden desfasar.
+ */
+const NARROW_Q = "(max-width: 900px)";
+
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(
+    () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(NARROW_Q).matches,
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia(NARROW_Q);
+    const sync = () => setNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return narrow;
+}
 
 export function SubjectShell() {
   const { subject = "" } = useParams();
@@ -67,10 +90,24 @@ export function SubjectShell() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
+  const { toast } = useToast();
+  /* Modo angosto (N0-29 / nav.css:543-549): el índice es un cajón. */
+  const narrow = useNarrow();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  const toggleDrawer = useCallback(() => setDrawerOpen((v) => !v), []);
   const mainRef = useRef<HTMLElement>(null);
   /* Raíz del shell: es el nodo sobre el que la tarjeta de vista previa (N0-50)
      delega puntero, foco y tacto, igual que el ⌘-clic de las pestañas. */
   const shellRef = useRef<HTMLDivElement>(null);
+
+  /* El cajón se cierra al llegar a destino y al volver al ancho ancho: si no,
+     quedaba tapando el contenido de la página recién abierta. */
+  useEffect(() => setDrawerOpen(false), [location.pathname]);
+  useEffect(() => {
+    if (!narrow) setDrawerOpen(false);
+  }, [narrow]);
 
   const tabs = useTabs(subject);
   const openTab = useSubjectTabsStore((s) => s.openTab);
@@ -112,6 +149,20 @@ export function SubjectShell() {
     [model, subject, location.pathname, studyLabels],
   );
 
+  const runtimeCrumbs = runtime.crumbs;
+  /**
+   * Rótulo REAL de la vista abierta (herr-11): cuando una herramienta pide sus
+   * propias migas con `App.setCrumbs`, el último tramo nombra el argumento
+   * («Cadenas de Markov», «Binomial») y es lo que el baseline pone en la pestaña
+   * y en el título del documento (`tabTitle()` deriva del `document.title` de la
+   * vista, core.js:1611). Sin esto la pestaña dice siempre el rótulo genérico.
+   */
+  const viewTitle = useMemo(() => {
+    if (!route.tool || !runtimeCrumbs?.length) return route.title;
+    const last = runtimeCrumbs[runtimeCrumbs.length - 1];
+    return last?.label?.trim() || route.title;
+  }, [route.tool, route.title, runtimeCrumbs]);
+
   /* ---------- pestañas ↔ router ------------------------------------------- */
 
   /** Escribe en la pestaña activa el scroll con el que se la está dejando. */
@@ -129,13 +180,14 @@ export function SubjectShell() {
       {
         path: location.pathname,
         hash: location.hash,
-        title: route.title,
+        title: viewTitle,
         chip: route.chip,
         color: route.color,
+        section: route.section,
       },
       mainRef.current?.scrollTop,
     );
-  }, [subject, location.pathname, location.hash, route.title, route.chip, route.color, syncActive]);
+  }, [subject, location.pathname, location.hash, viewTitle, route.chip, route.color, route.section, syncActive]);
 
   /**
    * Restauración del scroll al cambiar de pestaña (bug 5).
@@ -148,37 +200,23 @@ export function SubjectShell() {
    */
   const restoringRef = useRef(false);
 
-  /* Mientras se lee, la pestaña activa va anotando su scroll: al volver a ella
-     no hace falta haber pasado por ningún «guardar antes de salir». */
-  useEffect(() => {
-    const main = mainRef.current;
-    if (!main) return;
-    let raf = 0;
-    const onScroll = () => {
-      if (raf || restoringRef.current) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        if (restoringRef.current) return;
-        setScroll(subject, useSubjectTabsStore.getState().tabsOf(subject).active, main.scrollTop);
-      });
-    };
-    main.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      main.removeEventListener("scroll", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, [subject, setScroll, model]);
+  /**
+   * Memoria de scroll POR RUTA (`scrollMem` del baseline, core.js:1292-1330).
+   *
+   * La memoria por pestaña no alcanza: ir de `/t/calc` a `/t/lab` en la misma
+   * pestaña pisa el valor con el 0 del destino, y volver con Atrás dejaba la
+   * lectura en el tope. Acá se anota además la posición de cada dirección, se
+   * restaura SOLO al volver (`POP`) y se borra la entrada del destino en una
+   * navegación hacia adelante, que es exactamente lo que hace `go()`.
+   */
+  const routeKey = `${location.pathname}${location.search}`;
+  const routeKeyRef = useRef(routeKey);
+  routeKeyRef.current = routeKey;
+  const routeScrollRef = useRef(new Map<string, number>());
 
-  /* Al cambiar de pestaña se repone su scroll (dos cuadros: el primero monta la
-     vista, el segundo ya tiene el alto real para desplazarse). El valor se lee
-     del store en el momento de restaurar, no de la lista que cerró este render:
-     así el efecto depende SOLO de la pestaña activa. */
-  const restoredRef = useRef(tabs.active);
-  useEffect(() => {
-    if (restoredRef.current === tabs.active) return;
-    restoredRef.current = tabs.active;
+  /** Deja `main` en `y` cuando la vista ya tiene alto real, sin anotarlo como scroll del usuario. */
+  const restoreScroll = useCallback((y: number) => {
     restoringRef.current = true;
-    const y = useSubjectTabsStore.getState().tabsOf(subject).list.find((t) => t.id === tabs.active)?.scrollY ?? 0;
     let second = 0;
     let third = 0;
     const first = window.requestAnimationFrame(() => {
@@ -196,7 +234,52 @@ export function SubjectShell() {
       if (third) window.cancelAnimationFrame(third);
       restoringRef.current = false;
     };
-  }, [tabs.active, subject]);
+  }, []);
+
+  useEffect(() => {
+    if (navigationType === "POP") {
+      const y = routeScrollRef.current.get(routeKey);
+      if (y === undefined || y <= 0) return;
+      return restoreScroll(y);
+    }
+    /* Hacia adelante: la dirección de destino se lee desde el principio. */
+    routeScrollRef.current.delete(routeKey);
+    return;
+  }, [routeKey, navigationType, restoreScroll]);
+
+  /* Mientras se lee, la pestaña activa va anotando su scroll: al volver a ella
+     no hace falta haber pasado por ningún «guardar antes de salir». */
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf || restoringRef.current) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        if (restoringRef.current) return;
+        setScroll(subject, useSubjectTabsStore.getState().tabsOf(subject).active, main.scrollTop);
+        routeScrollRef.current.set(routeKeyRef.current, main.scrollTop);
+      });
+    };
+    main.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      main.removeEventListener("scroll", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [subject, setScroll, model]);
+
+  /* Al cambiar de pestaña se repone su scroll (dos cuadros: el primero monta la
+     vista, el segundo ya tiene el alto real para desplazarse). El valor se lee
+     del store en el momento de restaurar, no de la lista que cerró este render:
+     así el efecto depende SOLO de la pestaña activa. */
+  const restoredRef = useRef(tabs.active);
+  useEffect(() => {
+    if (restoredRef.current === tabs.active) return;
+    restoredRef.current = tabs.active;
+    const y = useSubjectTabsStore.getState().tabsOf(subject).list.find((t) => t.id === tabs.active)?.scrollY ?? 0;
+    return restoreScroll(y);
+  }, [tabs.active, subject, restoreScroll]);
 
   const selectTab = useCallback(
     (id: string) => {
@@ -219,11 +302,17 @@ export function SubjectShell() {
     [closeTabAction, subject, navigate],
   );
 
+  /** Aviso único del tope de pestañas (core.js:1626-1628). */
+  const warnFullTabs = useCallback(() => toast(`Máximo de pestañas abiertas (${MAX_TABS})`), [toast]);
+
   const addTab = useCallback(() => {
     saveScroll();
-    newTab(subject);
+    if (!newTab(subject)) {
+      warnFullTabs();
+      return;
+    }
     navigate(routes.subject(subject));
-  }, [saveScroll, newTab, subject, navigate]);
+  }, [saveScroll, newTab, subject, navigate, warnFullTabs]);
 
   const reorderTabs = useCallback((from: number, to: number) => moveTab(subject, from, to), [moveTab, subject]);
 
@@ -247,9 +336,21 @@ export function SubjectShell() {
       event.preventDefault();
       event.stopPropagation();
       const info = describePath(model, subject, path, studyLabels);
-      openTab(subject, { path, hash, title: info.title, chip: info.chip, color: info.color });
+      /* Dos puertas distintas (core.js:2508-2512 y 2531): ⌘/Ctrl-clic SALTA a la
+         pestaña nueva; el botón del medio la deja en segundo plano. */
+      const activate = !aux;
+      const id = openTab(
+        subject,
+        { path, hash, title: info.title, chip: info.chip, color: info.color, section: info.section },
+        activate,
+      );
+      if (!id) {
+        warnFullTabs();
+        return;
+      }
+      if (activate) navigate(`${path}${hash}`);
     },
-    [subject, model, openTab, studyLabels],
+    [subject, model, openTab, studyLabels, navigate, warnFullTabs],
   );
 
   /* ---------- teclado ------------------------------------------------------ */
@@ -260,7 +361,14 @@ export function SubjectShell() {
       const mod = event.metaKey || event.ctrlKey;
       if (mod && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setSearchOpen(true);
+        /* ⌘K conmuta: dos pulsaciones seguidas dejan la paleta cerrada
+           (core.js:2569). */
+        setSearchOpen((open) => !open);
+        return;
+      }
+      if (event.key === "Escape" && drawerOpen) {
+        event.preventDefault();
+        setDrawerOpen(false);
         return;
       }
       if (isTypingTarget(event.target)) return;
@@ -299,28 +407,45 @@ export function SubjectShell() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [subject, selectTab, closeTab]);
+  }, [subject, selectTab, closeTab, drawerOpen]);
 
   /* ---------- migas y título ----------------------------------------------- */
 
-  const runtimeCrumbs = runtime.crumbs;
   const crumbs = useMemo<Crumb[]>(() => {
-    const head: Crumb = { label: model?.config.name ?? subject, to: routes.subject(subject) };
+    const home = routes.subject(subject);
+    const head: Crumb = { label: model?.config.name ?? subject, to: home };
     /* Una vista de herramienta puede escribir sus propias migas con
        `App.setCrumbs` (el «Explorador · Normal» del baseline): cuelgan de la
        materia y reemplazan el rótulo único de la vista. */
     if (route.tool && runtimeCrumbs?.length) {
-      return [head, ...runtimeCrumbs.map((c) => ({ label: c.label, to: c.href }))];
+      /* El bundle antepone su propio «Inicio» (tools.js:707-709), que en el
+         baseline se pinta como la casita. Acá la casita y el nombre de la
+         materia ya lo dicen: repetirlo daba cinco tramos donde el original
+         tiene tres (herr-09). */
+      const first = runtimeCrumbs[0];
+      const redundant =
+        !!first && (first.label.trim().toLowerCase() === "inicio" || first.href === home || first.hash === "#/inicio");
+      const rest = redundant ? runtimeCrumbs.slice(1) : runtimeCrumbs;
+      return [head, ...rest.map((c) => ({ label: c.label, to: c.href }))];
     }
-    return route.parent ? [head, route.parent, { label: route.title }] : [head, { label: route.title }];
-  }, [model, subject, route, runtimeCrumbs]);
+    /* Una página del wiki cuelga de «Todo el wiki» (core.js:1494-1508): sin ese
+       tramo el catálogo solo se alcanza por el icono del rail. El rótulo es el
+       del propio ítem del rail, para que la miga y el rail se llamen igual. */
+    if (route.page) {
+      const wiki: Crumb = { label: model?.railItem("wiki")?.item.label ?? "Todo el wiki", to: routes.wiki(subject) };
+      return route.parent
+        ? [head, wiki, route.parent, { label: viewTitle }]
+        : [head, wiki, { label: viewTitle }];
+    }
+    return route.parent ? [head, route.parent, { label: viewTitle }] : [head, { label: viewTitle }];
+  }, [model, subject, route, runtimeCrumbs, viewTitle]);
 
   /* La pestaña del navegador dice lo mismo que la pestaña activa de la cabecera. */
   useEffect(() => {
     const name = model?.config.name ?? subject;
     if (!name) return;
-    document.title = `${route.title} · ${name}`;
-  }, [route.title, model, subject]);
+    document.title = `${viewTitle} · ${name}`;
+  }, [viewTitle, model, subject]);
 
   const ctx = useMemo<SubjectCtx | null>(
     () => (model ? { slug: subject, model, openSearch, runtime } : null),
@@ -362,14 +487,22 @@ export function SubjectShell() {
         Saltar al contenido
       </a>
       <Rail slug={subject} groups={model.railGroups} compact={compact} onToggleCompact={toggle} />
-      {compact ? null : (
+      {/* En el ancho angosto el índice es un cajón. Con el índice plegado desde
+          el rail no se dibuja hasta que el botón de menú lo pide: así ninguno de
+          los dos controles queda sin efecto. */}
+      {!compact || (narrow && drawerOpen) ? (
         <IndexPanel
           model={model}
           activePage={route.page}
           activeDivision={route.division}
           bookmarks={bookmarks}
+          drawer={narrow}
+          drawerOpen={drawerOpen}
         />
-      )}
+      ) : null}
+      {narrow && drawerOpen ? (
+        <div className={css.scrim} role="presentation" onClick={closeDrawer} data-testid="drawer-scrim" />
+      ) : null}
       <div className={css.content}>
         <SubjectHeader
           tabs={tabs.list}
@@ -379,6 +512,9 @@ export function SubjectShell() {
           onNew={addTab}
           onReorder={reorderTabs}
           onSearch={openSearch}
+          narrow={narrow}
+          drawerOpen={drawerOpen}
+          onToggleDrawer={toggleDrawer}
         />
         <Crumbs items={crumbs} />
         {/* El contenido es el panel de la pestaña activa (N0-34): el patrón de

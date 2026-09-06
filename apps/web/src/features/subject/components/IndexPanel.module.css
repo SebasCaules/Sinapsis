@@ -261,14 +261,33 @@
 }
 
 /* Por debajo de 900 px el índice deja de robarle ancho a la prosa: se despega
-   del flujo y se posa sobre el contenido, que pasa a ocupar todo el hueco. */
+   del flujo y pasa a ser un CAJÓN que entra desde la izquierda (nav.css:543-549).
+   Cerrado no ocupa nada, no tapa el contenido y no se puede tabular; lo abre el
+   botón de menú de la cabecera y lo cierra el velo, Escape o navegar. */
 @media (max-width: 900px) {
   .panel {
     position: fixed;
     inset: 40px auto 0 52px;
+    width: min(250px, calc(100vw - 52px));
     z-index: 20;
     box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform var(--t), visibility var(--t);
   }
+  .panel[data-open="true"] {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  /* Objetivos táctiles del cajón: 44 px de alto útil (nav.css:342-345). */
+  .divisionRow { min-height: 44px; }
+  .page,
+  .wholeDivision { padding-top: 10px; padding-bottom: 10px; }
+  .blockLabel { min-height: 34px; }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
 }
 
 /* Claustro: las superficies llevan el mismo grano que el fondo (mezcla screen), como en el baseline. */
@@ -276,4 +295,10 @@
   background-image: var(--grain-22);
   background-size: 140px 140px;
   background-blend-mode: screen;
+}
+
+
+/* El índice no se imprime (nav.css:557). */
+@media print {
+  .panel { display: none !important; }
 }

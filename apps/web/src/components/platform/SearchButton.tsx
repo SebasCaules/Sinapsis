@@ -10,15 +10,24 @@ export interface SearchButtonProps {
   width?: number;
 }
 
-/** Botón-buscador de la cabecera: abre el buscador real. */
+/**
+ * Botón-buscador de la cabecera: abre el buscador real.
+ *
+ * `width` es un ancho DESEADO, no fijo: se publica como `--sb-w` y la hoja lo
+ * usa como base flexible con un mínimo de 34 px. Con el ancho fijo, en una
+ * cabecera angosta el buscador se quedaba con 250 de los 368 px disponibles y la
+ * barra de pestañas quedaba en 18 px (nav.css:328-329 hace lo mismo: bajo 860 px
+ * el buscador se reduce a la lupa).
+ */
 export function SearchButton({ onClick, label = "Buscar…", hint = "⌘K", width = 300 }: SearchButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={`${css.shell} ${css.button}`}
-      style={{ width }}
+      style={{ ["--sb-w" as string]: `${width}px` }}
       aria-keyshortcuts="Meta+K Control+K"
+      title={label}
     >
       <UiIcon name="search" size={14} />
       <span className={css.label}>{label}</span>

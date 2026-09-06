@@ -56,8 +56,27 @@ describe("rótulos", () => {
     expect(info.division).toBe("1");
   });
 
-  it("una página que no está en la materia se rotula con su slug", () => {
-    expect(describePath(model, S, routes.page(S, "fantasma")).title).toBe("fantasma");
+  it("una página que no está en la materia se rotula «Página no encontrada»", () => {
+    const info = describePath(model, S, routes.page(S, "fantasma"));
+    expect(info.title).toBe("Página no encontrada");
+    expect(info.parent).toBeNull();
+    expect(info.page).toBe("fantasma");
+  });
+
+  it("las rutas que no son del wiki traen el grupo del rail y su color", () => {
+    /* Es el `tabMark` del baseline: el punto de la pestaña se pinta con el color
+       de la sección y su `title` la nombra. */
+    const flash = describePath(model, S, routes.flashcards(S));
+    expect(flash.section).toBe("Practicar");
+    expect(flash.color).not.toBeNull();
+
+    const calc = describePath(model, S, routes.tool(S, "calc"));
+    expect(calc.section).toBe("Resolver");
+    expect(calc.color).not.toBe(flash.color);
+
+    expect(describePath(model, S, routes.subject(S)).section).toBe("Mi ruta");
+    /* Una página del wiki se marca por su división, no por la sección. */
+    expect(describePath(model, S, routes.page(S, "media")).section).toBeNull();
   });
 
   it("una división se rotula con su etiqueta y no lleva chip", () => {

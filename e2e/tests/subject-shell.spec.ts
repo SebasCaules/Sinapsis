@@ -86,6 +86,89 @@ test("ocultar el índice desde el rail lo esconde y sobrevive a la recarga", asy
   await expect(panel(page)).toBeVisible();
 });
 
+test("las migas de una página ofrecen el salto a «Todo el wiki»", async ({ page }) => {
+  await page.goto(`${home}/p/${seed.readerPage.slug}`);
+  await waitForSubjectShell(page);
+
+  const wiki = crumbs(page).getByRole("link", { name: "Todo el wiki" });
+  await expect(wiki).toBeVisible();
+  await wiki.click();
+  await expect(page).toHaveURL(new RegExp(`${home}/wiki$`));
+});
+
+test("la paleta con la consulta vacía lista las herramientas por sección y ⌘K la cierra", async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+k");
+  const dialog = page.getByRole("dialog", { name: "Buscar en la materia" });
+  await expect(dialog).toBeVisible();
+
+  // Sin escribir nada ya hay a dónde ir, agrupado por intención.
+  await expect(dialog.getByRole("group", { name: "Mi ruta" })).toBeVisible();
+  await expect(dialog.getByRole("group", { name: "Consultar" })).toBeVisible();
+  await expect(dialog.getByRole("option").first()).toContainText("Inicio");
+
+  // El mismo atajo la cierra.
+  await page.keyboard.press("ControlOrMeta+k");
+  await expect(dialog).toHaveCount(0);
+});
+
+test("el rail se recorre con las flechas ↑ y ↓", async ({ page }) => {
+  const inicio = rail(page).getByRole("link", { name: "Inicio", exact: true });
+  await inicio.focus();
+
+  await page.keyboard.press("ArrowDown");
+  const siguiente = await page.evaluate(() => document.activeElement?.getAttribute("aria-label") ?? "");
+  expect(siguiente).not.toBe("Inicio");
+
+  await page.keyboard.press("ArrowUp");
+  await expect(inicio).toBeFocused();
+});
+
+test("por debajo de 900 px el índice es un cajón que abre el botón de menú", async ({ page }) => {
+  await page.setViewportSize({ width: 700, height: 900 });
+  await waitForSubjectShell(page);
+
+  const abrir = header(page).getByRole("button", { name: "Abrir el índice" });
+  await expect(abrir).toBeVisible();
+  // Cerrado, el índice no tapa el contenido.
+  await expect(panel(page)).toBeHidden();
+
+  await abrir.click();
+  await expect(panel(page)).toBeVisible();
+
+  // El velo lo cierra.
+  await page.getByTestId("drawer-scrim").click();
+  await expect(panel(page)).toBeHidden();
+
+  await page.setViewportSize({ width: 1440, height: 1024 });
+  await expect(header(page).getByRole("button", { name: "Abrir el índice" })).toHaveCount(0);
+});
+
+test("al llegar al tope de pestañas avisa y no abre ninguna más", async ({ page }) => {
+  const strip = page.getByRole("tablist", { name: "Pestañas de la materia" });
+  const nueva = header(page).getByRole("button", { name: "Nueva pestaña" });
+
+  for (let i = 1; i < 20; i += 1) await nueva.click();
+  await expect(strip.getByRole("tab")).toHaveCount(20);
+
+  await nueva.click();
+  await expect(page.getByText("Máximo de pestañas abiertas (20)")).toBeVisible();
+  await expect(strip.getByRole("tab")).toHaveCount(20);
+});
+
+test("el selector de tema lista los tres temas y deja elegir", async ({ page }) => {
+  await header(page).getByRole("button", { name: /^Tema: / }).click();
+  const menu = page.getByRole("menu", { name: "Tema" });
+  await expect(menu.getByRole("menuitemradio")).toHaveCount(3);
+
+  await menu.getByRole("menuitemradio", { name: /Claustro/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "claustro");
+
+  // Se deja el tema como estaba: el ajuste viaja al perfil.
+  await header(page).getByRole("button", { name: /^Tema: / }).click();
+  await page.getByRole("menu", { name: "Tema" }).getByRole("menuitemradio", { name: /Pergamino/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "pergamino");
+});
+
 test("el sello S vuelve a la landing", async ({ page }) => {
   await rail(page).getByRole("link", { name: "Volver a Sinapsis" }).click();
   await expect(page).toHaveURL(/\/$/);

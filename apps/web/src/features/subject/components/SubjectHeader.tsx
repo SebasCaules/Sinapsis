@@ -33,6 +33,9 @@ export const tabElementId = (id: string): string => `subject-tab-${id}`;
 /** El `id` del panel que gobiernan todas las pestañas (el `main` del shell). */
 const PANEL_ID = "contenido";
 
+/** El `id` del índice: lo gobierna el botón de menú del ancho angosto. */
+export const INDEX_PANEL_ID = "indice-materia";
+
 /** Cuánto desplaza la tira cada golpe de ‹ o ›. */
 const SCROLL_STEP = 180;
 
@@ -44,6 +47,11 @@ export interface SubjectHeaderProps {
   onNew: () => void;
   onReorder: (from: number, to: number) => void;
   onSearch: () => void;
+  /** Ancho angosto: aparece el botón de menú y el buscador se reduce a la lupa. */
+  narrow?: boolean;
+  /** ¿El cajón del índice está abierto? (solo en el ancho angosto). */
+  drawerOpen?: boolean;
+  onToggleDrawer?: () => void;
 }
 
 /**
@@ -60,7 +68,18 @@ function numberedTitles(tabs: SubjectTab[]): string[] {
   });
 }
 
-export function SubjectHeader({ tabs, activeId, onSelect, onClose, onNew, onReorder, onSearch }: SubjectHeaderProps) {
+export function SubjectHeader({
+  tabs,
+  activeId,
+  onSelect,
+  onClose,
+  onNew,
+  onReorder,
+  onSearch,
+  narrow = false,
+  drawerOpen = false,
+  onToggleDrawer,
+}: SubjectHeaderProps) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState(false);
 
@@ -132,14 +151,30 @@ export function SubjectHeader({ tabs, activeId, onSelect, onClose, onNew, onReor
       go(tabs.length - 1);
       return;
     }
-    if (event.key === "Delete") {
+    /* En un teclado Mac la tecla «delete» es Backspace: el baseline acepta las
+       dos (core.js:2492). */
+    if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       onClose(activeId);
     }
   };
 
   return (
-    <header className={css.header} data-testid="subject-header">
+    <header className={css.header} data-testid="subject-header" data-narrow={narrow ? "true" : undefined}>
+      {/* Primer control de la cabecera en el ancho angosto: abre el índice, que
+          ahí es un cajón (index.html:44-46 · `#navToggle`). */}
+      {narrow ? (
+        <button
+          type="button"
+          className={css.menu}
+          onClick={onToggleDrawer}
+          aria-expanded={drawerOpen}
+          aria-controls={INDEX_PANEL_ID}
+          aria-label={drawerOpen ? "Cerrar el índice" : "Abrir el índice"}
+        >
+          <UiIcon name="menu" size={18} />
+        </button>
+      ) : null}
       <div className={css.tabsArea}>
         {overflow ? (
           <button
@@ -206,7 +241,9 @@ export function SubjectHeader({ tabs, activeId, onSelect, onClose, onNew, onReor
         </button>
       </div>
 
-      <SearchButton label="Buscar páginas…" width={250} onClick={onSearch} />
+      {/* El rótulo dice lo que la paleta realmente busca hoy (shell-23). En el
+          ancho angosto el casco se reduce a la lupa por CSS (nav.css:328). */}
+      <SearchButton label="Buscar páginas y herramientas…" width={250} onClick={onSearch} />
       <ThemeToggle />
       <AvatarMenu />
     </header>
@@ -242,7 +279,10 @@ function SortableTab({ tab, label, active, closable, onSelect, onClose }: TabPro
       data-tab-id={tab.id}
       data-tab-active={active ? "true" : undefined}
       data-dragging={isDragging ? "true" : undefined}
-      title={label}
+      /* Como el `tabMark` del baseline: la píldora de la división cuando la
+         pestaña es una página, y si no el nombre de su sección delante del
+         rótulo («Practicar · Flashcards»). */
+      title={tab.section ? `${tab.section} · ${label}` : label}
       style={{
         ...(tab.color ? { ["--ucol" as string]: tab.color } : null),
         transform: CSS.Transform.toString(transform),

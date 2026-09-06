@@ -42,6 +42,31 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
   // una página del rail gana sobre "Todo el wiki" cuando es exactamente esa página
   const exact = groups.some((g) => g.items.some((i) => i.item.kind === "page" && i.to === pathname));
 
+  /**
+   * El rail es UNA columna de controles: ↑ y ↓ la recorren en círculo (y
+   * Inicio/Fin van a los extremos), como en core.js:2552-2564. Sin esto llegar
+   * al último icono costaba diecinueve tabuladores que además atravesaban el
+   * índice.
+   */
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    const keys = ["ArrowDown", "ArrowUp", "Home", "End"];
+    if (!keys.includes(event.key)) return;
+    const nav = navRef.current;
+    if (!nav) return;
+    const focusables = [...nav.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")];
+    if (!focusables.length) return;
+    const at = focusables.indexOf(document.activeElement as HTMLElement);
+    if (at === -1) return;
+    event.preventDefault();
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? focusables.length - 1
+          : (at + (event.key === "ArrowDown" ? 1 : focusables.length - 1)) % focusables.length;
+    focusables[next]?.focus();
+  };
+
   return (
     <nav
       className={css.rail}
@@ -49,9 +74,12 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
       ref={navRef}
       style={{ ["--rs" as string]: scale }}
       data-scaled={scale < 1 ? "true" : undefined}
+      onKeyDown={onKeyDown}
     >
       <div className={css.sealRow}>
-        <Link className={css.seal} to={routes.landing()} aria-label="Volver a Sinapsis" title="Volver a Sinapsis">
+        {/* Sin `title` nativo: el globo propio (.tip) ya dice lo mismo y sin él
+            el navegador dibujaba los dos, uno encima del otro (shell-22). */}
+        <Link className={css.seal} to={routes.landing()} aria-label="Volver a Sinapsis">
           <Seal size={34} />
           <span className={css.tip} role="tooltip">
             Volver a Sinapsis
@@ -68,7 +96,6 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
           onClick={onToggleCompact}
           aria-expanded={!compact}
           aria-label={compact ? "Mostrar el índice" : "Ocultar el índice"}
-          title={compact ? "Mostrar el índice" : "Ocultar el índice"}
         >
           <UiIcon name="sidebar" size={18} />
           <span className={css.tip} role="tooltip">
@@ -120,14 +147,7 @@ function RailButton({ view, group, active }: { view: RailItemView; group: RailGr
 
   if (view.external && view.href) {
     return (
-      <a
-        className={css.item}
-        href={view.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={hint}
-        aria-label={item.label}
-      >
+      <a className={css.item} href={view.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}>
         {body}
       </a>
     );
@@ -137,7 +157,6 @@ function RailButton({ view, group, active }: { view: RailItemView; group: RailGr
     <Link
       className={css.item}
       to={view.to ?? "."}
-      title={hint}
       aria-label={item.label}
       aria-current={active ? "page" : undefined}
       data-active={active ? "true" : undefined}

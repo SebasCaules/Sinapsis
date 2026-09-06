@@ -8,9 +8,10 @@
  */
 import { memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { routes } from "@sinapsis/contract";
+import { plural, routes } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { pad2, type DivisionNode, type SubjectModel } from "../model";
+import { INDEX_PANEL_ID } from "./SubjectHeader";
 import { useOpenDivisions, useSubjectUiStore, useTypeCollapsed } from "../store";
 import css from "./IndexPanel.module.css";
 
@@ -22,9 +23,19 @@ export interface IndexPanelProps {
   activeDivision: string | null;
   /** Slugs marcados como favoritos: la ★ del árbol. */
   bookmarks: ReadonlySet<string>;
+  /** En el ancho angosto el panel es un cajón que entra desde la izquierda. */
+  drawer?: boolean;
+  drawerOpen?: boolean;
 }
 
-export function IndexPanel({ model, activePage, activeDivision, bookmarks }: IndexPanelProps) {
+export function IndexPanel({
+  model,
+  activePage,
+  activeDivision,
+  bookmarks,
+  drawer = false,
+  drawerOpen = false,
+}: IndexPanelProps) {
   const { config, placeholder } = model;
   const open = useOpenDivisions(model.slug);
   const openDivision = useSubjectUiStore((s) => s.openDivision);
@@ -37,7 +48,14 @@ export function IndexPanel({ model, activePage, activeDivision, bookmarks }: Ind
   const divisions = placeholder && !model.pages.length ? model.divisions : model.visibleDivisions;
 
   return (
-    <aside className={css.panel} aria-label={`Índice de ${config.name}`}>
+    <aside
+      className={css.panel}
+      id={INDEX_PANEL_ID}
+      aria-label={`Índice de ${config.name}`}
+      data-drawer={drawer ? "true" : undefined}
+      data-open={drawer && drawerOpen ? "true" : undefined}
+      aria-hidden={drawer && !drawerOpen ? true : undefined}
+    >
       <Link
         to={routes.subject(model.slug)}
         className={css.hero}
@@ -98,6 +116,10 @@ const DivisionRow = memo(function DivisionRow({
 }: DivisionRowProps) {
   const toggleDivision = useSubjectUiStore((s) => s.toggleDivision);
   const count = model.contentPages(division.key).length;
+  /* El tooltip del baseline (core.js:1916-1921): «U4 · … · 11 páginas · 0
+     leídas». El progreso ya lo calcula el modelo; hasta ahora la fila no decía
+     cuánto se llevaba leído. */
+  const done = model.progress(division.key).done;
   const blocks = expanded ? model.typeBlocks(division.key) : [];
   /* El mapa de posiciones lo memoriza el modelo: una vez por división, no por render. */
   const position = model.positions(division.key);
@@ -119,11 +141,10 @@ const DivisionRow = memo(function DivisionRow({
         data-active={active ? "true" : undefined}
         data-testid="division-row"
         data-division={division.key}
+        title={`${division.long} · ${count} ${plural(count, "página", "páginas")} · ${done} ${plural(done, "leída", "leídas")}`}
       >
         <span className={css.dot} aria-hidden="true" />
-        <span className={css.divisionLabel} title={division.long}>
-          {division.label}
-        </span>
+        <span className={css.divisionLabel}>{division.label}</span>
         <span className={css.count}>{count}</span>
         <UiIcon name="chevronDown" size={14} className={expanded ? css.chevOpen : css.chev} />
       </button>
@@ -138,6 +159,8 @@ const DivisionRow = memo(function DivisionRow({
             className={css.wholeDivision}
             to={routes.division(model.slug, division.key)}
             aria-label={`Ver la ${model.config.division.singular.toLowerCase()} completa: ${division.name}`}
+            /* Dice qué se va a encontrar del otro lado (core.js:1923). */
+            title={`Temario, progreso y fuentes de la ${model.config.division.singular.toLowerCase()}`}
           >
             <UiIcon name="menu" size={13} />
             Ver la {model.config.division.singular.toLowerCase()} completa
@@ -187,7 +210,7 @@ function TypeBlockRows({
         onClick={() => toggleType(model.slug, divisionKey, block.type.key, block.type.collapsedByDefault)}
         aria-expanded={shown.length > 0}
       >
-        <span>
+        <span title={`${block.count} ${block.type.plural.toLowerCase()}`}>
           {block.type.plural.toUpperCase()} · {block.count}
         </span>
         <UiIcon name="chevronDown" size={11} className={shown.length ? css.chevOpen : css.chev} />

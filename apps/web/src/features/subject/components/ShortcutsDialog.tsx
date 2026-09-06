@@ -28,6 +28,7 @@ const GROUPS: Group[] = [
       { keys: ["/"], what: "Buscar en la materia (una sola tecla)" },
       { keys: ["T"], what: "Cambiar de tema" },
       { keys: ["?"], what: "Abrir esta lista" },
+      { keys: ["↑", "↓"], what: "Recorrer el rail (con el foco en un icono)" },
       { keys: ["Esc"], what: "Cerrar lo que esté abierto" },
     ],
   },
@@ -38,6 +39,7 @@ const GROUPS: Group[] = [
       { keys: ["⌘", "⇧", "["], what: "Pestaña anterior" },
       { keys: ["⌘", "⇧", "W"], what: "Cerrar la pestaña activa" },
       { keys: ["←", "→"], what: "Recorrer las pestañas (con el foco en la barra)" },
+      { keys: ["Supr"], what: "Cerrar la pestaña enfocada (⌫ en un teclado Mac)" },
     ],
   },
   {

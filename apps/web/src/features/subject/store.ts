@@ -194,8 +194,10 @@ export interface SubjectTab {
   title: string;
   /** Rótulo corto de la división: solo cuando la pestaña es una página del wiki. */
   chip: string | null;
-  /** Color de la división del chip. */
+  /** Color de la división del chip, o el del grupo del rail cuando no es una página. */
   color: string | null;
+  /** Grupo del rail al que pertenece la ruta («Practicar»…): el `title` del punto. */
+  section: string | null;
   scrollY: number;
 }
 
@@ -225,9 +227,15 @@ export interface TabInfo {
   title: string;
   chip: string | null;
   color: string | null;
+  /** Grupo del rail de la ruta, si pertenece a alguno. */
+  section?: string | null;
 }
 
-/** Tope del baseline: pasado el 20, se cierra la más vieja que no esté activa. */
+/**
+ * Tope del baseline (core.js:1626-1628): al llegar a 20, `openTab` NO abre nada
+ * y avisa. Desalojar en silencio la pestaña más vieja hacía desaparecer trabajo
+ * sin decirlo.
+ */
 export const MAX_TABS = 20;
 
 let tabSeq = 0;
@@ -248,6 +256,7 @@ function tab(info: TabInfo): SubjectTab {
     title: info.title,
     chip: info.chip,
     color: info.color,
+    section: info.section ?? null,
     scrollY: 0,
   };
 }
@@ -279,6 +288,7 @@ function readTabs(slug: string): TabsState | null {
       title: t.title,
       chip: typeof t.chip === "string" ? t.chip : null,
       color: typeof t.color === "string" ? t.color : null,
+      section: typeof t.section === "string" ? t.section : null,
       scrollY: typeof t.scrollY === "number" && Number.isFinite(t.scrollY) ? t.scrollY : 0,
     };
   });
@@ -324,12 +334,12 @@ export interface SubjectTabsState {
   /** Estado de una materia, creándolo si hace falta (no escribe). */
   tabsOf: (slug: string) => TabsState;
   /**
-   * Abre una pestaña nueva al final. Si ya hay 20, cierra la primera que no
-   * esté activa. Devuelve el id de la nueva.
+   * Abre una pestaña nueva al final. Devuelve el id de la nueva, o null si ya se
+   * llegó al tope de 20 (en ese caso no abre nada: quien llame avisa).
    */
-  openTab: (slug: string, info: TabInfo, activate?: boolean) => string;
-  /** Abre una pestaña «Inicio» y la activa (el botón «+»). */
-  newTab: (slug: string) => string;
+  openTab: (slug: string, info: TabInfo, activate?: boolean) => string | null;
+  /** Abre una pestaña «Inicio» y la activa (el botón «+»). Null si está en el tope. */
+  newTab: (slug: string) => string | null;
   /** Activa una pestaña; `scrollY` es el scroll con el que se deja la anterior. */
   activateTab: (slug: string, id: string, scrollY?: number) => void;
   /** Cierra una pestaña. Devuelve la ruta a la que hay que navegar, o null. */
@@ -360,15 +370,12 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
 
     openTab: (slug, info, activate = false) => {
       const state = read(slug);
+      /* El tope corta ANTES de crear nada (core.js:1626-1628): ninguna pestaña
+         abierta se pierde por abrir una más. */
+      if (state.list.length >= MAX_TABS) return null;
       const fresh = tab(info);
-      let list = [...state.list, fresh];
-      let active = activate ? fresh.id : state.active;
-      if (list.length > MAX_TABS) {
-        const victim = list.find((t) => t.id !== active && t.id !== fresh.id);
-        if (victim) list = list.filter((t) => t.id !== victim.id);
-        else list = list.slice(list.length - MAX_TABS);
-      }
-      if (!list.some((t) => t.id === active)) active = (list[0] as SubjectTab).id;
+      const list = [...state.list, fresh];
+      const active = activate ? fresh.id : state.active;
       commit(slug, { list, active });
       return fresh.id;
     },
@@ -433,12 +440,15 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
           current.title === info.title &&
           current.chip === info.chip &&
           current.color === info.color &&
+          current.section === (info.section ?? null) &&
           current.hash === hash
         ) {
           return;
         }
         const list = state.list.map((t) =>
-          t.id === state.active ? { ...t, hash, title: info.title, chip: info.chip, color: info.color } : t,
+          t.id === state.active
+            ? { ...t, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null }
+            : t,
         );
         commit(slug, { ...state, list });
         return;
@@ -453,7 +463,7 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
 
       const list = state.list.map((t) =>
         t.id === state.active
-          ? { ...t, path, hash, title: info.title, chip: info.chip, color: info.color, scrollY: 0 }
+          ? { ...t, path, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null, scrollY: 0 }
           : t,
       );
       commit(slug, { ...state, list });

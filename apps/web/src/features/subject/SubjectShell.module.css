@@ -86,3 +86,44 @@
 }
 
 .crumbsGhost { height: 28px; flex: none; }
+
+
+/* ---------- velo del cajón (ancho angosto) ---------- */
+/* Por debajo del panel (z-index 20) y por encima del contenido: cierra el cajón
+   con un toque, como `#navScrim` del baseline. */
+.scrim {
+  position: fixed;
+  /* Deja el rail fuera: en el baseline el rail es parte del cajón y sigue
+     usándose mientras está abierto. */
+  inset: 40px 0 0 52px;
+  z-index: 15;
+  background: var(--scrim);
+  border: 0;
+}
+
+@media (min-width: 901px) {
+  .scrim { display: none; }
+}
+
+/* ---------- impresión ---------- */
+/* Se imprime la lectura, no el armazón (nav.css:145-150 y 557): fuera el rail,
+   el índice, la cabecera y las migas, y el documento se pagina entero en vez de
+   salir recortado a una pantalla. */
+@media print {
+  .shell {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  .content { display: block; }
+  .main {
+    overflow: visible;
+    height: auto;
+  }
+  .skip,
+  .scrim,
+  .railGhost,
+  .panelGhost,
+  .headerGhost,
+  .crumbsGhost { display: none !important; }
+}

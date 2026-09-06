@@ -4,7 +4,7 @@
  * que la paleta lo deja en prosa antes de mostrarlo.
  */
 import { describe, expect, it } from "vitest";
-import { highlight, plainSnippet } from "./SearchPalette";
+import { coreTitle, highlight, norm, plainSnippet, scorePage } from "./SearchPalette";
 
 describe("plainSnippet", () => {
   it("quita los marcadores del resaltado del API", () => {
@@ -57,5 +57,38 @@ describe("highlight", () => {
 
   it("sin término, devuelve el texto entero sin marcar", () => {
     expect(highlight("Distribución Normal", "  ")).toEqual([{ text: "Distribución Normal", hit: false }]);
+  });
+});
+
+describe("orden de los resultados", () => {
+  const page = (title: string, content = true) => ({ title, hay: norm(title), content });
+
+  it("normaliza sin tildes para comparar", () => {
+    expect(norm("Distribución Binomial")).toBe("distribucion binomial");
+  });
+
+  it("el núcleo del título deja fuera el sustantivo genérico inicial", () => {
+    expect(coreTitle("distribucion binomial")).toBe("binomial");
+    expect(coreTitle("teorema de la probabilidad total")).toBe("probabilidad total");
+    /* Sin sustantivo genérico, el núcleo es el título entero. */
+    expect(coreTitle("esperanza")).toBe("esperanza");
+  });
+
+  it("la página canónica del término gana a la que solo lo menciona", () => {
+    const canonica = scorePage(page("Distribución Binomial"), "binomial", ["binomial"]);
+    const derivada = scorePage(page("Aproximación Normal de la Binomial"), "binomial", ["binomial"]);
+    expect(canonica).toBeGreaterThan(derivada);
+  });
+
+  it("el contenido va antes que las fuentes", () => {
+    const contenido = scorePage(page("Varianza"), "varianza", ["varianza"]);
+    const fuente = scorePage(page("Varianza", false), "varianza", ["varianza"]);
+    expect(contenido).toBeGreaterThan(fuente);
+  });
+
+  it("empezar por lo escrito puntúa más que mencionarlo a mitad de palabra", () => {
+    const empieza = scorePage(page("Media aritmética"), "media", ["media"]);
+    const dentro = scorePage(page("Promedio"), "media", ["media"]);
+    expect(empieza).toBeGreaterThan(dentro);
   });
 });
