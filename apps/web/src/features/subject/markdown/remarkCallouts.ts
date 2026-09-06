@@ -125,7 +125,7 @@ export function remarkCallouts() {
           type: "calloutPart",
           data: { hName: "figcaption" },
           children: [
-            span("figLabel", labelFor(kind, id)),
+            span("figLabel", labelFor(kind)),
             ...(extra ? [span("calloutTitle", extra)] : []),
             ...(quote.children ?? []),
           ],
@@ -144,7 +144,7 @@ export function remarkCallouts() {
         return;
       }
 
-      const head: MdNode[] = [span("calloutLabel", labelFor(kind, title))];
+      const head: MdNode[] = [span("calloutLabel", labelFor(kind))];
       if (title) head.push(span("calloutTitle", title));
 
       quote.data = {
@@ -158,8 +158,12 @@ export function remarkCallouts() {
   };
 }
 
-function labelFor(kind: string, title: string): string {
-  const label = CALLOUT_LABELS[kind] ?? CALLOUT_LABELS.nota ?? "Nota";
-  if (kind === "figura") return title ? `Figura · ${title}` : "Figura";
-  return label;
+/**
+ * Rótulo en versalita del aviso. No lleva NUNCA el «título» del callout: en
+ * `> [!figura] id` ese primer token es el identificador del bundle, no texto
+ * para el lector (el baseline no lo muestra). El id sigue en `data-fig`, que es
+ * donde lo busca `App.mountFigures`.
+ */
+function labelFor(kind: string): string {
+  return CALLOUT_LABELS[kind] ?? CALLOUT_LABELS.nota ?? "Nota";
 }

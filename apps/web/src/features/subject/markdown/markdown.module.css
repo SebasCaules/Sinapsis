@@ -274,12 +274,17 @@
 }
 .prose :global(.figura figcaption p) { margin: 0 0 6px; }
 .prose :global(.figura figcaption > :last-child) { margin-bottom: 0; }
+/* El rótulo del epígrafe usa `--text-3`, no `--u0`: a 10,5 px no es texto grande,
+   así que le corre el 4,5:1 de AA y `--u0` sobre `--surface` medía 4,46 en
+   pergamino. Con `--text-3` los tres temas quedan arriba del umbral —pergamino
+   5,62 · laurel 5,45 · claustro 5,91 sobre `--surface`; 5,85 / 5,60 / 4,73 sobre
+   `--elevated`— y sigue siendo la tinta apagada del sistema, no un color nuevo. */
 .prose :global(.figura .figLabel) {
   font: 600 10.5px var(--font-ui);
   font-style: normal;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--u0);
+  color: var(--text-3);
 }
 .prose :global(.figura .calloutTitle) {
   font: 600 13.5px var(--font-ui);

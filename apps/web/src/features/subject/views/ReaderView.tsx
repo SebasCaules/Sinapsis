@@ -13,6 +13,7 @@ import { routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
 import { Dialog, Icon, UiIcon } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { Markdown } from "../markdown/Markdown";
+import { MathText } from "../components/MathText";
 import { ErrorCard, SheetSkeleton } from "../components/States";
 import {
   useDeleteNote,
@@ -30,6 +31,18 @@ import css from "./ReaderView.module.css";
  * porque apuntes, índice, fuentes y backlinks tienen que seguir accesibles.
  */
 const WIDE = "(min-width: 1280px)";
+
+/**
+ * Un encabezado del wiki puede traer wikilinks: el índice muestra la ETIQUETA,
+ * no el marcado. `h.text` se deja INTACTO porque de él sale `h.id` y es lo que
+ * el autor escribe en `[[pagina#ancla]]` (N0-22): esto es solo presentación.
+ * La matemática en línea la compone `MathText`, igual que en el catálogo.
+ */
+const WIKILINK_EN_TITULO = /\[\[([^\]\n|]+)(?:\|((?:[^\]\n]|\](?!\]))+?))?\]\]/g;
+export const tocLabel = (text: string): string =>
+  text.replace(WIKILINK_EN_TITULO, (_, destino: string, etiqueta?: string) =>
+    (etiqueta ?? destino).trim(),
+  );
 
 function useWideViewport(): boolean {
   const [wide, setWide] = useState(() =>
@@ -271,9 +284,14 @@ export function ReaderView() {
             </div>
             {headings.length ? (
               <div className={css.toc}>
-                {headings.map((h: PageHeading) => (
+                {headings.map((h: PageHeading, i: number) => (
                   <a
-                    key={h.id}
+                    /* Dos encabezados distintos pueden dar el MISMO id —el
+                       compilador es el dueño del algoritmo y no desambigua
+                       (N0-22)—: `formulario-maestro` tiene «Independencia» dos
+                       veces. El ancla se conserva tal cual; lo que se
+                       desambigua es solo la clave de React, con el índice. */
+                    key={`${i}-${h.id}`}
                     href={`#${h.id}`}
                     className={h.level === 3 ? css.tocSub : css.tocItem}
                     data-active={activeHeading === h.id ? "true" : undefined}
@@ -283,7 +301,7 @@ export function ReaderView() {
                       history.replaceState(null, "", `#${h.id}`);
                     }}
                   >
-                    {h.text}
+                    <MathText text={tocLabel(h.text)} />
                   </a>
                 ))}
               </div>

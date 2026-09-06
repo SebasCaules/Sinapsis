@@ -207,11 +207,14 @@
 
 .segmentsRow { display: flex; gap: 4px; align-items: center; }
 
-/* El enlace mide 20 de alto (objetivo señalable); la barra de 5 la pinta ::after. */
+/* El enlace mide 24 de alto —objetivo táctil mínimo del contrato, medido antes
+   en 18,2 × 20—; la barra de 5 la pinta ::after, centrada, así que el segmento
+   se ve exactamente igual: lo que crece es el área señalable. */
 .segment {
   position: relative;
   flex: 1;
-  height: 20px;
+  min-height: 24px;
+  height: 24px;
   display: block;
   border-radius: 3px;
 }
@@ -253,8 +256,16 @@
   border-top: 1px solid var(--border);
 }
 
+/* 24 px de objetivo (medidos 15-17 de alto). `inline-flex` + `align-items` para
+   que el texto siga sentado donde estaba y la fila no cambie de alto. */
 .prev,
-.next { color: var(--text-2); text-decoration: none; }
+.next {
+  color: var(--text-2);
+  text-decoration: none;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
 .prev:hover,
 .next:hover { color: var(--primary); }
 .prev:focus-visible,
@@ -290,6 +301,9 @@
   padding-top: 4px;
   max-height: calc(100vh - 90px);
   overflow-y: auto;
+  /* Hueco para el botón flotante de la materia: tapaba «FUENTES» al final de la
+     columna, sin manera de sacarlo (visto a 1280 y a 1440). */
+  padding-bottom: 52px;
 }
 
 .card {
@@ -331,10 +345,14 @@
 .tocItem[data-active="true"],
 .tocSub[data-active="true"] { border-left-color: var(--primary); color: var(--primary); font-weight: 600; }
 
+/* Idem `.prev`/`.next`: 24 px de objetivo sin mover el texto (U30). */
 .cardLink {
   font: 500 12.5px/1.35 var(--font-ui);
   color: var(--text-2);
   text-decoration: none;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
 }
 .cardLink:hover { color: var(--primary); }
 
@@ -425,7 +443,8 @@
   cursor: pointer;
 }
 .noteSave:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-.noteSave:disabled { opacity: 0.45; cursor: default; }
+/* N0-25: un control deshabilitado baja a 0,75 y nada más. */
+.noteSave:disabled { opacity: 0.75; cursor: default; }
 .noteSave:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* Objetivo de 24 px de alto (U30): el relleno negativo lo consigue sin mover el

@@ -39,9 +39,14 @@ describe("callout `figura`", () => {
     expect(root.querySelector(".figFrame")).not.toBeNull();
   });
 
-  it("rotula la figura con su id y no promete ninguna entrega", () => {
+  it("el rótulo es «Figura» a secas: el id no es texto para el lector", () => {
+    /* §4-D: `labelFor` mostraba «Figura · <id>» y el id es el nombre interno del
+       bundle (`U0-FUBINI-ORDEN-DE-INTEGRACION`), que el baseline nunca dibuja.
+       El id sigue estando donde importa: en `data-fig`. */
     const root = html("> [!figura] normal-densidad\n> Epígrafe.");
-    expect(root.querySelector(".figLabel")?.textContent).toBe("Figura · normal-densidad");
+    expect(root.querySelector(".figLabel")?.textContent).toBe("Figura");
+    expect(root.querySelector("figcaption")?.textContent).not.toContain("normal-densidad");
+    expect(root.querySelector("figure")?.getAttribute("data-fig")).toBe("normal-densidad");
     expect(root.textContent).not.toContain("Sprint");
   });
 

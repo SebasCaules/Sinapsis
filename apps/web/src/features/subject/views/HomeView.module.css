@@ -123,10 +123,17 @@
 
 .progressCount { font: 500 13px var(--font-mono); color: var(--text-3); }
 
+/* La pista VACÍA es `--border-2`, no `--track`.
+   `--track` es la tinta de «trazo que se tiene que ver» (3,2:1 sobre la hoja) y
+   a 0/11 leía como barra LLENA: la unidad sin empezar parecía terminada. El
+   baseline pinta la pista con el mismo valor que `--border-2` —medido sobre
+   `inicio-pergamino-baseline.png`, rgb(201,188,160) = #c9bca0, que es
+   exactamente el `--border-2` de pergamino—, así que el relleno se distingue de
+   un vistazo. Vale para los tres temas: es un token, no un literal. */
 .totalTrack {
   height: 6px;
   border-radius: 3px;
-  background: var(--track);
+  background: var(--border-2);
   overflow: hidden;
 }
 .totalFill {
@@ -175,12 +182,13 @@
   white-space: nowrap;
 }
 
+/* Misma pista vacía que `.totalTrack`: `--border-2`. */
 .rowTrack {
   flex: none;
   width: 260px;
   height: 5px;
   border-radius: 3px;
-  background: var(--track);
+  background: var(--border-2);
   overflow: hidden;
 }
 .rowFill {

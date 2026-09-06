@@ -48,6 +48,50 @@ node scripts/smoke.mjs                # verificación sin runtime
 Tampoco entran `core.js` ni el resto del chrome del baseline (header, sidebar,
 lector, paleta, grafo, flashcards, quiz, selector de tema).
 
+### 2.1 Divergencias declaradas de `figures.css` respecto del baseline
+
+`packages/runtime/src/styles/figures.css` era **byte a byte** el del baseline.
+Ya no lo es. Cada divergencia lleva en el código la sigla del agente que la
+introdujo, y son estas tres —ninguna cambia el dibujo de una figura:
+
+| Marca | Regla | Por qué | Efecto en el baseline |
+|---|---|---|---|
+| `[F5]` | `@import "katex/dist/katex.min.css";` (línea 9) | En el baseline la hoja de KaTeX la cargaba `index.html` para todo el documento; en la plataforma solo la traía el lector, así que al entrar directo a una vista de herramienta la matemática salía **duplicada** (el bloque `.katex-mathml`, que esa hoja esconde, quedaba visible) y sin tipografía. Medido: 14 fórmulas en el explorador, 72 en calculadoras, 5 en el laboratorio, 4 en el taller. | Ninguno: el baseline no la necesita. Cuesta ~9 kB comprimidos duplicados en el build. |
+| `[F5]` | `.fig-tex:has(> code)` | Cuando `putTex` no puede componer, deja el LaTeX crudo en un `<code>`; como ese rótulo es un overlay (`position: absolute`, `nowrap`) una línea larga se iba muy afuera de la hoja (medido: 1585 px de ancho de contenido en una hoja de 840). La regla lo devuelve al flujo, debajo del lienzo. | Ninguno: `:has(> code)` acota la regla **exactamente** al repliegue, y con KaTeX disponible el hijo es `.katex`. |
+| `[X5]` | `min-height: 24px` en `.fig-ctl.fig-toggle label` | La casilla del conmutador mide 15 × 15 y el objetivo señalable quedaba por debajo del mínimo de 24 px del contrato (hallazgo 29 de la revisión de diseño). Se agranda la **etiqueta**, que envuelve a la casilla y la activa: medido 193,6 × 21,6 → 193,6 × 24. La casilla NO se toca. | Ninguno visible: la etiqueta crece 2,4 px dentro de una fila de controles que ya mide más. |
+
+> **Atribución corregida.** La revisión de diseño anotó las casillas de 15 × 15
+> como «del bundle de Proba» y las pasó al orquestador. No lo son: el bundle no
+> tiene **ni una** casilla ni un radio propios —cero apariciones de
+> `type="checkbox"` / `type="radio"` en los 15 scripts y en el `tool-push.json`
+> generado—. El control lo dibuja el runtime de la plataforma
+> (`packages/runtime/src/figures.ts` → `Fig.toggle`) y lo estila el `figures.css`
+> del runtime, así que la corrección va ahí y la hereda **cualquier** materia,
+> no solo Proba. Por eso **no hizo falta volver a subir el bundle**: sus cinco
+> hojas (`lab`, `lookup`, `taller`, `tools`, `vocab`) no cambiaron.
+
+### 2.2 `window.katex` lo publica el runtime
+
+El baseline definía **`window.katex`** como global desde su `index.html`, y los
+scripts portados lo dan por sentado: `figures.js` → `putTex` compone con
+`window.katex.render(...)` y, si no está, cae al repliegue del `<code>` con el
+LaTeX crudo. En la plataforma ese global no existía (verificado:
+`typeof window.katex === "undefined"` mientras `App.katex` sí era función), y
+por eso salían crudas **22 fórmulas de figura** en 6 páginas del wiki —6 en
+`tecnica-derivadas-parciales`, 5 en `proceso-de-poisson`, 4 en
+`tecnica-integrales-dobles`, 3 en `cadenas-de-markov`, 3 en
+`proceso-de-bernoulli` y 1 en `datos-agrupados`.
+
+Ahora lo publica `installRuntime` (`packages/runtime/src/index.ts`) junto con
+`window.App`, `window.M` y `window.SinapsisRuntime`, y lo retira el teardown
+**solo si sigue siendo el suyo** (una página que traiga su propio KaTeX manda).
+Con eso `putTex` queda verbatim y conserva sus macros propias (`macros()` mezcla
+las `MACROS` de `figures.ts` con `A.KATEX_MACROS`), que es lo que pide P4-1; la
+alternativa —cambiar `putTex` para usar `A.katex`— las habría perdido.
+
+El bundle **no cambia**: sigue sin declarar KaTeX y sigue asumiendo el global,
+igual que en el baseline.
+
 ---
 
 ## 3. Adaptaciones aplicadas
@@ -560,3 +604,5 @@ completo:
 | **P4-6** | La burbuja ⌘J se monta en un host propio con clase `sinapsis-tool` y `display: contents` en línea, en vez de agregar una regla CSS sin envolver. |
 | **P4-7** | Los reemplazos de `App.$`/`$$`/`katex` son **equivalentes funcionales**, no meras guardias: el bundle anda contra el runtime tal como está hoy y sigue andando cuando R4 agregue los miembros. |
 | **P4-8** | El CSS se genera con `scripts/wrap-css.mjs` en vez de editarse a mano, para poder regenerarlo cuando cambie el baseline y para que el criterio de recorte quede escrito en código. |
+| **X5-1** | El objetivo señalable del conmutador de figura se arregla en `figures.css` del **runtime**, no en el CSS del bundle: el bundle no tiene casillas propias y la corrección vale para cualquier materia. Queda como tercera divergencia declarada (§2.1) en vez de como parche de Proba. |
+| **X5-2** | `window.katex` lo publica el **runtime** (§2.2) en vez de reescribir `putTex` para que use `A.katex`: así el script portado sigue siendo verbatim (P4-1) y no pierde las macros de `figures.ts`. |

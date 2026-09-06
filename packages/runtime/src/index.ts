@@ -21,6 +21,7 @@
          <div class="fig-host"></div><figcaption>…</figcaption>
        </figure>
    ============================================================ */
+import katex from "katex";
 import type { SinapsisRuntime, ThemeId, ViewFn } from "@sinapsis/contract";
 import { createCompatApp, type CompatHandle, type RuntimeApp, type SubjectContext } from "./compat.js";
 import { createLoader, type BundleInfo, type BundleLoader } from "./loader.js";
@@ -73,6 +74,19 @@ export interface Runtime extends SinapsisRuntime {
 
 let current: Runtime | null = null;
 let currentTeardown: (() => void) | null = null;
+
+/**
+ * `window` con `katex` como lo trata el runtime: opcional y sin tipo.
+ *
+ * Los tipos de `katex` traen `export as namespace katex`, o sea un global UMD
+ * OBLIGATORIO y con el tipo del namespace del módulo; el `katex?: unknown` del
+ * contrato se intersecta con él y `window.katex` termina siendo obligatorio (no
+ * se puede `delete`) y de un tipo al que el default export no asigna. Esta vista
+ * angosta es la misma que ya usa `figures.ts` para leerlo.
+ */
+function globals(): { katex?: unknown } {
+  return window as unknown as { katex?: unknown };
+}
 
 /** Runtime instalado, o null. */
 export function getRuntime(): Runtime | null {
@@ -172,6 +186,9 @@ export function installRuntime(ctx: SubjectContext): Runtime {
       if (window.App === (app as unknown as Window["App"])) delete window.App;
       if (window.M === (app.M as unknown as Window["M"])) delete window.M;
       if (window.SinapsisRuntime === runtime) delete window.SinapsisRuntime;
+      // solo se retira el que publicó ESTE runtime: si lo puso otro, se respeta
+      const g = globals();
+      if (g.katex === katex) delete g.katex;
     }
   };
 
@@ -180,6 +197,14 @@ export function installRuntime(ctx: SubjectContext): Runtime {
     window.App = app;
     window.M = app.M;
     window.SinapsisRuntime = runtime;
+    /* El baseline cargaba KaTeX como global desde `index.html` y los bundles lo
+       asumen: `figures.js` → `putTex` compone con `window.katex` y, sin el
+       global, las fórmulas de las figuras salen como LaTeX crudo. Se publica
+       SOLO si nadie más lo puso (una página que traiga su propio KaTeX manda), y
+       el teardown lo retira. Con esto `putTex` queda verbatim, con sus macros
+       propias, que es lo que pide P4-1. */
+    const g = globals();
+    if (!g.katex) g.katex = katex;
   }
   return runtime;
 }

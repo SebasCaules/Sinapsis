@@ -40,9 +40,18 @@ test("la página con figura la monta dentro del hueco del callout", async ({ pag
   await expect(figure(page).locator(".figFrame")).toHaveCount(0);
   await expect(figure(page).locator(".fig-missing")).toHaveCount(0);
 
-  // El epígrafe se lee igual: rótulo «Figura · id» y el texto del callout.
-  await expect(figure(page).locator("figcaption")).toBeVisible();
-  await expect(figure(page).getByText(`Figura · ${target.fig}`)).toBeVisible();
+  /* El epígrafe se lee igual, pero el rótulo es «Figura» A SECAS (§4-D): el
+     primer token de `> [!figura] <id>` es el identificador del bundle, no texto
+     para el lector, y el baseline no lo dibuja. El id sigue estando donde lo
+     busca `mountFigures` —`data-fig`, que esta misma prueba afirma arriba—, así
+     que acá se comprueba el epígrafe DE VERDAD: el rótulo, que el id no se
+     filtre al texto, y que el texto del callout esté. */
+  const epigrafe = figure(page).locator("figcaption");
+  await expect(epigrafe).toBeVisible();
+  await expect(epigrafe.locator("p.figLabel")).toHaveText("Figura");
+  await expect(epigrafe).not.toContainText(target.fig);
+  // el epígrafe no es solo el rótulo: abajo va el texto que escribió el wiki
+  expect(((await epigrafe.innerText()) || "").replace(/^Figura\s*/i, "").trim().length).toBeGreaterThan(10);
 
   await figure(page).scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(SHOTS_DIR, `figura-${target.fig}.png`) });

@@ -155,5 +155,13 @@ declare global {
     SinapsisRuntime?: SinapsisRuntime;
     App?: CompatApp;
     M?: CompatApp["M"];
+    /**
+     * KaTeX como global, que es como lo cargaba el `index.html` del baseline y
+     * como lo asumen los bundles (`figures.js` → `putTex` compone con
+     * `window.katex`). Lo publica el runtime al instalarse y lo retira al
+     * desmontarse. Sin tipo: el contrato no depende de `katex`, y quien lo usa
+     * ya lo hace con acceso laxo.
+     */
+    katex?: unknown;
   }
 }

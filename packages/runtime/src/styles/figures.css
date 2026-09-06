@@ -19,8 +19,15 @@
    Todos los colores salen de los tokens --* de styles.css, así que los tres
    temas (pergamino, laurel, claustro) quedan cubiertos sin colores nuevos.
 
-   Única divergencia respecto del `figures.css` del baseline: el `@import` de
-   arriba (el baseline no lo necesita porque su `index.html` carga KaTeX).
+   Divergencias respecto del `figures.css` del baseline, todas marcadas en el
+   código con la sigla del agente que las introdujo y declaradas en
+   `examples/proba/tools/proba-tools/ADAPTACIONES.md`:
+     · [F5] el `@import` de KaTeX de arriba (el baseline no lo necesita porque su
+       `index.html` carga la librería para todo el documento);
+     · [F5] `.fig-tex:has(> code)`, que contiene el repliegue de `Fig.tex` (en el
+       baseline nunca se dispara);
+     · [X5] `min-height` de 24 px en la etiqueta de `.fig-toggle`, para que el
+       objetivo de la casilla llegue al mínimo del contrato.
    ============================================================ */
 
 /* ---------- lienzo ---------- */
@@ -216,9 +223,14 @@
   align-items: center;
   gap: 7px;
 }
+/* La casilla mide 15 × 15 y no se toca: agrandarla cambiaría el aspecto de toda
+   figura con conmutador. El objetivo señalable es la ETIQUETA —que envuelve a la
+   casilla y la activa—, así que el mínimo de 24 px del contrato se consigue ahí,
+   sin mover ni un píxel del dibujo. Medido: 193,6 × 21,6 → 193,6 × 24.  [X5] */
 .fig-ctl.fig-toggle label {
   justify-content: flex-start;
   cursor: pointer;
+  min-height: 24px;
 }
 .fig-ctl.fig-toggle input[type="checkbox"] {
   width: 15px;
