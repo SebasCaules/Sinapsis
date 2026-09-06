@@ -473,14 +473,25 @@ helper del runtime, un comportamiento del lector, un arreglo de un bug de la pla
 es trabajo de la materia y no ocupa a la plataforma. Tampoco se propone «de paso» algo que
 no estaba en el pedido del usuario.
 
-1. **Pedirle el visto bueno al usuario.** Una propuesta crea una rama y un commit en el
+1. **Pedirle el visto bueno al usuario.** Una propuesta crea una rama y dos commits en el
    repositorio de la plataforma: no se hace sin que lo pida o lo autorice.
 
-2. **Implementar el cambio en el repositorio de la plataforma**, mínimo y coherente: un
+2. **Comprobar que la plataforma esté lista.** El comando trabaja sobre el árbol de trabajo
+   del repositorio de Sinapsis, así que tiene que estar en `main` y sin cambios ajenos:
+
+   ```bash
+   git -C "$SINAPSIS_HOME" rev-parse --abbrev-ref HEAD   # tiene que decir main
+   git -C "$SINAPSIS_HOME" status --porcelain            # solo lo que va a proponer
+   ```
+
+   Si hay cambios de otro que no son suyos, **no los proponga**: avise al usuario. El CLI se
+   niega igual si `--files` no los declara, pero es mejor verlo antes.
+
+3. **Implementar el cambio en el repositorio de la plataforma**, mínimo y coherente: un
    cambio por propuesta. Si toca `packages/contract`, el campo nuevo va **opcional y con
    default**, con sus tests, para que las materias ya sincronizadas sigan validando.
 
-3. **Proponer:**
+4. **Proponer:**
 
    ```bash
    pnpm --dir "$SINAPSIS_HOME" sinapsis -- propose \
@@ -493,20 +504,38 @@ no estaba en el pedido del usuario.
 
    El CLI comprueba que la plataforma esté en `main` y que lo único modificado sea lo que
    `--files` declara; corre los gates (`pnpm typecheck`, `pnpm test`, y `pnpm build` si toca
-   `apps/`) **antes** de tocar git; crea la rama `proposal/<slug>-<fecha>-<titulo>`; escribe
-   `proposals/<fecha>-<slug>-<titulo>.md` con motivo, alcance (la lista real de archivos),
-   compatibilidad y la salida literal de los gates; commitea todo en la rama; abre el PR si
-   hay remoto en GitHub y `gh` autenticado, y si no anota la propuesta en
-   `proposals/INBOX.md` de `main`; y vuelve a `main`.
+   `apps/`) **antes** de tocar git; crea la rama; escribe la propuesta con motivo, alcance
+   (la lista real de archivos), compatibilidad y los conteos y últimas líneas de los gates;
+   commitea todo en la rama; abre el PR si hay remoto en GitHub y `gh` autenticado, y si no
+   anota la propuesta en `proposals/INBOX.md` de `main` **en un commit aparte**; y vuelve a
+   `main`.
 
-   Si los gates fallan **no crea nada**: corrija y vuelva a ejecutar el mismo comando.
-   `--skip-gates` es solo para propuestas que no cambian código ejecutable.
+   Los nombres son predecibles, y conviene nombrarlos en el reporte:
 
-4. **Cerrar con la instrucción para el usuario**, que es la que imprime el CLI:
+   | Qué | Cómo se llama | Ejemplo |
+   |---|---|---|
+   | Rama | `proposal/<materia>-<AAAAMMDD>-<titulo>` | `proposal/proba-20260906-badge-en-el-rail` |
+   | Propuesta | `proposals/<AAAA-MM-DD>-<materia>-<titulo>.md` | `proposals/2026-09-06-proba-badge-en-el-rail.md` |
+
+   `<titulo>` es el título en minúsculas y con guiones, recortado a 60 caracteres por el
+   guion anterior. Dos propuestas abiertas a la vez no se pisan; dos propuestas de la misma
+   materia con el mismo título y el mismo día sí, y la segunda se niega.
+
+   Si los gates fallan **no crea nada** (ni rama, ni propuesta, ni fila): corrija y vuelva a
+   ejecutar el mismo comando. `--skip-gates` es solo para propuestas que no cambian código
+   ejecutable, y el orquestador lo comprueba.
+
+   Cuando el comando se niega, el motivo está en la **primera** línea roja de la salida. Lo
+   que viene después (`ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL`, `ELIFECYCLE`) es el eco de pnpm
+   por el código de salida 1, no un error aparte: no lo reporte como si fuera la causa.
+
+5. **Cerrar con la instrucción para el usuario**, que es la que imprime el CLI:
 
    > Abra una sesión de Claude Code en `<repo de Sinapsis>` y ejecute `/sinapsis-review`.
 
-   La materia **no** revisa ni mergea su propia propuesta. Decide la plataforma.
+   Nombre también la rama y el archivo de la propuesta. La materia **no** revisa ni mergea
+   su propia propuesta, ni le pone el veredicto, ni toca `proposals/INBOX.md` a mano:
+   decide la plataforma.
 
 ---
 

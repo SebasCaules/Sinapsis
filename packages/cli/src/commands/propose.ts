@@ -22,6 +22,10 @@
  * propio. El INBOX es el índice del orquestador y tiene que verse sin cambiar de
  * rama; escribirlo también en la rama no agrega nada y hace conflictar dos
  * propuestas abiertas a la vez. La rama lleva el cambio y la propuesta, nada más.
+ *
+ * Decisión Q5-1: la fila va al final de la tabla de **abiertas**, no al final del
+ * archivo. El INBOX tiene después la tabla de las cerradas, que escribe
+ * `/sinapsis-review` al adjudicar.
  */
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -113,7 +117,7 @@ export async function runPropose(opts: ProposeOptions, ctx: Ctx): Promise<number
   const paths = changes.map((c) => c.path);
   const date = isoDate(new Date());
   const slug = normalizeSlug(subject) || "materia";
-  const titleSlug = (normalizeSlug(title) || "propuesta").slice(0, 60);
+  const titleSlug = shorten(normalizeSlug(title) || "propuesta", 60);
   const branch = `proposal/${slug}-${date.replaceAll("-", "")}-${titleSlug}`;
   const file = path.join(PROPOSALS_DIR, `${date}-${slug}-${titleSlug}.md`);
 
@@ -180,6 +184,8 @@ export async function runPropose(opts: ProposeOptions, ctx: Ctx): Promise<number
   ctx.out("");
   ctx.out(pc.bold("Siguiente paso (lo hace el usuario, no la materia):"));
   ctx.out(`  Abra una sesión de Claude Code en \`${root}\` y ejecute \`/sinapsis-review\`.`);
+  ctx.out(`  Rama a revisar: ${pc.bold(branch)}`);
+  ctx.out(`  Propuesta: ${file}`);
   return 0;
 }
 
@@ -201,7 +207,9 @@ async function runGates(ctx: Ctx, repo: string, paths: readonly string[]): Promi
   for (const script of scripts) {
     ctx.out(pc.dim(`  gate: pnpm ${script}…`));
     const result = await runCommand("pnpm", [script], repo);
-    results.push({ name: `pnpm ${script}`, code: result.code, output: result.output });
+    // La ruta absoluta del repositorio se reemplaza por `.`: la propuesta la lee el
+    // orquestador en otra máquina (y en un worktree), y esas rutas solo hacen ruido.
+    results.push({ name: `pnpm ${script}`, code: result.code, output: result.output.replaceAll(repo, ".") });
     if (result.code === 0) {
       ctx.out(`  ${pc.green("OK")} pnpm ${script}`);
       continue;
@@ -239,7 +247,7 @@ export function renderProposal(input: ProposalInput): string {
     ...input.changes.map((c) => `- \`${c.path}\` — ${changeLabel(c.status)}`),
     "",
     contract
-      ? "**Contrato afectado: `packages/contract`.** Un cambio de contrato necesita versión o campo opcional con default, tests, y una fila en `docs/DECISIONS.md` (regla de `docs/PROPOSALS.md`)."
+      ? "**Contrato afectado: `packages/contract`.** Si esto cambia el esquema, necesita versión del contrato o campo opcional con default, tests, y una fila en `docs/DECISIONS.md`; si solo documenta o prueba una decisión ya tomada, alcanza con decir cuál (regla de `docs/PROPOSALS.md`)."
       : "Contratos afectados: ninguno (`packages/contract` no se toca).",
   ];
 
@@ -261,8 +269,15 @@ export function renderProposal(input: ProposalInput): string {
       : input.gates.flatMap((gate) => [
           `### \`${gate.name}\` — ${gate.code === 0 ? "OK" : `falló (código ${gate.code})`}`,
           "",
+          // Lo comparable entre dos máquinas: los conteos. El resto de la salida
+          // lleva tiempos y advertencias que cambian en cada corrida.
+          ...(gateCounts(gate.output).length > 0
+            ? ["Conteos (esto es lo que el orquestador vuelve a obtener en la rama):", "", ...gateCounts(gate.output), ""]
+            : []),
+          "Últimas líneas:",
+          "",
           "```",
-          tail(gate.output.trimEnd(), 40) || "(sin salida)",
+          tail(gate.output.trimEnd(), 20) || "(sin salida)",
           "```",
           "",
         ]);
@@ -297,6 +312,23 @@ export function renderProposal(input: ProposalInput): string {
     "(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)",
     "",
   ].join("\n");
+}
+
+/**
+ * Los conteos de vitest de una salida de `pnpm test` (`Tests  31 passed (31)`),
+ * uno por paquete, como viñetas.
+ *
+ * Es lo único de la salida que sobrevive al cambio de máquina: el orquestador
+ * corre los mismos gates en la rama y compara **estos números**, no el texto
+ * literal, que trae tiempos y advertencias distintas en cada corrida.
+ */
+export function gateCounts(output: string): string[] {
+  const out: string[] = [];
+  for (const match of output.matchAll(/^(?:(\S+)\s+test:)?\s*Tests\s{2,}(\S.*?)\s*$/gm)) {
+    const where = match[1];
+    out.push(`- ${where ? `\`${where}\`: ` : ""}${match[2]}`);
+  }
+  return out;
 }
 
 /** Escribe el enlace del PR en el frontmatter y lo suma al commit de la propuesta. */
@@ -377,7 +409,7 @@ async function noteInInbox(
   }
 
   const row = `| ${entry.date} | ${entry.slug} | ${cell(entry.title)} | ${entry.branch} | abierta |`;
-  await writeFile(full, `${text.replace(/\n+$/, "")}\n${row}\n`, "utf8");
+  await writeFile(full, insertInboxRow(text, row), "utf8");
 
   const added = await git(repo, ["add", "--", INBOX_FILE]);
   const committed =
@@ -419,6 +451,18 @@ function isoDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+/**
+ * Recorta un slug a `max` caracteres **por el guion anterior**, para que el nombre
+ * de la rama y del archivo terminen en una palabra entera y no en un muñón
+ * (`…-es-la-m`). Si la primera palabra ya es más larga que el límite, corta seco.
+ */
+export function shorten(slug: string, max: number): string {
+  if (slug.length <= max) return slug;
+  const cut = slug.slice(0, max);
+  const lastDash = cut.lastIndexOf("-");
+  return (lastDash > 0 ? cut.slice(0, lastDash) : cut).replace(/-+$/, "");
+}
+
 /** Últimas `n` líneas de una salida larga, con la marca de lo recortado. */
 export function tail(text: string, n: number): string {
   const lines = text.replace(/\s+$/, "").split("\n");
@@ -434,4 +478,25 @@ function yaml(text: string): string {
 /** Celda de la tabla del INBOX: sin barras ni saltos que rompan el markdown. */
 function cell(text: string): string {
   return text.replaceAll("|", "\\|").replace(/\s*\n\s*/g, " ");
+}
+
+/**
+ * Agrega la fila al final de la **primera** tabla del INBOX, que es la de las
+ * propuestas abiertas.
+ *
+ * No se agrega al final del archivo: el INBOX tiene después la tabla de las
+ * propuestas cerradas (la escribe `/sinapsis-review` al adjudicar), y una fila de
+ * cinco columnas caída ahí queda invisible para el orquestador y con las columnas
+ * cambiadas. Si el archivo no tiene ninguna tabla, se agrega al final, que es lo
+ * único sensato que queda.
+ */
+export function insertInboxRow(text: string, row: string): string {
+  const lines = text.replace(/\n+$/, "").split("\n");
+  const separator = lines.findIndex((line) => /^\|\s*:?-{3,}/.test(line.trim()));
+  if (separator === -1) return `${lines.join("\n")}\n${row}\n`;
+
+  let end = separator + 1;
+  while (end < lines.length && lines[end]!.trim().startsWith("|")) end += 1;
+  lines.splice(end, 0, row);
+  return `${lines.join("\n")}\n`;
 }

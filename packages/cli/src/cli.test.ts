@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SubjectConfig, SyncPayload, ToolPush } from "@sinapsis/contract";
 import { compileStudy, studyCounts } from "@sinapsis/markdown";
 import { cleanArgv, extractCwd, main } from "./cli.js";
+import { gateCounts, shorten } from "./commands/propose.js";
 import { extraChecks } from "./commands/validate.js";
 import { invocationCwd, type Ctx } from "./context.js";
 
@@ -898,5 +899,144 @@ describe("sinapsis propose", () => {
     expect(ctx.stderr.join("\n")).toContain("Los gates no pasan");
     const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
     expect(branches.trim()).toBe("");
+    // Tampoco quedó la fila del INBOX ni un commit suelto en main.
+    const inbox = await readFile(path.join(repo, "proposals", "INBOX.md"), "utf8");
+    expect(inbox).not.toContain("Con gates");
+    const { stdout: log } = await run("git", ["log", "--oneline", "-1"], { cwd: repo });
+    expect(log).toContain("gates rotos");
   }, 60_000);
+
+  it("falla si --files nombra un archivo sin cambios", async () => {
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+
+    const ctx = testCtx(repo);
+    const code = await main(
+      [
+        "propose",
+        "--repo",
+        repo,
+        "--subject",
+        "proba",
+        "--title",
+        "Archivo fantasma",
+        "--body",
+        "Motivo.",
+        "--files",
+        "packages/contract/src/index.ts,packages/contract/src/no-existe.ts",
+        "--skip-gates",
+      ],
+      ctx,
+    );
+    expect(code).toBe(1);
+    expect(ctx.stderr.join("\n")).toContain("packages/contract/src/no-existe.ts");
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches.trim()).toBe("");
+  });
+
+  it("dos propuestas abiertas a la vez no se pisan: dos ramas y dos filas en el INBOX", async () => {
+    const propose = async (subject: string, title: string, file: string) => {
+      await writeFile(path.join(repo, file), `export const x = "${title}";\n`, "utf8");
+      const ctx = testCtx(repo);
+      const code = await main(
+        ["propose", "--repo", repo, "--subject", subject, "--title", title, "--body", "Motivo.", "--skip-gates"],
+        ctx,
+      );
+      expect(ctx.stderr.join("\n")).toBe("");
+      expect(code).toBe(0);
+    };
+
+    await propose("proba", "Primera", "packages/contract/src/index.ts");
+    await propose("algebra", "Segunda", "packages/contract/src/otro.ts");
+
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches).toContain("-primera");
+    expect(branches).toContain("-segunda");
+
+    const inbox = await readFile(path.join(repo, "proposals", "INBOX.md"), "utf8");
+    expect(inbox).toContain("| proba | Primera |");
+    expect(inbox).toContain("| algebra | Segunda |");
+    // Cada fila viajó en su propio commit de main, y main quedó limpio.
+    const { stdout: log } = await run("git", ["log", "--oneline", "-2"], { cwd: repo });
+    expect(log).toContain("proposals: algebra — Segunda");
+    expect(log).toContain("proposals: proba — Primera");
+    const { stdout: status } = await run("git", ["status", "--porcelain"], { cwd: repo });
+    expect(status.trim()).toBe("");
+  });
+
+  it("la fila entra en la tabla de abiertas, no al final de un INBOX con más secciones", async () => {
+    const inboxPath = path.join(repo, "proposals", "INBOX.md");
+    await writeFile(
+      inboxPath,
+      `${await readFile(inboxPath, "utf8")}\n## Cerradas\n\n| fecha | materia | título | veredicto |\n|---|---|---|---|\n| 2026-09-05 | proba | Vieja | aprobada |\n`,
+      "utf8",
+    );
+    await run("git", ["commit", "-qam", "INBOX con cerradas"], { cwd: repo });
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+
+    const ctx = testCtx(repo);
+    expect(
+      await main(
+        ["propose", "--repo", repo, "--subject", "proba", "--title", "Nueva", "--body", "Motivo.", "--skip-gates"],
+        ctx,
+      ),
+    ).toBe(0);
+
+    const lines = (await readFile(inboxPath, "utf8")).split("\n");
+    const nueva = lines.findIndex((l) => l.includes("| Nueva |"));
+    const cerradas = lines.findIndex((l) => l.startsWith("## Cerradas"));
+    expect(nueva).toBeGreaterThan(0);
+    expect(nueva).toBeLessThan(cerradas);
+    // Y la tabla de cerradas quedó intacta.
+    expect(lines[lines.length - 2]).toContain("| 2026-09-05 | proba | Vieja | aprobada |");
+  });
+
+  it("recorta el título largo por el guion: la rama no termina en un muñón", async () => {
+    expect(shorten("corto", 60)).toBe("corto");
+    expect(shorten("documentar-que-una-fase-compartida-entre-modalidades-es-la-misma", 60)).toBe(
+      "documentar-que-una-fase-compartida-entre-modalidades-es-la",
+    );
+    // Una sola palabra más larga que el límite se corta seco: no hay guion donde cortar.
+    expect(shorten("a".repeat(70), 60)).toBe("a".repeat(60));
+
+    await writeFile(path.join(repo, "packages", "contract", "src", "index.ts"), "export const x = 2;\n", "utf8");
+    const ctx = testCtx(repo);
+    expect(
+      await main(
+        [
+          "propose",
+          "--repo",
+          repo,
+          "--subject",
+          "proba",
+          "--title",
+          "Documentar que una fase compartida entre modalidades es la misma fase",
+          "--body",
+          "Motivo.",
+          "--skip-gates",
+        ],
+        ctx,
+      ),
+    ).toBe(0);
+    const { stdout: branches } = await run("git", ["branch", "--list", "proposal/*"], { cwd: repo });
+    expect(branches.trim()).toMatch(/-es-la$/);
+  });
+});
+
+describe("gateCounts", () => {
+  it("saca el conteo de vitest de cada paquete de una corrida recursiva", () => {
+    const output = [
+      "packages/contract test:  Test Files  3 passed (3)",
+      "packages/contract test:       Tests  31 passed (31)",
+      "packages/cli test:       Tests  35 passed | 2 skipped (37)",
+    ].join("\n");
+    expect(gateCounts(output)).toEqual([
+      "- `packages/contract`: 31 passed (31)",
+      "- `packages/cli`: 35 passed | 2 skipped (37)",
+    ]);
+  });
+
+  it("también sirve para una corrida de un solo paquete, y no inventa nada", () => {
+    expect(gateCounts("      Tests  7 passed (7)")).toEqual(["- 7 passed (7)"]);
+    expect(gateCounts("tsc --noEmit: Done")).toEqual([]);
+  });
 });
