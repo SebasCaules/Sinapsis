@@ -9,9 +9,10 @@ import {
   SiteTools,
   emptyBackup,
   emptySubjectState,
+  siteAssetBase,
   siteToolBase,
 } from "./site.js";
-import { SubjectConfig } from "./index.js";
+import { Page, PageMeta, SubjectConfig } from "./index.js";
 
 const config = SubjectConfig.parse({
   contract: 1,
@@ -115,5 +116,36 @@ describe("copia de seguridad del estado personal", () => {
     expect(LocalBackup.safeParse({ format: 99, savedAt: "x" }).success).toBe(false);
     expect(LocalBackup.safeParse({ ...emptyBackup(), subjects: { "Mal Slug": emptySubjectState() } }).success).toBe(false);
     expect(LocalBackup.safeParse({ ...emptyBackup(), landing: { hidden: ["ok", "NO OK"] } }).success).toBe(false);
+  });
+});
+
+describe("adjuntos de imagen (N0-61)", () => {
+  const page = {
+    slug: "des",
+    title: "DES",
+    type: "nota",
+    body: "![Feistel](../../assets/f.png)",
+  };
+
+  it("`assets` es opcional y nace vacío: una materia sin imágenes no cambia", () => {
+    expect(Page.parse(page).assets).toEqual([]);
+  });
+
+  it("un `pages.json` anterior a los adjuntos sigue validando", () => {
+    const parsed = SitePages.parse({
+      format: SITE_FORMAT,
+      pages: { des: { body: "texto", links: [], headings: [] } },
+    });
+    expect(parsed.pages["des"]?.assets).toEqual([]);
+  });
+
+  it("los adjuntos viajan con el cuerpo, no en los listados", () => {
+    const full = Page.parse({ ...page, assets: [{ ref: "../../assets/f.png", file: "abc123.png" }] });
+    expect(full.assets).toHaveLength(1);
+    expect(PageMeta.parse(full)).not.toHaveProperty("assets");
+  });
+
+  it("la base de los adjuntos es relativa al sitio y sin barra final", () => {
+    expect(siteAssetBase("cripto")).toBe("subjects/cripto/assets");
   });
 });

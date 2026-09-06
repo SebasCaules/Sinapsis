@@ -25,6 +25,24 @@ export type {
   CompileWikiResult,
 } from "./compile.js";
 
+export {
+  imageRefs,
+  isLocalImageRef,
+  extensionOf,
+  assetFileName,
+  capAssets,
+  readAssetIndex,
+  resolvePageAssets,
+  formatBytes as formatAssetBytes,
+  isAssetIndex,
+  ASSET_INDEX_FILE,
+  ASSET_INDEX_FORMAT,
+  IMAGE_EXTENSIONS,
+  MAX_ASSET_BYTES,
+  MAX_SUBJECT_ASSET_BYTES,
+} from "./assets.js";
+export type { WikiAsset, AssetIssue, AssetIndexType } from "./assets.js";
+
 export { compileStudy, studyCounts, planPhases, isEmptyStudy, emptyStudy, splitSections } from "./study.js";
 export type { CompileStudyOptions, CompileStudyResult, StudyCounts, StudySection } from "./study.js";
 

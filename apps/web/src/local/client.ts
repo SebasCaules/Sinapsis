@@ -244,7 +244,13 @@ export const localApi: ApiClient = {
         .filter((p): p is PageMeta => Boolean(p))
         .sort((a, b) => a.title.localeCompare(b.title, "es"));
 
-      const full: Page = { ...meta, links: body.links, headings: body.headings, body: body.body };
+      const full: Page = {
+        ...meta,
+        links: body.links,
+        headings: body.headings,
+        assets: body.assets,
+        body: body.body,
+      };
       return { page: full, backlinks, studied: page in subjectStateOf(getState(), slug).studied };
     },
 

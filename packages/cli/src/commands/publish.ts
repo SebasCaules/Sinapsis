@@ -24,7 +24,14 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import pc from "picocolors";
 import { plural, type SubjectConfig as SubjectConfigType } from "@sinapsis/contract";
-import { compileWiki, listWikiFiles } from "@sinapsis/markdown";
+import {
+  ASSET_INDEX_FILE,
+  ASSET_INDEX_FORMAT,
+  compileWiki,
+  formatAssetBytes,
+  listWikiFiles,
+  type WikiAsset,
+} from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
 import { ghReady, git, githubRemote, hasRef, repoRoot, runCommand } from "../git.js";
 import { countsByDivision, countsByType, heading, studyLine, warnings as printWarnings, webUrl } from "../report.js";
@@ -98,6 +105,13 @@ export async function runPublish(opts: PublishOptions, ctx: Ctx): Promise<number
   ctx.out("");
   studyLine(ctx, compiled.study);
   ctx.out(`  ${pc.dim(compiled.studyDir)}`);
+  if (compiled.assets.length > 0) {
+    const bytes = compiled.assets.reduce((sum, a) => sum + a.bytes, 0);
+    ctx.out("");
+    ctx.out(
+      `  Adjuntos: ${pc.bold(String(compiled.assets.length))} ${plural(compiled.assets.length, "imagen", "imágenes")} · ${formatAssetBytes(bytes)}`,
+    );
+  }
   ctx.out("");
   printWarnings(ctx, warnings);
   ctx.out("");
@@ -183,9 +197,10 @@ export async function runPublish(opts: PublishOptions, ctx: Ctx): Promise<number
       wikiRoot: compiled.wikiRoot,
       studyDir: compiled.studyDir,
       bundles,
+      assets: compiled.assets,
     });
     ctx.out(
-      `  copiados: ${pc.bold(String(copied.wiki))} .md · estudio: ${copied.study} ${plural(copied.study, "archivo", "archivos")} · bundles: ${bundles.length}`,
+      `  copiados: ${pc.bold(String(copied.wiki))} .md · estudio: ${copied.study} ${plural(copied.study, "archivo", "archivos")} · adjuntos: ${copied.assets} · bundles: ${bundles.length}`,
     );
 
     const rel = `${SUBJECTS_DIR}/${config.slug}`;
@@ -214,6 +229,7 @@ export async function runPublish(opts: PublishOptions, ctx: Ctx): Promise<number
       warnings,
       config,
       wiki: copied.wiki,
+      assets: copied.assets,
       study: copied.study,
     };
     const committed = await git(worktree, [
@@ -274,6 +290,8 @@ export interface CopySubjectInput {
   /** Carpeta del material de estudio, resuelta contra el config. */
   studyDir: string;
   bundles: readonly BuiltBundle[];
+  /** Adjuntos de imagen que el compilador resolvió (N0-61). */
+  assets: readonly WikiAsset[];
 }
 
 /**
@@ -283,7 +301,9 @@ export interface CopySubjectInput {
  * (`listWikiFiles`), no la carpeta entera: un vault de Obsidian trae adjuntos,
  * plantillas y `.obsidian/` que no son la materia.
  */
-export async function copySubject(input: CopySubjectInput): Promise<{ wiki: number; study: number }> {
+export async function copySubject(
+  input: CopySubjectInput,
+): Promise<{ wiki: number; study: number; assets: number }> {
   const { dest, config } = input;
   await mkdir(dest, { recursive: true });
 
@@ -308,6 +328,27 @@ export async function copySubject(input: CopySubjectInput): Promise<{ wiki: numb
   // --- estudio --------------------------------------------------------------
   const study = await copyTree(input.studyDir, path.join(dest, "estudio"));
 
+  // --- adjuntos -------------------------------------------------------------
+  // Los archivos van con su nombre publicado (`<hash>.<ext>`) y el índice
+  // traduce la ruta del vault a ese nombre: es lo que deja que `site build`
+  // compile esta copia al mismo resultado, sin los archivos originales.
+  if (input.assets.length > 0) {
+    const assetsDir = path.join(dest, "assets");
+    await mkdir(assetsDir, { recursive: true });
+    const index: Record<string, string> = {};
+    for (const asset of input.assets) {
+      const target = resolveInside(assetsDir, asset.file);
+      if (target === null) continue;
+      await copyFile(asset.source, target);
+      index[asset.ref] = asset.file;
+    }
+    await writeFile(
+      path.join(assetsDir, ASSET_INDEX_FILE),
+      `${JSON.stringify({ format: ASSET_INDEX_FORMAT, assets: index }, null, 2)}\n`,
+      "utf8",
+    );
+  }
+
   // --- bundles --------------------------------------------------------------
   for (const bundle of input.bundles) {
     const dir = path.join(dest, "tools", bundle.manifest.id);
@@ -321,7 +362,7 @@ export async function copySubject(input: CopySubjectInput): Promise<{ wiki: numb
     }
   }
 
-  return { wiki: files.length, study };
+  return { wiki: files.length, study, assets: input.assets.length };
 }
 
 /** Carpetas que nunca se copian del material de estudio. */
@@ -375,6 +416,7 @@ interface Summary {
   config: SubjectConfigType;
   wiki: number;
   study: number;
+  assets: number;
 }
 
 /** `Materia <slug>: <name> — N páginas, M bundles`. */
@@ -392,6 +434,7 @@ export function commitBody(s: Summary): string {
     `Divisiones declaradas: ${s.config.divisions.length}`,
     `Archivos del wiki copiados: ${s.wiki}`,
     `Material de estudio: ${s.study} ${plural(s.study, "archivo", "archivos")}`,
+    `Adjuntos de imagen: ${s.assets}`,
     `Bundles: ${s.bundles}`,
   ];
   if (s.warnings.length === 0) {
@@ -420,6 +463,7 @@ export function pullRequestBody(s: Summary): string {
     `- Páginas: **${s.pages}**`,
     `- Archivos del wiki: ${s.wiki}`,
     `- Material de estudio: ${s.study} archivo(s)`,
+    `- Adjuntos de imagen: ${s.assets}`,
     `- Bundles de herramientas: ${s.bundles}`,
     "",
     `## ${s.config.division.plural} (${s.config.divisions.length})`,

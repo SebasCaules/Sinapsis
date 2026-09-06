@@ -17,7 +17,7 @@
  * Todo se valida con los esquemas de `site.ts` ANTES de escribirlo: un archivo
  * que la web no podría parsear no llega a existir.
  */
-import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import pc from "picocolors";
 import {
@@ -35,11 +35,12 @@ import {
   SitePages,
   SiteSubject,
   SiteTools,
+  SITE_ASSETS_DIR,
   SITE_FORMAT,
   siteToolBase,
   type SiteCatalogEntry as SiteCatalogEntryType,
 } from "@sinapsis/contract/site";
-import { compileWiki } from "@sinapsis/markdown";
+import { compileWiki, type WikiAsset } from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
 import { buildBundle, findBundles, type BuiltBundle } from "../tools/bundle.js";
 import { GENERATOR } from "../version.js";
@@ -79,6 +80,8 @@ interface CompiledSubject {
   pages: unknown;
   tools: unknown;
   bundles: BuiltBundle[];
+  /** Adjuntos de imagen que hay que emitir bajo `<out>/<slug>/assets/` (N0-61). */
+  assets: readonly WikiAsset[];
   warnings: string[];
   /** Páginas totales y las que cuentan como contenido, para el resumen. */
   counts: { pages: number; content: number };
@@ -135,6 +138,15 @@ export async function runSiteBuild(opts: SiteBuildOptions, ctx: Ctx): Promise<nu
     await writeJson(path.join(dir, "subject.json"), subject.subject);
     await writeJson(path.join(dir, "pages.json"), subject.pages);
     await writeJson(path.join(dir, "tools.json"), subject.tools);
+    // Los adjuntos van tal cual, con el nombre publicado: el lector los pide
+    // por `siteAssetBase(slug) + "/" + file`, prefijado con `BASE_URL`.
+    if (subject.assets.length > 0) {
+      const assetsDir = path.join(dir, SITE_ASSETS_DIR);
+      await mkdir(assetsDir, { recursive: true });
+      for (const asset of subject.assets) {
+        await copyFile(asset.source, path.join(assetsDir, asset.file));
+      }
+    }
     for (const bundle of subject.bundles) {
       const problem = await writeBundleFiles(path.join(dir, "tools", bundle.manifest.id), bundle);
       if (problem !== null) {
@@ -262,7 +274,12 @@ async function compileSubject(ctx: Ctx, dir: string, builtAt: string): Promise<C
 
   const bodies: Record<string, unknown> = {};
   for (const page of pages) {
-    bodies[page.slug] = { body: page.body, links: page.links, headings: page.headings };
+    bodies[page.slug] = {
+      body: page.body,
+      links: page.links,
+      headings: page.headings,
+      assets: page.assets,
+    };
   }
   const sitePages = SitePages.parse({ format: SITE_FORMAT, pages: bodies });
   const siteTools = SiteTools.parse({ format: SITE_FORMAT, tools });
@@ -291,6 +308,7 @@ async function compileSubject(ctx: Ctx, dir: string, builtAt: string): Promise<C
     pages: sitePages,
     tools: siteTools,
     bundles,
+    assets: compiled.assets,
     warnings,
     counts: { pages: pages.length, content },
   };

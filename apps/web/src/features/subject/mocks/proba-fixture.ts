@@ -181,6 +181,7 @@ export function mockPageDetail(_slug: string, pageSlug: string): PageDetail {
     body,
     links: [],
     headings: headingsOf(body),
+    assets: [],
   };
   const backlinks =
     pageSlug === "distribucion-normal"

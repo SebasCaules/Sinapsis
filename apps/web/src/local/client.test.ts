@@ -75,9 +75,9 @@ const subject: SiteSubject = {
 const pages: SitePages = {
   format: 1,
   pages: {
-    media: { body: "La media es el centro de la distribución.", links: [], headings: [] },
-    varianza: { body: "La varianza mide la dispersión respecto de la media.", links: [{ slug: "media", text: "media" }], headings: [] },
-    "apunte-7": { body: "Notas sueltas sobre la media.", links: [], headings: [] },
+    media: { body: "La media es el centro de la distribución.", links: [], headings: [], assets: [] },
+    varianza: { body: "La varianza mide la dispersión respecto de la media.", links: [{ slug: "media", text: "media" }], headings: [], assets: [] },
+    "apunte-7": { body: "Notas sueltas sobre la media.", links: [], headings: [], assets: [] },
   },
 };
 
