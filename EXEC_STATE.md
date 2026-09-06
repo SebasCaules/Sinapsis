@@ -167,7 +167,7 @@ Iniciado el 2026-09-06 en autopilot; decisiones N0-40… en `docs/DECISIONS.md`.
 | S3-07 /sinapsis-review + propuesta de prueba | DONE | 5752f5d b2f3a62 edcf469 | Q5: flujo feliz + 5 casos negativos en un clon, 11 fricciones corregidas; propuesta real de proba (`Plan.tracks`) aprobada con `/sinapsis-review` (1 errata corregida al mergear, N0-43 ampliada) |
 | S3-08 E2E + diseño + fidelidad | DONE | 48e78c4 6f42c59 b6b8d60 | E5: 60 E2E (13 nuevas) · D5: 36 pantallas × 3 temas × 4 anchos, 33 fallas (25 corregidas) en `docs/DISENO-sprint3.md` · F5: 20 pantallas pareadas con la app original, 34 diferencias (25 intencionales, 9 defectos) en `docs/FIDELIDAD-sprint3.md`; los 7 defectos fuera de ownership los cierra X5 (ola 3) · N0-47 hallado en el smoke del orquestador |
 | S3-09 auditoría | DONE | 83e1420 4b1697d 111450f | AS: 4 hallazgos (3 medios, 1 bajo) todos corregidos por el orquestador (CSP sandbox en archivos de bundle, trust de KaTeX, `/\\host` externo, color de leyenda escapado); S-22/S-23 anotados · AC: 15 hallazgos (1 alto, 8 medios, 6 bajos), todos aceptados: AC-01/02/03/06 corregidos por el orquestador en el compilador; AC-04/05/07..15 corregidos por Y5 (runtime 133, cli 50, web 252 tests); S-25/S-26 anotados |
-| S3-10 contratos consolidados + handoff | TODO | | cierre |
+| S3-10 contratos consolidados + handoff | DONE | 3a87c82 | `docs/contracts/00-07`, `docs/HANDOFF-sprint3.md`, README, SPRINTS, N0-40..49 |
 
 Ownership ola 1: A4 `apps/api/**` · B4 `packages/cli/**`, `packages/markdown/**`, `packages/contract/src/*.test.ts`, `skills/**`, `docs/PROPOSALS.md`(no), `examples/proba/estudio/**` · R4 `packages/runtime/**` · P4 `examples/proba/tools/**` · D4 `apps/web/**` salvo `router.tsx` · orquestador: contrato, docs, `proposals/`.
 
