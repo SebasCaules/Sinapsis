@@ -21,11 +21,11 @@
     { "key": "eval", "name": "Evaluaciones", "kind": "extra", "color": "--ueval" }
   ],
   "pageTypes": [
-    { "key": "concepto", "label": "Concepto", "plural": "Conceptos", "folder": "conceptos" },
-    { "key": "distribucion", "label": "Distribución", "plural": "Distribuciones", "folder": "distribuciones" },
-    { "key": "teorema", "label": "Teorema", "plural": "Teoremas", "folder": "teoremas" },
-    { "key": "tecnica", "label": "Técnica", "plural": "Técnicas", "folder": "tecnicas" },
-    { "key": "formulario", "label": "Formulario", "plural": "Formularios", "folder": "formularios" },
+    { "key": "concepto", "label": "Concepto", "plural": "Conceptos", "folder": "conceptos", "color": "--u2" },
+    { "key": "distribucion", "label": "Distribución", "plural": "Distribuciones", "folder": "distribuciones", "color": "--u3" },
+    { "key": "teorema", "label": "Teorema", "plural": "Teoremas", "folder": "teoremas", "color": "--u5" },
+    { "key": "tecnica", "label": "Técnica", "plural": "Técnicas", "folder": "tecnicas", "color": "--u1" },
+    { "key": "formulario", "label": "Formulario", "plural": "Formularios", "folder": "formularios", "color": "--u6" },
     { "key": "fuente", "label": "Fuente", "plural": "Fuentes", "folder": "fuentes", "countsAsContent": false, "collapsedByDefault": true }
   ],
   "rail": [

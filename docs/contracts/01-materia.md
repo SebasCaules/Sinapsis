@@ -103,6 +103,7 @@ Rótulos que derivan de esto (`divisionShort`, `divisionLong` del contrato):
 | `folder` | texto | no | — | 1–64 | Carpeta de `wiki.root` cuyas páginas son de este tipo **por defecto**. El frontmatter manda. |
 | `countsAsContent` | booleano | no | `true` | — | `false` para las «fuentes»: no cuentan en el progreso ni en la numeración de lectura, y pesan menos en la búsqueda. |
 | `collapsedByDefault` | booleano | no | `false` | — | `true` pliega el bloque en el índice. |
+| `color` | `string` | no | paleta por posición (`typeColor`) | hex `#rrggbb` o token `--nombre` | Color del tipo: segmentos de la barra de unidad del lector y puntos de tipo. Sin declarar, la plataforma asigna `--u2, --u3, --u5, --u1, …` por posición entre los tipos que cuentan como contenido; los que no cuentan van en `--u0`. |
 
 **Reglas:**
 

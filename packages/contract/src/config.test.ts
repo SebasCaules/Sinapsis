@@ -16,6 +16,7 @@ import {
   numberedIndex,
   type SubjectConfig as SubjectConfigType,
 } from "./index.js";
+import { typeColor } from "./index.js";
 
 const EXAMPLE = path.resolve(
   fileURLToPath(new URL("../../../examples/proba/sinapsis.config.json", import.meta.url)),
@@ -139,5 +140,21 @@ describe("helpers de división — 14 semanas (N > 9 → oklch)", () => {
       .filter((d) => d.kind !== "extra")
       .map((d) => divisionColor(semanal, d.key));
     expect(new Set(colors).size).toBe(14);
+  });
+});
+
+describe("typeColor", () => {
+  const cfg = {
+    pageTypes: [
+      { key: "concepto", label: "Concepto", plural: "Conceptos", countsAsContent: true, collapsedByDefault: false },
+      { key: "tecnica", label: "Técnica", plural: "Técnicas", countsAsContent: true, collapsedByDefault: false, color: "--u1" },
+      { key: "fuente", label: "Fuente", plural: "Fuentes", countsAsContent: false, collapsedByDefault: true },
+    ],
+  };
+  it("usa el color declarado, la paleta por posición y gris para lo que no cuenta", () => {
+    expect(typeColor(cfg, "concepto")).toBe("var(--u2)");
+    expect(typeColor(cfg, "tecnica")).toBe("var(--u1)");
+    expect(typeColor(cfg, "fuente")).toBe("var(--u0)");
+    expect(typeColor(cfg, "desconocido")).toBe("var(--u0)");
   });
 });

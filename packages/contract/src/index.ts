@@ -90,6 +90,12 @@ export const PageTypeDef = z.object({
   countsAsContent: z.boolean().default(true),
   /** true para plegar el bloque por defecto en el índice (fuentes). */
   collapsedByDefault: z.boolean().default(false),
+  /**
+   * Color del tipo (hex o token `--nombre`): pinta los segmentos de la barra de
+   * unidad del lector y el punto del tipo en las tarjetas. Sin declarar, la
+   * plataforma asigna uno por posición (`typeColor`).
+   */
+  color: ColorRef.optional(),
 });
 export type PageTypeDef = z.infer<typeof PageTypeDef>;
 
@@ -458,6 +464,22 @@ export function normalizeDivisionKey(raw: string): string {
 export const isValidSlug = (v: string): boolean => Slug.safeParse(v).success;
 export const isValidDivisionKey = (v: string): boolean => DivisionKey.safeParse(v).success;
 export const isExternalUrl = (v: string): boolean => ExternalUrl.safeParse(v).success;
+
+/**
+ * Color de un tipo de página: el declarado en el config o, si no, uno de la
+ * paleta de unidades por posición entre los tipos que cuentan como contenido
+ * (los que no cuentan —fuentes— van en gris cálido `--u0`). Un tipo que el
+ * config no declara también cae en `--u0`.
+ */
+const TYPE_PALETTE = ["--u2", "--u3", "--u5", "--u1", "--u6", "--u4", "--u8", "--u9", "--u7"] as const;
+export function typeColor(cfg: Pick<SubjectConfigLoose, "pageTypes">, key: string): string {
+  const t = cfg.pageTypes.find((x) => x.key === key);
+  if (t?.color) return cssColor(t.color);
+  if (!t || t.countsAsContent === false) return "var(--u0)";
+  const content = cfg.pageTypes.filter((x) => x.countsAsContent !== false);
+  const i = content.findIndex((x) => x.key === key);
+  return `var(${TYPE_PALETTE[i % TYPE_PALETTE.length]})`;
+}
 
 /** `--token` → `var(--token)`; un hex se devuelve tal cual; vacío → fallback. */
 export function cssColor(ref: string | null | undefined, fallback = "var(--u0)"): string {

@@ -34,6 +34,7 @@ import {
   type RailItem,
   type SubjectConfig,
   type SubjectDetail,
+  typeColor,
 } from "@sinapsis/contract";
 
 /**
@@ -134,6 +135,8 @@ export interface SubjectModel {
   /** Las tres para repasar: estudiadas hace más tiempo, o las tres primeras sin leer. */
   reviewPages: () => PageMeta[];
   typeLabel: (key: string) => string;
+  /** Color del tipo de página (`typeColor` del contrato): segmentos de la barra de unidad, puntos de tipo. */
+  typeColor: (key: string) => string;
   railGroups: RailGroupView[];
   /** El ítem del rail de una herramienta (`/t/:tool`) o de una vista builtin. */
   railItem: (key: string) => RailItemView | null;
@@ -445,6 +448,7 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectM
     prevNext,
     reviewPages,
     typeLabel: (key: string) => typeByKey.get(key)?.label ?? key,
+    typeColor: (key: string) => typeColor(cfg, key),
     railGroups,
     railItem,
     fab,
