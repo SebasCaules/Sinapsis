@@ -31,15 +31,34 @@
 }
 
 .group {
+  position: relative;
   width: 100%;
   flex: none;
-  padding: 6px 0;
+  padding: 6px 4px 6px 12px; /* 12 px a la izquierda para el rótulo vertical */
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
 }
+
+/* Rótulo vertical del grupo, pegado al borde izquierdo y leído de abajo hacia
+   arriba; los grupos de la materia (slot) lo llevan en su color. */
+.groupLabel {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  font: 600 8px var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+.group[data-slot="true"] .groupLabel { color: var(--gcol, var(--text-3)); }
 
 .item {
   position: relative;

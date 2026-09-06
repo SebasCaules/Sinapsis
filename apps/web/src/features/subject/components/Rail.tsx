@@ -76,6 +76,12 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
           role="group"
           aria-label={group.label}
         >
+          {/* Rótulo vertical en el borde izquierdo: distingue cada sección del
+              rail de un vistazo (pedido del usuario). Decorativo: el nombre
+              accesible del grupo ya lo lleva `aria-label`. */}
+          <span className={css.groupLabel} aria-hidden="true">
+            {group.label}
+          </span>
           {group.items.map((view) => {
             const active = !(exact && view.item.kind !== "page") && railItemActive(pathname, view, slug);
             return <RailButton key={`${group.id}:${view.item.id}`} view={view} group={group} active={active} />;
