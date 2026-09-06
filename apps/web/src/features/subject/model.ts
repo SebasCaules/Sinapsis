@@ -136,7 +136,10 @@ function labelOf(short: string, name: string): string {
 
 /** Construye el modelo. `dark` solo afecta a la escala paramétrica (N > 9 divisiones). */
 export function buildSubjectModel(detail: SubjectDetail, dark = false): SubjectModel {
-  const cfg = detail.config;
+  // Los helpers del contrato (numeración, color) indexan por posición en
+  // `divisions`: se les pasa la lista ya ordenada por `order` para que
+  // rótulo, color y orden del índice coincidan.
+  const cfg = { ...detail.config, divisions: orderedDivisions(detail.config) };
   const pages = detail.pages;
   const bySlug = new Map(pages.map((p) => [p.slug, p]));
   const studiedOrder = detail.studied.slice();

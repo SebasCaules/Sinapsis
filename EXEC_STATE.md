@@ -32,8 +32,8 @@ Workers y verificadores de ola: Opus 5. Auditoría final: modelo N0.
 | S1-10 web inicio | DONE | ola1 | progreso real 0/97 → 1/97 tras marcar |
 | S1-11 web lector | DONE | ola1 | 147 nodos KaTeX, 28 wikilinks, callout; H1 duplicado corregido por el orquestador |
 | S1-12 web catálogo + búsqueda | DONE | ola1 | filtros en URL, paleta ⌘K |
-| S1-13 e2e + smoke visual | DOING | | agente E (Playwright) + smoke manual del orquestador sobre stack real |
-| S1-14 auditoría final | TODO | | ola 3 |
+| S1-13 e2e + smoke visual | DONE | ola2 | 24 E2E verdes; smoke manual real; capturas 3 temas |
+| S1-14 auditoría final | DOING | | seguridad 4/4 corregidos; corrección 5/5 corregidos; UX pendiente |
 | S1-15 docs | TODO | | ola 3 |
 
 ## Ownership de archivos (ola 1)
@@ -70,6 +70,20 @@ Ver `docs/DECISIONS.md` (N0-1 … N0-19).
 | SEC-3 | `target` de ítems `link` sin validar esquema → `javascript:` en el rail/paleta | CONFIRMADO (media) | `ExternalUrl` (http(s)/mailto) en `RailItem`/`Fab` + filtro `isSafeExternalUrl` en la web |
 | SEC-4 | Cookie `Secure` y orígenes CSRF de desarrollo atados a `NODE_ENV` | CONFIRMADO (media) | `COOKIE_SECURE`, `ALLOWED_ORIGINS` en `AppEnv` validado; guard lee de `c.var.env` |
 Descartado por el auditor con evidencia: inyección SQL/FTS5, IDOR, comparación del token, CSRF, XSS en el lector (react-markdown sanea URLs, sin rehype-raw, KaTeX trust=false), traversal en el estático, YAML, verificación del ID token.
+
+## Auditoría final — corrección (adjudicada por el orquestador)
+
+| # | Hallazgo | Veredicto | Fix |
+|---|---|---|---|
+| BUG-1 | El bloque de tipo con `collapsedByDefault` (Fuentes) no se podía desplegar: `toggleType` conmutaba la marca, no el estado efectivo | CONFIRMADO (alta) | `collapsedTypes: Record<string, boolean>`; toggle contra el efectivo |
+| BUG-2 | `-rank * 1e5` hacía que BM25 tapara la heurística de título/slug/resumen (`tp7` → la guía TP7 en 9.º lugar) | CONFIRMADO (alta) | BM25 a escala: `min(20, -rank*2)` |
+| BUG-3 | `studied` sin `ORDER BY` → «Repaso de hoy» mostraba las más recientes | CONFIRMADO (media) | `orderBy(progress.studiedAt)` |
+| BUG-4 | Marcar estudiado no invalidaba `qk.landing` → tarjeta con progreso viejo | CONFIRMADO (media) | `onSettled` invalida landing |
+| BUG-5 | `order` explícito de divisiones cambiaba el índice pero no numeración ni color | CONFIRMADO (media, latente) | el modelo pasa `divisions` ordenadas a los helpers |
+
+## Auditoría final — E2E
+
+24 pruebas Playwright (auth, landing, shell, lector, catálogo/búsqueda, temas) en verde antes y después de los fixes; 0 bugs de la app detectados por la suite; capturas 1440×1024 en `e2e/shots/`.
 
 ## Veredicto final
 

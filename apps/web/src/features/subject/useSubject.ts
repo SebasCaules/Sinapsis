@@ -84,6 +84,10 @@ export function useToggleStudied(slug: string) {
       if (studied) await api.subject.markStudied(slug, page);
       else await api.subject.unmarkStudied(slug, page);
     },
+    onSettled: () => {
+      // La tarjeta de la landing muestra studiedCount: refrescarla al asentarse.
+      void qc.invalidateQueries({ queryKey: qk.landing });
+    },
     onMutate: async ({ page, studied }) => {
       await Promise.all([
         qc.cancelQueries({ queryKey: qk.subject(slug) }),

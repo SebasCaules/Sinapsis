@@ -94,8 +94,10 @@ export function scoreHit(row: HitRow, terms: string[], secondary: boolean): numb
   if (title === query) score += 60;
   if (fold(row.slug) === terms.join("-")) score += 60;
 
-  // BM25 de SQLite es negativo (más negativo = mejor); se usa de desempate.
-  score += -row.rank * 1e5;
+  // BM25 de SQLite es negativo (más negativo = mejor). Se suma a la escala de la
+  // heurística (≈ 2 puntos por unidad, tope 20): ordena entre iguales sin tapar
+  // el título, el slug ni el resumen. (Antes ×1e5 anulaba el ranking propio.)
+  score += Math.min(20, Math.max(0, -row.rank) * 2);
 
   // Las fuentes (apuntes, teóricas, videos, TPs) se atenúan en vez de
   // penalizarse con un valor fijo: siguen ganando cuando son lo único que

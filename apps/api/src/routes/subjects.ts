@@ -117,7 +117,9 @@ export function subjectRoutes(): Hono<AppBindings> {
       .select({ pageSlug: progress.pageSlug })
       .from(progress)
       .innerJoin(pages, and(eq(pages.subjectId, progress.subjectId), eq(pages.slug, progress.pageSlug)))
-      .where(and(eq(progress.userId, c.var.user.id), eq(progress.subjectId, subject.id)));
+      .where(and(eq(progress.userId, c.var.user.id), eq(progress.subjectId, subject.id)))
+      // Más vieja primero: «Repaso de hoy» toma las tres primeras.
+      .orderBy(progress.studiedAt);
 
     const detail: SubjectDetail = {
       config: resolveConfig(subject),

@@ -45,11 +45,12 @@ function initialOpen(slug: string): string[] {
 
 export interface SubjectUiState {
   open: Record<string, string[]>;
-  collapsedTypes: Record<string, true>;
+  /** Estado explícito por bloque: true plegado, false desplegado; ausente = `collapsedByDefault`. */
+  collapsedTypes: Record<string, boolean>;
   toggleDivision: (slug: string, key: string) => void;
   /** Abre la división (idempotente): la usa la navegación a una página. */
   openDivision: (slug: string, key: string) => void;
-  toggleType: (slug: string, division: string, type: string) => void;
+  toggleType: (slug: string, division: string, type: string, byDefault: boolean) => void;
   setTypeCollapsed: (slug: string, division: string, type: string, collapsed: boolean) => void;
 }
 
@@ -74,24 +75,17 @@ export const useSubjectUiStore = create<SubjectUiState>((set, get) => ({
     set((s) => ({ open: { ...s.open, [slug]: next } }));
   },
 
-  toggleType: (slug, division, type) => {
+  toggleType: (slug, division, type, byDefault) => {
     const id = typeId(slug, division, type);
     set((s) => {
-      const next = { ...s.collapsedTypes };
-      if (next[id]) delete next[id];
-      else next[id] = true;
-      return { collapsedTypes: next };
+      const effective = s.collapsedTypes[id] ?? byDefault;
+      return { collapsedTypes: { ...s.collapsedTypes, [id]: !effective } };
     });
   },
 
   setTypeCollapsed: (slug, division, type, collapsed) => {
     const id = typeId(slug, division, type);
-    set((s) => {
-      const next = { ...s.collapsedTypes };
-      if (collapsed) next[id] = true;
-      else delete next[id];
-      return { collapsedTypes: next };
-    });
+    set((s) => ({ collapsedTypes: { ...s.collapsedTypes, [id]: collapsed } }));
   },
 }));
 
@@ -103,7 +97,7 @@ export function useOpenDivisions(slug: string): string[] {
 /** ¿Está plegado este bloque de tipo? `byDefault` viene de `collapsedByDefault`. */
 export function useTypeCollapsed(slug: string, division: string, type: string, byDefault: boolean): boolean {
   const flag = useSubjectUiStore((s) => s.collapsedTypes[typeId(slug, division, type)]);
-  return flag === undefined ? byDefault : true;
+  return flag === undefined ? byDefault : flag;
 }
 
 /** El índice plegado, compartido con la plataforma. */

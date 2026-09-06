@@ -153,7 +153,7 @@ function TypeBlockRows({
       <button
         type="button"
         className={css.blockLabel}
-        onClick={() => toggleType(model.slug, divisionKey, block.type.key)}
+        onClick={() => toggleType(model.slug, divisionKey, block.type.key, block.type.collapsedByDefault)}
         aria-expanded={shown.length > 0}
       >
         <span>
