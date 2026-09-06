@@ -160,7 +160,7 @@ Iniciado el 2026-09-06 en autopilot; decisiones N0-40… en `docs/DECISIONS.md`.
 | F0 contrato + docs + propuestas | DONE | | ToolManifest, runtime types, Plan.tracks, dueCount, PROPOSALS.md |
 | S3-01 contract tests | TODO | | B4 |
 | S3-02 runtime | TODO | | R4 |
-| S3-03 API tools + dueCount + S-13 | TODO | | A4 |
+| S3-03 API tools + dueCount + S-13 | DONE | | 169 tests; S-13 → S-15 (web) |
 | S3-04 CLI tools/propose + tracks + skill | TODO | | B4 |
 | S3-05 bundle Proba | TODO | | P4 |
 | S3-06 web ToolHost/figuras/tracks/dueCount/grafo | TODO | | D4 |
@@ -174,3 +174,4 @@ Ownership ola 1: A4 `apps/api/**` · B4 `packages/cli/**`, `packages/markdown/**
 | # | fix diferido | superficie | origen | cuándo |
 |---|---|---|---|---|
 | S-14 | Sandbox por iframe para bundles de herramientas si la plataforma deja de ser personal | runtime, web | N0-41 | cuando haya más de un usuario |
+| S-15 | S-13 resuelto en diagnóstico (A4): el API conserva la sesión; `useMe()` de la web trata un 500/fallo de red del proxy (API reiniciándose) como «sin sesión» y `RequireAuth` manda a `/login`. Fix: reintentar 5xx/red en `useMe` y distinguir `isError` de «sin sesión» en `RequireAuth`. | apps/web lib/auth.ts, app/RequireAuth.tsx | reporte A4 | fixers Sprint 3 |

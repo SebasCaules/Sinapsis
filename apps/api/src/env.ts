@@ -38,6 +38,11 @@ export const EnvSchema = z.object({
     .min(8, "SYNC_TOKEN: al menos 8 caracteres"),
   AUTH_DEV_BYPASS: booleanish,
   WEB_DIST: optionalText,
+  /**
+   * Carpeta raíz de los bundles de herramientas (Sprint 3). Si falta, se usa
+   * `<carpeta del archivo de DATABASE_URL>/tools` (ver `services/tools.ts`).
+   */
+  TOOLS_DIR: optionalText,
   /** Fuerza el atributo Secure de la cookie de sesión (por defecto: solo en producción). */
   COOKIE_SECURE: booleanish,
   /** Orígenes adicionales admitidos por el guard CSRF, separados por coma. */
@@ -61,6 +66,7 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     SYNC_TOKEN: source.SYNC_TOKEN,
     AUTH_DEV_BYPASS: source.AUTH_DEV_BYPASS,
     WEB_DIST: source.WEB_DIST,
+    TOOLS_DIR: source.TOOLS_DIR,
     COOKIE_SECURE: source.COOKIE_SECURE,
     ALLOWED_ORIGINS: source.ALLOWED_ORIGINS,
   });

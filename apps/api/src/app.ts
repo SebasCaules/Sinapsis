@@ -24,6 +24,7 @@ import { searchRoutes } from "./routes/search.js";
 import { studyRoutes } from "./routes/study.js";
 import { subjectRoutes } from "./routes/subjects.js";
 import { syncRoutes } from "./routes/sync.js";
+import { toolRoutes } from "./routes/tools.js";
 import type { AppBindings, AppDeps } from "./types.js";
 
 /** Tope de cuerpo aceptado (el sync de un wiki grande ronda unos pocos MB). */
@@ -65,6 +66,7 @@ export function createApp(deps: AppDeps): Hono<AppBindings> {
   app.route(API_PREFIX, progressRoutes());
   app.route(API_PREFIX, graphRoutes());
   app.route(API_PREFIX, studyRoutes());
+  app.route(API_PREFIX, toolRoutes());
   app.route(API_PREFIX, subjectRoutes());
 
   mountWebDist(app, env.WEB_DIST);

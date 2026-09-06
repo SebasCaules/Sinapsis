@@ -828,6 +828,7 @@ export const ToolFilePath = z
   .max(200)
   .regex(/^[a-zA-Z0-9_][a-zA-Z0-9_./-]*$/, "ruta de bundle: caracteres inválidos")
   .refine((v) => !/(^|\/)\.\.(\/|$)/.test(v) && !v.startsWith("/"), "ruta de bundle: debe ser relativa y sin «..»")
+  .refine((v) => !/(^|\/)\.(\/|$)/.test(v) && !v.includes("//") && !v.endsWith("/"), "ruta de bundle: debe venir normalizada (sin «./», «//» ni barra final)")
   .refine((v) => /\.(js|mjs|css|json|svg|png|jpg|jpeg|webp|woff|woff2|txt|md|csv)$/i.test(v), "ruta de bundle: extensión no admitida");
 export type ToolFilePath = z.infer<typeof ToolFilePath>;
 
@@ -890,9 +891,14 @@ export const ToolInfo = z.object({
 });
 export type ToolInfo = z.infer<typeof ToolInfo>;
 
+/** Base (sin barra final) de los archivos de un bundle: `${base}/${path}`. Es lo que devuelve `ToolInfo.base`. */
+export function toolFilesBase(subject: string, toolId: string): string {
+  return `${API_PREFIX}/subjects/${encodeURIComponent(subject)}/tools/${encodeURIComponent(toolId)}/files`;
+}
+
 /** URL de un archivo de bundle servida por el API. */
 export function toolFileUrl(subject: string, toolId: string, path: string): string {
-  return `${API_PREFIX}/subjects/${encodeURIComponent(subject)}/tools/${encodeURIComponent(toolId)}/files/${path}`;
+  return `${toolFilesBase(subject, toolId)}/${path}`;
 }
 
 /** Vistas builtin que la plataforma garantiza en el Sprint 1. */

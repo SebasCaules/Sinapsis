@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { SubjectCard, SubjectDetail } from "@sinapsis/contract";
 import { createHarness, type Harness } from "../test/harness.js";
-import { demoPayload } from "../test/fixtures.js";
+import { demoPayload, demoStudy } from "../test/fixtures.js";
+import { srsCards, subjects } from "../db/schema.js";
 
 const divisionLabel = { singular: "Unidad", abbr: "U", plural: "Unidades" };
 
@@ -234,5 +235,127 @@ describe("landing, materias y progreso", () => {
     expect(vuelve.status).toBe(200);
     const card2 = (await landing()).find((c) => c.slug === "demo");
     expect(card2?.studiedCount).toBe(1);
+  });
+});
+
+/**
+ * `dueCount` de la tarjeta de la landing (Sprint 3 · A4): tarjetas SRS vencidas
+ * del usuario en esa materia, contando solo las que siguen existiendo en el
+ * material vigente. Las filas se insertan directo en `srs_cards` con `due` de
+ * ayer porque calificar por HTTP siempre deja la próxima revisión en el futuro.
+ */
+describe("dueCount en la landing", () => {
+  let h: Harness;
+  let subjectId: string;
+
+  const ayer = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const manana = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  const cardOf = async (slug: string): Promise<SubjectCard | undefined> =>
+    ((await (await h.request("/api/landing")).json()) as SubjectCard[]).find((c) => c.slug === slug);
+
+  const srsRow = (cardId: string, due: string) => ({
+    userId: user.id,
+    subjectId,
+    cardId,
+    ease: 2.5,
+    intervalDays: 1,
+    due,
+    reps: 1,
+    lapses: 0,
+    lastGrade: 3 as const,
+    updatedAt: ayer,
+  });
+
+  let user: { id: string };
+
+  beforeAll(async () => {
+    h = await createHarness();
+    const me = await h.login();
+    user = { id: me.id };
+
+    const sync = await h.json(
+      "PUT",
+      "/api/subjects/demo/sync",
+      { ...demoPayload(), study: demoStudy() },
+      { authorization: `Bearer ${h.env.SYNC_TOKEN}` },
+    );
+    expect(sync.status).toBe(200);
+    subjectId = (await h.db.select({ id: subjects.id }).from(subjects))[0]?.id ?? "";
+
+    const added = await h.json("POST", "/api/subjects", {
+      slug: "demo",
+      name: "Materia Demo",
+      code: "00.01",
+      institution: "ITBA",
+      semester: "2026-1C",
+      division: divisionLabel,
+    });
+    expect(added.status).toBe(201);
+  });
+
+  afterAll(() => h.close());
+
+  it("arranca en 0 y viaja en la tarjeta", async () => {
+    expect((await cardOf("demo"))?.dueCount).toBe(0);
+  });
+
+  it("cuenta las tarjetas vencidas del material vigente", async () => {
+    await h.db.insert(srsCards).values([
+      srsRow("carta-tcl", ayer),
+      srsRow("carta-intro", ayer),
+    ]);
+    expect((await cardOf("demo"))?.dueCount).toBe(2);
+  });
+
+  it("no cuenta las que vencen en el futuro ni las huérfanas", async () => {
+    await h.db.insert(srsCards).values([
+      // Vence mañana: todavía no toca.
+      srsRow("carta-futura", manana),
+      // Huérfana: la tarjeta ya no existe en ningún mazo de la materia.
+      srsRow("carta-fantasma", ayer),
+    ]);
+    expect((await cardOf("demo"))?.dueCount).toBe(2);
+  });
+
+  it("es por usuario: las tarjetas de otro no suman", async () => {
+    const otro = await h.otherUser();
+    await h.db.insert(srsCards).values({ ...srsRow("carta-tcl", ayer), userId: otro.id });
+    expect((await cardOf("demo"))?.dueCount).toBe(2);
+  });
+
+  it("la tarjeta de una sola materia (POST /api/subjects) también lo trae", async () => {
+    const res = await h.json("POST", "/api/subjects", {
+      slug: "vacia",
+      name: "Materia Vacía",
+      code: "00.02",
+      institution: "ITBA",
+      semester: "2026-1C",
+      division: divisionLabel,
+    });
+    expect(res.status).toBe(201);
+    expect((await res.json()) as SubjectCard).toMatchObject({ dueCount: 0 });
+  });
+
+  it("una tarjeta que vuelve al material vuelve a contarse", async () => {
+    // El material se reemplaza entero: sin `study`, el mazo autoral desaparece…
+    const sinMazos = await h.json(
+      "PUT",
+      "/api/subjects/demo/sync",
+      { ...demoPayload(), study: { decks: [], quizzes: [], plan: null, kits: [] } },
+      { authorization: `Bearer ${h.env.SYNC_TOKEN}` },
+    );
+    expect(sinMazos.status).toBe(200);
+    expect((await cardOf("demo"))?.dueCount).toBe(0);
+
+    // …y al volver, las filas de SRS seguían guardadas.
+    const vuelve = await h.json(
+      "PUT",
+      "/api/subjects/demo/sync",
+      { ...demoPayload(), study: demoStudy() },
+      { authorization: `Bearer ${h.env.SYNC_TOKEN}` },
+    );
+    expect(vuelve.status).toBe(200);
+    expect((await cardOf("demo"))?.dueCount).toBe(2);
   });
 });

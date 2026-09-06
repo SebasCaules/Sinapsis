@@ -16,6 +16,7 @@ import type {
   StudyContent,
   SubjectConfig,
   ThemeId,
+  ToolManifest,
 } from "@sinapsis/contract";
 
 export const users = sqliteTable(
@@ -296,6 +297,32 @@ export const userSemesters = sqliteTable(
   (t) => ({ pk: primaryKey({ columns: [t.userId, t.label] }) }),
 );
 
+// ---------------------------------------------------------------------------
+// Sprint 3 · bundles de herramientas de la materia (N0-41, N0-42)
+// ---------------------------------------------------------------------------
+
+/**
+ * Índice de los bundles de una materia. Los archivos NO están acá: viven en
+ * disco bajo `TOOLS_DIR/<subject_id>/<tool_id>/` (ver `services/tools.ts`), y
+ * esta fila guarda el manifiesto, el tamaño total y la fecha del último push.
+ * La fila y la carpeta se crean y se borran juntas; el sync del wiki no las
+ * toca.
+ */
+export const subjectTools = sqliteTable(
+  "subject_tools",
+  {
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subjects.id, { onDelete: "cascade" }),
+    toolId: text("tool_id").notNull(),
+    manifestJson: text("manifest_json", { mode: "json" }).$type<ToolManifest>().notNull(),
+    /** Suma de los tamaños decodificados de los archivos del bundle. */
+    bytes: integer("bytes").notNull().default(0),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (t) => ({ pk: primaryKey({ columns: [t.subjectId, t.toolId] }) }),
+);
+
 /** Tabla de control de migraciones aplicadas. */
 export const migrationsApplied = sqliteTable("_migrations", {
   name: text("name").primaryKey(),
@@ -307,3 +334,4 @@ export type SubjectRow = typeof subjects.$inferSelect;
 export type PageRow = typeof pages.$inferSelect;
 export type SessionRow = typeof sessions.$inferSelect;
 export type SrsCardRow = typeof srsCards.$inferSelect;
+export type SubjectToolRow = typeof subjectTools.$inferSelect;

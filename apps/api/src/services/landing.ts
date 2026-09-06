@@ -5,10 +5,20 @@
  * `subjects` es global y `user_subjects` guarda cuatrimestre y posición por
  * usuario (N0-6).
  */
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, lte, sql } from "drizzle-orm";
 import { canonicalSemester, compareSemestersDesc, type SubjectCard } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
-import { pages, progress, subjects, userSemesters, userSubjects, type SubjectRow } from "../db/schema.js";
+import {
+  pages,
+  progress,
+  srsCards,
+  subjects,
+  userSemesters,
+  userSubjects,
+  type SubjectRow,
+} from "../db/schema.js";
+import { nowIso } from "../lib/ids.js";
+import { readStudyContent, studyCardIds } from "./study.js";
 import { contentTypePredicate, resolveConfig } from "./subjects.js";
 
 /** Color de reserva cuando la materia no declara ninguno. */
@@ -41,6 +51,7 @@ function buildCard(
   position: number,
   pageCounts: CountsBySubject,
   studiedCounts: CountsBySubject,
+  dueCounts: ReadonlyMap<string, number>,
 ): SubjectCard {
   const config = resolveConfig(row);
   const isContent = contentTypePredicate(config);
@@ -57,7 +68,7 @@ function buildCard(
     semester,
     position,
     placeholder: row.placeholder,
-    dueCount: 0, // TODO Sprint 3 (A4): tarjetas SRS vencidas del usuario en esta materia
+    dueCount: dueCounts.get(row.id) ?? 0,
     lastSyncAt: row.lastSyncAt,
   };
 }
@@ -99,6 +110,55 @@ async function countsFor(
   return { pageCounts: groupCounts(pageRows), studiedCounts: groupCounts(studiedRows) };
 }
 
+/**
+ * Tarjetas SRS vencidas (`due <= ahora`) por materia, contando solo los ids que
+ * siguen existiendo en el material vigente (misma regla que
+ * `GET .../study/state`, bug 7): una tarjeta borrada del wiki conserva su fila
+ * —el progreso vuelve si vuelve la tarjeta— pero no puede aparecer como
+ * «vence hoy» en una tarjeta de la landing desde la que no se puede abrir.
+ *
+ * El material se calcula una sola vez por materia, y solo para las materias que
+ * tienen alguna fila vencida: una landing donde nadie repasó no cuesta ninguna
+ * lectura de material.
+ */
+async function dueCountsFor(
+  db: Db,
+  userId: string,
+  rows: readonly SubjectRow[],
+): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (rows.length === 0) return out;
+
+  const dueRows = await db
+    .select({ subjectId: srsCards.subjectId, cardId: srsCards.cardId })
+    .from(srsCards)
+    .where(
+      and(
+        eq(srsCards.userId, userId),
+        inArray(srsCards.subjectId, rows.map((row) => row.id)),
+        // Las fechas son ISO-8601 UTC con formato fijo: el orden lexicográfico
+        // es el cronológico.
+        lte(srsCards.due, nowIso()),
+      ),
+    );
+  if (dueRows.length === 0) return out;
+
+  const dueBySubject = new Map<string, string[]>();
+  for (const row of dueRows) {
+    const bucket = dueBySubject.get(row.subjectId);
+    if (bucket) bucket.push(row.cardId);
+    else dueBySubject.set(row.subjectId, [row.cardId]);
+  }
+
+  for (const row of rows) {
+    const due = dueBySubject.get(row.id);
+    if (!due) continue;
+    const known = studyCardIds(await readStudyContent(db, row));
+    out.set(row.id, due.filter((cardId) => known.has(cardId)).length);
+  }
+  return out;
+}
+
 export async function landingCards(db: Db, userId: string): Promise<SubjectCard[]> {
   const rows = await db
     .select({ subject: subjects, semester: userSubjects.semester, position: userSubjects.position })
@@ -108,9 +168,10 @@ export async function landingCards(db: Db, userId: string): Promise<SubjectCard[
 
   if (rows.length === 0) return [];
   const { pageCounts, studiedCounts } = await countsFor(db, userId, rows.map((r) => r.subject.id));
+  const dueCounts = await dueCountsFor(db, userId, rows.map((r) => r.subject));
 
   return rows
-    .map((r) => buildCard(r.subject, r.semester, r.position, pageCounts, studiedCounts))
+    .map((r) => buildCard(r.subject, r.semester, r.position, pageCounts, studiedCounts, dueCounts))
     .sort(compareCards);
 }
 
@@ -130,7 +191,8 @@ export async function landingCard(db: Db, userId: string, slug: string): Promise
   if (!row) return null;
 
   const { pageCounts, studiedCounts } = await countsFor(db, userId, [row.subject.id]);
-  return buildCard(row.subject, row.semester, row.position, pageCounts, studiedCounts);
+  const dueCounts = await dueCountsFor(db, userId, [row.subject]);
+  return buildCard(row.subject, row.semester, row.position, pageCounts, studiedCounts, dueCounts);
 }
 
 // ---------------------------------------------------------------------------
