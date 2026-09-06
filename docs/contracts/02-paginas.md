@@ -362,6 +362,41 @@ carácter por carácter lo que hay en el archivo `.md`.
 
 ---
 
+## 9 bis. Diagramas Mermaid (N0-63)
+
+Un bloque de código con el lenguaje `mermaid` se dibuja como diagrama:
+
+````markdown
+```mermaid
+graph TD
+  A[Criptografía<br/>qué es y para qué] --> B[Criptosistema]
+```
+````
+
+- Vale cualquier tipo de diagrama que Mermaid entienda (`graph`, `flowchart`,
+  `sequenceDiagram`, `stateDiagram`, `classDiagram`…). La plataforma no restringe la sintaxis:
+  la fija Mermaid.
+- **Los `<br/>` de las etiquetas parten la línea.** Es la forma en que Obsidian y Mermaid
+  escriben una etiqueta de dos renglones, y se conserva.
+- **La librería se descarga sola en las páginas que la usan.** Entra por import dinámico y
+  Vite la deja en su propio trozo: una materia sin diagramas no la baja nunca.
+- **Los colores salen de los tokens del tema**, y el diagrama se vuelve a dibujar al cambiar
+  de tema.
+- **Un diagrama ancho se desplaza, no se encoge**: igual que una tabla o una fórmula anchas.
+- **Si el diagrama no compila, se muestra el bloque de código tal como está escrito.** Nunca
+  un hueco en blanco ni el cartel de error de Mermaid.
+
+Se dibuja con `securityLevel: "strict"`, el nivel más alto de Mermaid: el texto de cada
+etiqueta pasa por su saneado y el SVG que se monta no lleva `<script>`, ni manejadores de
+evento, ni enlaces `javascript:`. El lector sigue sin `rehype-raw` (N0-10): el texto del
+diagrama se entrega como `textContent`, nunca como marcado, y el SVG lo construye Mermaid.
+
+Los bloques de código de cualquier otro lenguaje **no se resaltan ni se ejecutan**: se
+muestran tal cual, con las ligaduras tipográficas apagadas para que `-->`, `!=` y `<-` se lean
+literales y no como un símbolo compuesto.
+
+---
+
 ## 10. Callouts
 
 Bloques `>` de Obsidian con una cabecera `[!tipo]`:
@@ -454,6 +489,7 @@ no rompe nada**. Un `[!figura]` sin id se dibuja como figura vacía (sin `data-f
 | Enlaces markdown `[texto](otra-pagina)` como enlaces internos | Solo los wikilinks `[[…]]` se resuelven contra la materia y alimentan el grafo. | `[[slug|texto]]`. |
 | Adjuntos e imágenes locales del vault | No se publican: `Page` solo tiene texto. | Publicarlas dentro de un bundle de herramientas (`04`) o enlazarlas por URL. |
 | Un tipo de callout propio | El registro es cerrado. | Usar el más parecido; un tipo desconocido cae en `nota`. |
+| Resaltado de sintaxis en los bloques de código | El lector no trae ningún resaltador: un bloque de código es texto. La única excepción es `mermaid`, que se dibuja (§9 bis). | Nada: el bloque se ve tal como está escrito. |
 | Frontmatter con claves propias | El compilador ignora lo que no está en §3. | Si hace falta un campo nuevo, es una propuesta (`07`). |
 
 ---
@@ -492,6 +528,8 @@ Ninguna de ellas detiene la publicación. Las listas largas se recortan a 6 elem
   `[!figura]` y el marcador de plegado.
 - `apps/web/src/features/subject/markdown/folded.ts` — `openFoldedAncestors`: el ancla que
   cae dentro de un aviso cerrado.
+- `apps/web/src/features/subject/markdown/Mermaid.tsx` — el dibujo de los diagramas, el import
+  dinámico y los colores del tema.
 - `apps/web/src/features/subject/components/page-tip.ts` — `leadOf`, `firstPara`,
   `sectionOf`: de dónde sale cada texto de la vista previa (N0-50).
 - `packages/runtime/src/markdown.ts` — `figureMarkup`, el mismo marcado desde el runtime.
@@ -504,4 +542,4 @@ N0-10 (markdown en el cliente, sin HTML crudo) · N0-13 (compilador propio) ·
 N0-21 (recorte del H1 duplicado) · N0-22 (el compilador es dueño de los ids de encabezado) ·
 N0-23 (divisiones sintéticas) · N0-42 (figuras en callouts) ·
 N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página) ·
-N0-66 (callouts plegables).
+N0-66 (callouts plegables) · N0-63 (diagramas Mermaid).

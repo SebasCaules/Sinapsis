@@ -14,6 +14,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import type { PluggableList } from "unified";
+import { Mermaid } from "./Mermaid";
 import { rehypeExercisePlates } from "./rehypeExercisePlates";
 import { rehypeHeadingIds } from "./rehypeHeadingIds";
 import { remarkCallouts } from "./remarkCallouts";
@@ -34,6 +35,7 @@ export interface MarkdownProps {
 }
 
 type AnchorProps = ComponentPropsWithoutRef<"a"> & ExtraProps;
+type PreProps = ComponentPropsWithoutRef<"pre"> & ExtraProps;
 type TableProps = ComponentPropsWithoutRef<"table"> & ExtraProps;
 type ImageProps = ComponentPropsWithoutRef<"img"> & ExtraProps;
 
@@ -59,8 +61,34 @@ function MarkdownLink({ node: _node, href, children, ...rest }: AnchorProps) {
   );
 }
 
+/**
+ * El texto de un bloque ```` ```mermaid ````, o `null` si el `<pre>` no lo es.
+ *
+ * Se lee del árbol (`node`) y no de los hijos ya renderizados: ahí el lenguaje
+ * está en la clase del `<code>` y el contenido todavía es texto plano.
+ */
+function mermaidSource(node: PreProps["node"]): string | null {
+  const code = node?.children?.find((c) => c.type === "element" && c.tagName === "code");
+  if (code === undefined || code.type !== "element") return null;
+  const classes = code.properties?.["className"];
+  const list = Array.isArray(classes) ? classes.map(String) : typeof classes === "string" ? [classes] : [];
+  if (!list.includes("language-mermaid")) return null;
+  const text = code.children
+    .map((child) => (child.type === "text" ? child.value : ""))
+    .join("")
+    .replace(/\n$/, "");
+  return text.trim() === "" ? null : text;
+}
+
+function MarkdownPre({ node, children, ...rest }: PreProps) {
+  const chart = mermaidSource(node);
+  if (chart !== null) return <Mermaid chart={chart} />;
+  return <pre {...rest}>{children}</pre>;
+}
+
 const components: Components = {
   a: MarkdownLink,
+  pre: MarkdownPre,
   table: ({ node: _node, ...rest }: TableProps) => (
     <div className={css.tableWrap}>
       <table {...rest} />
