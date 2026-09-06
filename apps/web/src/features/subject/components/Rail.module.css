@@ -109,8 +109,9 @@
 .bar {
   position: absolute;
   left: -15px;
+  top: -1px;
+  bottom: -1px; /* tan alta como el tinte del ítem (36 px; el borde de 1 px del ítem no cuenta) */
   width: 3px;
-  height: 20px;
   border-radius: 2px;
   background: var(--gcol, var(--primary));
 }
