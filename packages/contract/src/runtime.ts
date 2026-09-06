@@ -110,6 +110,21 @@ export interface CompatApp {
   Plot: Record<string, unknown>;
   /** Biblioteca numérica (`lib-math.js` portada): funciones escalares y de matrices. */
   M: Record<string, unknown>;
+
+  // --- consulta del DOM (compat: `$`/`$$` del baseline) ---
+  /**
+   * `querySelector` acotado al contenedor de la vista montada; con `root`, dentro de
+   * ese nodo. Sin vista montada (o con el contenedor ya desmontado), `document`.
+   */
+  $(sel: string, root?: ParentNode | null): HTMLElement | null;
+  /** Igual que `$`, pero devuelve un array (no una NodeList). */
+  $$(sel: string, root?: ParentNode | null): HTMLElement[];
+
+  // --- paleta ⌘K del shell ---
+  /** ¿Está abierta la paleta? Es una PREGUNTA: así la usa `lookup.js` del baseline con Escape. */
+  paletteOpen(): boolean;
+  /** Abre la paleta ⌘K del shell. */
+  openPalette(): void;
 }
 
 /** Lo que la plataforma instala en `window.SinapsisRuntime`. */
@@ -125,6 +140,13 @@ export interface SinapsisRuntime {
   /** Vista registrada por algún bundle cargado, o null. */
   view(id: string): ViewFn | null;
   onThemeChange(fn: (theme: ThemeId) => void): () => void;
+  /**
+   * Ata el contenedor de la vista montada: ámbito de `$`/`$$` y delegación de los
+   * clics de `[data-nav]`, `[data-go]` y `a.wikilink[data-slug]` hacia `go` (sin
+   * recargar la página; ⌘/Ctrl-clic y `target="_blank"` pasan de largo). Devuelve el
+   * desatador, que el host llama al desmontar la vista; también limpia `setRedraw`.
+   */
+  bindView(container: HTMLElement): () => void;
 }
 
 declare global {
