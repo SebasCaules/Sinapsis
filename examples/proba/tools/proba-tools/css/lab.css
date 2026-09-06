@@ -1,0 +1,15 @@
+/* ============================================================
+   lab.css — copia envuelta de `estudio/lab.css` del baseline de Proba.
+   GENERADO por `scripts/wrap-css.mjs`. No editar a mano.
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista.
+   ============================================================ */
+
+.sinapsis-tool {
+  /* lab.css — Laboratorio Monte Carlo (TCL/LGN). Reusa .pw-card/.pw-canvas/.pw-legend/.pw-sw de taller.css. */
+  & .lab-row {
+    display:flex; flex-wrap:wrap; gap:14px 16px; align-items:flex-end;
+  }
+  & .lab-row > div {
+    min-width:0;
+  }
+}

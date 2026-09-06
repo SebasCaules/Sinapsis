@@ -1,0 +1,234 @@
+/* ============================================================
+   lookup.css — copia envuelta de `estudio/lookup.css` del baseline de Proba.
+   GENERADO por `scripts/wrap-css.mjs`. No editar a mano.
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista.
+   ============================================================ */
+
+.sinapsis-tool {
+  /* ============================================================
+     lookup.css — burbuja flotante "Buscador de valores" (lookup.js).
+     Reusa el design system de styles.css: todos los colores salen de tokens
+     --* para que los tres temas (pergamino, laurel, claustro) funcionen sin
+     reglas por tema. Capas z: theme-pop 110 < burbuja 115 < toast 120.
+     ============================================================ */
+  /* ---------------- FAB ---------------- */
+  & .ql-fab {
+    position: fixed; z-index: 115;
+    right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    width: 48px; height: 48px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    border: 1px solid var(--border-2); background: var(--elevated); color: var(--primary-2);
+    box-shadow: var(--shadow-lg);
+    transition: background var(--t), color var(--t), border-color var(--t), transform var(--t);
+  }
+  & .ql-fab:hover {
+    background: var(--surface); border-color: var(--primary); transform: translateY(-1px);
+  }
+  & .ql-fab:focus-visible {
+    outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-ring), var(--shadow-lg);
+  }
+  & .ql-fab.on {
+    background: var(--primary-soft); border-color: transparent; color: var(--primary-2);
+  }
+  & .ql-fab svg {
+    display: block;
+  }
+  /* ---------------- Panel ---------------- */
+  & .ql-panel {
+    position: fixed; z-index: 115;
+    right: 20px; bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    width: min(360px, 92vw);
+    max-height: min(76vh, calc(100vh - 150px));
+    display: flex; flex-direction: column;
+    background: var(--elevated); color: var(--text);
+    border: 1px solid var(--border-2); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    opacity: 0; visibility: hidden; transform: translateY(10px) scale(.985);
+    /* visibility NO se transiciona: durante el paso hidden → visible seguiría
+       calculando "hidden" en el instante 0 y el foco al abrir no entraría en el
+       campo principal. Es el mismo criterio que usa .palette en styles.css. */
+    transition: opacity var(--t), transform var(--t);
+    overflow: hidden;
+  }
+  & .ql-panel.show {
+    opacity: 1; visibility: visible; transform: translateY(0) scale(1);
+  }
+  & .ql-head {
+    display: flex; align-items: center; gap: 9px;
+    padding: 11px 12px 11px 15px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  & .ql-title {
+    font-family: var(--font-ui); font-weight: 700; font-size: 13.5px;
+    color: var(--text); flex: 1 1 auto; letter-spacing: -.01em;
+  }
+  & .ql-head .kbd {
+    flex: none;
+  }
+  & .ql-panel .icon-btn {
+    width: 30px; height: 30px; flex: none;
+  }
+  & .ql-panel .icon-btn svg {
+    display: block;
+  }
+  & .ql-body {
+    padding: 14px 15px 16px; overflow-y: auto; overscroll-behavior: contain;
+  }
+  /* ---------------- Controles ---------------- */
+  & .ql-segs {
+    display: flex; flex-direction: column; gap: 8px; margin-bottom: 13px;
+  }
+  & .ql-seg {
+    flex-wrap: wrap; max-width: 100%;
+  }
+  & .ql-seg button {
+    padding: 6px 10px; font-size: 12px;
+  }
+  & .ql-params {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  & .ql-params:empty {
+    display: none;
+  }
+  & .ql-fld {
+    display: block;
+  }
+  & .ql-lbl {
+    display: block; font-family: var(--font-ui); font-size: 11.5px; font-weight: 600;
+    color: var(--text-3); margin-bottom: 4px;
+  }
+  & .ql-main {
+    margin-top: 11px;
+  }
+  & .ql-main .ql-lbl {
+    color: var(--text-2);
+  }
+  & .ql-panel .field {
+    font-size: 13.5px; padding: 8px 10px;
+  }
+  & .ql-panel .field.err {
+    border-color: var(--bad); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 22%, transparent);
+  }
+  & .ql-chips {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 11px;
+  }
+  & .ql-chips-lbl {
+    width: 100%; font-family: var(--font-ui); font-size: 11px; font-weight: 600;
+    color: var(--text-3); margin-bottom: 1px;
+  }
+  & .ql-chip {
+    padding: 4px 9px; font-family: var(--font-mono); font-size: 11.5px;
+  }
+  /* ---------------- Resultado ---------------- */
+  & .ql-result {
+    margin-top: 14px; padding-top: 13px;
+    border-top: 1px solid var(--border);
+  }
+  & .ql-out-head {
+    display: flex; align-items: center; gap: 8px;
+  }
+  & .ql-out-lbl {
+    flex: 1 1 auto; font-family: var(--font-ui); font-size: 11.5px; font-weight: 600;
+    color: var(--text-3);
+  }
+  & .ql-out {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    font-size: 26px; font-weight: 600; line-height: 1.25;
+    color: var(--primary-2); margin-top: 3px; overflow-wrap: anywhere;
+  }
+  & .ql-read {
+    font-size: 12.5px; line-height: 1.65; color: var(--text-2); margin-top: 8px;
+  }
+  & .ql-read:empty {
+    display: none;
+  }
+  & .ql-read .katex {
+    font-size: 1em; color: var(--text);
+  }
+  & .ql-note {
+    font-size: 11.5px; line-height: 1.55; color: var(--text-3); margin-top: 8px;
+  }
+  & .ql-note:empty {
+    display: none;
+  }
+  & .ql-err {
+    font-size: 12px; line-height: 1.5; font-weight: 600; color: var(--bad-text);
+    background: var(--bad-soft); border-radius: var(--r-sm);
+    padding: 8px 10px; margin-top: 10px;
+  }
+  & .ql-err:empty {
+    display: none;
+  }
+  /* ---------------- El FAB frente al panel del lector ----------------
+     Arriba de 1080 px el rail del lector es una columna a la derecha, a toda la
+     altura de la página: un botón fijo abajo a la derecha le quedaba encima de
+     forma permanente y tapaba la esquina inferior del rail (los últimos enlaces
+     de «Enlazan aquí»). Con el rail desplegado, el FAB y su panel se corren a la
+     izquierda de esa columna; con el rail plegado vuelven al borde.
+     El corrimiento son los 248 px del rail más los 40 px de padding derecho de
+     .main.page-view y 10 px de aire. Donde :has() no exista, la regla se ignora
+     entera y queda el comportamiento anterior. */
+  @media (min-width: 1081px) {
+    body:has(.page-view & .with-rail:not(.rail-collapsed)) .ql-fab,
+    body:has(.page-view & .with-rail:not(.rail-collapsed)) .ql-panel {
+      right: calc(var(--rail-w, 248px) + 50px);
+    }
+  }
+  /* ---------------- Responsive ---------------- */
+  /* Táctil: en pantallas angostas los controles del panel llegan a 40 px de
+     alto y se separan, que es el mínimo cómodo para el dedo. Los cinco modos
+     pasan a dos filas cuando no entran (.ql-seg ya viene con flex-wrap). */
+  @media (max-width: 860px) {
+    & .ql-segs {
+      gap: 10px;
+    }
+    & .ql-seg {
+      gap: 6px;
+    }
+    & .ql-seg button {
+      min-height: 40px; min-width: 40px; padding: 0 12px; font-size: 12.5px;
+    }
+    & .ql-panel .chip-btn {
+      min-height: 40px; padding: 0 14px;
+    }
+    & .ql-chips {
+      gap: 8px;
+    }
+    & .ql-panel .icon-btn {
+      width: 40px; height: 40px;
+    }
+    & .ql-panel .field {
+      padding: 10px;
+    }
+  }
+  @media (max-width: 720px) {
+    & .ql-fab {
+      right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: 40px; height: 40px;
+    }
+  }
+  @media (max-width: 640px) {
+    & .ql-panel {
+      left: 12px; right: 12px; width: auto;
+      bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+      max-height: min(72vh, calc(100vh - 126px));
+    }
+    & .ql-out {
+      font-size: 23px;
+    }
+  }
+  /* ---------------- Impresión ---------------- */
+  @media print {
+    & .ql-fab,
+    & .ql-panel {
+      display: none !important;
+    }
+  }
+  /* ---------------- Movimiento reducido ---------------- */
+  @media (prefers-reduced-motion: reduce) {
+    & .ql-fab,
+    & .ql-panel {
+      transition: none;
+    }
+  }
+}

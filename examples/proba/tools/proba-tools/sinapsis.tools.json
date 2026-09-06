@@ -1,0 +1,40 @@
+{
+  "id": "proba-tools",
+  "title": "Herramientas de Probabilidad y Estadística",
+  "version": "1.0.0",
+  "description": "Explorador de distribuciones, calculadoras, asistente de elección, taller de resolución, laboratorio Monte Carlo, buscador de valores (⌘J) y las 93 figuras interactivas del wiki de 93.24.",
+  "runtime": 1,
+  "scripts": [
+    "data/study-data.js",
+    "lookup.js",
+    "tools.js",
+    "taller.js",
+    "lab.js",
+    "figuras/u1.js",
+    "figuras/u2.js",
+    "figuras/u3.js",
+    "figuras/u4.js",
+    "figuras/u5.js",
+    "figuras/u6.js",
+    "figuras/u7.js",
+    "figuras/u8.js",
+    "figuras/u9.js",
+    "figuras/u0.js"
+  ],
+  "styles": [
+    "css/vocab.css",
+    "css/tools.css",
+    "css/taller.css",
+    "css/lab.css",
+    "css/lookup.css"
+  ],
+  "views": [
+    { "id": "explorador", "label": "Explorador de distribuciones", "icon": "chart", "layout": "wide" },
+    { "id": "calc", "label": "Calculadoras", "icon": "calc", "layout": "wide" },
+    { "id": "asistente", "label": "¿Qué distribución o prueba?", "icon": "compass", "layout": "wide" },
+    { "id": "taller", "label": "Taller de resolución", "icon": "function", "layout": "wide" },
+    { "id": "lab", "label": "Laboratorio Monte Carlo", "icon": "flask", "layout": "wide" }
+  ],
+  "figures": true,
+  "data": ["data/study-data.json"]
+}

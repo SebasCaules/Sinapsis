@@ -1,0 +1,152 @@
+/* ============================================================
+   taller.css — copia envuelta de `estudio/taller.css` del baseline de Proba.
+   GENERADO por `scripts/wrap-css.mjs`. No editar a mano.
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista.
+   ============================================================ */
+
+.sinapsis-tool {
+  /* ============================================================
+     taller.css — Taller de resolución (solvers interactivos).
+     Reusa tokens de styles.css y clases de roadmap.css (kit-card, kit-grid…).
+     ============================================================ */
+  & .slv-controls {
+    display:flex; flex-wrap:wrap; gap:18px 24px; align-items:flex-end;
+  }
+  & .slv-controls > div {
+    min-width:0;
+  }
+  & .slv-presets > div {
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  & .slv-fields {
+    margin-top:14px; display:flex; flex-direction:column; gap:12px;
+  }
+  & .slv-row2 {
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  @media (max-width:520px) {
+    & .slv-row2 {
+      grid-template-columns:1fr;
+    }
+  }
+  /* matriz editable (Markov) */
+  & .slv-matwrap {
+    margin-top:16px;
+  }
+  & .slv-matlabel {
+    font-size:12px; color:var(--text-3); margin-bottom:8px; font-weight:600;
+  }
+  & .mk-grid {
+    display:grid; gap:6px; max-width:520px;
+  }
+  & .mk-cell {
+    font-family:var(--font-mono); text-align:center; padding:8px 4px;
+  }
+  & .mk-cell:focus {
+    z-index:1;
+  }
+  /* bloque de resolución */
+  & .solver-result {
+    margin-top:18px;
+  }
+  & .slv-step {
+    padding:14px 0; border-top:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  }
+  & .slv-step:first-child {
+    border-top:none; padding-top:2px;
+  }
+  & .slv-step-h {
+    font-family:var(--font-ui); font-weight:700; font-size:13.5px; color:var(--text); margin-bottom:8px; letter-spacing:-.01em;
+  }
+  & .slv-step-b {
+    font-size:13.5px; color:var(--text-2); line-height:1.55;
+  }
+  & .slv-step-b .katex-display {
+    margin:8px 0;
+  }
+  & .slv-list {
+    margin:6px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:4px;
+  }
+  & .slv-list li {
+    font-size:13px;
+  }
+  & .slv-vec {
+    display:flex; flex-wrap:wrap; gap:8px 16px; margin:10px 0; font-family:var(--font-mono); font-size:13px;
+  }
+  & .slv-vec b {
+    color:var(--text);
+  }
+  & .slv-vec span {
+    background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:5px 10px;
+  }
+  & .slv-note {
+    font-size:12px; color:var(--text-3); margin-top:8px; font-style:italic;
+  }
+  & .slv-warn {
+    display:flex; align-items:center; gap:7px; font-size:13px; color:var(--bad-text); background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 30%,transparent); border-radius:var(--r-sm); padding:9px 12px; margin:8px 0;
+  }
+  & .slv-warn svg {
+    color:var(--bad); flex:none;
+  }
+  & .slv-ic {
+    margin-top:12px; font-family:var(--font-mono); font-size:15px; background:var(--primary-soft); border-radius:var(--r-sm); padding:10px 14px; color:var(--text);
+  }
+  & .slv-ic b {
+    color:var(--primary-2);
+  }
+  & .slv-rej {
+    color:var(--bad-text);
+  }
+  & .slv-acc {
+    color:var(--good-text);
+  }
+  /* tablas de matriz / Bayes en el resultado */
+  & .slv-mat {
+    border-collapse:separate; border-spacing:0; margin:8px 0; font-family:var(--font-mono); font-size:12.5px;
+  }
+  & .slv-mat td,
+  & .slv-mat th {
+    padding:6px 12px; border:1px solid var(--border); text-align:right; min-width:54px; background:var(--surface);
+  }
+  & .slv-mat th {
+    background:var(--surface-2); color:var(--text-3); font-family:var(--font-ui); font-weight:700; font-size:11.5px; text-align:center;
+  }
+  & .slv-mat td.hl {
+    background:color-mix(in srgb, var(--accent) 16%, var(--surface)); color:var(--text); font-weight:600;
+  }
+  & .slv-mat.bayes td:first-child,
+  & .slv-mat.bayes th:first-child {
+    text-align:center;
+  }
+  /* visualizador de potencia (canvas) */
+  & .pw-card {
+    margin-top:16px; padding:16px;
+  }
+  & .pw-canvas {
+    width:100%; height:300px; display:block;
+  }
+  & .pw-legend {
+    display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:10px; font-size:12px; color:var(--text-2);
+  }
+  & .pw-legend span {
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  /* El swatch lo pinta App.Plot.legend con el color y la MISMA opacidad de la
+     marca que representa; acá solo queda su geometría. */
+  & .pw-sw {
+    width:14px; height:10px; border-radius:3px; display:inline-block; flex:none;
+  }
+  /* Lectura del punto bajo el cursor (App.Plot.hover con `readout`). */
+  & .pw-readout {
+    margin-top:8px; min-height:16px; font-family:var(--font-mono); font-size:12px; color:var(--text-2);
+  }
+  /* impresión */
+  @media print {
+    & .slv-controls,
+    & .slv-matwrap,
+    & .slv-fields,
+    & [data-action] {
+      display:none !important;
+    }
+  }
+}

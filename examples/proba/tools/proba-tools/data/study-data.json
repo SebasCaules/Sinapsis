@@ -1,0 +1,1120 @@
+{
+  "DISTS": [
+    {
+      "id": "bernoulli",
+      "slug": "distribucion-bernoulli",
+      "name": "Bernoulli",
+      "kind": "disc",
+      "unit": 3,
+      "modela": "Un único ensayo con dos resultados: éxito (1) o fracaso (0).",
+      "support": "\\{0,1\\}",
+      "params": [
+        {
+          "key": "p",
+          "label": "p",
+          "min": 0,
+          "max": 1,
+          "step": 0.01,
+          "def": 0.5
+        }
+      ],
+      "tex": {
+        "pmf": "p_X(1)=p,\\quad p_X(0)=q=1-p",
+        "mean": "E[X]=p",
+        "var": "V(X)=p\\,q",
+        "fgm": "M_X(t)=q+p\\,e^{t}"
+      }
+    },
+    {
+      "id": "binomial",
+      "slug": "distribucion-binomial",
+      "name": "Binomial",
+      "kind": "disc",
+      "unit": 3,
+      "modela": "Número de éxitos en n ensayos de Bernoulli independientes.",
+      "support": "\\{0,1,\\dots,n\\}",
+      "params": [
+        {
+          "key": "n",
+          "label": "n",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "def": 12
+        },
+        {
+          "key": "p",
+          "label": "p",
+          "min": 0,
+          "max": 1,
+          "step": 0.01,
+          "def": 0.4
+        }
+      ],
+      "tex": {
+        "pmf": "p_X(k)=\\binom{n}{k}p^{k}q^{\\,n-k}",
+        "mean": "E[X]=n\\,p",
+        "var": "V(X)=n\\,p\\,q",
+        "fgm": "M_X(t)=(q+p\\,e^{t})^{n}"
+      }
+    },
+    {
+      "id": "geometrica",
+      "slug": "distribucion-geometrica",
+      "name": "Geométrica",
+      "kind": "disc",
+      "unit": 3,
+      "modela": "Número de FRACASOS antes del primer éxito (convención de la cátedra).",
+      "support": "\\mathbb{N}_0=\\{0,1,2,\\dots\\}",
+      "note": "La cátedra cuenta FRACASOS (soporte $\\mathbb{N}_0$, $E=q/p$), no ensayos.",
+      "params": [
+        {
+          "key": "p",
+          "label": "p",
+          "min": 0.02,
+          "max": 1,
+          "step": 0.01,
+          "def": 0.3
+        }
+      ],
+      "tex": {
+        "pmf": "p_X(k)=q^{k}\\,p",
+        "mean": "E[X]=\\dfrac{q}{p}",
+        "var": "V(X)=\\dfrac{q}{p^{2}}",
+        "fgm": "M_X(t)=\\dfrac{p}{1-q\\,e^{t}}"
+      }
+    },
+    {
+      "id": "binomial-negativa",
+      "slug": "distribucion-binomial-negativa",
+      "name": "Binomial negativa",
+      "kind": "disc",
+      "unit": 3,
+      "modela": "Número de FRACASOS antes del r-ésimo éxito (Pascal).",
+      "support": "\\mathbb{N}_0",
+      "note": "Suma de $r$ geométricas independientes; cuenta fracasos.",
+      "params": [
+        {
+          "key": "r",
+          "label": "r",
+          "min": 1,
+          "max": 15,
+          "step": 1,
+          "def": 3
+        },
+        {
+          "key": "p",
+          "label": "p",
+          "min": 0.05,
+          "max": 1,
+          "step": 0.01,
+          "def": 0.4
+        }
+      ],
+      "tex": {
+        "pmf": "p_X(k)=\\binom{k+r-1}{k}q^{k}p^{r}",
+        "mean": "E[X]=\\dfrac{r\\,q}{p}",
+        "var": "V(X)=\\dfrac{r\\,q}{p^{2}}",
+        "fgm": "M_X(t)=\\left(\\dfrac{p}{1-q\\,e^{t}}\\right)^{r}"
+      }
+    },
+    {
+      "id": "hipergeometrica",
+      "slug": "distribucion-hipergeometrica",
+      "name": "Hipergeométrica",
+      "kind": "disc",
+      "unit": 3,
+      "modela": "Especiales en una muestra SIN reposición de tamaño n de una población N con M especiales.",
+      "support": "\\max(0,n-(N-M))\\le k\\le\\min(n,M)",
+      "params": [
+        {
+          "key": "N",
+          "label": "N",
+          "min": 2,
+          "max": 80,
+          "step": 1,
+          "def": 40
+        },
+        {
+          "key": "M",
+          "label": "M",
+          "min": 1,
+          "max": 80,
+          "step": 1,
+          "def": 15
+        },
+        {
+          "key": "n",
+          "label": "n",
+          "min": 1,
+          "max": 80,
+          "step": 1,
+          "def": 10
+        }
+      ],
+      "tex": {
+        "pmf": "p_X(k)=\\dfrac{\\binom{M}{k}\\binom{N-M}{n-k}}{\\binom{N}{n}}",
+        "mean": "E[X]=n\\dfrac{M}{N}",
+        "var": "V(X)=n\\,p\\,q\\,\\dfrac{N-n}{N-1}",
+        "fgm": "—"
+      }
+    },
+    {
+      "id": "poisson",
+      "slug": "distribucion-poisson",
+      "name": "Poisson",
+      "kind": "disc",
+      "unit": 3,
+      "modela": "Número de ocurrencias en un intervalo con tasa media λ. Media = varianza.",
+      "support": "\\mathbb{N}_0",
+      "params": [
+        {
+          "key": "lam",
+          "label": "λ",
+          "min": 0.1,
+          "max": 30,
+          "step": 0.1,
+          "def": 4
+        }
+      ],
+      "tex": {
+        "pmf": "p_X(k)=\\dfrac{\\lambda^{k}}{k!}e^{-\\lambda}",
+        "mean": "E[X]=\\lambda",
+        "var": "V(X)=\\lambda",
+        "fgm": "M_X(t)=e^{\\lambda(e^{t}-1)}"
+      }
+    },
+    {
+      "id": "uniforme",
+      "slug": "distribucion-uniforme-continua",
+      "name": "Uniforme continua",
+      "kind": "cont",
+      "unit": 4,
+      "modela": "Valor al azar en (a,b) sin predilección: densidad constante.",
+      "support": "x\\in(a,b)",
+      "params": [
+        {
+          "key": "a",
+          "label": "a",
+          "min": -10,
+          "max": 10,
+          "step": 0.5,
+          "def": 0
+        },
+        {
+          "key": "b",
+          "label": "b",
+          "min": -10,
+          "max": 20,
+          "step": 0.5,
+          "def": 10
+        }
+      ],
+      "tex": {
+        "pmf": "f_X(x)=\\dfrac{1}{b-a},\\ x\\in(a,b)",
+        "mean": "E[X]=\\dfrac{a+b}{2}",
+        "var": "V(X)=\\dfrac{(b-a)^2}{12}",
+        "fgm": "M_X(t)=\\dfrac{e^{tb}-e^{ta}}{t(b-a)}"
+      }
+    },
+    {
+      "id": "exponencial",
+      "slug": "distribucion-exponencial",
+      "name": "Exponencial",
+      "kind": "cont",
+      "unit": 4,
+      "modela": "Tiempo de espera / entre sucesos con tasa λ. Sin memoria.",
+      "support": "x\\ge 0",
+      "params": [
+        {
+          "key": "lam",
+          "label": "λ",
+          "min": 0.1,
+          "max": 5,
+          "step": 0.05,
+          "def": 1
+        }
+      ],
+      "tex": {
+        "pmf": "f_X(x)=\\lambda e^{-\\lambda x},\\ x>0",
+        "mean": "E[X]=\\dfrac{1}{\\lambda}",
+        "var": "V(X)=\\dfrac{1}{\\lambda^{2}}",
+        "fgm": "M_X(t)=\\dfrac{\\lambda}{\\lambda-t}"
+      }
+    },
+    {
+      "id": "normal",
+      "slug": "distribucion-normal",
+      "name": "Normal",
+      "kind": "cont",
+      "unit": 4,
+      "modela": "La campana de Gauss; límite de sumas de muchos efectos pequeños (TCL).",
+      "support": "x\\in\\mathbb{R}",
+      "note": "Segundo parámetro = DESVÍO $\\sigma$ (no varianza), por convención de la cátedra.",
+      "params": [
+        {
+          "key": "mu",
+          "label": "μ",
+          "min": -10,
+          "max": 10,
+          "step": 0.5,
+          "def": 0
+        },
+        {
+          "key": "sigma",
+          "label": "σ",
+          "min": 0.3,
+          "max": 6,
+          "step": 0.1,
+          "def": 1
+        }
+      ],
+      "tex": {
+        "pmf": "f_X(x)=\\dfrac{1}{\\sqrt{2\\pi}\\,\\sigma}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}",
+        "mean": "E[X]=\\mu",
+        "var": "V(X)=\\sigma^{2}",
+        "fgm": "M_X(t)=e^{\\mu t+\\frac12\\sigma^2 t^2}"
+      }
+    },
+    {
+      "id": "gamma",
+      "slug": "distribucion-gamma",
+      "name": "Gamma",
+      "kind": "cont",
+      "unit": 7,
+      "modela": "Tiempo de espera hasta acumular α ocurrencias de un proceso de Poisson.",
+      "support": "x>0",
+      "params": [
+        {
+          "key": "a",
+          "label": "α",
+          "min": 0.5,
+          "max": 15,
+          "step": 0.5,
+          "def": 3
+        },
+        {
+          "key": "lam",
+          "label": "λ",
+          "min": 0.2,
+          "max": 5,
+          "step": 0.1,
+          "def": 1
+        }
+      ],
+      "tex": {
+        "pmf": "f_X(x)=\\dfrac{\\lambda^{\\alpha}x^{\\alpha-1}e^{-\\lambda x}}{\\Gamma(\\alpha)}",
+        "mean": "E[X]=\\dfrac{\\alpha}{\\lambda}",
+        "var": "V(X)=\\dfrac{\\alpha}{\\lambda^{2}}",
+        "fgm": "M_X(t)=\\left(\\dfrac{\\lambda}{\\lambda-t}\\right)^{\\alpha}"
+      }
+    },
+    {
+      "id": "erlang",
+      "slug": "distribucion-erlang",
+      "name": "Erlang",
+      "kind": "cont",
+      "unit": 7,
+      "modela": "Instante de la k-ésima ocurrencia de Poisson = suma de k exponenciales (Gamma de forma entera).",
+      "support": "t>0",
+      "params": [
+        {
+          "key": "k",
+          "label": "k",
+          "min": 1,
+          "max": 15,
+          "step": 1,
+          "def": 3
+        },
+        {
+          "key": "lam",
+          "label": "λ",
+          "min": 0.2,
+          "max": 5,
+          "step": 0.1,
+          "def": 1
+        }
+      ],
+      "tex": {
+        "pmf": "f_X(t)=\\dfrac{\\lambda^{k}t^{k-1}e^{-\\lambda t}}{(k-1)!}",
+        "mean": "E[T_k]=\\dfrac{k}{\\lambda}",
+        "var": "V(T_k)=\\dfrac{k}{\\lambda^{2}}",
+        "fgm": "M(t)=\\left(\\dfrac{\\lambda}{\\lambda-t}\\right)^{k}"
+      }
+    },
+    {
+      "id": "weibull",
+      "slug": "distribucion-weibull",
+      "name": "Weibull",
+      "kind": "cont",
+      "unit": 4,
+      "modela": "Tiempo a la falla cuando la tasa de fallas varía con el tiempo (b≠1). b=1 ⇒ exponencial.",
+      "support": "x>0",
+      "params": [
+        {
+          "key": "lam",
+          "label": "λ",
+          "min": 0.2,
+          "max": 3,
+          "step": 0.1,
+          "def": 1
+        },
+        {
+          "key": "b",
+          "label": "b",
+          "min": 0.3,
+          "max": 5,
+          "step": 0.1,
+          "def": 1.5
+        }
+      ],
+      "tex": {
+        "pmf": "f_X(x)=\\lambda b(\\lambda x)^{b-1}e^{-(\\lambda x)^{b}}",
+        "mean": "E[X]=\\tfrac{1}{\\lambda}\\Gamma(1+\\tfrac1b)",
+        "var": "V(X)=\\tfrac{1}{\\lambda^2}\\big[\\Gamma(1+\\tfrac2b)-\\Gamma(1+\\tfrac1b)^2\\big]",
+        "fgm": "—"
+      }
+    },
+    {
+      "id": "t",
+      "slug": "distribucion-t-de-student",
+      "name": "t de Student",
+      "kind": "cont",
+      "unit": 8,
+      "modela": "Estadístico estandarizado de la media muestral cuando σ es desconocido (m=n−1 g.l.).",
+      "support": "t\\in\\mathbb{R}",
+      "params": [
+        {
+          "key": "m",
+          "label": "g.l. (m)",
+          "min": 1,
+          "max": 40,
+          "step": 1,
+          "def": 5
+        }
+      ],
+      "tex": {
+        "pmf": "f_T(t)=\\dfrac{\\Gamma(\\frac{m+1}{2})}{\\sqrt{m\\pi}\\,\\Gamma(\\frac{m}{2})}\\left(1+\\tfrac{t^2}{m}\\right)^{-\\frac{m+1}{2}}",
+        "mean": "E[T]=0\\ (m>1)",
+        "var": "V(T)=\\dfrac{m}{m-2}\\ (m>2)",
+        "fgm": "—"
+      }
+    },
+    {
+      "id": "chi2",
+      "slug": "distribucion-ji-cuadrado",
+      "name": "Ji-cuadrado χ²",
+      "kind": "cont",
+      "unit": 8,
+      "modela": "Suma de k cuadrados de normales estándar. (n−1)S²/σ² ~ χ²₍ₙ₋₁₎.",
+      "support": "x>0",
+      "params": [
+        {
+          "key": "k",
+          "label": "g.l. (k)",
+          "min": 1,
+          "max": 40,
+          "step": 1,
+          "def": 4
+        }
+      ],
+      "tex": {
+        "pmf": "f(x)=\\dfrac{x^{k/2-1}e^{-x/2}}{2^{k/2}\\Gamma(k/2)}",
+        "mean": "E[X]=k",
+        "var": "V(X)=2k",
+        "fgm": "M(t)=(1-2t)^{-k/2}"
+      }
+    }
+  ],
+  "DIST_WIZARD": {
+    "start": "tipo",
+    "nodes": {
+      "tipo": {
+        "q": "¿La variable cuenta cosas (entero) o mide algo continuo?",
+        "opts": [
+          {
+            "label": "Cuenta / discreta",
+            "to": "disc1"
+          },
+          {
+            "label": "Mide / continua",
+            "to": "cont1"
+          }
+        ]
+      },
+      "disc1": {
+        "q": "¿Qué está contando?",
+        "opts": [
+          {
+            "label": "Éxitos en un número FIJO de ensayos",
+            "to": "disc_fijo"
+          },
+          {
+            "label": "Ensayos/fracasos HASTA lograr éxitos",
+            "to": "disc_hasta"
+          },
+          {
+            "label": "Ocurrencias en un intervalo (tiempo/espacio)",
+            "dist": "poisson"
+          }
+        ]
+      },
+      "disc_fijo": {
+        "q": "¿Los ensayos son CON o SIN reposición (independientes)?",
+        "opts": [
+          {
+            "label": "Con reposición / independientes (p constante)",
+            "dist": "binomial"
+          },
+          {
+            "label": "Sin reposición (población finita)",
+            "dist": "hipergeometrica"
+          },
+          {
+            "label": "Un solo ensayo",
+            "dist": "bernoulli"
+          }
+        ]
+      },
+      "disc_hasta": {
+        "q": "¿Hasta el PRIMER éxito o hasta el r-ésimo?",
+        "opts": [
+          {
+            "label": "Primer éxito",
+            "dist": "geometrica"
+          },
+          {
+            "label": "r-ésimo éxito",
+            "dist": "binomial-negativa"
+          }
+        ]
+      },
+      "cont1": {
+        "q": "¿Qué describe la variable?",
+        "opts": [
+          {
+            "label": "Valor al azar uniforme en un intervalo",
+            "dist": "uniforme"
+          },
+          {
+            "label": "Tiempo de espera / vida",
+            "to": "cont_espera"
+          },
+          {
+            "label": "Medición/error en torno a una media (campana)",
+            "dist": "normal"
+          },
+          {
+            "label": "Estadístico de inferencia",
+            "to": "cont_infer"
+          }
+        ]
+      },
+      "cont_espera": {
+        "q": "¿Tasa de fallas constante o variable, y cuántos eventos?",
+        "opts": [
+          {
+            "label": "Hasta 1 evento, tasa constante (sin memoria)",
+            "dist": "exponencial"
+          },
+          {
+            "label": "Hasta el k-ésimo evento de Poisson",
+            "dist": "erlang"
+          },
+          {
+            "label": "Tasa de fallas que cambia con el tiempo",
+            "dist": "weibull"
+          },
+          {
+            "label": "Tiempo a acumular α ocurrencias (general)",
+            "dist": "gamma"
+          }
+        ]
+      },
+      "cont_infer": {
+        "q": "¿Sobre qué parámetro inferís?",
+        "opts": [
+          {
+            "label": "Media con σ desconocido (n chico)",
+            "dist": "t"
+          },
+          {
+            "label": "Varianza / suma de normales al cuadrado",
+            "dist": "chi2"
+          },
+          {
+            "label": "Media con σ conocido (estandarizar)",
+            "dist": "normal"
+          }
+        ]
+      }
+    }
+  },
+  "TEST_WIZARD": {
+    "start": "param",
+    "nodes": {
+      "param": {
+        "q": "¿Sobre qué parámetro es la prueba?",
+        "opts": [
+          {
+            "label": "La media μ",
+            "to": "media_sigma"
+          },
+          {
+            "label": "Una proporción p",
+            "to": "prop_cola"
+          },
+          {
+            "label": "La varianza σ²",
+            "result": {
+              "stat": "\\chi^2=\\dfrac{(n-1)S^2}{\\sigma_0^2}\\sim\\chi^2_{n-1}",
+              "tip": "Comparar con los fractiles de la ji-cuadrado.",
+              "slug": "distribucion-ji-cuadrado"
+            }
+          }
+        ]
+      },
+      "media_sigma": {
+        "q": "¿Conocés σ (o n es grande)?",
+        "opts": [
+          {
+            "label": "Sí, σ conocido / n grande",
+            "to": "media_Z_cola"
+          },
+          {
+            "label": "No, σ desconocido y n chico",
+            "to": "media_T_cola"
+          }
+        ]
+      },
+      "media_Z_cola": {
+        "q": "¿Cómo es H₁?",
+        "opts": [
+          {
+            "label": "≠ (dos colas)",
+            "result": {
+              "stat": "Z=\\dfrac{\\bar X-\\mu_0}{\\sigma/\\sqrt n}",
+              "tip": "Rechazar si $|Z|>z_{1-\\alpha/2}$.",
+              "slug": "prueba-de-hipotesis-para-la-media"
+            }
+          },
+          {
+            "label": "> (cola derecha)",
+            "result": {
+              "stat": "Z=\\dfrac{\\bar X-\\mu_0}{\\sigma/\\sqrt n}",
+              "tip": "Rechazar si $Z>z_{1-\\alpha}$.",
+              "slug": "prueba-de-hipotesis-para-la-media"
+            }
+          },
+          {
+            "label": "< (cola izquierda)",
+            "result": {
+              "stat": "Z=\\dfrac{\\bar X-\\mu_0}{\\sigma/\\sqrt n}",
+              "tip": "Rechazar si $Z<-z_{1-\\alpha}$.",
+              "slug": "prueba-de-hipotesis-para-la-media"
+            }
+          }
+        ]
+      },
+      "media_T_cola": {
+        "q": "¿Cómo es H₁?",
+        "opts": [
+          {
+            "label": "≠ (dos colas)",
+            "result": {
+              "stat": "T=\\dfrac{\\bar X-\\mu_0}{S/\\sqrt n}\\sim t_{n-1}",
+              "tip": "Rechazar si $|T|>t_{n-1,\\,1-\\alpha/2}$.",
+              "slug": "prueba-de-hipotesis-para-la-media"
+            }
+          },
+          {
+            "label": "> (cola derecha)",
+            "result": {
+              "stat": "T=\\dfrac{\\bar X-\\mu_0}{S/\\sqrt n}\\sim t_{n-1}",
+              "tip": "Rechazar si $T>t_{n-1,\\,1-\\alpha}$.",
+              "slug": "prueba-de-hipotesis-para-la-media"
+            }
+          },
+          {
+            "label": "< (cola izquierda)",
+            "result": {
+              "stat": "T=\\dfrac{\\bar X-\\mu_0}{S/\\sqrt n}\\sim t_{n-1}",
+              "tip": "Rechazar si $T<-t_{n-1,\\,1-\\alpha}$.",
+              "slug": "prueba-de-hipotesis-para-la-media"
+            }
+          }
+        ]
+      },
+      "prop_cola": {
+        "q": "¿Cómo es H₁? (usar $n>100$)",
+        "opts": [
+          {
+            "label": "≠ (dos colas)",
+            "result": {
+              "stat": "Z=\\dfrac{\\hat q-q_0}{\\sqrt{q_0(1-q_0)/n}}",
+              "tip": "Rechazar si $|Z|>z_{1-\\alpha/2}$.",
+              "slug": "prueba-de-hipotesis-para-la-proporcion"
+            }
+          },
+          {
+            "label": "> (cola derecha)",
+            "result": {
+              "stat": "Z=\\dfrac{\\hat q-q_0}{\\sqrt{q_0(1-q_0)/n}}",
+              "tip": "Rechazar si $Z>z_{1-\\alpha}$.",
+              "slug": "prueba-de-hipotesis-para-la-proporcion"
+            }
+          },
+          {
+            "label": "< (cola izquierda)",
+            "result": {
+              "stat": "Z=\\dfrac{\\hat q-q_0}{\\sqrt{q_0(1-q_0)/n}}",
+              "tip": "Rechazar si $Z<-z_{1-\\alpha}$.",
+              "slug": "prueba-de-hipotesis-para-la-proporcion"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CHEATSHEETS": [
+    {
+      "unit": "1",
+      "title": "Estadística Descriptiva",
+      "slug": "estadistica-descriptiva",
+      "sections": [
+        {
+          "h": "Medidas de posición",
+          "rows": [
+            {
+              "l": "Media muestral",
+              "tex": "\\bar x=\\dfrac{1}{n}\\sum_{i=1}^{n} x_i"
+            },
+            {
+              "l": "Mediana (datos ordenados)",
+              "tex": "\\tilde x = x_{(\\frac{n+1}{2})}\\ \\text{o promedio central}"
+            },
+            {
+              "l": "Media de datos agrupados",
+              "tex": "\\bar x=\\dfrac{1}{n}\\sum f_i\\,m_i"
+            }
+          ]
+        },
+        {
+          "h": "Dispersión",
+          "rows": [
+            {
+              "l": "Varianza muestral",
+              "tex": "S^2=\\dfrac{1}{n-1}\\sum (x_i-\\bar x)^2"
+            },
+            {
+              "l": "Desvío estándar",
+              "tex": "S=\\sqrt{S^2}"
+            },
+            {
+              "l": "Coef. de variación",
+              "tex": "CV=\\dfrac{S}{\\bar x}"
+            },
+            {
+              "l": "Rango intercuartílico",
+              "tex": "IQR=Q_3-Q_1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "2",
+      "title": "Probabilidad",
+      "slug": "probabilidad",
+      "sections": [
+        {
+          "h": "Axiomas y reglas",
+          "rows": [
+            {
+              "l": "Complemento",
+              "tex": "P(A^c)=1-P(A)"
+            },
+            {
+              "l": "Unión",
+              "tex": "P(A\\cup B)=P(A)+P(B)-P(A\\cap B)"
+            },
+            {
+              "l": "Condicional",
+              "tex": "P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}"
+            },
+            {
+              "l": "Producto",
+              "tex": "P(A\\cap B)=P(B)\\,P(A\\mid B)"
+            },
+            {
+              "l": "Independencia",
+              "tex": "P(A\\cap B)=P(A)\\,P(B)"
+            }
+          ]
+        },
+        {
+          "h": "Probabilidad total y Bayes",
+          "rows": [
+            {
+              "l": "Prob. total (partición $\\{A_k\\}$)",
+              "tex": "P(B)=\\sum_k P(B\\mid A_k)P(A_k)"
+            },
+            {
+              "l": "Bayes",
+              "tex": "P(A_i\\mid B)=\\dfrac{P(B\\mid A_i)P(A_i)}{\\sum_k P(B\\mid A_k)P(A_k)}"
+            },
+            {
+              "l": "Laplace (equiprobable)",
+              "tex": "P(A)=\\dfrac{\\#\\,\\text{casos favorables}}{\\#\\,\\text{casos totales}}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "3",
+      "title": "Variables Aleatorias Discretas",
+      "slug": "variable-aleatoria",
+      "sections": [
+        {
+          "h": "Definiciones",
+          "rows": [
+            {
+              "l": "PMF",
+              "tex": "p_X(x)=P(X=x),\\quad \\sum_x p_X(x)=1"
+            },
+            {
+              "l": "FDA",
+              "tex": "F_X(x)=P(X\\le x)=\\sum_{t\\le x} p_X(t)"
+            },
+            {
+              "l": "Esperanza",
+              "tex": "E[X]=\\sum_x x\\,p_X(x)"
+            },
+            {
+              "l": "Varianza",
+              "tex": "V(X)=E[X^2]-E[X]^2"
+            },
+            {
+              "l": "FGM",
+              "tex": "M_X(t)=E[e^{tX}],\\quad E[X^n]=M_X^{(n)}(0)"
+            }
+          ]
+        },
+        {
+          "h": "Distribuciones (E[X] · V(X))",
+          "rows": [
+            {
+              "l": "Bernoulli($p$)",
+              "tex": "p\\;\\cdot\\;pq"
+            },
+            {
+              "l": "Binomial($n,p$)",
+              "tex": "np\\;\\cdot\\;npq"
+            },
+            {
+              "l": "Geométrica($p$) — fracasos",
+              "tex": "\\tfrac{q}{p}\\;\\cdot\\;\\tfrac{q}{p^2}"
+            },
+            {
+              "l": "Binomial neg.($r,p$)",
+              "tex": "\\tfrac{rq}{p}\\;\\cdot\\;\\tfrac{rq}{p^2}"
+            },
+            {
+              "l": "Hipergeom.($N,M,n$)",
+              "tex": "n\\tfrac{M}{N}\\;\\cdot\\;npq\\tfrac{N-n}{N-1}"
+            },
+            {
+              "l": "Poisson($\\lambda$)",
+              "tex": "\\lambda\\;\\cdot\\;\\lambda"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "4",
+      "title": "Variables Aleatorias Continuas",
+      "slug": "funcion-de-densidad",
+      "sections": [
+        {
+          "h": "Definiciones",
+          "rows": [
+            {
+              "l": "Densidad",
+              "tex": "f_X(x)\\ge0,\\quad \\int_{\\mathbb R} f_X=1"
+            },
+            {
+              "l": "FDA",
+              "tex": "F_X(x)=\\int_{-\\infty}^x f_X(t)\\,dt,\\quad f_X=F_X'"
+            },
+            {
+              "l": "Probabilidad de intervalo",
+              "tex": "P(a<X\\le b)=F_X(b)-F_X(a)"
+            },
+            {
+              "l": "Esperanza",
+              "tex": "E[X]=\\int_{\\mathbb R} x\\,f_X(x)\\,dx"
+            }
+          ]
+        },
+        {
+          "h": "Distribuciones (E[X] · V(X))",
+          "rows": [
+            {
+              "l": "Uniforme($a,b$)",
+              "tex": "\\tfrac{a+b}{2}\\;\\cdot\\;\\tfrac{(b-a)^2}{12}"
+            },
+            {
+              "l": "Exponencial($\\lambda$)",
+              "tex": "\\tfrac1\\lambda\\;\\cdot\\;\\tfrac1{\\lambda^2}"
+            },
+            {
+              "l": "Normal($\\mu,\\sigma$)",
+              "tex": "\\mu\\;\\cdot\\;\\sigma^2"
+            }
+          ]
+        },
+        {
+          "h": "Estandarización",
+          "rows": [
+            {
+              "l": "Tipificar",
+              "tex": "Z=\\dfrac{X-\\mu}{\\sigma}\\sim N(0,1)"
+            },
+            {
+              "l": "Tabla",
+              "tex": "\\Phi(z)=P(Z\\le z),\\quad \\Phi(-z)=1-\\Phi(z)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "5",
+      "title": "Función de V.A. y Bidimensionales",
+      "slug": "covarianza-y-correlacion",
+      "sections": [
+        {
+          "h": "Conjuntas",
+          "rows": [
+            {
+              "l": "Marginal (continua)",
+              "tex": "f_X(x)=\\int f_{XY}(x,y)\\,dy"
+            },
+            {
+              "l": "Condicional",
+              "tex": "f_{Y\\mid X}(y\\mid x)=\\dfrac{f_{XY}(x,y)}{f_X(x)}"
+            },
+            {
+              "l": "Independencia",
+              "tex": "f_{XY}(x,y)=f_X(x)\\,f_Y(y)"
+            }
+          ]
+        },
+        {
+          "h": "Covarianza y correlación",
+          "rows": [
+            {
+              "l": "Covarianza",
+              "tex": "\\mathrm{Cov}(X,Y)=E[XY]-E[X]E[Y]"
+            },
+            {
+              "l": "Correlación",
+              "tex": "\\rho=\\dfrac{\\mathrm{Cov}(X,Y)}{\\sigma_X\\sigma_Y}\\in[-1,1]"
+            },
+            {
+              "l": "Varianza de suma",
+              "tex": "V(X+Y)=V(X)+V(Y)+2\\mathrm{Cov}(X,Y)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "6",
+      "title": "Procesos Estocásticos",
+      "slug": "procesos-estocasticos",
+      "sections": [
+        {
+          "h": "Poisson",
+          "rows": [
+            {
+              "l": "Conteo",
+              "tex": "N(t)\\sim\\mathrm{Poisson}(\\lambda t)"
+            },
+            {
+              "l": "Tiempo entre eventos",
+              "tex": "T\\sim\\mathrm{Exp}(\\lambda)"
+            },
+            {
+              "l": "Tiempo al k-ésimo",
+              "tex": "T_k\\sim\\mathrm{Erlang}(k,\\lambda)"
+            }
+          ]
+        },
+        {
+          "h": "Bernoulli / Markov",
+          "rows": [
+            {
+              "l": "Conteo Bernoulli",
+              "tex": "N(k)\\sim\\mathrm{Binomial}(k,p)"
+            },
+            {
+              "l": "Chapman–Kolmogorov",
+              "tex": "P^{(n)}=P^{n}"
+            },
+            {
+              "l": "Estacionaria",
+              "tex": "\\pi P=\\pi,\\ \\textstyle\\sum_i\\pi_i=1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "7",
+      "title": "Suma de Variables Aleatorias",
+      "slug": "suma-de-variables-aleatorias",
+      "sections": [
+        {
+          "h": "Sumas",
+          "rows": [
+            {
+              "l": "Esperanza (lineal, siempre)",
+              "tex": "E\\Big[\\textstyle\\sum X_i\\Big]=\\sum E[X_i]"
+            },
+            {
+              "l": "Varianza (si independientes)",
+              "tex": "V\\Big[\\textstyle\\sum X_i\\Big]=\\sum V(X_i)"
+            },
+            {
+              "l": "FGM de suma indep.",
+              "tex": "M_{\\sum X_i}(t)=\\prod M_{X_i}(t)"
+            }
+          ]
+        },
+        {
+          "h": "TCL y aproximaciones",
+          "rows": [
+            {
+              "l": "TCL",
+              "tex": "Z_n=\\dfrac{\\sum X_i-n\\mu}{\\sigma\\sqrt n}\\xrightarrow{d} N(0,1)"
+            },
+            {
+              "l": "Normal de la media",
+              "tex": "\\bar X\\approx N\\!\\left(\\mu,\\tfrac{\\sigma}{\\sqrt n}\\right)"
+            },
+            {
+              "l": "Bin → Normal (corrección $\\pm0.5$)",
+              "tex": "\\mathrm{Bin}(n,p)\\approx N(np,\\sqrt{npq})"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "8",
+      "title": "Inferencia Estadística",
+      "slug": "inferencia-estadistica",
+      "sections": [
+        {
+          "h": "Estimación",
+          "rows": [
+            {
+              "l": "Insesgadez",
+              "tex": "E[\\hat\\theta]=\\theta"
+            },
+            {
+              "l": "ECM",
+              "tex": "\\mathrm{ECM}(\\hat\\theta)=V(\\hat\\theta)+\\mathrm{sesgo}^2"
+            },
+            {
+              "l": "Varianza muestral (insesgada)",
+              "tex": "S^2=\\tfrac{1}{n-1}\\sum(X_i-\\bar X)^2"
+            }
+          ]
+        },
+        {
+          "h": "Intervalos de confianza ($1-\\alpha$)",
+          "rows": [
+            {
+              "l": "Media, $\\sigma$ conocido",
+              "tex": "\\bar X\\pm z_{1-\\alpha/2}\\,\\dfrac{\\sigma}{\\sqrt n}"
+            },
+            {
+              "l": "Media, $\\sigma$ desconocido",
+              "tex": "\\bar X\\pm t_{n-1,\\,1-\\alpha/2}\\,\\dfrac{S}{\\sqrt n}"
+            },
+            {
+              "l": "Proporción",
+              "tex": "\\hat p\\pm z_{1-\\alpha/2}\\sqrt{\\dfrac{\\hat p\\hat q}{n}}"
+            },
+            {
+              "l": "Varianza",
+              "tex": "\\left[\\dfrac{(n-1)S^2}{\\chi^2_{1-\\alpha/2}},\\dfrac{(n-1)S^2}{\\chi^2_{\\alpha/2}}\\right]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "9",
+      "title": "Pruebas de Hipótesis",
+      "slug": "prueba-de-hipotesis",
+      "sections": [
+        {
+          "h": "Conceptos",
+          "rows": [
+            {
+              "l": "Error tipo I / II",
+              "tex": "\\alpha=P(\\text{rech }H_0\\mid H_0),\\ \\beta=P(\\text{no rech}\\mid H_1)"
+            },
+            {
+              "l": "Potencia",
+              "tex": "1-\\beta"
+            },
+            {
+              "l": "Regla del valor p",
+              "tex": "\\text{rechazar } H_0 \\iff p<\\alpha"
+            }
+          ]
+        },
+        {
+          "h": "Estadísticos",
+          "rows": [
+            {
+              "l": "Media, $\\sigma$ conocido",
+              "tex": "Z=\\dfrac{\\bar X-\\mu_0}{\\sigma/\\sqrt n}"
+            },
+            {
+              "l": "Media, $\\sigma$ desconocido",
+              "tex": "T=\\dfrac{\\bar X-\\mu_0}{S/\\sqrt n}\\sim t_{n-1}"
+            },
+            {
+              "l": "Proporción ($n>100$)",
+              "tex": "Z=\\dfrac{\\hat q-q_0}{\\sqrt{q_0(1-q_0)/n}}"
+            },
+            {
+              "l": "Varianza",
+              "tex": "\\chi^2=\\dfrac{(n-1)S^2}{\\sigma_0^2}\\sim\\chi^2_{n-1}"
+            },
+            {
+              "l": "Tamaño muestral",
+              "tex": "n=\\left(\\dfrac{(z_{1-\\alpha}+z_{1-\\beta})\\,\\sigma}{\\mu_1-\\mu_0}\\right)^2"
+            }
+          ]
+        },
+        {
+          "h": "Fractiles frecuentes",
+          "rows": [
+            {
+              "l": "$z_{0.95}$ · $z_{0.975}$ · $z_{0.99}$",
+              "tex": "1.645\\;\\cdot\\;1.960\\;\\cdot\\;2.326"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,398 @@
+/* ============================================================
+   tools.css — copia envuelta de `estudio/tools.css` del baseline de Proba.
+   GENERADO por `scripts/wrap-css.mjs`. No editar a mano.
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista.
+   ============================================================ */
+
+.sinapsis-tool {
+  /* ============================================================
+     tools.css — estilos específicos de HERRAMIENTAS MATEMÁTICAS.
+     Reusa el design system (styles.css). Solo agrega layout y micro-detalles
+     propios del explorador, las calculadoras nuevas y el asistente.
+     ============================================================ */
+  /* ---------------- Explorador de distribuciones ---------------- */
+  & .ex-tabs {
+    display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px;
+  }
+  & .ex-head {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+  }
+  & .ex-name {
+    font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -.01em;
+  }
+  & .ex-modela {
+    color: var(--text-2); font-size: 13.5px; line-height: 1.5; margin: 0 0 12px;
+  }
+  & .ex-support {
+    font-size: 12.5px; color: var(--text-3); margin-bottom: 18px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  & .ex-support .katex {
+    font-size: 1em; color: var(--text-2);
+  }
+  & .ex-prob-card {
+    margin-top: 16px;
+  }
+  & .ex-prob-inputs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 14px;
+  }
+  & .ex-fld {
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  & .ex-fld .lbl {
+    font-size: 11.5px; color: var(--text-3); font-weight: 600;
+  }
+  & .ex-prob-out {
+    font-family: var(--font-mono); font-size: 16px; color: var(--text-2);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 12px 14px; text-align: center;
+  }
+  & .ex-prob-out b {
+    color: var(--primary-2); font-weight: 700;
+  }
+  & .ex-prob-out .katex {
+    color: var(--text-2);
+  }
+  & .ex-prob-hint {
+    font-size: 12px; color: var(--text-3); margin: 9px 0 0; text-align: center;
+  }
+  & .ex-formula-grid {
+    display: grid; gap: 12px;
+  }
+  & .ex-formula-row {
+    display: flex; gap: 22px; flex-wrap: wrap; align-items: center;
+  }
+  & .ex-formula-row .katex {
+    font-size: 1.02em;
+  }
+  & .stat-pills .pill .katex {
+    font-size: .96em; color: var(--text-2);
+  }
+  /* ---------------- Calculadoras ---------------- */
+  /* Subnavegación de secciones: pegada bajo el encabezado y las migas
+     (core.js publica la altura real de las migas en --crumbs-h). */
+  & .calc-subnav {
+    position: sticky; top: calc(var(--header-h) + var(--crumbs-h)); z-index: 35;
+    display: flex; flex-wrap: wrap; gap: 7px;
+    padding: 10px 0 11px; margin: 0 0 6px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  & .calc-subnav .chip-btn {
+    font-size: 12px; padding: 5px 11px;
+  }
+  & .calc-subnav .chip-btn.on {
+    background: var(--primary-soft); border-color: transparent; color: var(--primary-2);
+  }
+  & .calc-section {
+    scroll-margin-top: calc(var(--header-h) + var(--crumbs-h) + 58px);
+  }
+  & .calc-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px;
+  }
+  & .calc-title {
+    font-family: var(--font-ui); font-weight: 700; font-size: 15px; color: var(--text);
+  }
+  & .calc-head .calc-title {
+    margin-bottom: 0;
+  }
+  & .calc-lookup {
+    flex: none; font-size: 11px; padding: 4px 9px; gap: 5px; white-space: nowrap;
+  }
+  & .calc-lbl {
+    display: block; margin: 12px 0 5px;
+  }
+  & .calc-2col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  & .calc-3col {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+  }
+  & .calc-divider {
+    height: 1px; background: var(--border); margin: 16px 0;
+  }
+  & .calc-note {
+    color: var(--text-3); font-size: 11.5px; line-height: 1.5; margin: 10px 0 0;
+  }
+  & .calc-fractil {
+    width: 100%; font-size: 12.5px; margin-top: 2px;
+  }
+  /* la fórmula que aplica, arriba de la tarjeta */
+  & .calc-formula {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 8px 12px; margin-bottom: 14px; overflow-x: auto; scrollbar-width: thin;
+    box-shadow: var(--relief);
+  }
+  & .calc-formula .katex-display {
+    margin: 0;
+  }
+  & .calc-formula .katex {
+    font-size: 1em; color: var(--math-ink);
+  }
+  /* modo explícito y campos que dependen de él */
+  & .calc-seg {
+    display: inline-flex; margin: 0 0 12px; flex-wrap: wrap;
+  }
+  & .calc-seg button {
+    font-size: 12px; padding: 6px 11px;
+  }
+  & .calc-when.is-off {
+    display: none;
+  }
+  /* validación por campo */
+  & .field.err {
+    border-color: var(--bad); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 18%, transparent);
+  }
+  & .calc-err {
+    display: none; margin: 10px 0 0; padding: 7px 10px;
+    font-size: 12px; line-height: 1.45; color: var(--bad-text);
+    background: var(--bad-soft); border: 1px solid color-mix(in srgb, var(--bad) 30%, transparent);
+    border-radius: var(--r);
+  }
+  & .calc-err.show {
+    display: block;
+  }
+  /* resultado grande + copiar */
+  & .calc-outrow {
+    display: flex; align-items: center; gap: 8px; margin-top: 12px;
+  }
+  & .calc-out {
+    flex: 1; min-width: 0; font-size: 26px; line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+    /* pisa el word-break:break-all de styles.css: un número no se parte al medio */
+    word-break: normal; overflow-wrap: anywhere;
+  }
+  & .calc-out.tex {
+    word-break: normal; overflow-x: auto; padding-bottom: 2px;
+  }
+  & .calc-out.tex .katex {
+    font-size: .8em; color: var(--primary-2);
+  }
+  & .calc-out.sm {
+    font-size: 19px;
+  }
+  & .calc-copy {
+    flex: none;
+  }
+  & .calc-copy[disabled] {
+    opacity: .35; cursor: default;
+  }
+  /* pasos plegables con los números sustituidos */
+  & .calc-steps {
+    margin-top: 12px; border-top: 1px solid var(--border); padding-top: 9px;
+  }
+  & .calc-steps.is-empty {
+    display: none;
+  }
+  & .calc-steps > summary {
+    cursor: pointer; list-style: none; display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--text-3);
+  }
+  & .calc-steps > summary::-webkit-details-marker {
+    display: none;
+  }
+  & .calc-steps > summary::before {
+    content: "▸"; font-size: 10px; transition: transform var(--t, .15s);
+  }
+  & .calc-steps[open] > summary::before {
+    content: "▾";
+  }
+  & .calc-steps > summary:hover {
+    color: var(--text-2);
+  }
+  & .cs-body {
+    margin-top: 6px;
+  }
+  & .cs-body .katex-display {
+    margin: 6px 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin;
+  }
+  & .cs-body .katex {
+    color: var(--math-ink);
+  }
+  & .cs-body .calc-note {
+    margin-top: 6px;
+  }
+  /* chips de preset */
+  & .calc-presets {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+  }
+  & .calc-presets .chip-btn {
+    font-size: 11.5px; padding: 4px 9px;
+  }
+  & .calc-presets .chip-btn.xs {
+    font-size: 11px; padding: 3px 8px;
+  }
+  /* tripletas P(X≤k)/P(X≥k) */
+  & .calc-triple {
+    display: flex; flex-direction: column; gap: 7px; margin-top: 12px;
+  }
+  & .ctp {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px 8px 13px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: var(--r);
+  }
+  & .ctp-l {
+    flex: none;
+  }
+  & .ctp-l .katex {
+    font-size: .95em; color: var(--text-2);
+  }
+  & .ctp-v {
+    flex: 1; text-align: right; font-family: var(--font-mono); font-weight: 600;
+    font-size: 14.5px; color: var(--primary-2); font-variant-numeric: tabular-nums;
+  }
+  /* ---------------- Prueba de hipótesis ---------------- */
+  & .ht-card {
+    grid-column: 1 / -1;
+  }
+  & .ht-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px;
+  }
+  /* las dos salidas grandes del test: estadístico observado y valor-p */
+  & .ht-outs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px;
+  }
+  & .ht-outs .calc-lbl {
+    margin-top: 14px;
+  }
+  /* los pasos numerados viven dentro de details.calc-steps */
+  & .calc-steps .ht-list {
+    margin-top: 4px;
+  }
+  & .ht-list {
+    list-style: none; counter-reset: ht; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;
+  }
+  & .ht-list li {
+    counter-increment: ht; position: relative; padding: 12px 14px 12px 44px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r);
+  }
+  & .ht-list li::before {
+    content: counter(ht); position: absolute; left: 12px; top: 12px;
+    width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--primary-soft); color: var(--primary-2);
+    font-family: var(--font-mono); font-size: 11.5px; font-weight: 700;
+  }
+  & .ht-k {
+    display: block; font-size: 11px; font-weight: 700; font-variant-caps: all-small-caps; letter-spacing: .05em; color: var(--text-3); margin-bottom: 6px;
+  }
+  & .ht-txt {
+    font-size: 14px; color: var(--text-2);
+  }
+  & .ht-mono {
+    font-family: var(--font-mono);
+  }
+  & .ht-list .katex {
+    color: var(--text);
+  }
+  & .ht-decision {
+    display: flex; align-items: center; gap: 10px; margin-top: 16px;
+    padding: 14px 16px; border-radius: var(--r); font-weight: 700; font-size: 15px;
+  }
+  & .ht-decision svg {
+    flex: none;
+  }
+  & .ht-decision.rej {
+    background: var(--bad-soft); color: var(--bad-text); border: 1px solid color-mix(in srgb, var(--bad) 35%, transparent);
+  }
+  & .ht-decision.no {
+    background: var(--good-soft); color: var(--good-text); border: 1px solid color-mix(in srgb, var(--good) 35%, transparent);
+  }
+  & .ht-note {
+    color: var(--text-3); font-size: 12.5px; line-height: 1.5; margin: 10px 0 0;
+  }
+  /* ---------------- Tabla normal con scroll ---------------- */
+  & .ztable-scroll {
+    position: relative;            /* el offsetTop de la celda .hot se mide contra este contenedor */
+    overflow: auto; max-height: 460px; margin-top: 10px;
+    border: 1px solid var(--border); border-radius: var(--r);
+  }
+  & .calc-tables .ztable-scroll {
+    max-height: 300px;
+  }
+  /* Ningún rótulo de encabezado envuelve: partido en varias líneas, el encabezado
+     quedaba mucho más alto que el de las tablas vecinas. */
+  & .ztable th,
+  & .ztable td.zhead {
+    white-space: nowrap;
+  }
+  /* Las tres tablas de valores críticos comparten una tarjeta angosta. Con el
+     cuerpo y el padding normales, la de χ² (7 columnas) no entraba y su última
+     columna quedaba escondida detrás del scroll horizontal, sin ninguna señal. */
+  & .calc-tables .ztable {
+    font-size: 11px;
+  }
+  & .calc-tables .ztable th,
+  & .calc-tables .ztable td {
+    padding: 3px 5px;
+  }
+  & .calc-ztable-card {
+    margin-top: 16px;
+  }
+  /* ---------------- Asistente (refinamientos) ---------------- */
+  & .wizard-stage {
+    max-width: 600px; margin: 0 auto;
+  }
+  & .wiz-footer {
+    margin-top: 24px; text-align: center;
+  }
+  & .wiz-kicker {
+    color: var(--text-3); font-size: 12.5px; font-weight: 600;
+  }
+  & .wiz-pmf {
+    margin: 14px 0;
+  }
+  & .wiz-ev {
+    display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; font-size: 14px; margin-bottom: 14px;
+  }
+  & .wiz-modela {
+    color: var(--text-2); font-size: 14px; line-height: 1.55; margin: 0 0 6px;
+  }
+  & .wiz-actions {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px;
+  }
+  /* ---------------- Responsive ---------------- */
+  @media (max-width: 720px) {
+    & .ex-prob-inputs {
+      grid-template-columns: 1fr 1fr;
+    }
+    /* en un teléfono los campos NO se comprimen: una columna por campo */
+    & .calc-2col,
+    & .calc-3col {
+      grid-template-columns: 1fr;
+    }
+    & .calc-head {
+      flex-direction: column; align-items: flex-start; gap: 8px;
+    }
+    & .calc-out {
+      font-size: 22px;
+    }
+    & .calc-subnav {
+      gap: 5px; padding: 8px 0 9px;
+    }
+    & .ht-row {
+      grid-template-columns: 1fr;
+    }
+    & .ht-outs {
+      grid-template-columns: 1fr;
+    }
+  }
+  /* ---------------- Gráfico del explorador (App.Plot) ---------------- */
+  /* La leyenda reusa .pw-legend/.pw-sw de taller.css; acá solo se la separa del
+     lienzo y se estiliza la lectura del punto que emite Plot.hover. */
+  & .plot-wrap canvas {
+    cursor: crosshair;
+  }
+  & .plot-wrap .pw-legend {
+    margin-top: 12px; justify-content: center;
+  }
+  & .ex-readout {
+    margin: 8px 0 0; min-height: 1.2em; text-align: center;
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-2);
+  }
+  /* Tabla equivalente que agrega Plot.a11y cuando se le pasa el html. */
+  & details.pw-data {
+    margin-top: 10px; font-size: 12px; color: var(--text-2);
+  }
+  & details.pw-data > summary {
+    cursor: pointer; color: var(--text-3);
+  }
+}
