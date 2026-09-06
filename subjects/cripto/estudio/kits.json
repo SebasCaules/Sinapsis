@@ -1,0 +1,111 @@
+[
+  {
+    "id": "parcial-1",
+    "title": "Primer parcial · Clases 1 a 5",
+    "description": "Todo lo que entra en el primer parcial: criptografía clásica y secreto perfecto, cifrado simétrico y sus modos, integridad con MAC y hash, clave pública y firma, protocolos.",
+    "divisions": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pages": [
+      "clase-01-introduccion-y-criptografia-clasica",
+      "clase-02-cifrado",
+      "clase-03-macs-y-cifrado-autenticado",
+      "clase-04-criptografia-asimetrica-y-firma-digital",
+      "clase-05-protocolos-criptograficos",
+      "guia-01-resolucion",
+      "guia-02-resolucion",
+      "guia-03-resolucion",
+      "parciales-viejos"
+    ],
+    "decks": [
+      "criptografia-clasica",
+      "definiciones",
+      "algoritmos-simetricos",
+      "hash-y-macs",
+      "asimetrica-y-firma",
+      "protocolos-y-pki",
+      "matematica"
+    ],
+    "quizzes": [
+      "quiz-bloque-1-criptografia"
+    ],
+    "tools": []
+  },
+  {
+    "id": "tp",
+    "title": "TP de implementación",
+    "description": "El material que sostiene el trabajo práctico: la consigna, el reglamento que fija su peso y las implementaciones de referencia.",
+    "divisions": [],
+    "pages": [
+      "tp-implementacion",
+      "reglamento-y-evaluacion",
+      "cronograma",
+      "implementaciones-de-referencia",
+      "eleccion-de-primitivas",
+      "agilidad-criptografica"
+    ],
+    "decks": [],
+    "quizzes": [],
+    "tools": []
+  },
+  {
+    "id": "parcial-2",
+    "title": "Segundo parcial · Clases 6 a 11",
+    "description": "El bloque de seguridad: políticas y control de acceso, autenticación, principios de diseño y vulnerabilidades, flujo de información, redes y protección de datos.",
+    "divisions": [
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11"
+    ],
+    "pages": [
+      "clase-06-politicas-de-seguridad-y-control-de-acceso",
+      "clase-07-autenticacion",
+      "clase-08-principios-de-diseno-y-vulnerabilidades",
+      "clase-09-flujo-de-informacion",
+      "clase-10-seguridad-en-la-empresa",
+      "video-12-proteccion-de-datos-personales"
+    ],
+    "decks": [
+      "politicas-y-control-de-acceso",
+      "autenticacion",
+      "diseno-y-vulnerabilidades",
+      "flujo-de-informacion",
+      "seguridad-en-redes"
+    ],
+    "quizzes": [
+      "quiz-bloque-2-seguridad"
+    ],
+    "tools": []
+  },
+  {
+    "id": "final",
+    "title": "Final integrador",
+    "description": "Repaso cruzado de los dos bloques, con el foco puesto en aplicar los conceptos a problemas de ingeniería en vez de reproducir definiciones.",
+    "divisions": [],
+    "pages": [
+      "programa-y-objetivos",
+      "bibliografia",
+      "eleccion-de-primitivas",
+      "privacidad-e-integridad",
+      "riesgo-y-seguridad-relativa",
+      "principios-de-diseno",
+      "video-13-tips-sobre-el-final"
+    ],
+    "decks": [
+      "definiciones",
+      "criptografia-clasica",
+      "matematica"
+    ],
+    "quizzes": [
+      "quiz-integrador"
+    ],
+    "tools": []
+  }
+]

@@ -1,0 +1,216 @@
+{
+  "contract": 1,
+  "slug": "cripto",
+  "name": "Criptografía y Seguridad",
+  "code": "72.44",
+  "institution": "ITBA",
+  "color": "--u4",
+  "semester": "2026-2C",
+  "division": {
+    "singular": "Clase",
+    "abbr": "C",
+    "plural": "Clases"
+  },
+  "divisions": [
+    {
+      "key": "1",
+      "name": "Introducción y criptografía clásica",
+      "kind": "numbered"
+    },
+    {
+      "key": "2",
+      "name": "Cifrado",
+      "kind": "numbered"
+    },
+    {
+      "key": "3",
+      "name": "MAC y cifrado autenticado",
+      "kind": "numbered"
+    },
+    {
+      "key": "4",
+      "name": "Criptografía asimétrica y firma digital",
+      "kind": "numbered"
+    },
+    {
+      "key": "5",
+      "name": "Protocolos criptográficos",
+      "kind": "numbered"
+    },
+    {
+      "key": "6",
+      "name": "Políticas de seguridad y control de acceso",
+      "kind": "numbered"
+    },
+    {
+      "key": "7",
+      "name": "Autenticación",
+      "kind": "numbered"
+    },
+    {
+      "key": "8",
+      "name": "Principios de diseño y vulnerabilidades",
+      "kind": "numbered"
+    },
+    {
+      "key": "9",
+      "name": "Flujo de información y malware",
+      "kind": "numbered"
+    },
+    {
+      "key": "10",
+      "name": "Seguridad en la empresa",
+      "kind": "numbered"
+    },
+    {
+      "key": "11",
+      "name": "Protección de datos personales",
+      "kind": "numbered"
+    },
+    {
+      "key": "catedra",
+      "name": "Cátedra y evaluación",
+      "kind": "extra",
+      "color": "--ueval"
+    }
+  ],
+  "pageTypes": [
+    {
+      "key": "clase",
+      "label": "Clase",
+      "plural": "Clases",
+      "folder": "clases",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "concepto",
+      "label": "Concepto",
+      "plural": "Conceptos",
+      "folder": "conceptos",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "practica",
+      "label": "Práctica",
+      "plural": "Prácticas",
+      "folder": "practicas",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "guia",
+      "label": "Guía",
+      "plural": "Guías",
+      "folder": "guias",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "resolucion",
+      "label": "Resolución",
+      "plural": "Resoluciones",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "tp",
+      "label": "Trabajo práctico",
+      "plural": "Trabajos prácticos",
+      "folder": "tp",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "apunte",
+      "label": "Apunte",
+      "plural": "Apuntes",
+      "folder": "apuntes",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    },
+    {
+      "key": "video",
+      "label": "Video",
+      "plural": "Videos",
+      "folder": "videos",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    },
+    {
+      "key": "catedra",
+      "label": "Cátedra",
+      "plural": "Material de la cátedra",
+      "folder": "catedra",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    }
+  ],
+  "rail": [
+    {
+      "id": "catedra",
+      "label": "Cátedra",
+      "color": "--u3",
+      "items": [
+        {
+          "id": "cronograma",
+          "label": "Cronograma",
+          "icon": "clock",
+          "kind": "page",
+          "target": "cronograma"
+        },
+        {
+          "id": "programa",
+          "label": "Programa y objetivos",
+          "icon": "list",
+          "kind": "page",
+          "target": "programa-y-objetivos"
+        },
+        {
+          "id": "reglamento",
+          "label": "Reglamento y evaluación",
+          "icon": "book",
+          "kind": "page",
+          "target": "reglamento-y-evaluacion"
+        },
+        {
+          "id": "bibliografia",
+          "label": "Bibliografía",
+          "icon": "notebook",
+          "kind": "page",
+          "target": "bibliografia"
+        }
+      ]
+    },
+    {
+      "id": "evaluacion",
+      "label": "Evaluación",
+      "color": "--ueval",
+      "items": [
+        {
+          "id": "parciales",
+          "label": "Parciales viejos",
+          "icon": "quiz",
+          "kind": "page",
+          "target": "parciales-viejos"
+        },
+        {
+          "id": "tp",
+          "label": "TP de implementación",
+          "icon": "pencil",
+          "kind": "page",
+          "target": "tp-implementacion"
+        }
+      ]
+    }
+  ],
+  "fab": null,
+  "wiki": {
+    "root": "wiki",
+    "index": "indice.md",
+    "ignore": [],
+    "divisionField": "clase",
+    "study": "estudio"
+  }
+}
