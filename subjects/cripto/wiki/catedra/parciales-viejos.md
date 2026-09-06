@@ -1,0 +1,376 @@
+---
+title: Parciales viejos
+resumen: 'Cuatro primeros parciales de la materia entre 2018 y 2025, resueltos a mano y verificados uno por uno: la única muestra de evaluación real del vault y de qué se toma de verdad.'
+fuentes: ["[[cronograma]]", "[[reglamento-y-evaluacion]]", "[[clase-05-protocolos-criptograficos]]"]
+aliases: [Parciales viejos, Primeros parciales, Parciales resueltos, Exámenes viejos, Modelos de parcial]
+type: catedra
+clase: catedra
+orden: 6
+created: 2026-09-04
+updated: 2026-09-04
+tags: [catedra, parcial, examenes, resoluciones, protocolos, secreto-perfecto, modos, certificados, shamir]
+sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
+---
+
+# Parciales viejos
+
+**Cuatro primeros parciales de la materia, resueltos a mano, entre 2018 y 2025.** Es la única muestra de evaluación real que tiene el vault, y contesta la pregunta que ninguna filmina contesta: **qué se toma de verdad.**
+
+> Fuente: [`raw/parciales/Cripto - Primeros Parciales.pdf`](../../raw/parciales/Cripto%20-%20Primeros%20Parciales.pdf) — 13 páginas, escaneadas de un cuaderno el 23/04/2026. Los enunciados están pegados como recortes del PDF original de cada parcial; las resoluciones son manuscritas.
+> **No es material de la cátedra**: es el apunte de un estudiante. Los enunciados sí son de la cátedra; las resoluciones son de quien escribió el cuaderno, y esta nota las **verifica una por una** en vez de darlas por buenas — ver [[#Discrepancias con el apunte|Discrepancias con el apunte]].
+
+> **Ojo: esto no es lo que el docente prometió.** El 20/08 Ramele recorre el campus y dice *"ahí tienen los ejemplos de parcial"*, bajo la carpeta de Prácticas (cue pt2 521, ver [[clase-02-cifrado#El cierre del 20/08: el campus, los ejemplos de parcial y el libro de aritmética|Clase 02]]). **Aquéllos siguen sin estar en `raw/`.** Este PDF llegó por otra vía y los cuatro parciales son reales, pero no hay ninguna garantía de que sean los mismos que la cátedra publica ni de que estén completos.
+
+---
+
+## Qué hay, y de cuándo
+
+| Parcial | Páginas | Ejercicios | Estado de la resolución |
+|---|---|---|---|
+| **2C-2025** | 2-4 | 5 | 4 resueltos · el **2 sin hacer** (marcado *"Skip"*) — **resuelto acá** |
+| **1C-2025** | 5-7 | 5 | los 5 resueltos |
+| **1C-2023** | 8-10 | 5 + múltiple choice | 4 resueltos · el 3b y 3c sin hacer (*"No lo vimos"*) |
+| **1C-2018** | 11-12 | 5 | 2 resueltos · los Ej. 3, 4 y 5 marcados *"Repetido"* (son los del 1C-2023) |
+| Shamir, Guía 6 | 13 | 2 | los 2 resueltos |
+
+**Los cuatro son primeros parciales**, o sea que cubren el bloque de Criptografía: clases 1 a 5 según el [[cronograma]]. Coincide con lo que se ve: hay criptografía clásica, secreto perfecto, modos de encadenamiento, MAC y hash, asimétrica y protocolos.
+
+---
+
+## Lo que se toma de verdad
+
+Ésta es la tabla que justifica la nota. Con sólo cuatro muestras no da para hablar de frecuencias, pero **hay tres patrones que se repiten en los cuatro**, y eso ya es información:
+
+| Tema | 2C-2025 | 1C-2025 | 1C-2023 | 1C-2018 | Clase |
+|---|---|---|---|---|---|
+| **Analizar un protocolo** | Ej. 1 | Ej. 1 | Ej. 1 | Ej. 1 | [[clase-05-protocolos-criptograficos\|5]] |
+| **¿Es válido este esquema de bloque?** | Ej. 3 | Ej. 2 | Ej. 2 y 4 | Ej. 3 y 4 | **2** |
+| **Verdadero o Falso, con corrección** | Ej. 5 | Ej. 5 | Ej. 5 | Ej. 2 | varias |
+| Secreto perfecto, demostrado | Ej. 4 | Ej. 4 | — | — | **1** |
+| Criptoanálisis clásico | Ej. 2 | — | Ej. 3 | Ej. 2.2 | **1** |
+| Certificados digitales y PKI | Ej. 5d | Ej. 5d | Ej. 3 | Ej. 2.1, 2.3 | [[clase-05-protocolos-criptograficos\|5]] |
+| MAC, hash e integridad | Ej. 1, 5b | Ej. 3 | Ej. 5a, 5b | — | **3** |
+| Diffie-Hellman | — | Ej. 1 | — | — | [[clase-04-criptografia-asimetrica-y-firma-digital\|4]] |
+
+**Tres conclusiones operativas** *(lectura nuestra, sobre cuatro muestras)*:
+
+1. **El Ejercicio 1 es siempre un protocolo**, en los cuatro, sin excepción. Y siempre con la misma estructura de consigna: *"¿qué tipo de protocolo sería, qué intenta construir?"*, seguido de *"¿qué problema tiene?"* o *"¿es susceptible a tal ataque?"*. Es material de la **Clase 5**, que ya tiene nota propia: [[clase-05-protocolos-criptograficos|Clase 05 — Protocolos criptográficos]]. Esa nota dedica su sección [[clase-05-protocolos-criptograficos#Para el parcial|Para el parcial]] exactamente a cruzar estos cuatro exámenes contra sus catorce secciones — con la misma tabla que ésta, mirada desde el otro lado. El caso más directo es el 1C-2018, que **es**, literalmente, el protocolo [[needham-schroeder|Needham-Schroeder]] desarrollado en esa clase.
+2. **Siempre hay un esquema de cifrado en bloque inventado** y hay que decidir si es válido, si es CPA-seguro y cómo propaga errores contra `CBC`/`CTR`/`OFB`. Nunca se pregunta *"¿qué es CBC?"*: se pregunta *"¿esto sirve?"*.
+3. **El último ejercicio es Verdadero o Falso con corrección obligatoria** —*"corrija la sentencia para que sea verdadera e identifique el cambio realizado"*—. No alcanza con marcar falso: hay que reescribir. Y las sentencias mezclan temas de todo el cuatrimestre.
+
+> **Lo que estos cuatro parciales NO tienen:** ni un solo ejercicio de `CBC-MAC`, de Merkle-Damgård, de `HMAC`, de la paradoja del cumpleaños ni de `CCM`/`GCM`. La [[clase-03-macs-y-cifrado-autenticado|Clase 03]] aparece sólo como Verdadero o Falso y como *"¿este esquema da integridad?"*. *(Lectura nuestra, y con la salvedad obvia: cuatro parciales no son una muestra representativa, y el temario cambia de año en año.)*
+
+---
+
+## 2C-2025
+
+### Ejercicio 1 — Protocolo de intercambio de claves con MAC
+
+Cinco mensajes entre $A$ y $B$, que comparten dos claves simétricas $K$ y $K'$, con $h_K(\cdot)$ un MAC y $h'_{K'}(\cdot)$ un MAC distinto. Se pide el tipo de protocolo, qué permiten los mensajes 1.2 y 1.3, y si es susceptible a MitM.
+
+**La resolución del apunte, verificada.** Es un protocolo de intercambio de claves que busca establecer la clave de sesión $W$ y **autenticar a las dos partes**. El mensaje 1.2 le permite a $A$ validar que el mensaje no es viejo —por el nonce $r_A$ que ella misma eligió— y autenticar a $B$, porque con $K$ puede recomputar $h_K(B,A,r_A,r_B)$ sobre lo que recibe en claro. El 1.3 le permite a $B$ hacer lo mismo respecto de $A$. **No es susceptible a MitM**: la autenticación es mutua y se apoya en claves previamente compartidas, así que un atacante que no conoce $K$ ni $K'$ no puede hacerse pasar por ninguno de los dos.
+
+**Lo que hay que ver acá** *(agregado nuestro)*: el nonce hace **frescura** y el MAC hace **autenticación de origen**, y son dos servicios distintos que el protocolo necesita a la vez — exactamente la distinción de [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]]. Un MAC sin nonce sería replayable aunque fuera infalsificable.
+
+> No es literalmente ninguno de los protocolos que trae la [[clase-05-protocolos-criptograficos|Clase 05]] —no hay KDC ni certificado de por medio—, pero el criterio para decidir si resiste `MITM` es el mismo que esa clase desarrolla en [[ataques-activos-y-man-in-the-middle|Ataques activos y man in the middle]]: un atacante sin las claves compartidas no puede fabricar los MAC que autentican cada mensaje, así que no puede interponerse sin ser detectado. *(Cruce nuestro; el enunciado no lo pide.)*
+
+### Ejercicio 2 — El Vigenère que el apunte no resolvió
+
+> *"El siguiente texto fue encontrado en una botella en la guerra de los Roses: `GWAOESFENITLAGEUGEDRVPHJVCDFDR`. Se sabe que el mensaje fue encriptado **con clave** y estaba en castellano con un alfabeto de 26 letras."* Se pide (a) el abordaje del criptoanálisis y (b) encontrar clave y mensaje. Viene con la tabla de frecuencias del castellano.
+
+El apunte anota *"Es un Vigenère con clave `CLAVE`, el enunciado lo dice medio escondido"* y a continuación escribe **`Skip`**: la corazonada está, la cuenta no.
+
+**Resuelto acá, y cierra.** Con $k = \texttt{CLAVE}$ y $m_j = (c_j - k_j) \bmod 26$:
+
+$$\texttt{GWAOESFENITLAGEUGEDRVPHJVCDFDR} \;\longrightarrow\; \texttt{ELATAQUESERAALASVEINTEHORASFIN}$$
+
+o sea **`EL ATAQUE SERA A LAS VEINTE HORAS FIN`**. Las 30 letras del criptograma dan 30 de texto plano y el mensaje es castellano corrido, así que no hay ambigüedad.
+
+**El juego de palabras del enunciado.** *"Fue encriptado con clave"* no es una aclaración obvia: **es el dato**. La clave literalmente es la palabra `CLAVE`. Es el mismo tipo de gancho que la Clase 01 usa con `LACABEZA` en el ejercicio de sustitución por símbolos.
+
+> **Cómo se resolvería sin el gancho** *(agregado nuestro, que es lo que el ítem (a) pide de verdad).* El abordaje es el estándar de [[cifrado-de-vigenere|Vigenère]]: (1) [[test-de-kasiski|test de Kasiski]] sobre las secuencias repetidas para proponer candidatos de longitud de clave; (2) [[indice-de-coincidencia|índice de coincidencia]] sobre los $t$ sub-textos para confirmar cuál $t$ hace saltar el IC a $\approx 0{,}0775$; (3) con $t$ fijo, el problema se **factoriza en $t$ rotaciones independientes** y cada una cae por [[criptoanalisis-por-frecuencias|análisis de frecuencias]] contra la tabla que el propio enunciado adjunta. Con 30 letras y $t=5$ quedan sub-textos de 6 caracteres, que es **poco para que las frecuencias sean confiables** — de ahí que el enunciado regale el gancho.
+
+### Ejercicio 3 — ¿Es válido este esquema?
+
+$$C_0 = IV, \qquad C_i = E_k(C_{i-1} \oplus M_i)$$
+
+**Verificado: es exactamente `CBC`.** El apunte lo dice —*"no es más que un encadenamiento CBC"*— y demuestra la validez exhibiendo la inversa: $D_k(C_i) = C_{i-1}\oplus M_i$, luego $M_i = D_k(C_i)\oplus C_{i-1}$. Es invertible, entonces es válido.
+
+Para confidencialidad y errores, ver [[modos-de-encadenamiento|Modos de encadenamiento]]: `CBC` es CPA-seguro **siempre que el IV sea aleatorio**, y un bit malo en $C_i$ afecta **exactamente dos bloques**. Acá el apunte se equivoca sobre `OFB` → [[#Discrepancias con el apunte|Discrepancias]].
+
+### Ejercicio 4 — Secreto perfecto de un Vigenère formal
+
+$$c_j = \bigl(m_j + k_{((j-1)\bmod l)+1}\bigr)(26), \qquad k_i \in \{0,\ldots,25\}$$
+
+Se pide demostrar si tiene secreto perfecto y **bajo qué condiciones sobre los parámetros**. La resolución del apunte está completa y es correcta; conviene tenerla porque es el molde de lo que se pide:
+
+**Si $l < n$** (la clave se repite), entonces $m_j$ y $m_{j+l}$ usan la misma $k$, y restando:
+
+$$c_j - c_{j+l} = m_j - m_{j+l} \pmod{26}$$
+
+El criptograma **revela una relación entre los mensajes sin depender de la clave**. No hay secreto perfecto.
+
+**Si $l = n$** (clave tan larga como el mensaje, o sea un [[one-time-pad|One Time Pad]] sobre $\mathbb{Z}_{26}$), cada $k_i$ es uniforme e independiente, $\Pr[K{=}k] = (1/26)^{n}$. Fijados $c$ y $m$, la clave queda determinada: $k_j = c_j - m_j \pmod{26}$, **una sola** produce ese cifrado. Entonces
+
+$$\Pr[C{=}c \mid M{=}m] \;=\; \Pr[K = c-m] \;=\; \left(\tfrac{1}{26}\right)^{n}$$
+
+que **no depende de $m$**, así que $\Pr[C{=}c\mid M{=}m_0] = \Pr[C{=}c\mid M{=}m_1]$ para todo par. Hay secreto perfecto.
+
+> **La condición que se pide nombrar es $l \ge n$ con clave uniforme y de un solo uso**, que es el teorema de Shannon instanciado: $\lvert\mathcal{K}\rvert \ge \lvert\mathcal{M}\rvert$ ([[secreto-perfecto|Secreto perfecto]]). El ejercicio es, en el fondo, *"demostrá que Vigenère con clave del largo del mensaje es un OTP"*.
+
+### Ejercicio 5 — Verdadero o Falso
+
+| Sentencia | Apunte | Verificación |
+|---|---|---|
+| a) `MD5` es un criptosistema **asimétrico** que no debe usarse porque usa clave de 128 bits | Falso: es una **función de hash** | Correcto. Y la razón real de no usarlo es que está **quebrada** —colisión en $<2^{20}$ operaciones—, no la longitud; los 128 bits son la **salida**, no una clave ([[primitivas-de-hash-estandar\|03.09]]) |
+| b) Un protocolo basado sólo en un MAC simétrico provee confidencialidad, integridad y **no repudio** | Falso: sólo integridad y autenticación | Correcto — y la razón del no repudio es que **la clave es compartida** ([[message-authentication-code\|03.03]]) |
+| c) El padding aleatorio en RSA es para que sea seguro ante **texto cifrado elegido** | Falso: *"se hace para que sea CPA-Secure"* | Correcto — confirmado por la filmina 27 de la Clase 4, ver [[#Discrepancias con el apunte\|Discrepancias]] |
+| d) Un certificado emitido por una CA contiene siempre la **clave pública de la CA** | Falso: contiene la del **titular** | Correcto. El certificado lleva la clave pública del titular y va **firmado** con la privada de la CA — es exactamente la trampa que documenta [[certificados-digitales\|Certificados digitales]] |
+
+---
+
+## 1C-2025
+
+### Ejercicio 1 — Diffie-Hellman
+
+Ocho pasos con $A(G,q,g)$ eligiendo un grupo $\mathbb{Z}_q$ con raíz primitiva $g$, luego $x \leftarrow \mathbb{Z}_q$, $h_1 = g^x$, $y \leftarrow \mathbb{Z}_q$, $h_2 = g^y$, y finalmente $k_A = h_2^{x}$, $k_B = h_1^{y}$.
+
+La resolución del apunte cubre los cuatro ítems: es **Diffie-Hellman**, genera un secreto compartido sobre un canal inseguro; $q$ tiene que ser **primo** para que exista la raíz primitiva; la seguridad computacional reside en que $x$ e $y$ **nunca se transmiten** y obtenerlos de $g^x$ y $g^y$ es el **problema del logaritmo discreto**, sin solución eficiente conocida; y los dos problemas son que **no resiste atacantes activos** —necesita un canal autenticado, o sea MitM— y que la exponenciación modular es cara al crecer los bits.
+
+**El ejemplo numérico del apunte tiene un problema** *(precisión nuestra)*: usa $\mathbb{Z}_5$ con $g=2$, $x=3$, $y=4$, y llega a $h_1 = 2^3 = 8 \equiv 3$, $h_2 = 2^4 = 16 \equiv 1$, $k_A = 1^3 = 1$, $k_B = 3^4 = 81 \equiv 1$. Las cuentas cierran y el secreto coincide, **pero el ejemplo es degenerado**: da $k = 1$, que es el peor valor posible para ilustrar nada. Conviene rehacerlo con otros exponentes —por ejemplo $x=2$, $y=3$ sobre $\mathbb{Z}_5$ con $g=2$: $h_1 = 4$, $h_2 = 3$, $k_A = 3^2 = 9 \equiv 4$, $k_B = 4^3 = 64 \equiv 4$— antes de usarlo como modelo de respuesta.
+
+> Esto es la [[clase-04-criptografia-asimetrica-y-firma-digital#5. Diffie-Hellman|Clase 04 § 5. Diffie-Hellman]] → concepto [[diffie-hellman|Diffie-Hellman]], que el vault ya tiene ingerida —sólo contra las filminas, sin transcripción, porque la clase todavía no se dictó (es el 10/09)—. Los siete pasos que formaliza esa nota coinciden exactamente con los ocho de este enunciado, y confirman los cuatro puntos de la resolución del apunte: el problema del **logaritmo discreto**, la necesidad de **canal autenticado** contra `MITM`, y que la seguridad reposa en que $x$ e $y$ nunca viajan.
+
+### Ejercicio 2 — El esquema que parece CBC y no lo es
+
+$$C_0 = IV, \qquad C_i = E_k(M_i) \oplus C_{i-1}$$
+
+**Cuidado con éste, porque es el gemelo tramposo del Ej. 3 del 2C-2025.** Ahí la primitiva envuelve al encadenamiento —$E_k(C_{i-1}\oplus M_i)$, que es `CBC`—; acá el encadenamiento envuelve a la primitiva. **No es `CBC`, y no es CPA-seguro.**
+
+*Validez*: sí. $D_k$ existe porque $M_i = D_k(C_i \oplus C_{i-1})$.
+
+*Confidencialidad*: **no es CPA-seguro**, y el ataque del apunte es correcto y vale la pena tenerlo escrito. De $C_i = E_k(M_i)\oplus C_{i-1}$ sale
+
+$$C_i \oplus C_{i-1} = E_k(M_i)$$
+
+o sea que **dos bloques contiguos revelan una función determinística del bloque de mensaje**. El adversario elige
+
+$$m_0 = M \Vert M \quad\text{(dos bloques iguales)}, \qquad m_1 = M \Vert M'$$
+
+y recibe $C_0, C_1, C_2$. Entonces calcula $C_1 \oplus C_0$ y $C_2 \oplus C_1$:
+
+- si el mensaje era $m_0$, los dos valen $E_k(M)$ y **coinciden**;
+- si era $m_1$, valen $E_k(M)$ y $E_k(M')$ y **difieren**.
+
+Emite $b' = 0$ si coinciden. Acierta con **probabilidad 1**. Es el mismo defecto que prohíbe [[modos-de-encadenamiento|ECB]]: bloques iguales producen huella igual, y el IV no lo tapa porque se cancela al xorear bloques contiguos.
+
+### Ejercicio 3 — ¿Este esquema da integridad?
+
+$$c = E_{k_1}\bigl(m \Vert H(k_2 \Vert m)\bigr)$$
+
+con $H$ una función de hash, $E_k$ simétrica, y $k_1, k_2$ compartidas. Se piden los pasos del receptor, si un atacante puede modificar el mensaje, si provee autenticación y si provee no repudio.
+
+La resolución del apunte es correcta en los cuatro puntos, y el (b) es el que importa: **es `authenticate-then-encrypt`**, la segunda de las [[privacidad-e-integridad|tres formas de combinar]], la que *"puede ser segura pero requiere prueba"*. El apunte dice que el atacante **sí puede modificar** porque *"primero se aplica el hash y luego se encripta"*, y que **lo correcto sería cifrar y luego autenticar**.
+
+> **Matiz necesario** *(precisión nuestra).* La conclusión —preferir `Encrypt-then-MAC`— es la correcta y es la de la cátedra. Pero el argumento *"puede introducir un cambio tal que $c' = (m'\Vert t')$ y pasaría la validación"* está incompleto: para fabricar ese $c'$ el atacante tendría que producir un $t' = H(k_2\Vert m')$ **sin conocer $k_2$**, que es justamente lo que la construcción impide. Lo que falla de verdad en *authenticate-then-encrypt* es que **obliga a descifrar para poder verificar**, y eso abre los ataques de **oráculo de padding** que se llevaron puesto a `TLS` hasta la 1.2. La respuesta correcta al ítem (b) es *"no puede falsificar, pero el orden es igualmente malo, y ésta es la razón"*.
+
+Sobre (c) y (d): provee **autenticación simétrica** —el receptor confirma que el emisor tiene $k_2$— pero **no identidad individual** ni **no repudio**, porque las claves son compartidas y no se puede distinguir cuál de los dos emitió.
+
+### Ejercicio 4 — Secreto perfecto con una clave de dos bits
+
+$$c = E_k(m) = (m \oplus k_0) \oplus f(k_1), \qquad f = \text{identidad},\ k = k_0k_1 \in \{0,1\}^2 \text{ uniforme}$$
+
+con $m, c \in \{0,1\}$ y $\Pr[m{=}0] = 0{,}9$, $\Pr[m{=}1] = 0{,}1$.
+
+El apunte lo resuelve **dos veces**: primero con Bayes y la tabla de verdad completa de los 8 casos, y después con el atajo. **El atajo es el que conviene reproducir en un parcial**:
+
+$$\Pr[C{=}0\mid M{=}0] = \Pr[k{=}00] + \Pr[k{=}11] = \tfrac14+\tfrac14 = \tfrac12$$
+$$\Pr[C{=}0\mid M{=}1] = \Pr[k{=}01] + \Pr[k{=}10] = \tfrac14+\tfrac14 = \tfrac12$$
+
+y análogamente para $C{=}1$. Como $\Pr[C{=}c\mid M{=}m]$ **no depende de $m$**, hay [[secreto-perfecto|secreto perfecto]].
+
+> **La lectura de una línea que el apunte no hace** *(agregado nuestro)*: $c = m \oplus k_0 \oplus k_1$, y **$k_0 \oplus k_1$ es uniforme en $\{0,1\}$** cuando $k$ es uniforme en $\{0,1\}^2$ —dos de las cuatro claves dan 0 y dos dan 1—. O sea que el esquema **es un One Time Pad de un bit disfrazado**, y por eso tiene secreto perfecto. Notar además que el sesgo $0{,}9 / 0{,}1$ de la distribución de $M$ **es una distracción**: el secreto perfecto no depende de cómo se distribuyan los mensajes.
+
+### Ejercicio 5 — Verdadero o Falso
+
+| Sentencia | Apunte | Verificación |
+|---|---|---|
+| a) Cualquier función de encripción simétrica tiene que ser **inyectiva** | Verdadero | Correcto: si no, dos mensajes distintos darían el mismo cifrado y `Dec` no podría decidir. Es la **condición de corrección** de [[criptosistema\|01.01]] |
+| b) En clave pública se usa una clave para encriptar/desencriptar y la otra para firmar | Falso: se encripta con la **pública** y se desencripta con la **privada**; se firma con la **privada** y se verifica con la **pública** | Correcto |
+| c) Con un código binario de 3 bits, hay **más** cifrados de transposición que de sustitución | Falso: transposición $= 3! = 6$, sustitución $= 8! = 40320$ | Correcto. La transposición permuta **3 posiciones**; la sustitución es una biyección sobre las **8 cadenas** de 3 bits ([[cifrado-por-transposicion\|01.09]] contra [[cifrado-de-sustitucion-monoalfabetica\|01.05]]) |
+| d) Un certificado público contiene la **clave privada** de la entidad certificante | Falso: contiene la pública del titular, firmada con la privada de la CA | Correcto — ver [[certificados-digitales\|Certificados digitales]] |
+
+---
+
+## 1C-2023
+
+### Ejercicio 1 — Protocolo tipo TLS
+
+Siete mensajes cliente-servidor con certificado, firma digital $Sgn_{kS}(S)$, $E_{K_0}(kS)$, derivación $k1 = H(K_0, N_C, N_S)$ y $K_{cs} = H(N, k1)$, más `finished` con `MAC` sobre un timestamp.
+
+La resolución cubre los tres ítems: es un protocolo de **autenticación e intercambio de claves** que construye una clave de sesión y un canal seguro con confidencialidad y **autenticación del servidor**; los mensajes 1.4 y 1.5 sirven para **validar que ambos tienen la misma $K_{cs}$**, con **timestamp contra replay** y **MAC por integridad**; y $K_{cs}$ se deriva en vez de usar $K_0$ porque $K_0$ es la **clave pública del servidor**, obtenida del certificado, o sea parte de un esquema asimétrico que no sirve para el intercambio simétrico posterior.
+
+> **Es un protocolo *tipo TLS* disfrazado con otra notación**, y ahora el vault lo tiene desarrollado con nombre propio: [[clase-05-protocolos-criptograficos#10. TLS: arquitectura y el TLS Record|Clase 05 § 10. TLS: arquitectura y el TLS Record]] hasta [[clase-05-protocolos-criptograficos#13. TLS Handshake|§ 13. TLS Handshake]]. El certificado que trae $K_0$ es exactamente el mecanismo de [[certificados-digitales|Certificados digitales]] y [[x509|X.509]]: la clave del certificado es asimétrica y sirve para **autenticar y transportar** el material a partir del cual se deriva la clave de sesión, nunca para cifrar el tráfico en sí — la misma razón que da el apunte. *(Cruce nuestro.)*
+
+### Ejercicio 2 — CTR con una primitiva sin inversa
+
+*"Una propuesta de cifrador en bloque usando modo CTR usa una primitiva $E(\cdot)$ que no admite una primitiva de desencripción inversa."*
+
+**Sí es válido, y ésta es la pregunta que separa a quien entendió `CTR` de quien lo memorizó.** El apunte lo resuelve bien: $C_i = M_i \oplus E_k(\text{nonce}\Vert i)$ y $M_i = C_i \oplus E_k(\text{nonce}\Vert i)$ — **la primitiva se usa hacia adelante en las dos direcciones**, nunca se invierte. Es lo que hace que `CTR` (y `OFB`, y `CFB`) sólo necesiten una **función pseudoaleatoria** y no una **permutación**; la misma distinción `PRF`/`PRP` que aparece en [[primitiva-de-cifrado-en-bloque|02.07]] y en [[cbc-mac|03.05]].
+
+Sobre el nonce: es aleatorio, se concatena con el contador del bloque, y **no se puede repetir el par $(k, \text{nonce})$** ([[cifrado-probabilistico-nonce-e-iv|02.06]]). La ventaja de procesamiento es el **paralelismo**: no hay operaciones entre bloques, así que se cifra y descifra en paralelo y con acceso aleatorio.
+
+### Ejercicio 3 — base64 como "cifrado"
+
+*"El banco de Estander usa base64 como sistema de encripción simétrica."* Se pregunta si es válido, qué significa que ofrezca **confusión y difusión**, y qué significa que un criptosistema sea **no lineal**.
+
+El apunte responde (a) correctamente —**no es un criptosistema**: no usa clave, no da confidencialidad y no hay dificultad computacional en revertirlo— y marca (b) y (c) como **"No lo vimos"**.
+
+> **El apunte se equivoca al marcarlas "No lo vimos": el vault, cruzado, muestra que sí se vieron.** *Confusión* y *difusión* están definidas y nombradas en la propia [[clase-02-cifrado#9. Primitivas de cifrado en bloque|Clase 02 § 9. Primitivas de cifrado en bloque]] —con cita textual del docente (cues pt2 44-56, 111): *"difusión: si yo altero algún bit, que se alteren muchos… confusión: que yo no pueda predecir cómo la alteración de un bit va a modificar los otros bits"*—, y **la respuesta a (b) sale de ahí**: es exactamente lo que ofrece un esquema de cifrado en bloque en lugar de un dato codificado en base64. *No linealidad* no aparece con ese nombre en una filmina de clase, pero sí como propiedad desarrollada: las **cajas $S$ son el único paso no lineal de DES** ([[des-descripcion-del-algoritmo|apunte de DES]]) y `Byte Sub` lo es de `AES` ([[aes|02.10]]), y la respuesta a (c) es que `base64` es una función **fija y lineal** —una tabla de sustitución de 6 a 8 bits sin clave— así que no tiene ninguna de las tres propiedades. *(Precisión nuestra, y también una corrección a esta misma nota: la versión anterior de este párrafo daba el hueco por real sin cruzar contra la Clase 02, que ya estaba ingerida cuando se escribió.)*
+
+### Ejercicio 4 — Cuando el aleatorio deja de serlo
+
+$$c = E_k(m) = (r,\; ar + b + m)_p, \qquad k = (a,b),\ r \leftarrow \text{random}$$
+
+y la variante donde **$r$ deja de ser aleatorio** y toma el valor fijo $r = (a+b)_p$. Se pide demostrar con $\mathsf{PrivK}^{\mathsf{CPA}}$ si sigue siendo seguro.
+
+Correcto y bien visto: con $r$ fijo queda
+
+$$c = \bigl(a+b,\; \underbrace{a^2+ab+b}_{\text{constante}} + m\bigr)_p$$
+
+o sea **determinístico**, y *determinístico $\Rightarrow$ no CPA-seguro* es una de las tres propiedades de [[pruebas-de-indistinguibilidad|02.05]]. El adversario pide al oráculo el cifrado de $m_0$ y de $m_1$, recibe el desafío y compara: acierta con probabilidad 1.
+
+### Ejercicio 5 — Verdadero o Falso
+
+| Sentencia | Apunte | Verificación |
+|---|---|---|
+| a) Cifrar $m$ con $k_1$ y **a la vez** sacar el MAC de $m$ con $k_2$; $k_1$ y $k_2$ **pueden ser iguales** | Falso: primero cifrar, después el MAC **sobre $c$**, y las claves **independientes** | Correcto, y es exactamente [[privacidad-e-integridad\|03.12]] más el ejercicio de claves iguales de la [[practica-04-macs-hash-y-cifrado-autenticado\|Práctica 04]] |
+| b) La seguridad de un hash se establece **sólo** como resistencia a preimágenes | Falso: son **tres** propiedades | Correcto ([[resistencias-de-una-funcion-de-hash\|03.07]]) |
+| c) Diffie-Hellman permite que Alice le **envíe** una clave de sesión a Bob | Falso: permite que **la establezcan** entre los dos, no que uno se la mande | Correcto, y es la distinción que define un **acuerdo** de claves contra un **transporte** de claves |
+| d) En los cifrados en bloque se requiere que la `PRF` **siempre sea reversible** | Falso: la **primitiva de cifrado** debe ser reversible, la `PRF` no | Correcto, y engancha con el Ej. 2 de este mismo parcial |
+
+### Múltiple choice — SSL, TLS y PKI
+
+Tres opciones sobre confidencialidad e integridad en canal inseguro. La correcta es **(c) TLS ofrece confidencialidad, integridad y autenticación bajo un esquema PKI de distribución de certificados**. Las otras dos fallan porque (a) atribuye a SSL un **KDC centralizado** —usa PKI, no KDC; el `KDC` es de [[needham-schroeder|Needham-Schroeder]], no de TLS— y (b) le atribuye **no repudio**, que no da porque una vez establecida la clave de sesión el esquema es simétrico. Aparece **idéntica** en el 1C-2018. Desarrollado con esta misma comparación en [[clase-05-protocolos-criptograficos#Para el parcial|Clase 05 § Para el parcial]].
+
+---
+
+## 1C-2018
+
+### Ejercicio 1 — Needham-Schroeder
+
+$$1.1)\ A \to T: A, B, N_A \qquad 1.2)\ A \leftarrow T: E_{K_{AT}}(N_A, B, k, E_{K_{BT}}(k,A)) \qquad 1.3)\ A \to B: E_{K_{BT}}(k,A)$$
+$$1.4)\ A \leftarrow B: E_k(N_B) \qquad 1.5)\ A \to B: E_k(N_B - 1)$$
+
+Es el protocolo clásico con **KDC**. **Es, literalmente, el protocolo [[needham-schroeder|Needham-Schroeder]] de [[clase-05-protocolos-criptograficos#8. Needham-Schroeder|Clase 05 § 8]]** — con `T` en vez de `KDC` como nombre del tercero de confianza, y **sin** el timestamp de la corrección [[denning-sacco-y-frescura|Denning-Sacco]] que sí aparece en la filmina 28 de esa clase. Las tres respuestas del apunte son correctas y son las estándar:
+
+- **(a) Por qué está el nombre del destinatario** en 1.1 y 1.2: $T$ es un KDC, y $A$ tiene que **especificar con quién quiere hablar** para obtener la clave de sesión. En 1.2 el nombre va **adentro del cifrado** para que no se pueda suplantar la identidad del destinatario aunque el mensaje esté cifrado con $K_{AT}$.
+- **(b) El problema**: en el paso 1.3 **no viaja ningún timestamp ni nonce**, así que es vulnerable a **replay** — un atacante que grabó un $E_{K_{BT}}(k,A)$ viejo, con una clave $k$ ya comprometida, se lo puede reenviar a $B$.
+- **(c) [[denning-sacco-y-frescura|Denning-Sacco]]** agrega timestamps a 1.2 y 1.3 justamente para eso: $B$ puede validar si el mensaje que le llegó es viejo o reciente.
+
+### Ejercicio 2 — Múltiple choice
+
+**2.1 Validación de un certificado digital** → la correcta es verificar que **la firma de la CA sea válida**, usando la clave pública de la CA, porque la firma se generó con la privada que sólo ella tiene — el segundo de los cinco pasos de [[x509#Verificación de un certificado X.509, en cinco pasos|X.509 § Verificación de un certificado X.509, en cinco pasos]].
+
+**2.2 El Duque de Mantua, 1401 — cifrado homofónico.** Cada vocal se sustituye por **más de un símbolo**, elegido al azar, con tantos símbolos como su frecuencia en el idioma. La correcta es **(c) el índice de coincidencia no es tan útil en este caso**, y la razón que da el apunte es exacta: al repartir cada vocal en varios símbolos **se aplana el histograma** y el [[indice-de-coincidencia|índice de coincidencia]] deja de distinguir. Las otras dos son trampas: no es Vigenère —no hay desplazamientos cíclicos— y sí se puede razonar sobre su secreto perfecto.
+
+> **Éste es el ejercicio más interesante de los cuatro parciales** *(lectura nuestra)*, porque ataca justo el punto ciego de la herramienta: el IC mide **cuán disparejo** es el histograma, y el cifrado homofónico está **diseñado** para emparejarlo. Es el contraejemplo que muestra que el IC no es un detector universal de sustitución monoalfabética.
+
+**2.3 SSL/TLS/PKI** → misma pregunta que en el 1C-2023, misma respuesta — ver [[clase-05-protocolos-criptograficos#Para el parcial|Clase 05 § Para el parcial]].
+
+### Ejercicio 3 — Cirugía sobre CBC
+
+Sobre $C_0 = IV$, $C_k = E_k(M_k \oplus C_{k-1})$:
+
+- **(a) Si se elimina $C_0$**: $M_1$ **no se puede recuperar**, porque $D_k(C_1) = M_1 \oplus C_0$ y falta $C_0$. Los demás bloques salen bien.
+- **(b) Si se elimina $C_n$**: se pierde **sólo $M_n$**; $M_1 \ldots M_{n-1}$ se recuperan correctamente.
+- **(c) Cómo agregar un bloque $M_0$ al principio**: no se puede insertar sin más, por la dependencia del bloque anterior. Hay que **anteponer un nuevo $C'_0$** tal que $M_0 = D_k(C_0) \oplus C'_0$, o sea $C'_0 = D_k(C_0) \oplus M_0$.
+
+La resolución del apunte de (c) es correcta y es más fina de lo que parece: **el usuario legítimo puede hacerlo porque tiene la clave** y por lo tanto puede calcular $D_k(C_0)$. Sin la clave no sale — y ésa es la diferencia entre esta manipulación y el ataque de [[maleabilidad]] de la Clase 03.
+
+### Ejercicios 4 y 5
+
+El apunte los marca **"Repetido"**: son literalmente los mismos que el Ej. 4 y el Ej. 5 del 1C-2023, arriba. **Que un ejercicio reaparezca idéntico con cinco años de diferencia es, en sí, el dato más accionable de esta nota.**
+
+---
+
+## Los ejercicios de Shamir, de la Guía 6
+
+La última página no es de un parcial: son dos ejercicios de la **Guía 6**, que el vault **no tiene ingerida**. Se conservan acá porque vinieron en el mismo PDF.
+
+**Ejercicio 14 — encontrar al espía.** Cuatro personas, tres tienen shares legítimos de un esquema de Shamir $(2,3)$ módulo 11 y una es un agente extranjero. Los pares son $A(1,4)$, $B(3,7)$, $C(5,1)$, $D(7,2)$.
+
+**El planteo del apunte es correcto y la aritmética no.** Resuelto de nuevo acá, verificado punto por punto.
+
+Con umbral $k=2$, el polinomio tiene grado $k-1 = 1$: $f(x) = ax + b$, y **el secreto es $f(0) = b$**. Con tres shares legítimos y una recta, la estrategia es tomar **dos** puntos, construir la recta, y ver cuál de los otros dos **no** cae en ella. Tomando $A$ y $B$:
+
+$$a = (y_2-y_1)(x_2-x_1)^{-1} = (7-4)\cdot(3-1)^{-1} = 3 \cdot 2^{-1} = 3\cdot 6 = 18 \equiv \mathbf{7} \pmod{11}$$
+$$b = y_1 - a x_1 = 4 - 7 = -3 \equiv \mathbf{8} \pmod{11}$$
+
+*(Usando $2^{-1} \equiv 6$, porque $2\cdot 6 = 12 \equiv 1 \pmod{11}$ — ver [[inverso-modular|Inverso modular]].)*
+
+$$f(x) = 7x + 8 \pmod{11}$$
+
+Verificando los cuatro:
+
+| Share | $f(x)$ calculado | Declarado | |
+|---|---|---|---|
+| $A(1,4)$ | $7+8 = 15 \equiv 4$ | 4 | pertenece |
+| $B(3,7)$ | $21+8 = 29 \equiv 7$ | 7 | pertenece |
+| $C(5,1)$ | $35+8 = 43 \equiv 10$ | 1 | **no pertenece** |
+| $D(7,2)$ | $49+8 = 57 \equiv 2$ | 2 | pertenece |
+
+**$C$ es el agente extranjero, y el secreto es $f(0) = 8$.**
+
+> **Este mismo ejercicio ya tiene teoría propia en el vault.** [[secretos-compartidos-y-metodo-de-shamir|Secretos compartidos y método de Shamir]] desarrolla el esquema $(t,n)$-threshold en general —acá con $t=2$, ahí con el ejemplo de la filmina en $t=3$— y documenta la interpolación de Lagrange sobre $\mathbb{Z}_p$ que hace posible reconstruir $f(0)$. Y trae un dato que conviene cruzar: **el propio deck de la cátedra comete un error de aritmética modular en su ejemplo** —$80+12+7=99\equiv 0\pmod{11}$, no $2$ como escribe la filmina 26— del mismo tipo que el de este apunte: una cuenta módulo 11 que sale mal por un paso, aunque en el deck el veredicto final tampoco se ve afectado más que en un valor de sombra. Dos aritméticas independientes, mismo módulo, mismo tipo de desliz.
+
+> **Dónde se rompe la cuenta del apunte** *(y por qué el veredicto le sale bien igual)*. Al despejar llega a $12 - 2b = 7$, lo reduce a $1 - 2b = 7$ —correcto, $12 \equiv 1$— pero concluye $b = 3$ cuando de ahí sale $2b = -6 \equiv 5$ y $b = 5\cdot 6 = 30 \equiv 8$. Después, al verificar $C$ y $D$, usa **otro par todavía**: $a=1$, $b=6$. Esa recta **no pasa ni por $A$ ni por $B$**, que son los dos puntos de los que se dedujo. Le cierra $D$ por casualidad —$7+6=13\equiv 2$— y le falla $C$, así que el veredicto sale correcto **con la cuenta equivocada**. El apunte además **nunca dice cuál es el secreto**, que es la mitad de lo que el ejercicio pide.
+
+**Ejercicio 15 — esquema jerárquico.** Un general, dos coroneles y cinco suboficiales; se lanza el misil si decide el general, **o** los dos coroneles, **o** los cinco suboficiales, **o** un coronel más tres suboficiales. La solución del apunte reparte el secreto en un Shamir $(1,4)$ y subdivide cada rama: $S_1$ al general directamente, $S_2$ como $(2,2)$ entre los coroneles, $S_3$ como $(5,5)$ entre los suboficiales, y $S_4$ partido en $(1,2)$ para coroneles y $(3,5)$ para suboficiales. **Una persona termina con más de un share**, que es justo lo que la pista del enunciado adelanta.
+
+---
+
+## Discrepancias con el apunte
+
+Cuatro cosas que la resolución manuscrita dice mal o a medias. Ninguna invalida el veredicto final del ejercicio, pero todas cambiarían la nota si se copiaran tal cual.
+
+**1. `OFB` no propaga errores, y el apunte dice que sí — dos veces.** En el 2C-2025 (Ej. 3) escribe *"el CBC transmite el error al bloque actual y al siguiente… En OFB sucede exactamente lo mismo"*, y en el 1C-2025 (Ej. 2) repite *"será afectado el bloque del error y el contiguo, al igual que en CBC y OFB"*.
+
+**Es incorrecto en los dos casos.** `OFB` genera el keystream realimentando **la salida de la primitiva**, sin mirar el criptograma: $O_i = E_k(O_{i-1})$, $C_i = M_i \oplus O_i$. Como el keystream **no depende de $C$**, un bit corrompido en $C_i$ corrompe **exactamente ese bit** de $M_i$ y nada más — igual que `CTR`. La tabla verificada está en [[modos-de-encadenamiento#Propagación de errores|Modos de encadenamiento § Propagación de errores]]. **Que el error aparezca en dos parciales distintos sugiere que es una confusión asentada, no un desliz** — probablemente por agrupar `CBC`, `CFB` y `OFB` como "los que realimentan", cuando lo que decide no es *si* realimentan sino *qué*.
+
+**2. El apunte tenía razón: la filmina lo confirma, y revierte lo que esta nota conjeturaba.** El apunte marca falsa la sentencia *"el padding aleatorio en RSA es para que sea seguro ante texto cifrado elegido"* y la corrige a *"para que sea `CPA-Secure`"*. Una versión anterior de este párrafo especulaba —rotulado *"precisión nuestra"*, a falta de la Clase 4— que la sentencia original podía ser **defendible como verdadera**, con el argumento de que `RSA-OAEP` se diseñó para `IND-CCA2` y de que Bleichenbacher es un ataque de texto cifrado elegido contra `PKCS#1 v1.5`.
+
+**Esa conjetura era incorrecta, y la filmina 27 del deck de la Clase 4 la revierte de manera explícita.** Verificado renderizando la página —no de segunda mano—: *"Se cree que es `CPA-Secure`. Pero se encontraron ataques que muestran que no es `CCA-Secure`."* La cátedra afirma justo lo contrario de lo que esta nota conjeturaba: el padding aleatorio de `PKCS#1 v1.5` apunta a `CPA`, no a `CCA`, y de hecho **no** alcanza `CCA` — es exactamente lo que explota Bleichenbacher. El desarrollo completo, incluida la razón por la que el argumento sobre `RSA-OAEP` seguía siendo cierto en general pero no aplicaba al esquema de esta filmina, está en [[clase-04-criptografia-asimetrica-y-firma-digital#8-pkcs1-y-tamaño-de-claves|Clase 04 § 8. PKCS#1 y tamaño de claves]] → concepto [[pkcs1-y-tamano-de-claves|PKCS#1 y tamaño de claves]]. **La corrección del apunte del estudiante era la correcta**, y la sentencia del examen 2C-2025 es **falsa**, sin matices — la tabla del Ejercicio 5 de ese parcial, arriba, ya lo dice bien.
+
+**3. El contraejemplo del Ej. 3 del 1C-2025 está incompleto.** Ver el matiz arriba: el atacante **no** puede forjar $H(k_2\Vert m')$ sin $k_2$. Lo que hace mala a *authenticate-then-encrypt* es que obliga a descifrar para verificar, no que sea forjable.
+
+**4. La cuenta de Shamir está mal, y el veredicto sale bien por casualidad.** En el Ej. 14 el apunte despeja $b = 3$ donde corresponde $b = 8$, y después verifica con un tercer par distinto, $a=1$, $b=6$ — una recta que **no pasa por $A$ ni por $B$**, los dos puntos que la originaron. Le falla $C$ y le cierra $D$, así que acierta que **$C$ es el espía** sin que la aritmética lo sostenga. Y **nunca da el secreto**, que es la otra mitad de la consigna: es $b = 8$. La resolución correcta, $f(x) = 7x+8 \pmod{11}$, está [[#Los ejercicios de Shamir, de la Guía 6|arriba]] verificada en los cuatro shares, con la teoría del método desarrollada en [[secretos-compartidos-y-metodo-de-shamir|Secretos compartidos y método de Shamir]] — nota que documenta, además, un error de aritmética modular **independiente** en el propio deck de la cátedra, sobre el mismo módulo 11.
+
+> **Y una advertencia general.** Estas resoluciones son de un estudiante, no de la cátedra: **no hay ninguna corrección docente sobre ellas**. Donde esta nota dice "verificado", quiere decir verificado contra las notas de concepto del vault y contra Katz & Lindell — no contra una clave de corrección oficial.
+
+---
+
+## Cabos sueltos
+
+- **Los ejemplos de parcial del campus siguen sin bajar.** Son los que el docente nombra el 20/08 (cue pt2 521) y **no son éstos**: ver el [[cronograma#Fechas críticas|cronograma]] y el [[reglamento-y-evaluacion|reglamento]]. Con cuatro parciales reales en la mano el hueco importa menos, pero sigue abierto.
+- **No hay ningún segundo parcial ni ningún final** en el vault. Este PDF es explícitamente de *primeros* parciales. El segundo cubre las Clases 6 a 11 —la unidad de Seguridad—, de la que el vault ahora tiene [[clase-06-politicas-de-seguridad-y-control-de-acceso|notas de clase]] escritas contra las filminas (Clases 6 a 10; la Clase 11, Protección de datos, sigue sin deck) además de las [[videografia|notas de video]], pero **ningún examen real** de ese bloque: esta nota no puede decir todavía qué se toma de verdad ahí.
+- **Confusión, difusión y no linealidad** ya no son un hueco: aparecen desarrolladas en la Clase 02 —ver la corrección al punto (b)/(c) del 1C-2023 Ej. 3, [[#1C-2023|arriba]]—. Lo que sí sigue faltando es una nota de concepto dedicada a esos tres términos como tríada de Shannon; hoy viven repartidos en `02.09`, `02.10` y `02.16`.
+- **Las Clases 4 y 5 ya tienen nota**, escrita sólo contra las filminas —no se dictan hasta el 10/09 y el 17/09, así que no hay transcripción ni matiz de voz todavía—. Con eso alcanza para resolver, hoy, el Ejercicio 1 de protocolo en los cuatro parciales, el ítem de Diffie-Hellman y el bloque de certificados/PKI: ver los links agregados en cada sección de esta nota. Lo que **no** cambia es que esta nota sigue siendo el apunte de un estudiante sin corrección docente — cuando esas clases se dicten de verdad, conviene revisar de nuevo contra lo que se diga en voz.
+- **La Guía 6** no está ingerida, y de ella salen los dos ejercicios de Shamir de la última página. El **método** de Shamir sí tiene teoría propia desde hoy, en [[secretos-compartidos-y-metodo-de-shamir|06.13]] — pero esa nota nace de la Clase 06 (Control de acceso), no de la Guía 6, y usa un ejemplo con umbral distinto ($t=3$, contra el $t=2$ del Ej. 14).
+
+---
+
+## Ver también
+
+- [[cronograma|Cronograma]] — el Parcial 1 es el **24/09** y cubre Clases 1-5 y Guías 1-4
+- [[reglamento-y-evaluacion|Reglamento y evaluación]] — la fórmula de la nota y las condiciones de aprobación
+- [[programa-y-objetivos|Programa y objetivos]] — el mapeo tema ↔ clase ↔ concepto
+- [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] · [[clase-02-cifrado|Clase 02]] · [[clase-03-macs-y-cifrado-autenticado|Clase 03]] — las tres clases con transcripción que estos parciales evalúan
+- [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04]] · [[clase-05-protocolos-criptograficos|Clase 05]] — las dos clases que más se toman según esta nota, ingeridas sólo contra filminas (se dictan el 10/09 y el 17/09)
+- [[secreto-perfecto|Secreto perfecto]] · [[cifrado-de-vigenere|Cifrado de Vigenère]] · [[indice-de-coincidencia|Índice de coincidencia]] — el bloque clásico que aparece en tres de los cuatro
+- [[modos-de-encadenamiento|Modos de encadenamiento]] · [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — lo que se pregunta como *"¿es válido este esquema?"*
+- [[privacidad-e-integridad|Privacidad e integridad]] · [[message-authentication-code|Message Authentication Code]] · [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — el bloque de integridad, que acá aparece sobre todo como Verdadero o Falso
+- [[diffie-hellman|Diffie-Hellman]] · [[pkcs1-y-tamano-de-claves|PKCS#1 y tamaño de claves]] — el Ej. 1 de intercambio de claves y la discrepancia resuelta sobre `CPA`/`CCA`
+- [[certificados-digitales|Certificados digitales]] · [[x509|X.509]] · [[needham-schroeder|Needham-Schroeder]] · [[denning-sacco-y-frescura|Denning-Sacco y frescura]] — PKI y el protocolo con KDC que es, literalmente, el Ej. 1 del 1C-2018
+- [[secretos-compartidos-y-metodo-de-shamir|Secretos compartidos y método de Shamir]] — la teoría del método, con su propia errata aritmética en el deck de la cátedra
+- [[indice|Índice de la wiki]]

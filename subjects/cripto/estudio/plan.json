@@ -1,0 +1,518 @@
+{
+  "title": "Plan de estudio · Criptografía y Seguridad",
+  "instances": [
+    {
+      "key": "parcial1",
+      "label": "Primer parcial (Clases 1 a 5)"
+    },
+    {
+      "key": "tp",
+      "label": "Entrega del TP de implementación"
+    },
+    {
+      "key": "parcial2",
+      "label": "Segundo parcial (Clases 6 a 11)"
+    },
+    {
+      "key": "recuperatorio",
+      "label": "Recuperatorio",
+      "optional": true
+    },
+    {
+      "key": "final",
+      "label": "Final escrito integrador"
+    }
+  ],
+  "phases": [
+    {
+      "id": "parcial-1",
+      "title": "Primer parcial",
+      "subtitle": "Clases 1 a 5 · Guías 1 a 4",
+      "description": "La primera etapa del curso es criptografía pura: qué garantiza cada primitiva y contra qué adversario.",
+      "icon": "map",
+      "date": "2026-09-24",
+      "instance": "parcial1",
+      "retake": "recuperatorio",
+      "scope": "Criptografía clásica y secreto perfecto; cifrado simétrico de flujo y de bloque con sus modos de encadenamiento; integridad con MAC, funciones de hash y cifrado autenticado; criptografía asimétrica y firma digital; manejo de claves y protocolos.\n\nEl parcial es escrito e individual, y toma contenidos de las clases teóricas **y** de las prácticas. El reglamento agrega una advertencia que conviene tomar en serio: el cuerpo de conocimiento evaluable es el de la bibliografía obligatoria, no solo lo que se dijo en clase.\n\nAusente en la fecha del parcial equivale a ir directo al recuperatorio.",
+      "guide": "Cada clase se abre con su nota de clase, que es el panorama del tema, y recién después se leen sus conceptos. Las guías se resuelven en el orden del cronograma: la Guía 1 después de la Clase 1, la Guía 2 después de la Clase 2 y la Guía 3 después de la Clase 3.\n\nLos conceptos de aritmética modular, Euclides extendido, inverso modular y cuerpos finitos aparecen en la Clase 2 pero son la herramienta de la Clase 4: conviene tenerlos firmes antes de RSA y Diffie-Hellman.",
+      "milestones": [
+        {
+          "id": "p1-c1",
+          "title": "Clase 1 · Introducción y criptografía clásica",
+          "icon": "book",
+          "divisions": [
+            "1"
+          ],
+          "tasks": [
+            {
+              "id": "p1-c1-leer",
+              "label": "Leer la Clase 1 completa",
+              "kind": "read",
+              "target": "1"
+            },
+            {
+              "id": "p1-c1-clasica",
+              "label": "Repasar los cifrados clásicos y su criptoanálisis",
+              "kind": "cards",
+              "target": "criptografia-clasica"
+            },
+            {
+              "id": "p1-c1-cards",
+              "label": "Repasar las definiciones formales",
+              "kind": "cards",
+              "target": "definiciones"
+            },
+            {
+              "id": "p1-c1-guia",
+              "label": "Resolver la Guía 1 — Criptografía clásica",
+              "kind": "exercises",
+              "target": "guia-01-criptografia-clasica",
+              "detail": "8 ejercicios"
+            }
+          ]
+        },
+        {
+          "id": "p1-c2",
+          "title": "Clase 2 · Cifrado",
+          "icon": "layers",
+          "divisions": [
+            "2"
+          ],
+          "tasks": [
+            {
+              "id": "p1-c2-leer",
+              "label": "Leer la Clase 2 completa",
+              "kind": "read",
+              "target": "2"
+            },
+            {
+              "id": "p1-c2-cards",
+              "label": "Repasar los algoritmos simétricos y sus modos",
+              "kind": "cards",
+              "target": "algoritmos-simetricos"
+            },
+            {
+              "id": "p1-c2-mate",
+              "label": "Repasar la matemática de fondo",
+              "kind": "cards",
+              "target": "matematica"
+            },
+            {
+              "id": "p1-c2-guia",
+              "label": "Resolver la Guía 2 — Criptografía simétrica",
+              "kind": "exercises",
+              "target": "guia-02-criptografia-simetrica",
+              "detail": "8 ejercicios"
+            }
+          ]
+        },
+        {
+          "id": "p1-c3",
+          "title": "Clase 3 · MAC y cifrado autenticado",
+          "icon": "square",
+          "divisions": [
+            "3"
+          ],
+          "tasks": [
+            {
+              "id": "p1-c3-leer",
+              "label": "Leer la Clase 3 completa",
+              "kind": "read",
+              "target": "3"
+            },
+            {
+              "id": "p1-c3-cards",
+              "label": "Repasar hash y MAC",
+              "kind": "cards",
+              "target": "hash-y-macs"
+            },
+            {
+              "id": "p1-c3-guia",
+              "label": "Resolver la Guía 3 — MAC y funciones de hash",
+              "kind": "exercises",
+              "target": "guia-03-mac-y-funciones-de-hash",
+              "detail": "6 ejercicios"
+            }
+          ]
+        },
+        {
+          "id": "p1-c4",
+          "title": "Clase 4 · Criptografía asimétrica y firma digital",
+          "icon": "diamond",
+          "divisions": [
+            "4"
+          ],
+          "tasks": [
+            {
+              "id": "p1-c4-leer",
+              "label": "Leer la Clase 4 completa",
+              "kind": "read",
+              "target": "4"
+            },
+            {
+              "id": "p1-c4-cards",
+              "label": "Repasar clave pública y firma",
+              "kind": "cards",
+              "target": "asimetrica-y-firma"
+            }
+          ]
+        },
+        {
+          "id": "p1-c5",
+          "title": "Clase 5 · Protocolos criptográficos",
+          "icon": "graph",
+          "divisions": [
+            "5"
+          ],
+          "tasks": [
+            {
+              "id": "p1-c5-leer",
+              "label": "Leer la Clase 5 completa",
+              "kind": "read",
+              "target": "5"
+            },
+            {
+              "id": "p1-c5-cards",
+              "label": "Repasar protocolos, PKI y TLS",
+              "kind": "cards",
+              "target": "protocolos-y-pki"
+            }
+          ]
+        },
+        {
+          "id": "p1-repaso",
+          "title": "Repaso y práctica de examen",
+          "icon": "timer",
+          "divisions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "tasks": [
+            {
+              "id": "p1-repaso-quiz",
+              "label": "Rendir el quiz del Bloque 1",
+              "kind": "quiz",
+              "target": "quiz-bloque-1-criptografia"
+            },
+            {
+              "id": "p1-repaso-parciales",
+              "label": "Resolver los primeros parciales de años anteriores",
+              "kind": "exercises",
+              "target": "parciales-viejos",
+              "detail": "4 parciales resueltos, de 2018 a 2025"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tp",
+      "title": "TP de implementación",
+      "subtitle": "Grupal · condición necesaria para la cursada",
+      "description": "Implementar una función de seguridad que no se vio en el curso, a partir de un paper de criptografía.",
+      "icon": "wrench",
+      "date": "2026-11-16",
+      "instance": "tp",
+      "scope": "Proyecto grupal basado en un paper de criptografía: hay que implementar una función de seguridad **no vista en el curso**, construida con los conceptos de la materia.\n\nPesa el 30 % de la nota de cursada y es condición necesaria: sin TP aprobado no hay cursada, valga lo que valga la fórmula. Un TP no aprobado se puede corregir una única vez.\n\nEl enunciado se presenta el 28/09/2026 y la entrega es el 16/11/2026.",
+      "milestones": [
+        {
+          "id": "tp-enunciado",
+          "title": "Enunciado y elección del paper",
+          "icon": "notebook",
+          "tasks": [
+            {
+              "id": "tp-enunciado-leer",
+              "label": "Leer el enunciado cuando salga",
+              "kind": "custom",
+              "target": "tp-implementacion",
+              "detail": "se presenta el 28/09"
+            },
+            {
+              "id": "tp-enunciado-paper",
+              "label": "Elegir el paper y armar el grupo",
+              "kind": "custom"
+            }
+          ]
+        },
+        {
+          "id": "tp-implementacion",
+          "title": "Implementación",
+          "icon": "tool",
+          "tasks": [
+            {
+              "id": "tp-impl-base",
+              "label": "Implementar la función de seguridad del paper",
+              "kind": "custom"
+            },
+            {
+              "id": "tp-impl-ref",
+              "label": "Contrastar con las implementaciones de referencia en Java",
+              "kind": "custom",
+              "target": "implementaciones-de-referencia"
+            },
+            {
+              "id": "tp-impl-informe",
+              "label": "Escribir el informe",
+              "kind": "custom"
+            }
+          ]
+        },
+        {
+          "id": "tp-entrega",
+          "title": "Entrega",
+          "icon": "clock",
+          "tasks": [
+            {
+              "id": "tp-entrega-final",
+              "label": "Entregar el 16/11",
+              "kind": "custom"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "parcial-2",
+      "title": "Segundo parcial",
+      "subtitle": "Clases 6 a 11 · Guías 5 a 10",
+      "description": "La segunda etapa aplica lo anterior a sistemas: políticas, control de acceso, autenticación, vulnerabilidades y redes.",
+      "icon": "grid",
+      "date": "2026-11-19",
+      "instance": "parcial2",
+      "retake": "recuperatorio",
+      "scope": "Políticas de seguridad y modelos de control de acceso; autenticación y almacenamiento de claves; principios de diseño, modelado de amenazas y análisis de vulnerabilidades; flujo de información y canales ocultos; seguridad en la red de una empresa; protección de datos personales.\n\nMismo régimen que el primero: escrito, individual, sobre teoría y práctica, con la bibliografía obligatoria como cuerpo de conocimiento evaluable.",
+      "guide": "Este bloque cambia de bibliografía: la referencia pasa de Katz & Lindell a Bishop. El material es más descriptivo que el del primer parcial, pero se evalúa igual de fino: conviene poder enunciar cada modelo (Bell-LaPadula, Biba, muralla china) con sus reglas exactas y decir qué propiedad garantiza cada una.\n\nLa Clase 11 no tiene deck de filminas: su única fuente es el video de protección de datos personales.",
+      "milestones": [
+        {
+          "id": "p2-c6",
+          "title": "Clase 6 · Políticas de seguridad y control de acceso",
+          "icon": "list",
+          "divisions": [
+            "6"
+          ],
+          "tasks": [
+            {
+              "id": "p2-c6-leer",
+              "label": "Leer la Clase 6 completa",
+              "kind": "read",
+              "target": "6"
+            },
+            {
+              "id": "p2-c6-cards",
+              "label": "Repasar políticas y control de acceso",
+              "kind": "cards",
+              "target": "politicas-y-control-de-acceso"
+            }
+          ]
+        },
+        {
+          "id": "p2-c7",
+          "title": "Clase 7 · Autenticación",
+          "icon": "star",
+          "divisions": [
+            "7"
+          ],
+          "tasks": [
+            {
+              "id": "p2-c7-leer",
+              "label": "Leer la Clase 7 completa",
+              "kind": "read",
+              "target": "7"
+            },
+            {
+              "id": "p2-c7-cards",
+              "label": "Repasar autenticación y almacenamiento de claves",
+              "kind": "cards",
+              "target": "autenticacion"
+            }
+          ]
+        },
+        {
+          "id": "p2-c8",
+          "title": "Clase 8 · Principios de diseño y vulnerabilidades",
+          "icon": "compass",
+          "divisions": [
+            "8"
+          ],
+          "tasks": [
+            {
+              "id": "p2-c8-leer",
+              "label": "Leer la Clase 8 completa",
+              "kind": "read",
+              "target": "8"
+            },
+            {
+              "id": "p2-c8-cards",
+              "label": "Repasar principios de diseño y análisis de vulnerabilidades",
+              "kind": "cards",
+              "target": "diseno-y-vulnerabilidades"
+            }
+          ]
+        },
+        {
+          "id": "p2-c9",
+          "title": "Clase 9 · Flujo de información y malware",
+          "icon": "line",
+          "divisions": [
+            "9"
+          ],
+          "tasks": [
+            {
+              "id": "p2-c9-leer",
+              "label": "Leer la Clase 9 completa",
+              "kind": "read",
+              "target": "9"
+            },
+            {
+              "id": "p2-c9-cards",
+              "label": "Repasar flujo de información y canales ocultos",
+              "kind": "cards",
+              "target": "flujo-de-informacion"
+            }
+          ]
+        },
+        {
+          "id": "p2-c10",
+          "title": "Clase 10 · Seguridad en la empresa",
+          "icon": "triangle",
+          "divisions": [
+            "10"
+          ],
+          "tasks": [
+            {
+              "id": "p2-c10-leer",
+              "label": "Leer la Clase 10 completa",
+              "kind": "read",
+              "target": "10"
+            },
+            {
+              "id": "p2-c10-cards",
+              "label": "Repasar seguridad a nivel de red",
+              "kind": "cards",
+              "target": "seguridad-en-redes"
+            }
+          ]
+        },
+        {
+          "id": "p2-c11",
+          "title": "Clase 11 · Protección de datos personales",
+          "icon": "circle",
+          "divisions": [
+            "11"
+          ],
+          "tasks": [
+            {
+              "id": "p2-c11-leer",
+              "label": "Mirar el video de protección de datos personales",
+              "kind": "read",
+              "target": "11",
+              "detail": "única fuente de la clase: no hay deck de filminas"
+            }
+          ]
+        },
+        {
+          "id": "p2-repaso",
+          "title": "Repaso y práctica de examen",
+          "icon": "timer",
+          "divisions": [
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11"
+          ],
+          "tasks": [
+            {
+              "id": "p2-repaso-quiz",
+              "label": "Rendir el quiz del Bloque 2",
+              "kind": "quiz",
+              "target": "quiz-bloque-2-seguridad"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "final",
+      "title": "Final",
+      "subtitle": "Escrito e integrador",
+      "description": "El final no repite los parciales: pide aplicar los conceptos a problemas reales de ingeniería.",
+      "icon": "quiz",
+      "instance": "final",
+      "scope": "Escrito e integrador sobre toda la materia. Hay que mostrar idoneidad aplicando los conceptos a problemas reales de ingeniería, no reproducir definiciones.\n\nSi en una fecha hay cinco inscriptos o menos, la cátedra puede optar por tomarlo oral, y lo avisa al cerrar la inscripción.",
+      "guide": "El final cruza los dos bloques: la pregunta típica no es «qué es un MAC» sino «qué propiedad falta en este sistema y con qué primitiva se consigue». Conviene repasar por problema y no por clase, y tener a mano los criterios de elección de primitivas y de composición de cifrado con integridad.",
+      "milestones": [
+        {
+          "id": "final-b1",
+          "title": "Repaso del Bloque 1 · Criptografía",
+          "icon": "cards",
+          "divisions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "tasks": [
+            {
+              "id": "final-b1-cards",
+              "label": "Repasar todas las definiciones formales",
+              "kind": "cards",
+              "target": "definiciones"
+            },
+            {
+              "id": "final-b1-quiz",
+              "label": "Rehacer el quiz del Bloque 1",
+              "kind": "quiz",
+              "target": "quiz-bloque-1-criptografia"
+            }
+          ]
+        },
+        {
+          "id": "final-b2",
+          "title": "Repaso del Bloque 2 · Seguridad",
+          "icon": "cards",
+          "divisions": [
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11"
+          ],
+          "tasks": [
+            {
+              "id": "final-b2-quiz",
+              "label": "Rehacer el quiz del Bloque 2",
+              "kind": "quiz",
+              "target": "quiz-bloque-2-seguridad"
+            }
+          ]
+        },
+        {
+          "id": "final-integrador",
+          "title": "Integración",
+          "icon": "sparkle",
+          "tasks": [
+            {
+              "id": "final-int-quiz",
+              "label": "Rendir el quiz integrador",
+              "kind": "quiz",
+              "target": "quiz-integrador"
+            },
+            {
+              "id": "final-int-tips",
+              "label": "Mirar el video de tips sobre el final",
+              "kind": "custom",
+              "target": "video-13-tips-sobre-el-final"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
