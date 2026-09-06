@@ -21,7 +21,7 @@ diferido está en `EXEC_STATE.md` (S-14 … S-26).
 
 ## 2. Verificación
 
-- Gates en el commit de cierre: `pnpm typecheck`, `pnpm test` (__TESTS__), `pnpm build`, `pnpm e2e` (__E2E__).
+- Gates en el commit de cierre: `pnpm typecheck`, `pnpm test` (contract 29 · runtime 133 · markdown 88 · api 169 · web 252 · cli 50 = 721), `pnpm build`, `pnpm e2e` (60 pruebas: 59 pasadas y 1 que solo corre con el fixture de demostración).
 - Revisión de diseño con el navegador (D5): 36 pantallas × 3 temas × 4 anchos; 33 fallas, 25 corregidas
   (`docs/DISENO-sprint3.md`).
 - Comparación página a página con la app original de Proba (F5, N0-46): 20 pantallas pareadas, 34
