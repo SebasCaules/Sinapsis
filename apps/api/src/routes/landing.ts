@@ -5,7 +5,12 @@ import { requireSession } from "../auth/middleware.js";
 import { withTransaction } from "../db/client.js";
 import { subjects, userSubjects } from "../db/schema.js";
 import { jsonBody } from "../lib/validate.js";
-import { landingCards, landingSemesters, replaceSemesters } from "../services/landing.js";
+import {
+  landingCards,
+  landingSemesters,
+  normalizeSemester,
+  replaceSemesters,
+} from "../services/landing.js";
 import type { AppBindings } from "../types.js";
 
 export function landingRoutes(): Hono<AppBindings> {
@@ -46,9 +51,11 @@ export function landingRoutes(): Hono<AppBindings> {
         for (const item of items) {
           const subjectId = idBySlug.get(item.slug);
           if (subjectId === undefined) continue;
+          // El cuatrimestre se guarda canónico ("2026-1c" → "2026-1C"): es la
+          // misma fila que la que declara `semesters` (N0-32).
           await db
             .update(userSubjects)
-            .set({ semester: item.semester, position: item.position })
+            .set({ semester: normalizeSemester(item.semester), position: item.position })
             .where(and(eq(userSubjects.userId, userId), eq(userSubjects.subjectId, subjectId)));
         }
         // `semesters` ausente = la landing no declara cuatrimestres (cliente

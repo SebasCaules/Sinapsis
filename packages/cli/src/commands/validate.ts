@@ -9,7 +9,7 @@ import {
   isExternalUrl,
   type SubjectConfig as SubjectConfigType,
 } from "@sinapsis/contract";
-import { compileStudy, formatIssues } from "@sinapsis/markdown";
+import { compileStudy, formatIssues, isInside } from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
 import { studyLine } from "../report.js";
 
@@ -76,8 +76,15 @@ export async function runValidate(opts: ValidateOptions, ctx: Ctx): Promise<numb
 
   // Material de estudio: mismas advertencias que en `sync`, salvo las que
   // necesitan las páginas del wiki (`validate` no lo compila): esas se ven en
-  // el dry-run del sync.
-  const studyDir = path.resolve(path.dirname(loaded.path), loaded.config.wiki.study);
+  // el dry-run del sync. Y la misma contención que `compileWiki`: `wiki.study`
+  // viene del config de la materia (que puede ser de un repositorio ajeno) y no
+  // puede apuntar fuera de la carpeta del config.
+  const configDir = path.dirname(loaded.path);
+  const studyDir = path.resolve(configDir, loaded.config.wiki.study);
+  if (!isInside(configDir, studyDir)) {
+    ctx.err(pc.red(`wiki.study: "${loaded.config.wiki.study}" queda fuera de la carpeta del config`));
+    return 1;
+  }
   const { study, issues } = await compileStudy({ dir: studyDir, config: loaded.config });
   studyLine(ctx, study);
   const studyWarnings = formatIssues(issues);

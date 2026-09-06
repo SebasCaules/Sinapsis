@@ -100,6 +100,13 @@ describe("GET /api/landing/semesters y PUT /api/landing con `semesters`", () => 
     expect(await semesters()).toEqual(["2026-1C", "2026-2C"]);
   });
 
+  it("normaliza el rótulo y deduplica por la forma canónica", async () => {
+    expect(
+      (await guardar({ items: [], semesters: ["2026-1c", "2026-1C", " 2026-2c "] })).status,
+    ).toBe(200);
+    expect(await semesters()).toEqual(["2026-1C", "2026-2C"]);
+  });
+
   it("rechaza una lista de cuatrimestres inválida", async () => {
     expect((await guardar({ items: [], semesters: [""] })).status).toBe(400);
     expect((await guardar({ items: [], semesters: "2026-1C" })).status).toBe(400);
@@ -114,6 +121,20 @@ describe("GET /api/landing/semesters y PUT /api/landing con `semesters`", () => 
     ).toBe(200);
     expect(await (await otro.request("/api/landing/semesters")).json()).toEqual(["2030-1C"]);
     // El primero no se entera.
+    expect(await semesters()).toEqual(["2026-1C", "2026-2C"]);
+  });
+
+  it("una materia creada con un rótulo no canónico cae en el cuatrimestre canónico", async () => {
+    const res = await crear("algebra", "2025-2c");
+    expect(res.status).toBe(201);
+    expect(((await res.json()) as SubjectCard).semester).toBe("2025-2C");
+    expect(await semesters()).toEqual(["2026-1C", "2026-2C", "2025-2C"]);
+
+    // Y moverla en minúsculas tampoco abre un cuatrimestre nuevo.
+    const movida = await guardar({ items: [{ slug: "algebra", semester: "2026-1c", position: 3 }] });
+    expect(movida.status).toBe(200);
+    const cards = (await movida.json()) as SubjectCard[];
+    expect(cards.find((c) => c.slug === "algebra")?.semester).toBe("2026-1C");
     expect(await semesters()).toEqual(["2026-1C", "2026-2C"]);
   });
 });

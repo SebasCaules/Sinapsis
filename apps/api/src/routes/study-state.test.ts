@@ -3,7 +3,7 @@
  * intentos de quiz. Todo es por usuario y materia; nada se comparte.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Note, QuizAttempt, StudyState } from "@sinapsis/contract";
+import type { Note, QuizAttempt, StudyContent, StudyState } from "@sinapsis/contract";
 import { ATTEMPTS_LIMIT } from "../services/study.js";
 import { createHarness, type Harness, type UserClient } from "../test/harness.js";
 import { demoPayload, demoStudy, pageIntro, pageTeorema } from "../test/fixtures.js";
@@ -231,5 +231,48 @@ describe("el estado de estudio no se filtra entre usuarios", () => {
       (await otro.request("/api/subjects/demo/bookmarks/intro", { method: "DELETE" })).status,
     ).toBe(204);
     expect((await stateOf(h)).bookmarks).toEqual(["intro"]);
+  });
+});
+
+describe("el SRS del estado se recorta al material vigente (bug 7)", () => {
+  let h: Harness;
+
+  const sync = (study: StudyContent) =>
+    h.json("PUT", "/api/subjects/demo/sync", demoPayload([pageIntro, pageTeorema], study), {
+      authorization: `Bearer ${h.env.SYNC_TOKEN}`,
+    });
+
+  const state = async (): Promise<StudyState> =>
+    (await (await h.request("/api/subjects/demo/study/state")).json()) as StudyState;
+
+  beforeAll(async () => {
+    h = await createHarness();
+    expect((await sync(demoStudy())).status).toBe(200);
+    await h.login();
+  });
+
+  afterAll(() => h.close());
+
+  it("devuelve solo las tarjetas que existen hoy", async () => {
+    // Una tarjeta autoral, una del mazo automático y una que no está en ningún
+    // mazo (quedó de un sync anterior): el POST acepta las tres.
+    for (const cardId of ["carta-tcl", "auto:intro", "carta-vieja"]) {
+      expect((await h.json("POST", `/api/subjects/demo/study/srs/${cardId}`, { grade: 3 })).status).toBe(200);
+    }
+    expect((await state()).srs.map((s) => s.cardId).sort()).toEqual(["auto:intro", "carta-tcl"]);
+  });
+
+  it("la fila no se borra: si la tarjeta vuelve al material, vuelve su progreso", async () => {
+    const study = demoStudy();
+    study.decks[0]!.cards.push({
+      id: "carta-vieja",
+      front: "¿Qué es una muestra?",
+      back: "Un subconjunto de la población.",
+      tags: [],
+    });
+    expect((await sync(study)).status).toBe(200);
+
+    const vieja = (await state()).srs.find((s) => s.cardId === "carta-vieja");
+    expect(vieja).toMatchObject({ reps: 1, lastGrade: 3 });
   });
 });

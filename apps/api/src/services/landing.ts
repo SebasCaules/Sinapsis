@@ -6,7 +6,7 @@
  * usuario (N0-6).
  */
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
-import { compareSemestersDesc, type SubjectCard } from "@sinapsis/contract";
+import { canonicalSemester, compareSemestersDesc, type SubjectCard } from "@sinapsis/contract";
 import type { Db } from "../db/client.js";
 import { pages, progress, subjects, userSemesters, userSubjects, type SubjectRow } from "../db/schema.js";
 import { contentTypePredicate, resolveConfig } from "./subjects.js";
@@ -164,12 +164,27 @@ export async function landingSemesters(db: Db, userId: string): Promise<string[]
 }
 
 /**
+ * Rótulo de cuatrimestre tal como se guarda: la forma canónica del contrato
+ * ("2026-1c" → "2026-1C"). Los rótulos libres (los que no tienen la forma
+ * "AAAA-NC") solo se recortan; si al recortarlos no queda nada, se conserva lo
+ * que escribió el usuario antes que guardar una cadena vacía. Es el único
+ * criterio de igualdad entre cuatrimestres: se aplica al declararlos
+ * (`user_semesters`) y al ubicar una materia (`user_subjects.semester`), así
+ * «2026-1c» y «2026-1C» son siempre la misma fila (N0-32).
+ */
+export function normalizeSemester(raw: string): string {
+  return canonicalSemester(raw) || raw;
+}
+
+/**
  * Reemplaza la lista de cuatrimestres del usuario: `position` es el índice en
  * el array recibido. Se llama dentro de la transacción de `PUT /api/landing`.
+ * Los rótulos se normalizan y se deduplican por su forma canónica, conservando
+ * la primera aparición.
  */
 export async function replaceSemesters(db: Db, userId: string, labels: string[]): Promise<void> {
   await db.delete(userSemesters).where(eq(userSemesters.userId, userId));
-  const unique = [...new Set(labels)];
+  const unique = [...new Set(labels.map(normalizeSemester))];
   if (unique.length === 0) return;
   await db
     .insert(userSemesters)

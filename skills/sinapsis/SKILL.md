@@ -196,7 +196,8 @@ por id, **si se reordenan las tarjetas se pierde su progreso**. Para fijarlo: `#
 
 **Quiz.** Cada `##` abre una pregunta; las opciones son una lista de tildes (`- [x]` la
 correcta) y el blockquote que va después de la lista es la explicación. Hacen falta ≥ 2
-opciones y ≥ 1 correcta.
+opciones y ≥ 1 correcta. Una opción que es **solo matemática** lleva su texto para el lector
+de pantalla al final de la línea: `- [x] $\alpha$ {alt: alfa}`.
 
 ```markdown
 ---
@@ -213,19 +214,27 @@ titulo: Quiz conceptual
 - [ ] Normal
 
 > Poisson: $E[X]=V(X)=\lambda$.
+
+## ¿Qué mide la potencia de una prueba?
+
+- [ ] $\alpha$ {alt: alfa}
+- [x] $1-\beta$ {alt: uno menos beta}
 ```
 
 **Plan y kits.** JSON validado contra `Plan` y `Kit[]`. Las tareas del plan llevan `kind`:
-`read` (destino: una división), `cards` (un mazo), `quiz` (un quiz), `exercises` y `custom`
-(una página o una URL). Los `tools` de un kit son **ids de ítems del `rail`** del config.
+`read` (destino: una división), `cards` (un mazo), `quiz` (un quiz), `tool` (un **id de ítem
+del `rail`**), `exercises` y `custom` (una página o una URL). Además del `label`, una tarea
+puede llevar `detail` (una línea corta: «41 ejercicios · 14–16 h»), y las fases y los hitos,
+`icon`. Los `tools` de un kit son también ids de ítems del `rail` del config.
 
 ```jsonc
 // plan.json
 { "title": "Plan de estudio",
   "phases": [{ "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
     "date": "2026-10-01", "scope": "Qué cae en este examen (markdown)",
-    "milestones": [{ "id": "fase-1-h1", "title": "Unidad 1", "divisions": ["1"],
-      "tasks": [{ "id": "fase-1-h1-t1", "label": "Leer la teoría", "kind": "read", "target": "1" }] }] }] }
+    "milestones": [{ "id": "fase-1-h1", "title": "Unidad 1", "icon": "book", "divisions": ["1"],
+      "tasks": [{ "id": "fase-1-h1-t1", "label": "Resolver el TP1", "kind": "exercises",
+                  "detail": "7 ejercicios · 4–5 h" }] }] }] }
 ```
 
 Referencia completa, con todas las verificaciones: `reference/contrato.md` §7.

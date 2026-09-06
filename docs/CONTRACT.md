@@ -154,7 +154,7 @@ pnpm sinapsis sync --config /ruta/a/sinapsis.config.json --api http://localhost:
 | `GET /api/landing/semesters` | sesión | Cuatrimestres del usuario en orden (incluye vacíos). `PUT /api/landing` acepta `semesters?: string[]`. |
 | `GET /api/subjects/:slug/graph` | sesión | `GraphData`: páginas y wikilinks resueltos (`page_links`). |
 | `GET /api/subjects/:slug/study` | sesión | `StudyContent`: mazos, quizzes, plan y kits del wiki + mazos automáticos por división. |
-| `GET /api/subjects/:slug/study/state` | sesión | `StudyState`: SRS, favoritos, apuntes, tareas hechas, intentos. |
+| `GET /api/subjects/:slug/study/state` | sesión | `StudyState`: SRS (solo tarjetas que existen en el material vigente; las filas huérfanas se conservan en la base), favoritos, apuntes, tareas hechas, últimos 50 intentos. |
 | `POST /api/subjects/:slug/study/srs/:cardId` `{grade}` | sesión | Califica una tarjeta (SM-2, `sm2` del contrato) → `SrsState`. `DELETE` reinicia. |
 | `PUT` / `DELETE /api/subjects/:slug/bookmarks/:page` | sesión | Favorito. |
 | `PUT /api/subjects/:slug/notes/:page` `{body}` / `DELETE` | sesión | Apunte markdown por página. |
@@ -243,12 +243,22 @@ id: quiz-general
 - [ ] Normal
 
 > Poisson: $E[X]=V(X)=\lambda$.
+
+## ¿Qué mide la potencia de una prueba?
+
+- [ ] $\alpha$ {alt: alfa}
+- [x] $1-\beta$ {alt: uno menos beta}
 ```
 
 Cada `##` abre una pregunta; el texto entre el encabezado y la lista se suma al enunciado.
 Las opciones son una lista de tildes (`- [x]` la correcta, `- [ ]` las demás) y el blockquote
 que va **después** de la lista es la explicación. Hacen falta ≥ 2 opciones y ≥ 1 correcta: si
 no, la pregunta se descarta con una advertencia (y si no queda ninguna, el quiz entero).
+
+Una opción que es **solo matemática** no deja nada que leer en voz alta: el `{alt: …}` al
+final de la línea le da el texto que anuncia el lector de pantalla (`QuizOption.alt`). Es
+opcional y solo hace falta ahí; si al quitarlo la opción quedara sin texto, la directiva se
+ignora y `{alt: …}` se toma como el texto de la opción.
 
 ### `plan.json` y `kits.json`
 
@@ -279,8 +289,14 @@ campo (`phases.0.milestones.2.title: Required`).
 | `read` | clave de división | La división en el índice. |
 | `cards` | id de mazo (o sin `target`) | El mazo (o el repaso del día). |
 | `quiz` | id de quiz | El quiz. |
+| `tool` | id de ítem del `rail` | Una herramienta de la materia. |
 | `exercises` | slug de página o URL (opcional) | Práctica: TP, guía de ejercicios. |
 | `custom` | slug de página o URL (opcional) | Cualquier otra cosa. |
+
+Además del `label`, una tarea puede llevar `detail`: una línea corta con el costo estimado o
+la aclaración («41 ejercicios · 14–16 h»), que la plataforma muestra aparte y no dentro del
+nombre de la tarea. Las fases y los hitos admiten `icon` (un nombre del registro cerrado de
+iconos, el mismo del `rail`); si falta, la plataforma usa el suyo.
 
 ### Qué se verifica
 
@@ -289,6 +305,7 @@ campo (`phases.0.milestones.2.title: Required`).
 - `pagina:` de una tarjeta o pregunta, o `pages[]` de un kit, que apunta a un slug inexistente;
 - `decks[]` / `quizzes[]` de un kit, o `target` de una tarea `cards` / `quiz`, que no existe;
 - `target` de una tarea `read` que no es una división declarada;
+- `target` de una tarea `tool` que no es un id de ítem del `rail` del config;
 - `division` de un mazo, quiz, hito o kit que no está en `config.divisions`;
 - `tools[]` de un kit que no es un id de ítem del `rail` del config;
 - id repetido (mazo, quiz, tarjeta, pregunta o kit);

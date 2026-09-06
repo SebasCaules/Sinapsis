@@ -6,7 +6,9 @@
  * se guarda acá depende de que la tarjeta, la tarea o el quiz existan en el
  * material: los mazos automáticos se calculan al vuelo y el material autoral
  * vive dentro de un JSON. Lo único que se valida contra la base son los slugs
- * de página (favoritos y apuntes), que sí son filas de `pages`.
+ * de página (favoritos y apuntes), que sí son filas de `pages`. Al leer, en
+ * cambio, el SRS se recorta al material vigente: una tarjeta que ya no existe
+ * conserva su fila pero no vuelve en el estado (bug 7).
  *
  * Los cuerpos JSON se validan con los esquemas del contrato (`SrsGradeInput`,
  * `NoteInput`, `QuizAttemptInput`), que son los mismos que tipa la web: si el
@@ -33,7 +35,7 @@ import { newId, nowIso } from "../lib/ids.js";
 import { jsonBody } from "../lib/validate.js";
 import { loadSubject } from "../middleware/subject.js";
 import type { Db } from "../db/client.js";
-import { readStudyContent, readStudyState, rowToSrsState } from "../services/study.js";
+import { readStudyContent, readStudyState, rowToSrsState, studyCardIds } from "../services/study.js";
 import type { AppBindings } from "../types.js";
 
 /** Id de tarjeta / tarea / quiz de la URL, con el formato del contrato. */
@@ -73,9 +75,18 @@ export function studyRoutes(): Hono<AppBindings> {
     c.json(await readStudyContent(c.var.db, c.var.subject)),
   );
 
-  app.get("/subjects/:slug/study/state", async (c) =>
-    c.json(await readStudyState(c.var.db, c.var.user.id, c.var.subject.id)),
-  );
+  /**
+   * El estado devuelve solo el SRS de tarjetas que existen hoy (bug 7): el
+   * material vigente se calcula igual que en `GET .../study` —una fila de
+   * `subject_study` más las páginas de la materia— y las filas de tarjetas
+   * borradas quedan guardadas, pero no viajan.
+   */
+  app.get("/subjects/:slug/study/state", async (c) => {
+    const content = await readStudyContent(c.var.db, c.var.subject);
+    return c.json(
+      await readStudyState(c.var.db, c.var.user.id, c.var.subject.id, studyCardIds(content)),
+    );
+  });
 
   // -------------------------------------------------------------------------
   // SRS (SM-2, N0-28)

@@ -200,6 +200,38 @@ describe("compileStudy · quizzes", () => {
     expect(issues.find((i) => i.kind === "quiz-no-correct")!.detail).toContain("- [x]");
   });
 
+  it("lee el `{alt: …}` de una opción que es solo matemática", async () => {
+    await write(
+      "quiz-alt.md",
+      [
+        "---",
+        "tipo: quiz",
+        "titulo: Potencia",
+        "id: quiz-alt",
+        "---",
+        "",
+        "## ¿Qué mide la potencia de una prueba?",
+        "",
+        "- [ ] $\\alpha$ {alt: alfa}",
+        "- [x] $1-\\beta$ {alt: uno menos beta}",
+        "- [ ] $\\beta$",
+        "- [ ] {alt: sin texto}",
+        "",
+      ].join("\n"),
+    );
+    const { study, issues } = await compile();
+
+    expect(study.quizzes[0]!.questions[0]!.options).toEqual([
+      { text: "$\\alpha$", correct: false, alt: "alfa" },
+      { text: "$1-\\beta$", correct: true, alt: "uno menos beta" },
+      { text: "$\\beta$", correct: false },
+      // Sin texto delante, la directiva no se separa: la opción vale más.
+      { text: "{alt: sin texto}", correct: false },
+    ]);
+    expect(issues).toEqual([]);
+    expect(StudyContent.safeParse(study).success).toBe(true);
+  });
+
   it("descarta el quiz entero si ninguna pregunta queda en pie", async () => {
     await write("quiz-vacio.md", ["---", "tipo: quiz", "titulo: Vacío", "---", "", "## Sin opciones", "", "texto", ""].join("\n"));
     const { study, issues } = await compile();
@@ -294,6 +326,8 @@ describe("compileStudy · plan.json y kits.json", () => {
                   { id: "fase-1-h1-t1", label: "Leer", kind: "read", target: "esperanza" },
                   { id: "fase-1-h1-t2", label: "Mazo", kind: "cards", target: "no-existe" },
                   { id: "fase-1-h1-t3", label: "Quiz", kind: "quiz", target: "tampoco" },
+                  { id: "fase-1-h1-t4", label: "Herramienta", kind: "tool", target: "taller" },
+                  { id: "fase-1-h1-t5", label: "Calculadoras", kind: "tool", target: "calc" },
                 ],
               },
             ],
@@ -315,6 +349,7 @@ describe("compileStudy · plan.json y kits.json", () => {
       '«read» apunta a "esperanza", que no es una división del config',
       '«cards» apunta al mazo "no-existe", que no existe',
       '«quiz» apunta al quiz "tampoco", que no existe',
+      '«tool» apunta a "taller", que no es un id de ítem del rail del config',
       'la página "fantasma" no existe en el wiki',
       'el mazo "ninguno" no existe',
       'el quiz "ningun-quiz" no existe',

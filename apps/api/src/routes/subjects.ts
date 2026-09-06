@@ -8,7 +8,7 @@ import { conflict, notFound } from "../lib/errors.js";
 import { newId, nowIso } from "../lib/ids.js";
 import { jsonBody } from "../lib/validate.js";
 import { loadSubject } from "../middleware/subject.js";
-import { landingCard, nextPosition } from "../services/landing.js";
+import { landingCard, nextPosition, normalizeSemester } from "../services/landing.js";
 import { findSubjectBySlug, pageMetaColumns, resolveConfig, rowToPageMeta } from "../services/subjects.js";
 import type { AppBindings } from "../types.js";
 
@@ -31,6 +31,9 @@ export function subjectRoutes(): Hono<AppBindings> {
       const db = c.var.db;
       const userId = c.var.user.id;
       const input = c.req.valid("json");
+      // El cuatrimestre se guarda canónico ("2025-2c" → "2025-2C"), así la
+      // materia cae en la misma fila de la landing que las demás (N0-32).
+      const semester = normalizeSemester(input.semester);
 
       const slug = await withTransaction(db, async () => {
         const existing = await findSubjectBySlug(db, input.slug);
@@ -56,7 +59,7 @@ export function subjectRoutes(): Hono<AppBindings> {
             code: input.code,
             institution: input.institution,
             color: input.color ?? null,
-            semesterHint: input.semester,
+            semesterHint: semester,
             divisionJson: input.division,
             configJson: null,
             placeholder: true,
@@ -66,11 +69,11 @@ export function subjectRoutes(): Hono<AppBindings> {
           });
         }
 
-        const position = await nextPosition(db, userId, input.semester);
+        const position = await nextPosition(db, userId, semester);
         await db.insert(userSubjects).values({
           userId,
           subjectId,
-          semester: input.semester,
+          semester,
           position,
           addedAt: now,
         });

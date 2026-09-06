@@ -250,6 +250,13 @@ function parseDeck({ file, meta, body, config, issues }: ParseInput): DeckType |
 
 const OPTION = /^\s{0,3}[-*+]\s+\[([ xX])\]\s+(.*)$/;
 const QUOTE = /^\s{0,3}>\s?(.*)$/;
+/**
+ * Texto alternativo de una opción, al final de la línea: `- [x] $\alpha$ {alt: alfa}`.
+ * Es para las opciones que son solo matemática, que un lector de pantalla no
+ * puede leer (`QuizOption.alt` del contrato). Si al quitarlo no queda texto, la
+ * directiva se ignora: la opción vale más que su alternativa.
+ */
+const OPTION_ALT = /\{alt:\s*([^}]*)\}$/i;
 
 function parseQuiz({ file, meta, body, config, issues }: ParseInput): QuizType | null {
   const id = idFromMeta(meta, file, issues);
@@ -265,16 +272,18 @@ function parseQuiz({ file, meta, body, config, issues }: ParseInput): QuizType |
     const { directives, rest } = takeDirectives(section.lines);
 
     const preamble: string[] = [];
-    const options: Array<{ text: string; correct: boolean }> = [];
+    const options: Array<{ text: string; correct: boolean; alt?: string }> = [];
     const explanation: string[] = [];
     let seenOption = false;
     for (const line of rest) {
       const option = line.match(OPTION);
       if (option) {
         seenOption = true;
+        const { text, alt } = optionText((option[2] ?? "").trim());
         options.push({
-          text: (option[2] ?? "").trim().slice(0, 600),
+          text,
           correct: (option[1] ?? "").toLowerCase() === "x",
+          ...(alt ? { alt } : {}),
         });
         continue;
       }
@@ -341,6 +350,15 @@ function parseQuiz({ file, meta, body, config, issues }: ParseInput): QuizType |
     ...(division ? { division } : {}),
     questions,
   };
+}
+
+/** Separa el texto de una opción de su `{alt: …}` final (ver `OPTION_ALT`). */
+function optionText(raw: string): { text: string; alt: string } {
+  const match = raw.match(OPTION_ALT);
+  if (!match) return { text: raw.slice(0, 600), alt: "" };
+  const text = raw.slice(0, raw.length - match[0].length).trim();
+  if (text === "") return { text: raw.slice(0, 600), alt: "" };
+  return { text: text.slice(0, 600), alt: (match[1] ?? "").trim().slice(0, 300) };
 }
 
 // ---------------------------------------------------------------------------
@@ -456,6 +474,12 @@ function crossCheck(
         }
         if (task.kind === "quiz" && !quizIds.has(task.target)) {
           broken(`${where}/${task.id}`, `«quiz» apunta al quiz "${task.target}", que no existe`);
+        }
+        if (task.kind === "tool" && !railIds.has(task.target)) {
+          broken(
+            `${where}/${task.id}`,
+            `«tool» apunta a "${task.target}", que no es un id de ítem del rail del config`,
+          );
         }
       }
     }

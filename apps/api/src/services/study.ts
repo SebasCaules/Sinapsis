@@ -76,6 +76,17 @@ export async function readStudyContent(db: Db, subject: SubjectRow): Promise<Stu
   };
 }
 
+/**
+ * Ids de tarjeta que existen hoy en la materia (autoral + automático). Con
+ * ellos `readStudyState` descarta el SRS de tarjetas que ya no están (bug 7):
+ * las filas se conservan en la base —el usuario recupera su progreso si la
+ * tarjeta vuelve—, pero no viajan a la web, que si no dibujaría un «vence hoy»
+ * de algo que no puede abrir.
+ */
+export function studyCardIds(content: StudyContent): Set<string> {
+  return new Set(content.decks.flatMap((deck) => deck.cards.map((card) => card.id)));
+}
+
 /** Fila de `srs_cards` → `SrsState` del contrato. */
 export function rowToSrsState(row: SrsCardRow): SrsState {
   return {
@@ -90,17 +101,23 @@ export function rowToSrsState(row: SrsCardRow): SrsState {
   };
 }
 
-/** Estado de estudio del usuario en una materia. */
+/**
+ * Estado de estudio del usuario en una materia. Con `knownCards` (los ids de
+ * `studyCardIds`) el SRS se filtra a las tarjetas que siguen existiendo; sin
+ * él vuelve entero.
+ */
 export async function readStudyState(
   db: Db,
   userId: string,
   subjectId: string,
+  knownCards?: ReadonlySet<string>,
 ): Promise<StudyState> {
-  const srsRows = await db
+  const allSrsRows = await db
     .select()
     .from(srsCards)
     .where(and(eq(srsCards.userId, userId), eq(srsCards.subjectId, subjectId)))
     .orderBy(asc(srsCards.due), asc(srsCards.cardId));
+  const srsRows = knownCards ? allSrsRows.filter((row) => knownCards.has(row.cardId)) : allSrsRows;
 
   const bookmarkRows = await db
     .select({ pageSlug: bookmarks.pageSlug })

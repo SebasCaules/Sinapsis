@@ -116,6 +116,37 @@ for (const deck of decks) {
 // 2. Quiz
 // ---------------------------------------------------------------------------
 
+/**
+ * Texto alternativo de las opciones que son **solo** matemática: KaTeX no deja
+ * nada legible para un lector de pantalla, así que el contrato admite
+ * `QuizOption.alt` (`- [x] $\alpha$ {alt: alfa}`). Es un diccionario explícito
+ * —son ocho opciones en todo el quiz—, no un traductor de LaTeX: si la fuente
+ * agrega una opción matemática nueva, el resumen la lista y hay que traducirla
+ * acá a mano.
+ */
+const MATH_ALT = new Map([
+  ["$\\alpha$", "alfa"],
+  ["$1-\\alpha$", "uno menos alfa"],
+  ["$\\beta$", "beta"],
+  ["$1-\\beta$", "uno menos beta"],
+  ["$> \\alpha$", "mayor que alfa"],
+  ["$< \\alpha$", "menor que alfa"],
+  ["$=0.5$", "igual a 0,5"],
+  ["$>0.5$", "mayor que 0,5"],
+]);
+
+/** Opciones matemáticas sin traducción: se listan en el resumen del conversor. */
+const missingAlt = [];
+
+/** `alt` de una opción, o "" si la opción tiene texto además de la matemática. */
+function mathAlt(raw) {
+  const text = oneLine(raw);
+  if (!/^(\$[^$]*\$\s*)+$/.test(text)) return "";
+  const alt = MATH_ALT.get(text);
+  if (!alt) missingAlt.push(text);
+  return alt ?? "";
+}
+
 const quiz = {
   id: "quiz-general",
   file: "quiz-general.md",
@@ -123,7 +154,7 @@ const quiz = {
   description: "Reconocer distribuciones, criterios de inferencia y convenciones de la cátedra.",
   questions: STUDY.QUIZ.map((q) => ({
     prompt: q.q,
-    options: q.options.map((text, i) => ({ text, correct: i === q.correct })),
+    options: q.options.map((text, i) => ({ text, correct: i === q.correct, alt: mathAlt(text) })),
     explanation: q.explain,
     page: q.slug,
   })),
@@ -136,15 +167,48 @@ const quiz = {
 const UNITS = STUDY.ROADMAP.unitsMeta;
 
 /**
- * `nav` de la app → tarea del contrato. Lo que la plataforma todavía no tiene
- * (simulador, banco de ejercicios, asistentes) queda como `custom` sin destino:
- * la etiqueta explica qué hacer y no se inventa un enlace roto.
+ * `nav` de una tarea del plan → id del ítem del rail que la abre. `#/asistente`
+ * cuenta como el explorador de distribuciones porque la única tarea del plan
+ * que lo usa es «¿qué distribución uso?»; en los kits ese mismo nav abre además
+ * el asistente de pruebas de hipótesis, que no tiene ítem de rail, así que allá
+ * no se mapea (ver `TOOL_IDS`).
  */
-function fromNav(nav, label) {
-  if (nav === "#/quiz") return { label, kind: "quiz", target: quiz.id };
-  if (nav === "#/formularios") return { label, kind: "custom", target: "formulario-maestro" };
-  if (nav === "#/flashcards/__due") return { label, kind: "cards" };
-  return { label, kind: "custom" };
+const PLAN_TOOL_IDS = new Map([
+  ["#/calc", "calc"],
+  ["#/asistente", "explorador"],
+  ["#/explorador", "explorador"],
+  ["#/taller", "taller"],
+  ["#/lab", "lab"],
+]);
+
+/**
+ * `nav` de la app → tarea del contrato. Las herramientas de la materia salen
+ * como `kind: "tool"` con el id del ítem del rail; los formularios siguen
+ * siendo la página del wiki que abre ese ítem. Lo que la plataforma todavía no
+ * tiene (simulador, banco de ejercicios) queda como `custom` sin destino: la
+ * etiqueta explica qué hacer y no se inventa un enlace roto.
+ */
+function fromNav(nav, label, detail) {
+  if (nav === "#/quiz") return { label, detail, kind: "quiz", target: quiz.id };
+  if (nav === "#/formularios") return { label, detail, kind: "custom", target: "formulario-maestro" };
+  if (nav === "#/flashcards/__due") return { label, detail, kind: "cards" };
+  const tool = PLAN_TOOL_IDS.get(nav);
+  if (tool && railIds.has(tool)) return { label, detail, kind: "tool", target: tool };
+  return { label, detail, kind: "custom" };
+}
+
+/** Iconos que la plataforma sabe dibujar (`IconName` de `@sinapsis/contract`). */
+const ICONS = new Set([
+  "home", "map", "grid", "book", "sigma", "graph", "cards", "quiz", "pencil", "timer",
+  "function", "calc", "compass", "layers", "notebook", "star", "list", "clock",
+  "square", "circle", "diamond", "line", "triangle", "flask", "chart", "table",
+  "link", "tool", "sparkle", "wrench",
+]);
+
+/** Icono de la fuente → `IconName`; `undefined` si no hay equivalente (se omite). */
+function iconOf(raw) {
+  const name = String(raw ?? "").trim().toLowerCase();
+  return ICONS.has(name) ? name : undefined;
 }
 
 const phaseOrder = [...STUDY.ROADMAP.modes.find((m) => m.id === "cursada").phases, "directo"];
@@ -158,13 +222,15 @@ const phases = phaseOrder.map((id, i) => {
     for (const milestone of phase.milestones) {
       milestones.push({
         title: milestone.title,
+        icon: iconOf(milestone.icon),
         divisions: [],
-        tasks: milestone.tasks.map((task) => {
-          const label = task.hint ? `${task.label} (${task.hint})` : task.label;
-          if (task.kind === "deck") return { label, kind: "cards", target: DECK_IDS.get(task.deck) };
-          if (task.kind === "tool") return fromNav(task.nav, label);
+        // El `hint` de la fuente es una aclaración corta, no parte del nombre de
+        // la tarea: va en `detail` (el contrato lo muestra aparte).
+        tasks: milestone.tasks.map(({ label, hint: detail, ...task }) => {
+          if (task.kind === "deck") return { label, detail, kind: "cards", target: DECK_IDS.get(task.deck) };
+          if (task.kind === "tool") return fromNav(task.nav, label, detail);
           const slug = task.slug ?? task.slugs?.[0];
-          return { label, kind: "custom", ...(wiki.has(slug) ? { target: slug } : {}) };
+          return { label, detail, kind: "custom", ...(wiki.has(slug) ? { target: slug } : {}) };
         }),
       });
     }
@@ -178,7 +244,8 @@ const phases = phaseOrder.map((id, i) => {
       }
       if (meta.tp) {
         tasks.push({
-          label: `Resolver el TP${unit} · ${meta.tp.ej} ejercicios (${meta.tp.horas})`,
+          label: `Resolver el TP${unit}`,
+          detail: `${meta.tp.ej} ejercicios · ${meta.tp.horas}`,
           kind: "exercises",
         });
       }
@@ -204,25 +271,29 @@ const phases = phaseOrder.map((id, i) => {
     title: "Simulacro y autoevaluación",
     divisions: [],
     tasks: [
-      ...(phase.exam ? [{ label: `${phase.exam.label} — ${phase.exam.hint}`, kind: "custom" }] : []),
+      ...(phase.exam ? [{ label: phase.exam.label, detail: phase.exam.hint, kind: "custom" }] : []),
       { label: "Quiz conceptual de autoevaluación", kind: "quiz", target: quiz.id },
     ],
   });
 
+  const phaseIcon = iconOf(phase.icon);
   return {
     id: `fase-${n}`,
     title: phase.title,
     ...(phase.kicker ? { subtitle: phase.kicker } : {}),
+    ...(phaseIcon ? { icon: phaseIcon } : {}),
     scope: scopeOf(phase),
     milestones: milestones.map((m, mi) => ({
       id: `fase-${n}-h${mi + 1}`,
       title: m.title,
+      ...(m.icon ? { icon: m.icon } : {}),
       divisions: m.divisions,
       tasks: m.tasks.map((t, ti) => ({
         id: `fase-${n}-h${mi + 1}-t${ti + 1}`,
         label: cut(t.label, 200),
         kind: t.kind,
         ...(t.target ? { target: t.target } : {}),
+        ...(t.detail ? { detail: cut(t.detail, 300) } : {}),
       })),
     })),
   };
@@ -293,6 +364,9 @@ console.log(`  kits:      ${kits.length}`);
 if (brokenPages.length) {
   console.log(`  páginas descartadas por no existir en el wiki: ${[...new Set(brokenPages)].join(", ")}`);
 }
+if (missingAlt.length) {
+  console.log(`  opciones solo matemáticas sin «alt» (agregarlas a MATH_ALT): ${[...new Set(missingAlt)].join(" · ")}`);
+}
 
 // ---------------------------------------------------------------------------
 // Serialización a markdown
@@ -337,7 +411,8 @@ function quizMarkdown(q) {
     lines.push(`## ${oneLine(question.prompt)}`, "");
     if (question.page) lines.push(`> pagina: ${question.page}`, "");
     for (const option of question.options) {
-      lines.push(`- [${option.correct ? "x" : " "}] ${oneLine(option.text)}`);
+      const alt = option.alt ? ` {alt: ${option.alt}}` : "";
+      lines.push(`- [${option.correct ? "x" : " "}] ${oneLine(option.text)}${alt}`);
     }
     lines.push("");
     if (question.explanation) lines.push(`> ${oneLine(question.explanation)}`, "");

@@ -66,10 +66,10 @@ descripcion: 'Reconocer distribuciones, criterios de inferencia y convenciones d
 
 > pagina: error-tipo-i-y-tipo-ii
 
-- [ ] $\alpha$
-- [ ] $1-\alpha$
-- [ ] $\beta$
-- [x] $1-\beta$
+- [ ] $\alpha$ {alt: alfa}
+- [ ] $1-\alpha$ {alt: uno menos alfa}
+- [ ] $\beta$ {alt: beta}
+- [x] $1-\beta$ {alt: uno menos beta}
 
 > Potencia $=1-\beta=$ probabilidad de rechazar $H_0$ cuando es falsa.
 
@@ -77,10 +77,10 @@ descripcion: 'Reconocer distribuciones, criterios de inferencia y convenciones d
 
 > pagina: valor-p
 
-- [ ] $> \alpha$
-- [x] $< \alpha$
-- [ ] $=0.5$
-- [ ] $>0.5$
+- [ ] $> \alpha$ {alt: mayor que alfa}
+- [x] $< \alpha$ {alt: menor que alfa}
+- [ ] $=0.5$ {alt: igual a 0,5}
+- [ ] $>0.5$ {alt: mayor que 0,5}
 
 > Regla: rechazar $H_0\iff p<\alpha$.
 

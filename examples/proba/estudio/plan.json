@@ -28,8 +28,9 @@
             },
             {
               "id": "fase-1-h1-t3",
-              "label": "Resolver el TP1 · 7 ejercicios (4–5 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP1",
+              "kind": "exercises",
+              "detail": "7 ejercicios · 4–5 h"
             }
           ]
         },
@@ -60,8 +61,9 @@
             },
             {
               "id": "fase-1-h2-t4",
-              "label": "Resolver el TP2 · 40 ejercicios (12–15 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP2",
+              "kind": "exercises",
+              "detail": "40 ejercicios · 12–15 h"
             }
           ]
         },
@@ -72,8 +74,9 @@
           "tasks": [
             {
               "id": "fase-1-h3-t1",
-              "label": "Simulacro del parcialito 1 — Solo ejercicios de TP1 y TP2, con corrección al final",
-              "kind": "custom"
+              "label": "Simulacro del parcialito 1",
+              "kind": "custom",
+              "detail": "Solo ejercicios de TP1 y TP2, con corrección al final"
             },
             {
               "id": "fase-1-h3-t2",
@@ -118,8 +121,9 @@
             },
             {
               "id": "fase-2-h1-t4",
-              "label": "Resolver el TP3 · 41 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP3",
+              "kind": "exercises",
+              "detail": "41 ejercicios · 14–16 h"
             }
           ]
         },
@@ -144,8 +148,9 @@
             },
             {
               "id": "fase-2-h2-t3",
-              "label": "Resolver el TP4 · 33 ejercicios (16–18 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP4",
+              "kind": "exercises",
+              "detail": "33 ejercicios · 16–18 h"
             }
           ]
         },
@@ -156,8 +161,9 @@
           "tasks": [
             {
               "id": "fase-2-h3-t1",
-              "label": "Simulacro del parcialito 2 — Solo ejercicios de TP3 y TP4, con corrección al final",
-              "kind": "custom"
+              "label": "Simulacro del parcialito 2",
+              "kind": "custom",
+              "detail": "Solo ejercicios de TP3 y TP4, con corrección al final"
             },
             {
               "id": "fase-2-h3-t2",
@@ -196,8 +202,9 @@
             },
             {
               "id": "fase-3-h1-t3",
-              "label": "Resolver el TP5 · 24 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP5",
+              "kind": "exercises",
+              "detail": "24 ejercicios · 14–16 h"
             }
           ]
         },
@@ -222,8 +229,9 @@
             },
             {
               "id": "fase-3-h2-t3",
-              "label": "Resolver el TP6 · 25 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP6",
+              "kind": "exercises",
+              "detail": "25 ejercicios · 14–16 h"
             }
           ]
         },
@@ -254,8 +262,9 @@
             },
             {
               "id": "fase-3-h3-t4",
-              "label": "Resolver el TP7 · 24 ejercicios (12–14 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP7",
+              "kind": "exercises",
+              "detail": "24 ejercicios · 12–14 h"
             }
           ]
         },
@@ -302,8 +311,9 @@
           "tasks": [
             {
               "id": "fase-3-h5-t1",
-              "label": "Simulacro del parcial cronometrado — Solo TP1 a TP7, cronometrado y con corrección al final",
-              "kind": "custom"
+              "label": "Simulacro del parcial cronometrado",
+              "kind": "custom",
+              "detail": "Solo TP1 a TP7, cronometrado y con corrección al final"
             },
             {
               "id": "fase-3-h5-t2",
@@ -342,8 +352,9 @@
             },
             {
               "id": "fase-4-h1-t3",
-              "label": "Resolver el TP8 · 24 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP8",
+              "kind": "exercises",
+              "detail": "24 ejercicios · 14–16 h"
             }
           ]
         },
@@ -368,8 +379,9 @@
             },
             {
               "id": "fase-4-h2-t3",
-              "label": "Resolver el TP9 · 20 ejercicios (12–14 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP9",
+              "kind": "exercises",
+              "detail": "20 ejercicios · 12–14 h"
             }
           ]
         },
@@ -380,8 +392,9 @@
           "tasks": [
             {
               "id": "fase-4-h3-t1",
-              "label": "Simulacro del parcialito 3 — Solo ejercicios de TP8 y TP9, con corrección al final",
-              "kind": "custom"
+              "label": "Simulacro del parcialito 3",
+              "kind": "custom",
+              "detail": "Solo ejercicios de TP8 y TP9, con corrección al final"
             },
             {
               "id": "fase-4-h3-t2",
@@ -402,13 +415,15 @@
         {
           "id": "fase-5-h1",
           "title": "Estimación y EMV",
+          "icon": "function",
           "divisions": [],
           "tasks": [
             {
               "id": "fase-5-h1-t1",
-              "label": "Repasar Estimación puntual (incluye EMV) (EMV de exponencial y de Poisson)",
+              "label": "Repasar Estimación puntual (incluye EMV)",
               "kind": "custom",
-              "target": "estimacion-puntual"
+              "target": "estimacion-puntual",
+              "detail": "EMV de exponencial y de Poisson"
             },
             {
               "id": "fase-5-h1-t2",
@@ -450,13 +465,15 @@
             {
               "id": "fase-5-h2-t4",
               "label": "Practicar con las calculadoras Φ · t · χ²",
-              "kind": "custom"
+              "kind": "tool",
+              "target": "calc"
             }
           ]
         },
         {
           "id": "fase-5-h3",
           "title": "Procesos y Markov",
+          "icon": "layers",
           "divisions": [],
           "tasks": [
             {
@@ -487,13 +504,15 @@
             {
               "id": "fase-5-h4-t2",
               "label": "Asistente: ¿qué distribución uso?",
-              "kind": "custom"
+              "kind": "tool",
+              "target": "explorador"
             }
           ]
         },
         {
           "id": "fase-5-h5",
           "title": "Repaso general",
+          "icon": "layers",
           "divisions": [],
           "tasks": [
             {
@@ -517,8 +536,9 @@
           "tasks": [
             {
               "id": "fase-5-h6-t1",
-              "label": "Simulacro de final cronometrado — Todo el banco. Suba la cantidad de ítems para emular el final",
-              "kind": "custom"
+              "label": "Simulacro de final cronometrado",
+              "kind": "custom",
+              "detail": "Todo el banco. Suba la cantidad de ítems para emular el final"
             },
             {
               "id": "fase-5-h6-t2",
@@ -563,8 +583,9 @@
             },
             {
               "id": "fase-6-h1-t4",
-              "label": "Resolver el TP2 · 40 ejercicios (12–15 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP2",
+              "kind": "exercises",
+              "detail": "40 ejercicios · 12–15 h"
             }
           ]
         },
@@ -595,8 +616,9 @@
             },
             {
               "id": "fase-6-h2-t4",
-              "label": "Resolver el TP3 · 41 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP3",
+              "kind": "exercises",
+              "detail": "41 ejercicios · 14–16 h"
             }
           ]
         },
@@ -621,8 +643,9 @@
             },
             {
               "id": "fase-6-h3-t3",
-              "label": "Resolver el TP4 · 33 ejercicios (16–18 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP4",
+              "kind": "exercises",
+              "detail": "33 ejercicios · 16–18 h"
             }
           ]
         },
@@ -647,8 +670,9 @@
             },
             {
               "id": "fase-6-h4-t3",
-              "label": "Resolver el TP5 · 24 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP5",
+              "kind": "exercises",
+              "detail": "24 ejercicios · 14–16 h"
             }
           ]
         },
@@ -673,8 +697,9 @@
             },
             {
               "id": "fase-6-h5-t3",
-              "label": "Resolver el TP1 · 7 ejercicios (4–5 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP1",
+              "kind": "exercises",
+              "detail": "7 ejercicios · 4–5 h"
             }
           ]
         },
@@ -699,8 +724,9 @@
             },
             {
               "id": "fase-6-h6-t3",
-              "label": "Resolver el TP6 · 25 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP6",
+              "kind": "exercises",
+              "detail": "25 ejercicios · 14–16 h"
             }
           ]
         },
@@ -731,8 +757,9 @@
             },
             {
               "id": "fase-6-h7-t4",
-              "label": "Resolver el TP7 · 24 ejercicios (12–14 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP7",
+              "kind": "exercises",
+              "detail": "24 ejercicios · 12–14 h"
             }
           ]
         },
@@ -757,8 +784,9 @@
             },
             {
               "id": "fase-6-h8-t3",
-              "label": "Resolver el TP8 · 24 ejercicios (14–16 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP8",
+              "kind": "exercises",
+              "detail": "24 ejercicios · 14–16 h"
             }
           ]
         },
@@ -783,8 +811,9 @@
             },
             {
               "id": "fase-6-h9-t3",
-              "label": "Resolver el TP9 · 20 ejercicios (12–14 h)",
-              "kind": "exercises"
+              "label": "Resolver el TP9",
+              "kind": "exercises",
+              "detail": "20 ejercicios · 12–14 h"
             }
           ]
         },
@@ -795,8 +824,9 @@
           "tasks": [
             {
               "id": "fase-6-h10-t1",
-              "label": "Simulacro de final cronometrado — Todo el programa, cronometrado y con corrección al final",
-              "kind": "custom"
+              "label": "Simulacro de final cronometrado",
+              "kind": "custom",
+              "detail": "Todo el programa, cronometrado y con corrección al final"
             },
             {
               "id": "fase-6-h10-t2",

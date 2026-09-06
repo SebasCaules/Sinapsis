@@ -300,6 +300,10 @@ la lista se suma al enunciado. Opciones: lista de tildes, `- [x]` correcta, `- [
 (≥ 2 opciones, ≥ 1 correcta). El blockquote **posterior** a la lista es la explicación.
 `pagina:` vale igual que en los mazos.
 
+Una opción que es **solo matemática** (`$\alpha$`) no deja nada legible para un lector de
+pantalla: se le agrega el texto alternativo al final de la línea, `- [x] $\alpha$ {alt: alfa}`
+(`QuizOption.alt`). Si al quitar la directiva la opción quedara vacía, se ignora.
+
 ### `plan.json` (`Plan`)
 
 ```jsonc
@@ -308,11 +312,14 @@ la lista se suma al enunciado. Opciones: lista de tildes, `- [x]` correcta, `- [
     "id": "fase-1", "title": "Parcial 1", "subtitle": "U1 y U2",
     "date": "2026-10-01",             // opcional, AAAA-MM-DD
     "scope": "Qué cae (markdown)",    // opcional
+    "icon": "map",                    // opcional, un IconName del registro cerrado
     "milestones": [{
-      "id": "fase-1-h1", "title": "Unidad 1", "divisions": ["1"],
+      "id": "fase-1-h1", "title": "Unidad 1", "icon": "book", "divisions": ["1"],
       "tasks": [
         { "id": "fase-1-h1-t1", "label": "Leer la teoría", "kind": "read", "target": "1" },
-        { "id": "fase-1-h1-t2", "label": "Flashcards", "kind": "cards", "target": "definiciones-clave" }
+        { "id": "fase-1-h1-t2", "label": "Flashcards", "kind": "cards", "target": "definiciones-clave" },
+        { "id": "fase-1-h1-t3", "label": "Resolver el TP1", "kind": "exercises",
+          "detail": "7 ejercicios · 4–5 h" }   // `detail`: costo estimado, aparte del label
       ] }] }] }
 ```
 
@@ -321,6 +328,7 @@ la lista se suma al enunciado. Opciones: lista de tildes, `- [x]` correcta, `- [
 | `read` | clave de división |
 | `cards` | id de mazo (o sin `target`: repaso del día) |
 | `quiz` | id de quiz |
+| `tool` | id de ítem del `rail` del config |
 | `exercises` | slug de página o URL (opcional) |
 | `custom` | slug de página o URL (opcional) |
 
@@ -340,7 +348,8 @@ Los ids son la clave del progreso del usuario («tarea hecha»): conviene que se
 ### Advertencias del material de estudio
 
 `sinapsis sync --dry-run` avisa (sin fallar) por: página / mazo / quiz / división / herramienta
-inexistente, `target` de una tarea `read` que no es una división, id repetido (mazo, quiz,
+inexistente, `target` de una tarea `read` que no es una división o de una tarea `tool` que no
+es un id de ítem del `rail`, id repetido (mazo, quiz,
 tarjeta, pregunta, kit), tarjeta sin reverso, pregunta con menos de 2 opciones o sin correcta,
 y JSON que no cumple el contrato (con la ruta del campo).
 
