@@ -57,6 +57,14 @@ El paso 3 casi nunca acierta de entrada más allá de las 2-3 letras más frecue
 | [[cifrado-de-vigenere\|Vigenère]] | Sólo por bloques | El histograma global se **aplana**; hay que hallar $t$ primero ([[test-de-kasiski\|Kasiski]]) y luego atacar cada sub-bloque |
 | [[cifrado-por-transposicion\|Transposición]] | No | El histograma queda **idéntico** — pero por eso mismo delata que es transposición |
 
+## El ejercicio de la clase
+
+![Ejercicio de descifrado](../../assets/Pasted%20image%2020260806172344.png)
+
+**Ayudas:** el mensaje original está en castellano · la separación en grupos de 5 símbolos no es parte del problema (sólo ayuda a contar) · **gancho: `LACABEZA`** aparece en el mensaje plano.
+
+El ejercicio **no está para practicar sustitución**: está para medir la distancia entre *«no es seguro»* y *«lo rompí»*. Declarar inseguro un criptosistema es barato; explotarlo cuesta trabajo incluso en el cifrado más fácil que conoce la humanidad, y esa brecha es la que después justifica que la criptografía moderna hable de **costo** y no de imposibilidad. La cátedra habilita explícitamente resolverlo con un modelo de lenguaje o a mano, sin preferencia entre las dos vías.
+
 ## Identificar el tipo de cifrado a partir del histograma
 
 Esto es exactamente el Ej. 5 de la [[guia-01-criptografia-clasica|Guía 1]]: clasificar sin descifrar.

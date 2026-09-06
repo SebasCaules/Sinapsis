@@ -72,9 +72,21 @@ Con un solo símbolo, las 27 claves dan 27 mensajes y **todos son igualmente pla
 
 En la práctica la hipótesis se instrumenta con un **test de plausibilidad**: ¿el candidato es texto en el idioma esperado? Se automatiza con frecuencias de letras, listas de bigramas/trigramas frecuentes o un diccionario.
 
+## Distancia de unicidad: cuándo la fuerza bruta no termina
+
+La hipótesis de discriminación **se cae de dos maneras**, y las dos importan.
+
+- **Por abajo**, cuando el texto plano no tiene redundancia. Si el mensaje es una secuencia aleatoria, el criptograma parece aleatorio y *todos* los descifrados parecen aleatorios: no hay con qué elegir. Es exactamente el motivo por el que el [[one-time-pad|One Time Pad]] es indistinguible de azar.
+- **Por arriba**, cuando hay **varios** descifrados con sentido. Si la clave 4 da una palabra y la clave 6 da otra palabra, el ataque termina con dos candidatos y ninguno gana.
+
+El umbral entre los dos regímenes tiene nombre y fórmula: la **distancia de unicidad** de Shannon, el largo de mensaje a partir del cual es esperable que sobreviva **un único** descifrado con sentido, para una única clave. La clase da el número para el castellano: **5 letras**. Casi todo lo que se usa en la práctica está muy por encima de ese umbral, así que en el mundo real la hipótesis se cumple sola — y por eso se la olvida. Sólo en escenarios de laboratorio, o en los extremos, la fuerza bruta deja de decidir.
+
+> [!nota] La distancia de unicidad no es una constante del castellano
+> En la formulación de Shannon es el cociente entre la entropía de la clave y la redundancia del lenguaje, así que **crece con el tamaño del espacio de claves**: un cifrado con más claves necesita más texto para quedar determinado. El número de 5 letras se lee como orden de magnitud para los cifrados clásicos de esta unidad. El apunte de [[teoria-de-la-informacion#9. Qué NO está en esta fuente|Teoría de la información]] registra que la distancia de unicidad **no** está en el paper de 1948 que resume: es del de 1949.
+
 ## Nota histórica
 
-**1939 — Bombe / Enigma.** Los ataques de exploración sistemática por fuerza bruta motivaron las primeras protocomputadoras. La fuerza bruta no es un ataque "de juguete": es el que hizo falta industrializar el cómputo.
+**1939 — Bombe / Enigma.** Los ataques de exploración sistemática por fuerza bruta motivaron las primeras protocomputadoras. La fuerza bruta no es un ataque "de juguete": es el que hizo falta industrializar el cómputo → [[maquinas-de-rotores-y-enigma|Máquinas de rotores y Enigma]].
 
 ## Ver también
 

@@ -58,6 +58,10 @@
   /* escala tipográfica de la matemática (KaTeX) */
   --math-scale: 1.10;
 
+  /* veladuras de estado (N0-66): resuelven con el --text del tema activo */
+  --hover-wash: color-mix(in srgb, var(--text) 8%, transparent);
+  --active-wash: color-mix(in srgb, var(--text) 13%, transparent);
+
   /* grano de papel sutil (textura de imprenta) */
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
 }
@@ -74,15 +78,29 @@
              que --ucol / --uink (N0-25). Escribir `color: var(--accent)` es un
              error de contraste, no una preferencia estética.
 
+   --border-3 es el CONTORNO que es la única señal de un control o de un panel
+             (campo, casilla, disparador del calendario, tarjeta fantasma discontinua,
+             destino de arrastre, retícula de una tabla): WCAG 1.4.11 pide ≥ 3:1 y ni
+             --border ni --border-2 llegan en ningún tema. --border y --border-2 son
+             para bordes que SIEMPRE tienen un cambio de fondo al lado. (N0-66)
+
+   --hover-wash / --active-wash son el escalón de hover y de selección para lo
+             que se apoya sobre CUALQUIER superficie, en especial --elevated (menús,
+             diálogos, filas de la paleta ⌘K): una veladura de --text al 8 % / 13 %
+             que oscurece en los temas claros y aclara en Claustro, así el estado
+             siempre va en la dirección «más notorio». Usar --surface-2 sobre
+             --elevated era 1.1:1 y en Claustro hundía la fila en vez de resaltarla.
+
    --track   es la PISTA de las barras de progreso y es un token propio, no un
              alias de --border-2 (U16). Un borde puede ser tenue porque siempre
              tiene contenido al lado; una barra al 0 % es SOLO pista, y si no se
              ve sola la tarjeta miente («sin comenzar» parece «sin barra»). Por
              eso se mide contra --surface, que es el fondo de la tarjeta, y se
-             exige ≥ 3:1 (componente gráfico, WCAG 1.4.11):
-                 pergamino  #968769 sobre #faf5ea → 3.24:1
-                 laurel     #8a8d6c sobre #f8f6ec → 3.17:1
-                 claustro   #786a4b sobre #1e1910 → 3.30:1
+             exige ≥ 3:1 (componente gráfico, WCAG 1.4.11). Desde N0-66 vale el
+             mismo valor que --border-3 y se mide también sobre --bg y --elevated:
+                 pergamino  #8a7c5f → 3.21 (--bg) · 3.77 (--surface) · 3.92 (--elevated)
+                 laurel     #7e8161 → 3.21 · 3.73 · 3.83
+                 claustro   #847557 → 4.15 · 3.88 · 3.10
    ============================================================ */
 
 /* ============================================================
@@ -92,10 +110,11 @@
    ============================================================ */
 :root, [data-theme="pergamino"], [data-theme="light"] {
   --bg:#ece3d2; --bg-2:#e4d9c4;
-  --surface:#faf5ea; --surface-2:#f2ebdb; --surface-3:#eae0cd; --elevated:#fdfaf1;
-  --text:#231c12; --text-2:#574b37; --text-3:#6a6150;
+  --surface:#faf5ea; --surface-2:#f2ebdb; --surface-3:#e2d7c0; --elevated:#fdfaf1; /* --surface-3: 1.12 sobre --bg (antes #eae0cd, 1.01: una píldora sobre la página desaparecía) */
+  --text:#231c12; --text-2:#574b37; --text-3:#665c4b; /* --text-3: 4.70:1 sobre --bg-2, 5.16 sobre --bg (antes #6a6150: 4.37 sobre --bg-2) */
   --border:#ddd2bb; --border-2:#c9bca0;
-  --track:#968769;   /* pista de progreso, propia de --border-2: 3.24:1 sobre --surface */
+  --border-3:#8a7c5f; /* contorno que es la ÚNICA señal (N0-66): 3.21 sobre --bg · 3.77 sobre --surface · 3.92 sobre --elevated */
+  --track:#8a7c5f;   /* pista de progreso = --border-3: ≥ 3:1 sobre --bg, --surface y --elevated */
   --scroll-thumb:rgba(74,62,42,.34); --scroll-thumb-hover:rgba(74,62,42,.58); /* barras de desplazamiento propias */
   --ink-mix:68%;     /* cuánto color de unidad sobrevive en la TINTA (ver --uink) */
   --accent-ink:#755c24; --ueval-ink:#74571c; --umeta-ink:#6a6152; --warn-ink:#75521b; --good-ink:#365c33;
@@ -147,10 +166,11 @@
    ============================================================ */
 [data-theme="laurel"] {
   --bg:#e7e6d6; --bg-2:#dedcc8;
-  --surface:#f8f6ec; --surface-2:#eff0df; --surface-3:#e6e6d1; --elevated:#fbf9f0;
-  --text:#1b2117; --text-2:#3f4a38; --text-3:#606751;
+  --surface:#f8f6ec; --surface-2:#eff0df; --surface-3:#dedec7; --elevated:#fbf9f0; /* --surface-3: 1.09 sobre --bg (antes #e6e6d1, 1.005) */
+  --text:#1b2117; --text-2:#3f4a38; --text-3:#5a604b; /* --text-3: 4.73 sobre --bg-2, 5.20 sobre --bg (antes #606751: 4.27 / 4.69) */
   --border:#d8dac1; --border-2:#c2c5a5;
-  --track:#8a8d6c;   /* pista de progreso, propia de --border-2: 3.17:1 sobre --surface */
+  --border-3:#7e8161; /* única señal (N0-66): 3.21 sobre --bg · 3.73 sobre --surface · 3.83 sobre --elevated */
+  --track:#7e8161;   /* pista de progreso = --border-3 */
   --scroll-thumb:rgba(52,64,48,.34); --scroll-thumb-hover:rgba(52,64,48,.58);
   --ink-mix:68%;
   --accent-ink:#735e26; --ueval-ink:#66531d; --umeta-ink:#5f5f4d; --warn-ink:#73531c; --good-ink:#335e35;
@@ -205,13 +225,17 @@
   --bg:#15120c; --bg-2:#100e08;
   --surface:#1e1910; --surface-2:#251f14; --surface-3:#2d2618; --elevated:#332b1b;
   --text:#ece2cd; --text-2:#bcae93; --text-3:#a1957b;
-  --border:#322a1a; --border-2:#443a25;
-  --track:#786a4b;   /* pista de progreso, propia de --border-2: 3.30:1 sobre --surface */
+  /* Bordes subidos (N0-66): con #322a1a el borde era invisible sobre --elevated (1.01:1) y
+     tenue sobre --surface (1.23): menús, diálogos, tablas y chips perdían su delimitación.
+     Ahora --border 1.71 sobre --surface / 1.37 sobre --elevated; --border-2 2.34 / 1.87. */
+  --border:#4a4028; --border-2:#5f5439;
+  --border-3:#847557; /* única señal (N0-66): 4.15 sobre --bg · 3.88 sobre --surface · 3.10 sobre --elevated */
+  --track:#847557;   /* pista de progreso = --border-3 (antes #786a4b: 2.64 sobre la hoja --elevated) */
   --scroll-thumb:rgba(200,180,140,.30); --scroll-thumb-hover:rgba(200,180,140,.55);
   /* en el tema oscuro los colores de unidad ya contrastan: la tinta es casi el
      mismo color (el 8 % de --text solo levanta el azul y el rosa) */
-  --ink-mix:92%;
-  --accent-ink:#c77963; --ueval-ink:#d1a653; --umeta-ink:#a1977f; --warn-ink:#ddab53; --good-ink:#76b267;
+  --ink-mix:72%;     /* antes 92 %: el color casi crudo no llegaba a 4.5:1 sobre la hoja (--elevated): --u2 4.11, --u5 4.10, --u3 4.37; con 72 % todos ≥ 5.1 */
+  --accent-ink:#d68a72; /* 5.15 sobre --elevated (antes #c77963: 4.22) */ --ueval-ink:#d1a653; --umeta-ink:#a1977f; --warn-ink:#ddab53; --good-ink:#76b267;
   --primary:#c79a4e; --primary-2:#d8ac5e; --primary-soft:#2c2313; --primary-ring:rgba(199,154,78,.32);
   --accent:#c4705a; --accent-soft:#2e1c15;
   --link:#d2a85c; --link-soft:#2c2313;
@@ -222,7 +246,7 @@
   --shadow-ctrl:0 1px 2px rgba(0,0,0,.45);
   --shadow-lg:0 24px 62px rgba(0,0,0,.68);
   --kbd-bg:#2a2316;
-  --plot-grid:#2a2316; --plot-axis:#473a24;
+  --plot-grid:#2a2316; --plot-axis:#56462b; /* eje 1.92 sobre --surface, a la par de los temas claros (antes #473a24: 1.58) */
   /* ---- tokens de gráfico (ola 14) ------------------------------------------
      Paleta categórica de SERIE: seis ranuras independientes de --primary /
      --accent / --good / --warn / --bad. El ORDEN de la ranura es el mecanismo
@@ -261,7 +285,7 @@
   --math-ink:#f5ecd8;
   /* unidades aclaradas para fondo oscuro cálido */
   --u1:#56a394; --u2:#5a86c4; --u3:#9a7bc4; --u4:#dd7a52;
-  --u5:#cf6088; --u6:#e09642; --u7:#8f7024; --u8:#6fa85a;
+  --u5:#cf6088; --u6:#e09642; --u7:#b08c30; --u8:#6fa85a; /* --u7 subido: 5.53 sobre --surface, 4.42 sobre --elevated (antes #8f7024: 3.75 / 3.00) */
   --u9:#d96a5c; --u0:#9a907a; --ueval:#cfa148; --umeta:#cfc4ab;
 }
 
