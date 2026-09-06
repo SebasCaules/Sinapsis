@@ -406,6 +406,94 @@ export function divisionColor(cfg: Pick<SubjectConfig, "divisions">, key: Divisi
   return `oklch(${L} ${C} ${Math.round(162 + i * (320 / n))})`;
 }
 
+// ---------------------------------------------------------------------------
+// Texto y slugs (una sola implementación para api, web, markdown y cli)
+// ---------------------------------------------------------------------------
+
+/** Pliega acentos y mayúsculas: "Distribución" → "distribucion". Criterio único de igualdad «sin acentos». */
+export function fold(text: string): string {
+  return (text ?? "").normalize("NFD").replace(/\p{M}+/gu, "").toLowerCase();
+}
+
+/** Convierte cualquier texto en un `Slug` válido (o "" si no queda nada). */
+export function normalizeSlug(raw: string): string {
+  return fold(raw)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120)
+    .replace(/-+$/, "");
+}
+
+/** Convierte cualquier texto en una `DivisionKey` válida. */
+export function normalizeDivisionKey(raw: string): string {
+  return (raw ?? "")
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^[-_]+|[-_]+$/g, "")
+    .slice(0, 24)
+    .toLowerCase();
+}
+
+export const isValidSlug = (v: string): boolean => Slug.safeParse(v).success;
+export const isValidDivisionKey = (v: string): boolean => DivisionKey.safeParse(v).success;
+export const isExternalUrl = (v: string): boolean => ExternalUrl.safeParse(v).success;
+
+/** `--token` → `var(--token)`; un hex se devuelve tal cual; vacío → fallback. */
+export function cssColor(ref: string | null | undefined, fallback = "var(--u0)"): string {
+  if (!ref) return fallback;
+  return ref.startsWith("--") ? `var(${ref})` : ref;
+}
+
+/** Singular o plural según n: plural(1, "página", "páginas") → "página". */
+export function plural(n: number, singular: string, pluralForm: string): string {
+  return n === 1 ? singular : pluralForm;
+}
+
+/** Mensaje de error de una respuesta del API (`{ error }`) o, si no, `HTTP <status> <statusText>`. */
+export function errorMessageFromBody(body: unknown, status: number, statusText = ""): string {
+  if (body && typeof body === "object" && typeof (body as { error?: unknown }).error === "string") {
+    return (body as { error: string }).error;
+  }
+  return `HTTP ${status}${statusText ? " " + statusText : ""}`;
+}
+
+/**
+ * ¿El tipo cuenta como contenido (progreso, numeración de lectura)? Los tipos
+ * no declarados en el config cuentan; solo `countsAsContent: false` excluye.
+ */
+export function countsAsContent(cfg: Pick<SubjectConfigLoose, "pageTypes">, type: string): boolean {
+  return cfg.pageTypes.find((t) => t.key === type)?.countsAsContent !== false;
+}
+
+// ---------------------------------------------------------------------------
+// Cuatrimestres: rótulo canónico "AAAA-NC" (regla de la landing)
+// ---------------------------------------------------------------------------
+
+export interface SemesterParts { year: number; term: number }
+const SEMESTER_RE = /^(\d{4})-(\d{1,2})C$/i;
+
+/** "2026-1C" → { year: 2026, term: 1 }; null si el rótulo es libre. */
+export function parseSemester(raw: string): SemesterParts | null {
+  const m = SEMESTER_RE.exec((raw ?? "").trim());
+  if (!m) return null;
+  const year = Number(m[1]);
+  const term = Number(m[2]);
+  if (!Number.isFinite(year) || !Number.isFinite(term) || term < 1) return null;
+  return { year, term };
+}
+
+/** Descendente: el más reciente primero; los rótulos libres al final (alfabético descendente). */
+export function compareSemestersDesc(a: string, b: string): number {
+  const pa = parseSemester(a);
+  const pb = parseSemester(b);
+  if (pa && pb) return pb.year - pa.year || pb.term - pa.term;
+  if (pa) return -1;
+  if (pb) return 1;
+  return b.localeCompare(a, "es", { numeric: true, sensitivity: "base" });
+}
+
 /** Vistas builtin que la plataforma garantiza en el Sprint 1. */
 export const BUILTIN_VIEWS = ["home", "wiki", "graph", "flashcards", "quiz", "notes", "favorites"] as const;
 export type BuiltinView = (typeof BUILTIN_VIEWS)[number];
