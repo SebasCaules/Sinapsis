@@ -670,7 +670,9 @@ export const PlanPhase = z.object({
   instance: StudyId.optional(),
   /** Instancia de recuperatorio de la fase (clave de `Plan.instances`), si la hay. */
   retake: StudyId.optional(),
-  /** Texto libre «qué cae en este examen». */
+  /** Descripción corta de la fase (una o dos oraciones bajo el título). */
+  description: z.string().max(600).optional(),
+  /** Texto libre «qué cae en este examen» (markdown: lista con negritas). */
   scope: z.string().max(4000).optional(),
   /** Texto libre «cómo recorrer el programa» de la fase (orden sugerido, ritmo). */
   guide: z.string().max(4000).optional(),
