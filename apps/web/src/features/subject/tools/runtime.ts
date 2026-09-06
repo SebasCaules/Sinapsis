@@ -83,13 +83,31 @@ export function loadRuntimeModule(): Promise<RuntimeModule | null> {
 export function bundleOf(subject: string, info: ToolInfo): BundleInfo {
   const id = info.manifest.id;
   const base = withBase(info.base || siteToolBase(subject, id));
+  const stamp = versionStamp(info.updatedAt);
   return {
     id,
     base,
-    scripts: [...info.manifest.scripts],
-    styles: [...info.manifest.styles],
-    data: [...info.manifest.data],
+    scripts: info.manifest.scripts.map((f) => withVersion(f, stamp)),
+    styles: info.manifest.styles.map((f) => withVersion(f, stamp)),
+    data: info.manifest.data.map((f) => withVersion(f, stamp)),
   };
+}
+
+/**
+ * Sello de versión para las URL de los archivos de un bundle: la fecha del
+ * build que escribió `site build` (`ToolInfo.updatedAt`), compactada. Los
+ * `<script>` y `<link>` que inserta el cargador se cachean diez minutos en
+ * GitHub Pages; con el sello en la URL, cada despliegue trae los archivos
+ * nuevos y un bundle sin cambios se sigue sirviendo desde caché.
+ */
+export function versionStamp(updatedAt: string): string {
+  return updatedAt.replace(/[^0-9]/g, "").slice(0, 14);
+}
+
+/** `figuras/u1.js` → `figuras/u1.js?v=20260906204025`; respeta una query previa y las URL absolutas. */
+export function withVersion(file: string, stamp: string): string {
+  if (!stamp || /^(https?:)?\/\//i.test(file) || file.startsWith("/")) return file;
+  return `${file}${file.includes("?") ? "&" : "?"}v=${stamp}`;
 }
 
 /**

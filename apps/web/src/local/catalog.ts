@@ -37,7 +37,11 @@ export function clearCatalogCache(): void {
 async function readJson(url: string, missing: string): Promise<unknown> {
   let res: Response;
   try {
-    res = await fetch(url, { credentials: "same-origin" });
+    /* `no-cache` = REVALIDAR siempre: GitHub Pages sirve con `max-age=600`, y
+       sin esto la web recién desplegada leía un `tools.json` o `subject.json`
+       de hace diez minutos (visto en producción). Con ETag, un archivo que no
+       cambió cuesta un 304. */
+    res = await fetch(url, { credentials: "same-origin", cache: "no-cache" });
   } catch (err) {
     throw new ApiError(0, `No se pudieron leer los datos del sitio (${String(err)})`);
   }

@@ -305,7 +305,7 @@ describe("<ToolHost/>", () => {
 
     expect(await screen.findByText("Herramienta de prueba")).toBeTruthy();
     expect(mounted).toBe(1);
-    expect(loadedBundles).toEqual(["/subjects/proba/tools/demo/demo.js"]);
+    expect(loadedBundles).toEqual(["/subjects/proba/tools/demo/demo.js?v=20260905180000"]);
     /* La vista vive dentro del nodo del host, con el ancho del manifiesto. */
     expect(hostNode()?.getAttribute("data-layout")).toBe("wide");
     expect(hostNode()?.textContent).toContain("Herramienta de prueba");
@@ -428,8 +428,8 @@ describe("<ToolHost/>", () => {
 
     expect(visto).toEqual([]);
     expect(loadedBundles).toEqual([
-      "/subjects/proba/tools/demo/demo.js",
-      "/subjects/proba/tools/otro/otro.js",
+      "/subjects/proba/tools/demo/demo.js?v=20260905180000",
+      "/subjects/proba/tools/otro/otro.js?v=20260905180000",
     ]);
     /* La vista anterior se limpió y la nueva se montó: dos montajes, una limpieza. */
     expect(mounted).toBe(2);

@@ -8,7 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { RUNTIME_VERSION, type ToolInfo } from "@sinapsis/contract";
 import { siteToolBase } from "@sinapsis/contract/site";
-import { bundleOf, withBase } from "./runtime";
+import { bundleOf, versionStamp, withBase, withVersion } from "./runtime";
 
 function info(base: string): ToolInfo {
   return {
@@ -54,13 +54,21 @@ describe("bundleOf", () => {
     expect(bundleOf("proba", info("")).base).toBe("/subjects/proba/tools/figuras");
   });
 
-  it("copia lo que el manifiesto declara, sin tocarlo", () => {
+  it("copia lo que el manifiesto declara y sella cada archivo con la fecha del build", () => {
     const bundle = bundleOf("proba", info("subjects/proba/tools/figuras"));
     expect(bundle).toMatchObject({
       id: "figuras",
-      scripts: ["figuras.js"],
-      styles: ["figuras.css"],
-      data: ["data/valores.json"],
+      scripts: ["figuras.js?v=20260905100000"],
+      styles: ["figuras.css?v=20260905100000"],
+      data: ["data/valores.json?v=20260905100000"],
     });
+  });
+
+  it("el sello no toca URL absolutas y respeta una query previa", () => {
+    expect(withVersion("https://cdn.example/x.js", "1")).toBe("https://cdn.example/x.js");
+    expect(withVersion("/ya/absoluta.js", "1")).toBe("/ya/absoluta.js");
+    expect(withVersion("a.js?x=1", "2")).toBe("a.js?x=1&v=2");
+    expect(withVersion("a.js", "")).toBe("a.js");
+    expect(versionStamp("2026-09-06T20:40:25.580Z")).toBe("20260906204025");
   });
 });
