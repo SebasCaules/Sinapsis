@@ -35,6 +35,8 @@ import {
 /** Referencias estables: sin ellas cada render rearmaría el handle. */
 const NO_TOOLS: ToolInfo[] = [];
 const NO_LOADED: ReadonlySet<string> = new Set<string>();
+/** Desatador inerte: sin runtime instalado no hay nada que soltar. */
+const NO_UNBIND = (): void => undefined;
 
 /** Lo que el shell y sus vistas pueden pedirle al runtime. */
 export interface RuntimeHandle {
@@ -61,6 +63,13 @@ export interface RuntimeHandle {
   isLoaded: (toolId: string) => boolean;
   /** La vista registrada por un bundle ya cargado, o null. */
   view: (viewId: string) => ViewFn | null;
+  /**
+   * Ata el contenedor de la vista recién montada (S-16): pasa a ser el ámbito de
+   * `App.$`/`App.$$` y recibe la delegación de clics de navegación
+   * (`[data-nav]`, `[data-go]`, wikilinks) hacia `App.go`, que navega por el
+   * router sin recargar. Devuelve el desatador, que el host llama al desmontar.
+   */
+  bindView: (container: HTMLElement) => () => void;
   /** true si hay al menos un bundle de figuras cargado. */
   figures: boolean;
   mountFigures: (container: HTMLElement) => number;
@@ -285,6 +294,7 @@ export function useRuntime(slug: string, model: SubjectModel | null): RuntimeHan
       load,
       isLoaded: (toolId: string) => loaded.has(toolId),
       view: (viewId: string) => runtimeRef.current?.view(viewId) ?? null,
+      bindView: (container: HTMLElement) => runtimeRef.current?.bindView(container) ?? NO_UNBIND,
       figures,
       mountFigures: (container: HTMLElement) => runtimeRef.current?.App.mountFigures(container) ?? 0,
       unmountFigures: (container: HTMLElement) => runtimeRef.current?.App.unmountFigures(container) ?? 0,
@@ -311,6 +321,7 @@ export const IDLE_RUNTIME: RuntimeHandle = {
   load: () => Promise.resolve(false),
   isLoaded: () => false,
   view: () => null,
+  bindView: () => NO_UNBIND,
   figures: false,
   mountFigures: () => 0,
   unmountFigures: () => 0,

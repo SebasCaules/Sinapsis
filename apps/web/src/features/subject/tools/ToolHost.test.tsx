@@ -25,7 +25,13 @@ import rawProbaConfig from "../../../../../../examples/proba/sinapsis.config.jso
 import { api, type ApiClient } from "@/lib/api";
 import type { SubjectCtx } from "../context";
 import { buildSubjectModel } from "../model";
-import { resetRuntimeModuleForTests, type RuntimeApi, type RuntimeContext, type RuntimeModule } from "./runtime";
+import {
+  PALETTE_EVENT,
+  resetRuntimeModuleForTests,
+  type RuntimeApi,
+  type RuntimeContext,
+  type RuntimeModule,
+} from "./runtime";
 import { useRuntime } from "./useRuntime";
 import { ToolHost } from "./ToolHost";
 
@@ -60,6 +66,11 @@ let lastArg: string | undefined;
 let installedWith: RuntimeContext | null = null;
 let loadedBundles: string[] = [];
 let uninstalled = 0;
+/* `bindView`: qué contenedores se ataron y cuáles se soltaron (S-16). */
+let bound: HTMLElement[] = [];
+let unbound: HTMLElement[] = [];
+let navigated: string[] = [];
+let searchOpened = 0;
 
 /** Un runtime de mentira con la superficie que consume la web. */
 function fakeModule(): RuntimeModule {
@@ -83,6 +94,12 @@ function fakeModule(): RuntimeModule {
       const title = document.createElement("h1");
       title.textContent = "Herramienta de prueba";
       main.appendChild(title);
+      /* Un enlace del baseline: `href` de hash y `data-nav`. Si el contenedor
+         no está atado, esto navega al hash crudo y recarga. */
+      const link = document.createElement("a");
+      link.setAttribute("data-nav", "#/taller");
+      link.textContent = "Ir al taller";
+      main.appendChild(link);
       return () => {
         cleaned += 1;
       };
@@ -101,6 +118,23 @@ function fakeModule(): RuntimeModule {
     },
     unloadBundle: () => undefined,
     view: (id) => views.get(id) ?? null,
+    /* Doble mínimo de la delegación real: lo que se prueba acá es el CONTRATO
+       del host (atar antes de dibujar, soltar al desmontar, una sola vez). La
+       gramática de `[data-nav]`/`[data-go]` se prueba en `packages/runtime`. */
+    bindView: (container: HTMLElement) => {
+      bound.push(container);
+      const onClick = (ev: Event) => {
+        const el = (ev.target as Element).closest("[data-nav]");
+        if (!el) return;
+        ev.preventDefault();
+        navigated.push(el.getAttribute("data-nav") ?? "");
+      };
+      container.addEventListener("click", onClick);
+      return () => {
+        unbound.push(container);
+        container.removeEventListener("click", onClick);
+      };
+    },
     onThemeChange: (fn) => {
       themeListeners.add(fn);
       return () => void themeListeners.delete(fn);
@@ -131,6 +165,10 @@ beforeEach(() => {
   installedWith = null;
   loadedBundles = [];
   uninstalled = 0;
+  bound = [];
+  unbound = [];
+  navigated = [];
+  searchOpened = 0;
   resetRuntimeModuleForTests(fakeModule());
 });
 
@@ -145,7 +183,7 @@ function ShellStub() {
   const { subject = "" } = useParams();
   const runtime = useRuntime(subject, model);
   const ctx = useMemo<SubjectCtx>(
-    () => ({ slug: subject, model, openSearch: () => undefined, runtime }),
+    () => ({ slug: subject, model, openSearch: () => void (searchOpened += 1), runtime }),
     [subject, runtime],
   );
   return (
@@ -238,6 +276,48 @@ describe("<ToolHost/>", () => {
     renderTool("/m/proba/t/explorador");
     expect(await screen.findByText("No se pudo cargar el material interactivo de la materia.")).toBeTruthy();
     expect(mounted).toBe(0);
+  });
+
+  it("ata el contenedor al runtime (una sola vez) y lo suelta al salir", async () => {
+    const view = renderTool("/m/proba/t/explorador");
+    await screen.findByText("Herramienta de prueba");
+    const node = hostNode();
+
+    expect(bound).toEqual([node]);
+    expect(unbound).toEqual([]);
+
+    view.unmount();
+    expect(unbound).toEqual([node]);
+    /* Ni un atado de más: ir y volver no puede dejar listeners duplicados. */
+    expect(bound).toHaveLength(1);
+  });
+
+  it("los `[data-nav]` de la vista los atiende el runtime, no el navegador", async () => {
+    const view = renderTool("/m/proba/t/explorador");
+    await screen.findByText("Herramienta de prueba");
+
+    const link = screen.getByText("Ir al taller");
+    act(() => void link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })));
+    expect(navigated).toEqual(["#/taller"]);
+
+    /* Desmontada la vista, el mismo clic ya no llega a ningún lado. */
+    const orphan = link;
+    view.unmount();
+    orphan.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(navigated).toEqual(["#/taller"]);
+  });
+
+  it("el pedido de paleta del bundle abre la del shell", async () => {
+    const view = renderTool("/m/proba/t/explorador");
+    await screen.findByText("Herramienta de prueba");
+
+    act(() => void window.dispatchEvent(new CustomEvent(PALETTE_EVENT)));
+    expect(searchOpened).toBe(1);
+
+    /* Fuera de la herramienta nadie escucha: sin listeners huérfanos. */
+    view.unmount();
+    window.dispatchEvent(new CustomEvent(PALETTE_EVENT));
+    expect(searchOpened).toBe(1);
   });
 
   it("sin bundle que declare la vista, sigue el «Próximamente» del rail", async () => {

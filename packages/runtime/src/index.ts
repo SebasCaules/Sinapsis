@@ -24,12 +24,14 @@
 import type { SinapsisRuntime, ThemeId, ViewFn } from "@sinapsis/contract";
 import { createCompatApp, type CompatHandle, type RuntimeApp, type SubjectContext } from "./compat.js";
 import { createLoader, type BundleInfo, type BundleLoader } from "./loader.js";
+import { bindNav } from "./nav.js";
 
 export type { SubjectContext, RuntimeApp, Crumb, KatexCompat } from "./compat.js";
 export type { BundleInfo, BundleLoader } from "./loader.js";
 export type { MathLib, Matrix } from "./math.js";
 export type { MarkdownApi, MarkdownContext } from "./markdown.js";
-export { createCompatApp, translateRoute, fmt, fmt4, fmt6, cssVar, withAlpha, emptyState, backBar } from "./compat.js";
+export { createCompatApp, translateRoute, fmt, fmt4, fmt6, cssVar, withAlpha, emptyState, backBar, PALETTE_EVENT } from "./compat.js";
+export { NAV_SEL, bindNav, isPlainClick, navTargetOf } from "./nav.js";
 export { createLoader, resolveUrl, dataKey } from "./loader.js";
 export { createMath } from "./math.js";
 export { createFigures } from "./figures.js";
@@ -55,6 +57,16 @@ export interface Runtime extends SinapsisRuntime {
   setTheme(theme: ThemeId): void;
   /** Cambia de materia (o refresca páginas/leídas) sin recrear el runtime. */
   updateContext(ctx: SubjectContext): void;
+  /**
+   * Ata el contenedor de la vista que el host acaba de montar (S-16): pasa a
+   * ser el ámbito de `App.$`/`App.$$` y recibe la delegación de clics de
+   * navegación (`[data-nav]`, `[data-go]`, wikilinks) hacia `App.go`.
+   *
+   * Devuelve el desatador, que el host DEBE llamar al desmontar la vista: es lo
+   * que evita listeners duplicados al ir y volver de una pestaña, y lo que
+   * impide que el `App` quede apuntando a un contenedor que ya no está.
+   */
+  bindView(container: HTMLElement): () => void;
   /** Desmonta el runtime: quita los bundles, los listeners y los globales. */
   uninstall(): void;
 }
@@ -127,6 +139,25 @@ export function installRuntime(ctx: SubjectContext): Runtime {
     updateContext(next: SubjectContext): void {
       handle.setContext(next);
     },
+    bindView(container: HTMLElement): () => void {
+      handle.setViewRoot(container);
+      const unbind = bindNav(container, (target) => app.go(target));
+      return () => {
+        unbind();
+        /* El redibujo que registró la vista con `setRedraw` muere con ella: si
+           no, un cambio de tema fuera de la herramienta seguiría llamando a la
+           función de una vista ya desmontada, que dibuja sobre un contenedor
+           que ya no está en el documento. */
+        try {
+          app.setRedraw(null);
+        } catch {
+          /* el runtime ya se desinstaló: no hay nada que soltar */
+        }
+        /* Solo se suelta si sigue siendo la raíz: si otra vista ya se montó
+           encima, el desmontaje tardío de la anterior no puede borrarla. */
+        if (handle.viewRoot() === container) handle.setViewRoot(null);
+      };
+    },
     uninstall(): void {
       uninstallRuntime();
     },
@@ -135,6 +166,7 @@ export function installRuntime(ctx: SubjectContext): Runtime {
   currentTeardown = () => {
     if (typeof document !== "undefined") document.removeEventListener("click", onClick);
     themeListeners.clear();
+    handle.setViewRoot(null);
     loader.unloadAll();
     if (typeof window !== "undefined") {
       if (window.App === (app as unknown as Window["App"])) delete window.App;

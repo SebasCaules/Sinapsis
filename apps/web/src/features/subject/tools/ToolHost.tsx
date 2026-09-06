@@ -13,7 +13,12 @@
  *  - el tema: si la vista registró un redibujo propio, el runtime se encarga; si
  *    no, se la vuelve a montar (decisión D4-2);
  *  - `App.render()`, que es la forma que tiene una vista del baseline de pedir
- *    «volvé a dibujarme».
+ *    «volvé a dibujarme»;
+ *  - atar el contenedor al runtime (`bindView`, S-16): ámbito de `App.$`/`App.$$`
+ *    y delegación de los clics de `[data-nav]` / `[data-go]` hacia `App.go`, que
+ *    navega por el router sin recargar;
+ *  - la reserva de ~72 px al pie en pantallas angostas, para que el FAB de ⌘J
+ *    del bundle no tape los últimos controles (`ToolHost.module.css`).
  *
  * Sin bundle que declare la vista, la ruta sigue mostrando «Próximamente» con el
  * nombre que la materia le dio en el rail, igual que en el Sprint 2.
@@ -22,12 +27,13 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useSubjectCtx } from "../context";
 import { ComingSoon, ErrorCard } from "../components/States";
+import { PALETTE_EVENT } from "./runtime";
 import css from "./ToolHost.module.css";
 
 type Status = "idle" | "loading" | "ready" | "failed";
 
 export function ToolHost() {
-  const { model, runtime } = useSubjectCtx();
+  const { model, runtime, openSearch } = useSubjectCtx();
   const { tool = "" } = useParams();
   const [params] = useSearchParams();
   const arg = params.get("arg") ?? undefined;
@@ -92,11 +98,15 @@ export function ToolHost() {
       return;
     }
 
+    /* Se ata ANTES de dibujar: una vista puede llamar a `App.$` mientras se
+       monta, y tiene que ver su propio contenedor y no el documento entero. */
+    const unbindView = rt.bindView(host);
     const watch = rt.watchRedraw();
     let cleanup: void | (() => void);
     try {
       cleanup = fn(host, arg);
     } catch (cause) {
+      unbindView();
       watch.release();
       host.replaceChildren();
       setStatus("failed");
@@ -113,6 +123,7 @@ export function ToolHost() {
 
     return () => {
       off();
+      unbindView();
       watch.release();
       if (typeof cleanup === "function") {
         try {
@@ -127,6 +138,15 @@ export function ToolHost() {
 
   /* Las migas que pidió la vista son suyas: se borran al dejarla. */
   useEffect(() => () => runtimeRef.current.clearCrumbs(), [tool]);
+
+  /* `App.openPalette()` del bundle (S-16). El runtime no conoce el shell, así
+     que pide la paleta con un evento; el host, que sí tiene `openSearch` del
+     contexto de la materia, lo atiende mientras hay una herramienta abierta. */
+  useEffect(() => {
+    const onPalette = () => openSearch();
+    window.addEventListener(PALETTE_EVENT, onPalette);
+    return () => window.removeEventListener(PALETTE_EVENT, onPalette);
+  }, [openSearch]);
 
   /* ---------- estados ------------------------------------------------------- */
   if (!info || !view) {

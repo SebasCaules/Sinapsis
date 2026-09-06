@@ -32,6 +32,18 @@ export interface RuntimeModule {
   uninstallRuntime(): void;
 }
 
+/**
+ * Nombre del evento con el que el runtime pide que se abra la paleta ⌘K
+ * (`App.openPalette()`), cuando el host no le pasó un `openPalette` propio.
+ *
+ * Está escrito literalmente y NO importado de `@sinapsis/runtime` a propósito:
+ * importar un valor del paquete acá lo traería al trozo principal y echaría a
+ * perder la carga diferida, que es la razón de ser de este módulo. La
+ * definición canónica vive en `packages/runtime/src/compat.ts` (`PALETTE_EVENT`)
+ * y las dos tienen que decir lo mismo.
+ */
+export const PALETTE_EVENT = "sinapsis:palette";
+
 let modulePromise: Promise<RuntimeModule | null> | null = null;
 
 /** Carga el paquete una sola vez; null si no se pudo. */

@@ -112,7 +112,16 @@ export function ReaderView() {
     if (!article.querySelector("figure[data-fig] > .fig-host")) return;
     const rt = runtimeRef.current;
     rt.mountFigures(article);
+    /* Cambio de tema: las figuras RESUELVEN los colores al dibujar (`cssVar`
+       devuelve el valor del token, no la referencia), así que un tema nuevo las
+       deja con la paleta vieja hasta que se vuelva a entrar en la página.
+       Volver a montarlas las redibuja conservando su estado interactivo, que el
+       motor guarda en el hueco y no en los nodos. */
+    const offTheme = rt.onThemeChange(() => {
+      if (article.isConnected) rt.mountFigures(article);
+    });
     return () => {
+      offTheme();
       rt.unmountFigures(article);
     };
   }, [detail, pageSlug, hasFigures]);

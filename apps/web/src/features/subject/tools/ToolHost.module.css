@@ -16,6 +16,17 @@
   .frame { padding: 18px 16px 32px; }
 }
 
+/* Reserva inferior en pantallas angostas (pedido 7 de P4). El baseline la daba
+   con `#main { padding-bottom: 72px }` en `lookup.css`, regla que quedó muerta
+   al acotar el CSS del bundle a `.sinapsis-tool`: el FAB de ⌘J es
+   `position: fixed` y sin este aire tapa los últimos controles de la vista.
+   Va en el host y no en el bundle porque el hueco es del contenedor, no del
+   contenido. */
+@media (max-width: 720px) {
+  .frame { padding-bottom: calc(32px + 72px); }
+  .frame[data-layout="full"] { padding-bottom: calc(28px + 72px); }
+}
+
 /* La clase con la que están escritos los estilos de los bundles: global a
    propósito (los scripts de la materia no conocen los módulos CSS). */
 :global(.sinapsis-tool) {

@@ -15,5 +15,13 @@
   text-transform: uppercase;
   animation: pulse 1.6s ease-in-out infinite;
 }
+/* El aviso de reconexión (S-15) es una frase, no un rótulo: sin versalitas ni
+   interletrado, para que se lea como lo que es. */
+.reconnect {
+  text-transform: none;
+  letter-spacing: .01em;
+  font: 500 12.5px var(--font-ui);
+  color: var(--text-2);
+}
 @keyframes pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .text { animation: none; } }

@@ -58,6 +58,16 @@ export interface SubjectContext {
   setCrumbs?(items: Crumb[]): void;
   /** Re-render de la vista actual (compat: `App.render()`). */
   render?(): void;
+  /**
+   * ¿Está abierta la paleta ⌘K del shell? (compat: `App.paletteOpen()`). Si el
+   * host no la provee, el runtime mira `[data-palette-open]` en el documento.
+   */
+  paletteOpen?(): boolean;
+  /**
+   * Abre la paleta ⌘K del shell (compat: `App.openPalette()`). Si el host no la
+   * provee, el runtime despacha `PALETTE_EVENT` en `window`.
+   */
+  openPalette?(): void;
 }
 
 /** KaTeX del baseline: `A.katex(tex, display)` y, además, la API de la librería. */
@@ -99,6 +109,23 @@ export interface RuntimeApp extends CompatApp {
   shuffle<T>(a: T[]): T[];
   /** Igual que `M`, pero con la superficie numérica tipada. */
   MathLib: MathLib;
+
+  /* --- atajos del baseline que el contrato todavía no nombra (S-16) --------
+     `$` y `$$` son `querySelector`/`querySelectorAll` ACOTADOS al contenedor de
+     la vista montada (el que ata `bindView`). Sin vista montada —o si el
+     contenedor ya se desmontó— caen en `document`, que es lo que hacía el
+     baseline. Una vista que cuelgue marcado de `document.body` (la burbuja ⌘J
+     de `lookup.js`, por ejemplo) tiene que pasar su raíz a mano. */
+  $(sel: string, root?: ParentNode | null): HTMLElement | null;
+  $$(sel: string, root?: ParentNode | null): HTMLElement[];
+  /**
+   * ¿Está abierta la paleta ⌘K del shell? Es una PREGUNTA, no una orden: así la
+   * usa `lookup.js` (Escape cierra su burbuja solo si la paleta no está
+   * abierta). Para abrirla está `openPalette()`.
+   */
+  paletteOpen(): boolean;
+  /** Abre la paleta ⌘K del shell. */
+  openPalette(): void;
 }
 
 /** Lo que devuelve `createCompatApp`: el `App` y el mando para actualizarlo. */
@@ -110,8 +137,19 @@ export interface CompatHandle {
   context(): SubjectContext;
   /** Fija el tema y dispara el redibujo registrado con `setRedraw`. */
   setTheme(theme: ThemeId): void;
+  /** Contenedor de la vista montada: ámbito de `App.$` y `App.$$`. */
+  setViewRoot(el: HTMLElement | null): void;
+  viewRoot(): HTMLElement | null;
   markdown: MarkdownApi;
 }
+
+/**
+ * Evento con el que el runtime le pide al shell que abra la paleta ⌘K cuando el
+ * host no le pasó un `openPalette` propio. El shell de la plataforma tiene que
+ * escucharlo en `window`; mientras no lo escuche, `App.openPalette()` no hace
+ * nada visible (degradación aceptable: la paleta se abre igual con ⌘K).
+ */
+export const PALETTE_EVENT = "sinapsis:palette";
 
 // ---------------------------------------------------------------------------
 // Helpers de formato (port del baseline)
@@ -267,6 +305,22 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
 
   let redrawFn: (() => void) | null = null;
 
+  /* Contenedor de la vista montada (lo ata `bindView` desde el host). Es el
+     ámbito de `App.$` y `App.$$`. */
+  let root: HTMLElement | null = null;
+  const doc = (): ParentNode | null => (typeof document === "undefined" ? null : document);
+  /**
+   * Dónde buscar: la raíz explícita, si la hay; si no, el contenedor de la
+   * vista SIEMPRE QUE siga en el documento —un contenedor ya desmontado no
+   * puede devolver nada útil, y dejarlo puesto era la forma de que una vista
+   * vieja siguiera «encontrando» sus nodos—; si no, el documento.
+   */
+  const scope = (explicit?: ParentNode | null): ParentNode | null => {
+    if (explicit) return explicit;
+    if (root && root.isConnected) return root;
+    return doc();
+  };
+
   const d = derive(ctx);
 
   const app = {
@@ -334,6 +388,33 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     withAlpha,
     shuffle,
 
+    // --- consulta del DOM (S-16) ---
+    $(sel: string, explicit?: ParentNode | null): HTMLElement | null {
+      const where = scope(explicit);
+      return where ? where.querySelector<HTMLElement>(sel) : null;
+    },
+    $$(sel: string, explicit?: ParentNode | null): HTMLElement[] {
+      const where = scope(explicit);
+      return where ? Array.prototype.slice.call(where.querySelectorAll<HTMLElement>(sel)) : [];
+    },
+
+    // --- paleta ⌘K del shell (S-16) ---
+    paletteOpen(): boolean {
+      if (typeof ctx.paletteOpen === "function") return !!ctx.paletteOpen();
+      /* Sin gancho del host: la marca que el shell puede dejar en la raíz. Es
+         el mismo camino que ya prueba `lookup.js` por su cuenta. */
+      const document_ = doc() as Document | null;
+      return !!document_?.querySelector("[data-palette-open]");
+    },
+    openPalette(): void {
+      if (typeof ctx.openPalette === "function") {
+        ctx.openPalette();
+        return;
+      }
+      if (typeof window === "undefined" || typeof CustomEvent !== "function") return;
+      window.dispatchEvent(new CustomEvent(PALETTE_EVENT));
+    },
+
     // --- registro de vistas y acciones ---
     VIEWS: {} as Record<string, ViewFn>,
     ACTIONS: {} as Record<string, (el: HTMLElement, ev: Event) => void>,
@@ -396,7 +477,11 @@ export function createCompatApp(initial: SubjectContext): CompatHandle {
     app.redraw();
   }
 
-  return { app, setContext, context: () => ctx, setTheme, markdown };
+  function setViewRoot(el: HTMLElement | null): void {
+    root = el;
+  }
+
+  return { app, setContext, context: () => ctx, setTheme, setViewRoot, viewRoot: () => root, markdown };
 }
 
 /** División efectiva de una página, con el criterio del contrato. */
