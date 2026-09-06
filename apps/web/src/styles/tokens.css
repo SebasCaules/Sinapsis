@@ -96,6 +96,7 @@
   --text:#231c12; --text-2:#574b37; --text-3:#6a6150;
   --border:#ddd2bb; --border-2:#c9bca0;
   --track:#968769;   /* pista de progreso, propia de --border-2: 3.24:1 sobre --surface */
+  --scroll-thumb:rgba(74,62,42,.34); --scroll-thumb-hover:rgba(74,62,42,.58); /* barras de desplazamiento propias */
   --ink-mix:68%;     /* cuánto color de unidad sobrevive en la TINTA (ver --uink) */
   --accent-ink:#755c24; --ueval-ink:#74571c; --umeta-ink:#6a6152; --warn-ink:#75521b; --good-ink:#365c33;
   --primary:#7c2230; --primary-2:#641a26; --primary-soft:#f1e0db; --primary-ring:rgba(124,34,48,.26);
@@ -150,6 +151,7 @@
   --text:#1b2117; --text-2:#3f4a38; --text-3:#606751;
   --border:#d8dac1; --border-2:#c2c5a5;
   --track:#8a8d6c;   /* pista de progreso, propia de --border-2: 3.17:1 sobre --surface */
+  --scroll-thumb:rgba(52,64,48,.34); --scroll-thumb-hover:rgba(52,64,48,.58);
   --ink-mix:68%;
   --accent-ink:#735e26; --ueval-ink:#66531d; --umeta-ink:#5f5f4d; --warn-ink:#73531c; --good-ink:#335e35;
   --primary:#1f4d39; --primary-2:#163b2c; --primary-soft:#dde9df; --primary-ring:rgba(31,77,57,.24);
@@ -205,6 +207,7 @@
   --text:#ece2cd; --text-2:#bcae93; --text-3:#a1957b;
   --border:#322a1a; --border-2:#443a25;
   --track:#786a4b;   /* pista de progreso, propia de --border-2: 3.30:1 sobre --surface */
+  --scroll-thumb:rgba(200,180,140,.30); --scroll-thumb-hover:rgba(200,180,140,.55);
   /* en el tema oscuro los colores de unidad ya contrastan: la tinta es casi el
      mismo color (el 8 % de --text solo levanta el azul y el rosa) */
   --ink-mix:92%;

@@ -81,3 +81,23 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   :root input[type="range"]::-webkit-slider-thumb { transition: none; }
 }
+
+/* ---------- barras de desplazamiento ----------
+   Barras propias en toda la plataforma (contenedor principal, índice, columna
+   del lector, paleta, herramientas): finas, sin pista visible, con el pulgar
+   redondeado en el tono del tema y más presente al pasar el puntero. */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) transparent;
+}
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: var(--scroll-thumb);
+  border-radius: 999px;
+  border: 3px solid transparent; /* aire alrededor del pulgar: la barra se ve de 5 px */
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--scroll-thumb-hover); }
+::-webkit-scrollbar-thumb:active { background-color: var(--scroll-thumb-hover); }
