@@ -165,7 +165,7 @@ Iniciado el 2026-09-06 en autopilot; decisiones N0-40… en `docs/DECISIONS.md`.
 | S3-05 bundle Proba | DONE | | 22 archivos, 912 kB, 5 vistas, 92 figuras |
 | S3-06 web ToolHost/figuras/tracks/dueCount/grafo | DONE | | 217 tests web |
 | S3-07 /sinapsis-review + propuesta de prueba | DOING | 5752f5d | Q5: flujo feliz + 5 casos negativos en un clon, 11 fricciones corregidas (43 tests CLI); falta la propuesta real con el árbol limpio (la hace el orquestador al cierre) |
-| S3-08 E2E + diseño + fidelidad | DOING | | ola 2 · E5, F5, D5; N0-47 (páginas truncadas por `$$`) hallado en el smoke del orquestador |
+| S3-08 E2E + diseño + fidelidad | DOING | 48e78c4 | E5: 60 E2E (13 nuevas) · F5 y D5 en curso; N0-47 (páginas truncadas por `$$`) hallado en el smoke del orquestador |
 | S3-09 auditoría | TODO | | ola 3 |
 | S3-10 contratos consolidados + handoff | TODO | | cierre |
 
