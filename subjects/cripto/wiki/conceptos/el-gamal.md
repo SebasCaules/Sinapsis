@@ -76,15 +76,3 @@ Descifrado de $c=(1430,697)$:
 $$1430^{-1751}\cdot 697 \bmod 2357 = 2035 \quad\checkmark$$
 
 Las tres cuentas cierran exactamente como las escribe la filmina 31 — verificado con aritmética modular, no solo leído del PDF.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#9. El Gamal|Clase 04 — Criptografía asimétrica y firma digital § 9. El Gamal]]
-- [[diffie-hellman|Diffie-Hellman]] — el protocolo del que El Gamal es una aplicación directa
-- [[criptosistema-asimetrico|Criptosistema asimétrico]] — la terna genérica y la prueba `Eav` que este esquema satisface
-- [[rsa|RSA]] — la otra construcción asimétrica de la clase, determinística y sin esta máscara
-- [[pkcs1-y-tamano-de-claves|PKCS#1 y tamaño de claves]] — el parche que `RSA` necesita y que El Gamal no
-- [[costo-del-cifrado-asimetrico|Costo del cifrado asimétrico]] — por qué el tamaño de $q$ recomendado depende de qué tipo de grupo es $G$
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — la estructura de $\mathbb{Z}_q^{*}$ y qué es un generador
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — la exponenciación modular sobre la que corre todo el ejemplo
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — la familia de la que `Eav`/`CPA` en clave pública es una variante

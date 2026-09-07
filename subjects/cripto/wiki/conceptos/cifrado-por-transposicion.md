@@ -72,11 +72,3 @@ Componer transposición con un [[cifrado-por-rotacion|cifrado por rotación]] es
 así que el histograma del criptograma final es el del castellano **rotado** — la capa de transposición no lo afecta. Eso permite recuperar la rotación primero, por frecuencias, y sólo después atacar la permutación. El costo del ataque combinado es la **suma**, no el producto, de los dos espacios.
 
 > Esta idea —que combinar dos operaciones no basta si el criptoanalista puede separarlas— reaparece en la criptografía moderna: las redes de sustitución-permutación (SPN) alternan ambas capas **muchas veces** justamente para impedir esa separación. Ver Clase 2 (cifrado en bloque).
-
-## Ver también
-
-- [[cifrado-de-sustitucion-monoalfabetica|Cifrado de sustitución monoalfabética]] — la familia complementaria
-- [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]]
-- [[indice-de-coincidencia|Índice de coincidencia]] — la medida que da alto en las dos familias que preservan el histograma
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el árbol donde es rama hermana de Sustitución
-- [[guia-01-criptografia-clasica|Guía 1 — Ej. 5 y Ej. 7]]

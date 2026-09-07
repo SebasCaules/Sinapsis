@@ -48,12 +48,3 @@ Esto conecta directo con el trade-off que ya apareció en [[analisis-de-puntos-d
 ## Dónde encaja esto en la arquitectura del caso de estudio
 
 *(Lectura nuestra.)* La cátedra no da, en estas dos filminas, ejemplos de producto ni de firma de ataque concreta —queda deliberadamente en el nivel de arquitectura—, pero el rol de `IDS`/`IPS` ya estaba anticipado en la sección anterior: son la herramienta detrás de "registrar ataques" (firewall externo) y "tener interés particular en los ataques" ([[analisis-de-puntos-de-entrada#En la DMZ|DMZ]]). El `IDS` es lo que permite **saber** qué pasó en cada capa; el `IPS` es lo que convierte esa detección en una respuesta automática en el firewall, en vez de en un log que alguien revisa después.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#10. Detección y prevención de intrusiones (filminas 32-33)|Clase 10 — Seguridad en la empresa: sección 10]]
-- [[analisis-de-puntos-de-entrada|Análisis de puntos de entrada]] — la premisa ("puede haber un ataque exitoso") y los cuatro recaudos generales que anticipan esta nota
-- [[servicios-de-soporte-dns-log-y-proxy|Servicios de soporte: DNS, log y proxy]] — el Log Server, insumo de todo análisis de eventos
-- [[firewalls|Firewalls]] — el mecanismo (bloqueo en el firewall) que ejecuta la acción de un `IPS`
-- [[variaciones-de-la-arquitectura|Variaciones de la arquitectura]]
-- [[videografia|Videografía]] — ningún video de la cátedra cubre esta clase, confirmado ahí

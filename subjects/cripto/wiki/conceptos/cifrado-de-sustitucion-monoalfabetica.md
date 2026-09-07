@@ -8,7 +8,7 @@ unidad: 1
 clase: 1
 orden: 5
 created: 2026-08-10
-updated: 2026-08-24
+updated: 2026-09-06
 tags: [criptografia-clasica, sustitucion, monoalfabetica, clase-01, practica-01, guia-01]
 sources: [Clase 01, Práctica 01, Guía 1 Ej. 1, Guía 1 Ej. 2, Guía 1 Ej. 8]
 ---
@@ -79,15 +79,5 @@ Bajo [[modelos-de-ataque|CPA]] el esquema se quiebra de forma **total y trivial*
 
 ### Composición
 
-Componer dos sustituciones simples **no agrega seguridad**: el conjunto de claves es un **grupo** bajo composición ($S_n$), así que $\pi_2 \circ \pi_1$ es otra permutación del mismo espacio. Es el Ej. 2 de la [[guia-01-criptografia-clasica|Guía 1]] — el enunciado está capturado en la [[guia-01-resolucion|resolución]], y este argumento del grupo $S_n$ es la respuesta.
+Componer dos sustituciones simples **no agrega seguridad**: el conjunto de claves es un **grupo** bajo composición ($S_n$), así que $\pi_2 \circ \pi_1$ es otra permutación del mismo espacio. Es el Ej. 2 de la [[guia-01-criptografia-clasica|Guía 1]] — el enunciado está capturado en su [[guia-01-criptografia-clasica#Ejercicio 2|resolución]], y este argumento del grupo $S_n$ es la respuesta.
 
----
-
-## Ver también
-
-- [[cifrado-por-rotacion|Cifrado por rotación]] — el caso particular
-- [[cifrado-de-vigenere|Cifrado de Vigenère]] — la respuesta polialfabética a esta debilidad
-- [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]]
-- [[modelos-de-ataque|Modelos de ataque]]
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el árbol que la clasifica y le anota las dos debilidades
-- [[guia-01-criptografia-clasica|Guía 1 — Criptografía Clásica]] · [[guia-01-resolucion|Resolución]]

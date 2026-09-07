@@ -8,7 +8,7 @@ unidad: 1
 clase: 3
 orden: 12
 created: 2026-08-28
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, integridad, mac, cifrado-autenticado, encrypt-then-mac, clase-03]
 sources: ["Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "raw/practicas/Clase 4.pdf"]
 ---
@@ -159,7 +159,7 @@ El único protocolo real que la cátedra nombra en este bloque es **`SSH`**, y l
 > [!quote]- De la transcripción — SSH como ejemplo de la segunda forma (cues pt2 700-707)
 > entre ellas una muy importante que es [SSH], el shell remoto que usamos para administrar servidores. El protocolo [SSH] utiliza el mecanismo del medio. Sí, lo utilizas de forma segura. […] tiene un montón de contramedidas para garantizarse que, incluso sin una prueba de seguridad de esto, todas las debilidades conocidas[,] esta estructura[,] [estuvieran] mitigadas. entonces es seguro. Digo, lo utilizamos para administrar prácticamente todos los servidores del mundo […] Si estuviésemos diseñando [SSH] hoy desde 0, seguro utilizaríamos el tercer mecanismo. Y el tercer mecanismo es el que se utiliza en los protocolos más modernos.
 
-**La discrepancia** *(precisión nuestra; conocimiento externo a la bibliografía del vault salvo donde se cita a Katz & Lindell).* El protocolo cuyo caso canónico es *authenticate-then-encrypt* no es `SSH` sino **`SSL`/`TLS` hasta la versión 1.2**, y eso sí está en la bibliografía: Katz & Lindell lo dice con todas las letras al describir la capa de registro —*"TLS 1.2 uses an authenticate-then-encrypt approach"*, §12.8— y remite justamente a la sección donde explica por qué ese enfoque es problemático. El transporte clásico de `SSH`, en cambio, calcula el MAC **sobre el texto plano** y lo transmite **al lado** del paquete cifrado: eso es `Encrypt-and-MAC`, o sea la **primera** forma, la que la filmina tacha.
+**La discrepancia** *(precisión nuestra; conocimiento externo a la bibliografía del vault salvo donde se cita a Katz & Lindell).* El protocolo cuyo caso canónico es *authenticate-then-encrypt* no es `SSH` sino **`SSL`/`TLS` hasta la versión 1.2** (RFC 5246), y eso sí está en la bibliografía: Katz & Lindell lo dice con todas las letras al describir la capa de registro —*"TLS 1.2 uses an authenticate-then-encrypt approach"*, §12.8— y remite justamente a la sección donde explica por qué ese enfoque es problemático. El transporte clásico de `SSH` (RFC 4253), en cambio, calcula el MAC **sobre el texto plano** y lo transmite **al lado** del paquete cifrado: eso es `Encrypt-and-MAC`, o sea la **primera** forma, la que la filmina tacha.
 
 **Lo notable es que la conclusión del docente sobrevive a las dos lecturas, y con la segunda queda incluso más fuerte:**
 
@@ -244,19 +244,3 @@ Con `Encrypt-then-MAC` esa clase de ataque **no existe**: el criptograma manipul
 - **Dos claves independientes**, siempre, salvo que haya una prueba que diga lo contrario. El ejercicio de la filmina 18 muestra el precio de olvidarlo **con el orden correcto y componentes seguros**.
 - La razón por la que hoy gana la tercera no es sólo la demostración: es la **[[agilidad-criptografica|agilidad criptográfica]]** — permite jubilar el MAC obsoleto sin rehacer la prueba del sistema entero.
 - La regla mnemotécnica que resume todo: **autenticar lo que se transmite, no lo que se guardó** — o sea, el MAC va sobre $c$, porque $c$ es lo que el adversario puede tocar.
-
-## Ver también
-
-- [[cifrado-autenticado|Cifrado autenticado]] — `Encrypt-then-MAC` escrito como criptosistema, y el teorema de que el resultado es CCA-Secure
-- [[ccm-y-gcm|CCM y GCM]] — los dos modos reales: uno de cada orden, y por qué cada uno se salva
-- [[agilidad-criptografica|Agilidad criptográfica]] — la razón de ingeniería por la que se favorece la tercera forma
-- [[maleabilidad|Maleabilidad]] — el problema que abre la clase y que esta nota empieza a cerrar
-- [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — el modelo en el que se mide todo esto
-- [[message-authentication-code|Message Authentication Code]] y [[seguridad-de-un-mac|Seguridad de un MAC]] — qué garantiza y qué no garantiza la pieza que se está combinando
-- [[cbc-mac|CBC-MAC]] — el MAC determinístico del que sale el ejemplo de las dos claves iguales
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `CPA`, y por qué determinístico implica inseguro
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — `CBC` y su padding, que es donde muerde el oráculo
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — dónde aterriza el criterio de reemplazabilidad
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la sesión del 03/09, cues pt2 640-718
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — las filminas 16, 17 y 18, que son las que corrigen y ponen a prueba este cuadro
-- Katz & Lindell cap. 4 *Message Authentication Codes*, §4.5.2 ([[bibliografia|bibliografía]])

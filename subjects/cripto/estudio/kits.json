@@ -16,9 +16,9 @@
       "clase-03-macs-y-cifrado-autenticado",
       "clase-04-criptografia-asimetrica-y-firma-digital",
       "clase-05-protocolos-criptograficos",
-      "guia-01-resolucion",
-      "guia-02-resolucion",
-      "guia-03-resolucion",
+      "guia-01-criptografia-clasica",
+      "guia-02-criptografia-simetrica",
+      "guia-03-mac-y-funciones-de-hash",
       "parciales-viejos"
     ],
     "decks": [

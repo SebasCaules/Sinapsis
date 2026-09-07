@@ -8,7 +8,7 @@ unidad: 2
 clase: 9
 orden: 9
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, flujo-de-informacion, aislacion, maquinas-virtuales, sandbox, confinamiento, bloque-2, clase-09, sin-dictar]
 sources: ["Clase 10 - Aplicaciones - Flujo de informacion.pdf"]
 ---
@@ -17,7 +17,7 @@ sources: ["Clase 10 - Aplicaciones - Flujo de informacion.pdf"]
 
 **Las dos respuestas prácticas de la cátedra a un problema —el [[problema-del-confinamiento|confinamiento]]— que en su forma total no tiene solución: máquinas virtuales y sandboxes, que no eliminan los canales ocultos pero reducen drásticamente la superficie que un proceso puede tocar.** El criterio que las separa no es cuál es "mejor", sino cuál de las dos exige tocar el sistema para funcionar.
 
-Cubre las filminas **24 a 26** del deck `Clase 10 - Aplicaciones - Flujo de informacion.pdf`. La clase todavía no se dictó —hoy es 04/09/2026—, así que esta nota está escrita sólo contra el PDF; lo que no sale literal de la filmina va marcado como *(lectura nuestra)*.
+Cubre las filminas **24 a 27** del deck `Clase 10 - Aplicaciones - Flujo de informacion.pdf` —las tres de aislación más la de cierre del deck—. La clase todavía no se dictó —hoy es 04/09/2026—, así que esta nota está escrita sólo contra el PDF; lo que no sale literal de la filmina va marcado como *(lectura nuestra)*.
 
 ## Dos caminos para el mismo problema
 
@@ -41,7 +41,7 @@ Es la misma maquinaria conceptual de una matriz de control de acceso —sujetos,
 
 **Ejemplos de la filmina:** `KVM`, `VMware`, `qemu`, `CCS64`, `Mame`, y la *Java virtual machine*.
 
-> **Errata de la filmina:** bajo "El núcleo de la máquina virtual se convierte en el agente que provee seguridad" la filmina 25 escribe *"Los objetos son son los recursos"*, con la palabra *son* duplicada. Es un error tipográfico trivial, verificado sobre la página renderizada a 150 dpi —no un artefacto de `pdftotext`— y no afecta el contenido: la lectura correcta es *"los objetos son los recursos"*. La misma errata ya está señalada desde la [[clase-09-flujo-de-informacion#9. Métodos de aislación|Clase 09]]; se repite acá porque cae exactamente en el rango de filminas de esta nota.
+> **Errata de la filmina:** bajo "El núcleo de la máquina virtual se convierte en el agente que provee seguridad" la filmina 25 escribe *"Los objetos son son los recursos"*, con la palabra *son* duplicada. Es un error tipográfico trivial, verificado sobre la página renderizada a 150 dpi —no un artefacto de `pdftotext`— y no afecta el contenido: la lectura correcta es *"los objetos son los recursos"*. Es la única errata de contenido de todo el deck, y cae exactamente en el rango de filminas de esta nota.
 
 ## Sandboxes
 
@@ -60,11 +60,10 @@ Es la misma maquinaria conceptual de una matriz de control de acceso —sujetos,
 
 *(Lectura nuestra: no está en la filmina, pero es la trampa clásica del ejemplo de sandbox que sí trae.)* `chroot` cambia el directorio raíz que un proceso ve, y por eso se lo presenta como sandbox de "se modifica el ambiente" —el kernel intercepta las rutas del proceso y las reescribe respecto de una nueva raíz—. Pero **no es una frontera de seguridad completa**: un proceso que corre dentro de un `chroot` con privilegios de superusuario puede, en general, escapar de él —por ejemplo, creando un nodo de dispositivo que le da acceso directo al disco físico por fuera del árbol de archivos confinado, o abriendo un descriptor de archivo a un directorio *fuera* del `chroot` antes de encerrarse y usándolo después para moverse hacia arriba—. Por eso las herramientas modernas de aislación de procesos —contenedores como los que usan `namespaces` y `cgroups` de Linux— tratan a `chroot` como una pieza más de un mecanismo compuesto, nunca como la aislación completa por sí sola. Es el mismo problema, en miniatura, que el [[problema-del-confinamiento|problema del confinamiento]] plantea en general: un mecanismo que restringe **la mayoría** de los caminos de fuga no restringe, por eso mismo, **todos**.
 
-## Ver también
+## La lectura recomendada con la que cierra el deck
 
-- [[clase-09-flujo-de-informacion#9. Métodos de aislación|Clase 09 — Flujo de información]] — la sección de la que cuelga esta nota
-- [[problema-del-confinamiento|Problema del confinamiento]] — el problema que estos dos métodos mitigan sin resolver del todo
-- [[canales-ocultos-y-side-channels|Canales ocultos y side channels]] — por qué ninguno de los dos métodos elimina el canal oculto de CPU o memoria compartida
-- [[video-11-flujo-de-informacion#Métodos de aislación: máquinas virtuales y sandboxes|Video 11 — Flujo de información]] — la misma tabla, con la observación de que los sandboxes son comunes en los sistemas operativos de celulares
-- [[video-07-principios-de-diseno-2024#7. Mecanismos exclusivos|Video 07 — Principios de diseño (2024)]] — el mismo par (VMs y sandboxing) presentado como principio de diseño, con el ejemplo del sandbox de iOS y su área de archivos exclusiva por proceso
-- [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|Bibliografía]] — la lectura recomendada de la filmina 27: Bishop, caps. 16-1 y 17
+**Filmina 27.** El deck termina, como los otros seis de las Clases 4 a 10, con una filmina de *Lectura Recomendada*: capítulo **16-1** y capítulo **17** de *Computer Security: Art and Science*, de Matt Bishop.
+
+*(Precisión nuestra.)* La [[bibliografia#El desfasaje de numeración de Bishop: qué edición, si es sistemático, y la lectura correcta|tabla de bibliografía del vault]], armada capítulo por capítulo contra el propio PDF de Bishop, mapea el **capítulo 17** (*Information Flow*) y el **capítulo 18** (*Confinement Problem*) a esta misma clase y a la Guía 8 — que es exactamente el contenido de este deck, mientras que el capítulo 16 de esa edición (*Access Control Mechanisms*) pertenece a la clase de control de acceso. Es una instancia más del **desfasaje de +1** que esa bibliografía documenta en cuatro decks distintos: las filminas retienen la numeración de una edición anterior de Bishop, así que la lectura hay que buscarla por **título de capítulo** y no por número.
+
+Queda un cabo suelto que no se puede cerrar con las fuentes disponibles: si *"capítulo 16-1"* nombra una **sección** puntual (§16.1) o el capítulo entero. No hay forma de confirmarlo sin ver la edición que la filmina cita, así que se deja constancia de la lectura tal como aparece escrita y de la referencia cruzada del vault, sin resolver la ambigüedad.

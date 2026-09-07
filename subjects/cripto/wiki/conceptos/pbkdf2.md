@@ -8,7 +8,7 @@ unidad: 2
 clase: 7
 orden: 8
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, autenticacion, pbkdf2, kdf, prf, salting, clase-07, sin-dictar]
 sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 ---
@@ -37,7 +37,7 @@ $$K = \mathrm{PBKDF2}(\mathrm{prf}, \mathit{pass}, \mathit{salt}, c, \mathit{len
 
 $$T_j = u_1 \oplus u_2 \oplus \cdots \oplus u_j, \qquad U_1 = \mathrm{PRF}(\mathit{pass}, \mathit{salt}\,\Vert\, j), \qquad U_k = \mathrm{PRF}(\mathit{pass}, u_{k-1})$$
 
-> **Errata de la filmina** *(ya señalada en la [[clase-07-autenticacion#8. PBKDF2|Clase 07]]).* El renglón $K = T_1 \Vert T_2 \Vert T_i$ usa una letra $i$ que no aparece en ningún otro lado de la lámina; la línea siguiente ya define $T_j$, y $U_1$ concatena la sal también con $j$. Arriba va con $j$ en las tres apariciones, que es la letra consistente con el resto de la fórmula.
+> **Errata de la filmina** *(ya señalada en la [[clase-07-autenticacion#Estado de las fuentes|Clase 07 § Estado de las fuentes]]).* El renglón $K = T_1 \Vert T_2 \Vert T_i$ usa una letra $i$ que no aparece en ningún otro lado de la lámina; la línea siguiente ya define $T_j$, y $U_1$ concatena la sal también con $j$. Arriba va con $j$ en las tres apariciones, que es la letra consistente con el resto de la fórmula.
 
 ### Lo que la filmina no distingue: dos roles distintos para la misma letra
 
@@ -56,13 +56,13 @@ donde $\mathrm{INT}_{32}(i)$ es $i$ codificado en 4 bytes big-endian, y el últi
 
 ## Por qué iterar sube el costo por intento
 
-Cada evaluación de $\mathrm{PRF}$ es una operación más que un atacante offline tiene que pagar por cada candidata que prueba. Subir $c$ **no cambia la seguridad de $\mathrm{PRF}$**: sigue siendo la misma función, con las mismas garantías. Lo que cambia es el **costo por intento**, y ese costo es exactamente el $G$ —pruebas por segundo— de la [[clase-07-autenticacion#La fórmula de Anderson|fórmula de Anderson]]:
+Cada evaluación de $\mathrm{PRF}$ es una operación más que un atacante offline tiene que pagar por cada candidata que prueba. Subir $c$ **no cambia la seguridad de $\mathrm{PRF}$**: sigue siendo la misma función, con las mismas garantías. Lo que cambia es el **costo por intento**, y ese costo es exactamente el $G$ —pruebas por segundo— de la [[complejidad-y-espacio-de-claves#La fórmula de Anderson|fórmula de Anderson]]:
 
 $$P \ge \frac{T \cdot G}{N}, \qquad G_{\mathrm{PBKDF2}} = \frac{G_{\text{sin KDF}}}{c}$$
 
 ### La cuenta, sobre el propio Ejemplo 1 de la clase
 
-**Ejemplo nuestro, reusando los parámetros exactos del [[clase-07-autenticacion#Ejemplo 1 — cuánto tarda un ataque (filmina 33)|Ejemplo 1]] de la clase** para que la comparación sea directa. Como en los tres ejemplos del deck, la desigualdad se usa acá como **igualdad de estimación** —se reemplaza y se saca un número— y no como la cota que el signo declara *(lectura nuestra)*. Ese ejemplo tenía $N = 10^{10}$ y $G = 10^{4}$ pruebas/segundo, y con $T = 500\,000$ s ($\approx 5{,}79$ días) llegaba a $P = 0{,}5$.
+**Ejemplo nuestro, reusando los parámetros exactos del [[complejidad-y-espacio-de-claves#Ejemplo 1 — cuánto tarda un ataque|Ejemplo 1]] de la clase** para que la comparación sea directa. Como en los tres ejemplos del deck, la desigualdad se usa acá como **igualdad de estimación** —se reemplaza y se saca un número— y no como la cota que el signo declara *(lectura nuestra)*. Ese ejemplo tenía $N = 10^{10}$ y $G = 10^{4}$ pruebas/segundo, y con $T = 500\,000$ s ($\approx 5{,}79$ días) llegaba a $P = 0{,}5$.
 
 Si esas mismas claves se protegieran con `PBKDF2` a $c = 100\,000$ iteraciones, cada prueba cuesta $10^5$ veces más, así que $G' = G/c = 10^{4}/10^{5} = 0{,}1$ pruebas por segundo. Manteniendo el **mismo** $T = 500\,000$ s:
 
@@ -89,14 +89,3 @@ byte[] key = skf.generateSecret(spec).getEncoded();
 ```
 
 *(Se preserva tal cual la filmina: es un fragmento de API de JCE, no una fórmula, y por eso queda en backticks en vez de LaTeX.)* La instanciación elegida es `HmacSHA1` — o sea, $\mathrm{PRF} = \mathrm{HMAC}\text{-}\mathrm{SHA1}$ con la clave dada por la propia contraseña. Es la instanciación real más común de la $\mathrm{PRF}$ genérica de la filmina 41: ver [[hmac#HMAC en la práctica|HMAC § HMAC en la práctica]] para cómo se arma esa construcción a partir de una función de hash.
-
-## Ver también
-
-- [[clase-07-autenticacion#8. PBKDF2|Clase 07 — Autenticación § 8. PBKDF2]] — la sección de la que cuelga esta nota
-- [[salting|Salting]] — de dónde sale la sal $S$ que esta construcción toma como entrada
-- [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] — la fórmula de Anderson y el Ejemplo 1 que esta nota reutiliza para la cuenta de costo
-- [[politicas-de-seleccion-y-expiracion-de-claves|Políticas de selección y expiración de claves]] — la otra vía para subir el costo de un ataque, actuando sobre el usuario en lugar de sobre el verificador
-- [[hmac|HMAC]] — la instanciación real de la $\mathrm{PRF}$ que usa el ejemplo de código
-- [[ataque-de-diccionario-sobre-hashes#Funciones deliberadamente lentas|Ataque de diccionario sobre hashes § Funciones deliberadamente lentas]] — dónde entra `PBKDF2` en la familia de KDFs lentas, y por qué `scrypt`/`Argon2` la superan contra hardware dedicado
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — qué es una función pseudoaleatoria, el ingrediente genérico de toda esta construcción
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — el ataque offline contra el que esta construcción sube el costo

@@ -204,18 +204,3 @@ Alice quiere que una **carta de recomendación** y una **carta de despido** teng
 **La clave es que el ataque del cumpleaños sólo necesita entradas distintas, no entradas aleatorias.** Nada obliga a que los mensajes sean basura: pueden ser $2^{64}$ documentos con sentido y con el contenido que el atacante quiera. Eso es lo que convierte una curiosidad combinatoria en una falsificación de firma.
 
 > **Y el escalón anterior, que es el slide 24.** Si hay $n+1$ mensajes y $n$ valores de salida, **existe** al menos una colisión: es el principio del palomar, y garantiza colisiones con $2^{\ell}+1$ entradas → [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]]. El cumpleaños es el refinamiento probabilístico de eso: no *garantiza* una colisión, pero la consigue con probabilidad $1/2$ usando la **raíz cuadrada** de las entradas. La distancia entre $2^{\ell}$ y $2^{\ell/2}$ es toda la diferencia entre "existe" y "la encuentro".
-
-## Ver también
-
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — las tres propiedades que acá se ponen a precio, y el juego `Hash-Coll`
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — la definición sobre la que se monta todo esto
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — qué salida tiene cada una y cuál está rota
-- [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — por qué la seguridad de la función entera se reduce a la de la función de compresión
-- [[hmac|HMAC]] — dónde entra la resistencia a colisiones como hipótesis de un teorema
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — el ataque en el que ninguno de estos exponentes aparece, porque el costo lo fija el tamaño del dominio
-- [[riesgo-y-seguridad-relativa|Riesgo y seguridad relativa]] — **la nota que hay que leer junto con ésta.** Un exponente no dice nada por sí solo: dice algo contra un escenario concreto. Es la razón por la que el docente sostiene que `MD5` está formalmente quebrada y que aun así sirve para verificar la lista de figuritas que faltan del álbum
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — seguro / debilitado / quebrado, el vocabulario para clasificar los $2^{80}$
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — la escala física de los exponentes
-- [[seguridad-computacional|Seguridad computacional]] — qué significa "computacionalmente imposible"
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-- Katz & Lindell §5.4 *Generic Attacks on Hash Functions* (ataque del cumpleaños y la variante de poco espacio) ([[bibliografia|bibliografía]])

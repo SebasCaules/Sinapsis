@@ -8,7 +8,7 @@ unidad: 1
 clase: 3
 orden: 2
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-09-06
 tags: [criptografia, cca, indistinguibilidad, juegos, integridad, flujo, clase-03]
 sources: ["Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "Clase 03pt1-Transcripcion.VTT"]
 ---
@@ -64,6 +64,8 @@ Es el mismo molde de las tres anteriores —dos mensajes, una moneda escondida, 
 > **Cuándo se puede consultar el oráculo de descifrado** *(lectura nuestra; la filmina no lo dice y el ejercicio depende de ello).* La filmina entrega los dos oráculos en el paso 2, o sea **antes** del desafío, y ahí podría leerse que después del paso 4 ya no se consulta nada. Sería una lectura equivocada, y la propia filmina lo delata: si las consultas terminaran antes del desafío, la restricción *"no puede calcular $g(c)$"* del paso 4 sería **vacía** —$c$ todavía no existe cuando se consulta—. Que la restricción tenga contenido implica que el acceso a $g$ **continúa después de recibir $c$**, que es la versión de Katz & Lindell y la que el ejercicio de abajo usa: todo el ataque consiste en una consulta de descifrado hecha **después** del desafío.
 
 > **Precisión sobre la escritura de la filmina** *(nuestra).* En el paso 5 escribe *"$A$ emite $b' = \{0,1\}$"* donde corresponde $b' \in \{0,1\}$ — el mismo desliz que ya está marcado en varias filminas de la [[clase-02-cifrado|Clase 02]]. Y el umbral lo escribe con $<$ donde la definición de Katz & Lindell usa $\le$; la diferencia es inocua. Lo que **sí** vale registrar es que acá el umbral está bien escrito —$\tfrac12 + \mathsf{neg}(n)$— mientras que dos filminas antes, en `CPA`, aparece como *"$= 0{,}5 + \varepsilon$"*: la comparación entre las dos láminas confirma que aquello es un desliz y no una convención de la cátedra.
+
+> **Y algo que parece una errata y no lo es: el nombre pegado al subíndice.** *(Artefacto de la extracción del PDF, verificación nuestra.)* Al copiar el texto de las filminas 3 y 11 con `pdftotext` el experimento sale como `CPAA,Π` y `CCAA,Π`, y da la impresión de que el nombre está duplicado. **En el PDF está perfectamente compuesto**: el subíndice $A,\Pi$ va en cuerpo menor y desplazado hacia abajo, verificado sobre la página renderizada. Lo que se aplana es la herramienta con la que se lee el PDF, no la lámina. Lo que sí difiere de verdad es la **notación**: la filmina escribe `CCA`$_{A,\Pi}$ y el vault escribe $\mathsf{PrivK}^{\mathsf{CPA}}_{A,\Pi}$ para el juego análogo — ver [[notacion-y-terminologia#7. Los experimentos, desarmados|Notación y terminología]].
 
 ---
 
@@ -198,18 +200,3 @@ Eso deja la salida a la vista y explica el resto de la clase:
 > [!quote]- De la transcripción — de confidencialidad a integridad (cues pt1 392-395)
 > **392-395.** "Hasta ahora veníamos viendo **confidencialidad**: cómo, a partir de ciertas transformaciones, nadie puede extraer información. Hoy vamos a entrar al mundo de **integridad**: cómo podemos identificar adulteraciones o modificaciones no permitidas en la información. Y vamos a ver que, si bien sigue siendo parte de criptografía y vamos a tratar de darle una forma parecida, **las construcciones son un poco distintas**."
 
----
-
-## Ver también
-
-- [[maleabilidad|Maleabilidad]] — la propiedad que hace ganar al adversario de esta prueba, con el ataque a la base de sueldos entero
-- [[modelos-de-ataque|Modelos de ataque]] — el `CCA` **informal** de la Clase 01: la taxonomía COA / KPA / CPA / CCA y el corte pasivo/activo. Ahí está *qué recursos tiene* el adversario; acá está el juego que convierte eso en una probabilidad
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul` y `CPA`, el molde del que esta prueba es la cuarta pieza
-- [[message-authentication-code|Message Authentication Code]] — la primitiva que falta
-- [[cifrado-autenticado|Cifrado autenticado]] — la construcción que sí es `CCA-Secure`
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — el esquema que cae en el ejercicio
-- [[one-time-pad|One Time Pad]] — secreto perfecto y aun así no `CCA-Secure`
-- [[seguridad-computacional|Seguridad computacional]] — qué quiere decir $\mathsf{negl}(n)$ y qué es un adversario $\mathrm{PPT}$
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el vocabulario para responder *"¿es seguro?"* con *"¿contra qué prueba?"*
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-- Katz & Lindell — la definición formal de `CCA` es la Definición 3.33; la lectura que manda la filmina es el cap. 4 *Message Authentication Codes* ([[bibliografia|bibliografía]])

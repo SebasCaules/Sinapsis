@@ -238,18 +238,3 @@ Mientras tanto, las dos tablas de $\mathrm{GF}(2^{2})$ de la sección 4.3 y el a
 | $\#\langle x\rangle = \operatorname{ord}(G)$ | sección 7 | va $\operatorname{ord}(x)$; con $G$ sólo coincide por casualidad en el ejemplo |
 | $\varphi(2^{n}-1)/n$ | sección 8 | cuenta polinomios primitivos, no generadores — **a chequear**, no confirmada como errata |
 
----
-
-## Ver también
-
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — el concepto atómico: **toda la teoría de esta nota, desarrollada**. Es el destino de casi todos los links de arriba
-- [[aes|AES]] — dónde se cobra todo esto: `Byte Sub` es la **inversión multiplicativa en $\mathrm{GF}(2^{8})$**, y ese campo existe por el teorema de la sección 3
-- [[teoria-de-numeros|Teoría de números]] — el otro apunte del bloque algebraico, sobre el manuscrito de divisibilidad, mcd y Euclides
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — congruencias y $\mathbb{Z}_m$, el conjunto sobre el que la sección 2 empieza a poner estructura
-- [[inverso-modular|Inverso modular]] — el criterio $\operatorname{mcd}(x,q)=1$ que explica la fila del $2$ en $\mathbb{Z}_4$
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — la familia a la que pertenece AES, o sea el objeto que termina usando $\mathrm{GF}(2^{8})$
-- [[des-y-3des|DES y 3-DES]] — la primitiva que **no** se apoya en ninguna de estas tablas: sus cajas $S$ no tienen estructura algebraica publicada
-- [[cifrado-por-rotacion|Cifrado por rotación]] — donde ya habías operado en $(\mathbb{Z}_n, +)$ sin que nadie lo llamara grupo
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — el otro apunte suelto del vault, con el andamiaje probabilístico en lugar del algebraico
-- [[cronograma|Cronograma]] — para ubicar la **Clase 4 (10/09)**, que es cuando esta álgebra se cobra
-- [[bibliografia|Bibliografía]] — el apunte **no cita ninguna fuente externa**, pero el respaldo natural en la bibliografía obligatoria es **Katz & Lindell, cap. 8** *(Number Theory and Cryptographic Hardness Assumptions,* mapeado a la **Clase 4** como soporte*)* y el **Apéndice A** *(Mathematical Background)*. Quien busque grupos cíclicos, generadores y $\varphi$ desarrollados con demostraciones los encuentra ahí *(observación nuestra)*

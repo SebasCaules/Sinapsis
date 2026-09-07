@@ -8,7 +8,7 @@ unidad: 1
 clase: 2
 orden: 17
 created: 2026-08-24
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, notacion, glosario, terminologia, convenciones, demostraciones, clase-01, clase-02, parcial]
 sources: ["Clase 01 - Criptografia - Introduccion.pdf", "Clase 02 - Criptografia - Cifrado.pdf", "Clase 1.pdf (práctica 01)", "Clase 3.pdf (práctica 03)", "probabilidad y criptografia.pdf", "DirtyGuidToNumberTheory.pdf", "Cuerpos Finitos - ITBA 2021(1).pdf", "informationtheory.pdf", "des.pdf", "Katz & Lindell"]
 ---
@@ -42,7 +42,7 @@ La convención de fondo, que vale en todo el vault: **mayúscula caligráfica es
 | $\Sigma^{\ell}$ | Cadenas de **exactamente** $\ell$ símbolos del alfabeto | [[secreto-perfecto\|Secreto perfecto]] |
 | $\Sigma^{*}$ | Cadenas de **cualquier** longitud (incluida la vacía) | [[cifrado-por-rotacion\|Cifrado por rotación]] |
 | $\ell$ | **Longitud** de un mensaje, medida en símbolos | [[ataque-de-fuerza-bruta\|Fuerza bruta]], [[secreto-perfecto\|Secreto perfecto]] |
-| $\sigma$ | La **biyección letra $\to$ número** por orden alfabético: $\sigma(\texttt{A})=0,\dots$ | [[cifrado-por-rotacion\|Cifrado por rotación]], [[guia-01-resolucion\|Guía 1 — Resolución]] |
+| $\sigma$ | La **biyección letra $\to$ número** por orden alfabético: $\sigma(\texttt{A})=0,\dots$ | [[cifrado-por-rotacion\|Cifrado por rotación]], [[guia-01-criptografia-clasica\|Guía 1]] |
 | $\lvert X\rvert$ | **Cardinal** de un conjunto (cuántos elementos tiene) o **longitud** de una cadena | [[secreto-perfecto\|Secreto perfecto]]: $\lvert\mathcal{K}\rvert \ge \lvert\mathcal{M}\rvert$ |
 | $\#X$ | Cardinal también, en el vocabulario de teoría de grupos: $\#\langle x\rangle$ | [[cuerpos-finitos-y-campos-de-galois\|Cuerpos finitos y campos de Galois]] |
 | $\{0,1\}^{n}$ | Las cadenas de **$n$ bits**: el espacio en el que trabajan flujo, bloque y las pruebas | [[pruebas-de-indistinguibilidad\|Pruebas de indistinguibilidad]] |
@@ -96,6 +96,8 @@ $$\forall k \in \mathcal{K},\ \forall m \in \mathcal{M}: \quad \mathsf{Dec}_k(\m
 
 > **Choque de símbolos que hay que tener presente:** $\pi$ minúscula es **el esquema completo** en la [[practica-01-esquemas-y-taxonomias|Práctica 01]], y es la **permutación-clave** en la [[cifrado-de-sustitucion-monoalfabetica|sustitución monoalfabética]] ($k = \pi \in S_n$) y en el [[cifrado-por-rotacion|cifrado por rotación]] ($\pi_k(x) = (x+k)\bmod n$). Son objetos distintos. Katz & Lindell evita el choque usando $\Pi$ mayúscula para el esquema; el vault reproduce la minúscula donde la filmina la escribe así y la aclara en el lugar.
 
+> **El PDF de la Clase 02 deriva sin avisar, y conviene saberlo antes de estudiarlo.** *(Precisión nuestra.)* Escribe $e_k$ en las filminas 17 y 21, $\mathsf{enc}_k$ en la 26 y la 34, $\mathsf{Enc}_k$ en la 28 y la 43 — **son la misma función**. Y el keystream pasa de $G(k)$ (filminas 17, 21, 26) a $G(s)$ (filmina 29) y a $G(S)$, $G(S')$ (filmina 32); esos tres símbolos **sí** designan cosas distintas —clave, semilla, y semilla compuesta por clave e IV—, y **la filmina nunca declara la transición**. Quién es quién está en [[cifrado-probabilistico-nonce-e-iv#La semilla partida en dos|Cifrado probabilístico § La semilla partida en dos]].
+
 ---
 
 ## 4. Asignación y azar
@@ -113,7 +115,7 @@ Esta distinción viene de la [[practica-01-esquemas-y-taxonomias|Práctica 01]],
 
 $$k \xleftarrow{\$} \mathbb{Z}_n$$
 
-Está usada en [[cifrado-por-rotacion|cifrado por rotación]], [[cifrado-de-sustitucion-monoalfabetica|sustitución monoalfabética]], [[cifrado-de-vigenere|Vigenère]] y la [[guia-01-resolucion|resolución de la Guía 1]], siempre dentro de la terna `Gen` / `Enc` / `Dec`.
+Está usada en [[cifrado-por-rotacion|cifrado por rotación]], [[cifrado-de-sustitucion-monoalfabetica|sustitución monoalfabética]], [[cifrado-de-vigenere|Vigenère]] y la [[guia-01-criptografia-clasica|Guía 1]], siempre dentro de la terna `Gen` / `Enc` / `Dec`.
 
 > **Por qué esa fórmula va en un bloque aparte y no en una celda** *(nota de escritura, no de contenido).* El símbolo se produce con `\xleftarrow{\$}`, y el `\$` de adentro es un **dólar escapado**. El escáner de delimitadores de math de Obsidian busca el siguiente `$` sin interpretar el backslash, así que en math **inline** puede cerrar el span antes de tiempo y dejar el resto de la celda como texto plano roto. En un bloque `$$...$$` el cierre es `$$` y el problema no se da: las otras seis apariciones del vault están **todas** en display —dentro del `\begin{aligned}` con el que cada nota escribe su terna `Gen` / `Enc` / `Dec`— y por eso ésta también va en display. **Regla:** `\xleftarrow{\$}` nunca inline, y menos dentro de una celda de tabla.
 
@@ -123,7 +125,7 @@ Está usada en [[cifrado-por-rotacion|cifrado por rotación]], [[cifrado-de-sust
 
 Katz escribe los algoritmos como $\mathsf{Gen}(1^{n})$: el parámetro de seguridad $n$ se pasa **en unario**, es decir como una cadena de $n$ unos, no como el número $n$ en binario.
 
-**Dónde se usa, que no es sólo el libro.** La notación es de Katz & Lindell ([[bibliografia|bibliografía]]), pero entró al vault por la **práctica**: la filmina [`Clase 3.pdf`](../../raw/practicas/Clase%203.pdf) la escribe tal cual —*"kGen(1n)"* y *"El adversario A recibe 1n"*— y la [[practica-03-seudoaleatoriedad-y-modos|Práctica 03]] la reproduce en el $\mathsf{Gen}(1^{n})$ de su [[practica-03-seudoaleatoriedad-y-modos#3. El OTP redefinido con el generador, y su veredicto|§3]] y en el paso 2 del experimento de su [[practica-03-seudoaleatoriedad-y-modos#6. El experimento PrivK-CPA, en 5 pasos|§6]], donde además le dedica un párrafo. La [[clase-02-cifrado#Notación y terminología|Clase 02]] ya tenía su propia fila de glosario.
+**Dónde se usa, que no es sólo el libro.** La notación es de Katz & Lindell ([[bibliografia|bibliografía]]), pero entró al vault por la **práctica**: la filmina [`Clase 3.pdf`](../../raw/practicas/Clase%203.pdf) la escribe tal cual —*"kGen(1n)"* y *"El adversario A recibe 1n"*— y la [[practica-03-seudoaleatoriedad-y-modos|Práctica 03]] la reproduce en el $\mathsf{Gen}(1^{n})$ de su [[practica-03-seudoaleatoriedad-y-modos#3. El OTP redefinido con el generador, y su veredicto|§3]] y en el paso 2 del experimento de su [[practica-03-seudoaleatoriedad-y-modos#6. El experimento PrivK-CPA, en 5 pasos|§6]], donde además le dedica un párrafo. La nota de la [[clase-02-cifrado|Clase 02]] la remite acá.
 
 Las filminas de **teoría** son las que no la usan: las Clases 01 y 02 escriben $\mathsf{Gen}$, $A(n)$ y $\Pi(n)$ a secas, sin unario. O sea que dentro de la misma materia conviven las dos escrituras según de qué filmina venga el enunciado — y las dos significan lo mismo.
 
@@ -185,18 +187,18 @@ La primera es el [[secreto-perfecto|secreto perfecto]] escrito en bits: *"el cri
 | Símbolo | Qué significa | Dónde se usa |
 |---|---|---|
 | $A$ | El **adversario**: el algoritmo que intenta ganar la prueba. El vault lo escribe con $A$ itálica pelada | [[pruebas-de-indistinguibilidad\|Pruebas de indistinguibilidad]], [[guia-02-criptografia-simetrica\|Guía 2]] |
-| $\mathcal{A}$ | **El mismo adversario**, en la caligráfica de Katz & Lindell y del enunciado de la [[guia-02-criptografia-simetrica\|Guía 2]]. El vault usa mayoritariamente $A$ pelada, pero la [[clase-02-cifrado#Notación y terminología\|Clase 02]] escribe $\mathsf{PrivK}^{\mathsf{eav}}_{\mathcal{A},\Pi}$ y $\mathcal{A}(1^{n})$ | [[clase-02-cifrado#Notación y terminología\|Clase 02 § Notación]], [[bibliografia\|Bibliografía]] |
+| $\mathcal{A}$ | **El mismo adversario**, en la caligráfica de Katz & Lindell y del enunciado de la [[guia-02-criptografia-simetrica\|Guía 2]]. El vault usa mayoritariamente $A$ pelada, pero el enunciado de la guía escribe $\mathsf{PrivK}^{\mathsf{eav}}_{\mathcal{A},\Pi}$ y $\mathcal{A}(1^{n})$ | [[guia-02-criptografia-simetrica\|Guía 2]], [[bibliografia\|Bibliografía]] |
 | $D$ | El **distinguidor**: variante del adversario que sólo tiene que decir "esto es pseudoaleatorio" o "esto es al azar" | [[pruebas-de-indistinguibilidad#Ejercicio 1: si G se distingue, el flujo no pasa EAV\|Pruebas de indistinguibilidad § Ejercicio 1]] |
 | $b$ | El **bit oculto** que el juego sortea y que el adversario tiene que adivinar | [[pruebas-de-indistinguibilidad\|Pruebas de indistinguibilidad]] |
 | $b'$ | El bit que el adversario **emite**. Gana si $b = b'$ | [[pruebas-de-indistinguibilidad\|Pruebas de indistinguibilidad]] |
-| $\beta$, $\beta'$ | **Exactamente lo mismo que $b$ y $b'$**, renombrados cuando la letra $b$ ya está tomada como nombre de un mensaje | [[guia-02-resolucion#Ejercicio 1\|Guía 2 — Resolución § Ej. 1]] y [[guia-02-resolucion#Ejercicio 4\|§ Ej. 4b]] |
+| $\beta$, $\beta'$ | **Exactamente lo mismo que $b$ y $b'$**, renombrados cuando la letra $b$ ya está tomada como nombre de un mensaje | [[guia-02-criptografia-simetrica#Ejercicio 1\|Guía 2 — Resolución § Ej. 1]] y [[guia-02-criptografia-simetrica#Ejercicio 4\|§ Ej. 4b]] |
 | $n$ | **Nivel / parámetro de seguridad**. En la práctica, el largo de la clave en bits | [[seguridad-computacional#Nivel de seguridad\|Seguridad computacional § Nivel de seguridad]] |
-| $1^{n}$ | El mismo parámetro **escrito en unario**, como argumento: $\mathsf{Gen}(1^{n})$, *"$A$ recibe $1^{n}$"*. Desarrollado más arriba, en la [[#4. Asignación y azar\|sección 4]] | [[practica-03-seudoaleatoriedad-y-modos#3. El OTP redefinido con el generador, y su veredicto\|Práctica 03 §3]] y [[practica-03-seudoaleatoriedad-y-modos#6. El experimento PrivK-CPA, en 5 pasos\|§6]], [[clase-02-cifrado#Notación y terminología\|Clase 02 § Notación]] |
+| $1^{n}$ | El mismo parámetro **escrito en unario**, como argumento: $\mathsf{Gen}(1^{n})$, *"$A$ recibe $1^{n}$"*. Desarrollado más arriba, en la [[#4. Asignación y azar\|sección 4]] | [[practica-03-seudoaleatoriedad-y-modos#3. El OTP redefinido con el generador, y su veredicto\|Práctica 03 §3]] y [[practica-03-seudoaleatoriedad-y-modos#6. El experimento PrivK-CPA, en 5 pasos\|§6]] |
 | $\mathrm{PPT}$ | *Probabilistic Polynomial Time*: el adversario puede tirar monedas y corre en tiempo polinomial en $n$ | [[seguridad-computacional\|Seguridad computacional]] |
 | $p(n)$ | Un **polinomio** en $n$ — la cota de pasos que el adversario tiene permitida | [[seguridad-computacional\|Seguridad computacional]] |
-| $\mathsf{negl}(n)$ | Una **función despreciable** en $n$. Es la abreviatura de Katz, y el vault la usa donde reproduce la filmina de la práctica | [[practica-03-seudoaleatoriedad-y-modos#3. El OTP redefinido con el generador, y su veredicto\|Práctica 03 §3, §5 y §6]], [[clase-02-cifrado#Notación y terminología\|Clase 02 § Notación]] |
+| $\mathsf{negl}(n)$ | Una **función despreciable** en $n$. Es la abreviatura de Katz, y el vault la usa donde reproduce la filmina de la práctica | [[practica-03-seudoaleatoriedad-y-modos#3. El OTP redefinido con el generador, y su veredicto\|Práctica 03 §3, §5 y §6]] |
 
-> **Por qué existen $\beta$ y $\beta'$ si ya existen $b$ y $b'$.** Porque **el enunciado de la Guía 2 usa $b$ como nombre de un mensaje**, y el bit del juego no puede llamarse igual que uno de los mensajes que el juego sortea. La [[guia-02-resolucion#Ejercicio 1|resolución]] lo dice en el lugar donde renombra: *"el enunciado usa $b$ como nombre de un mensaje, así que acá al bit del juego lo llamamos $\beta$ para que no choquen"*. Es un renombre **local y declarado**, no una segunda convención: la letra canónica del vault sigue siendo $b$, y sólo se cambia cuando hay colisión. Vale la pena registrarlo porque en el parcial la colisión se repite sola: los mensajes se suelen llamar $a$ y $b$.
+> **Por qué existen $\beta$ y $\beta'$ si ya existen $b$ y $b'$.** Porque **el enunciado de la Guía 2 usa $b$ como nombre de un mensaje**, y el bit del juego no puede llamarse igual que uno de los mensajes que el juego sortea. La [[guia-02-criptografia-simetrica#Ejercicio 1|resolución]] lo dice en el lugar donde renombra: *"el enunciado usa $b$ como nombre de un mensaje, así que acá al bit del juego lo llamamos $\beta$ para que no choquen"*. Es un renombre **local y declarado**, no una segunda convención: la letra canónica del vault sigue siendo $b$, y sólo se cambia cuando hay colisión. Vale la pena registrarlo porque en el parcial la colisión se repite sola: los mensajes se suelen llamar $a$ y $b$.
 
 ### Función despreciable
 
@@ -206,7 +208,7 @@ Donde sigue a las filminas de teoría, el vault la llama $\varepsilon(n)$, y la 
 
 O sea: **decae más rápido que la inversa de cualquier polinomio**. El cuantificador es universal sobre el polinomio, no existencial — ése es exactamente el punto donde la taquigrafía de la filmina engaña. La tabla de ejemplos ($2^{-n}$ sí, $1/n^{100}$ no) está en [[seguridad-computacional|seguridad computacional]].
 
-> **La literatura abrevia esto como $\mathsf{negl}(n)$, y "una función polinomial" como $\mathrm{poly}(n)$.** De las dos, **$\mathsf{negl}$ ya está en el vault**: la [[practica-03-seudoaleatoriedad-y-modos|Práctica 03]] reproduce con ella las **tres** cotas de la filmina —$\Pr[\cdots] = \tfrac12 + \mathsf{negl}(n)$ para el OTP con generador (§3), para el esquema construido sobre la función pseudoaleatoria (§5) y para el experimento `PrivK-CPA` (§6)— y la [[clase-02-cifrado#Notación y terminología|Clase 02]] le dedica una fila de glosario. **$\mathrm{poly}(n)$, en cambio, no aparece en ninguna nota:** donde hace falta un polinomio, el vault escribe $p(n)$. Y las filminas de teoría no usan ninguna de las dos: escriben $\varepsilon(n)$ y hablan de *despreciable* o *negligible*.
+> **La literatura abrevia esto como $\mathsf{negl}(n)$, y "una función polinomial" como $\mathrm{poly}(n)$.** De las dos, **$\mathsf{negl}$ ya está en el vault**: la [[practica-03-seudoaleatoriedad-y-modos|Práctica 03]] reproduce con ella las **tres** cotas de la filmina —$\Pr[\cdots] = \tfrac12 + \mathsf{negl}(n)$ para el OTP con generador (§3), para el esquema construido sobre la función pseudoaleatoria (§5) y para el experimento `PrivK-CPA` (§6)— y esta nota le dedica una fila de glosario. **$\mathrm{poly}(n)$, en cambio, no aparece en ninguna nota:** donde hace falta un polinomio, el vault escribe $p(n)$. Y las filminas de teoría no usan ninguna de las dos: escriben $\varepsilon(n)$ y hablan de *despreciable* o *negligible*.
 >
 > **La macro es $\mathsf{negl}$**, sans-serif, para que viaje con la misma familia que $\mathsf{PrivK}$, $\mathsf{Gen}$ y $\mathsf{Enc}$, con los que comparte fórmula. Ver la [[#12. Inconsistencias conocidas y la forma canónica|sección 12]].
 
@@ -237,7 +239,7 @@ $$\mathsf{Eav}_{A,\Pi} \qquad\text{es lo mismo que}\qquad \mathsf{PrivK}^{\maths
 | $(n)$ (argumento) | El **nivel de seguridad** con el que se instancia la familia. El vault suele omitirlo; Katz lo escribe siempre |
 | $= 1$ | El experimento **devuelve un bit**: $1$ si el adversario ganó ($b = b'$), $0$ si no |
 
-De ahí que la cantidad que se calcula sea siempre $\Pr[\mathsf{PrivK}^{\mathsf{eav}}_{A,\Pi} = 1]$: la probabilidad de que **ese** adversario le gane a **ese** esquema. El Ej. 4b de la [[guia-02-resolucion|Guía 2]] es exactamente ese cálculo, y da $2/3$.
+De ahí que la cantidad que se calcula sea siempre $\Pr[\mathsf{PrivK}^{\mathsf{eav}}_{A,\Pi} = 1]$: la probabilidad de que **ese** adversario le gane a **ese** esquema. El Ej. 4b de la [[guia-02-criptografia-simetrica|Guía 2]] es exactamente ese cálculo, y da $2/3$.
 
 ### La tabla de las pruebas
 
@@ -355,7 +357,7 @@ Esto no es un glosario de símbolos: es el catálogo de las **cuatro plantillas*
 **1. Contraejemplo — para refutar un $\forall$.**
 Si la afirmación dice *"para todo $c$ vale tal cosa"*, **alcanza con exhibir un solo $c$ donde falle**. No hay que explicar por qué falla en general ni construir una teoría: se muestra el caso y se cierra.
 
-- [[guia-02-resolucion|Guía 2 — Ej. 3]]: *"probar o encontrar un contraejemplo"*, y la afirmación resulta **falsa**.
+- [[guia-02-criptografia-simetrica|Guía 2 — Ej. 3]]: *"probar o encontrar un contraejemplo"*, y la afirmación resulta **falsa**.
 - [[aritmetica-modular-y-divisibilidad|Aritmética modular § 5]]: la cancelación no se hereda a $\mathbb{Z}_m$, y el contraejemplo mínimo es $4\cdot 3 \equiv 4\cdot 11 \pmod{32}$ con $3 \not\equiv 11$.
 - [[ataque-de-fuerza-bruta|Fuerza bruta]]: $\lvert\mathcal{K}\rvert \ge \lvert\mathcal{M}\rvert$ no alcanza para secreto perfecto, y el contraejemplo es el Ejemplo 2 del apunte de probabilidad.
 
@@ -364,7 +366,7 @@ Si la afirmación dice *"para todo $c$ vale tal cosa"*, **alcanza con exhibir un
 
 - [[pruebas-de-indistinguibilidad#Ejercicio 2: atacar un cifrado de flujo bajo Mul|Pruebas de indistinguibilidad § Ejercicio 2]] — el adversario contra `Mul` que gana con **probabilidad 1**.
 - [[pruebas-de-indistinguibilidad#Propiedades de CPA|Pruebas de indistinguibilidad § Propiedades]] — *"determinístico $\Rightarrow$ no CPA-Secure"*, en tres líneas, pidiendo una consulta al oráculo.
-- [[guia-02-resolucion|Guía 2 — Ej. 4b]] — se calcula $\Pr[\mathsf{PrivK}^{\mathsf{eav}}_{A,\Pi} = 1] = 2/3$ para un adversario dado.
+- [[guia-02-criptografia-simetrica|Guía 2 — Ej. 4b]] — se calcula $\Pr[\mathsf{PrivK}^{\mathsf{eav}}_{A,\Pi} = 1] = 2/3$ para un adversario dado.
 
 **3. Reducción — "si se rompe esto, se rompe aquello".**
 Es **la** forma de demostración de la criptografía moderna. Para probar que $\Pi$ es seguro se supone lo contrario —un adversario $A$ que le gana— y se **construye con él** un algoritmo que rompe la primitiva subyacente. Como se cree que la primitiva no se rompe, $A$ no puede existir. Toda la seguridad queda **delegada hacia abajo**: el teorema no dice *"CBC es seguro"*, dice *"CBC es tan seguro como pseudoaleatoria sea la primitiva"*.
@@ -443,7 +445,7 @@ Kebab-case, sin tildes ni espacios, y con un prefijo numérico según el tipo de
 | Concepto | `<clase>.<orden>-<nombre>.md` | `notacion-y-terminologia.md` |
 | Clase de teoría | `clase-NN-tema-corto.md` | `clase-02-cifrado.md` |
 | Clase de práctica | `practica-NN-tema-corto.md` | `practica-03-seudoaleatoriedad-y-modos.md` |
-| Guía y su resolución | `guia-NN-tema.md` y `guia-NN-resolucion.md` | `guia-02-resolucion.md` |
+| Guía | `guia-NN-tema.md` — enunciado y resolución en la misma página | `guia-02-criptografia-simetrica.md` |
 | Apunte | `tema.md`, sin número | `teoria-de-la-informacion.md` |
 
 **Sobre el prefijo de los conceptos**, que es el único que tiene dos números: **clase** es la que introduce el concepto —la semana temática completa, teoría del jueves y práctica del lunes— y **orden** es la posición dentro de esa clase, siguiendo el orden en que la clase lo **desarrolla**, no en el que lo menciona al pasar. Los dos van con **cero a la izquierda** (`02`, no `2`) para que el explorador de archivos no desordene al pasar del noveno.
@@ -464,8 +466,8 @@ El vault creció por ingestas sucesivas y en **siete** lugares quedaron dos escr
 | Orden de un elemento | $\operatorname{ord}$ | $\operatorname{Ord}$, $\operatorname{orden}$ | Siempre $\operatorname{ord}(x)$ en minúscula. $\operatorname{Exp}(G)$ sí va con mayúscula: es otra función |
 | Máximo común divisor | $\operatorname{mcd}$ | $\gcd$ | $\operatorname{mcd}$ siempre, salvo cuando el punto del párrafo es justamente **enumerar las notaciones alternativas** |
 | Vector de inicialización | $\mathrm{IV}$ | $IV$ pelado | $IV$ sin `\mathrm` lo renderiza MathJax como el **producto $I\cdot V$**, en itálica. Vale para toda sigla: $\mathrm{IC}$, $\mathrm{IP}$, $\mathrm{PPT}$, $\mathrm{GF}$ |
-| El adversario | $A$ | $\mathcal{A}$ | $A$ itálica pelada: es lo que usan las filminas y la enorme mayoría de las notas. $\mathcal{A}$ es de Katz y del enunciado de la [[guia-02-criptografia-simetrica\|Guía 2]], y la [[clase-02-cifrado#Notación y terminología\|Clase 02]] lo reproduce donde cita al libro. **No unificar ahí**: la gracia de esa nota es mostrar las dos escrituras juntas |
-| El bit oculto del juego | $b$, $b'$ | $\beta$, $\beta'$ | $b$ siempre, **salvo colisión**. Si el enunciado ya usa $b$ como nombre de un mensaje, se renombra a $\beta$ y **se declara en el lugar donde se renombra**, que es exactamente lo que hace la [[guia-02-resolucion#Ejercicio 1\|Guía 2 — Resolución]] |
+| El adversario | $A$ | $\mathcal{A}$ | $A$ itálica pelada: es lo que usan las filminas y la enorme mayoría de las notas. $\mathcal{A}$ es de Katz y del enunciado de la [[guia-02-criptografia-simetrica\|Guía 2]], y esta nota lo reproduce donde cita al libro. **No unificar acá**: la gracia de esta nota es mostrar las dos escrituras juntas |
+| El bit oculto del juego | $b$, $b'$ | $\beta$, $\beta'$ | $b$ siempre, **salvo colisión**. Si el enunciado ya usa $b$ como nombre de un mensaje, se renombra a $\beta$ y **se declara en el lugar donde se renombra**, que es exactamente lo que hace la [[guia-02-criptografia-simetrica#Ejercicio 1\|Guía 2 — Resolución]] |
 | Función despreciable | $\mathsf{negl}$ | $\mathrm{negl}$ | Sans-serif, para que viaje con la misma familia que $\mathsf{PrivK}$, $\mathsf{Gen}$ y $\mathsf{Enc}$, con los que comparte fórmula. Unificado en todo el vault; $\mathrm{negl}$ ya no aparece. **$\varepsilon(n)$ no entra en esta cuenta**: no es otra escritura de lo mismo, es la letra de las filminas, y las dos conviven a propósito |
 
 *(Las cuatro primeras filas venían fijadas de la ingesta original; las tres últimas son **observación nuestra**, sacadas de barrer los archivos.)*
@@ -473,7 +475,7 @@ El vault creció por ingestas sucesivas y en **siete** lugares quedaron dos escr
 **Otras tres que conviene tener en el radar** *(también observación nuestra, y todavía sin unificar):*
 
 - **Los espacios contra las variables aleatorias.** Algunas notas escriben los tres conjuntos como $K$, $M$, $C$ en itálica pelada, y otras como $\mathcal{K}$, $\mathcal{M}$, $\mathcal{C}$. El problema es que $M$, $K$ y $C$ **ya significan las variables aleatorias** (sección 2). **Canónico: caligráfica para el conjunto, itálica para la variable aleatoria.**
-- **La marca de fin de demostración.** Casi todas las notas cierran con $\blacksquare$, pero quedan tres demostraciones sueltas rematadas con el carácter ∎ escrito directamente en el texto ([[cifrado-por-rotacion|cifrado por rotación]], [[pruebas-de-indistinguibilidad|pruebas de indistinguibilidad]] y la [[guia-01-resolucion|resolución de la Guía 1]]). **Canónico: $\blacksquare$**, que va dentro de math y no depende de qué fuente tenga instalada el sistema.
+- **La marca de fin de demostración.** Casi todas las notas cierran con $\blacksquare$, pero quedan tres demostraciones sueltas rematadas con el carácter ∎ escrito directamente en el texto ([[cifrado-por-rotacion|cifrado por rotación]], [[pruebas-de-indistinguibilidad|pruebas de indistinguibilidad]] y la [[guia-01-criptografia-clasica|Guía 1]]). **Canónico: $\blacksquare$**, que va dentro de math y no depende de qué fuente tenga instalada el sistema.
 - **La información mutua y sus variables.** El apunte de [[teoria-de-la-informacion|Teoría de la información]] la escribe $I(x,y)$ con **coma** y minúsculas mientras habla de canales, y $I(M;C)$ con **punto y coma** y mayúsculas cuando hace el puente con criptografía, porque sigue a cada una de sus dos fuentes. **Canónico para el vault: $I(X;Y)$**, punto y coma y mayúscula — punto y coma porque la coma ya separa argumentos en $H(X,Y)$ (entropía **conjunta**, que es otra cosa), y mayúscula porque son variables aleatorias, igual que en la sección 2.
 
 ---
@@ -483,21 +485,3 @@ El vault creció por ingestas sucesivas y en **siete** lugares quedaron dos escr
 > **Por qué esta nota es `02.17`** *(decisión del vault, no de la cátedra).* No es un concepto que la materia enseñe: es una nota **sobre la wiki misma**, y por eso no hay ninguna clase que la introduzca. Se la ubica al final del bloque de la Clase 2 simplemente porque es donde el contador estaba. La justificación general de por qué los conceptos sin clase asignada continúan el contador `02.x` está en la sección final de [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]], y le vale entera a ésta.
 >
 > **Y por qué el número tiene dos partes y no tres.** El identificador de una nota de concepto es `<clase>.<orden>`: acá, la **clase 02** que introduce el bloque y el **orden 17** dentro de esa clase. La *unidad* iba adelante en la numeración vieja, como un tercer número, y se sacó del nombre de archivo: con sólo dos unidades en todo el programa, ese primer dígito era el mismo en las treinta notas de concepto y no ordenaba nada. **No se perdió el dato:** `unidad` sigue en el frontmatter, al lado de `clase` y `orden`, así que se puede seguir filtrando y ordenando por unidad desde Obsidian. Lo que cambió es el nombre del archivo, no la información.
-
-## Ver también
-
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la versión corta de esta nota, en su sección de notación
-- [[criptosistema|Criptosistema]] — de dónde salen `Gen`, `Enc`, `Dec` y las notaciones equivalentes
-- [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] — las variables aleatorias y las tres fórmulas
-- [[secreto-perfecto|Secreto perfecto]] — la definición donde toda la notación de probabilidad se pone en juego
-- [[seguridad-computacional|Seguridad computacional]] — $\mathrm{PPT}$, $\varepsilon(n)$ y el nivel de seguridad
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul`, `CPA` y los experimentos desarmados
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — $\mid$, $\perp$, $\bmod$, $\equiv$, $\operatorname{mcd}$
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — $\oplus$, $\odot$, $\langle x\rangle$, $\operatorname{ord}$, $\varphi$
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — la fuente de la distinción $\leftarrow$ / $:=$
-- [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] — la que metió $1^{n}$, $\mathsf{negl}(n)$ y el par ordenado $\langle r, s\rangle$ en el vault
-- [[teoria-de-la-informacion|Teoría de la información]] — $H$, $I$, $\eta$ y la traducción del secreto perfecto a bits
-- [[guia-02-resolucion|Guía 2 — Resolución]] — el renombre $b \to \beta$ y los cálculos de $\Pr[\mathsf{PrivK}^{\mathsf{eav}}_{A,\Pi} = 1]$
-- [[teoria-de-numeros|Teoría de números]] — la notación propia del manuscrito, con su diccionario
-- [[indice#Convenciones|Convenciones del vault]] — nombres de archivo, frontmatter y links
-- [[bibliografia|Bibliografía]] — Katz & Lindell, que es de donde salen $\mathsf{PrivK}$, $\mathsf{negl}$ y $1^{n}$

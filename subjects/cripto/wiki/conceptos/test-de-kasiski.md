@@ -68,11 +68,3 @@ $$n^t \longrightarrow t \cdot n$$
 ## Método complementario: índice de coincidencia
 
 La otra herramienta que la [[practica-01-esquemas-y-taxonomias|Práctica 01]] le asigna a la sustitución polialfabética. **Kasiski propone candidatos, el IC confirma:** con las distancias se arma una lista corta de $t$ plausibles, y el $\mathrm{IC}$ de los sub-textos decide cuál es — el $t$ correcto es el que hace saltar el índice al valor del idioma en vez de dejarlo cerca de $1/n$. Es más robusto que Kasiski cuando hay pocas repeticiones. Todo el desarrollo (definición, valores, el procedimiento de partir en $t$ sub-textos) está en [[indice-de-coincidencia|Índice de coincidencia]].
-
-## Ver también
-
-- [[indice-de-coincidencia|Índice de coincidencia]] — el método que confirma el $t$ candidato
-- [[cifrado-de-vigenere|Cifrado de Vigenère]]
-- [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]]
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]]
-- [[guia-01-criptografia-clasica|Guía 1 — Ej. 6]]

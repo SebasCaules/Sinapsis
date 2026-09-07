@@ -8,9 +8,9 @@ unidad: 1
 clase: 2
 orden: 1
 created: 2026-08-21
-updated: 2026-08-24
-tags: [criptografia, one-time-pad, secreto-perfecto, xor, vernam, clase-02]
-sources: [Clase 02 - Criptografia - Cifrado.pdf]
+updated: 2026-09-06
+tags: [criptografia, one-time-pad, secreto-perfecto, xor, vernam, clase-02, transcripcion]
+sources: [Clase 02 - Criptografia - Cifrado.pdf, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # One Time Pad
@@ -66,6 +66,13 @@ porque al recorrer todas las claves $k$, el valor $c \oplus k$ **recorre todos l
 
 > **El paso que hay que entender.** $k \mapsto c \oplus k$ es una **biyección** de $K$ en $M$. Eso es lo único que se usa, y es lo que hace que la demostración no dependa de *cómo* estén distribuidos los mensajes: por eso vale para **toda** distribución sobre $M$, como exige la definición.
 
+**Las dos hipótesis que hay que nombrar al escribir esta cuenta**, y que la filmina marca con dos globos: **$k$ y $m$ se eligen independientemente** —lo que permite factorizar la intersección— y, al recorrer todos los $k$, **$c \oplus k$ recorre todos los mensajes, así que la suma de probabilidades da $1$**.
+
+> [!quote]- De la transcripción — de dónde sale el $1/N$, preguntado por una alumna (cues pt1 120-128)
+> *"Este $1$ sobre $N$ viene porque es la elección de la clave. Cuando vos tenés una clave, ¿cuál es la distribución de cómo vas a elegir las claves? Y eso es uniforme, porque vos querés que la clave sea aleatoria, que todos los valores posibles de claves que vos podés tener tengan la misma probabilidad, que no haya ninguna clave particular que sea más importante que las otras, que aparezca más seguido; vos querés que todas sean iguales."*
+>
+> Y por qué la sumatoria colapsa a $1$ (cue pt1 128): *"la probabilidad de todos los mensajes posibles para todas las claves posibles es 1 porque estás recorriendo todos los valores, porque es una sumatoria"*.
+
 ### Parte 2 — de ahí sale la definición, vía Bayes
 
 $$P(M=m \mid C=c)\cdot P(C=c) = P(C=c \cap M=m) = P(K = c\oplus m \cap M = m) = P(K=c\oplus m)\cdot P(M=m)$$
@@ -76,11 +83,31 @@ $$P(M=m\mid C=c)\cdot \tfrac{1}{N} = \tfrac{1}{N}\cdot P(M=m) \quad\Longrightarr
 
 > Nótese que los dos $1/N$ **se cancelan**: uno viene de que la clave es uniforme, el otro de que el criptograma resulta uniforme. Si la clave no fuera uniforme, ninguno de los dos valdría — que es exactamente lo que muestra el ejercicio de más abajo.
 
+> [!quote]- De la transcripción — dónde está el truco de la demostración (cues pt1 131-141)
+> Las dos filminas son cadenas de igualdades sin comentario. El docente señala qué es lo único que las hace andar: **la simetría del xor**. *"El proceso común siempre es: agarran el mensaje, lo xorean con la clave y les da el criptograma; agarran el criptograma, lo xorean con la clave y les da el mensaje. Ahora, **si xorean el criptograma y el mensaje, les da la clave**."*
+>
+> Esa tercera identidad —$k = m \oplus c$— es la que permite reescribir el evento $\{C = c\}$ como un evento sobre $K$, que es el paso no obvio de la segunda filmina. Y el corolario intuitivo (cues pt1 138-139): *"cualquier criptograma puede venir de cualquier mensaje, dada una clave $k$ específica; entonces es lo mismo que ver random totalmente"*.
+
+> [!quote]- De la transcripción — el OTP como receta doméstica (cues pt1 219-224)
+> *"Si tenés un mensaje que querés que nadie pueda leer, lo xoreás, lo dejás escrito en un lugar y te guardás la clave —de la misma longitud, elegida de forma aleatoria con distribución uniforme— y **eso no te lo puede romper nadie. No hay chance.**"* El porqué: *"el criptograma que generaste puede ser cualquier cosa, depende simplemente de la clave; **es indistinguible de azar puro**"*.
+
 ---
 
 ## Las malas noticias
 
 Las tres limitaciones, tal como las lista la filmina:
+
+> [!quote]- De la transcripción — cómo nombra el docente cada una de las tres (cues pt1 86, 143-170)
+> La **(1)**: *"la logística de eso es muy mala, porque significa que hay que dar algo previo que es tan largo como el mismo mensaje que uno quiere mandar"* (cue pt1 143); antes ya lo había llamado *"un problema de logística"* (cue pt1 86).
+>
+> La **(2)**: al reusar la clave *"se empieza a chorrear [leakear] bits de información detrás de todo esto. Y entonces se pierde el secreto perfecto"* (cues pt1 150-151). *(El ASR degrada el pasaje; "chorrear/leakear" es la lectura del vault sobre lo que se escucha.)*
+>
+> La **(3)** queda como tarea explícita —*"ustedes después hagan esta cuenta y van a ver que empieza a aparecer información"* (cues pt1 167-168)— y avisa dónde se cobra: *"en la práctica van a hacer un montón de estos; creo que hay 2 o 3 ejercicios"*. Son los **Ej. 1 a 4 de la [[guia-02-criptografia-simetrica|Guía 2]]**, resueltos en la [[guia-02-criptografia-simetrica|resolución]].
+
+> [!quote]- De la transcripción — el OTP en la vida real, que ninguna filmina menciona (cues pt1 67-87)
+> El canal directo entre el presidente de Estados Unidos y el líder soviético durante la Guerra Fría estaba cifrado con OTP, y la logística era literalmente *"un libro de claves"* compartido de antemano, *"tenían que ir usando una cara y después la otra"*. Es la ilustración de por qué la primera mala noticia es de **logística**, no de matemática.
+>
+> De paso recomienda **Cryptonomicon**, de Neal Stephenson: *"Es un libro espectacular. Se lo superrecomiendo (…) es un libro que tiene 20 años, probablemente, y mucho de lo que vivimos actualmente está en ese libro como una gran predicción."*
 
 ### 1. Secreto perfecto ⇒ |K| ≥ |C|
 
@@ -137,6 +164,12 @@ $$P(M{=}00 \mid C{=}01) = \frac{0{,}1 \cdot 0{,}6}{0{,}185} = \mathbf{0{,}32} \n
 
 > **Errata de la filmina** en el paso 2: escribe $P(C{=}01 \mid M{=}00) = P(K = 01 * M \mid M = 00)$. El $*$ es un $\oplus$ mal renderizado — debe leerse $P(K = 01 \oplus M \mid M = 00)$.
 
+> **Y dos erratas más en el enunciado del mismo ejercicio.** Escribe *"se obtiene un mensaje C=01"* —$C{=}01$ es un **criptograma**, no un mensaje— y cierra la pregunta con *"¿Que probabilidades hay que M=00)"*, sin tilde, sin el *de* y con el paréntesis desbalanceado. *(Precisiones nuestras.)*
+
+> **El paso que no es obvio** y que conviene decir en voz alta al resolverlo: **la probabilidad total se suma sobre las cuatro claves, no sobre los mensajes**. El otro es traducir un evento sobre $C$ en un evento sobre $K$, que es lo que hace el paso 2.
+
+**Cómo se cierra formalmente.** La definición de secreto perfecto dice *"para todo $m$ y todo $c$"*; negarla es exhibir **uno**. Con este único par la igualdad falla, y con eso el secreto perfecto está roto: **no hace falta decir *cuánta* información se filtra**. Es la plantilla del [[notacion-y-terminologia#Las cuatro formas de demostración que la materia usa de verdad|contraejemplo]].
+
 ### La tabla completa (desarrollo nuestro)
 
 La filmina calcula sólo $m = 00$. Las cuatro posteriores dado $C = 01$ cuentan mejor la historia:
@@ -163,16 +196,13 @@ Dos resultados que la clase enuncia sin demostrar:
 > - Cualquier criptosistema con secreto perfecto es **reducible al OTP**.
 > - Cualquier sistema que **no** sea reducible al OTP **no** posee secreto perfecto.
 
+Juntos son una **condición necesaria y suficiente**.
+
 **Consecuencia.** El secreto perfecto es *demasiado impráctico* y **no hay alternativa**: no es que falten construcciones eficientes, es que toda construcción perfectamente secreta *es* un OTP disfrazado, y hereda sus tres problemas. Por eso el camino no es buscar mejores esquemas sino **cambiar la definición de seguridad** → [[seguridad-computacional|seguridad computacional]].
 
+> [!quote]- De la transcripción — cómo lee el docente los dos resultados (cues pt1 177-186)
+> Los junta en una frase: *"es una condición necesaria y suficiente"*, y agrega la imagen algebraica: *"cualquier cosa que tenga secreto perfecto va a poder establecer un enlace, un homomorfismo, con el One Time Pad"* (cues pt1 180-181). *(La palabra "homomorfismo" es del docente en voz; no aparece en las filminas y la clase no define de qué estructura se trata. Tomarla como intuición, no como enunciado.)*
+>
+> Y cuantifica lo impráctico: *"hay que transmitir tantas claves como mensajes"*, con el uso realista acotado a *"una comunicación específica entre 2 jefes de Estado en un contexto de guerra fría, con probabilidades no nulas de aniquilación mutua"*.
+
 > **Cómo leerlo.** Es el mismo movimiento que la [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] hizo con los cifrados clásicos, pero al revés. Allá se rompieron los esquemas hasta que hizo falta una definición rigurosa; acá la definición rigurosa se cumple perfectamente y lo que se rompe es su **costo**. En los dos casos el resultado es el mismo: hay que refundar la noción de seguridad.
-
-## Ver también
-
-- [[secreto-perfecto|Secreto perfecto]] — la definición que el OTP alcanza, y la cota de Shannon
-- [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] — de dónde salen $P(C{=}y)$ y $P(C{=}y \mid M{=}x)$
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — más ejemplos numéricos del mismo tipo
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — el OTP con la clave reemplazada por $G(k)$
-- [[seguridad-computacional|Seguridad computacional]] — a dónde lleva la impracticabilidad del OTP
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]
-- Katz & Lindell §2.2 *The One-Time Pad* ([[bibliografia|bibliografía]])

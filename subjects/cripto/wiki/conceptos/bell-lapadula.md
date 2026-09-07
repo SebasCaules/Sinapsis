@@ -8,7 +8,7 @@ unidad: 2
 clase: 6
 orden: 6
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [politicas-de-seguridad, bell-lapadula, confidencialidad, control-de-acceso-mandatorio, clase-06, sin-dictar]
 sources: ["Clase 06 - Politicas.pdf"]
 ---
@@ -102,15 +102,8 @@ Usuarios y objetos **no cambian de nivel** después de creados. Las dos formas d
 
 En los dos casos el problema es el mismo: las condiciones simple y de cierre se verifican **en el momento de cada transición**, así que cambiar retroactivamente el nivel de una entidad invalida garantías que ya se dieron por sentadas sobre transiciones pasadas. El teorema básico de la seguridad prueba que las transiciones nunca cruzan la partición **mientras los niveles se mantengan fijos**; sin el principio de tranquilidad, esa hipótesis deja de sostenerse y el teorema deja de aplicar.
 
-## Ver también
+## El único cruce con video: sólo la relación de dominancia
 
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#6. Bell-LaPadula|Clase 06 — Políticas de seguridad y control de acceso § 6. Bell-LaPadula]]
-- [[politica-de-seguridad-y-sistema-seguro|Política de seguridad y sistema seguro]] — el marco general del que el Teorema básico de la seguridad es instancia
-- [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]] — la propiedad que BLP protege, y de dónde sale la exigencia "ni siquiera por vías indirectas" que motiva la condición de cierre
-- [[paradigmas-de-control-de-acceso|Paradigmas de control de acceso]] — el eje DAC/MAC que las condiciones de BLP combinan explícitamente
-- [[modelos-de-politica|Modelos de política]] — por qué BLP cuenta como modelo y no como una política puntual
-- [[modelos-de-integridad-de-biba|Modelos de integridad de Biba]] — el dual exacto de BLP (Strict Integrity invierte las dos condiciones), para proteger integridad en vez de confidencialidad
-- [[muralla-china|Muralla china]] — otro modelo de confidencialidad, con un elemento temporal que BLP no tiene
-- [[composicion-de-politicas|Composición de políticas]] — el ejemplo desarrollado de componer dos sistemas Bell-LaPadula con jerarquías de niveles distintas
-- [[video-11-flujo-de-informacion#Bell-LaPadula: acá está sólo la relación de dominancia|Video 11 — Flujo de información § Bell-LaPadula: acá está sólo la relación de dominancia]] — la relación $\operatorname{dom}$ de esta nota, aplicada al problema del flujo de información en la Clase 9, con tres casos resueltos y una restricción discrecional que se elude por transitividad
-- [[politicas-de-control-de-flujo|Políticas de control de flujo]] — nota hermana de otra clase que retoma la misma relación de dominancia
+*(Cruce con video, no del deck.)* El [[video-11-flujo-de-informacion|Video 11 — Flujo de información]] es el **único** material en video de la cátedra que toca Bell-LaPadula, y lo hace con un alcance muy acotado: la filmina 15 de *esa* clase —Clase 9, deck de Flujo de información— usa **sólo la relación de dominancia**, sin desarrollar la condición simple ni la *-property. El propio docente la presenta en voz como *"dominancia, similar a lo que vimos en políticas"*, dando por vista una clase que, verificado sobre las ocho transcripciones del Bloque 2, **no tiene ninguna grabación**. Es decir: esta nota, escrita contra el PDF, es el desarrollo completo que el corpus de video no cubre en ningún lado.
+
+Esa misma filmina reporta además una notación que ni la lámina ni el audio explican, $(b,-,C_1)$, para una **restricción discrecional** — y encaja exactamente con la regla de esta nota: *"los accesos discrecionales solo pueden restringir a los mandatorios, no contradecirlos"* es el enunciado general del que ese símbolo es un caso particular sin desarrollar. La lectura completa de esa notación, cruzando el signo $-$ con el derecho **revocado** de [[listas-de-control-de-acceso|Listas de control de acceso]], está en [[politicas-de-control-de-flujo|Políticas de control de flujo]].

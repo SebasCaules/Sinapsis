@@ -82,12 +82,3 @@ Entre los cuatro primeros —`iat`/`exp`/`aud`/`iss`— el JWT replica, en un do
 ## Por qué esto no es lo mismo que control de acceso
 
 *(Cruce con video, no del deck.)* El [[video-12-proteccion-de-datos-personales|Video 12]] reporta una advertencia explícita, de otra clase del mismo canal: *"ojo en el parcial con autenticación versus control de acceso"*. Esta sección es la ilustración perfecta de esa distinción: **OIDC/JWT resuelve autenticación** —saber que `sub: "alice"` es efectivamente Alice, y desde cuándo—, mientras que el resto de la Clase 06 —[[matriz-de-control-de-acceso|matriz]], [[listas-de-control-de-acceso|ACLs]], [[listas-de-capacidades|capacidades]]— resuelve **qué puede hacer** esa Alice ya autenticada. Son preguntas distintas que un sistema real necesita resolver las dos, en ese orden: primero autenticar, después autorizar. El modelo formal completo de qué significa "autenticar" —los cinco componentes que hacen falta para describir cualquier esquema concreto— es contenido de la [[clase-07-autenticacion|Clase 07]], no de ésta.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#16. OpenID Connect y JWT|Clase 06 — OpenID Connect y JWT]]
-- [[oauth-2|OAuth 2.0]] — la sección inmediatamente anterior, y el protocolo sobre el que se construye OIDC
-- [[autenticacion|Autenticación]] — el modelo formal de qué significa autenticar, desarrollado en la Clase 07
-- [[video-12-proteccion-de-datos-personales|Video 12 — Protección de datos personales]] — la advertencia sobre autenticación versus control de acceso, y el ejemplo de policy de AWS IAM que ilustra la terna sujeto/objeto/derecho del lado del control de acceso
-- OpenID Connect Core 1.0 §2 (*ID Token*) — la especificación de la que sale, verbatim, el `id_token` de ejemplo de la filmina 41
-- RFC 7519 (*JSON Web Token*) y RFC 7518 (*JSON Web Algorithms*, para `RS256`)

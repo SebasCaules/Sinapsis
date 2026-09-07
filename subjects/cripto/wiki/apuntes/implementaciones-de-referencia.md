@@ -53,7 +53,7 @@ Lo verificable a simple vista, y lo que originó esta sección: **las dos URLs e
 
 **La transcripción del 20/08 cierra la pregunta.** Al llegar a DES, el docente anuncia que va a explicarlo *"con una implementación mía de hace muchos años en Java"* (cue pt2 124) y, más tarde, que *"AES tiene una implementación en Java que yo les estoy subiendo"* (cue pt2 425). O sea: **los dos repos son del docente de la Clase 02, Rodrigo Ramele**, y son exactamente el material que llegó a `raw/apuntes/` — el archivo del AES es lo que él dice estar subiendo mientras recorre esa filmina. Lo único que la fuente sigue sin decir con todas las letras es que la cuenta `faturita` sea la suya; es el último eslabón, y no hay otro candidato *(lectura nuestra)*.
 
-**El repo de DES no es un link: es la fuente de media clase.** Entre los cues pt2 167 y 317 el docente deja las filminas, comparte el proyecto en pantalla —*"esto está implementado en Java, así que si después quieren pueden toquetear el código; describe exactamente esto. Esto es como si fuese la ficha de lo que está haciendo DES"* (cue pt2 170)— y dicta sobre él todo el detalle del algoritmo. De ahí salen tres cosas que **ninguna filmina de la cátedra trae**: cómo se lee una matriz de permutación, cómo la expansión $E$ pasa de 32 a 48 bits repitiendo índices, y la aritmética de fila y columna de las cajas $S$. Están volcadas en la [[clase-02-cifrado#11. DES y 3-DES|§11 de la Clase 02]] y en [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]].
+**El repo de DES no es un link: es la fuente de media clase.** Entre los cues pt2 167 y 317 el docente deja las filminas, comparte el proyecto en pantalla —*"esto está implementado en Java, así que si después quieren pueden toquetear el código; describe exactamente esto. Esto es como si fuese la ficha de lo que está haciendo DES"* (cue pt2 170)— y dicta sobre él todo el detalle del algoritmo. De ahí salen tres cosas que **ninguna filmina de la cátedra trae**: cómo se lee una matriz de permutación, cómo la expansión $E$ pasa de 32 a 48 bits repitiendo índices, y la aritmética de fila y columna de las cajas $S$. Están volcadas en la [[des-y-3des#Media clase dictada sobre el código, no sobre el PDF|DES y 3-DES]] y en [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]].
 
 **La advertencia de performance es del autor, no nuestra.** Sobre su propia implementación: *"es hiper mal performante, pero hace lo que hace el algoritmo"* (cue pt2 124). Es la caracterización exacta del recurso — **sirve para entender el algoritmo, no para usarlo**, que es justamente la línea de la sección 4. Y da la escala del esfuerzo: *"a mí me llevó, hace 20 años, una o dos semanas hacer esa implementación"* (cues pt2 469-471), dicho como argumento de por qué escribir criptografía a mano era caro y por qué que hoy sea barato **empeora** el riesgo.
 
@@ -148,7 +148,7 @@ O sea: el mismo lenguaje sirve para las dos mitades del argumento, y se puede ve
 
 ## 6. Qué NO se afirma en esta nota
 
-- **No se miró el código.** No se afirma qué implementa cada repo, si compila, si está completo, ni con qué licencia se distribuye. Lo que el docente explicó en clase sobre DES está volcado en la [[clase-02-cifrado#11. DES y 3-DES|Clase 02]], pero eso salió de la voz, no de leer los archivos.
+- **No se miró el código.** No se afirma qué implementa cada repo, si compila, si está completo, ni con qué licencia se distribuye. Lo que el docente explicó en clase sobre DES está volcado en la [[des-y-3des|DES y 3-DES]], pero eso salió de la voz, no de leer los archivos.
 - **La autoría ya no es inferencia**, pero el eslabón que la ata a las URLs sí lo es: el docente dice que las dos implementaciones son suyas y que está subiendo la de AES (cues pt2 124, 425); que la cuenta `faturita` sea la suya no lo declara nadie (sección 2).
 - **No se afirma que sean material obligatorio.** Sí son material del curso: aparecen en la filmina de la [[practica-03-seudoaleatoriedad-y-modos|Práctica 03]] y el de DES se usó en clase el 20/08.
 - **No se afirma que se relacionen con JCE ni con la Guía 5** — la sección 5 va rotulada como lectura nuestra.
@@ -162,15 +162,3 @@ O sea: el mismo lenguaje sirve para las dos mitades del argumento, y se puede ve
 - [ ] **Cruzar el código de DES contra [[des-descripcion-del-algoritmo|des.pdf]]**: verificar que las tablas de permutación del repo coinciden con las del apunte. Es el mejor ejercicio de comprensión que dan estas dos fuentes juntas — y ahora tiene un tercer testigo, la explicación en voz de los cues pt2 167-317.
 - [ ] **Decidir si sirven de base para el [[tp-implementacion|TP]]** — como referencia de estilo, no como código a copiar: el TP pide algo **no visto en el curso**.
 - [x] **Confirmar si tienen clase asignada.** El de DES se usó en la clase del **20/08**; el de AES se anuncia esa misma jornada. La nota sigue en `apuntes/` porque los dos `.txt` de `raw/` no cuelgan de ninguna fecha, pero el contenido está atado a la [[clase-02-cifrado|Clase 02]].
-
-## Ver también
-
-- [[des-y-3des|DES y 3-DES]] — la red de Feistel, la función $F$ y la tabla de erosión
-- [[aes|AES]] — las cuatro etapas por ronda y las asimetrías deliberadas
-- [[des-descripcion-del-algoritmo|DES — descripción del algoritmo]] — la especificación a nivel de bits: el par teórico de estas implementaciones
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — *no inventes criptografía*, y la distinción entre implementar para aprender e implementar para producción
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] · [[modos-de-encadenamiento|Modos de encadenamiento]] — lo que hay que buscar en el código
-- [[numeros-aleatorios-y-randomness|Sobre números aleatorios y randomness]] — el otro apunte que es sólo links, y de donde sale la pregunta por el IV y la clave
-- [[tp-implementacion|TP de Implementación]] — el proyecto que estas lecturas preparan
-- [[programa-y-objetivos#Herramientas que se usan|Programa y objetivos]] — JCE, la JVM y OpenSSL
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

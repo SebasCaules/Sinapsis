@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 10
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, pentesting, hipotesis-de-falla, michigan-terminal-system, ingenieria-social, clase-08, sin-dictar]
 sources: ["Clase 13 - Pentesing.pdf"]
 ---
@@ -76,7 +76,7 @@ Búsqueda en internet de nombres de empleados y directores; teléfono de la sucu
 
 El tester se hace pasar por un **nuevo empleado** y aprende, en esa interacción, que para enviar cualquier documento hacen falta un **número de empleado** y un **centro de costos**. Con ese dato aprendido llama entonces a la secretaria del director sobre el que más información había recabado, **dos veces**: primero haciéndose pasar por un empleado, para conseguir el número de empleado del director; después haciéndose pasar por un auditor, para conseguir el centro de costos. Con esos dos datos, solicita que se envíe el listado completo de empleados a una consultora externa.
 
-**Por qué la recolección se hace en dos llamadas y no en una.** Cada llamada usa una identidad distinta —empleado, después auditor— porque cada dato pedido tiene un solicitante plausible distinto: un empleado nuevo preguntando su propio número de legajo es normal; un empleado preguntando el centro de costos de otro departamento, no. El auditor sí puede pedir esa segunda cosa sin levantar sospecha. Es el mismo principio de **compartimentar la información según a quién le corresponde pedirla** que aparece, del lado defensivo, en [[clase-08-principios-de-diseno-y-vulnerabilidades#1.6. Separación de privilegios|Separación de privilegios]]: acá el atacante explota exactamente que el receptor de cada llamada no tiene forma de verificar la identidad reclamada contra la pertinencia del pedido.
+**Por qué la recolección se hace en dos llamadas y no en una.** Cada llamada usa una identidad distinta —empleado, después auditor— porque cada dato pedido tiene un solicitante plausible distinto: un empleado nuevo preguntando su propio número de legajo es normal; un empleado preguntando el centro de costos de otro departamento, no. El auditor sí puede pedir esa segunda cosa sin levantar sospecha. Es el mismo principio de **compartimentar la información según a quién le corresponde pedirla** que aparece, del lado defensivo, en [[principios-de-diseno#6. Separación de privilegios|Separación de privilegios]]: acá el atacante explota exactamente que el receptor de cada llamada no tiene forma de verificar la identidad reclamada contra la pertinencia del pedido.
 
 ### Paso 2 — Hipótesis
 
@@ -103,15 +103,6 @@ La ingeniería social, no la ruptura de un algoritmo, es el vector más común e
 | Qué se explota | Una convención de llamada del sistema operativo | Que nadie verifica una identidad reclamada por teléfono |
 | Paso 3 | Ejecutar un *system call* preparado | Dos llamadas telefónicas con identidades fabricadas |
 | Paso 4 (generalización) | De "escribir 2 bytes" a "control total de la máquina" | Implícito: el mismo guion sirve contra cualquier empleado nuevo, no sólo contra el que se llamó |
-| Qué principio de diseño queda expuesto | [[clase-08-principios-de-diseno-y-vulnerabilidades#1.4. Mediación completa\|Mediación completa]] — la revalidación no ocurre en cada escritura | [[clase-08-principios-de-diseno-y-vulnerabilidades#1.8. Aceptación psicológica\|Aceptación psicológica]] y [[clase-08-principios-de-diseno-y-vulnerabilidades#1.6. Separación de privilegios\|Separación de privilegios]] — el proceso de verificación cede ante la urgencia y la autoridad reclamada |
+| Qué principio de diseño queda expuesto | [[principios-de-diseno#4. Mediación completa\|Mediación completa]] — la revalidación no ocurre en cada escritura | [[principios-de-diseno#8. Aceptación psicológica\|Aceptación psicológica]] y [[principios-de-diseno#6. Separación de privilegios\|Separación de privilegios]] — el proceso de verificación cede ante la urgencia y la autoridad reclamada |
 
 *(La columna del principio de diseño es lectura nuestra: ninguna filmina de Pentesting conecta explícitamente los dos casos con los ocho principios de la [[principios-de-diseno|Clase 07]], pero la conexión se sigue directamente de sus definiciones.)*
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#10. Casos de prueba de penetración|Clase 08 — Principios de diseño y vulnerabilidades, §10 Casos de prueba de penetración]]
-- [[metodologia-de-hipotesis-de-falla|Metodología de hipótesis de falla]] — los cinco pasos que estos dos casos ejecutan
-- [[verificacion-formal-y-prueba-de-penetracion|Verificación formal y prueba de penetración]] — la definición que estos casos instancian
-- [[validez-de-las-pruebas-de-penetracion|Validez de las pruebas de penetración]] — hasta dónde se puede generalizar lo que estos dos casos encontraron
-- [[principios-de-diseno|Principios de diseño]] — Mediación completa, Separación de privilegios y Aceptación psicológica, los tres principios que estos dos casos dejan expuestos
-- [[video-09-pentesting-metodologia#5. Ejemplo resuelto: Michigan Terminal System|Video 09 — Pentesting: metodología, §5 y §6]] — resuelve los dos casos con el mismo nivel de detalle que esta nota, y agrega la actuación del diálogo del caso de ingeniería social

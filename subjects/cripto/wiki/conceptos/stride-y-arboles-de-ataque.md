@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 6
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, stride, arbol-de-ataque, trust-boundary, modelado-de-amenazas, clase-08, sin-dictar]
 sources: ["Clase 12 - Analisis de vulnerabilidades.pdf"]
 ---
@@ -39,7 +39,7 @@ La filmina 18 trae la instrucción de uso escrita en la propia lámina, y es la 
 | **D** | Denial of Service | Amenaza a la **supervivencia** del sistema |
 | **E** | Elevation of privilege | Conseguir más permisos de los autorizados |
 
-**Por qué la instrucción "por cada trust boundary" es la parte que un examen puede pedir y que se olvida en la práctica.** Aplicar las seis letras una sola vez, mirando el sistema como un bloque, produce una lista genérica que no distingue qué amenaza corresponde a qué frontera — y sin esa correspondencia, el paso 5 ([[clase-08-principios-de-diseno-y-vulnerabilidades#7. Identificación de vulnerabilidades|identificación de vulnerabilidades]]) no sabe dónde buscar. `STRIDE` aplicado bien produce **una tabla de seis filas por cada zona de confianza**, no seis filas para todo el sistema.
+**Por qué la instrucción "por cada trust boundary" es la parte que un examen puede pedir y que se olvida en la práctica.** Aplicar las seis letras una sola vez, mirando el sistema como un bloque, produce una lista genérica que no distingue qué amenaza corresponde a qué frontera — y sin esa correspondencia, el paso 5 ([[identificacion-de-vulnerabilidades|identificación de vulnerabilidades]]) no sabe dónde buscar. `STRIDE` aplicado bien produce **una tabla de seis filas por cada zona de confianza**, no seis filas para todo el sistema.
 
 **Un ejemplo de aplicación, sobre el sistema de historial médico que reutiliza el deck** *(desarrollo nuestro, no está en la filmina)*: en la frontera **browser → firewall**, la pregunta de Tampering sería *¿puede un atacante alterar los datos de una consulta médica en tránsito antes de que lleguen al servidor?* — una pregunta bien distinta de la misma letra aplicada a la frontera **web server → base de datos**, donde Tampering preguntaría *¿puede alguien con acceso al servidor modificar directamente un registro sin pasar por la aplicación?* Las dos preguntas nacen de la misma letra, pero apuntan a mecanismos de defensa completamente distintos —cifrado en tránsito contra controles de acceso a la base—, y eso es exactamente lo que se pierde si `STRIDE` se aplica una sola vez para todo el sistema.
 
@@ -75,13 +75,3 @@ No es una regla técnica sobre cómo construir el árbol: es una advertencia de 
 | **Qué responde** | *¿Qué clase de cosas malas podrían pasar acá?* | *¿Qué tiene que ser cierto para que esta cosa mala puntual pase?* |
 
 `STRIDE` sin árboles de ataque deja una lista de amenazas sin desarrollar, difícil de priorizar porque no queda claro qué tan fácil o difícil es concretar cada una. Árboles de ataque sin `STRIDE` corren el riesgo de desarrollar en detalle una amenaza que nunca se identificó como relevante, mientras otra categoría entera queda sin considerar. El orden natural es el que sigue el propio [[modelado-de-amenazas#El ciclo de cinco pasos de Microsoft|ciclo de modelado]]: `STRIDE` primero, para cubrir superficie; árboles de ataque después, sobre lo que `STRIDE` marcó como prioritario.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#6. STRIDE y árboles de ataque|Clase 08 — Principios de diseño y vulnerabilidades § 6. STRIDE y árboles de ataque]]
-- [[modelado-de-amenazas|Modelado de amenazas]] — el ciclo completo; `STRIDE` es el paso 4
-- [[descomposicion-de-la-aplicacion|Descomposición de la aplicación]] — las zonas y fronteras de confianza sobre las que se aplica `STRIDE`
-- [[principios-de-diseno#4. Mediación completa|Principios de diseño]] — una frontera de confianza sin mediación completa es exactamente el tipo de hueco que `STRIDE` busca
-- [[modelos-de-ataque|Modelos de ataque]] — la otra gran taxonomía del curso, la de qué puede hacer un adversario criptográfico, con el mismo espíritu de cuestionario sistemático
-- [[video-08-vulnerabilidades#STRIDE, letra por letra|video-08 — Vulnerabilidades § STRIDE, letra por letra]] — la fuente hablada de esta nota
-- [[videografia|Videografía]] — el mapa completo de los videos de la cátedra

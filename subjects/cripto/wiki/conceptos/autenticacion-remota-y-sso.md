@@ -8,7 +8,7 @@ unidad: 2
 clase: 7
 orden: 10
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, autenticacion, sso, openid-connect, federacion, clase-07, sin-dictar]
 sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 ---
@@ -17,7 +17,7 @@ sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 
 **Qué implica delegar la verificación de identidad en un sistema externo en lugar de hacerla uno mismo, y qué separa a las dos tecnologías abiertas que compiten para hacerlo.** Es la nota más corta de las cinco de este bloque, porque la filmina se queda deliberadamente en el nivel de "qué existe" y no baja al protocolo — coherente con que el resto de la clase tampoco entra en el detalle de protocolos de federación.
 
-Cubre la filmina **45** del deck `Clase 07 - Aplicaciones - Principios y autenticacion.pdf`. Esta clase todavía no se dictó —hoy es 04/09/2026—, así que la nota está escrita contra el PDF y lecturas propias, rotuladas como tales; no hay transcripción, y **ningún video de la cátedra toca autenticación remota o SSO** — se verificó por grep sobre los trece videos de la [[videografia|videografía]] y no hay una sola mención a *OAuth*, *OpenID*, *federación* ni *Single Sign-On*.
+Cubre las filminas **45 y 46** del deck `Clase 07 - Aplicaciones - Principios y autenticacion.pdf`. Esta clase todavía no se dictó —hoy es 04/09/2026—, así que la nota está escrita contra el PDF y lecturas propias, rotuladas como tales; no hay transcripción, y **ningún video de la cátedra toca autenticación remota o SSO** — se verificó por grep sobre los trece videos de la [[videografia|videografía]] y no hay una sola mención a *OAuth*, *OpenID*, *federación* ni *Single Sign-On*.
 
 ## Delegar es confiar
 
@@ -29,7 +29,7 @@ Esto **implica necesariamente una relación de confianza**, y no es un detalle m
 
 La filmina nombra dos categorías con lógicas de mercado distintas:
 
-- **Productos comerciales**, cada uno con **tecnología propia y no intercambiable** entre sí: *Active Directory Federation Services*, `CAS`, *Siteminder*. Elegir uno de estos ata al sistema al ecosistema de ese proveedor.
+- **Productos comerciales**: *Active Directory Federation Services*, `CAS`, *Siteminder*. De los tres, la filmina dice literalmente *"Cada uno utiliza una tecnologia diferente"* —la falta de tilde en "tecnologia" es de la lámina—, lo que en la práctica los vuelve **no intercambiables entre sí**: elegir uno ata al sistema al ecosistema de ese proveedor. *(Lectura nuestra: la filmina afirma que las tecnologías difieren, no que no puedan convivir.)*
 - **Tecnologías abiertas**, pensadas para interoperar entre proveedores distintos:
   - **OpenID 1 y 2** — marcadas como **obsoletas** en la propia filmina.
   - **OpenID Connect** — vigente, **construido sobre `OAuth2`**.
@@ -44,13 +44,8 @@ La filmina no desarrolla el protocolo de ninguna de las dos, y esta nota tampoco
 
 `SSO` es, en el vocabulario de [[autenticacion|Autenticación]], la decisión de mover el componente $L$ —la función que decide si $(a,c)$ es una asociación válida— **fuera** del sistema que necesita el resultado. Todo lo demás que la clase desarrolla —[[factores-de-autenticacion|factores]], [[almacenamiento-de-claves|almacenamiento]], [[ataques-a-un-sistema-de-autenticacion|ataques]], [[challenge-response-y-eke|challenge-response y EKE]]— sigue existiendo, sólo que ahora ocurre **una vez**, adentro del proveedor de identidad, en lugar de repetirse en cada sistema que confía en él.
 
-**Nota sobre la filmina 46, que cierra el deck completo.** Inmediatamente después de ésta, la última filmina del PDF da la lectura recomendada —capítulos 12-13 de *Computer Security: Art and Science*, de Matt Bishop— para el bloque entero de principios y autenticación. Esa filmina y la precisión sobre a qué edición de Bishop corresponde esa numeración de capítulos ya están desarrolladas en [[clase-07-autenticacion#10. Autenticación remota y SSO|Clase 07 — Autenticación § 10. Autenticación remota y SSO]]; no se repite acá para no duplicar el análisis.
+## La filmina 46: la lectura recomendada del deck completo
 
-## Ver también
+Inmediatamente después de la de `SSO`, la **filmina 46** cierra el PDF entero con la lectura recomendada: **capítulos 12-13** de *Computer Security: Art and Science*, de Matt Bishop. No es la lectura de esta sección ni de esta nota: vale para **el deck completo**, o sea para los dos temas que ese PDF reparte en dos clases distintas —principios de diseño ([[clase-08-principios-de-diseno-y-vulnerabilidades|Clase 08]]) y autenticación ([[clase-07-autenticacion|Clase 07]])—.
 
-- [[clase-07-autenticacion#10. Autenticación remota y SSO|Clase 07 — Autenticación § 10. Autenticación remota y SSO]] — la sección de la que cuelga esta nota, con la precisión completa sobre la lectura recomendada de la filmina 46
-- [[autenticacion|Autenticación]] — el formalismo $(A,C,F,L,S)$ del que `SSO` es, en esencia, sacar $L$ afuera del sistema
-- [[factores-de-autenticacion|Factores de autenticación]] — lo que el sistema externo termina verificando en nombre de todos los demás
-- [[challenge-response-y-eke|Challenge-response y EKE]] — el mecanismo del paso anterior: autenticar directamente contra una clave compartida, la alternativa que `SSO` reemplaza
-- [[videografia#Los cuatro huecos del Bloque 2|Videografía § Los cuatro huecos del Bloque 2]] — por qué esta clase, y en particular esta sección, no tiene ningún video de respaldo
-- [[bibliografia|Bibliografía]] — Bishop, cap. 13 *Authentication*, lectura designada del bloque
+**Esos números no son los de la edición que está en el vault.** La [[bibliografia|bibliografía de la cátedra]] ubica, sobre la 2ª edición (2018) de Bishop que está en `raw/`, *Authentication* en el capítulo **13** y *Design Principles* en el **14** — no en el 12, que ahí es *Cipher Techniques*. Es un desfasaje de $+1$ que [[bibliografia#El desfasaje de numeración de Bishop: qué edición, si es sistemático, y la lectura correcta|esa misma nota]] verifica de forma independiente en cuatro decks distintos y atribuye a que las filminas retienen la numeración de una edición anterior. **La lectura correcta se busca por título de capítulo, no por número.**

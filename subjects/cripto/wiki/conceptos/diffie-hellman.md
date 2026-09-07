@@ -8,7 +8,7 @@ unidad: 1
 clase: 4
 orden: 4
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, diffie-hellman, logaritmo-discreto, ddh, intercambio-de-claves, man-in-the-middle, clase-04, sin-dictar]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf"]
 ---
@@ -43,7 +43,7 @@ Si $A$ y $B$ ya se conocen de antemano, los parámetros del grupo $(G, q, g)$ pu
 
 La primera condición: dado $g^{x}$ (y el grupo $G$, $q$, $g$ públicos), no debería ser posible recuperar $x$. Este es el **problema del logaritmo discreto**, y no se conoce ningún algoritmo eficiente que lo resuelva.
 
-> **Precisión sobre "NP-Hard", ya señalada en la [[clase-04-criptografia-asimetrica-y-firma-digital#5. Diffie-Hellman|Clase 04]].** La filmina 19 cierra afirmando *"hoy se sabe que es un problema NP-Hard"*. Eso es impreciso en el sentido técnico de la teoría de la complejidad: el logaritmo discreto está en $\mathrm{NP} \cap \mathrm{coNP}$ —una respuesta se verifica en tiempo polinomial en ambos sentidos—, y si además fuera `NP`-difícil implicaría $\mathrm{NP} = \mathrm{coNP}$, un colapso tan improbable como $\mathrm{P}=\mathrm{NP}$. Lo correcto es decir que **no se conoce un algoritmo eficiente (polinomial) para resolverlo**: es una suposición de dureza computacional, no un resultado de completitud `NP`.
+> **Precisión sobre "NP-Hard".** La filmina 19 cierra afirmando *"hoy se sabe que es un problema NP-Hard"*. Eso es impreciso en el sentido técnico de la teoría de la complejidad: el logaritmo discreto está en $\mathrm{NP} \cap \mathrm{coNP}$ —una respuesta se verifica en tiempo polinomial en ambos sentidos—, y si además fuera `NP`-difícil implicaría $\mathrm{NP} = \mathrm{coNP}$, un colapso tan improbable como $\mathrm{P}=\mathrm{NP}$. Lo correcto es decir que **no se conoce un algoritmo eficiente (polinomial) para resolverlo**: es una suposición de dureza computacional, no un resultado de completitud `NP`.
 
 **Por qué esta condición sola no alcanza.** Que no se pueda recuperar $x$ ni $y$ a partir de $g^x$ y $g^y$ no dice nada sobre si $g^{xy}$ —la clave que sale del protocolo— *parece* aleatorio a un adversario que ve $g^x$ y $g^y$. Podría existir, en principio, un algoritmo que calcule alguna propiedad parcial de $g^{xy}$ (por ejemplo, su bit menos significativo) sin resolver el logaritmo discreto completo. Ese hueco es exactamente lo que exige una hipótesis más fuerte.
 
@@ -57,7 +57,7 @@ Es una conjetura **estrictamente más fuerte** que la dureza del logaritmo discr
 
 ### La cita que abre el bloque
 
-*"We stand today on the brink of a revolution in cryptography"* — Diffie y Hellman, 1976. La cita, y el candado como metáfora —fácil de cerrar, imposible de abrir sin la llave correcta— es la que motiva toda la sección de [[clase-04-criptografia-asimetrica-y-firma-digital#2. La revolución asimétrica|Criptografía asimétrica]] en la nota de clase.
+*"We stand today on the brink of a revolution in cryptography"* — Diffie y Hellman, 1976. La cita, y el candado como metáfora —fácil de cerrar, imposible de abrir sin la llave correcta— es la que motiva todo el giro hacia la criptografía de clave pública que desarrolla [[criptosistema-asimetrico|Criptosistema asimétrico]].
 
 ## En la práctica: el problema del atacante activo
 
@@ -72,16 +72,4 @@ La versión original de Diffie-Hellman **exige un canal autenticado**. Un atacan
 
 $M$ termina con **dos** claves de sesión válidas: una compartida con $A$ y otra con $B$, y $A$ y $B$ nunca comparten ninguna clave entre sí. Todo el tráfico posterior cifrado con $k_a$ o $k_b$ pasa por $M$, que descifra con la clave que le corresponde, lee o modifica el contenido, y vuelve a cifrar con la otra clave antes de reenviarlo — ninguna de las dos víctimas nota nada, porque cada una recibe exactamente el tipo de mensaje que esperaba de la otra.
 
-**La defensa: firmas digitales.** El protocolo se complementa autenticando **quién** envió cada $h_1$ y $h_2$, de modo que sustituirlos deje evidencia verificable. Esa es precisamente la motivación con la que la [[clase-04-criptografia-asimetrica-y-firma-digital#11. Firma digital: la terna y Sig-forge|Clase 04]] introduce la [[firma-digital|Firma digital]] más adelante, y es también el ataque concreto que motiva [[ataques-activos-y-man-in-the-middle|Ataques activos y man-in-the-middle]] en la Clase 05.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#5. Diffie-Hellman|Clase 04 — Criptografía asimétrica y firma digital § 5. Diffie-Hellman]] — la sección de la que sale esta nota
-- [[intercambio-de-claves|Intercambio de claves]] — la definición abstracta y el experimento `KE` que este protocolo instancia
-- [[grupos-anillos-y-cuerpos|Grupos, anillos y cuerpos]] — generador, orden y $\mathbb{Z}_q$, el álgebra sobre la que corre el protocolo
-- [[criptosistema-asimetrico|Criptosistema asimétrico]] — el siguiente bloque de la clase, que usa la misma familia de supuestos de dureza
-- [[el-gamal|El Gamal]] — el criptosistema que se construye directamente sobre este intercambio de claves
-- [[firma-digital|Firma digital]] — la herramienta que arregla el problema del atacante activo
-- [[ataques-activos-y-man-in-the-middle|Ataques activos y man-in-the-middle]] — el desarrollo completo del ataque activo contra un intercambio de claves sin autenticar
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — la familia de experimentos de la que `DDH` toma la forma
-- Katz & Lindell, cap. 11 *Public-Key Encryption* — el problema del logaritmo discreto y `DDH` formalizados ([[bibliografia|bibliografía]])
+**La defensa: firmas digitales.** El protocolo se complementa autenticando **quién** envió cada $h_1$ y $h_2$, de modo que sustituirlos deje evidencia verificable. Esa es precisamente la motivación con la que la [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04]] introduce la [[firma-digital|Firma digital]] más adelante, y es también el ataque concreto que motiva [[ataques-activos-y-man-in-the-middle|Ataques activos y man-in-the-middle]] en la Clase 05.

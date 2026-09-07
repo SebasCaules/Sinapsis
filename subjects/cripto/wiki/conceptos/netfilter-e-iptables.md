@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 3
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, iptables, netfilter, linux, firewalls, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -63,7 +63,7 @@ iptables -A INPUT -s "201.232.1.24" -j DROP
 iptables -P INPUT DROP
 ```
 
-`-P` fija la **policy** (acción por defecto) de la chain, **no agrega una regla**. Cambia la chain entera a *denegar por defecto* — el patrón de diseño que exige [[clase-08-principios-de-diseno-y-vulnerabilidades#1.4. Mediación completa|mediación completa]]: todo lo no permitido explícitamente queda afuera.
+`-P` fija la **policy** (acción por defecto) de la chain, **no agrega una regla**. Cambia la chain entera a *denegar por defecto* — el patrón de diseño que exige [[principios-de-diseno#4. Mediación completa|mediación completa]]: todo lo no permitido explícitamente queda afuera.
 
 *(Lectura nuestra sobre el orden de este comando en un script real.)* La filmina no dice en qué momento del script conviene fijar esta policy, y hay dos prácticas con compromisos opuestos, no una sola "correcta". Fijar `DROP` **al principio**, antes de cargar las reglas de `ACCEPT` que siguen, cierra de entrada cualquier ventana con el `ACCEPT` por defecto de fábrica de la chain — al costo de dejar al propio administrador bloqueado por esa misma policy hasta terminar de cargar las reglas, riesgo que en la práctica se resuelve teniendo acceso por consola (fuera de la interfaz de red que se está configurando) en vez de depender de la sesión que se está por cortar. Fijar `DROP` **al final**, después de cargar las reglas de `ACCEPT`, evita ese riesgo de bloqueo — pero deja la chain en `ACCEPT` mientras el resto del script corre. Muchas guías de hardening optan por la primera opción justamente para no dejar esa ventana; ninguna de las dos es universalmente superior, es un trade-off entre superficie de exposición temporal y riesgo de auto-bloqueo.
 
@@ -86,7 +86,7 @@ iptables -A OUTPUT -o eth0 -p tcp --sport 22
 - `-m state --state NEW,ESTABLISHED` — invoca el módulo *statefull* (ver [[firewalls#Tipo 2 — Statefull packet filters (filmina 7)|Firewalls, tipo 2]]): acepta paquetes que **inician** una conexión nueva o que pertenecen a una **ya establecida**.
 - `-j ACCEPT` — deja pasar el paquete.
 
-**Por qué `OUTPUT` sólo acepta `ESTABLISHED`, no `NEW`.** La conexión SSH la abre siempre el cliente hacia el servidor; el servidor nunca inicia una sesión SSH saliente por ese puerto, sólo responde dentro de una ya abierta. Si la regla de `OUTPUT` aceptara también `NEW`, estaría permitiendo que **el propio host** iniciara conexiones SSH salientes por el puerto 22 — un permiso que la regla de entrada no pide y que ensancharía innecesariamente la superficie de lo permitido, violando [[clase-08-principios-de-diseno-y-vulnerabilidades#1.1. Menor privilegio|menor privilegio]] *(lectura nuestra)*.
+**Por qué `OUTPUT` sólo acepta `ESTABLISHED`, no `NEW`.** La conexión SSH la abre siempre el cliente hacia el servidor; el servidor nunca inicia una sesión SSH saliente por ese puerto, sólo responde dentro de una ya abierta. Si la regla de `OUTPUT` aceptara también `NEW`, estaría permitiendo que **el propio host** iniciara conexiones SSH salientes por el puerto 22 — un permiso que la regla de entrada no pide y que ensancharía innecesariamente la superficie de lo permitido, violando [[principios-de-diseno#1. Menor privilegio|menor privilegio]] *(lectura nuestra)*.
 
 ### 4. Permitir conexiones http/s
 
@@ -133,10 +133,3 @@ La única de las seis que toca la chain `FORWARD`: el host actúa de **router** 
 | `-m state --state` | Filtra por estado de la conexión (`NEW`, `ESTABLISHED`, `INVALID`) | `INPUT`, `OUTPUT` |
 | `-m limit --limit/--limit-burst` | Régimen y ráfaga de *rate limiting* | `INPUT` |
 | `-j` | Target: `ACCEPT` / `DROP` | Todas |
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#3. Netfilter e iptables (filminas 10-13)|Clase 10 — Seguridad en la empresa]] — la sección de la clase que esta nota desarrolla
-- [[firewalls#Tipo 2 — Statefull packet filters (filmina 7)|Firewalls]] — qué es un statefull packet filter, del que `-m state` es la implementación concreta
-- [[reglas-de-los-firewalls-externo-e-interno|Reglas de los firewalls externo e interno]] — la política de alto nivel que estas reglas de `iptables` implementarían en la práctica
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#1.4. Mediación completa|Clase 08 — Principios de diseño y vulnerabilidades]] — el principio de mediación completa que la policy `DROP` por defecto materializa

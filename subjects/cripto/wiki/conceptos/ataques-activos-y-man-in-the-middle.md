@@ -8,7 +8,7 @@ unidad: 1
 clase: 5
 orden: 1
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, protocolos, mitm, ataques-activos, administracion-de-claves, clase-05, sin-dictar]
 sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 ---
@@ -17,7 +17,19 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 
 **Por qué ningún protocolo de intercambio de claves visto hasta la Clase 04 sobrevive a un adversario que puede modificar mensajes, y no solo leerlos.** Es la nota que explica el salto de modelo de amenaza que motiva toda la clase: pasar de "alguien escucha" a "alguien puede mentir en el medio".
 
-Cubre las filminas **4 a 6** del PDF de teoría de la Clase 05. **Esta clase todavía no se dictó** — hoy es 04/09/2026 y la fecha del [[cronograma]] es el 17/09 — así que la nota está escrita contra el PDF de filminas, Katz & Lindell y lecturas propias rotuladas; no hay transcripción ni callouts *De la transcripción*. Verificado renderizando las filminas 5 y 6 a 150 dpi.
+Cubre las filminas **2 a 6** del PDF de teoría de la Clase 05. **Esta clase todavía no se dictó** — hoy es 04/09/2026 y la fecha del [[cronograma]] es el 17/09 — así que la nota está escrita contra el PDF de filminas, Katz & Lindell y lecturas propias rotuladas; no hay transcripción ni callouts *De la transcripción*. Verificado renderizando las filminas 5 y 6 a 150 dpi.
+
+## El punto de partida: un canal seguro exige una clave ya compartida
+
+*Filminas 2-3.* Un criptosistema `CCA`-Secure permite enviar información entre $A$ y $B$ manteniendo confidencialidad e integridad —$\mathrm{Enc}_k(M)$, con la maquinaria de [[cifrado-autenticado|cifrado autenticado]]—, pero **exige que las dos partes ya conozcan una misma clave**. Un protocolo de [[intercambio-de-claves|intercambio de claves]] es lo que resuelve ese "ya conozcan": formalmente, un protocolo $\Pi(n)$ ejecutado por dos partes sin más entrada que el parámetro de seguridad, cuya salida es la transcripción de los mensajes intercambiados más dos claves, una por parte,
+
+$$\Pi(n) \;\longrightarrow\; (\mathrm{Tran},\, k_a,\, k_b)$$
+
+con la **condición fundamental** de que las dos coincidan:
+
+$$k_a = k_b$$
+
+Ese es exactamente el molde que instancia Diffie-Hellman en la [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04]], y la definición completa —con el experimento `KE` que mide si la clave resultante sirve— está en [[intercambio-de-claves|Intercambio de claves]]. Todo lo que sigue en esta clase **asume ese problema resuelto** contra un espía puramente pasivo, y pregunta qué pasa cuando el adversario deja de serlo.
 
 ## Los cuatro poderes de un atacante activo
 
@@ -30,7 +42,7 @@ Cubre las filminas **4 a 6** del PDF de teoría de la Clase 05. **Esta clase tod
 
 La filmina es categórica: **ninguno de los esquemas de intercambio de claves vistos hasta la Clase 04 funciona frente a este adversario**. La familia de ataques que lo explota es la que da nombre a esta nota: `Man in the Middle` (`MITM`).
 
-> **Por qué esto no es una sorpresa técnica, sino un cambio de modelo** *(lectura nuestra)*. Las pruebas de seguridad que el curso vio hasta acá —[[pruebas-de-indistinguibilidad|pruebas de indistinguibilidad]], los [[modelos-de-ataque|modelos de ataque]] `COA`/`KPA`/`CPA`/`CCA`— acotan qué puede **ver** o **elegir consultar** el adversario, pero siempre contra un canal que entrega los mensajes intactos entre las partes honestas. Un intercambio de claves ideal, como el $\Pi(n)\to(\mathrm{Tran}, k_a, k_b)$ de la [[clase-05-protocolos-criptograficos#1. Repaso: intercambio de claves y su límite|Clase 05, sección 1]], se diseñó y demostró bajo esa hipótesis de canal honesto. Un atacante que además puede **escribir** en el canal no está fuera del alcance de una primitiva más fuerte: está fuera del alcance del **modelo entero**, porque la garantía $k_a = k_b$ nunca se formuló contra un adversario con ese poder.
+> **Por qué esto no es una sorpresa técnica, sino un cambio de modelo** *(lectura nuestra)*. Las pruebas de seguridad que el curso vio hasta acá —[[pruebas-de-indistinguibilidad|pruebas de indistinguibilidad]], los [[modelos-de-ataque|modelos de ataque]] `COA`/`KPA`/`CPA`/`CCA`— acotan qué puede **ver** o **elegir consultar** el adversario, pero siempre contra un canal que entrega los mensajes intactos entre las partes honestas. Un intercambio de claves ideal, como el $\Pi(n)\to(\mathrm{Tran}, k_a, k_b)$ de [[intercambio-de-claves|Intercambio de claves]], se diseñó y demostró bajo esa hipótesis de canal honesto. Un atacante que además puede **escribir** en el canal no está fuera del alcance de una primitiva más fuerte: está fuera del alcance del **modelo entero**, porque la garantía $k_a = k_b$ nunca se formuló contra un adversario con ese poder.
 
 ## El problema de origen: ¿de dónde sale una clave pública? (filmina 5)
 
@@ -63,12 +75,3 @@ $E$ recibe un cifrado bajo **su propia** clave pública — la que $A$ cree que 
 ## Por qué esto reordena el resto de la clase
 
 Este ataque es la bisagra entre las dos mitades del temario que traza el [[clase-05-protocolos-criptograficos#Mapa de la clase|mapa de la clase]]: del lado asimétrico, la respuesta es atar identidades a claves con un tercero confiable que **firma** esa asociación — la [[infraestructura-de-clave-publica|infraestructura de clave pública]] y los [[certificados-digitales|certificados digitales]] que le siguen. Del lado simétrico, [[needham-schroeder|Needham-Schroeder]] enfrenta el mismo problema de identidad con un tercero confiable distinto — un `KDC` que **comparte** una clave con cada parte en lugar de firmar certificados.
-
-## Ver también
-
-- [[clase-05-protocolos-criptograficos#2. Ataques activos y man in the middle|Clase 05 — Protocolos criptográficos, sección 2]] — la sección de la que sale esta nota
-- [[infraestructura-de-clave-publica|Infraestructura de clave pública]] — la respuesta asimétrica al problema de esta nota
-- [[needham-schroeder|Needham-Schroeder]] — la respuesta simétrica al mismo problema de identidad
-- [[modelos-de-ataque|Modelos de ataque]] — la taxonomía `COA`/`KPA`/`CPA`/`CCA` contra la que se mide un adversario pasivo, y por qué un atacante activo queda fuera de ella
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — el tipo de prueba de seguridad que asume un canal honesto entre las partes
-- [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] — de donde viene el intercambio de claves asimétrico que este ataque rompe

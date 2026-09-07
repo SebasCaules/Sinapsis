@@ -90,14 +90,3 @@ Es el Ej. 8 de la [[guia-01-criptografia-clasica|Guía 1]]. El punto es que la *
 Comparar con el esfuerzo en COA: en sustitución monoalfabética hace falta [[criptoanalisis-por-frecuencias|análisis de frecuencias]] con suficiente texto; en Vigenère hace falta [[test-de-kasiski|Kasiski]] más frecuencias por bloque. **El modelo cambia el costo del ataque en órdenes de magnitud** — de ahí que sea parte del enunciado y no un detalle.
 
 > Detalle a cuidar en el caso Vigenère: con $m = \texttt{aaa}\dots$, se recupera la clave **sólo si `Enc` es determinístico y el mensaje arranca alineado con $k_{1}$**, que es el caso en el esquema clásico. En esquemas modernos `Enc` es probabilístico justamente para romper esto.
-
-## Ver también
-
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el árbol de ataques tal como se dio en clase
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el ataque genérico, disponible en cualquier modelo
-- [[secreto-perfecto|Secreto perfecto]] — seguridad incondicional, sin límite de cómputo
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul` y `CPA` como juegos formales
-- [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — el `CCA` de esta tabla convertido en juego formal, con el ejercicio que refuta al cifrado de flujo
-- [[maleabilidad|Maleabilidad]] — el ataque **activo** que ninguna de las pruebas anteriores a `CCA` detecta: modificar el criptograma en vez de leerlo
-- [[seguridad-computacional|Seguridad computacional]] — el marco donde estos modelos se vuelven demostrables
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]]

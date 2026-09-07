@@ -114,7 +114,7 @@ Dos enteros son **coprimos** cuando no comparten ningún factor primo. Tres lect
 | **Bézout** | existen $x,y$ con $ax + by = 1$ | [[algoritmo-de-euclides-extendido\|Euclides extendido]] |
 | **Inversibilidad** | $a$ tiene inverso módulo $b$ | [[inverso-modular\|inverso modular]] — es la que le importa a la criptografía |
 
-> **La tercera es la que convierte esto en criptografía.** Ser coprimo con el módulo es exactamente la condición para que multiplicar por $a$ sea una **biyección** de $\mathbb{Z}_b$ en sí mismo — o sea, para que se pueda **descifrar**. En el [[guia-02-resolucion|Ej. 7 de la Guía 2]] eso es literalmente el espacio de claves usable. *(Lectura nuestra: el manuscrito nunca menciona criptografía.)*
+> **La tercera es la que convierte esto en criptografía.** Ser coprimo con el módulo es exactamente la condición para que multiplicar por $a$ sea una **biyección** de $\mathbb{Z}_b$ en sí mismo — o sea, para que se pueda **descifrar**. En el [[guia-02-criptografia-simetrica|Ej. 7 de la Guía 2]] eso es literalmente el espacio de claves usable. *(Lectura nuestra: el manuscrito nunca menciona criptografía.)*
 
 **Cuidado con "coprimo" versus "primo".** No hace falta que ninguno de los dos sea primo: $8 \perp 9$ y ninguno lo es. Y ser primo tampoco alcanza por sí solo: $3$ es primo pero $3 \not\perp 12$.
 
@@ -219,7 +219,7 @@ y el resultado no depende de qué representante elijas. Con eso, $(\mathbb{Z}_m,
 |---|---|---|
 | $m$ primo | **cuerpo** $\mathbb{Z}_p$ | los $p-1$ no nulos |
 | $m$ compuesto | anillo con **divisores de cero** | los $\varphi(m)$ coprimos con $m$ |
-| $m = 32$ | anillo; $4\cdot 8 \equiv 0$ | los $16$ impares — [[guia-02-resolucion\|Ej. 7 de la Guía 2]] |
+| $m = 32$ | anillo; $4\cdot 8 \equiv 0$ | los $16$ impares — [[guia-02-criptografia-simetrica\|Ej. 7 de la Guía 2]] |
 
 ---
 
@@ -233,14 +233,14 @@ Los cifrados clásicos de la [[clase-01-introduccion-y-criptografia-clasica|Clas
 |---|---|---|
 | [[cifrado-por-rotacion\|Rotación / César]] | $c = (m + k) \bmod n$ | la suma en el grupo $(\mathbb{Z}_n, +)$, con $n = 27$ para el castellano |
 | [[cifrado-de-vigenere\|Vigenère]] | $c_i = \bigl(m_i + k_{((i-1)\bmod t)+1}\bigr) \bmod n$ | **dos** módulos distintos y con roles distintos: $\bmod\ n$ para las letras, $\bmod\ t$ para el índice cíclico de la clave |
-| [[guia-02-resolucion\|Ej. 7 de la Guía 2]] | $E(K,M) = (M \cdot K) \bmod 32$ | el **producto** en $\mathbb{Z}_{32}$, no la suma |
+| [[guia-02-criptografia-simetrica\|Ej. 7 de la Guía 2]] | $E(K,M) = (M \cdot K) \bmod 32$ | el **producto** en $\mathbb{Z}_{32}$, no la suma |
 
 **Y ahí está el salto que justifica todo este bloque.** Nótese la diferencia entre las dos primeras filas y la tercera:
 
 - La rotación y Vigenère **suman**. La suma en $\mathbb{Z}_n$ es siempre inversible: sumar $k$ se deshace restando $k$, para **cualquier** $k$. Por eso $\mathsf{Dec}$ siempre existe y nadie tuvo que hablar de teoría de números.
 - El cifrado multiplicativo **multiplica**. Y el producto en $\mathbb{Z}_m$ **no siempre es inversible**: sólo lo es cuando la clave es coprima con el módulo (sección 5, "lo que no se hereda"). De golpe, la [[criptosistema#Condición de corrección|condición de corrección del criptosistema]] —que $\mathsf{Dec}_k(\mathsf{Enc}_k(m)) = m$— deja de ser gratis y **pasa a depender de un cálculo de teoría de números**.
 
-Ese es el motivo por el que el docente pidió este repaso justo al cerrar la [[clase-02-cifrado|Clase 02]], y por el que el [[guia-02-resolucion|Ej. 7 de la Guía 2]] no se puede terminar sin [[algoritmo-de-euclides-extendido|Euclides extendido]].
+Ese es el motivo por el que el docente pidió este repaso justo al cerrar la [[clase-02-cifrado|Clase 02]], y por el que el [[guia-02-criptografia-simetrica|Ej. 7 de la Guía 2]] no se puede terminar sin [[algoritmo-de-euclides-extendido|Euclides extendido]].
 
 En Vigenère, además, el índice $((i-1)\bmod t)+1$ es un uso de $\mathbb{Z}_t$ **como conjunto de índices**, no como conjunto de valores: es la forma canónica de decir *"recorrer la clave en círculo"*. Es el mismo truco que usa el contador de [[modos-de-encadenamiento|CTR]] para no repetir bloques de keystream.
 
@@ -269,17 +269,4 @@ En Vigenère, además, el índice $((i-1)\bmod t)+1$ es un uso de $\mathbb{Z}_t$
 - La **única fuente que lo asigna** a una clase es la [transcripción de la Clase 02](../../raw/clases/Clase%2002pt1-Transcripcion.VTT), donde el docente lo deja como tarea explícita al cerrar la clase y avisa que *"eso le va a servir para el parcial"*.
 - La [[indice#Convenciones|convención del vault]] dice que los conceptos que salen de la práctica o de la guía **continúan el contador después de los de teoría**. La Clase 02 cierra en `02.12`.
 
-Por eso: **unidad 1, clase 2, orden 13 en adelante**. Si más adelante la cátedra introduce el tema formalmente en la **Clase 4 (Criptografía Asimétrica, 10/09)**, corresponde renumerar este bloque a `04.xx` — son tres notas de concepto más los links entrantes desde el [[teoria-de-numeros|apunte]], la [[guia-02-resolucion|Guía 2]] y el [[indice|índice]].
-
-## Ver también
-
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — cómo se **calcula** el mcd y cómo salen los coeficientes de Bézout
-- [[inverso-modular|Inverso modular]] — la operación que le falta a $\mathbb{Z}_m$ y cómo recuperarla
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — qué pasa cuando el módulo es primo y todo se vuelve inversible
-- [[teoria-de-numeros|Teoría de números]] — la transcripción fiel del manuscrito, con su notación propia y las erratas marcadas
-- [[cuerpos-finitos|Cuerpos finitos]] — el apunte hermano, con $\varphi$ de Euler, grupos cíclicos y $\mathrm{GF}(2^{n})$
-- [[cifrado-por-rotacion|Cifrado por rotación]] — aritmética modular en su forma más simple: sólo suma
-- [[cifrado-de-vigenere|Cifrado de Vigenère]] — dos módulos a la vez, uno para las letras y otro para el índice
-- [[criptosistema|Criptosistema]] — la condición de corrección que obliga a que la clave sea inversible
-- [[guia-02-resolucion|Guía 2 — Resolución]] — el Ej. 7 es donde todo esto se cobra
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que encarga el repaso
+Por eso: **unidad 1, clase 2, orden 13 en adelante**. Si más adelante la cátedra introduce el tema formalmente en la **Clase 4 (Criptografía Asimétrica, 10/09)**, corresponde renumerar este bloque a `04.xx` — son tres notas de concepto más los links entrantes desde el [[teoria-de-numeros|apunte]], la [[guia-02-criptografia-simetrica|Guía 2]] y el [[indice|índice]].

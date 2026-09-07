@@ -81,12 +81,3 @@ $$\begin{array}{l|l|l}
 \end{array}$$
 
 La fila que más distingue a los dos modelos es la de la memoria: implementar la muralla china exige un sistema que **registre y consulte el historial de accesos** de cada sujeto para cada decisión de lectura, algo que Bell-LaPadula, con su comparación puntual de niveles, no necesita.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#8. Muralla china|Clase 06 — Políticas de seguridad y control de acceso § 8. Muralla china]]
-- [[bell-lapadula|Bell-LaPadula]] — el modelo del que la propiedad de cierre de esta nota copia la lógica, adaptada a COI y CD
-- [[modelos-de-integridad-de-biba|Modelos de integridad de Biba]] — el camino de transferencia de información, la versión de Biba del mismo canal indirecto que motiva la propiedad de cierre acá
-- [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]] — por qué este modelo cuenta como híbrido de las dos primeras propiedades
-- [[modelos-de-politica|Modelos de política]] — el tercer modelo concreto de la familia que abre esta sección
-- [[composicion-de-politicas|Composición de políticas]] — qué pasa al intentar combinar modelos como este con otros, en el resto de la clase

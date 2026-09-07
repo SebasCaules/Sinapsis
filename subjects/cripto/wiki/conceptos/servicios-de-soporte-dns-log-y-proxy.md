@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 7
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, dns, logging, dmz, mecanismos-exclusivos, defensa-en-profundidad, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -17,7 +17,7 @@ sources: ["Clase 11 - Seguridad en Redes.pdf"]
 
 **Los tres servicios que no atienden directamente a un cliente externo, sino que sostienen a los que sí lo hacen: resolución de nombres, registro de eventos y una copia de staging del sitio web.** Es la nota donde el caso de estudio admite, por primera vez, que un principio de diseño se viola a propósito — y muestra cómo se mitiga en vez de evitarla.
 
-*(Nota de nomenclatura.)* La filmina 27 titula este bloque completo "Otros" y su último servicio es el **web server interno**, no un proxy adicional — el servicio de **web proxy** propiamente dicho ya está cubierto en [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]], filmina 21, desarrollado en la clase en [[clase-10-seguridad-en-la-empresa#Servicio web proxy (filmina 21)|Servicio web proxy]]. Se conserva el nombre de archivo tal como fue asignado, y esta nota linkea al proxy real en el lugar que le corresponde en vez de inventarle contenido nuevo.
+*(Nota de nomenclatura.)* La filmina 27 titula este bloque completo "Otros" y su último servicio es el **web server interno**, no un proxy adicional — el servicio de **web proxy** propiamente dicho ya está cubierto en [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]], filmina 21, desarrollado en [[diseno-de-servicios-en-la-dmz#Servicio web proxy (filmina 21)|Servicio web proxy]]. Se conserva el nombre de archivo tal como fue asignado, y esta nota linkea al proxy real en el lugar que le corresponde en vez de inventarle contenido nuevo.
 
 Cubre las filminas **25 a 27** del deck `Clase 11 - Seguridad en Redes.pdf`. La clase todavía no se dictó — hoy es 04/09/2026 y está agendada para el 29/10 — así que esta nota está escrita contra el PDF de filminas, sin transcripción ni grabación; ver el aviso de fuente completo en [[clase-10-seguridad-en-la-empresa|Clase 10 — Seguridad en la empresa]].
 
@@ -43,7 +43,7 @@ Esta segunda función es la que la propia filmina marca como un problema, textua
 
 La mitigación que ofrece la propia filmina no elimina la violación —sigue siendo un servicio compartido por todos— sino que **acota el daño de un servidor comprometido**: *"como medida extra se suelen configurar las direcciones de los firewalls en cada servidor"*. Es decir, cada servidor conserva, fuera del DNS, una referencia fija a los firewalls que necesita alcanzar; si el DNS interno cae o es manipulado, esa ruta crítica no depende de una resolución de nombres que podría estar mentida. Es la misma lógica que aparece de nuevo, generalizada a toda la arquitectura, en la [[variaciones-de-la-arquitectura|unificación de servidores de redes chicas]]: un principio que cede ante una restricción práctica, compensado con una medida puntual en vez de descartado.
 
-*(Lectura nuestra.)* Ninguna de las dos filminas anteriores del caso de estudio —ni el [[clase-10-seguridad-en-la-empresa#Servicio web (filminas 16-17)|servicio web]] ni el [[clase-10-seguridad-en-la-empresa#Servicio email (filminas 18-20)|servicio email]]— admite abiertamente violar un principio de diseño: las dos presentan el diseño como si cumpliera todos los principios. Ésta es la primera de las dos excepciones que la clase reconoce explícitamente (la otra es la unificación de servidores de la filmina 35); conviene tenerlas ambas en la cabeza como el material más probable de una pregunta de "justifique un trade-off" en el parcial.
+*(Lectura nuestra.)* Ninguna de las dos filminas anteriores del caso de estudio —ni el [[diseno-de-servicios-en-la-dmz#Servicio web (filminas 16-17)|servicio web]] ni el [[diseno-de-servicios-en-la-dmz#Servicio email (filminas 18-20)|servicio email]]— admite abiertamente violar un principio de diseño: las dos presentan el diseño como si cumpliera todos los principios. Ésta es la primera de las dos excepciones que la clase reconoce explícitamente (la otra es la unificación de servidores de la filmina 35); conviene tenerlas ambas en la cabeza como el material más probable de una pregunta de "justifique un trade-off" en el parcial.
 
 ## Log Server en DMZ (filmina 26)
 
@@ -55,7 +55,7 @@ Recibe logs de **todos** los servidores de la DMZ, con tres reglas de diseño:
 
 > **Errata de la filmina.** La filmina 26 escribe *"filessytem"* en vez de *"filesystem"*, con dos letras trastocadas. Verificado contra la página renderizada — no es un artefacto de `pdftotext`, la palabra está mal escrita en la lámina.
 
-La regla de "sólo agregar, nunca leer ni modificar" es la misma que ya aparece en la [[clase-10-seguridad-en-la-empresa#Servicio web (filminas 16-17)|carga de órdenes del servidor web]] (filmina 16): ahí un proceso sólo puede escribir en una zona que otro lee después; acá un servidor sólo puede escribir en un log que otro proceso conserva. En ambos casos, comprometer el emisor no da acceso de lectura a lo ya emitido — el atacante puede seguir agregando ruido al log, pero no puede purgar la evidencia de lo que hizo antes de ser detectado.
+La regla de "sólo agregar, nunca leer ni modificar" es la misma que ya aparece en la [[diseno-de-servicios-en-la-dmz#Servicio web (filminas 16-17)|carga de órdenes del servidor web]] (filmina 16): ahí un proceso sólo puede escribir en una zona que otro lee después; acá un servidor sólo puede escribir en un log que otro proceso conserva. En ambos casos, comprometer el emisor no da acceso de lectura a lo ya emitido — el atacante puede seguir agregando ruido al log, pero no puede purgar la evidencia de lo que hizo antes de ser detectado.
 
 **Ante un incidente**, la filmina resuelve los dos escenarios de compromiso posibles:
 
@@ -72,14 +72,4 @@ Cierra el capítulo de servicios de soporte con la pieza que faltaba para entend
 - **Permite modificar y probar aplicaciones y modificaciones**, con algún control de acceso implementado en el propio servidor.
 - **Permite implementar el mecanismo para actualizar la página web del servidor en la DMZ**, vía acceso SSH desde una terminal administrativa.
 
-Es, en terminología moderna, un entorno de *staging*: el cambio se prueba acá, adentro de la red interna, y de acá se empuja hacia el servidor expuesto — nunca al revés. Encaja con la restricción que ya fijaban las [[clase-10-seguridad-en-la-empresa#Servicio web (filminas 16-17)|consecuencias del servicio web]]: *"el servidor sólo acepta conexiones administrativas remotas desde la red interna"*. El web server interno es, precisamente, el origen de esas conexiones administrativas.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#7. Caso de estudio: servicios de soporte — DNS, log y servidor web interno (filminas 25-27)|Clase 10 — Seguridad en la empresa: sección 7]]
-- [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]] — el servicio web y de email a los que estos tres dan soporte
-- [[zona-desmilitarizada|Zona desmilitarizada]]
-- [[segmentacion-de-la-red-interna|Segmentación de la red interna]]
-- [[analisis-de-puntos-de-entrada|Análisis de puntos de entrada]]
-- [[variaciones-de-la-arquitectura|Variaciones de la arquitectura]] — la otra excepción admitida a un principio de diseño
-- [[videografia|Videografía]] — ningún video de la cátedra cubre esta clase, confirmado ahí
+Es, en terminología moderna, un entorno de *staging*: el cambio se prueba acá, adentro de la red interna, y de acá se empuja hacia el servidor expuesto — nunca al revés. Encaja con la restricción que ya fijaban las [[diseno-de-servicios-en-la-dmz#Consecuencias (filmina 17)|consecuencias del servicio web]]: *"el servidor sólo acepta conexiones administrativas remotas desde la red interna"*. El web server interno es, precisamente, el origen de esas conexiones administrativas.

@@ -75,13 +75,3 @@ La filmina 5 no desarrolla el punto en texto: sólo muestra dos imágenes, un se
 ## Por qué esta nota antecede a la criptografía asimétrica
 
 El KDC resuelve la distribución de claves **sin** salir del mundo simétrico: sigue habiendo una clave fija por participante, sólo que administrada centralmente. La [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04]] plantea esta sección como motivación y a continuación introduce una alternativa radicalmente distinta —dos claves por participante, una pública y una privada, sin ningún tercero de confianza que reparta secretos—. El KDC y la criptografía asimétrica no son mutuamente excluyentes: en la práctica, el intercambio de claves asimétrico (Diffie-Hellman) y los KDC conviven en protocolos reales, cada uno resolviendo una parte distinta del problema de gestión de claves que retoma la [[clase-05-protocolos-criptograficos|Clase 05]].
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#1. Distribución de claves|Clase 04 — Criptografía asimétrica y firma digital § 1. Distribución de claves]] — la sección de la que sale esta nota
-- [[grupos-anillos-y-cuerpos|Grupos, anillos y cuerpos]] — el álgebra que hace falta para la alternativa asimétrica que sigue
-- [[intercambio-de-claves|Intercambio de claves]] — el protocolo formal y el experimento `KE` que reemplazan al KDC en el mundo de clave pública
-- [[diffie-hellman|Diffie-Hellman]] — el primer intercambio de claves asimétrico, motivado directamente por el problema de esta nota
-- [[cifrado-autenticado|Cifrado autenticado]] — el criptosistema `CCA-Secure` cuya clave compartida es el punto de partida de esta nota
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — de dónde sale el criptosistema simétrico que motiva todo el problema
-- Katz & Lindell, cap. 10 *Key Management and the Public-Key Revolution* — desarrollo formal del problema de distribución de claves ([[bibliografia|bibliografía]])

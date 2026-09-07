@@ -8,9 +8,9 @@ unidad: 1
 clase: 2
 orden: 3
 created: 2026-08-21
-updated: 2026-08-24
-tags: [criptografia, flujo, stream-cipher, prg, rc4, salsa20, clase-02]
-sources: [Clase 02 - Criptografia - Cifrado.pdf]
+updated: 2026-09-06
+tags: [criptografia, flujo, stream-cipher, prg, rc4, salsa20, clase-02, transcripcion]
+sources: [Clase 02 - Criptografia - Cifrado.pdf, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Criptosistema de flujo
@@ -35,6 +35,20 @@ Idéntico al OTP salvo por un detalle que lo cambia todo:
 $G$ **expande**: toma $n$ bits de clave y produce todos los bits de keystream que haga falta. Eso es exactamente lo que resuelve la primera mala noticia del OTP —la clave deja de ser tan larga como el mensaje— y exactamente lo que **le prohíbe** tener secreto perfecto.
 
 > **Por qué no puede ser perfectamente secreto, en una línea.** El [[secreto-perfecto#Teorema de Shannon (cota de claves)|teorema de Shannon]] exige $\lvert K\rvert \ge \lvert M\rvert$, y acá $\lvert K\rvert \lll \lvert M\rvert$ por construcción. No es un descuido: es el precio que se eligió pagar. Lo que se busca no es que el criptograma no revele **nada**, sino que **ningún adversario PPT pueda aprovechar lo que revela**.
+
+> **Sobre el ejemplo de la filmina.** *(Precisión nuestra.)* El exponente de $\lvert M\rvert = \lvert K\rvert^{128}$ da $2^{16384}$, un número sin interpretación natural para un espacio de mensajes. Lo que la filmina quiere decir es que **los mensajes son muchísimo más largos que la clave**, pero el $128$ es arbitrario y no lo justifica.
+
+**La semilla del generador *es* la clave del criptosistema.** Ése es el cambio de vocabulario que hay que registrar: $\lvert K\rvert$ pasa a ser el tamaño de la semilla y no el del mensaje.
+
+> [!quote]- De la transcripción — de dónde sale la clave, ahora (cues pt1 285-291)
+> *"Es muy impráctico tener que usar claves nuevas todo el tiempo, entonces puedo tener un generador pseudoaleatorio que me genere las claves (…) con eso voy a tener una especie de clave nueva todo el tiempo."*
+>
+> Y el punto de vocabulario: ***"el seed se empieza a transformar en una especie de clave"***.
+
+> [!quote]- De la transcripción — el secreto perfecto que se parte, y la tesis de toda la clase (cue pt1 255, 787)
+> *"Tomen todo esto como que **se parte el secreto perfecto**, y vamos a ir rompiendo cositas del secreto perfecto, pero tratando de que lo que vamos a ir construyendo sea **como una especie de secreto perfecto**."*
+>
+> El flujo cambia $k$ por $G(k)$; el nonce recupera *"claves distintas"*; y de los [[modos-de-encadenamiento|modos de bloque]] dice, al llegar a `CFB` (cue pt1 787), que *"se está pareciendo cada vez más a lo que es el mismo OTP"*. **Toda la clase es una sucesión de imitaciones cada vez más baratas del [[one-time-pad|One Time Pad]]**, y el propio docente lo confirma de frente al abrir la segunda fecha.
 
 ## Teorema de la clase
 
@@ -85,13 +99,3 @@ Dos cosas para leer en esa tabla:
 2. **Los recomendados tienen un segundo argumento $\{0,1\}^{64}$** — que la filmina señala con una flecha: es el **IV**. La diferencia estructural entre las dos mitades de la tabla es precisamente que los modernos toman IV en la firma de la función.
 
 > **Errata de la filmina:** escribe *"E0 (Bluetooh)"* — es **Bluetooth**.
-
-## Ver también
-
-- [[one-time-pad|One Time Pad]] — de dónde sale la construcción
-- [[generador-pseudoaleatorio|Generador pseudoaleatorio]] — la pieza que hace el trabajo
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav` que pasa, `Mul` que no
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — cómo se arregla
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — OFB, CFB y CTR construyen un flujo a partir de una primitiva de bloque
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]]
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

@@ -8,7 +8,7 @@ unidad: 1
 clase: 4
 orden: 7
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, criptografia-asimetrica, rsa, pkcs1, padding, cca-secure, tamano-de-claves, clase-04, sin-dictar]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf"]
 ---
@@ -43,22 +43,14 @@ $r$ tiene que ser distinto de cero **byte a byte**, y la razón es puramente de 
 
 ## CPA sí, CCA no
 
-La propia filmina lo dice sin vueltas: *"Se cree que es `CPA-Secure`. Pero se encontraron ataques que muestran que no es `CCA-Secure`."* Es una precisión que importa para el parcial, porque el vault tenía —antes de que esta clase existiera— una conjetura en sentido contrario: [[parciales-viejos#Discrepancias con el apunte|Parciales viejos]] especulaba que el padding aleatorio de `RSA` "apunta a `CCA`" y que la sentencia de examen 2C-2025 (*"el padding aleatorio en RSA es para que sea seguro ante texto cifrado elegido"*) era defendible como verdadera. Esta filmina la revierte: esa sentencia es **falsa**, y lo correcto es *"para que sea `CPA-Secure`"*. El desarrollo completo de esa discrepancia está en [[clase-04-criptografia-asimetrica-y-firma-digital#8-pkcs1-y-tamaño-de-claves|Clase 04 § 8. PKCS#1 y tamaño de claves]]; esta nota no lo repite.
+La propia filmina lo dice sin vueltas: *"Se cree que es `CPA-Secure`. Pero se encontraron ataques que muestran que no es `CCA-Secure`."*
+
+**Esta filmina revierte —no solo cierra— una conclusión que el vault ya traía en sentido contrario.** [[parciales-viejos#Discrepancias con el apunte|Parciales viejos]] no dejaba el punto neutralmente abierto: traía una conclusión tentativa específica, rotulada *"precisión nuestra"* y marcada a propósito para contrastarla cuando esta clase existiera, y esa conclusión iba en sentido **opuesto** al de la filmina — sostenía que el padding de `RSA` "sí apunta a `CCA`" y que la sentencia del examen 2C-2025 (*"el padding aleatorio en RSA es para que sea seguro ante texto cifrado elegido"*) era "defendible como verdadera". La cátedra dice lo contrario: confirma que la corrección del apunte del estudiante —*"es para que sea `CPA-Secure`"*— es la que coincide con la filmina, y que la sentencia de examen es **falsa**, sin matices.
+
+**Qué parte del argumento viejo sobrevive.** El razonamiento de [[parciales-viejos#Discrepancias con el apunte|Parciales viejos]] se apoyaba en `RSA-OAEP`, que efectivamente se diseñó para `IND-CCA2`; eso sigue siendo cierto **en general**, pero `RSA-OAEP` no es el esquema que describe esta filmina, que es `PKCS#1 v1.5` puro. El ataque de Bleichenbacher contra `PKCS#1 v1.5` es, precisamente, un ataque de texto cifrado elegido que explota que este esquema **no** es `CCA-Secure` — o sea, el mismo ejemplo que se citaba a favor de la conjetura es el que la desmiente.
 
 **Por qué no llega a CCA** *(lectura nuestra, no desarrollada en la filmina)*. La razón general es conocida y vale la pena tenerla para el parcial: `PKCS#1 v1.5` no valida la estructura del padding de forma que no filtre información. Un servidor que responde distinto según si un texto cifrado recibido despaddea a un $m'$ bien formado o no —esto se llama un *padding oracle*— le da a un atacante que puede enviar cifrados arbitrarios (exactamente el escenario `CCA`) una señal binaria por cada consulta. El ataque de Bleichenbacher (1998) explota justo eso: usa la maleabilidad multiplicativa de `RSA` —cifrar $c\cdot s^{e} \bmod n$ es cifrar $m\cdot s \bmod n$, sin conocer $m$— para ir acotando el mensaje original consulta a consulta, usando solo la respuesta "padding válido / inválido" del servidor. No hace falta invertir ninguna función: hace falta **una función de descifrado que se deje usar como oráculo**, que es exactamente lo que mide la prueba `CCA` y lo que `PKCS#1 v1.5` no cierra.
 
 ## Tamaño de claves
 
 La filmina 28 no da una fórmula: exhibe un módulo `RSA-2048` completo —un número de más de 600 dígitos decimales— como ilustración de escala, sin desarrollarlo más. El punto que dice, sin decirlo en palabras, es que **2048 bits no es un número abstracto**: es un entero de ese tamaño, y factorizarlo —el problema del que depende toda la seguridad de `RSA`— significa lidiar con un número así de grande. Cuánto hace falta exactamente, y por qué el número cambia según el tipo de campo, es el desarrollo de [[costo-del-cifrado-asimetrico|Costo del cifrado asimétrico]].
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#8-pkcs1-y-tamaño-de-claves|Clase 04 — Criptografía asimétrica y firma digital § 8. PKCS#1 y tamaño de claves]]
-- [[rsa|RSA]] — el esquema textbook cuyo determinismo motiva este padding
-- [[criptosistema-asimetrico|Criptosistema asimétrico]] — la prueba `Eav` y por qué exige cifrado no determinístico
-- [[costo-del-cifrado-asimetrico|Costo del cifrado asimétrico]] — qué tamaño de módulo hace falta y por qué
-- [[el-gamal|El Gamal]] — la otra construcción asimétrica de esta clase, probabilística por diseño y sin necesitar padding
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — la familia `Eav`/`CPA`/`CCA` completa
-- [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — qué mide `CCA-Secure` y por qué un oráculo de descifrado es la amenaza
-- [[eleccion-de-primitivas|Elección de primitivas]] — el criterio general de tamaños de clave recomendados
-- [[parciales-viejos#Discrepancias con el apunte|Parciales viejos]] — la discrepancia sobre `PKCS#1` que esta filmina resuelve

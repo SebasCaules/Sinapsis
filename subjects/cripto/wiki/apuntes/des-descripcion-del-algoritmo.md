@@ -398,7 +398,7 @@ Todo lo de esta sección 6 es **exactamente** la maquinaria que explica el **Eje
 
 O sea: la debilidad **no está en las cajas $S$ ni en las rondas**, está enteramente en el key schedule — y más precisamente en que PC-1 más rotaciones puede tener **puntos fijos**. Como cada mitad tiene 2 valores constantes posibles, hay $2 \times 2 = 4$ claves débiles; y admitiendo además las dos mitades **alternadas**, otras 12 claves semi-débiles agrupadas en 6 pares.
 
-La resolución completa —la demostración formal, las cuatro claves en hexadecimal, el papel de los bits de paridad y por qué el impacto práctico es casi nulo pero el riesgo de un `Gen` mal hecho no— está en **[[guia-02-resolucion#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]]**; la definición que da la cátedra —*"en lugar de generar 16 subclaves distintas, genera 1"* para las débiles, *"2 o 4"* para las semi-débiles— es de la [[practica-03-seudoaleatoriedad-y-modos|Práctica 3]] del 24/08.
+La resolución completa —la demostración formal, las cuatro claves en hexadecimal, el papel de los bits de paridad y por qué el impacto práctico es casi nulo pero el riesgo de un `Gen` mal hecho no— está en **[[guia-02-criptografia-simetrica#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]]**; la definición que da la cátedra —*"en lugar de generar 16 subclaves distintas, genera 1"* para las débiles, *"2 o 4"* para las semi-débiles— es de la [[practica-03-seudoaleatoriedad-y-modos|Práctica 3]] del 24/08.
 
 ---
 
@@ -433,7 +433,7 @@ La fuente lo despacha en tres renglones (sección *(ii)*):
 
 > *"Usar el mismo proceso descrito con anterioridad pero empleando las subclaves en orden inverso, esto es, en lugar de aplicar K(1) para la primera iteración aplicar K(16), K(15) para la segunda y así hasta K(1)."*
 
-**Nada más cambia**: las mismas $\mathrm{IP}$, $\mathrm{IP}^{-1}$, $E$, cajas $S$, $P$, el mismo intercambio final. Sólo se invierte el orden de las 16 subclaves. La fuente **no demuestra** que eso funcione, lo afirma; la razón estructural está en la [[des-y-3des#Estructura: red de Feistel|nota de concepto]] y se usa como Pieza 1 en el [[guia-02-resolucion#Ejercicio 8|Ejercicio 8 de la Guía 2]].
+**Nada más cambia**: las mismas $\mathrm{IP}$, $\mathrm{IP}^{-1}$, $E$, cajas $S$, $P$, el mismo intercambio final. Sólo se invierte el orden de las 16 subclaves. La fuente **no demuestra** que eso funcione, lo afirma; la razón estructural está en la [[des-y-3des#Estructura: red de Feistel|nota de concepto]] y se usa como Pieza 1 en el [[guia-02-criptografia-simetrica#Ejercicio 8|Ejercicio 8 de la Guía 2]].
 
 Y una consecuencia inmediata para implementar: por lo visto en 6.2, **$C_{16} = C_0$ y $D_{16} = D_0$**, así que las subclaves de descifrado se generan con el mismo PC-1 y **rotando a derecha** — no hace falta almacenar las 16.
 
@@ -527,18 +527,3 @@ $$
 
 Los tres números para llevarse: **$4 \cdot 1 + 12 \cdot 2 = 28$** (la suma de las rotaciones, que cierra el key schedule), **$56 = 64 - 8$** (los bits de paridad que PC-1 tira) y **$256$ bytes** de cajas $S$, que es donde vive toda la no-linealidad de DES.
 
----
-
-## Ver también
-
-- [[des-y-3des|DES y 3-DES]] — **la nota de concepto**: red de Feistel, la función $F$ en bloques, claves débiles y semi-débiles, 3-DES, meet-in-the-middle, y la cronología de ataques que dice por qué hoy DES está quebrado por **tamaño de clave**. Conviene empezar por ahí si lo que se busca es *entender*, y volver acá si lo que se busca es *implementar*
-- [[guia-02-resolucion#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]] — **las claves débiles**, que son un corolario directo del key schedule de la sección 6: si $C_0$ y $D_0$ son constantes, las rotaciones no las mueven y las 16 subclaves salen iguales
-- [[implementaciones-de-referencia|Implementaciones de referencia]] — el código, incluida la implementación de DES en Java que está en `raw/apuntes/`
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — por qué DES **no es** un criptosistema por sí solo, y el padding que el paso 2.1 de esta fuente deja sin especificar
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — lo que hay que ponerle encima para cifrar más de 64 bits; y el modo que la fuente no declara en sus vectores de prueba
-- [[aes|AES]] — el reemplazo, con la comparación natural: también sustitución + permutación por rondas, pero sin Feistel y con cajas $S$ derivadas de una fórmula en vez de tabuladas
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — DES como el ejemplo canónico de *quebrado*
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — dónde queda DES hoy (tachado) y por qué los tamaños de clave importan
-- [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] — la filmina del 24/08 que manda a buscar este apunte en *Material Didáctico/Extra* y que define las claves débiles y semi-débiles por cantidad de subclaves
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que desarrolla DES
-- [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]] — los enunciados

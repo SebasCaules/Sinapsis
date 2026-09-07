@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 1
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, arquitectura-de-red, politica-de-seguridad, defensa-en-profundidad, dmz, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -25,8 +25,8 @@ sources: ["Clase 11 - Seguridad en Redes.pdf"]
 
 La filmina de apertura, titulada simplemente *"Introducción"*, no define ningún mecanismo — fija tres condiciones que gobiernan todo lo que sigue:
 
-1. **Es aplicación, no invención.** *"Aplicación de principios básicos en diseño y construcción de redes."* Los principios en cuestión son los ocho de Saltzer y Schroeder que desarrolla la [[clase-08-principios-de-diseno-y-vulnerabilidades#1. Los ocho principios de diseño de Saltzer y Schroeder|Clase 08]] — menor privilegio, mediación completa, separación de privilegios, mecanismos exclusivos, aceptación psicológica, entre otros—. Esta clase no agrega principios nuevos: muestra cómo esos ocho, pensados en abstracto, se traducen en decisiones concretas de topología de red.
-2. **Se parte de una política ya definida.** *"Se parte de una política de seguridad a implementar."* El orden importa: primero existe la política —qué está permitido y qué no, para quién—, y **después** se diseña la red que la hace cumplir. La red no decide la política, la ejecuta. Es la costura exacta con la [[clase-06-politicas-de-seguridad-y-control-de-acceso#1. Política de seguridad y sistema seguro|Clase 06]], que define una política de seguridad como la partición de los estados de un sistema en autorizados y no autorizados. *(Síntesis nuestra, no una equivalencia que dé ninguna filmina del deck.)* Un firewall es, en esos términos, un mecanismo de transición que intenta garantizar que ninguna transición cruce esa partición hacia el lado no autorizado.
+1. **Es aplicación, no invención.** *"Aplicación de principios básicos en diseño y construcción de redes."* Los principios en cuestión son los ocho de Saltzer y Schroeder que desarrolla [[principios-de-diseno|Principios de diseño]] — menor privilegio, mediación completa, separación de privilegios, mecanismos exclusivos, aceptación psicológica, entre otros—. Esta clase no agrega principios nuevos: muestra cómo esos ocho, pensados en abstracto, se traducen en decisiones concretas de topología de red.
+2. **Se parte de una política ya definida.** *"Se parte de una política de seguridad a implementar."* El orden importa: primero existe la política —qué está permitido y qué no, para quién—, y **después** se diseña la red que la hace cumplir. La red no decide la política, la ejecuta. Es la costura exacta con la [[clase-06-politicas-de-seguridad-y-control-de-acceso|Clase 06]], que define una [[politica-de-seguridad-y-sistema-seguro|política de seguridad]] como la partición de los estados de un sistema en autorizados y no autorizados. *(Síntesis nuestra, no una equivalencia que dé ninguna filmina del deck.)* Un firewall es, en esos términos, un mecanismo de transición que intenta garantizar que ninguna transición cruce esa partición hacia el lado no autorizado.
 3. **Los principios son guías, no una receta única.** *"Los principios de diseño son guías para la definición de la arquitectura de redes."* Esta advertencia es la que habilita, treinta filminas después, que la clase cierre reconociendo [[variaciones-de-la-arquitectura|variaciones legítimas]] del mismo esquema — clusters, redes chicas con servidores unificados. Si los principios fueran una receta fija, esas variaciones serían errores; al ser guías, son adaptaciones válidas a otro contexto de costo y riesgo.
 
 ## El límite explícito del diseño de red (filmina 3)
@@ -76,15 +76,5 @@ La filmina cita la fuente al pie: *"Figura tomada de Computer Security Art & Sci
 
 Dos rasgos del diagrama que vale la pena notar antes de entrar al resto de la clase:
 
-- **Dos firewalls, no uno.** Hay mediación en dos puntos —Internet↔DMZ e DMZ↔interna—, no un único perímetro. Eso es lo que permite que la [[clase-10-seguridad-en-la-empresa#6. Caso de estudio: reglas de los firewalls externo e interno (filminas 22-24)|sección 6]] escriba políticas distintas y asimétricas para cada uno.
-- **La DMZ concentra todo lo que Internet necesita alcanzar directamente** —web, mail, DNS—, y la red interna no aparece del lado de afuera en ningún momento. Esa separación es, en sí misma, la aplicación concreta de [[clase-08-principios-de-diseno-y-vulnerabilidades#1.7. Mecanismos exclusivos|mecanismos exclusivos]] y de [[clase-08-principios-de-diseno-y-vulnerabilidades#1.6. Separación de privilegios|separación de privilegios]]: un servicio comprometido en la DMZ no hereda automáticamente acceso a la red interna, y viceversa.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#1. Seguridad a nivel de red (filminas 2-4)|Clase 10 — Seguridad en la empresa]] — la sección de la clase que esta nota desarrolla
-- [[firewalls|Firewalls]] — el primer mecanismo concreto que aparece en el diagrama
-- [[zona-desmilitarizada|Zona desmilitarizada]] — qué es la subred `DMZ` del diagrama y por qué existe
-- [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]] — el caso de estudio que desarrolla, servicio por servicio, este mismo diagrama
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#1. Política de seguridad y sistema seguro|Clase 06 — Políticas de seguridad y control de acceso]] — dónde se define la política que esta arquitectura implementa
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#1. Los ocho principios de diseño de Saltzer y Schroeder|Clase 08 — Principios de diseño y vulnerabilidades]] — los ocho principios que esta clase aplica a la arquitectura de red
-- Matt Bishop, *Computer Security: Art and Science*, cap. 26 *Network Security*, pp. 780 — la fuente del diagrama y de todo el caso de estudio ([[bibliografia|bibliografía]])
+- **Dos firewalls, no uno.** Hay mediación en dos puntos —Internet↔DMZ e DMZ↔interna—, no un único perímetro. Eso es lo que permite escribir políticas distintas y asimétricas para cada uno (ver [[reglas-de-los-firewalls-externo-e-interno|Reglas de los firewalls externo e interno]]).
+- **La DMZ concentra todo lo que Internet necesita alcanzar directamente** —web, mail, DNS—, y la red interna no aparece del lado de afuera en ningún momento. Esa separación es, en sí misma, la aplicación concreta de [[principios-de-diseno#7. Mecanismos exclusivos|mecanismos exclusivos]] y de [[principios-de-diseno#6. Separación de privilegios|separación de privilegios]]: un servicio comprometido en la DMZ no hereda automáticamente acceso a la red interna, y viceversa.

@@ -279,21 +279,3 @@ La costumbre de nombrarlo `HMAC-SHA256` en vez de `HMAC` a secas es la misma dis
 > **Dos advertencias operativas que van con esto** *(nuestras, salen de K&L cap. 4).*
 > - **`HMAC` no protege contra replay.** Un par $(m,t)$ válido lo es para siempre, porque la definición de MAC no tiene estado. Hacen falta números de secuencia o timestamps — y eso **sí es material de cátedra**, en la filmina 2 de la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] → [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]].
 > - **Comparar la etiqueta con `strcmp` filtra el resultado por temporización.** Comparar byte a byte y cortar al primer error revela **cuántos bytes coinciden**, y eso permite reconstruir la etiqueta byte por byte. Pasó de verdad en la Xbox 360. La comparación tiene que ser **de tiempo constante**, siempre sobre todos los bytes.
-
-## Ver también
-
-- [[message-authentication-code|Message Authentication Code]] — qué es un MAC y para qué sirve la etiqueta
-- [[seguridad-de-un-mac|Seguridad de un MAC]] — el juego `Mac-Forge` que la filmina invoca al final del slide 33
-- [[cbc-mac|CBC-MAC]] — la otra forma de construir un MAC, con la que la clase compara ésta; y el ataque al sufijo de longitud, hermano del length extension
-- [[construccion-de-macs-a-partir-de-una-prf|Construcción de MACs a partir de una PRF]] — de dónde viene la necesidad de encadenar, y por qué las construcciones ingenuas fallan
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — el $H^{s}$ de la fórmula, y por qué el selector va como superíndice
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — qué significa "libre de colisiones", que es la hipótesis del slide
-- [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — de dónde sale el length extension que hace inviable $H(k \Vert m)$, y la discusión sobre la transformación final
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — con cuál instanciar `HMAC`
-- [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — cuánto cuesta romper la hipótesis de colisiones
-- [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — lo que `HMAC` no resuelve y tiene que resolver el protocolo
-- [[des-y-3des|DES y 3-DES]] — las cajas $S$ secretas, que son el contraejemplo histórico del criterio *nothing up my sleeve*
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — por qué `MD5` puede estar quebrada y `HMAC-MD5` no
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — las filminas 12 y 13, de donde salen `NMAC` y los diagramas
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-- Katz & Lindell §5.3 *Message Authentication Using Hash Functions* (Construcción 5.5, Teoremas 5.6 y 5.8, y `NMAC` en §5.3.2) y cap. 4 *Message Authentication Codes* ([[bibliografia|bibliografía]])

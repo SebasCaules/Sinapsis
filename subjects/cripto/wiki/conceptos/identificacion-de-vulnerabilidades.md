@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 7
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, vulnerabilidades, modelado-de-amenazas, stride, arquitectura, clase-08, sin-dictar]
 sources: ["Clase 12 - Analisis de vulnerabilidades.pdf"]
 ---
@@ -44,7 +44,7 @@ La arquitectura conecta un **browser** contra un **firewall**, que da a un **web
 
 ### Cómo se aplicaría el paso, siguiendo el método de las filminas anteriores
 
-*(Desarrollo nuestro, no está resuelto en la filmina — es la aplicación del método de [[clase-08-principios-de-diseno-y-vulnerabilidades#5. Descomposición de la aplicación|§5 y §6 de la clase]] sobre esta arquitectura puntual.)* La descomposición de esta arquitectura da al menos tres fronteras de confianza: **browser↔firewall** (zona externa, internet contra la red de la clínica), **firewall↔web server** (externo contra el componente que procesa la lógica) y **web server↔filesystem/DB** (el componente de aplicación contra sus datos persistentes, que incluyen historiales de *otros* pacientes — la zona privilegiada del ejemplo). Aplicando `STRIDE` sobre la primera frontera, por ejemplo, la letra **S** (spoofing) pregunta si un paciente puede autenticarse como otro paciente o como un médico; sobre la tercera, la letra **I** (information disclosure) pregunta si un médico autenticado puede leer el historial de un paciente que no está atendiendo. **La identificación de vulnerabilidades** es el paso que, para cada una de esas preguntas afirmativas, señala el mecanismo concreto que la habilita — un control de acceso ausente en el filesystem, una sesión que no valida el rol antes de servir un registro, y así con cada frontera. Es exactamente el trabajo que la filmina reconoce como específico de cada sistema y que no puede resolverse en general.
+*(Desarrollo nuestro, no está resuelto en la filmina — es la aplicación del método de [[descomposicion-de-la-aplicacion|Descomposición de la aplicación]] y [[stride-y-arboles-de-ataque|STRIDE y árboles de ataque]] sobre esta arquitectura puntual.)* La descomposición de esta arquitectura da al menos tres fronteras de confianza: **browser↔firewall** (zona externa, internet contra la red de la clínica), **firewall↔web server** (externo contra el componente que procesa la lógica) y **web server↔filesystem/DB** (el componente de aplicación contra sus datos persistentes, que incluyen historiales de *otros* pacientes — la zona privilegiada del ejemplo). Aplicando `STRIDE` sobre la primera frontera, por ejemplo, la letra **S** (spoofing) pregunta si un paciente puede autenticarse como otro paciente o como un médico; sobre la tercera, la letra **I** (information disclosure) pregunta si un médico autenticado puede leer el historial de un paciente que no está atendiendo. **La identificación de vulnerabilidades** es el paso que, para cada una de esas preguntas afirmativas, señala el mecanismo concreto que la habilita — un control de acceso ausente en el filesystem, una sesión que no valida el rol antes de servir un registro, y así con cada frontera. Es exactamente el trabajo que la filmina reconoce como específico de cada sistema y que no puede resolverse en general.
 
 ### La instrucción metodológica que cierra la filmina
 
@@ -69,17 +69,3 @@ En el mapeo de capítulos de la [[bibliografia#2. Matt Bishop — Computer Secur
 ## Video-08 no llega a esta filmina
 
 **Vale dejarlo anotado porque cambia qué fuente hay para este tramo.** Según el recorrido de [[video-08-vulnerabilidades#Recorrido|video-08]], la proyección del deck de Análisis de vulnerabilidades corta a los 37:55 en la filmina de `STRIDE` —página 18 de 23 en el visor del docente— y de ahí en adelante el video cambia a un Keynote personal distinto (*Developer's Hardening*), que no vuelve a las filminas 19 a 23. **Las filminas 20 y 21 —identificación de vulnerabilidades y el ejemplo del historial médico— no tienen ninguna fuente hablada en el corpus de video de la cátedra.** Todo lo que agrega esta nota por fuera de la filmina está, por eso, marcado como desarrollo propio y no como lectura de un video.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#7. Identificación de vulnerabilidades|Clase 08 — Principios de diseño y vulnerabilidades, §7 Identificación de vulnerabilidades]]
-- [[modelado-de-amenazas|Modelado de amenazas]] — el ciclo de cinco pasos de Microsoft, del que éste es el último
-- [[descomposicion-de-la-aplicacion|Descomposición de la aplicación]] — las zonas y el flujo de datos que este paso revisa
-- [[stride-y-arboles-de-ataque|STRIDE y árboles de ataque]] — de dónde sale la lista de amenazas que este paso busca explicar
-- [[aseguramiento-en-el-ciclo-de-vida|Aseguramiento en el ciclo de vida]] — la cadena bug → vulnerabilidad → amenaza → efecto no deseado
-- [[confianza-y-aseguramiento|Confianza y aseguramiento]] — por qué el nivel de rigor tiene que ajustarse a lo que se puede pagar
-- [[verificacion-formal-y-prueba-de-penetracion|Verificación formal y prueba de penetración]] — la vulnerabilidad identificada acá es la precondición de la que arranca un pentest
-- [[metodologia-de-hipotesis-de-falla|Metodología de hipótesis de falla]] — el paso 2 de esa metodología (hipótesis) retoma exactamente este trabajo, ya contra un sistema construido
-- [[video-08-vulnerabilidades|Video 08 — Vulnerabilidades]] — cubre el resto del deck, pero no llega a esta filmina
-- [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|Bibliografía]] — probablemente los capítulos 19 (*Introduction to Assurance*) y 20 (*Building Systems with Assurance*) de la edición del vault, pese a que la filmina 22 trae escrito "Capítulo 18" y "Capitulo 19" *(ver el desfasaje de numeración explicado arriba)*
-- [[validez-de-las-pruebas-de-penetracion#Lectura recomendada, y el mismo desfasaje de numeración que ya aparece en el bloque de vulnerabilidades|Validez de las pruebas de penetración]] — el mismo desfasaje de numeración de Bishop, ya declarado sobre la filmina 32 del deck de Pentesting

@@ -41,12 +41,3 @@ Esto no significa que el mundo simétrico esté libre del problema de identidad 
 La filmina da el motivo en dos líneas que conviene desarrollar. Primero: **la selección de la clave depende de con quién se está hablando** — no hay una única clave "correcta" en abstracto, sino una clave correcta *para esa contraparte*. Segundo, y es la consecuencia que ya demostró la [[ataques-activos-y-man-in-the-middle|nota anterior]]: **usar la clave equivocada significa que no hay ninguna garantía de confidencialidad ni de integridad**, sin importar cuán fuerte sea el esquema de cifrado subyacente — exactamente lo que mostró el ataque de la filmina 6, donde $\mathrm{Enc}_{pk_e}(M)$ es criptográficamente perfecto y, al mismo tiempo, completamente inútil como defensa.
 
 *(Lectura nuestra, no está en la filmina)*: obsérvese que "identidad" en esta definición es deliberadamente abstracto — puede ser una persona, un servidor, una empresa o una autoridad certificante. La sección siguiente, [[certificados-digitales|Certificados digitales]], es la que instancia ese concepto de identidad con el campo concreto `CN` (*Common Name*) y sus distintas convenciones según el tipo de entidad.
-
-## Ver también
-
-- [[clase-05-protocolos-criptograficos#3. Infraestructura de clave pública|Clase 05 — Protocolos criptográficos, sección 3]] — la sección de la que sale esta nota
-- [[ataques-activos-y-man-in-the-middle|Ataques activos y man in the middle]] — el problema exacto que la PKI resuelve
-- [[certificados-digitales|Certificados digitales]] — el mecanismo concreto con el que la PKI ata identidad a clave
-- [[cadenas-de-firmas-y-autoridades-raiz|Cadenas de firmas y autoridades raíz]] — cómo se organiza la confianza entre certificados
-- [[needham-schroeder|Needham-Schroeder]] — la solución al mismo problema del lado simétrico, sin PKI
-- [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] — la criptografía de clave pública que la PKI administra

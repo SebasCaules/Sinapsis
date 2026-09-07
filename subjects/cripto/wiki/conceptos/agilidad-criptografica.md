@@ -83,14 +83,3 @@ La clase no baja el concepto a mecanismos concretos; queda anunciado para la uni
 > **El argumento a favor.** El docente lo señala él mismo como *"un concepto muy importante"* y como un hueco del curso hasta ese momento, y lo enmarca como algo que se retoma *"en un par de clases, cuando veamos protocolos"*. Es un **criterio de diseño**, no un detalle de la Clase 3: se necesita desde [[privacidad-e-integridad|03.12]] (por qué gana la tercera forma), desde [[cifrado-autenticado|03.13]] (por qué el esquema genérico se prefiere a uno acoplado), desde [[primitivas-de-hash-estandar|03.09]] (por qué hay que averiguar el estado de una primitiva) y desde [[estado-de-un-criptosistema|02.11]] y [[eleccion-de-primitivas|02.12]].
 >
 > **El argumento en contra, para dejarlo registrado.** Son **nueve cues**, sin ninguna filmina detrás, y hoy toda su carga útil se descarga en un solo lugar: la comparación de las tres formas de [[privacidad-e-integridad|03.12]]. Por el criterio que el vault usa para decidir —una idea merece nota propia cuando se la cita desde varios lados— la agilidad todavía está en el límite, y una sección *"Agilidad criptográfica: por qué gana la tercera"* dentro de `03.12` habría cumplido igual de bien **por ahora**. Lo que la salva es la promesa explícita de retomarlo en protocolos: la apuesta es que en dos clases esta nota crezca. Si no crece, corresponde plegarla a `03.12`.
-
-## Ver también
-
-- [[riesgo-y-seguridad-relativa|Riesgo y seguridad relativa]] — el criterio hermano de esta misma sesión: el riesgo dice cuánta seguridad hace falta hoy, la agilidad dice qué hacer cuando eso deje de alcanzar
-- [[privacidad-e-integridad|Privacidad e integridad]] — las tres formas de combinar; acá está la razón práctica de que gane la tercera
-- [[cifrado-autenticado|Cifrado autenticado]] — la tercera forma escrita como criptosistema, con el teorema genérico que hace posible el reemplazo
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — *debilitado* es, literalmente, un sistema con fecha de vencimiento: esta nota dice qué hacer con esa fecha
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — elegir bien hoy no exime de poder cambiar mañana
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — `MD5`, `SHA-1` y `SHA-3`: la evidencia histórica del paso 1
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la sesión del 03/09, donde esto se dicta
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la práctica del 31/08, que trabajó `Encrypt-then-MAC` antes que la teoría

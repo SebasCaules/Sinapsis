@@ -8,7 +8,7 @@ unidad: 1
 clase: 2
 orden: 10
 created: 2026-08-21
-updated: 2026-08-28
+updated: 2026-09-06
 tags: [criptografia, aes, bloque, gf28, round-keys, clase-02, parcial, transcripcion]
 sources: ["Clase 02 - Criptografia - Cifrado.pdf", "raw/clases/Clase 02pt2-Transcripcion.VTT"]
 ---
@@ -83,6 +83,8 @@ Es también el mejor anclaje que tiene [[cuerpos-finitos-y-campos-de-galois|Cuer
 > - *"tabla derivada de **invertir una matriz**"* → lo que se invierte es **cada byte como elemento** de $\mathrm{GF}(2^{8})$ (inverso multiplicativo), seguido de una transformación afín. La caja $S$ es una tabla precalculada de esa composición. Qué es ese cuerpo, por qué todo byte no nulo tiene inverso ahí y por qué no sirve $\mathbb{Z}_{256}$: [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]].
 >
 > Ninguna de las dos cambia la idea: **`Byte Sub` es la única parte no lineal, y todo lo demás es lineal.**
+>
+> **Y ninguna de las dos se corrige en clase**: el 20/08 el docente lee la filmina tal cual, erratas incluidas — *"Shift Row, que es una permutación de bits"* y *"una tabla derivada de invertir una matriz en campo finito"* (cue pt2 416).
 
 ## Round keys (128 bits)
 
@@ -116,13 +118,3 @@ $$\mathrm{AES}: \{0,1\}^{128,\,192\ \text{o}\ 256} \times \{0,1\}^{128} \to \{0,
 → **Recomendado para proyectos nuevos**: `AES-CBC`, `AES-CTR`.
 
 **AES es la primitiva; `CBC` y `CTR` son los [[modos-de-encadenamiento|modos]].** "AES" a secas no es un criptosistema — es determinístico y cifra 128 bits. Lo que se usa siempre es el par `AES-<modo>`.
-
-## Ver también
-
-- [[des-y-3des|DES y 3-DES]] — a quién reemplaza y por qué
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — qué es $\mathrm{GF}(2^{8})$ y por qué `Byte Sub` puede invertir ahí: es el único cuerpo de 256 elementos salvo isomorfismos, y $\mathbb{Z}_{256}$ no lo es (los bytes pares no tienen inverso)
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]]
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — sin modo, AES no es usable
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]]
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]
-- Katz & Lindell cap. 6 *Practical Constructions of Symmetric-Key Primitives* ([[bibliografia|bibliografía]])

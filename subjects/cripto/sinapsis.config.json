@@ -108,13 +108,6 @@
       "collapsedByDefault": false
     },
     {
-      "key": "resolucion",
-      "label": "Resolución",
-      "plural": "Resoluciones",
-      "countsAsContent": true,
-      "collapsedByDefault": false
-    },
-    {
       "key": "tp",
       "label": "Trabajo práctico",
       "plural": "Trabajos prácticos",

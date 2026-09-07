@@ -64,12 +64,3 @@ $$\text{Número de secuencia TLS: frescura de un \emph{récord individual}, cont
 | Qué guarda | acuerdos de **largo plazo**: suite, certificado, Master Secret | material de **uso**: claves de escritura, `MAC`, IVs, secuencia |
 | Se reusa para | evitar rehacer el handshake completo | — (es, en sí misma, la unidad que se abre y cierra) |
 | Riesgo si se confunde con sesión de aplicación | ninguno directo, pero la filmina lo advierte explícitamente | — |
-
-## Ver también
-
-- [[tls-arquitectura-y-record|TLS: arquitectura y record]] — el TLS Record que consume, récord a récord, las claves y el número de secuencia de la conexión
-- [[suites-criptograficas-de-tls|Suites criptográficas de TLS]] — qué es exactamente el "método de encriptación y MAC acordado" que guarda la sesión
-- [[tls-handshake|TLS handshake]] — de dónde salen $r_1$, $r_2$, el Master Secret y toda la información que sesión y conexión terminan almacenando
-- [[denning-sacco-y-frescura|Denning-Sacco y frescura]] — la otra noción de frescura de la clase, a nivel de sesión completa y no de récord individual
-- [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — el concepto general de número de secuencia como contramedida, del que esta nota da la instancia concreta en TLS
-- [[clase-05-protocolos-criptograficos#12. Sesión y conexión TLS|Clase 05 — Protocolos criptográficos]] — sección 12, de donde sale esta nota

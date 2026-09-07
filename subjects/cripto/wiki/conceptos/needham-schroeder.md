@@ -8,7 +8,7 @@ unidad: 1
 clase: 5
 orden: 7
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, protocolos, needham-schroeder, kdc, frescura, replay, clase-05, sin-dictar]
 sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 ---
@@ -19,7 +19,7 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 
 Cubre las filminas **22 a 27** del PDF de teoría de la Clase 05. **Esta clase todavía no se dictó** — hoy es 04/09/2026, la fecha del [[cronograma]] es el 17/09 —, así que la nota está escrita contra el PDF de filminas, Katz & Lindell y lecturas propias rotuladas; no hay transcripción de esta clase. Las seis filminas fueron verificadas renderizando la página a 150 dpi: el texto extraído reproduce fielmente las fórmulas de los tres protocolos.
 
-> **Por qué esta nota es la más rentable del temario de la Clase 05 para el primer parcial.** La nota [[parciales-viejos|Parciales viejos]] audita cuatro primeros parciales reales (2018 a 2025) y encuentra que **el Ejercicio 1 es siempre un protocolo**, con la estructura *"¿qué construye, qué problema tiene?"*. El examen **1C-2018** es, literalmente, este protocolo — con `T` en lugar de `KDC` como nombre del tercero de confianza, y sin el timestamp de la corrección de la sección final. El detalle completo está en la sección [[clase-05-protocolos-criptograficos#Para el parcial|Para el parcial]] de la nota de clase.
+> **Por qué esta nota es la más rentable del temario de la Clase 05 para el primer parcial.** La nota [[parciales-viejos|Parciales viejos]] audita cuatro primeros parciales reales (2018 a 2025) y encuentra que **el Ejercicio 1 es siempre un protocolo**, con la estructura *"¿qué construye, qué problema tiene?"*. El examen **1C-2018** es, literalmente, este protocolo — con `T` en lugar de `KDC` como nombre del tercero de confianza, y sin el timestamp de la corrección de la sección final. El detalle completo, con los cuatro exámenes, está en la sección [[clase-05-protocolos-criptograficos#Para el parcial|Para el parcial]] de la nota de clase.
 
 ## Qué resuelve, y bajo qué hipótesis
 
@@ -76,19 +76,8 @@ $E$ simplemente **reenvía el mensaje 3 de una ejecución vieja**, que sigue sie
 
 Y la consecuencia de esa asimetría es más grave que "una sesión queda expuesta": **una vez que cualquier clave de sesión pasada se compromete, el protocolo entero queda roto para siempre**, no solo para esa sesión puntual — cualquier clave de sesión vieja filtrada, sin importar cuánto tiempo haya pasado, sigue siendo una llave de impersonación válida contra $B$.
 
-> **Aclaración de notación.** Las filminas de la segunda aproximación rotulan al tercero de confianza como `KDC`; la filmina siguiente de esta clase —la de la [[denning-sacco-y-frescura|modificación Denning-Sacco]]— lo rotula como `C`. Es la **misma entidad** en las dos: el cambio de letra es una inconsistencia de las láminas, no dos protocolos distintos.
+> **Aclaración de notación.** El deck alterna dos rótulos para el mismo tercero de confianza. Lo llama `KDC` en la filmina introductoria (22, *"Requiere un servicio centralizado (KDC)"*) y en los **diagramas** de las dos aproximaciones (23 y 25); lo llama `C` en las filminas de **prosa** (24, *"Un atacante graba el mensaje de C a A"*; 26, *"Encriptado con clave compartida A-C"*) y en el diagrama de la [[denning-sacco-y-frescura|modificación Denning-Sacco]] (28). La filmina 27 no lo nombra de ninguna forma: en su diagrama solo aparecen $E$ y $B$. Es la **misma entidad** en todos los casos — la alternancia de rótulo es una inconsistencia de las láminas, no dos protocolos distintos.
 
 ## La corrección
 
 El arreglo —agregar un timestamp $T$ dentro del ticket que $B$ recibe, para que $B$ pueda verificar la frescura de la clave de sesión en lugar de aceptar cualquier $k_s$ que llegue bien envuelta— es la **modificación Denning-Sacco**, desarrollada en la nota siguiente: [[denning-sacco-y-frescura|Denning-Sacco y frescura]].
-
-## Ver también
-
-- [[clase-05-protocolos-criptograficos#8. Needham-Schroeder|Clase 05 — Protocolos criptográficos, sección 8]] — la sección de la que sale esta nota
-- [[denning-sacco-y-frescura|Denning-Sacco y frescura]] — el arreglo con timestamp que cierra el ataque de esta nota
-- [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — el concepto general de frescura del que este ataque es una instancia concreta
-- [[challenge-response-y-eke|Challenge-response y EKE]] — el patrón que instancian los mensajes 4 y 5 de la segunda aproximación
-- [[ataques-activos-y-man-in-the-middle|Ataques activos y man in the middle]] — el mismo problema de identidad que esta nota resuelve, del lado simétrico en vez del asimétrico
-- [[infraestructura-de-clave-publica|Infraestructura de clave pública]] — la razón formal de por qué la PKI no sirve acá, y hace falta un KDC en su lugar
-- [[distribucion-de-claves-y-kdc|Distribución de claves y KDC]] — por qué hace falta un tercero central como el KDC, y qué costo evita frente a una clave por cada par de participantes
-- [[parciales-viejos|Parciales viejos]] — el examen 1C-2018, que es exactamente este protocolo

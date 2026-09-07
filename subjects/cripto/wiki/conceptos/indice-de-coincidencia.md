@@ -8,7 +8,7 @@ unidad: 1
 clase: 1
 orden: 12
 created: 2026-08-11
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptoanalisis, indice-de-coincidencia, vigenere, frecuencias, estadistica, practica-01, guia-01]
 sources: ["Clase 1.pdf (práctica)", "Guía 1 Ej. 6"]
 ---
@@ -121,15 +121,5 @@ El verbo de (a) es **comprobar**, no "buscar": el enunciado ya entrega las cuatr
 
 Y la consigna *"obtener la frecuencia de aparición de cada letra como primera de cada bloque"* es literalmente construir el sub-texto $j = 1$ del paso 3: de ese mismo conteo salen **las dos cosas**, el $\mathrm{IC}$ que valida $t$ y el pico que, alineado con la $E$, da $k_1$.
 
-> **Estado de resolución al 24/08:** [[guia-01-resolucion#Ejercicio 6|Guía 1 — Resolución § Ejercicio 6]] — **en curso**. El Kasiski está corrido y la longitud comprobada por el mcd de las distancias ($t = 4$), y de ahí sale la clave `JUAN` y los diez primeros caracteres. **Lo que falta es justamente el IC:** partir el criptograma en los cuatro sub-textos y verificar que el promedio salte de $\approx 0{,}04$ a $\approx 0{,}0775$, que es la comprobación que pide el verbo de la parte (a).
+> **Estado de resolución al 24/08:** [[guia-01-criptografia-clasica#Ejercicio 6|Guía 1 § Ejercicio 6]] — **en curso**. El Kasiski está corrido y la longitud comprobada por el mcd de las distancias ($t = 4$), y de ahí sale la clave `JUAN` y los diez primeros caracteres. **Lo que falta es justamente el IC:** partir el criptograma en los cuatro sub-textos y verificar que el promedio salte de $\approx 0{,}04$ a $\approx 0{,}0775$, que es la comprobación que pide el verbo de la parte (a).
 
----
-
-## Ver también
-
-- [[test-de-kasiski|Test de Kasiski]] — el método que propone los candidatos a $t$
-- [[cifrado-de-vigenere|Cifrado de Vigenère]] — el esquema que este número delata
-- [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]] — la tabla del castellano y los criterios del Ej. 5
-- [[cifrado-por-rotacion|Cifrado por rotación]] — en qué se convierte cada sub-texto una vez hallado $t$
-- [[cifrado-por-transposicion|Cifrado por transposición]] — el otro caso de IC alto
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] · [[guia-01-criptografia-clasica|Guía 1 — Ej. 6]]

@@ -226,21 +226,3 @@ Vale la pena tener esa ubicación clara, porque el vocabulario se mezcla ensegui
 > **654-657.** "Lo que vimos hasta acá —MACs y funciones de hash— ataca el otro problema. Pero **no hay nada en la definición de las funciones de hash o de los MACs que proteja la confidencialidad** de la información. Si nosotros construimos una solución sólo con hash y con MACs, genial: detectamos la modificación. Pero todo el mundo vería la información, o tendría acceso a la información o a parte de la información."
 >
 > **658-659.** "Incluso —**porque el modelo de seguridad contra falsificaciones no lo toma en cuenta**— no hay nada que diga que, a partir de la etiqueta, yo tal vez no pueda recuperar el mensaje original; pero **tal vez pueda extraer parte** del mensaje original, o parte de la información, que es lo que queremos proteger realmente cuando hablamos de confidencialidad."
-
-## Ver también
-
-- [[seguridad-de-un-mac|Seguridad de un MAC]] — la nota que sigue: el experimento `Mac-Forge`, qué significa **infalsificable**, y el ejercicio de los tres MACs resuelto
-- [[construccion-de-macs-a-partir-de-una-prf|Construcción de MACs a partir de una PRF]] — el escalón que falta entre esta nota y `CBC-MAC`: el MAC de longitud fija $t \leftarrow F_k(m)$ y las tres construcciones de longitud variable que **no** funcionan
-- [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — lo que un MAC infalsificable sigue sin cubrir: **integridad no es frescura**
-- [[maleabilidad|Maleabilidad]] — el ataque concreto que motiva todo esto
-- [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — la prueba `CCA`, que ningún criptosistema pasa, y por eso hace falta el MAC
-- [[cbc-mac|CBC-MAC]] — la primera construcción concreta, a partir de una [[primitiva-de-cifrado-en-bloque|primitiva de bloque]]
-- [[hmac|HMAC]] — la otra construcción, a partir de una [[funciones-de-hash-criptograficas|función de hash]]
-- [[privacidad-e-integridad|Privacidad e integridad]] — cómo se combinan un criptosistema y un MAC, y cuál de las tres formas se rompe
-- [[cifrado-autenticado|Cifrado autenticado]] — el resultado de combinarlos bien
-- [[criptosistema|Criptosistema]] — la terna que la filmina 14 calca
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul` y `CPA`: lo que **no** mide modificación
-- [[notacion-y-terminologia|Notación y terminología]] — los tres espacios, las dos flechas y el resto del inventario de símbolos
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — las dos sesiones, 27/08 y 03/09
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la clase práctica del 31/08, que redibuja la terna y deja escrito que el par $\langle m,t\rangle$ viaja junto
-- Katz & Lindell cap. 4 *Message Authentication Codes*, §4.1 y Definición 4.1 ([[bibliografia|bibliografía]])

@@ -480,16 +480,3 @@ Con eso:
 
 ***(Lectura nuestra.)*** La pregunta más probable de un parcial sobre este material no es "enumerar los ocho principios" sino "dado este sistema, qué principios viola y cómo se arregla" — que es literalmente la forma del ejercicio que el deck deja planteado, y también la forma del bloque de LLM, donde la respuesta buscada era **qué principio se rompe**.
 
----
-
-## Ver también
-
-- [[videografia#Los 13, con sus datos duros|Videografía]] — dónde está listado este video y su versión de 2024
-- [[cronograma#Segunda mitad — Seguridad (hasta el 2do parcial)|Cronograma]] — la Clase 8 del 15/10, contra la que se ancla
-- [[programa-y-objetivos#Contenidos|Programa y objetivos]] — *"Seguridad en aplicaciones · principios de diseño seguro"*, que es la línea que este video cubre
-- [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|Bibliografía]] — **Bishop cap. 14, Design Principles**, es la lectura de esta clase; el video no la cita, el de 2024 sí
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — el principio 5 ya desarrollado; el video agrega la extensión a controles de seguridad y el matiz de la ofuscación como capa
-- [[eleccion-de-primitivas#El escrutinio ayuda, pero no es una garantía|Elección de primitivas en un proyecto]] — la misma discusión sobre el escrutinio del código abierto, en el bloque de criptografía
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el razonamiento por evaluación de riesgo que aparece en fail safe contra fail deadly
-- [[ataque-de-diccionario-sobre-hashes#Contramedidas|Ataque de diccionario sobre hashes]] — el lado técnico de la política de passwords de la que se ríe el meme del principio 8
-- [[tp-implementacion|TP de Implementación]] — los ocho principios son el checklist más barato para revisar el diseño del TP antes de entregarlo

@@ -141,12 +141,3 @@ Es la pieza que le falta al argumento de escala, y la clase la da explícitament
 5. **Revisar la elección con el tiempo:** hoy recomendado no es para siempre → [[estado-de-un-criptosistema|estado de un criptosistema]].
 
 > **Relevancia para el [[tp-implementacion|TP]].** El trabajo práctico pide implementar una función de seguridad **no vista en el curso**, a partir de un paper. Esta filmina es la que marca el límite: implementar algo para **aprender y demostrar** es el objetivo del TP; lo que la cátedra califica de mala práctica es **inventar un criptosistema nuevo para un proyecto en producción**. Son dos cosas distintas y conviene tenerlo claro al justificar el TP.
-
-## Ver también
-
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el vocabulario para clasificar candidatos
-- [[aes|AES]] · [[des-y-3des|DES y 3-DES]] · [[criptosistema-de-flujo|Criptosistema de flujo]]
-- [[modos-de-encadenamiento|Modos de encadenamiento]]
-- [[seguridad-computacional|Seguridad computacional]] — qué significan los exponentes
-- [[tp-implementacion|TP de Implementación]]
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

@@ -250,18 +250,3 @@ De ahí sale, en orden, el resto de la clase:
 > **168-170.** "El punto es: nosotros estábamos usando un criptosistema que pasa nuestra mejor prueba de seguridad, creíamos que estábamos tranquilos, y **bum**: esto sigue siendo un problema."
 > **171-173.** "Nosotros le podemos decir: usamos el mejor criptosistema del mundo, es el que usan los bancos para proteger todo, así que estás re seguro — pero puede pasar esto. **Nos van a mirar con cara de 'yo no sé si eso es seguro'; no van a decir 'no lo estás usando bien', por lo menos.**"
 
----
-
-## Ver también
-
-- [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — la prueba que sí ve este ataque, y el ejercicio que convierte la maleabilidad en una victoria formal contra el flujo
-- [[message-authentication-code|Message Authentication Code]] — la primitiva que detecta la adulteración
-- [[privacidad-e-integridad|Privacidad e integridad]] y [[cifrado-autenticado|Cifrado autenticado]] — cómo se combinan las dos garantías
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — de dónde sale el $G(k)\oplus m$ que hace todo el trabajo del ataque
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul` y `CPA`: las tres pruebas que este ataque atraviesa sin despeinarse
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — por qué `CTR` y `OFB` heredan la maleabilidad entera y `CBC` sólo en parte
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — qué compra el $IV$ (y qué no)
-- [[modelos-de-ataque|Modelos de ataque]] — el corte pasivo/activo, que es donde este ataque queda del lado que las pruebas de la Clase 02 no cubrían
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — *"¿es seguro?"* siempre se responde *"¿contra qué prueba?"*
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-- Katz & Lindell cap. 4 *Message Authentication Codes* — la lectura que manda la filmina; el caso de `CBC` está en §4.1 ([[bibliografia|bibliografía]])

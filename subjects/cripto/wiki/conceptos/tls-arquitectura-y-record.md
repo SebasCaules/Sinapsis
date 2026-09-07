@@ -66,13 +66,3 @@ El header de cada TLS Record distingue entre cuatro tipos de contenido, que **es
 | Application data | el contenido del protocolo que TLS encapsula | — |
 | Alert | eventos y errores, dentro y fuera de banda | [[change-cipher-spec-y-alert\|Change Cipher Spec y Alert]] |
 | Change Cipher Spec | dispara una renegociación de los parámetros de sesión | [[change-cipher-spec-y-alert\|Change Cipher Spec y Alert]] |
-
-## Ver también
-
-- [[suites-criptograficas-de-tls|Suites criptográficas de TLS]] — el menú de algoritmos que cada TLS Record termina usando para comprimir, hashear y cifrar
-- [[sesion-y-conexion-tls|Sesión y conexión TLS]] — qué parámetros concretos (claves, IVs, números de secuencia) alimentan el paso 4 del Record
-- [[tls-handshake|TLS handshake]] — cómo se negocian esos parámetros antes de que exista ningún Record cifrado
-- [[infraestructura-de-clave-publica|Infraestructura de clave pública]] · [[x509|X.509]] — la base de PKI de la que depende la autenticación que esta nota atribuye a TLS
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — la formalización de la idea de "ruido cifrado indistinguible" que la filmina 30 dibuja informalmente
-- [[denning-sacco-y-frescura|Denning-Sacco y frescura]] — el bloque anterior de la clase, con el mismo problema de administración de claves resuelto del lado simétrico
-- [[clase-05-protocolos-criptograficos#10. TLS: arquitectura y el TLS Record|Clase 05 — Protocolos criptográficos]] — sección 10, de donde sale esta nota

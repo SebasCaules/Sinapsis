@@ -86,13 +86,3 @@ La filmina cierra con la conclusión más fuerte de la sección, sin desarrollar
 > **Determinar el número mínimo de relaciones que hay que quitar para que la composición quede consistente es, en general, un problema NP.**
 
 El ejemplo de arriba es demasiado chico para exhibir la dificultad —con dos personas y una sola prohibición, "cuál quitar" es obvio—, pero la estructura general **sí escala mal**: cuando la expansión transitiva de muchos sistemas produce un conjunto grande de candidatos con prohibiciones cruzadas y superpuestas, decidir cuál es el subconjunto **mínimo** a eliminar para que ninguna prohibición sobreviva es un problema combinatorio de la misma familia que la búsqueda de un conjunto mínimo de aristas a quitar de un grafo para eliminar todos sus ciclos o violaciones de restricción —un problema de optimización combinatoria sobre un grafo de relaciones, no una simple revisión caso por caso—. *(Esta analogía con problemas de grafos es lectura nuestra: el deck no la desarrolla, sólo enuncia la conclusión de NP-completitud/dureza.)* La consecuencia práctica es la que vale para el parcial: componer dos políticas seguras no es sólo conceptualmente delicado —qué principio guía usar, qué hacer con los huecos—, sino que encontrar la composición **óptima** (la que sacrifica lo menos posible) es computacionalmente intratable en el caso general.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#9. Composición de políticas|Clase 06 — Composición de políticas]]
-- [[politica-de-seguridad-y-sistema-seguro|Política de seguridad y sistema seguro]] — la definición de "seguro" que esta sección pone a prueba al componer sistemas
-- [[bell-lapadula|Bell-LaPadula]] — el modelo que protagoniza el ejemplo de composición de las filminas 49-51
-- [[lenguajes-de-descripcion-de-politicas|Lenguajes de descripción de políticas]] — de donde sale el principio de denegación por defecto que reaparece acá como una de las dos salidas posibles
-- [[muralla-china|Muralla china]] — el otro modelo del deck de Políticas, con su propio elemento temporal que ninguna composición de esta sección contempla
-- [[matriz-de-control-de-acceso|Matriz de control de acceso]] — el modelo que retoma el deck de Control de acceso inmediatamente después de esta sección
-- Matt Bishop, *Computer Security: Art and Science*, cap. 4 (*Security Policies*), y la línea de trabajo de Li Gong y Xiaolei Qian sobre interoperabilidad segura entre políticas ([[bibliografia|Bibliografía]])

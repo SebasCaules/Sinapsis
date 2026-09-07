@@ -80,13 +80,3 @@ La filmina cierra el ejemplo con una observación que conecta directamente con o
 > **Errata de la filmina:** el PDF escribe literalmente "Bilba", no "Biba" —verificado sobre la página renderizada a 150 dpi, no es un artefacto de `pdftotext`—; es un error tipográfico real del deck de Control de acceso. El modelo al que se refiere la observación es el de **Biba**, desarrollado en [[modelos-de-integridad-de-biba|Modelos de integridad de Biba]]. Se preserva la grafía original dentro de la cita.
 
 La analogía es exacta: en [[modelos-de-integridad-de-biba#Los tres modelos|Low-Water-Mark]] —uno de los tres modelos de Biba— leer un objeto de menor nivel de integridad **degrada** el nivel del sujeto que lo lee, $i'(s) = \min(i(s), i(o))$, para impedir que después contamine información de nivel alto con lo que acaba de leer. Acá pasa lo mismo con el PACL: leer un objeto con un PACL más restringido **degrada** el PACL propio de quien lee (Paso 2), y esa degradación se propaga a cualquier cosa que ese sujeto cree después (Paso 3) — exactamente el mismo patrón de "lo que entra por abajo, empuja todo hacia abajo" que Low-Water-Mark aplica a niveles de integridad en lugar de a conjuntos de permisos.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#14. ACLs propagables|Clase 06 — ACLs propagables]]
-- [[listas-de-control-de-acceso|Listas de control de acceso]] — el ACL ordinario del que PACL es una variante
-- [[secretos-compartidos-y-metodo-de-shamir|Secretos compartidos y método de Shamir]] — la sección inmediatamente anterior
-- [[oauth-2|OAuth 2.0]] — la sección inmediatamente siguiente
-- [[modelos-de-integridad-de-biba#Los tres modelos|Modelos de integridad de Biba]] — el modelo del que este mecanismo es, según la propia filmina, una implementación casi directa
-- [[muralla-china#Propiedad de cierre|Muralla china]] — otra política que usa la misma lógica de "restringir por intersección" para cerrar canales indirectos
-- Matt Bishop, *Computer Security: Art and Science*, cap. 16 (*Access Control Mechanisms*) ([[bibliografia|Bibliografía]])

@@ -73,15 +73,3 @@ $$A = \{\text{secuencias de hasta 8 caracteres}\}, \qquad C = \{\,\underbrace{xx
 **Las $xx$ son la sal del esquema.** Con 4096 valores posibles ($2^{12}$), impiden que dos usuarios con la misma clave terminen con el mismo $C$ — es exactamente el objetivo que [[salting|Salting]] generaliza más adelante en la clase, y acá aparece ya construido, sin nombrarse todavía.
 
 Esta es también la puerta de entrada a los [[ataques-a-un-sistema-de-autenticacion|ataques offline]] de la sección siguiente: robar el archivo con los $C$ —`/etc/shadow`— y probar candidatos fuera de línea es el [[ataque-de-diccionario-sobre-hashes|ataque de diccionario sobre hashes]] aplicado a este esquema concreto.
-
-## Ver también
-
-- [[clase-07-autenticacion#3. Almacenamiento de claves|Clase 07 — Autenticación § 3. Almacenamiento de claves]] — la sección de la que cuelga esta nota
-- [[clase-07-autenticacion#Estado de las fuentes|Clase 07 — Autenticación § Estado de las fuentes]] — por qué el cruce con el Video 06 no contradice que ningún video dicte esta clase
-- [[autenticacion|Autenticación]] — el modelo $(A,C,F,L,S)$ que esta nota instancia dos veces
-- [[factores-de-autenticacion|Factores de autenticación]] — de dónde sale el $a$ que estos esquemas guardan como $c$
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — qué hace un atacante con el $C$ que esta nota describe
-- [[salting|Salting]] — la generalización de las $xx$ del esquema Unix
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — contraste con lo que el esquema Unix llama, de forma imprecisa, "función de hash"
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — el ataque offline sobre exactamente este tipo de archivo
-- [[video-06-principios-de-diseno-2026#La digresión de los HSMs|Video 06 — Principios de diseño (2026) § La digresión de los HSMs]] — desarrollo real del "dispositivo criptográfico especializado" de la filmina 27

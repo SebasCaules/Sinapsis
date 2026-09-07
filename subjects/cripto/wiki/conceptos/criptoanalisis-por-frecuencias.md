@@ -90,11 +90,3 @@ O sea: las dos familias que **conservan las frecuencias originales** son justame
 La diferencia fina entre las dos primeras la pone esta nota, no la filmina: monoalfabética conserva el **perfil** (mismos valores, otras etiquetas) y trasposición conserva la asignación **letra por letra**. Eso es lo que permite separarlas en la tabla de diagnóstico.
 
 > **De cualitativo a cuantitativo.** La tabla de arriba clasifica por alta / media / baja, a ojo sobre el histograma. El [[indice-de-coincidencia|índice de coincidencia]] le pone número al mismo criterio: colapsa la distribución en un solo valor, cerca del del idioma cuando las frecuencias se conservan y cerca de $1/n$ cuando están aplanadas. Sirve para decidir sin discutir la forma del gráfico.
-
-## Ver también
-
-- [[cifrado-de-sustitucion-monoalfabetica|Cifrado de sustitución monoalfabética]]
-- [[test-de-kasiski|Test de Kasiski]]
-- [[indice-de-coincidencia|Índice de coincidencia]] — el mismo criterio, en un número
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el árbol de cifrados clásicos
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el otro camino, por enumeración

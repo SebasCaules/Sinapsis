@@ -105,12 +105,3 @@ El apunte instancia todo esto en **dos ejemplos numéricos completos** — uno c
 Lo que hay que sacar del segundo: que **la cota de Shannon $\lvert K\rvert \ge \lvert M\rvert$ es necesaria pero no suficiente** — el desarrollo, con los números del Ejemplo 2, está en [[secreto-perfecto#Teorema de Shannon (cota de claves)|secreto perfecto]].
 
 Es el mismo hilo conductor que ya recorre la wiki: en [[ataque-de-fuerza-bruta|fuerza bruta]] y en [[cifrado-de-sustitucion-monoalfabetica|sustitución monoalfabética]], *espacio de claves grande ≠ seguro*. Acá aparece la versión fina del mismo error: no alcanza con **contar** claves, hay que mirar **cómo se reparten** — que es exactamente lo que mide $P[C=y \mid M=x]$.
-
-## Ver también
-
-- [[secreto-perfecto|Secreto perfecto]] — la definición que este modelo permite enunciar
-- [[criptosistema|Criptosistema]] — la capa combinatoria sobre la que se montan las distribuciones
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — el apunte con los dos ejemplos resueltos
-- [[modelos-de-ataque|Modelos de ataque]] — qué observa el adversario, que es lo que se condiciona
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01]]
-- Fuente: [probabilidad y criptografia.pdf](../../raw/apuntes/probabilidad%20y%20criptografia.pdf)

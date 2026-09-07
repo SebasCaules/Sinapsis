@@ -8,9 +8,9 @@ unidad: 1
 clase: 1
 orden: 11
 created: 2026-08-10
-updated: 2026-08-24
-tags: [criptografia, seguridad, secreto-perfecto, shannon, one-time-pad, clase-01, clase-02]
-sources: [Clase 01, probabilidad y criptografia.pdf, Clase 02 - Criptografia - Cifrado.pdf]
+updated: 2026-09-06
+tags: [criptografia, seguridad, secreto-perfecto, shannon, one-time-pad, clase-01, clase-02, transcripcion]
+sources: [Clase 01, probabilidad y criptografia.pdf, Clase 02 - Criptografia - Cifrado.pdf, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Secreto perfecto
@@ -39,7 +39,21 @@ La [[clase-02-cifrado|Clase 02]] repasa esta definición y le agrega un recuadro
 
 > **Se resuelve mirando la tercera variable.** *(lectura nuestra.)* $C$ no es función de $M$ sola sino **del par $(M, K)$**. Con $K$ fija, $M$ y $C$ serían dependientes —y el criptograma revelaría todo—; con $K$ uniforme e independiente de $M$, la dependencia se disuelve. **El secreto perfecto es precisamente la afirmación de que la clave aporta tanta incertidumbre como la que el mensaje podría filtrar**, y por eso cuesta $\lvert K\rvert \ge \lvert M\rvert$.
 >
-> **Errata de la filmina:** escribe *"las V.A.D.s **C** y **E**"*; por el contexto, $E$ es un tipeo por $M$.
+> **Errata de la filmina:** escribe *"las V.A.D.s **C** y **E**"*; por el contexto, $E$ es un tipeo por $M$. En la transcripción el docente lee la filmina diciendo *"el valor de $C$ surge de aplicar un método de encriptación al mensaje $M$"* (cue pt1 64).
+
+> [!quote]- De la transcripción — la clave es la que ata la dependencia (cues pt1 63-66, 163-166)
+> *"La clave está justamente en que, probabilísticamente, esa dependencia se logra a partir del conocimiento del $K$. Y si $K$ no se conoce, no existe."*
+>
+> Al explicar por qué la clave debe ser uniforme lo reformula: ***"la clave es la que ata la dependencia"***, y si no es uniforme *"no sirve para romper esa dependencia natural que hay entre…"* [el criptograma y el mensaje]. *(El cierre de la última frase está degradado en el ASR y es reconstrucción nuestra; el sentido es inequívoco por el contexto.)*
+
+> [!quote]- De la transcripción — la definición traducida por un alumno, y validada (cues pt1 46-62)
+> Juan Ignacio Causse la traduce y el docente la valida: *"$M$ y $C$ son variables aleatorias independientes (…) la probabilidad de obtener el mensaje no cambia si vos tenés la posibilidad de ver o no ver el mensaje cifrado"*.
+>
+> El docente le pone la imagen operativa: *"el hecho de conocer $C$ no aporta nada de información, es cero. **Es lo mismo saberlo que no saberlo**"* — da igual que el criptograma viaje por la red y alguien lo levante con Wireshark.
+>
+> De ahí el salto a teoría de la información (cue pt1 57), que la wiki desarrolla en [[teoria-de-la-informacion#8. El puente con criptografía|Teoría de la información § El puente con criptografía]] —entropía, información mutua y esta misma frase escrita $I(M;C) = 0$— y, con las cuentas de Bayes, en [[probabilidad-y-criptografia|Probabilidad y criptografía]].
+
+> **La condición de soporte, enunciada en voz.** Al leer la definición el docente glosa el $\Pr[C = c] > 0$: cada criptograma $c$ *"tal que la probabilidad de ese $c$ es positiva, es decir, que es un cifrado que puede aparecer"* (cues pt1 34-36). Es lo que hace que la condicional esté bien definida.
 
 ### Caracterización equivalente
 
@@ -103,15 +117,3 @@ El secreto perfecto no se abandona por falso sino **por caro**. La [[clase-02-ci
 3. **Por eso hay que cambiar la definición** → [[seguridad-computacional|seguridad computacional]]: limitar los escenarios (adversarios PPT) y limitar las garantías (probabilidad de éxito despreciable).
 
 Esa es la línea divisoria de la materia: de acá en adelante nada tiene secreto perfecto, y "seguro" pasa a significar *"pasa tal [[pruebas-de-indistinguibilidad|prueba de indistinguibilidad]]"*.
-
-## Ver también
-
-- [[criptosistema|Criptosistema]] — la definición sobre la que se enuncia
-- [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] — de dónde salen las probabilidades
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — los dos ejemplos numéricos trabajados
-- [[teoria-de-la-informacion|Teoría de la información]] — esta misma definición escrita como $I(M;C) = 0$ (información mutua nula entre mensaje y criptograma), y el teorema de Shannon $\lvert\mathcal{K}\rvert \ge \lvert\mathcal{M}\rvert$ como la versión de **conteo** de la cota de entropía $H(K) \ge H(M)$
-- [[one-time-pad|One Time Pad]] — el esquema que lo alcanza
-- [[seguridad-computacional|Seguridad computacional]] — lo que viene después
-- [[cifrado-por-rotacion|Cifrado por rotación]]
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]]
-- Katz & Lindell, cap. 2 — *Perfectly Secret Encryption* ([[bibliografia|bibliografía]])

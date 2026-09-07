@@ -193,18 +193,3 @@ Los modos que se usan de verdad son instanciaciones optimizadas de esta idea, y 
 Al cerrar la sesión del 03/09 el docente ubica **todo** el bloque de integridad en el **capítulo 4** de Katz & Lindell (cue pt2 907). El vault cita además el capítulo 5 para las funciones de hash, y conviene dejar registrada la discrepancia: probablemente sea diferencia de edición, la misma que explica el 4.19 contra el 4.20 de más arriba.
 
 Y hay **material anunciado que todavía no está en `raw/`**: la cátedra prometió subir al campus demostraciones y propiedades que no están en el libro (cues pt2 908-909), la misma promesa que ya había hecho al hablar de la demostración de `CCM` (cues pt2 806-808). Es un cabo suelto que hay que ir a buscar: mientras no esté, [[ccm-y-gcm|CCM y GCM]] sigue apoyándose en especificaciones externas al vault.
-
-## Ver también
-
-- [[privacidad-e-integridad|Privacidad e integridad]] — las tres formas de combinar, y por qué esta construcción usa la tercera
-- [[ccm-y-gcm|CCM y GCM]] — cómo se implementa esto en la práctica
-- [[agilidad-criptografica|Agilidad criptográfica]] — por qué conviene que el MAC sea una pieza reemplazable
-- [[maleabilidad|Maleabilidad]] — el problema que esta construcción resuelve
-- [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — la prueba que el esquema resultante pasa
-- [[message-authentication-code|Message Authentication Code]] y [[seguridad-de-un-mac|Seguridad de un MAC]] — la pieza $\Pi_m$
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `CPA`, la hipótesis sobre $\Pi_e$
-- [[modos-de-encadenamiento|Modos de encadenamiento]] y [[aes|AES]] — con qué se instancia $\Pi_e$
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — la recomendación del slide 40, llevada a la mesa de decisiones
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la sesión del 03/09, cues pt2 719-762 y 891-909
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — las filminas 14 a 18, que traen la definición, el experimento `CCA` completo y la condición de etiquetas únicas
-- Katz & Lindell cap. 4 *Message Authentication Codes*, §4.5, Definiciones 4.16 y 4.17 y Construcción 4.18 ([[bibliografia|bibliografía]])

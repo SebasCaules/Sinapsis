@@ -8,9 +8,9 @@ unidad: 1
 clase: 2
 orden: 8
 created: 2026-08-21
-updated: 2026-09-04
-tags: [criptografia, bloque, modos, ecb, cbc, cfb, ofb, ctr, propagacion-de-errores, fuera-de-orden, autosincronizacion, guia-02, practica-03, clase-02]
-sources: ["Clase 02 - Criptografia - Cifrado.pdf", "raw/guias/guia2/Guia 2 - Criptografía Simétrica.pdf", "raw/practicas/Modo CFB.pdf"]
+updated: 2026-09-06
+tags: [criptografia, bloque, modos, ecb, cbc, cfb, ofb, ctr, propagacion-de-errores, fuera-de-orden, autosincronizacion, guia-02, practica-03, clase-02, transcripcion]
+sources: ["Clase 02 - Criptografia - Cifrado.pdf", "raw/guias/guia2/Guia 2 - Criptografía Simétrica.pdf", "raw/practicas/Modo CFB.pdf", "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Modos de encadenamiento
@@ -64,6 +64,27 @@ La diferencia con CFB está en qué se realimenta: CFB realimenta el **criptogra
 
 La entrada de la primitiva es $\text{nonce} \,\Vert\, \text{contador}$, y el contador avanza por bloque. No hay realimentación de ningún tipo: **cada bloque es independiente de los demás**, y eso es lo que habilita el paralelismo y el acceso aleatorio.
 
+**La anatomía de la entrada** es lo que explica el acceso aleatorio: el IV está dividido en dos partes, un **nonce** que se usa una sola vez por mensaje —y por eso es el mismo en todos los bloques de ese mensaje— y un **contador** que va $0, 1, 2, 3, \dots$. El bloque $i$-ésimo del keystream sale de $\mathsf{Enc}_k(\text{nonce}\Vert i)$ **sin necesitar ninguno de los anteriores**, y el diagrama de la filmina lo dibuja con valores concretos (`c59bcf35…` repetido, contador `00000000`, `00000001`, `00000002`).
+
+Es también el modo que **más le exige a la primitiva**: dos entradas consecutivas difieren en un puñado de bits, así que sin [[primitiva-de-cifrado-en-bloque#El efecto avalancha|efecto avalancha]] los bloques de keystream serían casi iguales entre sí y `CTR` se caería solo.
+
+---
+
+### Los cinco, vistos juntos: no son cinco cosas distintas
+
+> [!quote]- De la transcripción — qué son los cinco modos, y los dos juicios que la tabla no registra (cues pt1 733, 787, 795, 808)
+> *"Todos estos, en definitiva, lo que están tratando de hacer es armar como una secuencia, **un generador pseudoaleatorio de bloques** que se usan para xorear con cada uno de los bloques"* (cue pt1 795). Sumado a lo que ya dijo en `CFB` —*"se está pareciendo cada vez más a lo que es el mismo OTP"* (cue pt1 787)—: **`CFB`, `OFB` y `CTR` no son modos de bloque, son maneras de fabricar un [[criptosistema-de-flujo|cifrado de flujo]] a partir de una primitiva de bloque**, y por eso reaparecen las reglas del [[cifrado-probabilistico-nonce-e-iv|cifrado probabilístico]]: IV que no se repite, nunca el mismo keystream dos veces.
+>
+> Y los dos juicios comparativos: sobre `ECB`, *"éste es el más básico de todos los encadenamientos, y es el menos seguro, el que menos garantías de seguridad ofrece"* (cue pt1 733); sobre `CTR`, *"es **mejor que los otros modos**, porque justamente permite que si hay un error en uno, el error se limita solamente a eso y no a todos los otros mensajes. No hay encadenamiento"* (cue pt1 808).
+
+> [!quote]- De la transcripción — `CFB` contra `OFB`, en una línea (cues pt1 788-794)
+> Los dos diagramas de la filmina son casi idénticos. El docente lo resuelve así: ***"la diferencia entre `CFB` y `OFB` es qué es lo que se propaga: si antes o después de hacer el xor."***
+>
+> Consecuencia inmediata: como en `OFB` el keystream no toca el criptograma, *"permite hacer eventualmente el cálculo por adelantado"* y un error *"se propaga sólo un bit"*.
+
+> [!quote]- De la transcripción — para qué sirve todo esto (cues pt1 726-727)
+> Lo dice presentando `ECB`: *"el objetivo de todo esto es **entender los riesgos**, no aplicar todo, porque aplicar todo es carísimo. Entender por dónde uno se está moviendo y qué es lo que gana y qué es lo que pierde en cada caso."*
+
 ---
 
 ## Tabla comparativa
@@ -107,6 +128,11 @@ Y entonces:
 > Y el remate de la filmina, con el cartel de peligro: **no está demostrado que existan las funciones pseudoaleatorias.**
 >
 > Vale la pena detenerse ahí. Toda la criptografía simétrica moderna es un edificio de **teoremas condicionales**: *si* AES se comporta como una PRF, *entonces* AES-CBC es CPA-Secure. La hipótesis nunca se demostró —demostrarla implicaría $\mathrm{P} \ne \mathrm{NP}$— y lo que la sostiene es que nadie la refutó en décadas de intentos. Es la versión honesta de "todavía nadie lo rompió" que la [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] criticaba: la diferencia es que ahora **está aislada en un solo lugar**, la primitiva, y todo lo demás se deduce.
+
+**Y `ECB` no figura en esa enumeración**: además de tener su propio cartel de prohibido, **no entra en el teorema**. El teorema tampoco dice *"CBC es seguro"*: dice ***"CBC es tan seguro como pseudoaleatoria sea la primitiva"***.
+
+> [!quote]- De la transcripción — cómo se convive con el disclaimer (cue pt1 837)
+> El docente lo relativiza sin borrarlo: *"no está demostrado que existan, pero, a efectos prácticos, **las que se utilizan se comportan bastante bien como si fuesen funciones pseudoaleatorias**"*. Es la última frase de la jornada del 13/08.
 
 ## Propagación de errores
 
@@ -191,7 +217,7 @@ $$\text{caracteres afectados} \;=\; \underbrace{1}_{\text{un bit mal}} \;+\; \un
 
 Con `DES` son **9 caracteres** —uno con un solo bit mal y ocho destruidos—, y a partir del décimo el registro ya se limpió: **`CFB` también es autosincronizante**. Con `AES` serían **17**. La respuesta correcta no es un número absoluto sino $1 + n/s$; un examen que pida "9" está asumiendo `DES` sin decirlo.
 
-> **Y la propia cátedra usa un tercer valor en su material.** Las cuatro láminas de [`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf) del 24/08 trabajan con **$n = 32$ y $s = 8$** — ni `DES` ni `AES` —, parámetros que están impresos en las tres primeras y que la cuarta, la del ejercicio, da por heredados, y ahí la respuesta es $1 + 32/8 = \mathbf{5}$ caracteres. La lámina 4 deja el cálculo planteado como ejercicio (*"analizar: llega mal $c_1$"*), que es el mismo [[guia-02-resolucion#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros. Es la mejor prueba de que lo evaluable es la fórmula: la cátedra le cambia el $n$ a su propio ejemplo. → [[practica-03-seudoaleatoriedad-y-modos#9.1. El ejercicio de la lámina 4: llega mal el primer segmento|Práctica 03 § El ejercicio de la lámina 4]]
+> **Y la propia cátedra usa un tercer valor en su material.** Las cuatro láminas de [`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf) del 24/08 trabajan con **$n = 32$ y $s = 8$** — ni `DES` ni `AES` —, parámetros que están impresos en las tres primeras y que la cuarta, la del ejercicio, da por heredados, y ahí la respuesta es $1 + 32/8 = \mathbf{5}$ caracteres. La lámina 4 deja el cálculo planteado como ejercicio (*"analizar: llega mal $c_1$"*), que es el mismo [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros. Es la mejor prueba de que lo evaluable es la fórmula: la cátedra le cambia el $n$ a su propio ejemplo. → [[practica-03-seudoaleatoriedad-y-modos#9.1. El ejercicio de la lámina 4: llega mal el primer segmento|Práctica 03 § El ejercicio de la lámina 4]]
 
 ### Tabla: propagación de errores en los cinco modos
 
@@ -210,6 +236,19 @@ Con `DES` son **9 caracteres** —uno con un solo bit mal y ocho destruidos—, 
 Es la fila que la [[#Tabla comparativa|tabla comparativa]] todavía no mostraba, y en la práctica pesa: sobre un canal ruidoso —radio, satélite, almacenamiento con sectores dañados— `OFB` y `CTR` degradan **bit a bit**, mientras que `CBC` pierde **un bloque entero más un bit** por cada bit corrompido y `CFB` con `DES` pierde **nueve caracteres**. Si el canal mete ruido y no se puede retransmitir, ésa es la razón técnica para elegir un modo de flujo.
 
 > **La contracara, para no leer la tabla como un ranking.** La ausencia de propagación es exactamente lo mismo que **maleabilidad en su forma más pura**: en `OFB` y `CTR`, dar vuelta un bit del criptograma da vuelta el bit correspondiente del plano, con precisión quirúrgica y sin destruir nada alrededor. Ninguno de los cinco modos da integridad, pero en éstos el atacante activo tiene la mira más fina.
+
+**La regla que resume la tabla entera:** si el bloque corrupto **entra por la primitiva**, hay avalancha y sale el bloque entero mal —$\approx$ la mitad de los bits—; si **entra por un xor directo**, se da vuelta exactamente ese bit y nada más.
+
+> [!quote]- De la transcripción — el docente lo comenta modo por modo mientras dibuja (cues pt1 753-808)
+> Todo lo que dice acá es sobre un **error en el canal**, no sobre un error en el texto claro antes de cifrar.
+>
+> - **ECB** (cue pt1 753): *"cada error afecta solamente a cada uno de los bloques"* — queda contenido.
+> - **CBC** (cues pt1 754-758): *"reciben mal éste y además van a recibir mal el que sigue; después para el tercero ya no"* — el bloque y el siguiente, y ahí se corta.
+> - **CFB** (cues pt1 784-785): *"un error en un bloque genera un error en todos los demás (…) hay que transmitir todo de vuelta"*.
+> - **OFB** (cue pt1 791): *"permite que se propague sólo un bit si hay un error"*.
+> - **CTR** (cues pt1 804-808): *"acá no hay encadenamiento (…) cualquier error que ocurre en alguno de los bits sólo altera ese"*.
+
+> **La fila de `CFB` dicha en clase no coincide con la cuenta hecha.** *"Un error en un bloque genera un error en todos los demás"* (cue pt1 784) no se sostiene al desarrollarlo: el criptograma se realimenta a un registro que **se limpia** después de un bloque, así que el daño está acotado y **`CFB` es autosincronizante**. El [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6c de la Guía 2]] da el número exacto, $1 + n/s$ segmentos. Las otras cuatro filas sí coinciden. *(Lectura nuestra, contra la resolución de la guía.)*
 
 ### Bloques que llegan fuera de orden: un modo de falla distinto
 
@@ -305,23 +344,10 @@ Uno esperaría que el modo con la realimentación más profunda fuera el más ro
 
 > **Qué sigue sin estar resuelto.** La **pérdida** o **inserción** de bits o bloques es otro problema distinto —cambia la *cantidad*, no sólo el orden, y si no está alineada a los límites de bloque desalinea todo lo que sigue— y **no está en el material que tenemos**. Lo único que la fuente aclara es que la autosincronización de `CBC` vale *ante errores de bit, no ante pérdida de bloques*. No lo desarrollamos más allá de eso.
 
-> **Desarrollo completo, paso a paso:** [[guia-02-resolucion#Ejercicio 6|Guía 2 — Resolución, Ejercicio 6]] · [[guia-02-criptografia-simetrica#Ejercicio 6|enunciado literal]]
+> **Desarrollo completo, paso a paso:** [[guia-02-criptografia-simetrica#Ejercicio 6|Guía 2 — Resolución, Ejercicio 6]] · [[guia-02-criptografia-simetrica#Ejercicio 6|enunciado literal]]
 
 ## Lo que esta clase no cubre
 
 **Integridad.** Todos estos modos dan **confidencialidad y nada más**: son maleables, y la sección de arriba lo hace concreto —en `CBC` un bit del criptograma da vuelta un bit elegido del plano descifrado, en `OFB` y `CTR` lo da vuelta sin daño colateral—. El cifrado autenticado es el tema de la [[cronograma|Clase 3]].
 
-*(La propagación de errores también faltaba en las filminas. Ya no falta acá: se resolvió arriba, a partir del [[guia-02-resolucion#Ejercicio 6|Ej. 6 de la Guía 2]].)*
-
-## Ver también
-
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — lo que los modos extienden
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]]
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — qué significa CPA-Secure
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — CFB, OFB y CTR construyen uno a partir de bloque
-- [[aes|AES]] · [[des-y-3des|DES y 3-DES]] — las primitivas que se encadenan
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — la filmina de recomendados lista `AES-CBC` y `AES-CTR`
-- [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]] — el enunciado del Ej. 6, que es el que obliga a resolver la propagación de errores
-- [[guia-02-resolucion#Ejercicio 6|Guía 2 — Resolución]] — el desarrollo completo del Ej. 6, con las tablas verificadas por simulación
-- [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] — las cuatro láminas de `CFB` de la cátedra, con $n = 32$ y $s = 8$: de ahí salen la fila de 5 caracteres y el caso de bloques fuera de orden
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]
+*(La propagación de errores también faltaba en las filminas. Ya no falta acá: se resolvió arriba, a partir del [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6 de la Guía 2]].)*

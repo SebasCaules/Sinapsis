@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 9
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, pentesting, hipotesis-de-falla, metodologia, pivoting, clase-08, sin-dictar]
 sources: ["Clase 13 - Pentesing.pdf"]
 ---
@@ -50,9 +50,9 @@ La filmina no los desarrolla; el docente los agrega en voz (43:25) como la tradu
 
 - **Las interfaces con terceros** — servicios externos, pasarelas de pago, sistemas legacy con interfaces viejas: "ahí es donde están los quilombos".
 - **Las discrepancias que se acumulan con el tiempo** — un sistema de vida larga que cambia requisitos sin reescribir lo viejo.
-- **Los elementos reutilizados para más de un propósito** — un flag que sirve a la vez para detectar un ingreso y para saber que alguien está presente. Es el mismo patrón que [[clase-08-principios-de-diseno-y-vulnerabilidades#1.7. Mecanismos exclusivos|Mecanismos exclusivos]] prohíbe desde el lado del diseño: un mecanismo de seguridad no debe compartirse, y acá se ve el motivo desde el lado de quien busca romperlo.
+- **Los elementos reutilizados para más de un propósito** — un flag que sirve a la vez para detectar un ingreso y para saber que alguien está presente. Es el mismo patrón que [[principios-de-diseno#7. Mecanismos exclusivos|Mecanismos exclusivos]] prohíbe desde el lado del diseño: un mecanismo de seguridad no debe compartirse, y acá se ve el motivo desde el lado de quien busca romperlo.
 
-Y un ejemplo puntual que ilustra por qué **cualquier convención de nombres predecible es explotable**: bautizar servidores con nombres de planetas es cómodo para administrar, pero le regala al atacante una forma de adivinar dónde está lo importante —si hay uno llamado *Plutón*, quizás ahí estén los usuarios—. La alternativa, un hash largo y aleatorio, choca contra la usabilidad porque nadie lo recuerda: es el mismo balance entre seguridad y comodidad que [[clase-08-principios-de-diseno-y-vulnerabilidades#1.8. Aceptación psicológica|Aceptación psicológica]] discute del lado del diseño.
+Y un ejemplo puntual que ilustra por qué **cualquier convención de nombres predecible es explotable**: bautizar servidores con nombres de planetas es cómodo para administrar, pero le regala al atacante una forma de adivinar dónde está lo importante —si hay uno llamado *Plutón*, quizás ahí estén los usuarios—. La alternativa, un hash largo y aleatorio, choca contra la usabilidad porque nadie lo recuerda: es el mismo balance entre seguridad y comodidad que [[principios-de-diseno#8. Aceptación psicológica|Aceptación psicológica]] discute del lado del diseño.
 
 ### Punto de partida: tres niveles incrementales de atacante
 
@@ -64,7 +64,7 @@ La filmina 9 da tres niveles, y aclara que **según el tipo de prueba, algunos s
 | 2 | Externo, **con** conocimiento del sistema | En sistemas con registro abierto |
 | 3 | Con acceso al sistema | — |
 
-Es, según señala `video-09`, **el análogo en seguridad de sistemas del [[modelos-de-ataque|modelo de adversario criptográfico]] del Bloque 1**: en los dos casos, la fuerza de la prueba depende de cuánta información inicial se le concede al atacante, y una prueba que sólo resiste a un atacante de nivel 1 no dice nada sobre su resistencia frente a uno de nivel 2 o 3. Es el mismo principio detrás de por qué [[clase-08-principios-de-diseno-y-vulnerabilidades#1.1. Menor privilegio|Menor privilegio]] exige asignar permisos por función: un atacante de nivel 3 —con acceso legítimo— es, en la práctica, el escenario más común y el más peligroso, porque ya partió con privilegios reales.
+Es, según señala `video-09`, **el análogo en seguridad de sistemas del [[modelos-de-ataque|modelo de adversario criptográfico]] del Bloque 1**: en los dos casos, la fuerza de la prueba depende de cuánta información inicial se le concede al atacante, y una prueba que sólo resiste a un atacante de nivel 1 no dice nada sobre su resistencia frente a uno de nivel 2 o 3. Es el mismo principio detrás de por qué [[principios-de-diseno#1. Menor privilegio|Menor privilegio]] exige asignar permisos por función: un atacante de nivel 3 —con acceso legítimo— es, en la práctica, el escenario más común y el más peligroso, porque ya partió con privilegios reales.
 
 ## Paso 2 — Hipótesis
 
@@ -83,7 +83,7 @@ El resultado de este paso es una **lista de posibles vulnerabilidades**, todaví
 > [!quote]- Del video 09 — por qué el post-it con el password existe (50:47)
 > "Esa persona tiene un objetivo que tiene que hacer algo todos los días y si no, no se acuerda el password y no cumple con su objetivo."
 
-La política falla porque **compite con la productividad**, no porque el usuario no entienda la regla. Es la misma tensión que [[clase-08-principios-de-diseno-y-vulnerabilidades#1.8. Aceptación psicológica|Aceptación psicológica]] plantea del lado del diseño: un mecanismo que dificulta el trabajo diario termina evadido, no obedecido, sin importar cuán correcto sea en el papel.
+La política falla porque **compite con la productividad**, no porque el usuario no entienda la regla. Es la misma tensión que [[principios-de-diseno#8. Aceptación psicológica|Aceptación psicológica]] plantea del lado del diseño: un mecanismo que dificulta el trabajo diario termina evadido, no obedecido, sin importar cuán correcto sea en el papel.
 
 ### Cuatro puntos calientes de implementación, según video-09
 
@@ -128,14 +128,3 @@ Filminas 15-16.
 **Eliminación** (opcional): por lo general sólo se incluyen recomendaciones, porque quien ejecuta la prueba no suele ser quien diseñó o desarrolló el sistema. Es importante que quede claro el contexto, los detalles y el mecanismo de explotación, para poder corregir el sistema, para poder impedirlo o monitorearlo mientras tanto, y para poder verificar si fue explotado en el pasado.
 
 > **Una tensión que conviene tener resuelta de antemano, sobre el alcance de "generalización".** Un alumno le señala a Ramele, en `video-09` (1:21:42), una contradicción aparente: si el paso 4 se llama *generalización*, ¿cómo puede ser que, según [[validez-de-las-pruebas-de-penetracion|Validez de las pruebas de penetración]], *"los resultados de un test sirvan sólo marginalmente para otros"*? La resolución que da la cátedra: **la generalización opera dentro del mismo sistema** —pivoteando desde una vulnerabilidad ya explotada hacia sus derivaciones, buscando dónde se replica el mismo problema— y no generaliza nada **hacia afuera**, hacia sistemas distintos. Es una aclaración útil para no leer "generalización" y "validez externa" como si fueran la misma idea; se desarrolla con más detalle en la nota de validez.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#9. Metodología de Hipótesis de Falla|Clase 08 — Principios de diseño y vulnerabilidades, §9 Metodología de Hipótesis de Falla]]
-- [[verificacion-formal-y-prueba-de-penetracion|Verificación formal y prueba de penetración]] — la definición que esta metodología pone en práctica
-- [[identificacion-de-vulnerabilidades|Identificación de vulnerabilidades]] — el mismo trabajo del paso 2 (hipótesis), pero antes de que el sistema exista
-- [[casos-de-prueba-de-penetracion|Casos de prueba de penetración]] — los cinco pasos aplicados de punta a punta en dos ejemplos completos
-- [[validez-de-las-pruebas-de-penetracion|Validez de las pruebas de penetración]] — hasta dónde sirve la generalización del paso 4, discutido en detalle
-- [[modelos-de-ataque|Modelos de ataque]] — el análogo criptográfico de los tres niveles incrementales de atacante del paso 1
-- [[principios-de-diseno|Principios de diseño]] — Menor privilegio, Mecanismos exclusivos y Aceptación psicológica son los tres principios que más se citan al buscar hipótesis en este paso
-- [[video-09-pentesting-metodologia#4. Metodología de Hipótesis de Falla|Video 09 — Pentesting: metodología]] — la fuente hablada de todo lo que esta nota atribuye al video, incluidos los cinco puntos calientes y el ejemplo del post-it

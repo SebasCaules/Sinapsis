@@ -8,9 +8,9 @@ unidad: 1
 clase: 2
 orden: 4
 created: 2026-08-21
-updated: 2026-08-24
-tags: [criptografia, prg, pseudoaleatorio, semilla, lfsr, clase-02]
-sources: [Clase 02 - Criptografia - Cifrado.pdf]
+updated: 2026-09-06
+tags: [criptografia, prg, pseudoaleatorio, semilla, lfsr, clase-02, transcripcion]
+sources: [Clase 02 - Criptografia - Cifrado.pdf, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Generador pseudoaleatorio
@@ -31,6 +31,22 @@ La primitiva que reemplaza al azar verdadero del [[one-time-pad|OTP]] por algo q
 
 > **"Parece aleatoria" no es una figura retórica** — es lo que la definición formal convierte en algo verificable. Y notar la tensión: el generador es **determinístico**, así que su salida es **completamente predecible** para quien conozca la semilla. Toda la pseudoaleatoriedad vive en el desconocimiento de $k$.
 
+> [!quote]- De la transcripción — el diálogo que instala el problema (cues pt1 260-273)
+> El docente no arranca por la definición sino por una pregunta a la clase: *"¿las computadoras son deterministas o son estocásticas?"* Respuesta del curso: deterministas. *"¿Y cómo hacen las computadoras para tener algo de estocasticidad?"* — usan semillas. Y un alumno cierra el círculo: *"si se sabe el proceso con el que se genera ese número y se tiene la semilla, también se puede determinar el número final"*.
+>
+> Ésa **es** la definición de pseudoaleatorio: no hay azar, hay una función determinística cuya salida no se puede predecir barato. La entropía real de la máquina queda para más adelante (cues pt1 272-273), y ese "más adelante" es [[numeros-aleatorios-y-randomness|Sobre números aleatorios y randomness]].
+
+### La analogía del anillo
+
+No está en ninguna filmina, y es la que ordena las tres propiedades que importan de un generador.
+
+> [!quote]- De la transcripción — el anillo, y cómo se lee con él el registro de la filmina (cues pt1 275-283, 297-309)
+> *"Imagínense un algoritmo que distribuye todos los números enteros posibles —los que entran en una representación de 24 bits— **en un anillo**. Lo que ustedes determinan con la semilla es **dónde arrancan de ese anillo** para recorrer todos los números posibles."*
+>
+> La misma imagen le sirve para leer el registro de desplazamiento de la filmina: 8 bits, se xorean dos posiciones, el resultado se realimenta, *"con la esperanza de que esto me recorra todos los valores posibles de 8 bits sin repetirlos, haciendo un anillo completo"*.
+
+De ahí salen tres cosas: **por qué la semilla es lo único secreto** (es la posición de arranque), **por qué el generador tiene período** (el anillo se cierra) y **por qué un período corto lo arruina** (se recorre poco antes de repetir). Las tres se ven en el ejercicio de más abajo, donde el período es $5$.
+
 ## Definición formal
 
 Sea $D = \{\, f : \{0,1\}^{n} \to \{0,1\} \,\}$ una familia de funciones. Entonces
@@ -41,7 +57,7 @@ es un **generador pseudoaleatorio respecto de $D$** si para toda $f \in D$:
 
 $$P\big(\,f(G(r^s)) \neq f(r^n)\,\big) = \varepsilon$$
 
-donde $r^{n}$ es una **secuencia realmente aleatoria** y $\varepsilon$ un **valor despreciable**.
+Las tres anotaciones con flecha de la filmina traducen cada símbolo: el $P$ es una **probabilidad generalizada**, $r^{n}$ es una **secuencia realmente aleatoria** y $\varepsilon$ un **valor despreciable**.
 
 | Pieza | Qué es |
 |---|---|
@@ -68,6 +84,10 @@ G(s) &= \{\, G_0 \% 2,\ G_1 \% 2,\ G_2 \% 2,\ \dots,\ G_n \% 2 \,\}\\
 &\quad G_0 = s\\
 &\quad G_i = G_{i-1} \cdot 3 + 1 \pmod{11}
 \end{aligned}$$
+
+> **Errata de la filmina:** escribe *"Sea $s = \{1, \dots, 10\}$"*, confundiendo el elemento con el conjunto. Es $s \in \{1,\dots,10\}$: tal como está, $G$ recibiría un conjunto. *(Precisión nuestra.)*
+
+> **Ojo con lo que se escucha en el audio (cues pt1 324-325).** Al leer el ejercicio el docente dice *"lo voy a dividir por 2"*, pero la filmina escribe $G_i \% 2$ y lo que se toma es **el resto**, no el cociente: es el bit de paridad. La cuenta correcta es la de la filmina, que es la que sigue acá abajo.
 
 **Generar 5 bits con $s = 2$:**
 
@@ -127,13 +147,3 @@ Las [[primitiva-de-cifrado-en-bloque|primitivas de cifrado en bloque]] se piden 
 > Para cada posible $k$, $f(x) = \mathsf{Enc}_k(x)$ **es un generador pseudoaleatorio**.
 
 Por eso los modos [[modos-de-encadenamiento|OFB, CFB y CTR]] pueden construir un cifrado de flujo a partir de uno de bloque: usan la primitiva como generador de keystream.
-
-## Ver también
-
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — el consumidor principal
-- [[seguridad-computacional|Seguridad computacional]] — qué significa "despreciable"
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — la misma idea de "no se distingue", ahora sobre criptogramas
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — funciones pseudoaleatorias
-- [[teoria-de-la-informacion|Teoría de la información]] — *bit* contra *binary digit*: por qué la salida de $n$ símbolos de un PRG lleva a lo sumo el contenido de la semilla, y por qué una clave sesgada de 56 binary digits no da $2^{56}$
-- [[numeros-aleatorios-y-randomness|Sobre números aleatorios y randomness]] — la pregunta que este concepto **no** contesta: de dónde sale la semilla, o sea el azar físico previo al generador
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

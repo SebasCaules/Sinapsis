@@ -8,7 +8,7 @@ unidad: 2
 clase: 9
 orden: 8
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, flujo-de-informacion, canales-ocultos, side-channel, timing-attack, exponenciacion-modular, bloque-2, clase-09, sin-dictar]
 sources: ["Clase 10 - Aplicaciones - Flujo de informacion.pdf"]
 ---
@@ -67,7 +67,7 @@ $$\begin{aligned}
 &\mathrm{result} := x
 \end{aligned}$$
 
-donde $b_i$ es el $i$-ésimo bit de la representación binaria de $b$, con $b_0$ el bit menos significativo. **El ataque, en una línea:** la multiplicación de la rama `if` sólo se ejecuta cuando $b_i = 1$; el "cuadrado" ($a_{\mathrm{tmp}} := a_{\mathrm{tmp}}^2 \bmod n$) se ejecuta siempre. Entonces **el tiempo total de ejecución depende de cuántos bits de $b$ valen 1**, y con métodos estadísticos se puede reconstruir parte de $b$ — que es, típicamente, el exponente secreto de un esquema como RSA o Diffie-Hellman.
+donde $b_i$ es el $i$-ésimo bit de la representación binaria de $b$, con $b_0$ el bit menos significativo. Es el mismo algoritmo de exponenciación rápida que aparece en cualquier implementación de RSA o de Diffie-Hellman, y la notación modular con paréntesis es la de [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]]. **El ataque, en una línea:** la multiplicación de la rama `if` sólo se ejecuta cuando $b_i = 1$; el "cuadrado" ($a_{\mathrm{tmp}} := a_{\mathrm{tmp}}^2 \bmod n$) se ejecuta siempre. Entonces **el tiempo total de ejecución depende de cuántos bits de $b$ valen 1**, y con métodos estadísticos se puede reconstruir parte de $b$ — que es, típicamente, el exponente secreto de un esquema como RSA o Diffie-Hellman.
 
 ### El ataque, verificado con un ejemplo numérico
 
@@ -92,14 +92,3 @@ $\mathrm{result} = x = 1$. Verificación directa: $3^{5} = 243$, y $243 = 22\cdo
 ### El mismo problema, del otro lado del curso
 
 *(Lectura nuestra.)* Éste no es el único side channel de tiempo que el curso toca: la nota de [[cbc-mac#Lo que la clase no dice sobre los MACs iterativos|CBC-MAC]] ya había señalado que comparar una etiqueta byte a byte y cortar en la primera diferencia filtra cuántos bytes coinciden —el caso documentado de la Xbox 360, con una diferencia de tiempo de apenas 2,2 ms—. Es la misma estructura del ataque de esta filmina: una operación cuyo **tiempo** depende de un valor que se supone secreto, con la diferencia de que allá el defecto está en la comparación de `Vrfy` y acá en el propio algoritmo de exponenciación. Los dos son el mismo recordatorio: una construcción matemáticamente segura puede filtrar igual si la implementación no corre en tiempo constante.
-
-## Ver también
-
-- [[clase-09-flujo-de-informacion#8. Canales ocultos y side channels|Clase 09 — Flujo de información]] — la sección de la que cuelga esta nota
-- [[problema-del-confinamiento|Problema del confinamiento]] — el porqué estructural de que estos canales existan siempre
-- [[metodos-de-aislacion|Métodos de aislación]] — las dos respuestas prácticas que la clase da para mitigarlos
-- [[flujo-de-informacion|Flujo de información]] — la desigualdad de entropía condicional que el "leakage" de estos canales no es más que un caso particular de
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — la notación modular que usa el algoritmo de la filmina 23
-- [[cbc-mac#Lo que la clase no dice sobre los MACs iterativos|CBC-MAC]] — el otro side channel de tiempo del curso, sobre la verificación de una etiqueta en lugar de sobre una exponenciación
-- [[video-11-flujo-de-informacion#Confinamiento, aislación total y canales ocultos|Video 11 — Flujo de información]] — la definición de canal oculto, con la anécdota del DRM de los DVDs
-- [[video-11-flujo-de-informacion#El side channel sobre la exponenciación modular|Video 11 — el side channel de la exponenciación modular]] — el mismo ataque, con la aclaración de notación de Ramele

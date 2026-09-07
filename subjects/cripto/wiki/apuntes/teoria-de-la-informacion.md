@@ -564,18 +564,3 @@ Y las traducciones al vocabulario de la materia *(lectura nuestra, §8)*:
 | $H_\infty(K) \ll$ largo de la clave | por qué una clave sesgada de 56 binary digits no da $2^{56}$ |
 | capacidad del canal hacia el adversario $= 0$ | el objetivo de diseño |
 
----
-
-## Ver también
-
-- [[secreto-perfecto|Secreto perfecto]] — la definición del curso; esta nota la reescribe como $I(M;C) = 0$ y convierte la cota de Shannon en $H(K) \ge H(M)$
-- [[one-time-pad|One Time Pad]] — el esquema que alcanza $I(M;C) = 0$; el ejercicio de la clave sesgada de ahí es el que acá se cierra en $0{,}128$ bits
-- [[generador-pseudoaleatorio|Generador pseudoaleatorio]] — la §8.5: $n$ binary digits de salida, a lo sumo $s$ bits de contenido
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — el $\lvert\mathcal{K}\rvert \lll \lvert\mathcal{M}\rvert$, dicho en entropía
-- [[seguridad-computacional|Seguridad computacional]] — el corte entre *qué información hay* y *quién puede sacarla*
-- [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] — $M$, $K$ y $C$ como variables aleatorias, que es lo que permite hablar de $H$ e $I$
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — **otro de los apuntes del vault sin fecha de clase asignada**, con las cuentas de Bayes hechas a mano; misma matemática, otra herramienta. La lista canónica de los que están en esa situación es la tabla [[cronograma#Material sin fecha de clase|Material sin fecha de clase]] del cronograma
-- [[indice-de-coincidencia|Índice de coincidencia]] y [[criptoanalisis-por-frecuencias|criptoanálisis por frecuencias]] — la redundancia del castellano medida sin logaritmos
-- [[des-y-3des|DES y 3-DES]] — 64 binary digits de clave, 56 bits: el error de categoría de la §2 en un estándar
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01 — Introducción y criptografía clásica]] — la clase sobre la que este material se apoya *(inferencia nuestra: la fuente no lo dice)*
-- [[programa-y-objetivos|Programa y objetivos]] — donde se verifica que la cátedra **no** dicta este tema

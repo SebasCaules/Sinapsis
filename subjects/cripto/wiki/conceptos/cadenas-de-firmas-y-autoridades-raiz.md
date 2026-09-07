@@ -47,11 +47,3 @@ donde $C'_x$ es el propio certificado firmado de $x$, y el resto de la concatena
 **En la práctica, ninguna de las dos se negocia por conexión.** Lo que existe es una **lista de AC reconocidas**, preinstalada de antemano en tres lugares distintos: el **sistema operativo**, los **navegadores**, y runtimes como la **JVM**. Esa lista es la que reemplaza, en el mundo real, a la elección explícita de "opción 1 o 2" para cada par de partes que se quieren comunicar: si la raíz de la cadena de $B$ ya está en la lista preinstalada de $A$, la validación es automática y no requiere ninguna negociación adicional.
 
 > **Por qué el mismo navegador puede confiar en cientos de raíces distintas** *(lectura nuestra, no desarrollado en la filmina)*: cada raíz preinstalada es una decisión de confianza independiente, tomada por el fabricante del sistema operativo o del navegador —no por el usuario final en el momento de la conexión—. Esto explica por qué revocar la confianza en una raíz comprometida es un evento raro y disruptivo: implica una actualización del sistema, no una negociación de protocolo.
-
-## Ver también
-
-- [[clase-05-protocolos-criptograficos#5. Cadenas de firmas y autoridades raíz|Clase 05 — Protocolos criptográficos, sección 5]] — la sección de la que sale esta nota
-- [[certificados-digitales|Certificados digitales]] — qué es exactamente lo que una AC firma
-- [[x509|X.509]] — el estándar donde esta cadena de firmas se instancia con un certificado real, autofirmado y marcado `CA:TRUE`
-- [[revocacion-y-listas-crl|Revocación y listas CRL]] — qué pasa cuando un eslabón de esta cadena se compromete antes de su expiración
-- [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] — la firma digital sobre la que se construye cada eslabón de la cadena

@@ -67,12 +67,3 @@ Validando la **firma digital** de la autoridad que certifica. Es la comprobació
 ## La pregunta que queda abierta
 
 El cierre de la filmina 10 es, textualmente, la bisagra hacia la sección siguiente: **validar una firma digital requiere una clave pública — ¿cómo se obtiene esa?** Es la misma pregunta de origen que abrió toda la clase en [[ataques-activos-y-man-in-the-middle#El problema de origen: ¿de dónde sale una clave pública? (filmina 5)|Ataques activos y man in the middle]] — solo que ahora aplicada a la clave de la **autoridad certificante**, no a la de $B$. La respuesta —que las autoridades certificantes tienen a su vez un certificado, hasta llegar a una raíz en la que se confía sin más pruebas— es el contenido de [[cadenas-de-firmas-y-autoridades-raiz|Cadenas de firmas y autoridades raíz]].
-
-## Ver también
-
-- [[clase-05-protocolos-criptograficos#4. Certificados digitales|Clase 05 — Protocolos criptográficos, sección 4]] — la sección de la que sale esta nota
-- [[infraestructura-de-clave-publica|Infraestructura de clave pública]] — el objetivo que el certificado instancia
-- [[cadenas-de-firmas-y-autoridades-raiz|Cadenas de firmas y autoridades raíz]] — de dónde sale la clave pública que valida la firma del certificado
-- [[x509|X.509]] — el estándar que fija los campos exactos de un certificado real, con un ejemplo completo
-- [[revocacion-y-listas-crl|Revocación y listas CRL]] — qué pasa cuando un certificado válido deja de serlo antes de su expiración
-- [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] — la firma digital que certifica un certificado

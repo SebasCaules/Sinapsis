@@ -21,7 +21,7 @@ Sale de la **filmina 28** del PDF de teoría de la Clase 05. La clase todavía n
 
 ## De dónde viene el problema
 
-Esta nota **no se entiende sin [[needham-schroeder|Needham-Schroeder]] primero**: ahí está la "segunda aproximación" del protocolo —la que agrega los nonces $r_1$ y $r_2$— y el ataque de la filmina 27 que la rompe. El resumen imprescindible: un atacante $E$ que en algún momento obtuvo una clave de sesión **vieja** $k_s$ —filtrada, por ejemplo, después de que esa sesión terminara— puede reinyectar el mensaje 3 grabado de esa sesión, $\{A \Vert k_s\}_{k_b}$, y $B$ no tiene **ningún** dato en ese mensaje que le permita distinguir una clave recién horneada de una de hace un mes. El nonce $r_1$ protege a $A$ contra la repetición del mensaje 2, pero $B$ no recibe ningún nonce propio para el mensaje 3, y por eso el ataque funciona con [[seguridad-de-un-mac|Mac-Forge]]-like probabilidad 1 sobre esa clave comprometida — ver el desarrollo completo en [[clase-05-protocolos-criptograficos#El ataque (filmina 27): una clave de sesión vieja alcanza|El ataque: una clave de sesión vieja alcanza]].
+Esta nota **no se entiende sin [[needham-schroeder|Needham-Schroeder]] primero**: ahí está la "segunda aproximación" del protocolo —la que agrega los nonces $r_1$ y $r_2$— y el ataque de la filmina 27 que la rompe. El resumen imprescindible: un atacante $E$ que en algún momento obtuvo una clave de sesión **vieja** $k_s$ —filtrada, por ejemplo, después de que esa sesión terminara— puede reinyectar el mensaje 3 grabado de esa sesión, $\{A \Vert k_s\}_{k_b}$, y $B$ no tiene **ningún** dato en ese mensaje que le permita distinguir una clave recién horneada de una de hace un mes. El nonce $r_1$ protege a $A$ contra la repetición del mensaje 2, pero $B$ no recibe ningún nonce propio para el mensaje 3, y por eso el ataque funciona con [[seguridad-de-un-mac|Mac-Forge]]-like probabilidad 1 sobre esa clave comprometida — ver el desarrollo completo en [[needham-schroeder#El ataque: una clave de sesión vieja alcanza|El ataque: una clave de sesión vieja alcanza]].
 
 Esto es exactamente el patrón general de [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]]: una construcción puede ser correcta en su propia definición de seguridad y aun así no ofrecer ninguna garantía contra un mensaje viejo reinyectado, porque esa garantía **no está en el alcance de la definición** — hay que agregarla aparte, con un mecanismo de frescura.
 
@@ -71,13 +71,3 @@ $$\text{Denning-Sacco: ventana de ataque} = (\text{emisión de } T,\ \text{emisi
 | Falla si… | el generador de aleatoriedad es predecible o se reutiliza un valor | los relojes se desincronizan, o el atacante actúa dentro de $\Delta t$ |
 
 Es la misma dicotomía que [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] plantea en general para los `MAC`: número de secuencia y timestamp son las dos contramedidas que la cátedra nombra ahí, y acá se ve **por qué** ninguna de las dos es gratis — cada una traslada el problema de "¿este mensaje es viejo?" a un supuesto distinto que hay que sostener en la implementación real.
-
-## Ver también
-
-- [[needham-schroeder|Needham-Schroeder]] — el protocolo que esta nota corrige, con el ataque de la clave de sesión vieja desarrollado paso a paso
-- [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — el concepto general de frescura y sus dos contramedidas, nonce y timestamp, del que Denning-Sacco es una instancia concreta
-- [[seguridad-de-un-mac|Seguridad de un MAC]] — por qué una primitiva demostrablemente segura no cubre por sí sola la repetición de mensajes
-- [[tls-arquitectura-y-record|TLS: arquitectura y record]] — la siguiente parada de la clase, donde la frescura reaparece con los nonces $r_1, r_2$ del handshake
-- [[clase-05-protocolos-criptograficos#9. La modificación Denning-Sacco|Clase 05 — Protocolos criptográficos]] — sección 9, de donde sale esta nota
-- Katz & Lindell, cap. 4 — la distinción entre lo que garantiza la primitiva y lo que tiene que resolver el protocolo que la usa
-- Denning, D. E. y Sacco, G. M., *"Timestamps in Key Distribution Protocols"*, Communications of the ACM, 1981 — el paper original que introduce esta modificación y discute la necesidad de relojes sincronizados *(lectura propia, no citada por la filmina)*

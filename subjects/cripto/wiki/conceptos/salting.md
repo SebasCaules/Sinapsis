@@ -54,15 +54,4 @@ donde $xx$ son 2 caracteres tomados de un alfabeto de 64 símbolos (`.`, `/`, d�
 
 ## Por qué el nombre se superpone con nonce e IV, y por qué no es el mismo rol
 
-**Precisión nuestra, ya registrada en la Unidad 1.** El docente, al hablar de cifrado probabilístico el 20/08, enumera varios nombres para la mitad pública de la semilla de un cifrado: *"se llama vector de inicialización, o se llama nonce. Se llama SALT, etcétera"* → [[clase-02-cifrado#8. Cifrado probabilístico: nonce e IV|Clase 02 § 8. Cifrado probabilístico: nonce e IV]]. Es la **misma palabra** que esta filmina usa, y el propósito de fondo es parecido —que una misma entrada no produzca siempre la misma salida—, pero el **rol es distinto**: el nonce o IV de un cifrado evita que el mismo mensaje produzca el mismo criptograma bajo la misma clave; la sal de esta filmina evita que la misma clave produzca el mismo $c$ en dos cuentas distintas, y sobre todo evita que el trabajo de romperla se amortice entre cuentas. No siembran el mismo generador ni resuelven el mismo problema — comparten nombre y mecánica superficial, no función.
-
-## Ver también
-
-- [[clase-07-autenticacion#7. Salting|Clase 07 — Autenticación § 7. Salting]] — la sección de la que cuelga esta nota
-- [[autenticacion|Autenticación]] — el formalismo $(A,C,F,L,S)$ en el que $f(a)=x\Vert f'(a,x)$ es una instancia de $C$
-- [[almacenamiento-de-claves|Almacenamiento de claves]] — el ejemplo Unix tradicional, que ya usa esta construcción con $2^{12}=4096$ sales
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — la distinción offline/online que hace que el ataque en lote sea posible
-- [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] — la fórmula de Anderson, que la sal no modifica cuando $n=1$
-- [[pbkdf2|PBKDF2]] — la contramedida complementaria, que ataca el costo por evaluación en vez de la amortización
-- [[ataque-de-diccionario-sobre-hashes#Sal|Ataque de diccionario sobre hashes § Sal]] — el mismo mecanismo descripto en la Unidad 1, con notación distinta, más la pimienta y las funciones lentas que esta filmina no cubre
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — el otro uso, no relacionado en función, de la misma palabra "sal"/"nonce"/"IV"
+**Precisión nuestra, ya registrada en la Unidad 1.** El docente, al hablar de cifrado probabilístico el 20/08, enumera varios nombres para la mitad pública de la semilla de un cifrado: *"se llama vector de inicialización, o se llama nonce. Se llama SALT, etcétera"* → [[cifrado-probabilistico-nonce-e-iv#Los tres nombres de la semilla pública|Cifrado probabilístico § Los tres nombres de la semilla pública]]. Es la **misma palabra** que esta filmina usa, y el propósito de fondo es parecido —que una misma entrada no produzca siempre la misma salida—, pero el **rol es distinto**: el nonce o IV de un cifrado evita que el mismo mensaje produzca el mismo criptograma bajo la misma clave; la sal de esta filmina evita que la misma clave produzca el mismo $c$ en dos cuentas distintas, y sobre todo evita que el trabajo de romperla se amortice entre cuentas. No siembran el mismo generador ni resuelven el mismo problema — comparten nombre y mecánica superficial, no función.

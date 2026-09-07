@@ -75,13 +75,3 @@ $$\text{Bug} \;\longrightarrow\; \text{Vulnerabilidad (debilidad)} \;\longrighta
 Cada flecha de esta cadena es una condición necesaria pero no suficiente para la siguiente: no todo bug es una vulnerabilidad (la mayoría de los bugs no son explotables contra ningún objetivo de seguridad), no toda vulnerabilidad se traduce en una amenaza concretada (puede existir y no ser explotada nunca), y no toda amenaza que ocurre produce el peor efecto posible (un atacante puede lograr acceso parcial sin llegar a comprometer todo el sistema). Es un embudo, no una equivalencia.
 
 **Por qué conviene tener la cadena completa y no sólo el par amenaza/vulnerabilidad.** El [[modelado-de-amenazas|modelado de amenazas]] trabaja de derecha a izquierda: parte de qué efecto no deseado hay que evitar, deriva qué amenazas lo producirían, y busca —en la [[descomposicion-de-la-aplicacion|descomposición de la aplicación]]— qué vulnerabilidades concretas las habilitarían. Entender la cadena completa es lo que permite ese recorrido en reversa: sin ella, "buscar vulnerabilidades" es una tarea sin rumbo, porque no hay forma de saber cuáles importan.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#3. Aseguramiento en el ciclo de vida|Clase 08 — Principios de diseño y vulnerabilidades § 3. Aseguramiento en el ciclo de vida]]
-- [[confianza-y-aseguramiento|Confianza y aseguramiento]] — la cadena Política → Aseguramiento → Mecanismo que esta nota distribuye sobre el ciclo de vida
-- [[modelado-de-amenazas|Modelado de amenazas]] — el proceso que aplica la distinción amenaza/vulnerabilidad para producir la lista de cada una
-- [[descomposicion-de-la-aplicacion|Descomposición de la aplicación]] — dónde se buscan concretamente las vulnerabilidades que la cadena predice
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el mismo vocabulario de "estado" aplicado a un esquema criptográfico concreto
-- [[video-08-vulnerabilidades#La cadena que ordena todo lo demás|video-08 — Vulnerabilidades]] — la fuente hablada de esta nota
-- [[videografia|Videografía]] — el mapa completo de los videos de la cátedra

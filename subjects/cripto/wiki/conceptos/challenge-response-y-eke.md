@@ -8,7 +8,7 @@ unidad: 2
 clase: 7
 orden: 9
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, autenticacion, challenge-response, eke, protocolos, clase-07, sin-dictar]
 sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 ---
@@ -56,19 +56,8 @@ $$A \xrightarrow{\ \{\text{pedido de autenticación}\}\,k_s\ } B \qquad A \xleft
 
 Sin $k_s$, un atacante que sólo ve tráfico cifrado no tiene ningún par $(r, f(k,r))$ en claro contra el cual probar candidatas: el ataque offline de verificación queda cerrado **no porque $f$ se haya vuelto más fuerte**, sino porque el atacante perdió el material sobre el que montar la comparación. Es la misma lógica, aplicada al revés, que el `IV` de [[cbc-mac#Publicar los estados intermedios también rompe|CBC-MAC]]: lo que no se publica, no se puede usar para verificar nada.
 
-> **Erratas de la filmina, ya señaladas en la [[clase-07-autenticacion#9. Challenge-response y EKE|Clase 07]].** El tercer mensaje del diagrama está escrito $\{\,f\{k, r)\,\}\,k_s$ —abre con llave después de la $f$ y cierra con paréntesis, una mezcla que no cierra—; corresponde $\{f(k,r)\}\,k_s$. Y el título de la filmina dice *"EKE – Encripted Key Exchange"*: el término correcto en inglés es *Encrypted*, con "y".
+> **Erratas de la filmina, ya señaladas en la [[clase-07-autenticacion#Estado de las fuentes|Clase 07 § Estado de las fuentes]].** El tercer mensaje del diagrama está escrito $\{\,f\{k, r)\,\}\,k_s$ —abre con llave después de la $f$ y cierra con paréntesis, una mezcla que no cierra—; corresponde $\{f(k,r)\}\,k_s$. Y el título de la filmina dice *"EKE – Encripted Key Exchange"*: el término correcto en inglés es *Encrypted*, con "y".
 
 ### Lo que la filmina no explica: de dónde sale la clave de sesión
 
 **Esto excede lo que cubre el deck, y conviene tenerlo presente para no llevarse una idea incompleta del protocolo real** *(lectura nuestra, fuera de la fuente)*. El diagrama de la filmina 44 presenta $k_s$ como si ya existiera un canal seguro previo — pero si $A$ y $B$ ya tuvieran una forma de compartir $k_s$ de manera segura, ¿por qué no usar directamente ese canal para todo? La pregunta no es capciosa: es exactamente el problema que el protocolo `EKE` real —de Bellovin y Merritt, 1992— fue diseñado para resolver, y lo resuelve de un modo bastante más fino que "envolver todo en una clave de sesión dada": las partes usan la propia contraseña, de **baja entropía**, para cifrar los valores públicos de un intercambio Diffie-Hellman, de forma que un atacante que intercepta el tráfico no puede distinguir un intento con la contraseña correcta de uno con una candidata incorrecta —los valores cifrados con una clave equivocada son indistinguibles de ruido, igual que los correctos—, así que tampoco puede montar el ataque de verificación offline de la sección anterior **ni siquiera contra la propia contraseña**, que es habitualmente el eslabón más débil de todo el esquema. La versión de la filmina captura el objetivo —cifrar el diálogo para no dejar material verificable en claro— pero no el mecanismo que hace que ese cifrado no dependa, a su vez, de tener ya una clave segura de antemano.
-
-## Ver también
-
-- [[clase-07-autenticacion#9. Challenge-response y EKE|Clase 07 — Autenticación § 9. Challenge-response y EKE]] — la sección de la que cuelga esta nota
-- [[message-authentication-code|Message Authentication Code]] — la definición formal que $f(k,r)$ instancia
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — la distinción offline/online que explica por qué capturar $(r,f(k,r))$ es tan grave
-- [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] — la fórmula de Anderson que cuantifica el costo del ataque offline que `EKE` cierra
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — el requisito de frescura que $r$ tiene que cumplir
-- [[ataques-de-repeticion-y-frescura#Un número de secuencia es un nonce|Ataques de repetición y frescura]] — el mismo problema de frescura, resuelto con número de secuencia o timestamp en vez de un challenge
-- [[cbc-mac#Publicar los estados intermedios también rompe|CBC-MAC § Publicar los estados intermedios también rompe]] — el mismo principio de "lo que no se publica no se puede explotar", en otra construcción
-- [[autenticacion-remota-y-sso|Autenticación remota y SSO]] — el paso siguiente: delegar la autenticación entera en un tercero, en lugar de compartir $k$ directamente con cada sistema

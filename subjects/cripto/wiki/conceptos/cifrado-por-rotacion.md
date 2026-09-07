@@ -109,10 +109,3 @@ $\mathsf{Enc}_k$ preserva el **patrón de repeticiones** del texto plano y la **
 | Corrección | $\pi_{-k} \circ \pi_k = \pi_0 = \operatorname{id}$ |
 | Seguridad | $\lvert K\rvert = n$ constante ⇒ fuerza bruta en $O(n\cdot\ell)$ |
 | Secreto perfecto | Sólo si $\ell = 1$ (ver [[secreto-perfecto\|secreto perfecto]]) |
-
-## Ver también
-
-- [[guia-01-criptografia-clasica|Guía 1 — Ej. 1 y Ej. 3]]
-- [[secreto-perfecto|Secreto perfecto]] — el análisis del caso $\ell = 1$
-- [[cifrado-de-sustitucion-monoalfabetica|Cifrado de sustitución monoalfabética]] — la generalización
-- [[cifrado-de-vigenere|Cifrado de Vigenère]] — ROT-X con clave que rota por posición

@@ -53,15 +53,3 @@ Los servicios externos (web, email, DNS) residen en un **datacenter alquilado**,
 ## El cierre del caso de estudio
 
 La filmina de cierre del deck (36) recomienda el capítulo 26 de *Computer Security Art and Science* de Matt Bishop —el mismo capítulo del que sale el diagrama de referencia de la [[seguridad-a-nivel-de-red|filmina 4]]—, así que todo el caso de estudio de esta clase, variaciones incluidas, tiene ahí su desarrollo completo con más variantes y casos de borde de los que el deck alcanza a cubrir.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#11. Variaciones de la arquitectura (filminas 34-35)|Clase 10 — Seguridad en la empresa: sección 11]]
-- [[firewalls|Firewalls]] — los tres tipos cuya capacidad de clusterizarse depende de si mantienen estado
-- [[seguridad-a-nivel-de-red|Seguridad a nivel de red]] — la arquitectura de referencia que estas variaciones modifican
-- [[servicios-de-soporte-dns-log-y-proxy|Servicios de soporte: DNS, log y proxy]] — el DNS interno, la otra excepción admitida a `mecanismos exclusivos`
-- [[segmentacion-de-la-red-interna|Segmentación de la red interna]]
-- [[analisis-de-puntos-de-entrada|Análisis de puntos de entrada]]
-- [[deteccion-y-prevencion-de-intrusiones|Detección y prevención de intrusiones]]
-- Matt Bishop, *Computer Security: Art and Science*, cap. 26 *Network Security* — la fuente de todo el caso de estudio ([[bibliografia|bibliografía]])
-- [[videografia|Videografía]] — ningún video de la cátedra cubre esta clase, confirmado ahí

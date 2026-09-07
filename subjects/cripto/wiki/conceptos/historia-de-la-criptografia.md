@@ -71,12 +71,3 @@ Según el relato de la clase, Enigma aguantó la mitad de la guerra y cayó cuan
 
 > [!discrepancia] El relato de la caída de Enigma es una simplificación
 > La clase da como **único** factor la captura de una máquina. La captura de material —máquinas, y sobre todo libros de claves— fue **una de varias vías**; faltan el trabajo previo del **Biuro Szyfrów** polaco (Rejewski reconstruyó el cableado y construyó las primeras *bombas* antes de la guerra, y se lo entregó a franceses y británicos en 1939) y los ***cribs*** de Bletchley Park, fragmentos de plano conocido. Queda registrado como lo que dijo la cátedra, no como historia establecida; el punto que la clase quiere hacer —que aguantó mientras el algoritmo fue secreto— se sostiene igual.
-
-## Ver también
-
-- [[maquinas-de-rotores-y-enigma|Máquinas de rotores y Enigma]] — la cúspide de la criptografía clásica, y cómo funciona la máquina
-- [[secreto-perfecto|Secreto perfecto]] — la definición que Shannon pone en el lugar del criterio viejo
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — por qué el secreto del algoritmo no es una defensa
-- [[modelos-de-ataque|Modelos de ataque]] — los modelos de amenaza que nacen de esta crisis
-- [[teoria-de-la-informacion|Teoría de la información]] — Shannon en detalle
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] — el recorrido donde esto se dicta

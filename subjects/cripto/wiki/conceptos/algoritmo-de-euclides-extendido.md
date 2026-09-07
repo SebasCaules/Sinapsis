@@ -148,7 +148,7 @@ En los dos ejemplos que siguen se hacen **las dos**, para que puedas verificar u
 
 ## 6. Ejemplo 1: el mcd de 7 y 32
 
-**Este es el ejemplo que hay que saber hacer**: es exactamente el que pide el [[guia-02-resolucion|Ej. 7c de la Guía 2]], donde la primitiva de bloque es $E(K,M) = (M\cdot K)\bmod 32$ con $K = 7$ y para descifrar hace falta $7^{-1} \bmod 32$.
+**Este es el ejemplo que hay que saber hacer**: es exactamente el que pide el [[guia-02-criptografia-simetrica|Ej. 7c de la Guía 2]], donde la primitiva de bloque es $E(K,M) = (M\cdot K)\bmod 32$ con $K = 7$ y para descifrar hace falta $7^{-1} \bmod 32$.
 
 ### 6.1 Euclides pelado
 
@@ -335,14 +335,3 @@ El docente marcó nominalmente *"cómo resolver la ecuación diofántica"* y *"c
 ## Sobre la numeración de esta nota
 
 Esta nota lleva `02.14` porque el bloque de teoría de números se ubica en la **Clase 02** —cuyo contador de conceptos cierra en `02.12`— y ésta es la segunda de las tres. De dónde sale esa atribución de clase, por qué no hay una oficial y qué habría que renumerar si la cátedra mueve el tema está en [[aritmetica-modular-y-divisibilidad#Sobre la numeración de esta nota|Aritmética modular y divisibilidad § Sobre la numeración de esta nota]], que vale para las tres.
-
-## Ver también
-
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — el lemma de combinación lineal y las dos propiedades del mcd sobre las que se apoya el algoritmo
-- [[inverso-modular|Inverso modular]] — el caso $c=1$: para qué se usa realmente Euclides extendido en criptografía
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — dónde el mcd deja de tener casos raros porque todo es inversible
-- [[teoria-de-numeros|Teoría de números]] — el manuscrito que enuncia la diofántica y Bézout **sin traer el algoritmo**
-- [[cuerpos-finitos|Cuerpos finitos]] — $\varphi$ de Euler y el otro lugar donde la factorización aparece como cuello de botella
-- [[guia-02-resolucion|Guía 2 — Resolución]] — el Ej. 7c necesita exactamente el Ejemplo 1 de esta nota
-- [[seguridad-computacional|Seguridad computacional]] — el marco donde "fácil" y "difícil" tienen definición precisa
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que encarga el repaso

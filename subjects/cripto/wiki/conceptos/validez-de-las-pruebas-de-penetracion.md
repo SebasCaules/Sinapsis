@@ -61,13 +61,3 @@ La filmina 32, de cierre, remite a **Bishop, capítulo 23, secciones 1-2**, y al
 En el mapeo de capítulos de la [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|bibliografía]] del vault, *Vulnerability Analysis — penetration testing* corresponde al **capítulo 24** en la edición que está en `raw/`, no al 23 — el 23, en esa edición, es *Malware*. Es el mismo desfasaje de numeración que ya señala [[identificacion-de-vulnerabilidades|Identificación de vulnerabilidades]] sobre la filmina 22 del deck de Vulnerabilidades, y que [[video-09-pentesting-metodologia#Lectura recomendada (1:20:52)|video-09]] confirma de forma independiente sobre esta misma lectura. *(Lectura nuestra: al buscar la lectura conviene ir por el título del capítulo, no por el número — probablemente ambas filminas sigan la numeración de una edición anterior del libro, pero eso no está confirmado contra ningún original de esa edición.)*
 
 El **`OSSTMM`** no tiene mapeo de capítulo porque no es un libro de la bibliografía del vault: es un manual metodológico externo, de acceso abierto, que —a diferencia de la Metodología de Hipótesis de Falla que da esta clase— sí intenta ofrecer una forma sistemática y estandarizada de auditar un sistema. Citarlo justo después de la filmina 31 —*"no provee una forma sistemática de revisar un sistema"*— sugiere una lectura posible, aunque no la diga la filmina explícitamente: el `OSSTMM` es, en parte, una respuesta a esa misma limitación. *(Lectura nuestra.)*
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#11. Validez de las pruebas de penetración — para discutir|Clase 08 — Principios de diseño y vulnerabilidades, §11 Validez de las pruebas de penetración]]
-- [[verificacion-formal-y-prueba-de-penetracion|Verificación formal y prueba de penetración]] — la asimetría existencia/ausencia que esta nota retoma para discutir qué prueba realmente un pentest
-- [[metodologia-de-hipotesis-de-falla|Metodología de hipótesis de falla]] — el paso 4 (generalización) cuyo alcance exacto esta nota discute
-- [[casos-de-prueba-de-penetracion|Casos de prueba de penetración]] — los dos casos concretos sobre los que se puede evaluar esta discusión
-- [[aseguramiento-en-el-ciclo-de-vida|Aseguramiento en el ciclo de vida]] — por qué el pentest no sustituye un buen proceso de desarrollo
-- [[video-09-pentesting-metodologia#7. Para discutir, y una tensión que un alumno marca bien|Video 09 — Pentesting: metodología, §7]] — la tensión de un alumno sobre "generalización" y su resolución
-- [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|Bibliografía]] — el capítulo 24 (*Vulnerability Analysis — penetration testing*) al que probablemente remite esta filmina, pese al número que trae escrito

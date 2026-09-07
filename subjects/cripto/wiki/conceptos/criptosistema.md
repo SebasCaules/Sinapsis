@@ -8,9 +8,9 @@ unidad: 1
 clase: 1
 orden: 1
 created: 2026-08-10
-updated: 2026-08-24
-tags: [criptografia, definiciones, gen-enc-dec, correccion, clase-01]
-sources: [Clase 01, Guía 1 Ej. 1]
+updated: 2026-09-06
+tags: [criptografia, definiciones, gen-enc-dec, correccion, clase-01, transcripcion]
+sources: [Clase 01, Guía 1 Ej. 1, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Criptosistema
@@ -20,6 +20,13 @@ sources: [Clase 01, Guía 1 Ej. 1]
 **Criptografía** — del griego *escritura secreta*. Conjunto de funciones matemáticas y técnicas que son las herramientas básicas desde donde construir seguridad.
 
 > Cuando la criptografía funciona bien, es invisible.
+
+**Qué objetivos cubre, y cuál se está mirando en cada momento del curso.** Ninguna filmina lo encuadra; el docente sí, al abrir la Clase 02: la criptografía cubre **disponibilidad**, **privacidad o confidencialidad** e **integridad** de la información, y es *"una parte de todo lo que es seguridad informática"*. El bloque de [[clase-02-cifrado|cifrado simétrico]] trabaja **sólo sobre confidencialidad**; la integridad es la [[clase-03-macs-y-cifrado-autenticado|Clase 03]]. La versión formal de las tres propiedades, con sus cuantificadores, está en [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]].
+
+> [!quote]- De la transcripción de la Clase 02 — qué cubre la criptografía y qué se está mirando (cues pt1 15, 228)
+> *"Criptografía trata de cubrir 3 objetivos: [el] objetivo de disponibilidad de información, después objetivos de privacidad, confidencialidad e integridad de la información. Eso es lo que cubre criptografía, que es una parte de todo lo que es seguridad informática."* *(Privacidad y confidencialidad se usan como sinónimos en la clase.)*
+>
+> Y el recorte de esa clase (cue pt1 228): estamos **sólo en confidencialidad**.
 
 ---
 
@@ -102,12 +109,3 @@ El cuantificador "cualquier función" es fuerte a propósito. Significa que:
 
 Las técnicas para probar o romper la seguridad de un criptosistema se denominan **criptoanálisis**. La versión formal de esta idea es el [[secreto-perfecto|secreto perfecto]].
 
----
-
-## Ver también
-
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — qué se asume público y qué secreto
-- [[secreto-perfecto|Secreto perfecto]] — la definición rigurosa de "seguro"
-- [[modelos-de-ataque|Modelos de ataque]] — qué puede hacer el adversario
-- [[notacion-y-terminologia|Notación y terminología]] — el glosario del vault: los tres espacios, la terna $(\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})$ y las dos flechas de asignación
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01]]

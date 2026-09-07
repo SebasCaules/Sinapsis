@@ -8,7 +8,7 @@ unidad: 2
 clase: 9
 orden: 1
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, flujo-de-informacion, control-de-acceso, acl, clase-09, bloque-2, sin-dictar]
 sources: ["Clase 10 - Aplicaciones - Flujo de informacion.pdf"]
 ---
@@ -25,7 +25,7 @@ Cubre las filminas **2 a 5** del deck `Clase 10 - Aplicaciones - Flujo de inform
 
 $$\mathrm{ACL}(\texttt{/var/cys/examenes}) = \{(\texttt{pablo},r),\ (\texttt{ana},r)\}$$
 
-Sólo `pablo` y `ana` tienen siquiera lectura; `juan` no aparece, así que no tiene ningún derecho sobre ese directorio — el **principio de denegar por defecto**, la misma regla con la que trabajan las ACLs completas de la [[clase-06-politicas-de-seguridad-y-control-de-acceso#11. Listas de control de acceso|Clase 6]]: un sujeto sin entrada no tiene derechos, punto. Hasta acá el control de acceso funciona exactamente como se espera.
+Sólo `pablo` y `ana` tienen siquiera lectura; `juan` no aparece, así que no tiene ningún derecho sobre ese directorio — el **principio de denegar por defecto**, la misma regla con la que trabajan las [[listas-de-control-de-acceso|ACLs completas]] de la Clase 6: un sujeto sin entrada no tiene derechos, punto. Hasta acá el control de acceso funciona exactamente como se espera.
 
 La segunda ACL es la que rompe la ilusión:
 
@@ -50,7 +50,7 @@ Cierre de la filmina, con la pregunta retórica que se contesta sola: **¿entonc
 
 ### Qué significa "mecanismo abierto" acá
 
-La filmina no define el término, y conviene no forzar una lectura única. Hay una distinción homónima y precisa en la [[clase-06-politicas-de-seguridad-y-control-de-acceso#4. Lenguajes de descripción de políticas|Clase 6]]: un lenguaje de políticas **cerrado** lista qué se permite —lo no mencionado queda denegado por defecto— y uno **abierto** lista qué se prohíbe —lo no mencionado queda permitido por defecto—. *(Lectura nuestra.)* Es tentador leer "mecanismo abierto" de la filmina 4 como ese mismo "abierto" —ACL = lenguaje cerrado, entonces "abierto" tendría que ser lo opuesto y no encajar—, pero la propia ACL de la filmina 2 **es** denegar-por-defecto (cerrada, en la terminología de la Clase 6) y aun así falla. La lectura que sí es consistente con el ejemplo: "abierto" describe que el mecanismo **no cierra todos los caminos** por los que la información puede moverse —dejar `/tmp` fuera de su radar es, literalmente, dejar una puerta abierta—, no el sentido técnico de "lenguaje de política abierto" de la Clase 6. Ambos usos comparten la palabra y la intuición de "algo queda sin cubrir", pero no son la misma definición formal, y la filmina no alcanza a precisar cuál de las dos tenía en mente.
+La filmina no define el término, y conviene no forzar una lectura única. Hay una distinción homónima y precisa en los [[lenguajes-de-descripcion-de-politicas|lenguajes de descripción de políticas de la Clase 6]]: un lenguaje de políticas **cerrado** lista qué se permite —lo no mencionado queda denegado por defecto— y uno **abierto** lista qué se prohíbe —lo no mencionado queda permitido por defecto—. *(Lectura nuestra.)* Es tentador leer "mecanismo abierto" de la filmina 4 como ese mismo "abierto" —ACL = lenguaje cerrado, entonces "abierto" tendría que ser lo opuesto y no encajar—, pero la propia ACL de la filmina 2 **es** denegar-por-defecto (cerrada, en la terminología de la Clase 6) y aun así falla. La lectura que sí es consistente con el ejemplo: "abierto" describe que el mecanismo **no cierra todos los caminos** por los que la información puede moverse —dejar `/tmp` fuera de su radar es, literalmente, dejar una puerta abierta—, no el sentido técnico de "lenguaje de política abierto" de la Clase 6. Ambos usos comparten la palabra y la intuición de "algo queda sin cubrir", pero no son la misma definición formal, y la filmina no alcanza a precisar cuál de las dos tenía en mente.
 
 ## Objeto vs. información
 
@@ -65,25 +65,14 @@ El argumento en una frase: controlar el acceso a un objeto controla el acceso **
 
 ### Por qué ni siquiera la maquinaria completa de ACLs resuelve esto
 
-Vale la pena ser preciso sobre el alcance de la objeción, porque no es una limitación de esta ACL puntual sino de todo el modelo. La [[clase-06-politicas-de-seguridad-y-control-de-acceso#11. Listas de control de acceso|Clase 6]] formaliza la ACL de un objeto como
+Vale la pena ser preciso sobre el alcance de la objeción, porque no es una limitación de esta ACL puntual sino de todo el modelo. La [[listas-de-control-de-acceso|nota de ACLs de la Clase 6]] formaliza la ACL de un objeto como
 
 $$\mathrm{ACL}(o) = \{(s_i, r_i) \mid s_i \in S,\ r_i \subseteq R\}$$
 
-y desarrolla grupos, resolución de conflictos, herencia de derechos por defecto y revocación en cascada — toda una teoría de qué puede hacer un sujeto sobre **un objeto dado**. *(Lectura nuestra.)* Nada de eso ayuda con el caso `/tmp`: por más sofisticada que sea la ACL de `/var/cys/examenes`, sigue siendo una ACL sobre **ese** objeto, y el archivo temporal en `/tmp` es un objeto **distinto**, con su propia ACL, que no hereda ni referencia a la primera de ninguna manera. Incluso las [[clase-06-politicas-de-seguridad-y-control-de-acceso#12. Listas de capacidades|listas de capacidades]] —la proyección por sujeto en lugar de por objeto— tienen el mismo punto ciego: preguntan qué objetos puede tocar un sujeto, no qué pasa con la información una vez que un objeto autorizado la entrega. El problema no es de implementación de las ACLs sino de **nivel de abstracción**: todo el aparato de control de acceso opera sobre objetos, y el fenómeno que hay que controlar vive un nivel más abajo, en la información que esos objetos transportan.
+y desarrolla grupos, resolución de conflictos, herencia de derechos por defecto y revocación en cascada — toda una teoría de qué puede hacer un sujeto sobre **un objeto dado**. *(Lectura nuestra.)* Nada de eso ayuda con el caso `/tmp`: por más sofisticada que sea la ACL de `/var/cys/examenes`, sigue siendo una ACL sobre **ese** objeto, y el archivo temporal en `/tmp` es un objeto **distinto**, con su propia ACL, que no hereda ni referencia a la primera de ninguna manera. Incluso las [[listas-de-capacidades|listas de capacidades]] —la proyección por sujeto en lugar de por objeto— tienen el mismo punto ciego: preguntan qué objetos puede tocar un sujeto, no qué pasa con la información una vez que un objeto autorizado la entrega. El problema no es de implementación de las ACLs sino de **nivel de abstracción**: todo el aparato de control de acceso opera sobre objetos, y el fenómeno que hay que controlar vive un nivel más abajo, en la información que esos objetos transportan.
 
 La única pieza de esa maquinaria que sí empieza a comportarse como una política de *flujo* en vez de una de *acceso* es la *-property* de Bell-LaPadula —prohibir la escritura hacia niveles bajos precisamente para cerrar el canal indirecto de "leer arriba, escribir abajo"—, y es el puente hacia [[politicas-de-control-de-flujo|Políticas de control de flujo]] más adelante en esta misma clase.
 
 ## Qué falta para ir más allá de "sirve o no sirve"
 
 La filmina 5 deja la objeción planteada mas no cuantificada: dice que la información se copia y se actualiza, pero no da una manera de medir *cuánta* información efectivamente pasó de un lado a otro. Esa pregunta —no "¿hay flujo?" sino "¿cuánto flujo hay?"— es la que motiva introducir entropía y entropía condicional en la sección siguiente del deck.
-
-## Ver también
-
-- [[clase-09-flujo-de-informacion#1. Control de acceso y por qué no alcanza|Clase 09 — Flujo de información § 1. Control de acceso y por qué no alcanza]]
-- [[entropia-y-entropia-condicional|Entropía y entropía condicional]] — la herramienta que mide lo que esta nota sólo puede señalar cualitativamente
-- [[flujo-de-informacion|Flujo de información]] — la definición formal que sale de esa medida
-- [[politicas-de-control-de-flujo|Políticas de control de flujo]] — dónde la *-property* de Bell-LaPadula empieza a cerrar el hueco que esta nota deja abierto
-- [[maleabilidad#El escenario: la base de sueldos|Maleabilidad]] — la misma base de sueldos, atacada por el otro lado
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#11. Listas de control de acceso|Clase 06 — Políticas de seguridad y control de acceso § 11. Listas de control de acceso]] — la teoría completa de ACLs, y por qué tampoco resuelve el caso `/tmp`
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#4. Lenguajes de descripción de políticas|Clase 06 — Políticas de seguridad y control de acceso § 4. Lenguajes de descripción de políticas]] — el sentido técnico de "abierto/cerrado" con el que se contrasta el "mecanismo abierto" de esta nota
-- [[video-11-flujo-de-informacion#Por qué el control de acceso no alcanza|Video 11 — Flujo de información § Por qué el control de acceso no alcanza]] — la misma motivación, dictada

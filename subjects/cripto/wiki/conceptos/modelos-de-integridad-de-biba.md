@@ -107,14 +107,3 @@ Los tres comparten la regla de escritura ($i(o)\le i(s)$: no se puede escribir p
 ## Ejemplo: S.O. LOCUS
 
 Cada archivo tiene un **nivel de credibilidad**; cada usuario arranca con un **nivel de confianza máximo** preasignado; cada **proceso** tiene un **nivel de riesgo** —el máximo nivel al que puede correr, fijado por la credibilidad de su ejecutable—. Para ejecutar un proceso de menor integridad hay que invocar explícitamente `run-untrusted` — el mismo patrón de **"degradación explícita, nunca implícita"** que el principio de tranquilidad de Bell-LaPadula aplica del lado de la confidencialidad: en los dos modelos, cruzar una frontera de confianza requiere una acción deliberada y visible, no puede pasar como efecto colateral silencioso de una operación cualquiera.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#7. Modelos de integridad de Biba|Clase 06 — Políticas de seguridad y control de acceso § 7. Modelos de integridad de Biba]]
-- [[bell-lapadula|Bell-LaPadula]] — el modelo del que Strict Integrity es el dual exacto, y de donde sale el principio de tranquilidad al que se compara `run-untrusted`
-- [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]] — la propiedad que Biba protege, con su exigencia de "agregación" ya presente en la formalización general
-- [[muralla-china|Muralla china]] — modelo híbrido de confidencialidad e integridad a la vez, con su propio "camino de transferencia" resuelto de otra forma
-- [[modelos-de-politica|Modelos de política]] — por qué Biba cuenta como una familia de tres modelos y no como una sola política
-- [[acls-propagables|ACLs propagables]] — la propia clase señala que el ejemplo de PACLs es *"una implementación casi directa de una política de integridad según el modelo de Bilba"*
-
-> **Errata de la filmina:** el deck de Control de acceso (filmina 30) escribe literalmente "Bilba", no "Biba" —verificado sobre la página renderizada a 150 dpi, no es un artefacto de `pdftotext`—; es un error tipográfico real del PDF de la cátedra. El modelo al que se refiere la observación es el de **Biba**, el desarrollado en esta nota. Se preserva la grafía original dentro de la cita.

@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 8
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, segmentacion, subredes, defensa-en-profundidad, dmz, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -23,7 +23,7 @@ Cubre la filmina **28** del deck `Clase 11 - Seguridad en Redes.pdf`. La clase t
 
 Tres reglas, textuales de la filmina:
 
-1. **División en subredes según cada grupo.** En el diagrama de la [[clase-10-seguridad-en-la-empresa#1. Seguridad a nivel de red (filminas 2-4)|filmina 4]], la red `INTERNAL` no es un único segmento: son `Corporate data subnet`, `Customer data subnet` y `Development subnet`.
+1. **División en subredes según cada grupo.** En el diagrama de la [[seguridad-a-nivel-de-red#El diagrama de referencia (filmina 4)|filmina 4]], la red `INTERNAL` no es un único segmento: son `Corporate data subnet`, `Customer data subnet` y `Development subnet`.
 2. **Cada subred arbitrada por un firewall**, probablemente un [[firewalls|packet filter]] — la propia filmina usa "probablemente", así que no es una prescripción cerrada, es la opción que basta para el caso.
 3. **Impide el acceso a subredes de acuerdo a las políticas.** El ejemplo concreto que da la filmina: *"no se permite tráfico desde la red de desarrollo hacia la red corporativa"*.
 
@@ -41,14 +41,3 @@ Si la red de desarrollo estuviera en el mismo segmento que la red corporativa �
 *(Lectura nuestra: la filmina no lo dice en estos términos, pero se sigue directo del resto del caso de estudio.)* La [[zona-desmilitarizada|DMZ]] separa lo que Internet puede alcanzar de lo que no puede. Pero comprometer el firewall interno y llegar a "la red interna" no debería ser, de por sí, comprometer **todo** lo interno —del mismo modo que comprometer el firewall externo no debería exponer directamente los servicios internos—. La segmentación aplica el mismo argumento de `defensa en profundidad` un nivel más adentro: cada subred es una capa más que un atacante tiene que atravesar, y cada capa que hay que atravesar es una oportunidad más de detectar el ataque antes de que llegue al dato sensible.
 
 Es también una instancia de `Menor privilegio` aplicada a nivel de red en vez de a nivel de usuario o proceso: un servidor o una máquina de la red de desarrollo no **necesita** alcanzar la red corporativa para hacer su trabajo, así que no se le da esa posibilidad —el mismo argumento con el que, más adelante en el caso de estudio, se le niega a un servidor de la DMZ acceso a recursos internos que no necesita.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#8. Caso de estudio: segmentación de la red interna (filmina 28)|Clase 10 — Seguridad en la empresa: sección 8]]
-- [[seguridad-a-nivel-de-red|Seguridad a nivel de red]] — el diagrama de la filmina 4, con las tres subredes internas
-- [[firewalls|Firewalls]] — el packet filter que arbitra cada subred
-- [[zona-desmilitarizada|Zona desmilitarizada]] — la misma lógica de aislamiento, aplicada afuera-adentro en vez de adentro-adentro
-- [[servicios-de-soporte-dns-log-y-proxy|Servicios de soporte: DNS, log y proxy]]
-- [[analisis-de-puntos-de-entrada|Análisis de puntos de entrada]]
-- [[variaciones-de-la-arquitectura|Variaciones de la arquitectura]]
-- [[videografia|Videografía]] — ningún video de la cátedra cubre esta clase, confirmado ahí

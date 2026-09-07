@@ -280,7 +280,7 @@ $$\texttt{EDBA} \;\longrightarrow\; (2, 4, 3, 0) \;=\; \boxed{\texttt{CEDA}}$$
 > [!quote]- Del video — para qué era todo esto (31:46)
 > "Muestra un poco cómo se puede utilizar la congruencia modular y el cálculo de las inversas como las claves para implementar un esquema de [cifrado] simétrico eligiendo una clave."
 
-**Esto es, en chiquito, el [[guia-02-resolucion|Ej. 7 de la Guía 2]].** Ahí la primitiva es $E(K,M) = (M \cdot K) \bmod 32$ y para escribir `Dec` hay que calcular $7^{-1} \bmod 32 = 23$. **Es el mismo esquema con otro módulo y otra clave**, y el video lo resuelve entero en cuatro minutos. Si el ejercicio de la guía no te cierra, este tramo es el camino más corto.
+**Esto es, en chiquito, el [[guia-02-criptografia-simetrica|Ej. 7 de la Guía 2]].** Ahí la primitiva es $E(K,M) = (M \cdot K) \bmod 32$ y para escribir `Dec` hay que calcular $7^{-1} \bmod 32 = 23$. **Es el mismo esquema con otro módulo y otra clave**, y el video lo resuelve entero en cuatro minutos. Si el ejercicio de la guía no te cierra, este tramo es el camino más corto.
 
 Y es la razón por la que a **20:53** dice lo único que en todo el video se acerca a marcar contenido evaluable:
 
@@ -325,17 +325,3 @@ Las dos ya estaban registradas en la [[teoria-de-numeros#2. La notación propia 
 
 **Lo que hay que retener si solo se retiene una cosa:** la cadena congruencia modular $\to$ diofántica lineal $\to$ Euclides extendido. Es lo que el docente marca a 15:35 y lo que después se cobra en el Ej. 7 de la Guía 2.
 
----
-
-## Ver también
-
-- [[teoria-de-numeros|Teoría de números]] — el manuscrito que este video narra página por página; la nota que queda **actualizada** por esta (la hipótesis de la §1 se confirma, y el pendiente *"mirar los dos videos"* se cierra para uno de los dos)
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — divisor, mcd, división entera y $\mathbb{Z}_m$ con demostraciones; el video es la versión narrada y con números de esta nota
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — el procedimiento que el video **usa sin justificar**, con la convención tabular del vault y el invariante demostrado
-- [[inverso-modular|Inverso modular]] — existencia, unicidad y cálculo; incluye la tabla de $\mathbb{Z}_{32}$ que contrasta con la de $\mathbb{Z}_5$ del video
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — por qué en $\mathbb{Z}_5$ todos los no nulos tienen inverso y en $\mathbb{Z}_{32}$ no
-- [[guia-02-resolucion|Guía 2 — Resolución]] — el **Ej. 7** es el cifrado multiplicativo del video con módulo $32$ en lugar de $5$
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que encarga este video como tarea, atado al parcial
-- [[videografia|Videografía]] — el mapeo de los 13 videos del canal; esta nota **corrige** su lectura de que todos sean grabaciones de clase
-- [[criptosistema|Criptosistema]] — la condición de corrección que obliga a que la clave sea inversible
-- [[cifrado-por-rotacion|Cifrado por rotación]] — el criptosistema que ya vive en $\mathbb{Z}_n$ pero con suma, donde el inverso es trivial y no hace falta nada de esto

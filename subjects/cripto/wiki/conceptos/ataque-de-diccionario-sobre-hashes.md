@@ -1,14 +1,14 @@
 ---
 title: Ataque de diccionario sobre hashes
 resumen: 'Hashear un dato no lo esconde: como la función es pública y determinística, un dominio de entradas chico se enumera y se compara digest a digest, sin violar la resistencia a preimágenes, solo esquivándola.'
-fuentes: ["[[guia-03-mac-y-funciones-de-hash]]", "[[guia-03-resolucion]]", "[[resistencias-de-una-funcion-de-hash]]"]
+fuentes: ["[[guia-03-mac-y-funciones-de-hash]]", "[[resistencias-de-una-funcion-de-hash]]"]
 aliases: [Ataque de diccionario sobre hashes, Ataque de diccionario, Enumeración del dominio, Dominio de baja entropía, Hasheo de contraseñas, Salt, Sal criptográfica, Pepper, Rainbow tables, Funciones de hash lentas, PBKDF2, bcrypt, scrypt, Argon2]
 type: concepto
 unidad: 1
 clase: 3
 orden: 15
 created: 2026-08-31
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, hash, diccionario, contrasenas, salt, kdf, privacidad, guia-03, clase-03]
 sources: ["raw/guias/guia3/Guia 3 - MAC y Funciones de Hash.pdf", "raw/clases/Clase 03pt2 - Transcripcion.VTT"]
 ---
@@ -105,7 +105,7 @@ echo "7 siete" | openssl dgst -sha1
 | 9 | `9 nueve` | — | nadie |
 | 10 | `10 diez` | `c736e546` | **palacios y zubeldia** |
 
-**Cada preimagen lleva un salto de línea al final**, que es lo que `echo` agrega. Sin ese byte no coincide ninguna de las ocho y el ejercicio parece irresoluble — la trampa está desarmada en [[primitivas-de-hash-estandar#Los digests de ejemplo, verificados|Primitivas de hash estándar]] y las cuentas completas, alumno por alumno, en [[guia-03-resolucion#Ejercicio 6|Guía 3 — Resolución]].
+**Cada preimagen lleva un salto de línea al final**, que es lo que `echo` agrega. Sin ese byte no coincide ninguna de las ocho y el ejercicio parece irresoluble — la trampa está desarmada en [[primitivas-de-hash-estandar#Los digests de ejemplo, verificados|Primitivas de hash estándar]] y las cuentas completas, alumno por alumno, en [[guia-03-mac-y-funciones-de-hash#Ejercicio 6|Guía 3, Ejercicio 6]].
 
 **Y lo que hay que ver en la última fila.** `palacios` y `zubeldia` tienen **el mismo digest**, y eso **no es una colisión**: es la misma preimagen. Los dos se sacaron 10. Invocar una colisión de `SHA-1` acá sería absurdo — [[seguridad-de-las-funciones-de-hash#La consecuencia operativa: L bits de salida dan L/2 bits de seguridad|cuesta 2⁸⁰ por el cumpleaños]], y lo que tenemos delante costó diez evaluaciones.
 
@@ -132,7 +132,7 @@ Un valor **aleatorio y público**, distinto por registro, que se guarda al lado 
 - **Qué compra:** rompe el ataque **en lote**. Sin sal, un atacante hashea el diccionario **una vez** y compara contra el padrón entero; con sal, el diccionario hay que rehacerlo **para cada víctima**. Contra $n$ registros el costo pasa de $\lvert D\rvert$ a $n \cdot \lvert D\rvert$. También tapa la fuga de la sección anterior: dos personas con la misma contraseña tienen digests distintos porque tienen sales distintas.
 - **Qué NO compra:** **nada contra un objetivo individual con dominio chico.** La sal es pública, el atacante la lee y rehace las diez cuentas. Para el Ejercicio 6, salar no cambia absolutamente nada.
 
-> **Sobre la palabra.** Es la única de esta nota que la cátedra pronunció: el 20/08 el docente enumera los nombres de la mitad pública de la semilla —*"se llama vector de inicialización, o se llama nonce. Se llama SALT, etcétera"*— ver [[clase-02-cifrado#8. Cifrado probabilístico: nonce e IV|Clase 02]]. Es el mismo término, y el propósito de fondo también es el mismo —que la misma entrada no dé siempre la misma salida—, pero **el rol es distinto**: la sal de contraseñas no siembra ningún generador, está para que el trabajo no se amortice entre víctimas. *(Precisión nuestra.)*
+> **Sobre la palabra.** Es la única de esta nota que la cátedra pronunció: el 20/08 el docente enumera los nombres de la mitad pública de la semilla —*"se llama vector de inicialización, o se llama nonce. Se llama SALT, etcétera"*— ver [[cifrado-probabilistico-nonce-e-iv#Los tres nombres de la semilla pública|Cifrado probabilístico § Los tres nombres]]. Es el mismo término, y el propósito de fondo también es el mismo —que la misma entrada no dé siempre la misma salida—, pero **el rol es distinto**: la sal de contraseñas no siembra ningún generador, está para que el trabajo no se amortice entre víctimas. *(Precisión nuestra.)*
 
 ### Pimienta
 
@@ -164,7 +164,7 @@ Con $\lvert D\rvert = 10$, **ninguna de las dos contramedidas sin clave —sal y
 
 Son **tablas precomputadas** que, en vez de guardar pares $(x, h(x))$ sueltos, guardan sólo los **extremos** de cadenas de hash-y-reducción de largo $t$. Así el almacenamiento baja por un factor $t$, y se paga con una consulta que ya no es una búsqueda directa sino del orden de $t^{2}$ evaluaciones: es un **trade-off tiempo-memoria**, y lo que la rainbow table sacrifica es justamente la consulta barata de la tabla plana. Lo que sí se conserva es lo que las vuelve peligrosas: **el barrido del diccionario se paga una sola vez y la misma tabla se reutiliza contra todas las víctimas**.
 
-**Y ahí está por qué la sal las mata:** una tabla precomputada sólo sirve para la función que se precomputó, y con sal hay una función distinta por registro. Precomputar todas las tablas cuesta $\lvert D\rvert$ multiplicado por la cantidad de sales posibles — con una sal de 128 bits eso no existe. *(La única mención de estas tablas en todo el vault sigue siendo la del docente el 20/08, anunciándolas para la Clase 3 → [[clase-02-cifrado#11. DES y 3-DES|Clase 02]]. **La Clase 3 se dictó entera y nunca llegaron**: cero apariciones en los 873 cues del 27/08 y en los 910 del 03/09. Queda como tema anunciado y no dado.)*
+**Y ahí está por qué la sal las mata:** una tabla precomputada sólo sirve para la función que se precomputó, y con sal hay una función distinta por registro. Precomputar todas las tablas cuesta $\lvert D\rvert$ multiplicado por la cantidad de sales posibles — con una sal de 128 bits eso no existe. *(La única mención de estas tablas en todo el vault sigue siendo la del docente el 20/08, anunciándolas para la Clase 3 → [[des-y-3des#3-DES|DES y 3-DES]]. **La Clase 3 se dictó entera y nunca llegaron**: cero apariciones en los 873 cues del 27/08 y en los 910 del 03/09. Queda como tema anunciado y no dado.)*
 
 ## SHA-1 acá no está roto: lo que falla es el diseño del sistema
 
@@ -181,20 +181,3 @@ Es la lección que hay que llevarse del ejercicio, y va contra el reflejo. `SHA-
 El [[programa-y-objetivos#Herramientas que se usan|programa]] lista **John The Ripper** *(cracking de passwords)* entre las herramientas de la materia, junto a `OpenSSL`, `JCE` y el compilador. Es, literalmente, una herramienta de ataque de diccionario: toma un archivo de hashes, un diccionario y un conjunto de reglas de mutación, y hace a escala industrial las diez cuentas del Ejercicio 6.
 
 **Lo que el programa no dice es cuándo.** A `OpenSSL` y a `JCE` los ubica en la **Guía 5**; a John The Ripper lo nombra **sin asignarle unidad, clase ni guía**. No hay ninguna otra mención en todo el material de la cátedra que hay en el vault, así que **no se sabe** en qué momento del curso aparece — el Bloque 2 (Seguridad, clases 6 a 11) es lo razonable, pero eso ya sería inventar. Cuando salga el material que lo ubique, se completa acá.
-
-## Ver también
-
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — la propiedad que este ataque esquiva sin violarla, y de dónde salió el párrafo que esta nota expande
-- [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — los $2^{160}$ y $2^{80}$ contra los que se contrastan los diez candidatos
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — el estado real de `SHA-1`, y la trampa del salto de línea en los digests de ejemplo
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — por qué el selector es público, que es la mitad de por qué esto funciona
-- [[message-authentication-code|Message Authentication Code]] — lo que hace falta cuando se quiere un hash con secreto adentro
-- [[hmac|HMAC]] — la forma correcta de meter una clave en un hash, y la base sobre la que está construido `PBKDF2`
-- [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — por qué concatenar el secreto adelante y hashear es una mala idea
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — `ECB` y el mismo defecto de preservar la igualdad, una capa más abajo
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — la sal es a un hash lo que el IV a `CBC`
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el ataque hermano, con la hipótesis de discriminación que acá sale gratis
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — elegir bien el algoritmo no cierra el problema
-- [[guia-03-resolucion#Ejercicio 6|Guía 3 — Resolución]] — el ejercicio hecho, alumno por alumno
-- [[programa-y-objetivos|Programa y objetivos]] — John The Ripper entre las herramientas del curso
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
