@@ -12,6 +12,14 @@
   padding: 8px 0 64px;
 }
 
+/* Dentro de la hoja del lector (`frame: "sheet"`) el ancho lo pone la hoja, que
+   el lector ajusta arrastrando: la vista no le impone otro techo ni repite su
+   margen. */
+[data-frame="sheet"] .pv {
+  max-width: none;
+  padding: 0;
+}
+
 /* ---------- cabecera ---------- */
 
 .pv-head {
