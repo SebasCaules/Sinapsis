@@ -265,7 +265,15 @@ export function Sheet({ children }: { children: ReactNode }) {
     <div
       className={css.layout}
       ref={layoutRef}
-      style={{ ["--sheet-width" as string]: `${sheetWidth}px` }}
+      /* `--ucol` es el acento de la unidad y acá no hay unidad, pero el borde
+         superior de la hoja lo usa (`border-top: 2px solid var(--ucol)`): sin la
+         variable la declaración es inválida y la hoja se queda SIN borde arriba,
+         con los otros tres lados dibujados. Se le da el color del borde, así el
+         canto superior es igual a los demás y la hoja no lleva acento de unidad. */
+      style={{
+        ["--ucol" as string]: "var(--border)",
+        ["--sheet-width" as string]: `${sheetWidth}px`,
+      }}
     >
       <div className={css.column} ref={columnRef}>
         <article className={css.sheet} data-page-frame="">

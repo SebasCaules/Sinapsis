@@ -279,7 +279,14 @@ export function ToolHost() {
      sin la línea de identidad ni la barra de la unidad. No depende del `?arg=`:
      una herramienta que se lee como un documento la quiere siempre. */
   if (view.frame === "sheet" && !framed) {
-    return <Sheet>{host}</Sheet>;
+    return (
+      <Sheet>
+        {/* El mismo aviso que los otros dos caminos: el contenedor está oculto
+            hasta que el bundle carga, y sin esto la hoja se ve vacía. */}
+        {status === "ready" ? null : <ToolLoading />}
+        {host}
+      </Sheet>
+    );
   }
 
   if (framed) {

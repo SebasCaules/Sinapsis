@@ -26,3 +26,4 @@ rama, que se conserva 30 días, así que esta fila tiene que bastarse sola.
 | 2026-09-06 | cripto | La placa de ejercicio pasa a ser decisión de la materia | proposal/cripto-20260906-la-placa-de-ejercicio-pasa-a-ser-decision-de-la-materia | aprobada | `7dbdc74` |
 | 2026-09-06 | cripto | Una imagen del wiki entra en la columna | proposal/cripto-20260906-una-imagen-del-wiki-entra-en-la-columna | aprobada | `975710e` |
 | 2026-09-06 | cripto | El runtime lee la ruta aunque el sitio cuelgue de un base | proposal/cripto-20260906-el-runtime-lee-la-ruta-aunque-el-sitio-cuelgue-de-un-base | aprobada | `c59d319` |
+| 2026-09-06 | cripto | Una herramienta puede vivir en la hoja ajustable del lector | proposal/cripto-20260906-una-herramienta-puede-vivir-en-la-hoja-ajustable-del-lector | aprobada | `e0e6e5b` |

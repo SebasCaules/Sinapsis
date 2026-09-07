@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Una herramienta puede vivir en la hoja ajustable del lector"
 rama: proposal/cripto-20260906-una-herramienta-puede-vivir-en-la-hoja-ajustable-del-lector
-estado: abierta
+estado: aprobada
 pr: https://github.com/SebasCaules/Sinapsis/pull/13
 ---
 
@@ -142,4 +142,66 @@ apps/web build: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-07
+**Commit de merge:** `e0e6e5b`
+
+### Gates en la rama
+
+Corridos en un worktree aparte, sobre la rama, con `pnpm install --frozen-lockfile`:
+
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — `packages/contract` 51, `packages/runtime` 181, `packages/markdown` 119,
+  `apps/web` 710, `packages/cli` 57. Coinciden uno a uno con los conteos de «Gates».
+- `pnpm build`: OK (el cambio toca `apps/web`).
+- `pnpm e2e`: OK — 94 pasadas, 3 salteadas.
+
+La prueba intermitente conocida de `apps/web` (S-35, «Otra vez» devuelve la tarjeta al final
+de la cola) no apareció.
+
+### Hallazgos
+
+1. **(medio)** `apps/web/src/features/subject/components/PageFrame.tsx:260` — la propuesta
+   dice que «la hoja se extrae de `PageFrame` como un componente `Sheet` y `PageFrame` la
+   sigue usando por dentro». **No es lo que hace la rama.** El diff de `PageFrame.tsx` es
+   puramente aditivo (26 líneas, 0 borradas): `Sheet` es una caja **nueva y paralela**, y
+   `PageFrame` sigue armando la suya. Lo que sí es único es el arrastre —`Sheet` reutiliza
+   `SheetHandle` y `useSheetWidth`—, así que la lente de duplicación queda satisfecha en lo
+   que importa: lo repetido es el andamio (`layout` → `column` → `article.sheet`), no la
+   regla. Se aprueba con esa lectura, y por dos motivos: `PageFrame` queda **probadamente
+   intacto** (no hay ni una línea modificada, así que el arrastre, el doble clic que vuelve a
+   840, el teclado y la escritura de `--sheet-width` en el nodo de `.layout` no cambiaron), y
+   hacer la extracción de verdad exigiría que `Sheet` recibiera `data-side`, `--ucol`,
+   `sheetRef`, el `aside` y el contenido intercalado del encabezado y del pie, es decir,
+   reproducir la firma de `PageFrame`. La fila `N0-73` describe lo que la rama hace, no lo
+   que la propuesta dice que hace.
+2. **(bajo, arreglado al mergear)** `PageFrame.tsx:265` — `Sheet` no declaraba `--ucol`, y
+   `.sheet` la usa en `border-top: 2px solid var(--ucol)`. Sin la variable la declaración es
+   inválida en tiempo de cómputo y el borde superior se reinicia a `0px none`: comprobado en
+   el navegador, la hoja quedaba **sin canto de arriba** con los otros tres lados a 1 px. Se
+   agregó `--ucol: var(--border)` en el estilo de `Sheet`, así el canto superior es igual a
+   los demás y la hoja no lleva acento de unidad, que es justamente lo que `"sheet"` promete.
+3. **(bajo, arreglado al mergear)** `apps/web/src/features/subject/tools/ToolHost.tsx:279` —
+   el camino de `"sheet"` devolvía `<Sheet>{host}</Sheet>` sin el `<ToolLoading />` que
+   llevan los otros dos caminos. Como `host` está `hidden` hasta que el bundle carga, la
+   primera visita mostraba una hoja **vacía y sin aviso**. Se agregó la misma línea que ya
+   tienen el camino enmarcado y el suelto.
+
+Lo que se buscó y **no** apareció: dato de la materia que entre sin validar (el valor viaja
+por el esquema y `apps/web` no lo usa para armar rutas ni HTML); un tercer valor de `frame`
+que se cuele (`packages/contract/src/tools.test.ts:70` lo sigue rechazando); una segunda
+implementación del ancho o de sus topes (`views/sheetWidth.ts` sigue siendo la única);
+manifiestos ya publicados que dejen de validar (el enum solo se ensancha, y `frame` sigue
+siendo opcional); un `frame: "page"` que quede atrapado en el camino nuevo (`framed` solo es
+distinto de `null` cuando `frame === "page"`, y la guarda `&& !framed` lo cubre igual);
+y un «mientras estaba acá también…» fuera de alcance.
+
+### Efecto en las materias
+
+- **cripto**: puede declarar `"frame": "sheet"` en la vista `parciales` y volver a publicar.
+- **proba**: el orquestador aplicó `"frame": "sheet"` a la vista `formularios` de
+  `subjects/proba/tools/proba-exercises/sinapsis.tools.json`, que es la copia publicada. El
+  agente de Probabilidad tiene que **replicar esa línea en el manifiesto de su vault**, o la
+  próxima publicación la pisa. `ejercicios` se deja en `"page"` (es un paso del recorrido) y
+  `parcial` se deja sin marco (es una pantalla de configuración con cronómetro, no un
+  documento).
