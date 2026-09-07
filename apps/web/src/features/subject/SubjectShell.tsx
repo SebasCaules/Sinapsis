@@ -61,6 +61,16 @@ function useNarrow(): boolean {
   return narrow;
 }
 
+/** Quita el `basename` del router (`/Sinapsis`) de un href interno; sin base devuelve el href tal cual. */
+function stripBasename(href: string): string {
+  /* La misma fuente que el `basename` del router (N0-59), leída acá para no
+     importar el router desde una vista que el router ya importa. */
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  if (!base) return href;
+  if (href === base) return "/";
+  return href.startsWith(base + "/") ? href.slice(base.length) : href;
+}
+
 export function SubjectShell() {
   const { subject = "" } = useParams();
   /* Dos vueltas del mismo modelo, y por una razón: el runtime necesita la
@@ -362,7 +372,10 @@ export function SubjectShell() {
       const anchor = (event.target as HTMLElement | null)?.closest?.("a[href]");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.target === "_blank") return;
-      const raw = anchor.getAttribute("href") ?? "";
+      /* En GitHub Pages el sitio cuelga de `/Sinapsis/` y los `<Link>` llevan ese
+         prefijo en su `href`: se quita antes de mirar la ruta, si no ningún
+         enlace parecía de la materia y ⌘-clic caía al navegador. */
+      const raw = stripBasename(anchor.getAttribute("href") ?? "");
       /* Dos puertas distintas (core.js:2508-2512 y 2531): ⌘/Ctrl-clic SALTA a la
          pestaña nueva; el botón del medio la deja en segundo plano. */
       const activate = !aux;
