@@ -85,7 +85,7 @@ hagan falta en tiempo de ejecución**.
 | `label` | texto | **sí** | — | 1–80 | Nombre de la vista. |
 | `icon` | `IconName` | no | — | registro cerrado | — |
 | `layout` | `"wide"` \| `"full"` | no | `"wide"` | — | `wide` = 1120 px; `full` = todo el ancho del área de contenido. |
-| `frame` | `"page"` | no | — | literal | Envuelve la vista en el **marco de página** de la plataforma: la hoja del lector con su línea de identidad y la barra de la unidad. Solo se aplica cuando el `?arg=` resuelve a un paso de progreso. Ver §8.1. |
+| `frame` | `"page"` \| `"sheet"` | no | — | — | Con `"page"`, envuelve la vista en el **marco de página**: la hoja del lector con su línea de identidad y la barra de la unidad; solo se aplica cuando el `?arg=` resuelve a un paso de progreso (§8.1). Con `"sheet"`, la envuelve en la **misma hoja ajustable** —el ancho se arrastra desde los costados y vuelve a 840 con doble clic— pero **sin** la línea de identidad ni la barra: es para una herramienta que se lee como un documento y no es un paso de ningún recorrido. `"sheet"` no depende del `?arg=`: se aplica siempre (N0-73). |
 
 ### `ToolFilePath` — las rutas admitidas
 

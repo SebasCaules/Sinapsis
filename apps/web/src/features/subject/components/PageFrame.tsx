@@ -252,6 +252,32 @@ export function PageFrame({
   );
 }
 
+/**
+ * La hoja ajustable, sin el marco de página: la misma caja y las mismas asas que
+ * usa `PageFrame`, para lo que se lee como un documento pero no es un paso de
+ * ningún recorrido —una herramienta con `frame: "sheet"` (N0-73)—.
+ */
+export function Sheet({ children }: { children: ReactNode }) {
+  const [sheetWidth, setSheetWidth] = useSheetWidth();
+  const layoutRef = useRef<HTMLDivElement>(null);
+  const columnRef = useRef<HTMLDivElement>(null);
+  return (
+    <div
+      className={css.layout}
+      ref={layoutRef}
+      style={{ ["--sheet-width" as string]: `${sheetWidth}px` }}
+    >
+      <div className={css.column} ref={columnRef}>
+        <article className={css.sheet} data-page-frame="">
+          {children}
+          <SheetHandle side="left" width={sheetWidth} onWidth={setSheetWidth} layoutRef={layoutRef} columnRef={columnRef} />
+          <SheetHandle side="right" width={sheetWidth} onWidth={setSheetWidth} layoutRef={layoutRef} columnRef={columnRef} />
+        </article>
+      </div>
+    </div>
+  );
+}
+
 const HANDLE_TITLE = `Arrastre para cambiar el ancho de la hoja · doble clic: volver a ${SHEET_DEFAULT}`;
 
 /**
