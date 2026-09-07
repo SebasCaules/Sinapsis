@@ -391,8 +391,29 @@ El tipo se compara con acentos y mayúsculas plegados (`fold`), así que `[!Intu
 `[!INTUICION]` e `[!intuicion]` son el mismo aviso. **Un tipo desconocido cae en `nota`**: no
 es un error, y no hace falta declarar nada en el config.
 
-El marcador de plegado de Obsidian (`[!info]-` / `[!info]+`) se acepta y **se descarta**: la
-plataforma no pliega callouts.
+### El marcador de plegado (N0-62)
+
+El marcador de Obsidian decide si el aviso llega abierto o cerrado, con la misma semántica que
+en Obsidian:
+
+| Se escribe | Se dibuja | Marcado |
+|---|---|---|
+| `> [!cita]- Título` | **Cerrado**, se abre con un clic o con el teclado | `<details class="callout calloutFolded" data-type="cita">` con la versalita de `<summary>` |
+| `> [!cita]+ Título` | Abierto | `<aside class="callout" data-type="cita">` |
+| `> [!cita] Título` | Abierto | ídem |
+
+Tres reglas que van con eso:
+
+- **El cuerpo está en el HTML aunque el aviso esté cerrado.** No se recorta ni se carga
+  aparte: la búsqueda, los enlaces entrantes y el índice de la página no cambian por plegar.
+- **Un ancla que apunta adentro de un aviso cerrado lo abre.** El lector abre todos los
+  pliegues que contienen al destino antes de saltar (`openFoldedAncestors`); si no, el
+  encabezado no tiene medida y el salto queda en cualquier lado.
+- **`[!figura]` no se pliega.** No es un aviso sino el hueco de una figura, y el marcador se
+  ignora ahí.
+
+Vale para todos los tipos del registro. La versalita sigue siendo **una sola** por aviso
+(§ lector-17): plegado, esa versalita es la cabecera del pliegue.
 
 ### `[!figura]` es otra cosa (N0-42)
 
@@ -468,7 +489,9 @@ Ninguna de ellas detiene la publicación. Las listas largas se recortan a 6 elem
   `headingId`, `fold`, `normalizeSlug`, `normalizeDivisionKey`, `DIVISION_NONE`,
   `DIVISION_OTHER`, `PAGE_TYPE_META`, `META_PAGES`, `divisionOf`, `effectiveDivisions`.
 - `apps/web/src/features/subject/markdown/remarkCallouts.ts` — `CALLOUT_LABELS`, alias,
-  `[!figura]`.
+  `[!figura]` y el marcador de plegado.
+- `apps/web/src/features/subject/markdown/folded.ts` — `openFoldedAncestors`: el ancla que
+  cae dentro de un aviso cerrado.
 - `apps/web/src/features/subject/components/page-tip.ts` — `leadOf`, `firstPara`,
   `sectionOf`: de dónde sale cada texto de la vista previa (N0-50).
 - `packages/runtime/src/markdown.ts` — `figureMarkup`, el mismo marcado desde el runtime.
@@ -480,4 +503,5 @@ Ninguna de ellas detiene la publicación. Las listas largas se recortan a 6 elem
 N0-10 (markdown en el cliente, sin HTML crudo) · N0-13 (compilador propio) ·
 N0-21 (recorte del H1 duplicado) · N0-22 (el compilador es dueño de los ids de encabezado) ·
 N0-23 (divisiones sintéticas) · N0-42 (figuras en callouts) ·
-N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página).
+N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página) ·
+N0-62 (callouts plegables).

@@ -6,6 +6,12 @@
  *
  * pasa a `<aside class="callout" data-type="info">` con un rótulo en versalita.
  *
+ * Con el marcador de plegado de Obsidian —`> [!info]- Título`— el aviso nace
+ * CERRADO y se dibuja como `<details class="callout calloutFolded">`, con la
+ * versalita de `<summary>` (N0-62). El cuerpo está en el HTML aunque no se vea,
+ * así la búsqueda, los enlaces entrantes y las anclas siguen funcionando; el
+ * lector abre el pliegue cuando un ancla apunta adentro.
+ *
  * Buena parte del wiki es anterior a la sintaxis de Obsidian y escribe el aviso
  * en prosa. El baseline (`parseCallouts`, core.js:800-874) reconoce cuatro
  * formas y este plugin las porta enteras (§ lector-06):
@@ -122,6 +128,18 @@ function host(): MdNode {
           children: [{ type: "text", value: "Figura interactiva" }],
         },
       ],
+    },
+  };
+}
+
+/** Cabecera del pliegue: la misma versalita del aviso, dentro de un `<summary>`. */
+function summary(value: string): MdNode {
+  return {
+    type: "calloutPart",
+    data: {
+      hName: "summary",
+      hProperties: { className: ["calloutLabel"] },
+      hChildren: [{ type: "text", value }],
     },
   };
 }
@@ -262,14 +280,31 @@ function stripLeadingLabel(p: MdNode, lead: MdNode | null, fallback: string): st
   return fallback;
 }
 
-/** Convierte la cita en un aviso con su única versalita. */
-function markCallout(quote: MdNode, kind: string, title: string): void {
+/**
+ * Convierte la cita en un aviso con su única versalita.
+ *
+ * Con el marcador de plegado de Obsidian (`> [!tipo]-`) el aviso nace CERRADO y
+ * se dibuja como `<details>`: la versalita pasa a ser el `<summary>`, que es la
+ * cabecera del pliegue, y el cuerpo sigue en el HTML aunque no se vea (N0-62).
+ * Sin marcador, o con `+`, el aviso es el `<aside>` de siempre.
+ */
+function markCallout(quote: MdNode, kind: string, title: string, folded = false): void {
+  const label = title || labelFor(kind);
+  if (folded) {
+    quote.data = {
+      ...quote.data,
+      hName: "details",
+      hProperties: { className: ["callout", "calloutFolded"], "data-type": kind },
+    };
+    quote.children = [summary(label), ...(quote.children ?? [])];
+    return;
+  }
   quote.data = {
     ...quote.data,
     hName: "aside",
     hProperties: { className: ["callout"], "data-type": kind },
   };
-  quote.children = [span("calloutLabel", title || labelFor(kind)), ...(quote.children ?? [])];
+  quote.children = [span("calloutLabel", label), ...(quote.children ?? [])];
 }
 
 export function remarkCallouts() {
@@ -285,6 +320,9 @@ export function remarkCallouts() {
       const m = lead ? HEAD.exec(lead.value ?? "") : null;
       if (lead && m?.[1]) {
         const kind = normalizeType(m[1]);
+        /* `-` cierra el aviso, `+` y la ausencia lo dejan abierto: es la
+           convención de Obsidian, y el wiki la escribe pensando en ella. */
+        const folded = m[2] === "-";
         const title = (m[3] ?? "").trim();
         lead.value = (lead.value ?? "").slice(m[0].length);
         if (!lead.value) {
@@ -321,7 +359,7 @@ export function remarkCallouts() {
           return;
         }
 
-        markCallout(quote, kind, title);
+        markCallout(quote, kind, title, folded);
         return;
       }
 

@@ -94,6 +94,50 @@ describe("avisos heredados (§ lector-06)", () => {
     expect(callout(root)?.textContent).not.toContain("⚠");
   });
 
+  it("«[!tipo]-» nace cerrado, con la versalita de cabecera", () => {
+    const root = html("> [!cita]- De la transcripción (cues pt2 583-589)\n> El cuerpo de la cita.");
+    const details = root.querySelector<HTMLDetailsElement>("details.callout");
+    expect(details).not.toBeNull();
+    expect(details?.open).toBe(false);
+    expect(details?.getAttribute("data-type")).toBe("cita");
+    /* La versalita es la cabecera del pliegue, no un párrafo más. */
+    expect(details?.querySelector("summary.calloutLabel")?.textContent).toBe(
+      "De la transcripción (cues pt2 583-589)",
+    );
+    /* El cuerpo sigue en el HTML aunque no se vea: la búsqueda y los enlaces
+       entrantes no cambian. */
+    expect(details?.textContent).toContain("El cuerpo de la cita.");
+    expect(root.querySelector("aside.callout")).toBeNull();
+  });
+
+  it("«[!tipo]+» y el aviso sin marcador siguen abiertos", () => {
+    for (const head of ["[!nota]+ Título", "[!nota] Título"]) {
+      cleanup();
+      const root = html(`> ${head}\n> Cuerpo.`);
+      expect(root.querySelector("details.callout"), head).toBeNull();
+      expect(callout(root)?.getAttribute("data-type"), head).toBe("nota");
+      expect(label(root), head).toBe("Título");
+    }
+  });
+
+  it("sin título, el pliegue muestra el rótulo del tipo", () => {
+    const root = html("> [!warn]-\n> Cuidado con esto.");
+    expect(root.querySelector("summary.calloutLabel")?.textContent).toBe("Atención");
+  });
+
+  it("un aviso plegado adentro de otro conserva los dos pliegues", () => {
+    const root = html("> [!nota]- Afuera\n> \n> > [!cita]- Adentro\n> > El cuerpo.");
+    const all = root.querySelectorAll("details.callout");
+    expect(all).toHaveLength(2);
+    expect([...all].map((d) => d.getAttribute("data-type"))).toEqual(["nota", "cita"]);
+  });
+
+  it("el marcador no pliega una figura", () => {
+    const root = html("> [!figura]- normal-densidad\n> La campana.");
+    expect(root.querySelector("details")).toBeNull();
+    expect(root.querySelector("figure.figura")).not.toBeNull();
+  });
+
   it("«cita» distingue la voz citada de la nota del autor", () => {
     const conTitulo = html("> [!cita] De la transcripción (cues pt2 583-589)\n> *«La segunda forma de construir un MAC es a partir de una función de hash.»*");
     expect(callout(conTitulo)?.getAttribute("data-type")).toBe("cita");

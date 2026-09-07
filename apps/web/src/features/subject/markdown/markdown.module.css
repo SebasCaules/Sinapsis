@@ -237,6 +237,45 @@
 .prose :global(.callout[data-type="cita"]) { --callout: var(--u6); }
 .prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface); }
 
+/* ---------- avisos plegados (N0-62) ----------
+   `> [!tipo]-` sale como <details>: la versalita es el <summary> y el cuerpo
+   sigue en el HTML aunque esté cerrado. El triángulo propio del navegador se
+   reemplaza por uno que sigue el color del aviso. */
+.prose :global(details.callout) > :global(summary.calloutLabel) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.prose :global(details.callout) > :global(summary.calloutLabel::-webkit-details-marker) {
+  display: none;
+}
+.prose :global(details.callout) > :global(summary.calloutLabel)::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 4px solid var(--callout);
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  transition: transform 120ms ease;
+}
+.prose :global(details.callout[open]) > :global(summary.calloutLabel)::before {
+  transform: rotate(90deg);
+}
+.prose :global(details.callout) > :global(summary.calloutLabel):focus-visible {
+  outline: 2px solid var(--callout);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+/* Cerrado, el aviso es una línea: el margen del rótulo solo hace falta cuando
+   hay cuerpo debajo. */
+.prose :global(details.callout[open]) > :global(summary.calloutLabel) {
+  margin-bottom: 6px;
+}
+
 /* ---------- figuras interactivas (N0-42) ----------
    `> [!figura] id` sale como <figure class="figura">: el hueco `.fig-host` es
    donde el runtime dibuja, y mientras no haya bundle cargado se ve el marco
