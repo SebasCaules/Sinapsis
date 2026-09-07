@@ -21,7 +21,7 @@
   "views": [
     { "id": "ejercicios", "label": "Ejercicios", "icon": "pencil", "layout": "wide", "frame": "page" },
     { "id": "parcial", "label": "Simulador de parcial", "icon": "timer", "layout": "wide" },
-    { "id": "formularios", "label": "Formularios", "icon": "sigma", "layout": "wide" }
+    { "id": "formularios", "label": "Formularios", "icon": "sigma", "layout": "wide", "frame": "sheet" }
   ],
   "figures": false,
   "progress": true,
