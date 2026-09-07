@@ -167,9 +167,12 @@
   padding: 5px 8px;
   cursor: pointer;
 }
+/* El trazo del aro lo hace --primary (≥ 3:1 en las tres pieles); --primary-ring
+   es semitransparente y solo sirve de halo, nunca de borde visible. [R9] */
 .fig-ctl select:focus-visible {
-  outline: 2px solid var(--primary-ring);
-  outline-offset: 1px;
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--primary-ring);
 }
 .fig-ctl.fig-toggle {
   flex: 0 0 auto;
@@ -203,9 +206,52 @@
   gap: 8px;
   margin: 8px 0 2px;
 }
+/* Estos botones viven FUERA de `.sinapsis-tool` (toda figura montada en el
+   lector), así que ninguna hoja de bundle los alcanzaba y caían al botón nativo
+   del navegador: gris del sistema, ajeno a las tres pieles y con el rótulo en
+   4.14:1 en Claustro. Copian el control de la plataforma
+   (components/platform/Button.module.css, `.btn` + `.sm`) con tokens. [R3/R8] */
 .fig-buttons .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-ui);
   font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
   padding: 6px 11px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  background: var(--surface);
+  color: var(--text-2);
+  box-shadow: var(--relief), var(--shadow-ctrl);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--t), border-color var(--t), color var(--t), box-shadow var(--t);
+}
+.fig-buttons .btn:hover:not(:disabled) { background: var(--surface-2); }
+.fig-buttons .btn:active:not(:disabled) { transform: translateY(1px); box-shadow: var(--relief); }
+/* El trazo del aro lo hace --primary (≥ 3:1); --primary-ring es solo el halo. [R9] */
+.fig-buttons .btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
+}
+/* Preset activo: misma señal que el secundario activo de la plataforma. */
+.fig-buttons .btn.on,
+.fig-buttons .btn[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+/* Deshabilitado sin opacity: el estado lo dicen los tokens. [R10] */
+.fig-buttons .btn:disabled {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-3);
+  box-shadow: none;
+  cursor: default;
 }
 
 /* ---------- lecturas numéricas ---------- */
@@ -262,11 +308,15 @@
   border-radius: 2px;
 }
 .fig-legend .sw.dash { border-top-style: dashed; }
+/* Sin `opacity`: apagaba TODO el swatch —contorno incluido— y la clave caía a
+   1.85-2.60:1, por debajo del 3:1 de un componente gráfico. [R6/R10]
+   `Fig.legend` (figures.ts) ya no escribe `opacity` en línea: pone la alfa de la
+   marca DENTRO del relleno (color-mix con transparent) y deja el contorno de
+   abajo a pleno color por currentColor. */
 .fig-legend .sw.fill {
   height: 11px;
   border: 1px solid currentColor;
   border-radius: 3px;
-  opacity: .55;
 }
 
 /* ---------- responsive ---------- */
@@ -320,7 +370,8 @@
     margin: -8px 0 -16px;
     /* la barra deja a la vista que el dibujo sigue hacia la derecha */
     scrollbar-width: thin;
-    scrollbar-color: var(--border-2) transparent;
+    /* Los tokens propios de la barra, los mismos que usa base.css. [R8] */
+    scrollbar-color: var(--scroll-thumb) transparent;
   }
   .fig-plot,
   .fig-panels { min-width: 520px; }
@@ -366,7 +417,9 @@
   min-width: 74px;
   max-width: 220px;
   padding: 6px 8px;
-  border: 1px solid var(--border);
+  /* En Claustro la burbuja se apoya sobre el dibujo y la sombra (negra) no se
+     ve: el canto es la única señal, y --border sobre --elevated no llega. [R7] */
+  border: 1px solid var(--border-2);
   border-radius: 7px;
   background: var(--elevated);
   box-shadow: var(--shadow-ctrl);
@@ -377,7 +430,7 @@
 .fig-tip .hd {
   margin-bottom: 3px;
   padding-bottom: 3px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-2);
   color: var(--text-3);
   font-family: var(--font-mono);
   font-size: 11px;

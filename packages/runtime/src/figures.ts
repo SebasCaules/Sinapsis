@@ -96,9 +96,9 @@
        líneas de REFERENCIA de Fig.vline / Fig.hline son canal secundario:
        punteadas, de 1.5 px y marcadas con la clase .fig-ref (por eso quedan
        fuera de la regla «trazo distinto de 2» de check-figuras.mjs).
-     · Fig.legend: la muestra de relleno se pinta con la misma opacidad que la
-       marca ({alpha} explícito, o --plot-band-a con {band: true}, o
-       --plot-fill-a).
+     · Fig.legend: la muestra de relleno lleva la misma alfa que la marca
+       ({alpha} explícito, o --plot-band-a con {band: true}, o --plot-fill-a),
+       pero DENTRO del relleno: el contorno queda a pleno color (≥ 3:1).
      · Cada <svg> recibe un <title> tomado de meta.title cuando la figura no
        pone uno propio.
 
@@ -1571,13 +1571,20 @@ export function createFigures(A: Loose): FiguresEngine {
       sw.className = "sw" + (it.dash ? " dash" : "") + (it.fill ? " fill" : "");
       sw.style.borderTopColor = it.color || color("primary");
       if (it.fill) {
-        sw.style.color = it.color || color("primary");
-        sw.style.background = it.color || color("primary");
-        // la muestra se pinta con la MISMA opacidad que la marca del dibujo:
-        // relleno de área (var(--plot-fill-a)) salvo que la llamada pase otra.
+        var c = it.color || color("primary");
+        sw.style.color = c;
+        // El alfa va en el RELLENO, no en `opacity`: apagar toda la muestra
+        // apagaba también su contorno y la clave caía a 1.85-2.60:1, por debajo
+        // del 3:1 que pide un componente gráfico. Ahora el interior conserva la
+        // MISMA alfa que la marca del dibujo (relleno de área var(--plot-fill-a),
+        // o var(--plot-band-a) con {band: true}, o la que pase la llamada) y el
+        // borde de .sw.fill queda a pleno color por currentColor. [R6/R10]
         var a = it.alpha;
         if (a == null) a = it.band ? color("plot-band-a") : color("plot-fill-a");
-        if (a !== "" && a != null) sw.style.opacity = String(a);
+        var pct = (a === "" || a == null) ? NaN : Math.round(Number(a) * 1000) / 10;
+        sw.style.background = (pct >= 0 && pct < 100)
+          ? "color-mix(in srgb, " + c + " " + pct + "%, transparent)"
+          : c;
       }
       var t = document.createElement("span");
       t.textContent = it.label;
