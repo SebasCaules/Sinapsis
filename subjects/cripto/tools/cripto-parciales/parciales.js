@@ -165,14 +165,32 @@
     return e.numeros && e.numeros.length > 1 ? e.numeros.join(" y ") : String(e.n);
   }
 
+  /** `2C-2025` → `2C25`: el rótulo corto con el que se identifica un parcial. */
+  function examenCorto(examen) {
+    var m = /^(\d)C-(\d{2})(\d{2})$/.exec(String(examen || ""));
+    return m ? m[1] + "C" + m[3] : String(examen || "");
+  }
+
+  /**
+   * El rótulo del ejercicio. Agrupado por tipo, los ejercicios de cuatro
+   * parciales distintos quedan mezclados, así que el número lleva el parcial
+   * adelante —`2C25 - Ejercicio 3`— y se sabe de cuál es sin buscar. Agrupado
+   * por parcial eso ya lo dice el encabezado del grupo.
+   */
+  function rotuloDe(e, orden) {
+    var base = "Ejercicio " + numeroDe(e) + ".";
+    return orden === "parcial" ? base : examenCorto(e.examen) + " - " + base;
+  }
+
   function ejercicioNodo(e, orden) {
     var art = el("article", "pv-ejercicio");
     art.id = "ej-" + e.id;
 
     var h = el("h3", "pv-titulo");
-    h.appendChild(el("span", "pv-numero", "Ejercicio " + numeroDe(e) + "."));
+    h.appendChild(el("span", "pv-numero", rotuloDe(e, orden)));
     if (e.titulo) h.appendChild(el("span", "pv-nombre", e.titulo));
-    h.appendChild(el("span", "pv-contexto", orden === "parcial" ? e.tipo : e.examen));
+    /* Agrupado por tipo el parcial ya va en el rótulo; a la derecha sobra. */
+    if (orden === "parcial") h.appendChild(el("span", "pv-contexto", e.tipo));
     art.appendChild(h);
 
     var enunciado = el("div", "pv-enunciado");
