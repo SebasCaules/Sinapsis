@@ -445,7 +445,7 @@ no rompe nada**. Un `[!figura]` sin id se dibuja como figura vacía (sin `data-f
 
 ---
 
-## 10 bis. Adjuntos de imagen (N0-61)
+## 10 bis. Adjuntos de imagen (N0-nn)
 
 Un vault de Obsidian escribe `![alt](../../assets/des-feistel.png)` al pegar una imagen. El
 compilador reconoce esas referencias, copia el archivo con la materia y el lector reescribe el
@@ -463,11 +463,19 @@ esté dentro de la carpeta de la materia.
 | `![f](data:image/png;base64,…)`, `![f](javascript:…)` | No | Ningún protocolo se admite. |
 | `![f](/assets/a.png)` | No | Ruta absoluta. |
 | `![f](../../../fuera.png)` | No | Sale de la carpeta de la materia: advertencia `asset-outside`. |
-| `![f](../../raw/clase.pdf)` | No | No es una extensión de imagen. |
+| `![f](../../assets/logo.svg)` | No | Un SVG **no se publica**: advertencia `asset-unsupported` (ver abajo). |
+| `![f](../../raw/clase.pdf)` | No | No es una extensión de imagen: advertencia `asset-unsupported`. |
 | `` `![f](a.png)` `` o dentro de ``` ``` ``` | No | Es documentación de la sintaxis, no una imagen. |
 
-Extensiones admitidas: `png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`. Topes: **2 MB por archivo**
+Extensiones admitidas: `png`, `jpg`, `jpeg`, `gif`, `webp`. Topes: **2 MB por archivo**
 y **25 MB por materia**; lo que no entra se avisa y se deja como está.
+
+**`svg` no está, y no es un olvido.** Un adjunto se publica tal cual y se sirve desde el
+**mismo origen** que la plataforma, y un SVG puede llevar `<script>`, manejadores `on*` o un
+`href` a `javascript:`: abierto por su URL ejecutaría con acceso al estado personal
+(`localStorage`, IndexedDB). Dentro de un `<img>` no ejecuta, pero la URL es pública igual. Una
+referencia `.svg` se avisa con `asset-unsupported` y el markdown queda intacto. Una materia que
+necesite un vector lo exporta a PNG, o lo dibuja con un bundle de figuras (`04`).
 
 ### Cómo viaja
 
@@ -478,6 +486,11 @@ y **25 MB por materia**; lo que no entra se avisa y se deja como está.
    índice en `subjects/<slug>/assets/assets.json` (`ruta del vault → nombre publicado`).
    Ese índice es lo que permite que `site build` compile la copia publicada al mismo
    resultado, donde los archivos ya no se llaman como en el vault.
+   **El índice lo escribe una materia, así que se lee como dato ajeno**: cada nombre
+   publicado tiene que cumplir `^[a-f0-9]{16}\.(png|jpe?g|gif|webp)$` —un solo segmento, sin
+   barras ni `..`— y, ya resuelto, la ruta real tiene que caer dentro de
+   `<materia>/assets/`. Lo que no cumple se descarta con `asset-index-invalid` y la
+   referencia queda como si faltara el archivo.
 3. `sinapsis site build` los emite bajo `subjects/<slug>/assets/` de la salida.
 4. El lector reescribe el `src` con `BASE_URL + subjects/<slug>/assets/<hash>.<ext>`
    (`siteAssetBase`). **Una referencia que no está en `Page.assets` se deja intacta**: el
@@ -489,7 +502,9 @@ y **25 MB por materia**; lo que no entra se avisa y se deja como está.
 |---|---|---|
 | `adjunto sin archivo en "x": "…" (la imagen se deja como está)` | `asset-missing` | La referencia apunta a un archivo que no existe. |
 | `adjunto fuera de la materia en "x": "…" (no se publica)` | `asset-outside` | Un `..` que sale de la carpeta del config. |
-| `adjunto demasiado grande en "x": …` | `asset-too-big` | Supera el tope por archivo o el de la materia. |
+| `adjunto demasiado grande en "x": …` | `asset-too-big` | Supera el tope por archivo o el de la materia. Cuando el que se pasa es el tope de la materia, `x` es una página que lo referencia y el texto nombra el archivo. |
+| `adjunto no admitido en "x": … (se deja como está)` | `asset-unsupported` | La extensión no está en la lista: un `.svg`, un `.pdf`. |
+| `índice de adjuntos inválido en "x": … (no se publica)` | `asset-index-invalid` | El `assets.json` de la copia publicada trae un nombre que no tiene la forma de un adjunto. |
 
 Ninguna detiene la publicación: son advertencias como todas las demás (`00-principios.md` §6.1).
 
@@ -503,7 +518,8 @@ Ninguna detiene la publicación: son advertencias como todas las demás (`00-pri
 | Subcarpetas del wiki | El compilador recorre un solo nivel. | Aplanar la carpeta. |
 | Encabezados H5 y H6 en el índice de la página | `extractHeadings` solo mira H1–H4. | Usar hasta H4 para lo que deba aparecer en el índice. |
 | Enlaces markdown `[texto](otra-pagina)` como enlaces internos | Solo los wikilinks `[[…]]` se resuelven contra la materia y alimentan el grafo. | `[[slug|texto]]`. |
-| Adjuntos que no son imágenes (PDF, `.VTT`, audio) | Solo se publican las imágenes (§10 bis). Un `![](…)` a otra cosa no es una imagen y un `[texto](archivo.pdf)` es un enlace, no un adjunto. | Enlazarlos por URL, o meterlos en un bundle de herramientas (`04`). |
+| Adjuntos que no son imágenes (PDF, `.VTT`, audio) | Solo se publican las imágenes de §10 bis. Un `![](…)` a otra cosa no es una imagen y un `[texto](archivo.pdf)` es un enlace, no un adjunto. | Enlazarlos por URL, o meterlos en un bundle de herramientas (`04`). |
+| **Adjuntos `.svg`** | Se servirían en el mismo origen del sitio y un SVG puede ejecutar script (§10 bis). | Exportar a PNG, o dibujar la figura con un bundle (`04`). |
 | Un tipo de callout propio | El registro es cerrado. | Usar el más parecido; un tipo desconocido cae en `nota`. |
 | Frontmatter con claves propias | El compilador ignora lo que no está en §3. | Si hace falta un campo nuevo, es una propuesta (`07`). |
 
@@ -534,9 +550,9 @@ Ninguna de ellas detiene la publicación. Las listas largas se recortan a 6 elem
   `formatIssues`, recorte del H1 (N0-21), orden de carpetas, páginas meta.
 - `packages/markdown/src/frontmatter.ts` — `parseFrontmatter`, parser tolerante y manual,
   `cleanWikilink`.
-- `packages/markdown/src/assets.ts` — `imageRefs`, `isLocalImageRef`, `assetFileName`,
-  `resolvePageAssets`, `capAssets`, `readAssetIndex`, los topes y el índice de la copia
-  publicada.
+- `packages/markdown/src/assets.ts` — `imageRefs`, `isLocalRef`, `isLocalImageRef`,
+  `assetFileName`, `isPublishedAssetName`, `resolveInsideAssets`, `resolvePageAssets`,
+  `capAssets`, `readAssetIndex`, los topes y el índice de la copia publicada.
 - `apps/web/src/features/subject/markdown/remarkAssets.ts` — la reescritura del `src`.
 - `packages/markdown/src/inline.ts` — `extractLinks`, `extractHeadings`, `countWords`,
   `firstH1Line`, `normalizeDisplayMath` (N0-47).

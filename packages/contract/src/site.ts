@@ -88,7 +88,7 @@ export function siteToolBase(slug: string, toolId: string): string {
 /**
  * Base de los adjuntos de una materia, RELATIVA al sitio y sin barra final
  * (`subjects/cripto/assets`). El lector la prefija con `BASE_URL` al reescribir
- * el `src` de una imagen (N0-61).
+ * el `src` de una imagen (N0-nn).
  */
 export function siteAssetBase(slug: string): string {
   return `${SITE_DATA_DIR}/${slug}/${SITE_ASSETS_DIR}`;

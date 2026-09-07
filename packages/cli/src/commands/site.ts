@@ -40,7 +40,7 @@ import {
   siteToolBase,
   type SiteCatalogEntry as SiteCatalogEntryType,
 } from "@sinapsis/contract/site";
-import { compileWiki, type WikiAsset } from "@sinapsis/markdown";
+import { compileWiki, isPublishedAssetName, type WikiAsset } from "@sinapsis/markdown";
 import { resolveUserPath, type Ctx } from "../context.js";
 import { buildBundle, findBundles, type BuiltBundle } from "../tools/bundle.js";
 import { GENERATOR } from "../version.js";
@@ -80,7 +80,7 @@ interface CompiledSubject {
   pages: unknown;
   tools: unknown;
   bundles: BuiltBundle[];
-  /** Adjuntos de imagen que hay que emitir bajo `<out>/<slug>/assets/` (N0-61). */
+  /** Adjuntos de imagen que hay que emitir bajo `<out>/<slug>/assets/` (N0-nn). */
   assets: readonly WikiAsset[];
   warnings: string[];
   /** Páginas totales y las que cuentan como contenido, para el resumen. */
@@ -144,7 +144,16 @@ export async function runSiteBuild(opts: SiteBuildOptions, ctx: Ctx): Promise<nu
       const assetsDir = path.join(dir, SITE_ASSETS_DIR);
       await mkdir(assetsDir, { recursive: true });
       for (const asset of subject.assets) {
-        await copyFile(asset.source, path.join(assetsDir, asset.file));
+        // El nombre viene del compilador, pero puede haber salido del
+        // `assets.json` de una materia: la misma contención que los bundles.
+        // `site build` corre en el CI de cada PR, así que acá no se descarta en
+        // silencio, se para.
+        const target = isPublishedAssetName(asset.file) ? resolveInside(assetsDir, asset.file) : null;
+        if (target === null) {
+          ctx.err(pc.red(`${subject.slug} · adjunto "${asset.file}": no es un nombre publicado válido`));
+          return 1;
+        }
+        await copyFile(asset.source, target);
       }
     }
     for (const bundle of subject.bundles) {

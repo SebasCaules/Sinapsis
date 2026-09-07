@@ -35,10 +35,10 @@ Archivos cambiados en la rama:
 
 **Compilador** (`packages/markdown`)
 
-- `src/assets.ts` — **nuevo**. `imageRefs` (saltea bloques y código en línea), `isLocalImageRef` (rechaza URLs, `data:`, `javascript:`, rutas absolutas y lo que no sea imagen), `assetFileName` (sha256 del contenido, 16 caracteres, más la extensión), `resolvePageAssets`, `capAssets`, `readAssetIndex` y los topes.
-- `src/compile.ts` — modificado. Tres `IssueKind` nuevos (`asset-missing`, `asset-outside`, `asset-too-big`), la resolución de adjuntos dentro de `compileWiki` y `CompileWikiResult.assets`.
+- `src/assets.ts` — **nuevo**. `imageRefs` (saltea bloques y código en línea), `isLocalRef` e `isLocalImageRef` (rechazan URLs, `data:`, `javascript:` y rutas absolutas), `assetFileName` (sha256 del contenido, 16 caracteres, más la extensión), `isPublishedAssetName` y `resolveInsideAssets` (las dos guardas sobre el nombre que trae el índice de la copia publicada), `resolvePageAssets`, `capAssets`, `readAssetIndex` y los topes.
+- `src/compile.ts` — modificado. Cinco `IssueKind` nuevos (`asset-missing`, `asset-outside`, `asset-too-big`, `asset-unsupported`, `asset-index-invalid`), la resolución de adjuntos dentro de `compileWiki` y `CompileWikiResult.assets`.
 - `src/index.ts` — modificado. Reexporta la superficie de `assets.ts`.
-- `src/assets.test.ts` — **nuevo**. 16 casos, incluida la equivalencia entre compilar el vault y compilar la copia publicada.
+- `src/assets.test.ts` — **nuevo**. 22 casos, incluidas la equivalencia entre compilar el vault y compilar la copia publicada, los intentos de escape por el índice y el `.svg` que no se publica.
 
 **CLI** (`packages/cli`)
 
@@ -62,7 +62,7 @@ Archivos cambiados en la rama:
 
 ## Texto para la fila de `docs/DECISIONS.md`
 
-**Qué se decide.** El wiki de una materia puede traer imágenes locales y la plataforma las publica. El compilador reconoce `![alt](ruta relativa)` dentro de la carpeta de la materia, le da a cada archivo un nombre estable con el hash de su contenido, `publish` los copia a `subjects/<slug>/assets/` con un índice, `site build` los emite bajo esa misma ruta y el lector reescribe el `src`. Solo imágenes (`png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`), solo dentro de la materia, 2 MB por archivo y 25 MB por materia.
+**Qué se decide.** El wiki de una materia puede traer imágenes locales y la plataforma las publica. El compilador reconoce `![alt](ruta relativa)` dentro de la carpeta de la materia, le da a cada archivo un nombre estable con el hash de su contenido, `publish` los copia a `subjects/<slug>/assets/` con un índice, `site build` los emite bajo esa misma ruta y el lector reescribe el `src`. Solo imágenes (`png`, `jpg`, `jpeg`, `gif`, `webp` — **`svg` no**, porque se serviría en el mismo origen y puede ejecutar script), solo dentro de la materia, 2 MB por archivo y 25 MB por materia. El nombre publicado que trae el índice de una materia se valida antes de tocar el disco.
 
 **Por qué.** Era el único material de una materia que la plataforma no sabía llevar, y el que menos se puede reemplazar con texto: un diagrama de Feistel o una resolución manuscrita no tienen equivalente en prosa. Las alternativas dentro de la materia eran romper el vault en Obsidian, disfrazar un diagrama de herramienta, o depender de un tercero. El hash como nombre resuelve tres cosas a la vez: nombres de archivo con espacios y acentos que no sirven como URL, el mismo archivo referenciado desde varias páginas, y el cacheado del sitio estático.
 
@@ -92,22 +92,31 @@ apps/web typecheck: Done
 
 ### `pnpm test` — OK
 
-Conteos:
+Conteos, sobre la rama ya rebasada en `origin/main`:
 
 - `packages/contract test`: 48 passed (48)
-- `packages/markdown test`: 113 passed (113)
+- `packages/markdown test`: 119 passed (119)
 - `packages/runtime test`: 178 passed (178)
-- `apps/web test`: 687 passed (687)
-- `packages/cli test`: 57 passed (57)
+- `apps/web test`: 695 passed (695)
+- `packages/cli test`: 55 passed | 2 skipped (57) en un worktree recién creado, porque las dos omitidas exigen `packages/cli/dist`; 57 passed (57) si se corre después de `pnpm build`.
 
-De esos, nuevos en esta rama: 16 en `packages/markdown/src/assets.test.ts`, 6 en `apps/web/src/features/subject/markdown/remarkAssets.test.tsx` y 4 en `packages/contract/src/site.test.ts`.
+De esos, nuevos en esta rama: 22 en `packages/markdown/src/assets.test.ts`, 6 en `apps/web/src/features/subject/markdown/remarkAssets.test.tsx` y 4 en `packages/contract/src/site.test.ts`. Los seis que se sumaron en la segunda vuelta están todos en `assets.test.ts`.
 
 ### `pnpm build` — OK
 
 ```
-apps/web build: ✓ built in 2.09s
+apps/web build: ✓ built in 2.16s
 apps/web build: Done
 ```
+
+### `pnpm build:subjects` — OK
+
+```
+  cripto          181 páginas (154 de contenido) · 0 bundles · sin advertencias
+  proba           209 páginas (95 de contenido) · 2 bundles · 3 advertencia(s)
+```
+
+Cripto ya no levanta las 76 advertencias `asset-missing` que vio la revisión: `main` ya trae `subjects/cripto/assets/` con sus 50 archivos y el índice, y los 50 nombres pasan la validación nueva. Las 3 de Proba son los wikilinks rotos de siempre.
 
 ## Respuesta a la revisión
 
@@ -155,3 +164,14 @@ Lo demás pasa las siete lentes: la contención de la referencia (`..` fuera de 
 ### Revisión anterior
 
 Primera vuelta (2026-09-06): cambios pedidos por falta de implementación, «Alcance» con un archivo ajeno y el conteo de páginas. Los tres puntos están respondidos en «Respuesta a la revisión»; los dos primeros hallazgos de esta vuelta son nuevos, sobre la implementación.
+
+## Respuesta a la segunda revisión
+
+La rama está **rebasada sobre `origin/main`** (que ya trae los callouts plegables, la auditoría de temas y el commit del grano). El único conflicto fue la lista «Decisiones relacionadas» de `docs/contracts/02-paginas.md`, resuelta conservando las dos: `N0-66 (callouts plegables) · N0-nn (adjuntos de imagen del wiki)`. Además se restauraron desde `origin/main` las 18 capturas de `e2e/shots/` que el commit de revisión anterior había arrastrado sin querer: el diff `origin/main...HEAD` es ahora solo lo de esta propuesta.
+
+- **(alto) El nombre publicado del índice ahora se valida.** `PUBLISHED_ASSET_NAME` e `isPublishedAssetName` en `packages/markdown/src/assets.ts:60` y `:69` aceptan únicamente `^[a-f0-9]{16}\.(png|jpe?g|gif|webp)$`: un solo segmento, sin barras, sin `..` y sin dos puntos. `resolvePageAssets` lo aplica **entrada por entrada** (`packages/markdown/src/assets.ts:255-266`) para que una fila adulterada se descarte sola en vez de tirar abajo el índice de una materia sana: la entrada se avisa con `asset-index-invalid` (nuevo `IssueKind`, `packages/markdown/src/compile.ts:55`) y la referencia queda como `asset-missing`, con el markdown intacto. Segunda vuelta sobre la ruta ya resuelta: `resolveInsideAssets` (`packages/markdown/src/assets.ts:376`) exige que el destino caiga dentro de `<materia>/assets/` comparando además los **realpath**, así que un enlace simbólico plantado en `assets/` tampoco sale de la carpeta. El acceso al índice es por `hasOwnProperty` (`assets.ts:351`), para que un `__proto__` en el markdown no saque nada de la cadena de prototipos. Del lado del CLI: `packages/cli/src/commands/site.ts:151-155` contiene el destino con `resolveInside` —como ya hacía `publish.ts`— y **para el build** si el nombre no es válido, porque `site build` corre en el CI de cada PR y ahí un descarte silencioso escondería el ataque; `packages/cli/src/commands/publish.ts:343` no escribe en el índice un nombre que no pase la guarda. El lector se apretó igual: `apps/web/src/features/subject/markdown/remarkAssets.ts:47` pasó de `^[a-z0-9][a-z0-9.-]*$` a la forma exacta. Tests: `packages/markdown/src/assets.test.ts:97` (la guarda pura, con `"../../../etc/passwd"`, `"assets/../x.png"`, `"/abs.png"`, `"x.svg"`, hexadecimal en mayúsculas y no-cadenas), `:243` (los mismos cuatro llegando por un `assets.json` real, comprobando que no se publica nada y que el cuerpo no se toca) y `:263` (el enlace simbólico que sale de la materia).
+- **(medio) `svg` fuera de `IMAGE_EXTENSIONS`.** `packages/markdown/src/assets.ts:41` — la lista quedó en `png`, `jpg`, `jpeg`, `gif`, `webp`. Una referencia local con extensión no admitida (un `.svg`, un `.pdf`) produce la advertencia nueva `asset-unsupported` (`packages/markdown/src/assets.ts:227-236`, `compile.ts:54` y `compile.ts:729`) y **el markdown se deja intacto**. Para poder avisar hizo falta partir la guarda en dos: `isLocalRef` (`assets.ts:159`) decide si la referencia es un archivo de la materia y la extensión se resuelve después. Contrato: `docs/contracts/02-paginas.md:470-478` (la lista nueva más el párrafo que explica por qué un SVG servido en el mismo origen es un vector de script), `:466`, `:506` y la fila nueva de §11. Tests: `packages/markdown/src/assets.test.ts:87` y `:229`.
+- **(bajo) `N0-61` → `N0-nn`.** Solo en lo que trae esta propuesta: `packages/markdown/src/assets.ts:2`, `compile.ts:50`, `compile.ts:363`, `compile.ts:488`, `assets.test.ts:2`, `packages/contract/src/index.ts:250`, `site.ts:91`, `site.test.ts:122`, `packages/cli/src/commands/site.ts:83`, `publish.ts:294`, `apps/web/src/features/subject/markdown/remarkAssets.ts:2`, `remarkAssets.test.tsx:2`, `Markdown.tsx:37`, `docs/contracts/02-paginas.md:448` y la lista de «Decisiones relacionadas» del mismo contrato. Las demás menciones de `N0-61` del repositorio son la decisión que ya existe (progreso por pasos de los bundles) y no se tocaron.
+- **(bajo) `asset-too-big` por tope de materia.** `packages/markdown/src/compile.ts:495` lleva ahora un mapa `nombre publicado → páginas que lo referencian`, y la advertencia (`compile.ts:519-529`) usa como `page` el slug de una página que referencia el archivo —coherente con todas las demás— y nombra el archivo en el texto: `adjunto demasiado grande en "clase-02": el archivo "assets/x.png" (2,0 MB) no entra en el tope de la materia; lo referencian: clase-02, clase-03`. La lista de páginas se recorta con el mismo `sample()` que el resto. Test: `packages/markdown/src/assets.test.ts:288`, con trece archivos de 2 MB que pasan el tope de 25 MB.
+
+Sobre el `pnpm e2e` de la revisión: la falla de `landing.spec.ts:47` ya está arreglada en `main` (`ca80d76`), así que no queda nada pendiente de esa lista.

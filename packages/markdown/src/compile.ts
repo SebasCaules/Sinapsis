@@ -47,10 +47,12 @@ export type IssueKind =
   | "invalid-order"
   | "broken-link"
   | "nested-folder"
-  // Adjuntos de imagen (`assets.ts`, N0-61).
+  // Adjuntos de imagen (`assets.ts`, N0-nn).
   | "asset-missing"
   | "asset-outside"
   | "asset-too-big"
+  | "asset-unsupported"
+  | "asset-index-invalid"
   // Material de estudio (`wiki.study`, ver `study.ts`).
   | "study-invalid"
   | "study-empty"
@@ -358,7 +360,7 @@ export interface CompileWikiResult {
   /**
    * Adjuntos de imagen que las páginas referencian, sin repetir y ya dentro del
    * tope de la materia. Vacío cuando el wiki no tiene imágenes, que es el caso
-   * de toda materia anterior a N0-61.
+   * de toda materia anterior a N0-nn.
    */
   assets: WikiAsset[];
 }
@@ -483,12 +485,14 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
     push(page, file, path.dirname(path.resolve(wikiRoot, file)));
   });
 
-  // --- adjuntos de imagen (N0-61) -------------------------------------------
+  // --- adjuntos de imagen (N0-nn) -------------------------------------------
   // La raíz de la contención es la carpeta del CONFIG, no la del wiki: un vault
   // de Obsidian guarda los adjuntos fuera de `wiki/` (`../../assets/x.png`), y
   // esa es justamente la forma que hay que reconocer.
   const assetIndex = await readAssetIndex(rootDir);
   const knownAssets = new Map<string, WikiAsset>();
+  /** Nombre publicado → páginas que lo referencian, para poder nombrarlas al avisar. */
+  const assetPages = new Map<string, string[]>();
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
     if (page === undefined) continue;
@@ -502,16 +506,25 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
       known: knownAssets,
     });
     for (const issue of assetIssues) issues.push({ kind: issue.kind, page: page.slug, detail: issue.detail });
+    for (const asset of pageAssets) {
+      const bucket = assetPages.get(asset.file) ?? [];
+      if (!bucket.includes(page.slug)) bucket.push(page.slug);
+      assetPages.set(asset.file, bucket);
+    }
     if (pageAssets.length > 0) pages[i] = { ...page, assets: pageAssets };
   }
   const { kept: assets, dropped } = capAssets([...knownAssets.values()]);
   if (dropped.length > 0) {
     const droppedFiles = new Set(dropped.map((a) => a.file));
     for (const asset of dropped) {
+      // `page` lleva un slug como todas las demás advertencias; el archivo va en
+      // el texto, porque el tope que se pasó es el de la materia, no el suyo.
+      const refs = assetPages.get(asset.file) ?? [];
+      const where = refs.length > 0 ? `; lo referencian: ${sample(refs)}` : "";
       issues.push({
         kind: "asset-too-big",
-        page: asset.ref,
-        detail: `no entra en el tope de la materia (${formatBytes(asset.bytes)})`,
+        page: refs[0] ?? "(materia)",
+        detail: `el archivo "${asset.ref}" (${formatBytes(asset.bytes)}) no entra en el tope de la materia${where}`,
       });
     }
     // Un adjunto que no se publica no se referencia: la página conserva el
@@ -712,6 +725,12 @@ export function formatIssues(issues: readonly CompileIssue[]): string[] {
   }
   for (const issue of of("asset-too-big")) {
     out.push(`adjunto demasiado grande en "${issue.page}": ${issue.detail}`);
+  }
+  for (const issue of of("asset-unsupported")) {
+    out.push(`adjunto no admitido en "${issue.page}": ${issue.detail} (se deja como está)`);
+  }
+  for (const issue of of("asset-index-invalid")) {
+    out.push(`índice de adjuntos inválido en "${issue.page}": ${issue.detail} (no se publica)`);
   }
 
   // --- material de estudio --------------------------------------------------

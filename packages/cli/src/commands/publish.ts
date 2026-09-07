@@ -29,6 +29,7 @@ import {
   ASSET_INDEX_FORMAT,
   compileWiki,
   formatAssetBytes,
+  isPublishedAssetName,
   listWikiFiles,
   type WikiAsset,
 } from "@sinapsis/markdown";
@@ -290,7 +291,7 @@ export interface CopySubjectInput {
   /** Carpeta del material de estudio, resuelta contra el config. */
   studyDir: string;
   bundles: readonly BuiltBundle[];
-  /** Adjuntos de imagen que el compilador resolvió (N0-61). */
+  /** Adjuntos de imagen que el compilador resolvió (N0-nn). */
   assets: readonly WikiAsset[];
 }
 
@@ -337,6 +338,9 @@ export async function copySubject(
     await mkdir(assetsDir, { recursive: true });
     const index: Record<string, string> = {};
     for (const asset of input.assets) {
+      // El nombre publicado nunca se escribe en el índice sin comprobarlo: es
+      // lo que después lee `site build` de la copia publicada.
+      if (!isPublishedAssetName(asset.file)) continue;
       const target = resolveInside(assetsDir, asset.file);
       if (target === null) continue;
       await copyFile(asset.source, target);

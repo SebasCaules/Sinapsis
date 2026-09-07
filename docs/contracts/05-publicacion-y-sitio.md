@@ -42,7 +42,7 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish \
 | `sinapsis.config.json` | El config de la materia | Reescrito con `wiki.root: "wiki"` y `wiki.study: "estudio"`, que es la forma canónica dentro del repositorio. `index`, `log`, `ignore`, `divisionField` y todo lo demás viajan tal cual. |
 | `wiki/**/*.md` | El `wiki.root` real del vault | Todos los `.md` que **lee el compilador**: primer nivel de cada carpeta, respetando `wiki.ignore`, más `wiki.index` y `wiki.log`. |
 | `estudio/` | La carpeta `wiki.study` | Completa. |
-| `assets/<hash>.<ext>` | Los adjuntos de imagen que el compilador reconoció (`02` §10 bis) | Solo los que alguna página referencia, con el nombre del hash de su contenido. Al lado va `assets/assets.json`, el índice que traduce la ruta del vault a ese nombre y que hace que `site build` compile esta copia al mismo resultado. |
+| `assets/<hash>.<ext>` | Los adjuntos de imagen que el compilador reconoció (`02` §10 bis) | Solo los que alguna página referencia, con el nombre del hash de su contenido. Al lado va `assets/assets.json`, el índice que traduce la ruta del vault a ese nombre y que hace que `site build` compile esta copia al mismo resultado. Al leerlo, cada nombre se valida contra `^[a-f0-9]{16}\.(png|jpe?g|gif|webp)$` y la ruta resuelta tiene que caer dentro de `assets/`: es dato de la materia y `site build` corre en el CI. |
 | `tools/<bundle>/` | Cada bundle de `tools/` | El `sinapsis.tools.json` más los archivos que `buildBundle` incluiría: los declarados (`scripts`, `styles`, `data`) y los assets sueltos que sirven en tiempo de ejecución. |
 
 **Nunca** se copian `dist/`, `.dist/`, `scripts/` ni `node_modules/`: son artefactos de

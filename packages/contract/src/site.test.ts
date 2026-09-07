@@ -119,7 +119,7 @@ describe("copia de seguridad del estado personal", () => {
   });
 });
 
-describe("adjuntos de imagen (N0-61)", () => {
+describe("adjuntos de imagen (N0-nn)", () => {
   const page = {
     slug: "des",
     title: "DES",

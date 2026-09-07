@@ -27,17 +27,23 @@ export type {
 
 export {
   imageRefs,
+  isLocalRef,
   isLocalImageRef,
   extensionOf,
+  rawExtensionOf,
+  isPublishedAssetName,
+  resolveInsideAssets,
   assetFileName,
   capAssets,
   readAssetIndex,
   resolvePageAssets,
   formatBytes as formatAssetBytes,
   isAssetIndex,
+  ASSET_DIR,
   ASSET_INDEX_FILE,
   ASSET_INDEX_FORMAT,
   IMAGE_EXTENSIONS,
+  PUBLISHED_ASSET_NAME,
   MAX_ASSET_BYTES,
   MAX_SUBJECT_ASSET_BYTES,
 } from "./assets.js";

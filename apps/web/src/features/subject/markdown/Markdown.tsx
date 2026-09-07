@@ -34,7 +34,7 @@ export interface MarkdownProps {
    */
   exists: (slug: string) => boolean;
   /**
-   * Adjuntos de imagen de la página (N0-61): `src` escrito → nombre publicado.
+   * Adjuntos de imagen de la página (N0-nn): `src` escrito → nombre publicado.
    * Tiene que ser ESTABLE, como `exists`: si cambia de identidad en cada render,
    * el pipeline se rearma. Sin adjuntos, el plugin no toca nada.
    */

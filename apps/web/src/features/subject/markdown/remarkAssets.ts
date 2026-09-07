@@ -1,5 +1,5 @@
 /**
- * remark-assets — el `src` de las imágenes del wiki (N0-61).
+ * remark-assets — el `src` de las imágenes del wiki (N0-nn).
  *
  * El cuerpo viaja crudo desde `pages.json` y sus imágenes están escritas como
  * las escribe Obsidian: relativas al archivo `.md` del vault
@@ -37,11 +37,17 @@ interface MdNode {
   children?: MdNode[];
 }
 
-/** Un nombre publicado es `<hash>.<ext>`: sin barras, sin dos puntos, sin `..`. */
-const PUBLISHED_FILE = /^[a-z0-9][a-z0-9.-]*$/i;
+/**
+ * Un nombre publicado es exactamente `<16 hex>.<ext>`, la forma que produce
+ * `assetFileName` del compilador: un solo segmento, sin barras, sin dos puntos y
+ * sin `..`. La copia de la expresión vive acá y no se importa de `@sinapsis/markdown`
+ * porque el lector no depende del compilador; el contrato es la forma del nombre.
+ * `svg` no está: no se publica (contrato `02` §10 bis).
+ */
+const PUBLISHED_FILE = /^[a-f0-9]{16}\.(png|jpe?g|gif|webp)$/;
 
 function isSafeFile(file: string): boolean {
-  return PUBLISHED_FILE.test(file) && !file.includes("..");
+  return PUBLISHED_FILE.test(file);
 }
 
 /** URL final de un adjunto: `<BASE_URL>subjects/<slug>/assets/<file>`. */

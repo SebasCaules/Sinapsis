@@ -1,5 +1,5 @@
 /**
- * El `src` de las imágenes del wiki (N0-61).
+ * El `src` de las imágenes del wiki (N0-nn).
  *
  * Lo que se prueba es la regla, no el dibujo: solo se reescribe lo que el
  * compilador reconoció, y nunca se inventa una ruta para lo que no está en el

@@ -1,12 +1,12 @@
 /**
- * Adjuntos de imagen (N0-61).
+ * Adjuntos de imagen (N0-nn).
  *
  * Las dos mitades que importan son las guardas —qué referencia se reconoce y
  * cuál no— y la EQUIVALENCIA entre compilar el vault y compilar la copia
  * publicada: el mismo wiki tiene que dar el mismo `Page.assets` en los dos, que
  * es lo que hace que `site build` no dependa de los archivos originales.
  */
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -20,6 +20,9 @@ import {
   imageRefs,
   isAssetIndex,
   isLocalImageRef,
+  isLocalRef,
+  isPublishedAssetName,
+  MAX_ASSET_BYTES,
   MAX_SUBJECT_ASSET_BYTES,
 } from "./assets.js";
 import { compileWiki } from "./compile.js";
@@ -78,8 +81,39 @@ describe("isLocalImageRef", () => {
 
   it("rechaza lo que no es una imagen", () => {
     expect(isLocalImageRef("../../raw/clase.pdf")).toBe(false);
-    expect(extensionOf("a.svg")).toBe("svg");
     expect(extensionOf("a.pdf")).toBeNull();
+  });
+
+  it("un SVG no es una extensión admitida, pero sí una referencia local", () => {
+    // Un SVG se sirve en el mismo origen del sitio y puede llevar `<script>`:
+    // se reconoce como referencia local para poder avisar, pero no se publica.
+    expect(extensionOf("a.svg")).toBeNull();
+    expect(isLocalImageRef("../../assets/logo.svg")).toBe(false);
+    expect(isLocalRef("../../assets/logo.svg")).toBe(true);
+    expect(isLocalRef("https://example.com/a.svg")).toBe(false);
+  });
+});
+
+describe("isPublishedAssetName", () => {
+  it("solo acepta la forma que produce assetFileName", () => {
+    expect(isPublishedAssetName(assetFileName(png(1), "png"))).toBe(true);
+    expect(isPublishedAssetName("0123456789abcdef.jpeg")).toBe(true);
+    for (const bad of [
+      "../../../etc/passwd",
+      "assets/../x.png",
+      "/abs.png",
+      "0123456789abcdef.svg",
+      "0123456789ABCDEF.png",
+      "0123456789abcde.png",
+      "x.png",
+      "0123456789abcdef.png\u0000.txt",
+      "",
+      3,
+      null,
+      undefined,
+    ]) {
+      expect(isPublishedAssetName(bad), String(bad)).toBe(false);
+    }
   });
 });
 
@@ -190,6 +224,92 @@ describe("compileWiki · adjuntos", () => {
     const out = await compileWiki({ config, rootDir: dir });
     expect(out.assets).toHaveLength(1);
     expect(out.payload.pages.map((p) => p.assets.length)).toEqual([1, 1]);
+  });
+
+  it("avisa del .svg y lo deja como está", async () => {
+    await writeFile(path.join(dir, "assets", "logo.svg"), Buffer.from("<svg onload=\"alert(1)\"/>"));
+    await writeFile(
+      path.join(dir, "wiki", "conceptos", "a.md"),
+      "---\ntitulo: A\nunidad: 1\nresumen: x\n---\n\n![logo](../../assets/logo.svg)\n",
+    );
+    const out = await compileWiki({ config, rootDir: dir });
+    expect(out.assets).toEqual([]);
+    expect(out.payload.pages[0]?.assets).toEqual([]);
+    expect(out.payload.pages[0]?.body).toContain("![logo](../../assets/logo.svg)");
+    expect(out.issues.map((i) => i.kind)).toEqual(["asset-unsupported"]);
+    expect(out.warnings.join("\n")).toContain("no es una imagen publicable");
+  });
+
+  it("descarta el nombre publicado que el índice trae adulterado", async () => {
+    // El `assets.json` lo escribe una materia: sin la guarda, `site build`
+    // leería y copiaría un archivo cualquiera del runner.
+    await writeFile(
+      path.join(dir, "wiki", "conceptos", "a.md"),
+      "---\ntitulo: A\nunidad: 1\nresumen: x\n---\n\n![x](../../assets/x.png)\n",
+    );
+    for (const named of ["../../../etc/passwd", "assets/../x.png", "/abs.png", "x.svg", "0123456789ABCDEF.png"]) {
+      await writeFile(
+        path.join(dir, "assets", ASSET_INDEX_FILE),
+        JSON.stringify({ format: ASSET_INDEX_FORMAT, assets: { "assets/x.png": named } }),
+      );
+      const out = await compileWiki({ config, rootDir: dir });
+      expect(out.assets, named).toEqual([]);
+      expect(out.payload.pages[0]?.assets, named).toEqual([]);
+      expect(out.payload.pages[0]?.body, named).toContain("![x](../../assets/x.png)");
+      expect(out.issues.map((i) => i.kind), named).toEqual(["asset-index-invalid", "asset-missing"]);
+    }
+  });
+
+  it("no sigue un enlace simbólico de `assets/` que sale de la materia", async () => {
+    // El nombre es válido y la ruta escrita cae dentro de `assets/`: lo único
+    // que lo delata es la ruta real.
+    const outside = await mkdtemp(path.join(tmpdir(), "sinapsis-fuera-"));
+    try {
+      const secret = path.join(outside, "secreto.png");
+      await writeFile(secret, png(9));
+      const named = assetFileName(png(9), "png");
+      await symlink(secret, path.join(dir, "assets", named));
+      await writeFile(
+        path.join(dir, "assets", ASSET_INDEX_FILE),
+        JSON.stringify({ format: ASSET_INDEX_FORMAT, assets: { "assets/x.png": named } }),
+      );
+      await writeFile(
+        path.join(dir, "wiki", "conceptos", "a.md"),
+        "---\ntitulo: A\nunidad: 1\nresumen: x\n---\n\n![x](../../assets/x.png)\n",
+      );
+      const out = await compileWiki({ config, rootDir: dir });
+      expect(out.assets).toEqual([]);
+      expect(out.issues.map((i) => i.kind)).toEqual(["asset-index-invalid", "asset-missing"]);
+    } finally {
+      await rm(outside, { recursive: true, force: true });
+    }
+  });
+
+  it("la advertencia del tope de la materia nombra la página y el archivo", async () => {
+    // 13 archivos de 2 MB pasan el tope de 25 MB de la materia. El que queda
+    // afuera se avisa con el slug de una página que lo referencia —como todas
+    // las demás advertencias— y con el archivo en el texto.
+    const files: string[] = [];
+    for (let i = 0; i < 13; i += 1) {
+      const name = `f${i}.png`;
+      await writeFile(path.join(dir, "assets", name), Buffer.alloc(MAX_ASSET_BYTES, i + 1));
+      files.push(name);
+    }
+    const refs = files.map((f) => `![${f}](../../assets/${f})`).join("\n\n");
+    await writeFile(
+      path.join(dir, "wiki", "conceptos", "a.md"),
+      `---\ntitulo: A\nunidad: 1\nresumen: x\n---\n\n${refs}\n`,
+    );
+    const out = await compileWiki({ config, rootDir: dir });
+    const tooBig = out.issues.filter((i) => i.kind === "asset-too-big");
+    expect(tooBig).toHaveLength(1);
+    expect(tooBig[0]?.page).toBe("a");
+    expect(tooBig[0]?.detail).toContain('el archivo "assets/');
+    expect(tooBig[0]?.detail).toContain("lo referencian: a");
+    expect(out.warnings.join("\n")).toContain('adjunto demasiado grande en "a"');
+    // Lo que no se publica tampoco se referencia: la página queda con 12.
+    expect(out.assets).toHaveLength(12);
+    expect(out.payload.pages[0]?.assets).toHaveLength(12);
   });
 
   it("la copia publicada da el mismo resultado leyendo el índice", async () => {

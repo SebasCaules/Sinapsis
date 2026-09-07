@@ -247,7 +247,7 @@ export const META_PAGES = { index: "indice", log: "log" } as const;
  * Un adjunto de imagen de una página: la referencia tal como está escrita en el
  * cuerpo (`![alt](../../assets/des-feistel.png)`) y el nombre estable con que se
  * publica (`<hash>.<ext>`). El lector reescribe el `src` con este mapa; una
- * referencia que no está acá se deja intacta (N0-61).
+ * referencia que no está acá se deja intacta (N0-nn).
  */
 export const PageAsset = z.object({
   /** El `src` literal del markdown, sin decodificar. */
