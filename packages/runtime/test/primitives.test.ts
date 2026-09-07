@@ -346,10 +346,16 @@ describe("App.go — redibujo cuando solo cambia la consulta", () => {
   });
 
   it("decide igual con el sitio colgado de un base (N0-59)", () => {
-    /* Es el caso de producción: `/Sinapsis/m/cripto/t/parciales`. Sin descontar
-       el base, las dos rutas se leían como la vista «Sinapsis» con el mismo
-       argumento vacío y el redibujo no se pedía nunca. */
+    /* Es el caso de producción, y es ASIMÉTRICO: `here` sale de `location`, que
+       trae el base (`/Sinapsis/…`), mientras que el destino sale de
+       `translateRoute`, que lo emite sin base (`/m/…`). Sin descontar el base,
+       la de aquí se leía como la vista «Sinapsis» y la de destino como
+       «parciales»: distintas, y el redibujo no se pedía nunca. Las dos formas
+       simétricas se comprueban después porque `App.go` no es el único que llama. */
     const aqui = { pathname: "/Sinapsis/m/cripto/t/parciales", search: "" };
+    expect(isQueryOnlyChange("cripto", "/m/cripto/t/parciales?orden=parcial", aqui)).toBe(true);
+    expect(isQueryOnlyChange("cripto", "/m/cripto/t/parciales", aqui)).toBe(false);
+    expect(isQueryOnlyChange("cripto", "/m/cripto/t/otra?orden=parcial", aqui)).toBe(false);
     expect(isQueryOnlyChange("cripto", "/Sinapsis/m/cripto/t/parciales?orden=parcial", aqui)).toBe(true);
     expect(isQueryOnlyChange("cripto", "/Sinapsis/m/cripto/t/parciales", aqui)).toBe(false);
     expect(isQueryOnlyChange("cripto", "/Sinapsis/m/cripto/t/otra?orden=parcial", aqui)).toBe(false);
