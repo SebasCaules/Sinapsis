@@ -173,3 +173,28 @@ describe("railSlotItemCount", () => {
     expect(RAIL_SLOT_ITEMS_RECOMMENDED).toBe(6);
   });
 });
+
+describe("exercisePlates (N0-64)", () => {
+  const base = {
+    slug: "demo",
+    name: "Materia Demo",
+    code: "00.01",
+    institution: "ITBA",
+    division: { singular: "Unidad", abbr: "U", plural: "Unidades" },
+    divisions: [{ key: "1", name: "Primera" }],
+    pageTypes: [{ key: "nota", label: "Nota", plural: "Notas", folder: "notas" }],
+  };
+
+  it("nace en true: una materia que no lo declara arma las placas como antes", () => {
+    expect(SubjectConfig.parse(base).exercisePlates).toBe(true);
+  });
+
+  it("una materia puede apagarlas", () => {
+    expect(SubjectConfig.parse({ ...base, exercisePlates: false }).exercisePlates).toBe(false);
+  });
+
+  it("solo admite un booleano", () => {
+    expect(SubjectConfig.safeParse({ ...base, exercisePlates: "no" }).success).toBe(false);
+  });
+});
+

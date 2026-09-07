@@ -35,6 +35,12 @@ export interface MarkdownProps {
    */
   exists: (slug: string) => boolean;
   /**
+   * ¿Se arma la placa de ejercicio? Lo decide la materia en su config
+   * (`exercisePlates`, N0-64). Con `false`, un «Ejercicio N» es un encabezado
+   * más y la página no encaja una caja adentro de otra.
+   */
+  exercisePlates?: boolean;
+  /**
    * Adjuntos de imagen de la página (N0-68): `src` escrito → nombre publicado.
    * Tiene que ser ESTABLE, como `exists`: si cambia de identidad en cada render,
    * el pipeline se rearma. Sin adjuntos, el plugin no toca nada.
@@ -114,15 +120,17 @@ const components: Components = {
 /* Las placas de ejercicio se arman ANTES que KaTeX (§ lector-05): el criterio
    del baseline mira el TEXTO de los encabezados y de los párrafos, y una vez
    compuesta la fórmula ese texto ya no está. */
-const REHYPE: PluggableList = [
+const REHYPE_CON_PLACAS: PluggableList = [
   rehypeHeadingIds,
   rehypeExercisePlates,
   [rehypeKatex, { output: "htmlAndMathml" }],
 ];
 
+const REHYPE_SIN_PLACAS: PluggableList = [rehypeHeadingIds, [rehypeKatex, { output: "htmlAndMathml" }]];
+
 const NO_ASSETS: readonly PageAsset[] = [];
 
-export const Markdown = memo(function Markdown({ body, subject, exists, assets = NO_ASSETS }: MarkdownProps) {
+export const Markdown = memo(function Markdown({ body, subject, exists, assets = NO_ASSETS, exercisePlates = true }: MarkdownProps) {
   const host = useRef<HTMLDivElement>(null);
   const remarkPlugins = useMemo<PluggableList>(
     () => [
@@ -181,7 +189,11 @@ export const Markdown = memo(function Markdown({ body, subject, exists, assets =
 
   return (
     <div className={css.prose} ref={host}>
-      <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={REHYPE} components={components}>
+      <ReactMarkdown
+        remarkPlugins={remarkPlugins}
+        rehypePlugins={exercisePlates ? REHYPE_CON_PLACAS : REHYPE_SIN_PLACAS}
+        components={components}
+      >
         {body}
       </ReactMarkdown>
     </div>

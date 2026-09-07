@@ -69,6 +69,7 @@ export function placeholderConfig(placeholder: LocalPlaceholder, semester?: stri
     name: placeholder.name,
     code: placeholder.code,
     institution: placeholder.institution,
+    exercisePlates: true,
     ...(placeholder.color ? { color: placeholder.color } : {}),
     ...(semester ? { semester } : {}),
     division: placeholder.division,

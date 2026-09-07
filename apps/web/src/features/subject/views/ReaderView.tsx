@@ -503,7 +503,13 @@ export function ReaderView() {
         />
       }
     >
-      <Markdown body={page.body} subject={slug} exists={exists} assets={page.assets} />
+      <Markdown
+        body={page.body}
+        subject={slug}
+        exists={exists}
+        assets={page.assets}
+        exercisePlates={model.config.exercisePlates}
+      />
     </PageFrame>
   );
 }
