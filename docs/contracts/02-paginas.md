@@ -391,7 +391,7 @@ El tipo se compara con acentos y mayúsculas plegados (`fold`), así que `[!Intu
 `[!INTUICION]` e `[!intuicion]` son el mismo aviso. **Un tipo desconocido cae en `nota`**: no
 es un error, y no hace falta declarar nada en el config.
 
-### El marcador de plegado (N0-62)
+### El marcador de plegado (N0-66)
 
 El marcador de Obsidian decide si el aviso llega abierto o cerrado, con la misma semántica que
 en Obsidian:
@@ -504,4 +504,4 @@ N0-10 (markdown en el cliente, sin HTML crudo) · N0-13 (compilador propio) ·
 N0-21 (recorte del H1 duplicado) · N0-22 (el compilador es dueño de los ids de encabezado) ·
 N0-23 (divisiones sintéticas) · N0-42 (figuras en callouts) ·
 N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página) ·
-N0-62 (callouts plegables).
+N0-66 (callouts plegables).

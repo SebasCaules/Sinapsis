@@ -8,7 +8,7 @@
  *
  * Con el marcador de plegado de Obsidian —`> [!info]- Título`— el aviso nace
  * CERRADO y se dibuja como `<details class="callout calloutFolded">`, con la
- * versalita de `<summary>` (N0-62). El cuerpo está en el HTML aunque no se vea,
+ * versalita de `<summary>` (N0-66). El cuerpo está en el HTML aunque no se vea,
  * así la búsqueda, los enlaces entrantes y las anclas siguen funcionando; el
  * lector abre el pliegue cuando un ancla apunta adentro.
  *
@@ -285,7 +285,7 @@ function stripLeadingLabel(p: MdNode, lead: MdNode | null, fallback: string): st
  *
  * Con el marcador de plegado de Obsidian (`> [!tipo]-`) el aviso nace CERRADO y
  * se dibuja como `<details>`: la versalita pasa a ser el `<summary>`, que es la
- * cabecera del pliegue, y el cuerpo sigue en el HTML aunque no se vea (N0-62).
+ * cabecera del pliegue, y el cuerpo sigue en el HTML aunque no se vea (N0-66).
  * Sin marcador, o con `+`, el aviso es el `<aside>` de siempre.
  */
 function markCallout(quote: MdNode, kind: string, title: string, folded = false): void {

@@ -1,5 +1,5 @@
 /**
- * Un ancla que cae dentro de un aviso plegado tiene que abrirlo (N0-62): con el
+ * Un ancla que cae dentro de un aviso plegado tiene que abrirlo (N0-66): con el
  * `<details>` cerrado el destino no tiene medida y el salto queda en la nada.
  */
 import { describe, expect, it } from "vitest";

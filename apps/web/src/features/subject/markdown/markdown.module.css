@@ -237,7 +237,7 @@
 .prose :global(.callout[data-type="cita"]) { --callout: var(--u6); }
 .prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface); }
 
-/* ---------- avisos plegados (N0-62) ----------
+/* ---------- avisos plegados (N0-66) ----------
    `> [!tipo]-` sale como <details>: la versalita es el <summary> y el cuerpo
    sigue en el HTML aunque esté cerrado. El triángulo propio del navegador se
    reemplaza por uno que sigue el color del aviso. */

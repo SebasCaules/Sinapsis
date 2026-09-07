@@ -3,8 +3,8 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Plegar los callouts que Obsidian marca como plegados"
 rama: proposal/cripto-20260906-plegar-los-callouts-que-obsidian-marca-como-plegados
-estado: abierta
-pr: null
+estado: aprobada
+pr: https://github.com/SebasCaules/Sinapsis/pull/4
 ---
 
 ## Motivo
@@ -135,4 +135,24 @@ apps/web build: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-06
+**Commit de merge:** `6a505b7`
+
+### Gates en la rama
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — contract 44, markdown 97, runtime 178, web 689, cli 55 + 2 omitidas (57; las omitidas exigen `packages/cli/dist`, que el worktree no tiene). Coinciden con la propuesta.
+- `pnpm build`: OK
+- `pnpm e2e`: 93 pasadas, 3 omitidas, 1 falla **preexistente en `main`**: `landing.spec.ts:47` («agrupa las materias por cuatrimestre») compara la lista exacta de cuatrimestres y asume una sola materia en el catálogo; falla igual en `main` desde que entró Cripto (2026-2C) y en las otras dos ramas abiertas. No es de esta propuesta.
+
+### Hallazgos
+1. **(bajo)** `packages/runtime/src/markdown.ts:190` — el renderizador de markdown del runtime (el de los bundles) también lee el marcador `[+-]?` y sigue descartándolo: un `[!tipo]-` dentro de una herramienta se dibuja abierto. Es la misma duplicación de registro anotada al aprobar `cita`; Cripto no publica bundles. Deuda de la plataforma, no de la propuesta.
+2. **(bajo)** Código y contrato citaban la decisión como N0-62, que ya existía (ancho de la hoja). Se reemplazó por el número asignado al mergear: **N0-66**.
+3. **(bajo)** frontmatter `pr:` — la rama empujada decía `pr: null` (el CLI estampa la URL con `--amend` después de empujar); se estampó en `main`.
+
+Sin hallazgos de corrección ni de seguridad. Se buscó: que `[!figura]-` no se pliegue (probado); que `+` y la ausencia de marcador sigan dando el `<aside>` de siempre (probado); que el cuerpo del `<details>` cerrado siga en el HTML para la búsqueda (probado); que un ancla dentro de un pliegue lo abra — el compilador no indexa encabezados dentro de un blockquote (`extractHeadings` no reconoce `> ##`), así que hoy ningún id de la página cae dentro de un aviso y `openFoldedAncestors` es una red de seguridad, no una ruta activa; que el índice de la página (`ReaderView.tsx:442-449`), que salta con `scrollMainTo` sin pasar por el `hash`, no necesite abrir pliegues por lo mismo. No se agrega HTML crudo: `details` y `summary` son nodos del árbol con `hName`, igual que el `aside`.
+
+Sin fila nueva de esquema: no toca `packages/contract`. Sí abre una fila N0 porque cambia una regla del lector que el contrato 02 §10 fijaba en sentido contrario.
+
+### Efecto en las materias
+- Ninguna acción: el plegado lo aplica el lector al renderizar. Las 418 citas de Cripto, escritas con `[!quote]-`, aparecen cerradas apenas se despliegue `main`; Proba no tiene marcadores y no cambia.

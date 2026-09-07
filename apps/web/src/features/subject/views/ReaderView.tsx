@@ -277,7 +277,7 @@ export function ReaderView() {
     const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
     const target = hash ? document.getElementById(hash) : null;
     if (target) {
-      /* Un ancla puede caer dentro de un aviso plegado (N0-62): si el destino
+      /* Un ancla puede caer dentro de un aviso plegado (N0-66): si el destino
          está en un `<details>` cerrado, no tiene medida y el salto no llega a
          ningún lado. */
       openFoldedAncestors(target);

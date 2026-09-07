@@ -1,5 +1,5 @@
 /**
- * Avisos plegados y anclas (N0-62).
+ * Avisos plegados y anclas (N0-66).
  *
  * Un `> [!tipo]-` se dibuja como `<details>` cerrado. El cuerpo sigue en el
  * HTML, así que la búsqueda y los enlaces entrantes no cambian, pero un
