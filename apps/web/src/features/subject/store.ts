@@ -363,7 +363,8 @@ export interface SubjectTabsState {
   /** Reordena por arrastre (índices de `list`). */
   moveTab: (slug: string, from: number, to: number) => void;
   /**
-   * Lo que hace la navegación: si el destino ya está abierto en OTRA pestaña,
+   * Lo que hace la navegación: mueve la pestaña activa al destino (nunca salta a
+   * otra pestaña, aunque ya tenga la misma ruta: son independientes). Antes: si el destino ya estaba abierto en OTRA pestaña,
    * la activa; si no, actualiza la activa con la ruta nueva.
    */
   syncActive: (slug: string, info: TabInfo, scrollY?: number) => void;
@@ -473,13 +474,10 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
         return;
       }
 
-      /* El destino ya está abierto: se activa esa pestaña en vez de mover la actual. */
-      const other = state.list.find((t) => t.path === path);
-      if (other) {
-        commit(slug, { ...withScroll(state, state.active, scrollY), active: other.id });
-        return;
-      }
-
+      /* Las pestañas son independientes (pedido del usuario, 2026-09-07): navegar
+         mueve SIEMPRE la pestaña activa, aunque otra ya tenga abierta la misma
+         ruta. Dos pestañas de la misma herramienta con distinto estado son dos
+         pestañas, no una. */
       const list = state.list.map((t) =>
         t.id === state.active
           ? { ...t, path, search, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null, scrollY: 0 }

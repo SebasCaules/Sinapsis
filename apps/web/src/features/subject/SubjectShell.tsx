@@ -362,25 +362,50 @@ export function SubjectShell() {
       const anchor = (event.target as HTMLElement | null)?.closest?.("a[href]");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.target === "_blank") return;
-      const href = anchor.getAttribute("href") ?? "";
-      const { path, search, hash } = splitHref(href);
-      if (!href.startsWith("/") || !isSubjectPath(subject, path)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const info = describePath(model, subject, path, studyLabels);
+      const raw = anchor.getAttribute("href") ?? "";
       /* Dos puertas distintas (core.js:2508-2512 y 2531): ⌘/Ctrl-clic SALTA a la
          pestaña nueva; el botón del medio la deja en segundo plano. */
       const activate = !aux;
-      const id = openTab(
-        subject,
-        { path, search, hash, title: info.title, chip: info.chip, color: info.color, section: info.section },
-        activate,
-      );
-      if (!id) {
-        warnFullTabs();
+      const openIn = (href: string) => {
+        const { path, search, hash } = splitHref(href);
+        if (!isSubjectPath(subject, path)) return;
+        const info = describePath(model, subject, path, studyLabels);
+        const id = openTab(
+          subject,
+          { path, search, hash, title: info.title, chip: info.chip, color: info.color, section: info.section },
+          activate,
+        );
+        if (!id) {
+          warnFullTabs();
+          return;
+        }
+        if (activate) navigate(`${path}${search}${hash}`);
+      };
+      if (raw.startsWith("/")) {
+        const { path } = splitHref(raw);
+        if (!isSubjectPath(subject, path)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        openIn(raw);
         return;
       }
-      if (activate) navigate(`${path}${search}${hash}`);
+      /* Un enlace de un bundle viene en la gramática del baseline (`#/taller`,
+         `#/p/slug`, `data-nav`, `data-go`): se traduce a la ruta del SPA con las
+         mismas reglas que `App.go`, así ⌘-clic abre una pestaña interna y no una
+         del navegador (pedido del usuario, 2026-09-07). El runtime se importa de
+         forma diferida para no engordar el trozo principal: cuando hay un bundle
+         en pantalla ya está cargado. */
+      const isBundleLink =
+        raw.startsWith("#/") || anchor.hasAttribute("data-nav") || anchor.hasAttribute("data-go") || anchor.matches("a.wikilink[data-slug]");
+      if (!isBundleLink) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const root = shellRef.current;
+      void import("@sinapsis/runtime").then(({ navTargetOf, translateRoute }) => {
+        const target = navTargetOf(anchor, root);
+        const translated = target ? translateRoute(subject, target) : null;
+        if (translated) openIn(translated);
+      });
     },
     [subject, model, openTab, studyLabels, navigate, warnFullTabs],
   );

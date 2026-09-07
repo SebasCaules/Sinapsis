@@ -130,13 +130,14 @@ describe("navegación (syncActive)", () => {
     expect(tabs().list[0]?.chip).toBe("U1");
   });
 
-  it("si el destino ya está abierto en otra pestaña, la activa (y no duplica)", () => {
+  it("navegar a una ruta que otra pestaña ya tiene NO salta a esa pestaña: las pestañas son independientes", () => {
+    const first = tabs().active;
     const other = store().openTab(SLUG, info(page("p-a")));
     store().syncActive(SLUG, info(page("p-a")), 120);
-    expect(tabs().active).toBe(other);
+    expect(tabs().active).toBe(first);
+    expect(other).not.toBe(first);
     expect(tabs().list).toHaveLength(2);
-    /* Y guarda el scroll de la que se deja. */
-    expect(tabs().list[0]?.scrollY).toBe(120);
+    expect(paths()).toEqual([page("p-a"), page("p-a")]);
   });
 
   it("estando ya en esa ruta no salta a otra pestaña con la misma (abrir «+» dos veces)", () => {
@@ -180,11 +181,13 @@ describe("el ancla viaja aparte del pathname (bug 4)", () => {
     expect(paths()).toEqual([home, page("p-a")]);
   });
 
-  it("el destino ya abierto se reconoce aunque la pestaña tenga ancla", () => {
-    const other = store().openTab(SLUG, { path: page("p-a"), hash: "#dos", title: "A", chip: null, color: null });
-    store().syncActive(SLUG, info(page("p-a")));
-    expect(tabs().active).toBe(other);
-    expect(tabs().list).toHaveLength(2);
+  it("dos pestañas de la misma herramienta conservan cada una su query", () => {
+    const first = tabs().active;
+    const second = store().openTab(SLUG, { path: "/m/proba/t/ejercicios", search: "?arg=4%2Fguia", title: "Guía", chip: null, color: null });
+    store().syncActive(SLUG, { path: "/m/proba/t/ejercicios", search: "?arg=3%2Flutzio", title: "Lutzio", chip: null, color: null });
+    expect(tabs().active).toBe(first);
+    expect(tabs().list.map((t) => t.search)).toEqual(["?arg=3%2Flutzio", "?arg=4%2Fguia"]);
+    expect(tabs().list.find((t) => t.id === second)?.search).toBe("?arg=4%2Fguia");
   });
 
   it("cerrar devuelve la dirección con su ancla", () => {
