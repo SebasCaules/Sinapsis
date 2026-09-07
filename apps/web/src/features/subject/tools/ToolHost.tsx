@@ -39,7 +39,7 @@ import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { plural, routes } from "@sinapsis/contract";
 import { useSubjectCtx } from "../context";
 import { ComingSoon, ErrorCard } from "../components/States";
-import { PageFrame, type ReadStep } from "../components/PageFrame";
+import { PageFrame, type ReadStep, Sheet } from "../components/PageFrame";
 import { EXERCISES_TYPE } from "../components/TypeTag";
 import type { SubjectModel, UnitStep } from "../model";
 import { PALETTE_EVENT } from "./runtime";
@@ -270,10 +270,17 @@ export function ToolHost() {
       data-layout={view.layout}
       data-tool={info.manifest.id}
       data-view={view.id}
-      data-frame={framed ? "page" : undefined}
+      data-frame={framed ? "page" : view.frame === "sheet" ? "sheet" : undefined}
       hidden={status !== "ready"}
     />
   );
+
+  /* `frame: "sheet"` (N0-73): la misma hoja ajustable de una página del wiki,
+     sin la línea de identidad ni la barra de la unidad. No depende del `?arg=`:
+     una herramienta que se lee como un documento la quiere siempre. */
+  if (view.frame === "sheet" && !framed) {
+    return <Sheet>{host}</Sheet>;
+  }
 
   if (framed) {
     return (

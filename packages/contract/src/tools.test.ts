@@ -64,10 +64,18 @@ describe("ToolManifest", () => {
       frame: "page",
     });
 
-    /* «page» es el único marco que hay: cualquier otro valor es un error del
-       manifiesto, no un marco desconocido que se ignora en silencio. */
+    /* «sheet» es el otro marco: la hoja ajustable sin la barra de la unidad
+       (N0-73). */
+    const enHoja = ToolManifest.parse({
+      ...manifest,
+      views: [{ id: "formularios", label: "Formularios", frame: "sheet" }],
+    });
+    expect(enHoja.views[0]?.frame).toBe("sheet");
+
+    /* Son los dos únicos: cualquier otro valor es un error del manifiesto, no un
+       marco desconocido que se ignora en silencio. */
     expect(() =>
-      ToolManifest.parse({ ...manifest, views: [{ id: "x", label: "X", frame: "sheet" }] }),
+      ToolManifest.parse({ ...manifest, views: [{ id: "x", label: "X", frame: "hoja" }] }),
     ).toThrow();
   });
 

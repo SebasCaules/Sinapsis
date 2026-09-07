@@ -995,9 +995,15 @@ export const ToolView = z.object({
    * la barra de la unidad con su Anterior/Siguiente. El marco solo se aplica
    * cuando el `?arg=` de la URL resuelve a un paso de progreso de una división
    * (`model.stepForTool`); si no resuelve, la vista se dibuja como siempre.
+   *
+   * Con `"sheet"` la vista se dibuja dentro de la MISMA hoja ajustable que una
+   * página del wiki —el ancho se arrastra desde los costados y vuelve a 840 con
+   * doble clic— pero sin la línea de identidad ni la barra de la unidad: es para
+   * una herramienta que se lee como un documento y no es un paso de ningún
+   * recorrido (N0-73). No depende del `?arg=`: se aplica siempre.
    * Sin este campo, la vista se dibuja suelta, que es lo de siempre.
    */
-  frame: z.literal("page").optional(),
+  frame: z.enum(["page", "sheet"]).optional(),
 });
 export type ToolView = z.infer<typeof ToolView>;
 
