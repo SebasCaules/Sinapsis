@@ -10,7 +10,9 @@ body {
 #root { min-height: 100vh; }
 a { color: var(--link); }
 button { font: inherit; color: inherit; }
-::selection { background: var(--hl); }
+/* R11: sobre --hl solo --text llega a 4.5:1 en los tres temas; sin fijar el color,
+   un texto secundario se volvía MENOS legible al seleccionarlo. */
+::selection { background: var(--hl); color: var(--text); }
 
 /* ---------- deslizadores (input[type="range"]) ----------
    Un solo deslizador para toda la plataforma, bundles incluidos: pista con la
@@ -35,7 +37,8 @@ button { font: inherit; color: inherit; }
 :root input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 999px;
-  border: 1px solid var(--border-2);
+  /* La pista es la única señal de recorrido restante: --track (≥ 3:1). */
+  border: 1px solid var(--track);
   background: linear-gradient(to right, var(--primary) 0 var(--pct), var(--surface-3) var(--pct) 100%);
 }
 :root input[type="range"]::-webkit-slider-thumb {
@@ -61,7 +64,7 @@ button { font: inherit; color: inherit; }
 :root input[type="range"]::-moz-range-track {
   height: 6px;
   border-radius: 999px;
-  border: 1px solid var(--border-2);
+  border: 1px solid var(--track);
   background: var(--surface-3);
 }
 :root input[type="range"]::-moz-range-progress {

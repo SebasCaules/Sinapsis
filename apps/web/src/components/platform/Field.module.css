@@ -14,7 +14,8 @@
   height: 36px;
   width: 100%;
   padding: 0 10px;
-  border: 1px solid var(--border-2);
+  /* El contorno es la ÚNICA señal del campo: --border-3 (≥ 3:1, WCAG 1.4.11). */
+  border: 1px solid var(--border-3);
   border-radius: var(--r-sm);
   background: var(--surface);
   color: var(--text);

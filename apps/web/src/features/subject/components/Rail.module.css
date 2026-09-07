@@ -60,7 +60,12 @@
   user-select: none;
   z-index: 1; /* por encima del tinte extendido del ítem activo */
 }
-.group[data-slot="true"] .groupLabel { color: var(--gcol, var(--text-3)); }
+/* R1/R2: el color del grupo es MANCHA; como TEXTO va corrido hacia la tinta del
+   tema (mismo criterio que --uink), porque --accent crudo se queda en 3.7:1
+   sobre --surface en las pieles claras. */
+.group[data-slot="true"] .groupLabel {
+  color: color-mix(in srgb, var(--gcol, var(--text-3)) var(--ink-mix), var(--text));
+}
 
 .item {
   position: relative;

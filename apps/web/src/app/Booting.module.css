@@ -15,5 +15,7 @@
   text-transform: uppercase;
   animation: pulse 1.6s ease-in-out infinite;
 }
-@keyframes pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+/* R10: el rótulo late con el COLOR, no con la opacidad (a .45 caía a 1,8:1
+   sobre --bg y desaparecía media animación). */
+@keyframes pulse { 0%, 100% { color: var(--text-3); } 50% { color: var(--text-2); } }
 @media (prefers-reduced-motion: reduce) { .text { animation: none; } }

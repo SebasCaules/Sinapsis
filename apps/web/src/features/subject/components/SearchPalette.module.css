@@ -30,7 +30,8 @@
   align-items: center;
   gap: 10px;
   padding: 0 14px;
-  border-bottom: 1px solid var(--border);
+  /* R7: sobre --elevated el --border no se ve en claustro (1.01:1). */
+  border-bottom: 1px solid var(--border-2);
   color: var(--text-3);
 }
 
@@ -48,11 +49,14 @@
 }
 .input::placeholder { color: var(--text-3); }
 
+/* R8: LA tecla de la plataforma se dibuja igual en todas partes (misma receta
+   que ShortcutsDialog .kbd); con --kbd-bg + --border la caja desaparecía en claustro. */
 .kbd {
   font: 600 10px var(--font-mono);
-  color: var(--text-3);
-  background: var(--kbd-bg);
-  border: 1px solid var(--border);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-bottom-width: 2px;
   border-radius: 5px;
   padding: 1px 5px;
 }
@@ -115,7 +119,9 @@
   text-align: left;
   cursor: pointer;
 }
-.row[data-active="true"] { background: var(--surface-2); }
+/* R5/R9: la fila seleccionada usa la veladura de selección; --surface-2 sobre
+   --elevated era 1,1:1 y en claustro hundía la fila. */
+.row[data-active="true"] { background: var(--active-wash); }
 .row:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
@@ -177,8 +183,9 @@
   display: flex;
   gap: 16px;
   padding: 8px 14px;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
+  /* R8: mismo pie que el diálogo de la plataforma. */
+  border-top: 1px solid var(--border-2);
+  background: var(--surface-2);
   font: 400 11px var(--font-ui);
   color: var(--text-3);
 }

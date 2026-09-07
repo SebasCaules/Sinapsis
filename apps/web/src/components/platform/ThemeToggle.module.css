@@ -38,7 +38,8 @@
   cursor: pointer;
   text-align: left;
 }
-.option:hover { background: var(--surface-2); }
+/* R5: veladura de estado sobre --elevated; --surface-2 hundía la opción en claustro. */
+.option:hover { background: var(--hover-wash); }
 .option:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;

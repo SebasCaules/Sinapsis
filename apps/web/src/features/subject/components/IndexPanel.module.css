@@ -85,7 +85,14 @@
 .division { display: flex; flex-direction: column; }
 /* Una división sin páginas NO se atenúa entera: el rótulo conserva su contraste
    y solo el contador se apaga; el control se apaga de verdad con `disabled`. */
-.division[data-dimmed] .count { opacity: 0.55; }
+/* R10: la división vacía no se apaga con opacity (el contador caía a 2,2:1).
+   Conserva su tinta y pierde la caja: el chip deja de leerse como recuento lleno. */
+.division[data-dimmed] .count {
+  opacity: 1;
+  color: var(--text-3);
+  background: transparent;
+  border-color: transparent;
+}
 
 .divisionRow {
   height: 32px;
@@ -102,7 +109,10 @@
   transition: background var(--t);
 }
 .divisionRow:hover:not(:disabled) { background: var(--surface-2); }
-.divisionRow[data-active="true"] { background: var(--surface-2); }
+/* R8/R9: la división abierta se marca como la página activa (--primary-soft);
+   --surface-2 queda solo para el hover, que antes era idéntico al activo. */
+.divisionRow[data-active="true"] { background: var(--primary-soft); }
+.divisionRow[data-active="true"] .divisionLabel { color: var(--text); font-weight: 600; }
 .divisionRow:disabled { cursor: default; }
 .divisionRow:disabled .chev,
 .divisionRow:disabled .chevOpen { visibility: hidden; }

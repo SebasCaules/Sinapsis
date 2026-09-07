@@ -25,9 +25,17 @@
   outline-offset: 2px;
   box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
 }
-.btn:disabled { opacity: .75; cursor: not-allowed; }
-/* Un botón ocupado no está apagado: sigue legible y el cursor lo dice. */
-.btn[aria-busy="true"] { opacity: 1; cursor: progress; }
+/* R10: el deshabilitado se expresa con tokens, no con opacidad (a .75 el rótulo
+   caía a 4,1:1 en pergamino). */
+.btn:disabled { opacity: 1; cursor: not-allowed; }
+/* Un botón ocupado no está apagado: conserva su variante (sigue siendo el botón
+   primario mientras guarda) y solo cambia el cursor. */
+.btn:disabled:not([aria-busy="true"]) {
+  color: var(--text-3);
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+.btn[aria-busy="true"] { cursor: progress; }
 
 .sm { height: 26px; padding: 0 12px; font-size: 12px; gap: 6px; }
 
@@ -69,7 +77,8 @@
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid var(--border);
+  /* R8: el botón de icono se delimita como .btn; --border no se ve en claustro. */
+  border: 1px solid var(--border-2);
   border-radius: var(--r-ctrl);
   background: var(--surface-2);
   color: var(--text-2);

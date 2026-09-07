@@ -4,7 +4,8 @@
   gap: 8px;
   height: 26px;
   padding: 0 9px;
-  border: 1px solid var(--border);
+  /* R7: el contorno es la única señal del campo, y --border se pierde en claustro. */
+  border: 1px solid var(--border-3);
   border-radius: var(--r-ctrl);
   background: var(--surface-2);
   box-shadow: var(--relief);
@@ -39,12 +40,14 @@
   white-space: nowrap;
 }
 
+/* R8: misma tecla que la paleta ⌘K y el mapa de atajos. */
 .kbd {
   flex: none;
   font: 600 10px var(--font-mono);
-  color: var(--text-3);
-  background: var(--surface-3);
-  border: 1px solid var(--border);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-bottom-width: 2px;
   border-radius: 5px;
   padding: 1px 4px;
 }
