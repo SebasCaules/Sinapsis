@@ -35,6 +35,7 @@ mismo esquema.
 | `pageTypes` | `PageTypeDef[]` | **sí** | — | 1–24 elementos | Los bloques dentro de cada división, en este orden. |
 | `rail` | `RailGroup[]` | no | `[]` | ≤ 6 grupos | Grupos **slot** del rail. Los fijos los dibuja la plataforma. |
 | `fab` | `Fab` o `null` | no | `null` | — | Botón flotante de la materia. |
+| `exercisePlates` | booleano | no | `true` | — | ¿El lector arma la **placa de ejercicio**? Ver §5 bis. |
 | `wiki` | `WikiSource` | no | `{}` (todos sus defaults) | ver §7 | Dónde están el wiki y el material de estudio. |
 
 ### Primitivas compartidas
@@ -190,6 +191,22 @@ verificación de ítems `tool` y su presencia entra en el chequeo de ids repetid
 
 ---
 
+## 5 bis. `exercisePlates` — la placa de ejercicio (N0-64)
+
+Con `true` —el default— un encabezado que empieza con **«Ejercicio»** en singular y todo lo
+que lo sigue se envuelven en una caja con antetítulo y filete lateral, y la resolución queda
+separada por una línea punteada (§ lector-05). Es lo que hace legible una guía escrita como
+la de Probabilidad: enunciado y resolución seguidos, sin más estructura que los encabezados.
+
+Con `false` la placa no se arma: «Ejercicio 1» es un encabezado más. Sirve para una materia
+cuya guía **ya trae su propia estructura** —el enunciado en prosa y la resolución en un aviso
+plegable `> [!nota]- …`—, donde la placa encajaría una caja adentro de otra.
+
+La bandera no cambia el markdown ni los ids de encabezado: las anclas `[[guia#Ejercicio 6]]`
+resuelven igual con placa y sin ella.
+
+---
+
 ## 6. `IconName` — el registro cerrado de iconos
 
 Los dibuja la plataforma; una materia no puede aportar los suyos.
@@ -236,6 +253,7 @@ es JSON estricto: **sin comentarios y sin comas finales**.
   "code": "93.24",
   "institution": "ITBA",
   "color": "--u9",                 // token del design system; también vale "#7c2230"
+  "exercisePlates": true,          // default: el lector arma la placa de ejercicio (§5 bis)
   "semester": "2026-1C",           // sugerencia: el usuario puede mover la materia
 
   // Cómo llama la cátedra a una división. Una sola nomenclatura por materia.

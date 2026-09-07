@@ -210,6 +210,14 @@ export const SubjectConfig = z.object({
   /** Grupos SLOT del rail (regiones 03 del contrato). Los grupos FIJOS los dibuja la plataforma. */
   rail: z.array(RailGroup).max(6).default([]),
   fab: Fab.nullable().default(null),
+  /**
+   * ¿El lector arma la placa de ejercicio? Con `true` —el default— un encabezado
+   * «Ejercicio N» y lo que lo sigue se envuelven en una caja con antetítulo
+   * (§ lector-05). Una materia cuyas guías ya traen su propia estructura —el
+   * enunciado en prosa y la resolución en un aviso plegable— lo pone en `false`
+   * para no encajar una caja adentro de otra (N0-64).
+   */
+  exercisePlates: z.boolean().default(true),
   wiki: WikiSource.default({}),
 });
 export type SubjectConfig = z.infer<typeof SubjectConfig>;

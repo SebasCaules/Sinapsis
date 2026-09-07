@@ -103,3 +103,23 @@ describe("rehypeExercisePlates", () => {
     expect(root.querySelector("h3")?.id).toBe("ejercicio-a-consumo");
   });
 });
+
+describe("exercisePlates: false (N0-64)", () => {
+  const EJ = "### Ejercicio 1\n\nAnalizar por qué no es seguro.\n\n> [!nota]- Resolución del Ejercicio 1\n> Porque el adversario gana con una consulta.";
+
+  it("sin placas, «Ejercicio N» es un encabezado más", () => {
+    const view = render(
+      <Markdown body={EJ} subject="cripto" exists={() => true} exercisePlates={false} />,
+    );
+    expect(view.container.querySelector(".exercise-plate")).toBeNull();
+    expect(view.container.querySelector("h3")?.textContent).toBe("Ejercicio 1");
+    /* El aviso plegado sigue siendo la única caja de la página. */
+    expect(view.container.querySelectorAll("details.callout")).toHaveLength(1);
+  });
+
+  it("con placas —el default— se arma la caja, como en Proba", () => {
+    const view = render(<Markdown body={EJ} subject="proba" exists={() => true} />);
+    expect(view.container.querySelector(".exercise-plate")).not.toBeNull();
+  });
+});
+
