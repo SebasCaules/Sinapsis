@@ -2,232 +2,333 @@
 
    La estética es la de un enunciado de LaTeX: «Ejercicio 1.» en versalita al
    principio del renglón, el enunciado corrido debajo, y la resolución plegada.
-   Nada de tarjetas: lo único que se dibuja como caja es el pliegue de la
-   resolución, que es la acción de la página. Los colores salen de los tokens
-   de la plataforma, así que la vista sigue los tres temas sin tocar nada. */
+   Lo único que se dibuja como caja es el pliegue de la resolución —la acción de
+   la página— y la cabecera de cada grupo, que es lo que separa una familia de
+   ejercicios de la siguiente. Los colores salen de los tokens de la plataforma,
+   así que la vista sigue los tres temas sin tocar nada.
 
-.pv {
-  max-width: 46rem;
-  margin: 0 auto;
-  padding: 8px 0 64px;
-}
+   Todo queda acotado al contenedor `.sinapsis-tool` de la vista. */
 
-/* Dentro de la hoja del lector (`frame: "sheet"`) el ancho lo pone la hoja, que
-   el lector ajusta arrastrando: la vista no le impone otro techo ni repite su
-   margen. */
-[data-frame="sheet"] .pv {
-  max-width: none;
-  padding: 0;
-}
+.sinapsis-tool {
 
-/* ---------- cabecera ---------- */
+  & .pv {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 8px 0 64px;
+  }
 
-.pv-head {
-  margin-bottom: 24px;
-}
-.pv-head h1 {
-  margin: 2px 0 8px;
-  font: 700 30px/1.15 var(--font-display, var(--font-ui));
-  letter-spacing: -0.01em;
-  color: var(--text);
-}
-.pv-bajada {
-  margin: 0;
-  max-width: 40rem;
-  font: 400 14.5px/1.6 var(--font-ui);
-  color: var(--text-2);
-}
+  /* Dentro de la hoja del lector (`frame: "sheet"`) el ancho lo pone la hoja, que
+     el lector ajusta arrastrando: la vista no le impone otro techo ni repite su
+     margen. */
+  &[data-frame="sheet"] .pv {
+    max-width: none;
+    padding: 0;
+  }
 
-/* ---------- controles ---------- */
+  /* ---------- cabecera ---------- */
 
-.pv-controles {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
-  margin: 0 0 30px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
-}
+  & .pv-head {
+    margin-bottom: 24px;
+  }
+  & .pv-head h1 {
+    margin: 2px 0 8px;
+    font: 700 30px/1.15 var(--font-display, var(--font-ui));
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  & .pv-bajada {
+    margin: 0;
+    max-width: 40rem;
+    font: 400 14.5px/1.6 var(--font-ui);
+    color: var(--text-2);
+  }
 
-.pv-tabs {
-  display: inline-flex;
-  padding: 2px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-}
-.pv-tab {
-  padding: 5px 14px;
-  border-radius: 999px;
-  font: 600 12.5px var(--font-ui);
-  color: var(--text-2);
-  text-decoration: none;
-  transition: background 120ms ease, color 120ms ease;
-}
-.pv-tab:hover { color: var(--text); }
-.pv-tab.is-on {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow);
-}
+  /* ---------- controles ---------- */
 
-.pv-chips {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.pv-chip {
-  padding: 4px 11px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font: 600 11.5px var(--font-ui);
-  color: var(--text-2);
-  text-decoration: none;
-}
-.pv-chip:hover { border-color: var(--text-3); color: var(--text); }
-.pv-chip.is-on {
-  background: color-mix(in srgb, var(--ueval) 14%, var(--surface));
-  border-color: var(--ueval);
-  color: var(--ueval-ink, var(--text));
-}
-/* Una instancia que el vault todavía no tiene: se ve, y se ve que no está. */
-.pv-chip.is-off {
-  opacity: 0.45;
-  cursor: default;
-  border-style: dashed;
-}
+  & .pv-controles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin: 0 0 30px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
 
-.pv-cuenta {
-  margin-left: auto;
-  font: 500 12px var(--font-ui);
-  color: var(--text-3);
-}
+  & .pv-tabs {
+    display: inline-flex;
+    padding: 2px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  & .pv-tab {
+    padding: 5px 14px;
+    border-radius: 999px;
+    font: 600 12.5px var(--font-ui);
+    color: var(--text-2);
+    text-decoration: none;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  & .pv-tab:hover { color: var(--text); }
+  & .pv-tab.is-on {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
 
-/* ---------- grupos ---------- */
+  & .pv-chips {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  & .pv-chip {
+    padding: 4px 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font: 600 11.5px var(--font-ui);
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  & .pv-chip:hover { border-color: var(--text-3); color: var(--text); }
+  & .pv-chip.is-on {
+    background: color-mix(in srgb, var(--ueval) 14%, var(--surface));
+    border-color: var(--ueval);
+    color: var(--ueval-ink, var(--text));
+  }
+  /* Una instancia que el vault todavía no tiene: se ve, y se ve que no está. */
+  & .pv-chip.is-off {
+    opacity: 0.45;
+    cursor: default;
+    border-style: dashed;
+  }
 
-.pv-grupo { margin: 0 0 38px; }
-.pv-grupo-t {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 0 0 18px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border-2, var(--border));
-  font: 700 11px var(--font-ui);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-3);
-}
-.pv-grupo-n {
-  font-weight: 600;
-  letter-spacing: 0;
-  color: var(--text-3);
-  opacity: 0.7;
-}
+  & .pv-cuenta {
+    margin-left: auto;
+    font: 500 12px var(--font-ui);
+    color: var(--text-3);
+  }
 
-/* ---------- el ejercicio ---------- */
+  /* ---------- el grupo, como bloque ----------
 
-.pv-ejercicio {
-  margin: 0 0 30px;
-  scroll-margin-top: 80px;
-}
-.pv-titulo {
-  display: block;
-  margin: 0 0 8px;
-  padding: 0;
-  border: 0;
-  font: 400 16px/1.5 var(--font-body, var(--font-ui));
-  color: var(--text);
-}
-.pv-numero {
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-.pv-nombre {
-  margin-left: 6px;
-  font-style: italic;
-  color: var(--text-2);
-}
-.pv-contexto {
-  float: right;
-  margin-left: 12px;
-  font: 600 10.5px var(--font-mono);
-  letter-spacing: 0.04em;
-  color: var(--text-3);
-}
+     Los diecinueve ejercicios son de familias distintas y el corte tiene que
+     verse antes de leer: cabecera propia sobre `--surface-2`, filete de 2 px en
+     el color del grupo, y 36 px hasta el grupo siguiente contra 18 px entre
+     ejercicios del mismo grupo. El color llega en `--ucol`, que la sección
+     publica en su `style`; de ahí sale también `--uink` para el texto. */
 
-.pv-enunciado {
-  font: 400 15px/1.7 var(--font-body, var(--font-ui));
-  color: var(--text);
-}
-.pv-enunciado > :first-child { margin-top: 0; }
-.pv-enunciado > :last-child { margin-bottom: 0; }
-.pv-enunciado img { display: block; max-width: 100%; height: auto; }
-.pv-enunciado table { font-size: 13.5px; }
+  & .pv-grupo {
+    --ucol: var(--primary);
+    margin: 0 0 36px;
+  }
+  & .pv-grupo:last-child { margin-bottom: 0; }
 
-.pv-sin-solucion {
-  margin: 10px 0 0;
-  font: 400 13px var(--font-ui);
-  color: var(--text-3);
-}
+  & .pv-grupo-head {
+    margin: 0 0 20px;
+    padding: 11px 14px 12px;
+    background: var(--surface-2);
+    border-top: 2px solid var(--ucol);
+    border-bottom: 1px solid var(--border);
+    border-radius: 0 0 var(--r) var(--r);
+  }
+  & .pv-grupo-linea {
+    display: flex;
+    align-items: baseline;
+    gap: 8px 14px;
+    flex-wrap: wrap;
+  }
+  & .pv-grupo-t {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font: 600 14px/1.3 var(--font-ui);
+    letter-spacing: -0.005em;
+    text-transform: none;
+    color: var(--text);
+  }
+  & .pv-grupo-n {
+    margin-left: auto;
+    font: 600 10.5px var(--font-ui);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--uink, var(--ucol));
+  }
+  & .pv-grupo-sub {
+    margin: 5px 0 0;
+    max-width: 44rem;
+    font: 400 12.5px/1.55 var(--font-ui);
+    color: var(--text-2);
+  }
 
-/* ---------- la resolución, plegada ---------- */
+  /* ---------- el ejercicio ---------- */
 
-.pv-solucion {
-  margin: 12px 0 0;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--ueval);
-  border-radius: var(--r);
-  background: color-mix(in srgb, var(--ueval) 4%, var(--surface-2));
-}
-.pv-solucion > summary {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 14px;
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-  font: 700 10.5px var(--font-ui);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ueval-ink, var(--text-2));
-}
-.pv-solucion > summary::-webkit-details-marker { display: none; }
-.pv-solucion > summary::before {
-  content: "";
-  width: 0;
-  height: 0;
-  border-left: 4px solid currentColor;
-  border-top: 3.5px solid transparent;
-  border-bottom: 3.5px solid transparent;
-  transition: transform 120ms ease;
-}
-.pv-solucion[open] > summary::before { transform: rotate(90deg); }
-.pv-solucion > summary:focus-visible {
-  outline: 2px solid var(--ueval);
-  outline-offset: -2px;
-  border-radius: var(--r);
-}
-.pv-solucion-cuerpo {
-  padding: 2px 16px 14px;
-  font: 400 14.5px/1.7 var(--font-body, var(--font-ui));
-  color: var(--text);
-}
-.pv-solucion-cuerpo > :first-child { margin-top: 0; }
-.pv-solucion-cuerpo > :last-child { margin-bottom: 0; }
-.pv-solucion-cuerpo table { font-size: 13px; }
-.pv-solucion-cuerpo img { display: block; max-width: 100%; height: auto; }
+  & .pv-ejercicio {
+    margin: 0 0 18px;
+    scroll-margin-top: 80px;
+  }
+  & .pv-grupo-cuerpo > .pv-ejercicio:last-child { margin-bottom: 0; }
 
-.pv-vacio {
-  margin: 40px 0;
-  text-align: center;
-  font: 400 14px var(--font-ui);
-  color: var(--text-3);
-}
+  & .pv-titulo {
+    display: block;
+    margin: 0 0 8px;
+    padding: 0;
+    border: 0;
+    font: 400 16px/1.5 var(--font-body, var(--font-ui));
+    color: var(--text);
+  }
+  & .pv-numero {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  & .pv-nombre {
+    margin-left: 6px;
+    font-style: italic;
+    color: var(--text-2);
+  }
+  & .pv-contexto {
+    float: right;
+    margin-left: 12px;
+    font: 600 10.5px var(--font-mono);
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+  }
 
-@media (max-width: 640px) {
-  .pv-contexto { float: none; display: block; margin: 2px 0 0; }
-  .pv-cuenta { margin-left: 0; width: 100%; }
+  & .pv-enunciado {
+    font: 400 15px/1.7 var(--font-body, var(--font-ui));
+    color: var(--text);
+  }
+  & .pv-enunciado > :first-child { margin-top: 0; }
+  & .pv-enunciado > :last-child { margin-bottom: 0; }
+  & .pv-enunciado img { display: block; max-width: 100%; height: auto; }
+  /* Los incisos del examen ya traen su marca —`a)`, `(a)`, `1-`—, así que la
+     lista sólo aporta la sangría. */
+  & .pv-enunciado ul {
+    margin: 10px 0;
+    padding-left: 1.3em;
+    list-style: none;
+  }
+  & .pv-enunciado ul li { margin: 3px 0; }
+  & .pv-enunciado ul ul { margin: 4px 0; }
+
+  & .pv-sin-solucion {
+    margin: 10px 0 0;
+    font: 400 13px var(--font-ui);
+    color: var(--text-3);
+  }
+
+  /* ---------- la resolución, plegada ---------- */
+
+  & .pv-solucion {
+    margin: 12px 0 0;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ueval);
+    border-radius: var(--r);
+    background: color-mix(in srgb, var(--ueval) 4%, var(--surface-2));
+  }
+  & .pv-solucion > summary {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    font: 700 10.5px var(--font-ui);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ueval-ink, var(--text-2));
+  }
+  & .pv-solucion > summary::-webkit-details-marker { display: none; }
+  & .pv-solucion > summary::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 4px solid currentColor;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+    transition: transform 120ms ease;
+  }
+  & .pv-solucion[open] > summary::before { transform: rotate(90deg); }
+  & .pv-solucion > summary:focus-visible {
+    outline: 2px solid var(--ueval);
+    outline-offset: -2px;
+    border-radius: var(--r);
+  }
+  & .pv-solucion-cuerpo {
+    padding: 2px 16px 14px;
+    font: 400 14.5px/1.7 var(--font-body, var(--font-ui));
+    color: var(--text);
+  }
+  & .pv-solucion-cuerpo > :first-child { margin-top: 0; }
+  & .pv-solucion-cuerpo > :last-child { margin-bottom: 0; }
+  & .pv-solucion-cuerpo img { display: block; max-width: 100%; height: auto; }
+
+  /* ---------- tablas ----------
+
+     El anfitrión no le da estilo a las tablas dentro de una herramienta, y acá
+     hay dos que son parte del enunciado —los pasos de un protocolo y la tabla
+     de frecuencias del castellano—: sin cuadrícula se leen como texto suelto.
+     `enhanceDoc` ya las envuelve en `.table-wrap`, que es donde va el scroll. */
+
+  & .pv .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  & .pv-enunciado table,
+  & .pv-solucion-cuerpo table {
+    width: auto;
+    margin: 12px 0;
+    border-collapse: collapse;
+    line-height: 1.5;
+  }
+  & .pv-enunciado table { font-size: 13.5px; }
+  & .pv-solucion-cuerpo table { font-size: 13px; }
+  & .pv-enunciado th,
+  & .pv-enunciado td,
+  & .pv-solucion-cuerpo th,
+  & .pv-solucion-cuerpo td {
+    padding: 5px 9px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  & .pv-enunciado thead th,
+  & .pv-solucion-cuerpo thead th {
+    background: var(--surface-2);
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  /* ---------- citas ----------
+
+     Lo que en el enunciado no es del examen —una nota sobre el apunte— y los
+     cruces con el wiki dentro de la resolución van como cita: sangrados y con
+     un filete, para que se vean como voz aparte. */
+
+  & .pv-enunciado blockquote,
+  & .pv-solucion-cuerpo blockquote {
+    margin: 12px 0;
+    padding: 1px 0 1px 14px;
+    border-left: 2px solid var(--border-2, var(--border));
+    color: var(--text-2);
+  }
+  & .pv-enunciado blockquote > :first-child,
+  & .pv-solucion-cuerpo blockquote > :first-child { margin-top: 0; }
+  & .pv-enunciado blockquote > :last-child,
+  & .pv-solucion-cuerpo blockquote > :last-child { margin-bottom: 0; }
+
+  & .pv-vacio {
+    margin: 40px 0;
+    text-align: center;
+    font: 400 14px var(--font-ui);
+    color: var(--text-3);
+  }
+
+  @media (max-width: 640px) {
+    & .pv-contexto { float: none; display: block; margin: 2px 0 0; }
+    & .pv-cuenta { margin-left: 0; width: 100%; }
+    & .pv-grupo-n { margin-left: 0; }
+  }
 }

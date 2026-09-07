@@ -63,18 +63,17 @@
   display: grid;
   place-items: center;
   margin-top: 3px;
-  /* R7/R8: el control se separa de la cabecera (que también es --surface) y su
-     contorno se ve en claustro. */
-  border: 1px solid var(--border-2);
+  /* Controles fantasma: la barra la protagonizan las pestañas, no sus botones. */
+  border: 1px solid transparent;
   border-radius: 7px;
-  background: var(--surface-2);
+  background: transparent;
   font: 600 15px var(--font-ui);
   line-height: 1;
   color: var(--text-3);
   cursor: pointer;
-  transition: border-color var(--t), color var(--t);
+  transition: background var(--t), color var(--t);
 }
-.scrollTabs:hover { background: var(--surface-3); border-color: var(--border-3); color: var(--text-2); }
+.scrollTabs:hover { background: var(--hover-wash); color: var(--text); }
 .scrollTabs:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 1px;
@@ -106,14 +105,16 @@
 }
 
 /* Inactiva: solo el rótulo, atenuado. Al pasar por encima insinúa la caja. */
-.tab:hover { background: var(--surface-2); }
+.tab:hover { background: var(--hover-wash); }
 
+/* Activa: la hoja más clara del tema, con su contorno y el filete de la marca. */
 .tab[aria-selected="true"] {
-  background: var(--surface-2);
-  border-color: var(--border);
+  background: var(--elevated);
+  border-color: var(--border-2);
   border-top-color: var(--primary);
-  box-shadow: var(--relief);
+  box-shadow: var(--relief), var(--shadow-ctrl);
 }
+.tab[aria-selected="true"]:hover { background: var(--elevated); }
 
 .tab[data-dragging="true"] {
   z-index: 3;
@@ -187,7 +188,7 @@
 .tab[aria-selected="true"] .tabClose { opacity: 0.8; }
 /* R5: la pestaña bajo el puntero ya es --surface-2; el hover de la ✕ tiene que
    subir un escalón (--surface-3), no bajarlo. */
-.tabClose:hover { opacity: 1; background: var(--surface-3); color: var(--text); }
+.tabClose:hover { opacity: 1; background: var(--active-wash); color: var(--text); }
 .tabClose:focus-visible {
   opacity: 1;
   outline: 2px solid var(--primary);
@@ -204,16 +205,16 @@
   line-height: 0;
   /* las pestañas miden 30 px y arrancan en 10 px: el «+» de 24 px se centra con ellas */
   margin: 13px 0 0 4px;
-  /* R7/R8: mismo tratamiento que los ‹ ›. */
-  border: 1px solid var(--border-2);
+  /* Fantasma, como los ‹ ›: aparece al pasar por encima. */
+  border: 1px solid transparent;
   border-radius: 7px;
-  background: var(--surface-2);
+  background: transparent;
   color: var(--text-3);
   cursor: pointer;
-  transition: border-color var(--t), color var(--t);
+  transition: background var(--t), color var(--t);
 }
 .addTab svg { display: block; }
-.addTab:hover { background: var(--surface-3); border-color: var(--border-3); color: var(--text-2); }
+.addTab:hover { background: var(--hover-wash); color: var(--text); }
 .addTab:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 1px;
@@ -236,15 +237,14 @@
   display: grid;
   place-items: center;
   padding: 0;
-  /* R7/R8: mismo tratamiento que los ‹ › y el «+». */
-  border: 1px solid var(--border-2);
+  border: 1px solid transparent;
   border-radius: 7px;
-  background: var(--surface-2);
+  background: transparent;
   color: var(--text-2);
   cursor: pointer;
-  transition: border-color var(--t), color var(--t);
+  transition: background var(--t), color var(--t);
 }
-.menu:hover { background: var(--surface-3); border-color: var(--border-3); color: var(--text); }
+.menu:hover { background: var(--hover-wash); color: var(--text); }
 .menu:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 1px;

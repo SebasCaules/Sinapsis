@@ -166,13 +166,13 @@
     },
     {
       "id": "practica",
-      "label": "Practicar",
+      "label": "Evaluación",
       "color": "--ueval",
       "items": [
         {
           "id": "parciales",
           "label": "Parciales resueltos",
-          "icon": "quiz",
+          "icon": "exam",
           "kind": "tool",
           "target": "parciales",
           "hint": "19 ejercicios de parcial con su resolución, por tipo o por parcial"

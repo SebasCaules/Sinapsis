@@ -80,7 +80,7 @@ export function Rail({ slug, groups, compact, onToggleCompact }: RailProps) {
         {/* Sin `title` nativo: el globo propio (.tip) ya dice lo mismo y sin él
             el navegador dibujaba los dos, uno encima del otro (shell-22). */}
         <Link className={css.seal} to={routes.landing()} aria-label="Volver a Sinapsis">
-          <Seal size={34} />
+          <Seal size={38} />
           <span className={css.tip} role="tooltip">
             Volver a Sinapsis
           </span>

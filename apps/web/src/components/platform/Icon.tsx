@@ -28,6 +28,8 @@ const PATHS: Record<IconName, string> = {
   circle: "M12 4a8 8 0 100 16 8 8 0 100-16",
   diamond: "M12 4l8 8-8 8-8-8z",
   line: "M4 12h16",
+  /* Hoja de examen: documento con esquina doblada, una línea de texto y un tilde. */
+  exam: "M6 3h9l3 3v15H6z M15 3v3h3 M9 17h6 M9 12l2 2 4-4",
   triangle: "M12 5l7 13H5z",
   flask: "M9 3h6 M10 3v6l-5 9a2 2 0 001.8 3h10.4A2 2 0 0019 18l-5-9V3 M7.5 15h9",
   chart: "M4 20h16 M7 16v-5 M12 16V8 M17 16v-9",

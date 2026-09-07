@@ -30,7 +30,7 @@ import { SubjectHeader, tabElementId } from "./components/SubjectHeader";
 import { ErrorCard, WideSkeleton } from "./components/States";
 import type { SubjectCtx } from "./context";
 import { describePath, isSubjectPath, type StudyLabels } from "./route-info";
-import { MAX_TABS, splitHash, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
+import { MAX_TABS, splitHref, tabHref, useCompact, useSubjectTabsStore, useTabs } from "./store";
 import { useRuntime } from "./tools/useRuntime";
 import { PALETTE_EVENT } from "./tools/runtime";
 import { useStudy } from "./study/useStudy";
@@ -210,6 +210,7 @@ export function SubjectShell() {
       subject,
       {
         path: location.pathname,
+        search: location.search,
         hash: location.hash,
         title: viewTitle,
         chip: route.chip,
@@ -218,7 +219,7 @@ export function SubjectShell() {
       },
       mainRef.current?.scrollTop,
     );
-  }, [subject, location.pathname, location.hash, viewTitle, route.chip, route.color, route.section, syncActive]);
+  }, [subject, location.pathname, location.search, location.hash, viewTitle, route.chip, route.color, route.section, syncActive]);
 
   /**
    * Restauración del scroll al cambiar de pestaña (bug 5).
@@ -362,7 +363,7 @@ export function SubjectShell() {
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.target === "_blank") return;
       const href = anchor.getAttribute("href") ?? "";
-      const { path, hash } = splitHash(href);
+      const { path, search, hash } = splitHref(href);
       if (!href.startsWith("/") || !isSubjectPath(subject, path)) return;
       event.preventDefault();
       event.stopPropagation();
@@ -372,14 +373,14 @@ export function SubjectShell() {
       const activate = !aux;
       const id = openTab(
         subject,
-        { path, hash, title: info.title, chip: info.chip, color: info.color, section: info.section },
+        { path, search, hash, title: info.title, chip: info.chip, color: info.color, section: info.section },
         activate,
       );
       if (!id) {
         warnFullTabs();
         return;
       }
-      if (activate) navigate(`${path}${hash}`);
+      if (activate) navigate(`${path}${search}${hash}`);
     },
     [subject, model, openTab, studyLabels, navigate, warnFullTabs],
   );

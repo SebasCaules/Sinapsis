@@ -66,7 +66,23 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 ### Ejercicio 1 — Protocolo de intercambio de claves con MAC
 
-Cinco mensajes entre $A$ y $B$, que comparten dos claves simétricas $K$ y $K'$, con $h_K(\cdot)$ un MAC y $h'_{K'}(\cdot)$ un MAC distinto. Se pide el tipo de protocolo, qué permiten los mensajes 1.2 y 1.3, y si es susceptible a MitM.
+**Enunciado.**
+
+Dado el siguiente protocolo
+
+|  |  |  |  |
+| --- | --- | --- | --- |
+| (1.1) | $A \to B$ | $r_A$ | $r_A$ es un número al azar que elige A |
+| (1.2) | $A \leftarrow B$ | $(B, A, r_A, r_B), h_K(B, A, r_A, r_B, K')$ | $r_B$ número al azar de B, $h_K(\cdot)$ MAC |
+| (1.3) | $A \to B$ | $(A, r_B), h_K(A, r_B, K')$ |  |
+| (1.4) | $A$ |  | $W = h'_{K'}(r_B)$ |
+| (1.5) | $B$ |  | $W = h'_{K'}(r_B)$ |
+
+donde A y B comparten dos claves simétricas $K$ y $K'$. $h'_{K'}(\cdot)$ es una función de MAC diferente de $h_K(\cdot)$ .
+
+- a) ¿Qué tipo de protocolo sería? ¿Qué es lo que el protocolo intenta construir?
+- b) ¿Qué le permiten hacer a A y B los mensajes cruzados 1.2 y 1.3?
+- c) ¿Es este protocolo suceptible a un ataque MiTM? Justificar.
 
 **La resolución del apunte, verificada.** Es un protocolo de intercambio de claves que busca establecer la clave de sesión $W$ y **autenticar a las dos partes**. El mensaje 1.2 le permite a $A$ validar que el mensaje no es viejo —por el nonce $r_A$ que ella misma eligió— y autenticar a $B$, porque con $K$ puede recomputar $h_K(B,A,r_A,r_B)$ sobre lo que recibe en claro. El 1.3 le permite a $B$ hacer lo mismo respecto de $A$. **No es susceptible a MitM**: la autenticación es mutua y se apoya en claves previamente compartidas, así que un atacante que no conoce $K$ ni $K'$ no puede hacerse pasar por ninguno de los dos.
 
@@ -76,7 +92,24 @@ Cinco mensajes entre $A$ y $B$, que comparten dos claves simétricas $K$ y $K'$,
 
 ### Ejercicio 2 — El Vigenère que el apunte no resolvió
 
-> *"El siguiente texto fue encontrado en una botella en la guerra de los Roses: `GWAOESFENITLAGEUGEDRVPHJVCDFDR`. Se sabe que el mensaje fue encriptado **con clave** y estaba en castellano con un alfabeto de 26 letras."* Se pide (a) el abordaje del criptoanálisis y (b) encontrar clave y mensaje. Viene con la tabla de frecuencias del castellano.
+**Enunciado.**
+
+El siguiente texto fue encontrado en una botella en la guerra de los Roses
+
+"GWAOESFENITLAGEUGEDRVPHJVCDFDR"
+
+Se sabe que el mensaje fue encriptado con clave y estaba en castellano con un alfabeto de 26 letras.
+
+- (a) Detallar cómo sería el abordaje para criptoanalizar el mensaje.
+- (b) Intentar encontrar la clave y el mensaje.
+
+Teniendo en cuenta que la frecuencia (aproximada) de aparición de letras en castellano es la siguiente:
+
+| Letra | A | B | C | D | E | F | G | H | I | J | K | L | M | N | Ñ | O | P | Q | R | S | T | U | V | W | X | Y | Z |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| % | 13 | 1 | 4 | 5 | 13 | 1 | 1 | 1 | 7 |  |  | 5 | 3 | 7 | 0 | 9 | 3 | 1 | 7 | 8 | 4 | 4 | 1 |  |  | 1 |  |
+
+Figura 1: Frecuencias de aparición de letras en castellano.
 
 El apunte anota *"Es un Vigenère con clave `CLAVE`, el enunciado lo dice medio escondido"* y a continuación escribe **`Skip`**: la corazonada está, la cuenta no.
 
@@ -92,7 +125,14 @@ o sea **`EL ATAQUE SERA A LAS VEINTE HORAS FIN`**. Las 30 letras del criptograma
 
 ### Ejercicio 3 — ¿Es válido este esquema?
 
-$$C_0 = IV, \qquad C_i = E_k(C_{i-1} \oplus M_i)$$
+**Enunciado.**
+
+Consideren el siguiente sistema de encripción en bloque para los mensajes $M_1M_2 \ldots M_n$, que generan los cifrados $C_0C_1C_2 \ldots C_n$.
+
+$$\begin{aligned} C_0 &= IV \\ C_i &= E_k(C_{i-1} \oplus M_i), i = 1, 2, \ldots \end{aligned}$$
+
+- a) ¿Es este un esquema de cifrado en bloque válido? Explicar y eventualmente corregirlo para que lo sea.
+- b) Comparar la confidencialidad y la tolerancia a errores de transmisión de este sistema contra CBC, CTR y OFB.
 
 **Verificado: es exactamente `CBC`.** El apunte lo dice —*"no es más que un encadenamiento CBC"*— y demuestra la validez exhibiendo la inversa: $D_k(C_i) = C_{i-1}\oplus M_i$, luego $M_i = D_k(C_i)\oplus C_{i-1}$. Es invertible, entonces es válido.
 
@@ -100,9 +140,19 @@ Para confidencialidad y errores, ver [[modos-de-encadenamiento|Modos de encadena
 
 ### Ejercicio 4 — Secreto perfecto de un Vigenère formal
 
-$$c_j = \bigl(m_j + k_{((j-1)\bmod l)+1}\bigr)(26), \qquad k_i \in \{0,\ldots,25\}$$
+**Enunciado.**
 
-Se pide demostrar si tiene secreto perfecto y **bajo qué condiciones sobre los parámetros**. La resolución del apunte está completa y es correcta; conviene tenerla porque es el molde de lo que se pide:
+Se define un criptosistema de encripción simétrica $\Pi = (\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})$ con un alfabeto de 26 letras con $K = k_1k_2k_3...k_l$ con $k_i \in \{0, ..., 25\}$. Los mensajes $M = m_1m_2...m_n$ donde $m_i \in \{0, ..., 25\}$. La encripción $\mathsf{Enc}$ procede como
+
+$$c_j = (m_j + k_{((j-1)\bmod l)+1})(26)$$
+
+y la desencripción $\mathsf{Dec}$
+
+$$m_j = (c_j - k_{((j-1)\bmod l)+1})(26)$$
+
+Demostrar si este sistema tiene secreto perfecto y ante que condiciones sobre los parámetros.
+
+La resolución del apunte está completa y es correcta; conviene tenerla porque es el molde de lo que se pide:
 
 **Si $l < n$** (la clave se repite), entonces $m_j$ y $m_{j+l}$ usan la misma $k$, y restando:
 
@@ -120,6 +170,15 @@ que **no depende de $m$**, así que $\Pr[C{=}c\mid M{=}m_0] = \Pr[C{=}c\mid M{=}
 
 ### Ejercicio 5 — Verdadero o Falso
 
+**Enunciado.**
+
+Verdadero o Falso. Si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado.
+
+- a) MD5 es un criptosistema de encripción asimétrico que no debe ser utilizado porque usa una longitud de clave de 128 bits.
+- b) Un protocolo de autenticación basado únicamente en un MAC simétrico provee confidencialidad, integridad y no repudio entre las partes.
+- c) El uso de padding aleatorio en la implementación del algoritmo de clave pública de RSA es para que el algoritmo sea seguro a ataque de textos cifrados elegidos.
+- d) Un certificado digital emitido por una autoridad certificante contiene siempre la clave pública de la CA.
+
 | Sentencia | Apunte | Verificación |
 |---|---|---|
 | a) `MD5` es un criptosistema **asimétrico** que no debe usarse porque usa clave de 128 bits | Falso: es una **función de hash** | Correcto. Y la razón real de no usarlo es que está **quebrada** —colisión en $<2^{20}$ operaciones—, no la longitud; los 128 bits son la **salida**, no una clave ([[primitivas-de-hash-estandar\|03.09]]) |
@@ -133,7 +192,27 @@ que **no depende de $m$**, así que $\Pr[C{=}c\mid M{=}m_0] = \Pr[C{=}c\mid M{=}
 
 ### Ejercicio 1 — Diffie-Hellman
 
-Ocho pasos con $A(G,q,g)$ eligiendo un grupo $\mathbb{Z}_q$ con raíz primitiva $g$, luego $x \leftarrow \mathbb{Z}_q$, $h_1 = g^x$, $y \leftarrow \mathbb{Z}_q$, $h_2 = g^y$, y finalmente $k_A = h_2^{x}$, $k_B = h_1^{y}$.
+**Enunciado.**
+
+Dado el siguiente protocolo
+
+|  |  |  |  |
+| --- | --- | --- | --- |
+| (1.1) | $A \to B$ | $G, q, g$ |  |
+| (1.2) | $A$ |  | $x \leftarrow \mathbb{Z}_q$ |
+| (1.3) | $A$ |  | $h_1 = g^x$ |
+| (1.4) | $A \to B$ | $h_1$ |  |
+| (1.5) | $B$ |  | $y \leftarrow \mathbb{Z}_q$ |
+| (1.6) | $A \leftarrow B$ | $h_2$ | $h_2 = g^y$ |
+| (1.7) | $A$ |  | $k_A = h_2^x$ |
+| (1.8) | $B$ |  | $k_B = h_1^y$ |
+
+donde $A(G, q, g)$ elige un Grupo $G$ $\mathbb{Z}_q$ con una raíz primitiva $g$.
+
+- a) ¿Qué tipo de protocolo sería, qué es lo que el protocolo intenta construir?
+- b) Mostrar un ejemplo numérico acotado cómo opera el protocolo. ¿Qué valores de $q$ son válidos y por qué?
+- c) ¿En qué reside la seguridad computacional del algoritmo?
+- d) Mencionar dos problemas que tiene este protocolo.
 
 La resolución del apunte cubre los cuatro ítems: es **Diffie-Hellman**, genera un secreto compartido sobre un canal inseguro; $q$ tiene que ser **primo** para que exista la raíz primitiva; la seguridad computacional reside en que $x$ e $y$ **nunca se transmiten** y obtenerlos de $g^x$ y $g^y$ es el **problema del logaritmo discreto**, sin solución eficiente conocida; y los dos problemas son que **no resiste atacantes activos** —necesita un canal autenticado, o sea MitM— y que la exponenciación modular es cara al crecer los bits.
 
@@ -143,7 +222,14 @@ La resolución del apunte cubre los cuatro ítems: es **Diffie-Hellman**, genera
 
 ### Ejercicio 2 — El esquema que parece CBC y no lo es
 
-$$C_0 = IV, \qquad C_i = E_k(M_i) \oplus C_{i-1}$$
+**Enunciado.**
+
+Consideren el siguiente sistema de encripción en bloque para los mensajes $M_1M_2 \ldots M_n$, que generan los cifrados $C_0C_1C_2 \ldots C_n$.
+
+$$\begin{aligned} C_0 &= IV \\ C_i &= E_k(M_i) \oplus C_{i-1}, i = 1, 2, \ldots \end{aligned}$$
+
+- a) ¿Es este un esquema de cifrado en bloque válido? Explicar.
+- b) Comparar la confidencialidad y la tolerancia a errores de transmisión de este sistema contra CBC, CTR y OFB.
 
 **Cuidado con éste, porque es el gemelo tramposo del Ej. 3 del 2C-2025.** Ahí la primitiva envuelve al encadenamiento —$E_k(C_{i-1}\oplus M_i)$, que es `CBC`—; acá el encadenamiento envuelve a la primitiva. **No es `CBC`, y no es CPA-seguro.**
 
@@ -166,9 +252,16 @@ Emite $b' = 0$ si coinciden. Acierta con **probabilidad 1**. Es el mismo defecto
 
 ### Ejercicio 3 — ¿Este esquema da integridad?
 
-$$c = E_{k_1}\bigl(m \Vert H(k_2 \Vert m)\bigr)$$
+**Enunciado.**
 
-con $H$ una función de hash, $E_k$ simétrica, y $k_1, k_2$ compartidas. Se piden los pasos del receptor, si un atacante puede modificar el mensaje, si provee autenticación y si provee no repudio.
+Dado el siguiente criptosistema $c = E_{k1}(\,m \Vert H(k2 \Vert m)\,)$.
+
+donde $m$ es un mensaje de tamaño fijo, $H$ es una función de hash criptográfica, $E_k(\cdot)$ es una primitiva de encripción simétrica y $\Vert$ implica concatenación; $k1$ y $k2$ son claves compartidas entre Bob y Alice.
+
+- a) Detallar el paso a paso itemizado de lo que debería hacer el receptor al recibir $c$.
+- b) ¿Puede un atacante modificar el mensaje? Explicar la integridad del criptosistema.
+- c) ¿Provee el protocolo algún esquema de autenticación? Explicar.
+- d) ¿Provee el esquema algún mecanismo de no-repudio? Explicar.
 
 La resolución del apunte es correcta en los cuatro puntos, y el (b) es el que importa: **es `authenticate-then-encrypt`**, la segunda de las [[privacidad-e-integridad|tres formas de combinar]], la que *"puede ser segura pero requiere prueba"*. El apunte dice que el atacante **sí puede modificar** porque *"primero se aplica el hash y luego se encripta"*, y que **lo correcto sería cifrar y luego autenticar**.
 
@@ -178,9 +271,13 @@ Sobre (c) y (d): provee **autenticación simétrica** —el receptor confirma qu
 
 ### Ejercicio 4 — Secreto perfecto con una clave de dos bits
 
-$$c = E_k(m) = (m \oplus k_0) \oplus f(k_1), \qquad f = \text{identidad},\ k = k_0k_1 \in \{0,1\}^2 \text{ uniforme}$$
+**Enunciado.**
 
-con $m, c \in \{0,1\}$ y $\Pr[m{=}0] = 0{,}9$, $\Pr[m{=}1] = 0{,}1$.
+Dado el siguiente criptosistema $Exp_{eav}(\mathbf{A}, n)$, verificar si un atacante tiene éxito en un ataque de texto cifrado.
+
+$$c = E_k(m) = (m \oplus k_0) \oplus f(k_1),$$
+
+con $f(\cdot)$ la función identidad, $f(0) = 0$ y $f(1) = 1$ y $k = k_0k_1 \in \{0,1\}^2$ uniformemente distribuídas, y teniendo en cuenta $m, c \in \{0,1\}$ y que $Pr[m = 0] = 0{,}9$ y $Pr[m = 1] = 0{,}1$.
 
 El apunte lo resuelve **dos veces**: primero con Bayes y la tabla de verdad completa de los 8 casos, y después con el atajo. **El atajo es el que conviene reproducir en un parcial**:
 
@@ -192,6 +289,15 @@ y análogamente para $C{=}1$. Como $\Pr[C{=}c\mid M{=}m]$ **no depende de $m$**,
 > **La lectura de una línea que el apunte no hace** *(agregado nuestro)*: $c = m \oplus k_0 \oplus k_1$, y **$k_0 \oplus k_1$ es uniforme en $\{0,1\}$** cuando $k$ es uniforme en $\{0,1\}^2$ —dos de las cuatro claves dan 0 y dos dan 1—. O sea que el esquema **es un One Time Pad de un bit disfrazado**, y por eso tiene secreto perfecto. Notar además que el sesgo $0{,}9 / 0{,}1$ de la distribución de $M$ **es una distracción**: el secreto perfecto no depende de cómo se distribuyan los mensajes.
 
 ### Ejercicio 5 — Verdadero o Falso
+
+**Enunciado.**
+
+Verdadero o Falso. Si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado.
+
+- a) Cualquier función de encripción simétrica tiene que ser inyectiva.
+- b) Los sistemas de encripción basados en clave pública utilizan una de las claves para encriptar/desencriptar y la otra para firmar.
+- c) Para sistemas de cifrado con un código binario de tres bits, el número de cifrados de transposición diferentes es mayor que el número de cifrados de sustitución.
+- d) Un certificado público contiene la clave privada de la entidad certificante.
 
 | Sentencia | Apunte | Verificación |
 |---|---|---|
@@ -206,7 +312,25 @@ y análogamente para $C{=}1$. Como $\Pr[C{=}c\mid M{=}m]$ **no depende de $m$**,
 
 ### Ejercicio 1 — Protocolo tipo TLS
 
-Siete mensajes cliente-servidor con certificado, firma digital $Sgn_{kS}(S)$, $E_{K_0}(kS)$, derivación $k1 = H(K_0, N_C, N_S)$ y $K_{cs} = H(N, k1)$, más `finished` con `MAC` sobre un timestamp.
+**Enunciado.**
+
+Dado el siguiente protocolo
+
+|  |  |  |  |
+| --- | --- | --- | --- |
+| (1.1) | $C \to S$ | $C, C\#, N_C$ |  |
+| (1.2) | $C \leftarrow S$ | $S, S\#, N_S, Cert(S, Sgn_{kS}(S))$ | Check Certificate |
+| (1.3) | $C \to S$ | $E_{K_0}(kS), N$ | $k1 = H(K_0, N_C, N_S)$ |
+| (1.4) | $C \to S$ | $E_{Kcs}(finished, MAC_k1(timestamp))$ | $Kcs = H(N, k1)$ |
+| (1.5) | $C \leftarrow S$ | $E_{Kcs}(finished, MAC_k1(timestamp))$ |  |
+| (1.6) | $C \to S$ | $E_{Kcs}(data)$ |  |
+| (1.7) | $C \leftarrow S$ | $E_{Kcs}(data)$ |  |
+
+donde $E(\cdot)$ es un esquema de cifrado simétrico, $Sgn(\cdot)$ es un esquema de firma digital.
+
+- a) ¿Qué tipo de protocol sería, qué es lo que el protocolo intenta construir?
+- b) ¿Cuál es el propósito de los mensajes (1.4) y (1.5)?
+- c) ¿Por qué se deriva la clave $Kcs$ y no se usa en cambio la clave $K_0$?
 
 La resolución cubre los tres ítems: es un protocolo de **autenticación e intercambio de claves** que construye una clave de sesión y un canal seguro con confidencialidad y **autenticación del servidor**; los mensajes 1.4 y 1.5 sirven para **validar que ambos tienen la misma $K_{cs}$**, con **timestamp contra replay** y **MAC por integridad**; y $K_{cs}$ se deriva en vez de usar $K_0$ porque $K_0$ es la **clave pública del servidor**, obtenida del certificado, o sea parte de un esquema asimétrico que no sirve para el intercambio simétrico posterior.
 
@@ -214,7 +338,13 @@ La resolución cubre los tres ítems: es un protocolo de **autenticación e inte
 
 ### Ejercicio 2 — CTR con una primitiva sin inversa
 
-*"Una propuesta de cifrador en bloque usando modo CTR usa una primitiva $E(\cdot)$ que no admite una primitiva de desencripción inversa."*
+**Enunciado.**
+
+Una propuesta de un cifrador en bloque usando modo CTR usa una primitiva de encripción $E(\cdot)$ que no admite una primitiva de desencripción inversa.
+
+- (a) ¿ Es este un sistema de encripción válido ? Explicar.
+- (b) ¿ Cómo se utiliza el nonce en dicho sistema ?
+- (c) ¿ Cuál es la ventaja de este sistema en términos de procesamiento ?
 
 **Sí es válido, y ésta es la pregunta que separa a quien entendió `CTR` de quien lo memorizó.** El apunte lo resuelve bien: $C_i = M_i \oplus E_k(\text{nonce}\Vert i)$ y $M_i = C_i \oplus E_k(\text{nonce}\Vert i)$ — **la primitiva se usa hacia adelante en las dos direcciones**, nunca se invierte. Es lo que hace que `CTR` (y `OFB`, y `CFB`) sólo necesiten una **función pseudoaleatoria** y no una **permutación**; la misma distinción `PRF`/`PRP` que aparece en [[primitiva-de-cifrado-en-bloque|02.07]] y en [[cbc-mac|03.05]].
 
@@ -222,7 +352,13 @@ Sobre el nonce: es aleatorio, se concatena con el contador del bloque, y **no se
 
 ### Ejercicio 3 — base64 como "cifrado"
 
-*"El banco de Estander usa base64 como sistema de encripción simétrica."* Se pregunta si es válido, qué significa que ofrezca **confusión y difusión**, y qué significa que un criptosistema sea **no lineal**.
+**Enunciado.**
+
+El banco de Estander usa base64 como sistema de encripción simétrica.
+
+- a) ¿Puede este considerarse un sistema de encripción válido? Explicar.
+- b) El CSO dice que su sistema ofrece confuseon y difusión. ¿Qué significa?
+- c) El además insiste en que el sistema no es lineal. ¿Qué significa que un criptosistema simétrico sea no lineal? De un ejemplo de otro criptosistema lineal.
 
 El apunte responde (a) correctamente —**no es un criptosistema**: no usa clave, no da confidencialidad y no hay dificultad computacional en revertirlo— y marca (b) y (c) como **"No lo vimos"**.
 
@@ -230,9 +366,17 @@ El apunte responde (a) correctamente —**no es un criptosistema**: no usa clave
 
 ### Ejercicio 4 — Cuando el aleatorio deja de serlo
 
-$$c = E_k(m) = (r,\; ar + b + m)_p, \qquad k = (a,b),\ r \leftarrow \text{random}$$
+**Enunciado.**
 
-y la variante donde **$r$ deja de ser aleatorio** y toma el valor fijo $r = (a+b)_p$. Se pide demostrar con $\mathsf{PrivK}^{\mathsf{CPA}}$ si sigue siendo seguro.
+Dado el siguiente criptosistema $\Pi = (\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})$.
+
+Para $p \in \mathbb{Z}$ y $a, b, r \in \mathbb{Z}_p$, siendo la clave $k = (a, b)$ y siendo $r \leftarrow random$
+
+$$\begin{aligned} c &= E_k(m) = (r, ar + b + m)_{(p)} \\ m &= D_k(c) = (-ar - b + c)_{(p)} \end{aligned}$$
+
+donde $(\cdot)_{(p)}$ implica que opera con aritmética modular.
+
+- a) Considerar una variante del criptosistema donde $r$ en lugar de ser aleatorio toma el valor $r = (a+b)_{(p)}$ ¿es este criptosistema seguro contra ataque de texto cifrado elegido? Demostrar mediante un experimento $\mathrm{PrivK}^{\mathrm{CPA}}_{\mathcal{A},\Pi}$
 
 Correcto y bien visto: con $r$ fijo queda
 
@@ -241,6 +385,15 @@ $$c = \bigl(a+b,\; \underbrace{a^2+ab+b}_{\text{constante}} + m\bigr)_p$$
 o sea **determinístico**, y *determinístico $\Rightarrow$ no CPA-seguro* es una de las tres propiedades de [[pruebas-de-indistinguibilidad|02.05]]. El adversario pide al oráculo el cifrado de $m_0$ y de $m_1$, recibe el desafío y compara: acierta con probabilidad 1.
 
 ### Ejercicio 5 — Verdadero o Falso
+
+**Enunciado.**
+
+Verdadero o Falso. Si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado.
+
+- a) Para proveer privacidad e integridad, lo correcto es primero Cifrar $m$ con $k_1$ para obtener $c$ y al mismo tiempo obtener el MAC con la clave $k_2$ de $m$ para obtener $t$. Tanto $m$ como $t$ se deben transmitir en forma conjunta. Las claves $k_1$ y $k_2$ pueden ser iguales.
+- b) La seguridad de las funciones de hash se establece como el nivel de resistencia a preimagenes donde dado un $y$ hallar $x/h(x) = y$.
+- c) El algoritmo de Diffie-Hellman permite que Alice le envíe una clave de sesión a Bob por un canal inseguro.
+- d) En los cifrados en bloque independientemente del modo de operación se requiere que BCE Block Cipher Encryption ó PRF Psuedo Random Function siempre sea reversible.
 
 | Sentencia | Apunte | Verificación |
 |---|---|---|
@@ -251,6 +404,14 @@ o sea **determinístico**, y *determinístico $\Rightarrow$ no CPA-seguro* es un
 
 ### Múltiple choice — SSL, TLS y PKI
 
+**Enunciado.**
+
+3- Confidencialidad e integridad sobre un canal inseguro
+
+- (a) SSL ofrece integridad y autenticación de los participantes mediante el uso de un KDC centralizado.
+- (b) SSL ofrece confidencialidad, integridad y no repudio de los participantes mediante el uso de PKI de distribución de certificados.
+- (c) TLS ofrece confidencialidad, integridad y autenticación de los participantes bajo un esquema PKI de distribución de certificados.
+
 Tres opciones sobre confidencialidad e integridad en canal inseguro. La correcta es **(c) TLS ofrece confidencialidad, integridad y autenticación bajo un esquema PKI de distribución de certificados**. Las otras dos fallan porque (a) atribuye a SSL un **KDC centralizado** —usa PKI, no KDC; el `KDC` es de [[needham-schroeder|Needham-Schroeder]], no de TLS— y (b) le atribuye **no repudio**, que no da porque una vez establecida la clave de sesión el esquema es simétrico. Aparece **idéntica** en el 1C-2018. Desarrollado con esta misma comparación en [[clase-05-protocolos-criptograficos#Para el parcial|Clase 05 § Para el parcial]].
 
 ---
@@ -259,8 +420,17 @@ Tres opciones sobre confidencialidad e integridad en canal inseguro. La correcta
 
 ### Ejercicio 1 — Needham-Schroeder
 
-$$1.1)\ A \to T: A, B, N_A \qquad 1.2)\ A \leftarrow T: E_{K_{AT}}(N_A, B, k, E_{K_{BT}}(k,A)) \qquad 1.3)\ A \to B: E_{K_{BT}}(k,A)$$
-$$1.4)\ A \leftarrow B: E_k(N_B) \qquad 1.5)\ A \to B: E_k(N_B - 1)$$
+**Enunciado.**
+
+Dado el siguiente protocolo
+
+$$\begin{aligned} (1.1)\ &A \to T : A, B, N_A \\ (1.2)\ &A \leftarrow T : E_{kAT}(N_A, B, k, E_{kBT}(k, A)) \\ (1.3)\ &A \to B : E_{kBT}(k, A) \\ (1.4)\ &A \leftarrow B : E_k(N_B) \\ (1.5)\ &A \to B : E_k(N_B - 1) \end{aligned}$$
+
+donde $E(\cdot)$ es un esquema de cifrado simétrico.
+
+- a) ¿Para qué está el nombre del destinatario en los mensajes (1.1) y (1.2)?
+- b) ¿Qué problema tiene este protocolo?
+- c) El protocolo de Denning-Sacco agrega timestamps a los mensajes (1.2) y (1.3). ¿Con qué objetivo?
 
 Es el protocolo clásico con **KDC**. **Es, literalmente, el protocolo [[needham-schroeder|Needham-Schroeder]] de la [[clase-05-protocolos-criptograficos|Clase 05]]** — con `T` en vez de `KDC` como nombre del tercero de confianza, y **sin** el timestamp de la corrección [[denning-sacco-y-frescura|Denning-Sacco]] que sí aparece en la filmina 28 de esa clase. Las tres respuestas del apunte son correctas y son las estándar:
 
@@ -269,6 +439,28 @@ Es el protocolo clásico con **KDC**. **Es, literalmente, el protocolo [[needham
 - **(c) [[denning-sacco-y-frescura|Denning-Sacco]]** agrega timestamps a 1.2 y 1.3 justamente para eso: $B$ puede validar si el mensaje que le llegó es viejo o reciente.
 
 ### Ejercicio 2 — Múltiple choice
+
+**Enunciado.**
+
+Elegir la opción correcta y justificar en una oración.
+
+1- La validación de un Certificado Digital incluye
+
+- (a) Verificar que la clave privada contenida en el certificado digital coincida con la clave pública que tiene el emisor del certificado.
+- (b) Verificar que la clave pública contenida en el certificado digital encripte adecuadamente la clave privada que tiene el emisor del certificado.
+- (c) Verificar que la firma digital emitida por la Autoridad Certificante incluída dentro del Certificado Digital sea válida.
+
+2- El Duque de Mantua en 1401 utilizó un sistema de encripción homofónico donde implementó un cifrado de sustitución de manera que cada una de las vocales era sustituída por más de un símbolo, que se seleccionaba al azar. La cantidad de símbolos de sustitución para cada vocal era proporcional a la frecuencia de aparición de esa vocal dentro del lenguaje.
+
+- (a) El esquema no tiene secreto perfecto porque es imposible identificar la vocal asignada.
+- (b) El esquema opera en realidad como un cifrado Vigènere.
+- (c) El índice de coincidencia no es tan útil en este caso.
+
+3- Confidencialidad e integridad sobre un canal inseguro
+
+- (a) SSL ofrece integridad y autenticación de los participantes mediante el uso de un KDC centralizado.
+- (b) SSL ofrece confidencialidad, integridad y no repudio de los participantes mediante el uso de PKI de distribución de certificados.
+- (c) TLS ofrece confidencialidad, integridad y autenticación de los participantes bajo un esquema PKI de distribución de certificados.
 
 **2.1 Validación de un certificado digital** → la correcta es verificar que **la firma de la CA sea válida**, usando la clave pública de la CA, porque la firma se generó con la privada que sólo ella tiene — el segundo de los cinco pasos de [[x509#Verificación de un certificado X.509, en cinco pasos|X.509 § Verificación de un certificado X.509, en cinco pasos]].
 
@@ -280,7 +472,15 @@ Es el protocolo clásico con **KDC**. **Es, literalmente, el protocolo [[needham
 
 ### Ejercicio 3 — Cirugía sobre CBC
 
-Sobre $C_0 = IV$, $C_k = E_k(M_k \oplus C_{k-1})$:
+**Enunciado.**
+
+En un esquema de encripción en bloques CBC de longitud n un mensaje $M_1M_2 \ldots M_n$ se cifra como un bloque de longitud n+1, $C_0C_1C_2 \ldots C_n$.
+
+$$\begin{aligned} C_0 &= IV \\ C_k &= E_k(M_k \oplus C_{k-1}) \end{aligned}$$
+
+- a) ¿ Cómo se ve afectada la desencripción si el primer bloque $C_0$ es eliminado del texto cifrado ?
+- b) ¿ Cómo se ve afectada la desencripción si el último bloque $C_n$ es eliminado del texto cifrado ?
+- c) Teniendo el texto cifrado ya generado como se especificó con anterioridad, ¿ Cómo puede un usuario legitimo agregar un texto de bloque $M_0$ específico al principio del mensaje plano original agregando bloques $C_k$ adicionales en cualquier ubicación del texto cifrado ?
 
 - **(a) Si se elimina $C_0$**: $M_1$ **no se puede recuperar**, porque $D_k(C_1) = M_1 \oplus C_0$ y falta $C_0$. Los demás bloques salen bien.
 - **(b) Si se elimina $C_n$**: se pierde **sólo $M_n$**; $M_1 \ldots M_{n-1}$ se recuperan correctamente.
@@ -290,7 +490,26 @@ La resolución del apunte de (c) es correcta y es más fina de lo que parece: **
 
 ### Ejercicios 4 y 5
 
-El apunte los marca **"Repetido"**: son literalmente los mismos que el Ej. 4 y el Ej. 5 del 1C-2023, arriba. **Que un ejercicio reaparezca idéntico con cinco años de diferencia es, en sí, el dato más accionable de esta nota.**
+**Enunciado.**
+
+**Ejercicio 4.** Dado el siguiente criptosistema $\Pi = (\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})$.
+
+Para $p \in \mathbb{Z}$ y $a, b, r \in \mathbb{Z}_p$, siendo la clave $k = (a, b)$ y siendo $r \leftarrow random$
+
+$$\begin{aligned} c &= E_k(m) = (r, ar + b + m)_{(p)} \\ m &= D_k(c) = (-ar - b + c)_{(p)} \end{aligned}$$
+
+donde $(\cdot)_{(p)}$ implica que opera con aritmética modular.
+
+- a) Considerar una variante del criptosistema donde $r$ en lugar de ser aleatorio toma el valor $r = (a+b)_{(p)}$ ¿es este criptosistema seguro contra ataque de texto cifrado elegido? Demostrar mediante un experimento $\mathrm{PrivK}^{\mathrm{CPA}}_{\mathcal{A},\Pi}$
+
+**Ejercicio 5.** Verdadero o Falso. Si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado.
+
+- a) Para proveer privacidad e integridad, lo correcto es primero Cifrar $m$ con $k_1$ para obtener $c$ y al mismo tiempo obtener el MAC con la clave $k_2$ de $m$ para obtener $t$. Tanto $m$ como $t$ se deben transmitir en forma conjunta. Las claves $k_1$ y $k_2$ pueden ser iguales.
+- b) La seguridad de las funciones de hash se establece como el nivel de resistencia a preimagenes donde dado un $y$ hallar $x/h(x) = y$.
+- c) El algoritmo de Diffie-Hellman permite que Alice le envíe una clave de sesión a Bob por un canal inseguro.
+- d) En los cifrados en bloque independientemente del modo de operación se requiere que BCE Block Cipher Encryption ó PRF Psuedo Random Function siempre sea reversible.
+
+> El apunte los marca **"Repetido"**: son literalmente los mismos que el Ej. 4 y el Ej. 5 del 1C-2023, arriba. **Que un ejercicio reaparezca idéntico con cinco años de diferencia es, en sí, el dato más accionable de esta nota.**
 
 ---
 
@@ -298,7 +517,18 @@ El apunte los marca **"Repetido"**: son literalmente los mismos que el Ej. 4 y e
 
 La última página no es de un parcial: son dos ejercicios de la **Guía 6**, que el vault **no tiene ingerida**. Se conservan acá porque vinieron en el mismo PDF.
 
-**Ejercicio 14 — encontrar al espía.** Cuatro personas, tres tienen shares legítimos de un esquema de Shamir $(2,3)$ módulo 11 y una es un agente extranjero. Los pares son $A(1,4)$, $B(3,7)$, $C(5,1)$, $D(7,2)$.
+**Ejercicio 14 — encontrar al espía.**
+
+**Enunciado.**
+
+Supongamos que hay 4 personas en una habitación, una de las cuales es un agente extranjero. A las otras tres personas se les ha dado sus pares correspondientes al esquema de Shamir en el cual cualquier par de personas pueden determinar el secreto. Las personas tienen los siguientes pares: (módulo 11)
+
+- A:(1, 4)
+- B:(3, 7)
+- C:(5, 1)
+- D:(7, 2)
+
+Determinar quién es el agente extranjero y cuál es el mensaje.
 
 **El planteo del apunte es correcto y la aritmética no.** Resuelto de nuevo acá, verificado punto por punto.
 
@@ -326,7 +556,15 @@ Verificando los cuatro:
 
 > **Dónde se rompe la cuenta del apunte** *(y por qué el veredicto le sale bien igual)*. Al despejar llega a $12 - 2b = 7$, lo reduce a $1 - 2b = 7$ —correcto, $12 \equiv 1$— pero concluye $b = 3$ cuando de ahí sale $2b = -6 \equiv 5$ y $b = 5\cdot 6 = 30 \equiv 8$. Después, al verificar $C$ y $D$, usa **otro par todavía**: $a=1$, $b=6$. Esa recta **no pasa ni por $A$ ni por $B$**, que son los dos puntos de los que se dedujo. Le cierra $D$ por casualidad —$7+6=13\equiv 2$— y le falla $C$, así que el veredicto sale correcto **con la cuenta equivocada**. El apunte además **nunca dice cuál es el secreto**, que es la mitad de lo que el ejercicio pide.
 
-**Ejercicio 15 — esquema jerárquico.** Un general, dos coroneles y cinco suboficiales; se lanza el misil si decide el general, **o** los dos coroneles, **o** los cinco suboficiales, **o** un coronel más tres suboficiales. La solución del apunte reparte el secreto en un Shamir $(1,4)$ y subdivide cada rama: $S_1$ al general directamente, $S_2$ como $(2,2)$ entre los coroneles, $S_3$ como $(5,5)$ entre los suboficiales, y $S_4$ partido en $(1,2)$ para coroneles y $(3,5)$ para suboficiales. **Una persona termina con más de un share**, que es justo lo que la pista del enunciado adelanta.
+**Ejercicio 15 — esquema jerárquico.**
+
+**Enunciado.**
+
+Un cuartel militar consiste de un general, dos coroneles y 5 suboficiales. Tienen el control sobre un poderoso misil, pero no quieren lanzarlo a  menos que el general decida hacerlo, o los dos coroneles decidan lanzarlo o los 5 suboficiales decidan lanzarlo, o un coronel y tres de los suboficiales decidan hacerlo. Describir cómo lo harías con un esquema de secreto compartido.
+
+**Pista:** Una persona podría tener más de un par de claves.
+
+La solución del apunte reparte el secreto en un Shamir $(1,4)$ y subdivide cada rama: $S_1$ al general directamente, $S_2$ como $(2,2)$ entre los coroneles, $S_3$ como $(5,5)$ entre los suboficiales, y $S_4$ partido en $(1,2)$ para coroneles y $(3,5)$ para suboficiales. **Una persona termina con más de un share**, que es justo lo que la pista del enunciado adelanta.
 
 ---
 

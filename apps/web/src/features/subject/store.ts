@@ -189,6 +189,9 @@ export function useTheme(): ThemeId {
 export interface SubjectTab {
   id: string;
   path: string;
+  /** Query de la ruta («?arg=4/guia») o cadena vacía: es el estado de las vistas de
+      herramienta, y sin ella la pestaña volvía a la portada de la vista al reactivarla. */
+  search: string;
   /** Ancla de la ruta («#seccion») o cadena vacía. Nunca forma parte de `path`. */
   hash: string;
   title: string;
@@ -201,15 +204,24 @@ export interface SubjectTab {
   scrollY: number;
 }
 
-/** Parte una dirección del SPA en su pathname y su ancla. */
+/** Parte una dirección del SPA en su pathname (con query) y su ancla. */
 export function splitHash(href: string): { path: string; hash: string } {
   const at = href.indexOf("#");
   return at === -1 ? { path: href, hash: "" } : { path: href.slice(0, at), hash: href.slice(at) };
 }
 
+/** Parte una dirección del SPA en pathname, query («?…») y ancla («#…»). */
+export function splitHref(href: string): { path: string; search: string; hash: string } {
+  const { path: withQuery, hash } = splitHash(href);
+  const q = withQuery.indexOf("?");
+  return q === -1
+    ? { path: withQuery, search: "", hash }
+    : { path: withQuery.slice(0, q), search: withQuery.slice(q), hash };
+}
+
 /** La dirección completa de una pestaña: lo que hay que navegar para abrirla. */
 export function tabHref(tab: SubjectTab): string {
-  return `${tab.path}${tab.hash}`;
+  return `${tab.path}${tab.search ?? ""}${tab.hash}`;
 }
 
 export interface TabsState {
@@ -220,8 +232,10 @@ export interface TabsState {
 
 /** Lo que la ruta activa aporta a una pestaña (sin el id ni el scroll). */
 export interface TabInfo {
-  /** Pathname, sin ancla: quien llame parte la dirección con `splitHash`. */
+  /** Pathname, sin ancla: quien llame parte la dirección con `splitHref`. */
   path: string;
+  /** Query («?…»), si la ruta trae una. */
+  search?: string;
   /** Ancla, si la ruta trae una. */
   hash?: string;
   title: string;
@@ -248,10 +262,11 @@ export function newTabId(): string {
 function tab(info: TabInfo): SubjectTab {
   /* Defensa en profundidad: si a alguien se le cuela una dirección con ancla en
      `path`, se normaliza acá y no dentro del estado. */
-  const split = splitHash(info.path);
+  const split = splitHref(info.path);
   return {
     id: newTabId(),
     path: split.path,
+    search: info.search ?? split.search,
     hash: info.hash ?? split.hash,
     title: info.title,
     chip: info.chip,
@@ -280,10 +295,11 @@ function readTabs(slug: string): TabsState | null {
   if (!Array.isArray(parsed.list)) return null;
   const list = parsed.list.filter(isTab).slice(0, MAX_TABS).map((t) => {
     /* Lo guardado por una versión anterior traía el ancla dentro de `path`. */
-    const split = splitHash(t.path);
+    const split = splitHref(t.path);
     return {
       id: t.id,
       path: split.path,
+      search: typeof t.search === "string" ? t.search : split.search,
       hash: typeof t.hash === "string" && t.hash ? t.hash : split.hash,
       title: t.title,
       chip: typeof t.chip === "string" ? t.chip : null,
@@ -428,8 +444,10 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
       if (!current) return;
       /* La comparación es SIEMPRE por pathname: el ancla no cambia de vista y no
          puede decidir si se está navegando o no (bug 4). */
-      const path = splitHash(info.path).path;
-      const hash = info.hash ?? splitHash(info.path).hash;
+      const parts = splitHref(info.path);
+      const path = parts.path;
+      const search = info.search ?? parts.search;
+      const hash = info.hash ?? parts.hash;
 
       /* La activa YA está en esa ruta: no se está navegando a ningún lado, así
          que la regla del «ya abierto en otra pestaña» no aplica (si aplicara,
@@ -441,13 +459,14 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
           current.chip === info.chip &&
           current.color === info.color &&
           current.section === (info.section ?? null) &&
-          current.hash === hash
+          current.hash === hash &&
+          (current.search ?? "") === search
         ) {
           return;
         }
         const list = state.list.map((t) =>
           t.id === state.active
-            ? { ...t, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null }
+            ? { ...t, search, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null }
             : t,
         );
         commit(slug, { ...state, list });
@@ -463,7 +482,7 @@ export const useSubjectTabsStore = create<SubjectTabsState>((set, get) => {
 
       const list = state.list.map((t) =>
         t.id === state.active
-          ? { ...t, path, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null, scrollY: 0 }
+          ? { ...t, path, search, hash, title: info.title, chip: info.chip, color: info.color, section: info.section ?? null, scrollY: 0 }
           : t,
       );
       commit(slug, { ...state, list });

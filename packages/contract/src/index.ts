@@ -46,7 +46,7 @@ export const IconName = z.enum([
   "home", "map", "grid", "book", "sigma", "graph", "cards", "quiz", "pencil", "timer",
   "function", "calc", "compass", "layers", "notebook", "star", "list", "clock",
   "square", "circle", "diamond", "line", "triangle", "flask", "chart", "table",
-  "link", "tool", "sparkle", "wrench",
+  "link", "tool", "sparkle", "wrench", "exam",
 ]);
 export type IconName = z.infer<typeof IconName>;
 

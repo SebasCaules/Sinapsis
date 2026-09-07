@@ -22,6 +22,15 @@
      por tipo     (default)  agrupa por el tema que la cátedra repite
      por parcial             agrupa por examen, del más nuevo al más viejo
 
+   CADA GRUPO ES UN BLOQUE. Los diecinueve ejercicios vienen de familias muy
+   distintas, así que el grupo no puede ser una versalita más: lleva una
+   cabecera propia —rótulo, contador y una línea que dice qué es esa familia o
+   de qué parcial se trata—, sobre `--surface-2` y con un filete de 2 px en el
+   color del grupo. El color sale de `--ucol` puesto en el `style` de la
+   sección, que es el canal por el que la plataforma deriva `--uink` (la misma
+   convención que usan las unidades). Y el aire entre grupos duplica al aire
+   entre ejercicios del mismo grupo: la separación se ve antes de leer.
+
    FILTRO POR INSTANCIA: 1P · 2P · Final. Hoy el vault solo tiene primeros
    parciales; las otras dos quedan a la vista, en gris, para que se note que
    faltan y no que no existen.
@@ -42,6 +51,38 @@
     { id: "1P", label: "Primer parcial" },
     { id: "2P", label: "Segundo parcial" },
     { id: "final", label: "Final" },
+  ];
+
+  /**
+   * Qué es cada familia de ejercicios, en una línea. Es lo que convierte el
+   * rótulo del grupo en información: no alcanza con decir «Analizar un
+   * protocolo», hay que decir que ése es el Ejercicio 1 de los cuatro parciales.
+   */
+  var DESCRIPCION_TIPO = {
+    "Analizar un protocolo":
+      "El Ejercicio 1 de los cuatro parciales, sin excepción: qué construye el protocolo y qué problema tiene.",
+    "¿Es válido este esquema de bloque?":
+      "Un esquema de cifrado en bloque inventado: si es válido, si es CPA-seguro y cómo propaga errores contra CBC, CTR y OFB.",
+    "Verdadero o Falso, con corrección":
+      "El último ejercicio: no alcanza con marcar falso, hay que reescribir la sentencia e identificar el cambio.",
+    "Secreto perfecto, demostrado":
+      "Demostrar si el criptosistema tiene secreto perfecto y bajo qué condiciones sobre los parámetros.",
+    "Criptoanálisis clásico":
+      "Romper un cifrado clásico a mano, con la tabla de frecuencias del castellano a la vista.",
+    "MAC, hash e integridad":
+      "Un esquema armado con hash o MAC: si da integridad, si da autenticación y si da no repudio.",
+  };
+
+  var CUATRIMESTRE = { "1": "primer cuatrimestre", "2": "segundo cuatrimestre" };
+
+  /**
+   * Los colores de división de la plataforma, en el orden en que se reparten
+   * entre los grupos. Nunca un literal: sólo el nombre del token, que se
+   * publica como `--ucol` en el `style` de la sección.
+   */
+  var COLORES = [
+    "var(--u1)", "var(--u2)", "var(--u3)", "var(--u4)", "var(--u5)",
+    "var(--u6)", "var(--u7)", "var(--u8)", "var(--u9)",
   ];
 
   /* ---------- construcción del DOM ---------- */
@@ -69,6 +110,17 @@
     var doc = new DOMParser().parseFromString("<body>" + html + "</body>", "text/html");
     doc.body.querySelectorAll("script, style, iframe, object, embed").forEach(function (n) {
       n.remove();
+    });
+    /* Las tablas de los enunciados —los pasos de un protocolo, la tabla de
+       frecuencias— no tienen fila de encabezado en el examen, pero markdown
+       obliga a escribir una. Si queda vacía se saca, para que no aparezca una
+       banda en blanco arriba de la tabla. */
+    doc.body.querySelectorAll("table > thead").forEach(function (cabecera) {
+      var celdas = cabecera.querySelectorAll("th, td");
+      var vacia = Array.prototype.every.call(celdas, function (c) {
+        return !(c.textContent || "").trim();
+      });
+      if (vacia) cabecera.remove();
     });
     doc.body.querySelectorAll("*").forEach(function (n) {
       Array.prototype.slice.call(n.attributes).forEach(function (at) {
@@ -210,6 +262,48 @@
     return art;
   }
 
+  /** `2C-2025` + `1P` → «Primer parcial, segundo cuatrimestre de 2025». */
+  function descripcionExamen(examen, instancia) {
+    var etiqueta = "";
+    INSTANCIAS.forEach(function (i) { if (i.id === instancia) etiqueta = i.label; });
+    var m = String(examen || "").match(/^(\d)C-(\d{4})$/);
+    if (!m) return etiqueta;
+    var fecha = (CUATRIMESTRE[m[1]] || "") + " de " + m[2];
+    return etiqueta ? etiqueta + ", " + fecha : fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  }
+
+  /** La línea que explica el grupo: qué familia es, o de qué parcial se trata. */
+  function descripcionGrupo(g, orden) {
+    if (orden !== "parcial") return DESCRIPCION_TIPO[g.clave] || "";
+    var primero = g.items[0];
+    return descripcionExamen(g.clave, primero ? primero.instancia : "");
+  }
+
+  /**
+   * El grupo, como bloque: cabecera con rótulo, contador y línea descriptiva,
+   * y el cuerpo con sus ejercicios. El color va en `--ucol` para que el filete
+   * y el contador lo tomen desde el CSS sin literales.
+   */
+  function grupoNodo(g, orden, indice) {
+    var sec = el("section", "pv-grupo");
+    sec.style.setProperty("--ucol", COLORES[indice % COLORES.length]);
+
+    var cab = el("header", "pv-grupo-head");
+    var linea = el("div", "pv-grupo-linea");
+    linea.appendChild(el("h2", "pv-grupo-t", g.clave));
+    var n = g.items.length;
+    linea.appendChild(el("span", "pv-grupo-n", n + (n === 1 ? " ejercicio" : " ejercicios")));
+    cab.appendChild(linea);
+    var sub = descripcionGrupo(g, orden);
+    if (sub) cab.appendChild(el("p", "pv-grupo-sub", sub));
+    sec.appendChild(cab);
+
+    var cuerpo = el("div", "pv-grupo-cuerpo");
+    g.items.forEach(function (e) { cuerpo.appendChild(ejercicioNodo(e, orden)); });
+    sec.appendChild(cuerpo);
+    return sec;
+  }
+
   function controlesNodo(st, total, mostrados) {
     var caja = el("div", "pv-controles");
 
@@ -223,6 +317,11 @@
       var activo = st.orden === t.id;
       var a = enlace("pv-tab" + (activo ? " is-on" : ""), href(st, { orden: t.id }), t.label);
       if (activo) a.setAttribute("aria-current", "true");
+      /* Tooltip de la plataforma (data-tip-*), no el nativo del navegador. */
+      a.setAttribute("data-tip-title", t.label);
+      a.setAttribute("data-tip-text", t.id === "parcial"
+        ? "Agrupa los ejercicios por el parcial del que salieron, del más reciente al más viejo."
+        : "Agrupa los ejercicios por familia (protocolos, modos, secreto perfecto…), sin importar el parcial.");
       tabs.appendChild(a);
     });
     caja.appendChild(tabs);
@@ -234,14 +333,18 @@
       var hay = ITEMS.some(function (e) { return e.instancia === i.id; });
       if (!hay) {
         var muerto = el("span", "pv-chip is-off", i.label);
-        muerto.title = "Todavía no hay ejercicios de esta instancia en el vault";
+        muerto.setAttribute("tabindex", "0");
+        muerto.setAttribute("data-tip-title", i.label);
+        muerto.setAttribute("data-tip-text", "Todavía no hay ejercicios de esta instancia en el vault.");
         chips.appendChild(muerto);
         return;
       }
       var activo = st.inst === i.id;
-      chips.appendChild(
-        enlace("pv-chip" + (activo ? " is-on" : ""), href(st, { inst: activo ? "" : i.id }), i.label),
-      );
+      var cuantos = ITEMS.filter(function (e) { return e.instancia === i.id; }).length;
+      var chip = enlace("pv-chip" + (activo ? " is-on" : ""), href(st, { inst: activo ? "" : i.id }), i.label);
+      chip.setAttribute("data-tip-title", i.label);
+      chip.setAttribute("data-tip-text", cuantos + (cuantos === 1 ? " ejercicio" : " ejercicios") + (activo ? " · clic para quitar el filtro" : " · clic para ver solo esta instancia"));
+      chips.appendChild(chip);
     });
     caja.appendChild(chips);
 
@@ -280,13 +383,8 @@
       var vacio = el("p", "pv-vacio", "Ningún ejercicio coincide con el filtro.");
       raiz.appendChild(vacio);
     }
-    grupos.forEach(function (g) {
-      var sec = el("section", "pv-grupo");
-      var t = el("h2", "pv-grupo-t", g.clave);
-      t.appendChild(el("span", "pv-grupo-n", String(g.items.length)));
-      sec.appendChild(t);
-      g.items.forEach(function (e) { sec.appendChild(ejercicioNodo(e, st.orden)); });
-      raiz.appendChild(sec);
+    grupos.forEach(function (g, i) {
+      raiz.appendChild(grupoNodo(g, st.orden, i));
     });
 
     main.replaceChildren(raiz);

@@ -267,8 +267,8 @@ describe("portada de división", () => {
 describe("rail", () => {
   it("intercala los grupos SLOT entre los FIJOS y marca cuál es cuál", () => {
     const groups = modelConLink().railGroups;
-    expect(groups.map((g) => g.id)).toEqual(["ruta", "consultar", "practicar", "resolver", "material", "mio"]);
-    expect(groups.map((g) => g.slot)).toEqual([false, false, false, true, true, false]);
+    expect(groups.map((g) => g.id)).toEqual(["ruta", "resolver", "material", "consultar", "practicar", "mio"]);
+    expect(groups.map((g) => g.slot)).toEqual([false, true, true, false, false, false]);
   });
 
   it("esconde los ítems `page` cuyo slug no existe y los grupos que quedan vacíos", () => {
@@ -293,13 +293,14 @@ describe("rail", () => {
 
   it("resuelve las rutas de cada `kind`", () => {
     const groups = modelConLink().railGroups;
-    const home = groups[0]?.items[0];
+    const byId = (id: string) => groups.find((g) => g.id === id);
+    const home = byId("ruta")?.items[0];
     expect(home?.to).toBe("/m/proba");
-    const graph = groups[1]?.items[1];
+    const graph = byId("consultar")?.items[1];
     expect(graph?.to).toBe("/m/proba/graph");
-    const explorador = groups[3]?.items[1];
+    const explorador = byId("resolver")?.items[1];
     expect(explorador?.to).toBe("/m/proba/t/explorador");
-    const campus = groups[4]?.items[0];
+    const campus = byId("material")?.items[0];
     expect(campus?.external).toBe(true);
     expect(campus?.href).toBe("https://campus.itba.edu.ar");
   });

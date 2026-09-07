@@ -708,9 +708,13 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
     return { id: group.id, label: group.label, color: cssColor(group.color, "var(--primary)"), slot, items };
   };
 
+  /* Orden (pedido del usuario, 2026-09-07): «Mi ruta», los grupos propios de la
+     materia, y recién después «Consultar» y «Practicar», que son genéricos; al
+     final los fijos de cierre. Así lo específico de cada materia queda a mano. */
   const railGroups: RailGroupView[] = [
-    ...FIXED_RAIL.map((g) => toGroup(g, false)),
+    ...FIXED_RAIL.filter((g) => g.id === "ruta").map((g) => toGroup(g, false)),
     ...cfg.rail.map((g) => toGroup(g, true)),
+    ...FIXED_RAIL.filter((g) => g.id !== "ruta").map((g) => toGroup(g, false)),
     ...FIXED_RAIL_TAIL.map((g) => toGroup(g, false)),
   ].filter((g): g is RailGroupView => g !== null);
 

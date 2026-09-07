@@ -15,7 +15,7 @@
     {
       "id": "parciales",
       "label": "Parciales resueltos",
-      "icon": "quiz",
+      "icon": "exam",
       "layout": "wide",
       "frame": "sheet"
     }
