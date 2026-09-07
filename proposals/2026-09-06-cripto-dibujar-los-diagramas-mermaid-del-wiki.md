@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Dibujar los diagramas Mermaid del wiki"
 rama: proposal/cripto-20260906-dibujar-los-diagramas-mermaid-del-wiki
-estado: abierta
+estado: cambios-pedidos
 pr: https://github.com/SebasCaules/Sinapsis/pull/5
 ---
 
@@ -146,4 +146,23 @@ apps/web build: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** cambios-pedidos
+**Revisó:** orquestador de la plataforma · 2026-09-06
+**Commit de merge:** no corresponde
+
+### Gates en la rama
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — contract 44, markdown 97, runtime 178, web 686, cli 57 (una primera corrida bajo carga dio un timeout en «compila la materia real de Proba»; a solas pasan las 57). Coinciden con la propuesta.
+- `pnpm build`: OK — `mermaid.core` sale en su propio trozo (659 kB, 159 kB comprimido) y el del lector no crece, como dice la propuesta.
+- `pnpm e2e`: 92 pasadas, 3 omitidas, 2 fallas: `landing.spec.ts:47` («agrupa las materias por cuatrimestre») es **preexistente en `main`** (asume una sola materia; falla igual en las otras ramas), y `reader.spec.ts:65` («marcar estudiado…») fue un timeout bajo carga: repetida a solas pasa dos de dos. Ninguna es de esta propuesta.
+
+### Hallazgos
+1. **(medio)** `apps/web/src/features/subject/markdown/Mermaid.tsx:111-129` — la promesa «si el diagrama no compila se muestra el bloque de código original, nunca el cartel de error de Mermaid» **no se cumple** con la librería real. Con `mermaid@11.17.2`, `securityLevel: "strict"` y `suppressErrors: true`, un texto que no parsea deja en el hueco el SVG de error de Mermaid («Syntax error in text · mermaid version 11.17.2»); `target.querySelector("svg")` lo encuentra, el componente marca `data-mermaid="dibujado"` y el lector muestra la bomba de Mermaid en vez del código. Lo comprobé en este worktree con un test contra la librería real (no mockeada). El test de la propuesta (`Mermaid.test.tsx:15-33`) no lo detecta porque el mock de `run` deja el nodo vacío al fallar, que no es lo que hace Mermaid. Hace falta: `suppressErrorRendering: true` en `initialize` (existe en la versión fijada: `config.type.d.ts:252`), y que el caso «no compila» se pruebe con la librería real o con un mock que reproduzca el SVG de error.
+2. **(medio)** La rama incluye el commit `3f20156` («Claustro: el grano pasa a ser una sola capa global…», N0-65), que no es de esta propuesta: nació de un `main` local que estaba adelante de `origin/main`, y ese commit además arrastró el CSS de Mermaid (`.prose .mermaid`, `.mermaidFallback`, `font-variant-ligatures: none`), como la propia propuesta anota. Para que el diff del PR sea solo la propuesta, `3f20156` tiene que llegar a `origin/main` antes (lo empuja quien lo hizo, desde `main`); si no llega, el CSS hay que traerlo a esta rama de forma explícita.
+3. **(bajo)** Los comentarios del código y el contrato citan la decisión como **N0-63**, que ya existe (dock del botón «Panel»). Escriba `N0-nn`; el número lo pone el orquestador al mergear.
+4. **(bajo)** El contrato 02 §11 sigue diciendo que los adjuntos de imagen no se publican; no lo toque acá (es de la propuesta de adjuntos), pero al rebasar sobre `main` puede aparecer el conflicto: la fila la resuelve la otra propuesta.
+
+Lo demás pasa las lentes: el texto del diagrama entra como `textContent` y no como HTML, sin `rehype-raw`; `securityLevel: "strict"` es correcto; la carga es diferida y medida; los `<br/>` se conservan; los colores salen de los tokens y se recomponen al cambiar el tema; una página sin Mermaid no importa la librería (probado). Español neutro.
+
+### Efecto en las materias
+- Ninguno hasta aprobar. Cripto no tiene que republicar: el dibujo lo hace el lector sobre el markdown ya publicado.
