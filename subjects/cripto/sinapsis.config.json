@@ -151,49 +151,39 @@
           "label": "Cronograma",
           "icon": "clock",
           "kind": "page",
-          "target": "cronograma"
-        },
-        {
-          "id": "programa",
-          "label": "Programa y objetivos",
-          "icon": "list",
-          "kind": "page",
-          "target": "programa-y-objetivos"
+          "target": "cronograma",
+          "hint": "Fechas de clases, guías, parciales y entrega del TP"
         },
         {
           "id": "reglamento",
-          "label": "Reglamento y evaluación",
+          "label": "Reglamento",
           "icon": "book",
           "kind": "page",
-          "target": "reglamento-y-evaluacion"
-        },
-        {
-          "id": "bibliografia",
-          "label": "Bibliografía",
-          "icon": "notebook",
-          "kind": "page",
-          "target": "bibliografia"
+          "target": "reglamento-y-evaluacion",
+          "hint": "Cómo se aprueba: parciales, TP, final y la fórmula de la nota"
         }
       ]
     },
     {
-      "id": "evaluacion",
-      "label": "Evaluación",
+      "id": "practica",
+      "label": "Practicar",
       "color": "--ueval",
       "items": [
         {
           "id": "parciales",
-          "label": "Parciales viejos",
+          "label": "Parciales resueltos",
           "icon": "quiz",
-          "kind": "page",
-          "target": "parciales-viejos"
+          "kind": "tool",
+          "target": "parciales",
+          "hint": "19 ejercicios de parcial con su resolución, por tipo o por parcial"
         },
         {
           "id": "tp",
           "label": "TP de implementación",
           "icon": "pencil",
           "kind": "page",
-          "target": "tp-implementacion"
+          "target": "tp-implementacion",
+          "hint": "La consigna, las fechas y el material de referencia"
         }
       ]
     }
