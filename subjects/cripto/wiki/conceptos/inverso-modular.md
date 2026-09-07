@@ -1,7 +1,7 @@
 ---
 title: Inverso modular
 resumen: 'Cuándo existe el inverso multiplicativo módulo m, cuántos hay y cómo se calcula: existe si y solo si a es coprimo con m, se obtiene con Euclides extendido y decide qué claves sirven en un criptosistema.'
-fuentes: ["[[clase-02-cifrado]]", "[[teoria-de-numeros]]", "[[video-02-guia-rapida-a-teoria-de-numeros]]", "[[guia-02-resolucion]]"]
+fuentes: ["[[clase-02-cifrado]]", "[[teoria-de-numeros]]", "[[video-02-guia-rapida-a-teoria-de-numeros]]", "[[guia-02-criptografia-simetrica]]"]
 aliases: [Inverso modular, Inverso multiplicativo, Inversa modular, Inversas modulares, Ecuación lineal de congruencia, Congruencia lineal, Elementos inversibles, Unidades de Zm]
 type: concepto
 unidad: 1
@@ -19,7 +19,7 @@ Esta nota trae **cómo dividir en $\mathbb{Z}_m$: cuándo existe $a^{-1}$, cuán
 
 **Qué la distingue de sus vecinas.** [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] muestra que $\mathbb{Z}_m$ sabe sumar y multiplicar **pero no dividir**; [[algoritmo-de-euclides-extendido|Euclides extendido]] da la maquinaria genérica. Esta nota junta las dos cosas: **el inverso modular es el caso $c=1$ de la ecuación diofántica**, y es el único caso que la criptografía usa todo el tiempo.
 
-> **Fuentes.** Apunte manuscrito [`DirtyGuidToNumberTheory.pdf`](../../raw/apuntes/DirtyGuidToNumberTheory.pdf), hoja 2 (secciones *Ecuación lineal de congruencia* e *Inverso modular*) — la [[teoria-de-numeros#Inverso modular|transcripción fiel está en el apunte]] · el video del docente, **ya mirado y volcado** en [[video-02-guia-rapida-a-teoria-de-numeros|video-02]] — donde, contra lo que sugiere el nombre del archivo, el título real es *Guía Rápida a Teoría de Números* · el [[guia-02-resolucion|Ej. 7 de la Guía 2]], que es donde el vault lo necesita por primera vez.
+> **Fuentes.** Apunte manuscrito [`DirtyGuidToNumberTheory.pdf`](../../raw/apuntes/DirtyGuidToNumberTheory.pdf), hoja 2 (secciones *Ecuación lineal de congruencia* e *Inverso modular*) — la [[teoria-de-numeros#Inverso modular|transcripción fiel está en el apunte]] · el video del docente, **ya mirado y volcado** en [[video-02-guia-rapida-a-teoria-de-numeros|video-02]] — donde, contra lo que sugiere el nombre del archivo, el título real es *Guía Rápida a Teoría de Números* · el [[guia-02-criptografia-simetrica|Ej. 7 de la Guía 2]], que es donde el vault lo necesita por primera vez.
 >
 > Las demostraciones, la tabla completa de inversibles de $\mathbb{Z}_{32}$, la lectura sobre el espacio de claves y el adelanto de RSA son **desarrollo nuestro**, y van rotulados.
 
@@ -158,13 +158,13 @@ $$7\cdot 23 \equiv 1 \pmod{32} \quad\Longrightarrow\quad \boxed{7^{-1} = 23 \ \t
 
 *Verificación directa:* $7\cdot 23 = 161 = 5\cdot 32 + 1$. $\checkmark$
 
-**Y de yapa, la primera fila del descifrado del Ej. 7c**: la congruencia $7\bar{x} \equiv 13 \pmod{32}$ se resuelve multiplicando por el inverso, $x \equiv 23\cdot 13 = 299 = 9\cdot 32 + 11 \equiv 11 \pmod{32}$ — que es exactamente el $Y_1 = 11$ de la [[guia-02-resolucion|tabla de descifrado de la guía]].
+**Y de yapa, la primera fila del descifrado del Ej. 7c**: la congruencia $7\bar{x} \equiv 13 \pmod{32}$ se resuelve multiplicando por el inverso, $x \equiv 23\cdot 13 = 299 = 9\cdot 32 + 11 \equiv 11 \pmod{32}$ — que es exactamente el $Y_1 = 11$ de la [[guia-02-criptografia-simetrica|tabla de descifrado de la guía]].
 
 ---
 
 ## 6. El ejemplo que importa: Z_32 y el espacio de claves
 
-Este es el contenido del [[guia-02-resolucion|Ej. 7a de la Guía 2]], y es donde el tema deja de ser matemática y pasa a ser criptografía.
+Este es el contenido del [[guia-02-criptografia-simetrica|Ej. 7a de la Guía 2]], y es donde el tema deja de ser matemática y pasa a ser criptografía.
 
 ### Quiénes son los inversibles
 
@@ -235,7 +235,7 @@ $$\boxed{\ \text{claves usables} \;=\; \mathbb{Z}_n^{*} \;=\; \{\,K : \operatorn
 
 $$E\big(K, E(K, M)\big) = M\cdot K^{2} \equiv M \pmod{32}$$
 
-**Cifrar dos veces con esa clave devuelve el mensaje original.** O sea: para esas cuatro claves, **cifrar y descifrar son la misma operación**. Es exactamente la definición de **clave débil** del [[guia-02-resolucion|Ej. 8 de la Guía 2]], donde se analizan las claves débiles de [[des-y-3des|DES]]. Acá el mecanismo es aritmético en vez de estructural (allá viene del key schedule de Feistel), pero el síntoma es idéntico: $\mathsf{Enc}_K$ es una **involución**, y eso le regala información al adversario.
+**Cifrar dos veces con esa clave devuelve el mensaje original.** O sea: para esas cuatro claves, **cifrar y descifrar son la misma operación**. Es exactamente la definición de **clave débil** del [[guia-02-criptografia-simetrica|Ej. 8 de la Guía 2]], donde se analizan las claves débiles de [[des-y-3des|DES]]. Acá el mecanismo es aritmético en vez de estructural (allá viene del key schedule de Feistel), pero el síntoma es idéntico: $\mathsf{Enc}_K$ es una **involución**, y eso le regala información al adversario.
 
 *Verificación:* $15^2 = 225 = 7\cdot 32 + 1$; $17^2 = 289 = 9\cdot 32 + 1$; $31^2 = 961 = 30\cdot 32 + 1$. $\checkmark$
 
@@ -281,17 +281,3 @@ El docente marcó nominalmente *"calcular cuál es el inverso multiplicativo o m
 ## Sobre la numeración de esta nota
 
 Esta nota lleva `02.15` por la misma razón que [[aritmetica-modular-y-divisibilidad|02.13]] y [[algoritmo-de-euclides-extendido|02.14]]: es la tercera del bloque de teoría de números, que el vault ubica en la Clase 02. La justificación completa —incluido qué renumerar si el tema termina en la Clase 4, que es donde, como muestra la sección 8, se cobra de verdad— está en [[aritmetica-modular-y-divisibilidad#Sobre la numeración de esta nota|Aritmética modular y divisibilidad § Sobre la numeración de esta nota]].
-
-## Ver también
-
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — la maquinaria que calcula el inverso; el Ejemplo 1 es el $7^{-1}\bmod 32$ de acá
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — por qué $\mathbb{Z}_m$ no sabe dividir de fábrica, y el contraejemplo de cancelación
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — el caso $m$ primo, donde **todo** es inversible y el anillo se vuelve cuerpo
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — el objeto que necesita que la clave sea inversible para poder existir
-- [[guia-02-resolucion|Guía 2 — Resolución]] — Ej. 7a (espacio efectivo de clave) y Ej. 7c (descifrar con $7^{-1}=23$); Ej. 8 para las claves débiles
-- [[teoria-de-numeros|Teoría de números]] — la transcripción del manuscrito, con la notación $\bar{x}$, $(a{:}m)$ y $a\perp m$
-- [[cuerpos-finitos|Cuerpos finitos]] — $\varphi$ de Euler y la advertencia de que sólo es calculable con la factorización
-- [[criptosistema|Criptosistema]] — la condición de corrección que esto convierte en una cuenta concreta
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — espacio nominal contra espacio efectivo de clave
-- [[des-y-3des|DES y 3-DES]] — el otro lugar del vault donde aparecen claves débiles e involuciones
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que encarga el repaso

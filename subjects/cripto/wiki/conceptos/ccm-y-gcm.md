@@ -369,18 +369,3 @@ La clase cierra el tema poniendo los modos autenticados en perspectiva contra lo
 > de bloques[,] nosotros vimos 5 mecanismos[,] si quieren, ignorando el […] E C B, que es no encadenar. Acá vemos 2 más. Hay muchos más mecanismos de encadenamiento en general. 99 por 100 de las aplicaciones requieren estos. El resto ya son de usos súper específicos[,] donde si alguna vez les aparece, tendrán que leer qué diferencia a esos […] modos de encadenamiento de los estándares. Y ojalá apliquen en el lugar donde estén. Si no, con esto cubren el 99 por 100 de las aplicaciones que requieran criptografía.
 
 > **Discrepancia menor de conteo, que conviene registrar.** El docente dice *"5 mecanismos, ignorando el ECB"*, lo que daría **seis** modos en total. En el material de la Clase 02 los modos son **cinco contando `ECB`**: `ECB`, `CBC`, `CFB`, `OFB` y `CTR` — así los enumera la nota [[modos-de-encadenamiento#Los cinco modos|Modos de encadenamiento]], cuyo propio título es *"Los cinco modos"*. Lo más probable es que el docente esté contando de memoria y que el "ignorando el ECB" sea una aclaración sobre su estatus (`ECB` no encadena y no es CPA-Secure) más que una resta al total. Con el conteo del vault, el inventario cerrado queda en **cinco modos de la Clase 02 más estos dos**, siete en total, de los cuales `ECB` no se usa nunca.
-
-## Ver también
-
-- [[cifrado-autenticado|Cifrado autenticado]] — la construcción genérica de la que estos dos modos son las instanciaciones prácticas
-- [[privacidad-e-integridad|Privacidad e integridad]] — las tres combinaciones, la regla de las dos claves independientes, y por qué **los dos** modos necesitan prueba propia para saltearla
-- [[cbc-mac|CBC-MAC]] — la pieza de autenticación de `CCM`, con el ataque de longitud variable que explica el bloque $B_0$
-- [[message-authentication-code|Message Authentication Code]] — qué es una etiqueta y qué garantiza
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — la familia con la que `GHASH` se compara en clase, y de la que en rigor no forma parte
-- [[maleabilidad|Maleabilidad]] y [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — el problema que estos modos resuelven
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — `CTR`, sobre el que se montan los dos, y los cinco modos del inventario de la Clase 02
-- [[aes|AES]] — la primitiva que los dos encadenan
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — qué es $\mathrm{GF}(2^{128})$, el cuerpo donde vive GHASH
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] y [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — dónde entran `AES-GCM` y `AES-CCM` en la lista de recomendados, y qué significa "cayendo en desuso"
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la sesión del 03/09, cues pt2 763-890
-- Katz & Lindell cap. 4 *Message Authentication Codes* ([[bibliografia|bibliografía]]) — el marco genérico; el libro **no** trata `CCM` ni `GCM`, y el docente lo dice en clase

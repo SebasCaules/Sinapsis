@@ -63,12 +63,3 @@ La filmina 23 es la única que describe su factor con **dos direcciones opuestas
 - **Factor negativo** — reduce la confianza sin necesariamente romperla. El ejemplo de la filmina: un usuario que aparece de golpe conectándose desde otro país tiene *"MENOS chances de que sea quien dice ser"* — nótese que la filmina dice *menos*, no *ninguna*.
 
 *(Lectura nuestra.)* Esa doble dirección es exactamente la lógica de cualquier sistema de ***risk-based authentication***: el contexto no decide por sí solo si autenticar o no, ajusta cuánta evidencia adicional exigir. Por esa misma razón el contexto **nunca funciona solo** — no hay forma de que "conectarse desde tal país" apruebe o rechace una identidad sin ningún otro factor detrás; sólo puede sumar o restar confianza sobre lo que otro factor ya estableció.
-
-## Ver también
-
-- [[clase-07-autenticacion#2. Factores de autenticación|Clase 07 — Autenticación § 2. Factores de autenticación]] — la sección de la que cuelga esta nota
-- [[clase-07-autenticacion#Estado de las fuentes|Clase 07 — Autenticación § Estado de las fuentes]] — por qué el cruce con el Video 07 no contradice que ningún video dicte esta clase
-- [[autenticacion|Autenticación]] — el modelo $(A,C,F,L,S)$ del que $a\in A$ es la entrada que estos factores completan
-- [[almacenamiento-de-claves|Almacenamiento de claves]] — qué pasa con el factor "algo que conozco" una vez que el sistema lo tiene que guardar
-- [[video-07-principios-de-diseno-2024#8. Aceptación psicológica|Video 07 — Principios de diseño (2024) § 8. Aceptación psicológica]] — biometría, usabilidad y *liveness detection*
-- [[video-07-principios-de-diseno-2024#Tres hilos transversales|Video 07 — Principios de diseño (2024) § Tres hilos transversales]] — el ejemplo de SMS/WhatsApp como canal compartido entre segundo factor y recupero de clave

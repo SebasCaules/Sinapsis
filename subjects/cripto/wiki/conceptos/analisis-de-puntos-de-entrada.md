@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 9
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, superficie-de-ataque, dmz, defensa-en-profundidad, ids, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -25,8 +25,8 @@ La filmina no enumera vulnerabilidades puntuales: enumera **superficies**, y par
 
 | Punto de entrada | Qué lo cubre |
 |---|---|
-| Puertos del web server | El [[clase-10-seguridad-en-la-empresa#Servicio web proxy (filmina 21)\|proxy]] revisa requerimientos inválidos o sospechosos y los rechaza |
-| Puerto del servidor de email | El [[clase-10-seguridad-en-la-empresa#Servicio email (filminas 18-20)\|proxy de email]] revisa emails buscando mensajes inválidos y los rechaza |
+| Puertos del web server | El [[diseno-de-servicios-en-la-dmz#Servicio web proxy (filmina 21)\|proxy]] revisa requerimientos inválidos o sospechosos y los rechaza |
+| Puerto del servidor de email | El [[diseno-de-servicios-en-la-dmz#Servicio email (filminas 18-20)\|proxy de email]] revisa emails buscando mensajes inválidos y los rechaza |
 | Problemas de software o hardware en el firewall mismo | Dos principios combinados: el firewall diseñado lo más simple posible, y `defensa en profundidad` (DMZ + firewall interno) |
 
 El tercer punto es el más interesante porque **no tiene un control puntual** como los dos primeros. Un packet filter o un application firewall son, ellos mismos, software: pueden tener bugs, configuraciones erróneas, o hardware que falla. Contra eso no hay un filtro adicional que lo revise —sería el mismo problema un nivel más arriba—, así que la mitigación es estructural: **menos código, menos superficie**, y si aun así falla, **una segunda barrera detrás** (el firewall interno) contiene el daño. Es la razón de fondo por la que la arquitectura entera usa dos firewalls y no uno solo: no es redundancia por las dudas, es la respuesta directa a que el firewall es, él mismo, un posible punto de entrada.
@@ -69,12 +69,3 @@ Nótese que las tres son mutuamente excluyentes como explicación de **cómo** l
 ## Por qué la asimetría es defendible, no arbitraria
 
 *(Lectura nuestra.)* La justificación de fondo es bayesiana, aunque la filmina no lo plantee en esos términos: la probabilidad **a priori** de un ataque exitoso es muy distinta según la capa. Afuera del firewall externo, el tráfico hostil es la norma y el filtro exitoso es la excepción esperable —tratar cada intento fallido como una emergencia sería ruido puro—. Adentro de la DMZ, la norma **debería** ser tráfico legítimo ya filtrado por el firewall externo, así que cualquier desviación —exitosa o no— es evidencia fuerte de que algo en el modelo falló. La misma señal (un ataque) actualiza mucho más la creencia de "algo anda mal" cuando ocurre donde es infrecuente que cuando ocurre donde es rutina.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#9. Caso de estudio: análisis de puntos de entrada (filminas 29-31)|Clase 10 — Seguridad en la empresa: sección 9]]
-- [[servicios-de-soporte-dns-log-y-proxy|Servicios de soporte: DNS, log y proxy]] — el Log Server que produce el insumo de este análisis
-- [[segmentacion-de-la-red-interna|Segmentación de la red interna]]
-- [[deteccion-y-prevencion-de-intrusiones|Detección y prevención de intrusiones]] — desarrollo de `IDS` e `IPS`, apenas anunciados acá
-- [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]] — los proxies que cubren los dos primeros puntos de entrada
-- [[videografia|Videografía]] — ningún video de la cátedra cubre esta clase, confirmado ahí

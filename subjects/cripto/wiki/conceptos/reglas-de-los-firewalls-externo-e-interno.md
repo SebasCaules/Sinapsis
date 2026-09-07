@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 6
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, firewalls, dmz, nat, mediacion-completa, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -51,7 +51,7 @@ Media entre la `DMZ` y la red `INTERNAL`:
 Dos observaciones que conviene tener explícitas, porque es el tipo de comparación que un examen puede pedir directamente:
 
 - **El firewall interno es más restrictivo que el externo en la dirección DMZ→interna.** El externo deja pasar SMTP y HTTP/S en ambos sentidos (con las restricciones de origen ya vistas); el interno, en el sentido DMZ→interna, **sólo** deja pasar SMTP. La DMZ nunca inicia una conexión web hacia la red interna, porque no hay ninguna razón operativa para que lo haga — nada en la red interna necesita recibir peticiones web iniciadas desde afuera de sí misma.
-- **El proxy web recibe tráfico redireccionado, no solicitado directamente por el usuario.** *"Redirecciona (transparentemente)"* significa que el usuario de la red interna no configura el proxy a mano: el propio firewall interno **intercepta** el tráfico HTTP/S saliente y lo fuerza a pasar por el proxy, sin que el usuario lo note. Es una instancia concreta de [[clase-08-principios-de-diseno-y-vulnerabilidades#1.4. Mediación completa|mediación completa]]: todo el tráfico relevante pasa por el punto de control, sin depender de que cada usuario recuerde configurarlo.
+- **El proxy web recibe tráfico redireccionado, no solicitado directamente por el usuario.** *"Redirecciona (transparentemente)"* significa que el usuario de la red interna no configura el proxy a mano: el propio firewall interno **intercepta** el tráfico HTTP/S saliente y lo fuerza a pasar por el proxy, sin que el usuario lo note. Es una instancia concreta de [[principios-de-diseno#4. Mediación completa|mediación completa]]: todo el tráfico relevante pasa por el punto de control, sin depender de que cada usuario recuerde configurarlo.
 
 ## Consecuencias, comunes a ambos firewalls (filmina 24)
 
@@ -60,7 +60,7 @@ Dos observaciones que conviene tener explícitas, porque es el tipo de comparaci
 - **Sólo se permiten conexiones salientes desde servidores conocidos** — nunca desde un host arbitrario de la DMZ o de la red interna.
 - **La arquitectura permite separar los servicios en diferentes servidores.**
 
-Las etiquetas de margen de esta filmina son `Mediación Completa`, `Aceptación Psicológica`, `Menor privilegio` y `Mecanismos Exclusivos`. La que vale la pena resaltar es **[[clase-08-principios-de-diseno-y-vulnerabilidades#1.8. Aceptación psicológica|aceptación psicológica]]**: que el proxy sea transparente significa que el usuario **no necesita saber** que está siendo mediado para seguir usando la red con normalidad — el mecanismo de seguridad no le exige un cambio de comportamiento, que es justamente lo que ese principio pide. Un proxy que el usuario tuviera que configurar a mano fallaría en ese punto, aunque filtrara exactamente lo mismo.
+Las etiquetas de margen de esta filmina son `Mediación Completa`, `Aceptación Psicológica`, `Menor privilegio` y `Mecanismos Exclusivos`. La que vale la pena resaltar es **[[principios-de-diseno#8. Aceptación psicológica|aceptación psicológica]]**: que el proxy sea transparente significa que el usuario **no necesita saber** que está siendo mediado para seguir usando la red con normalidad — el mecanismo de seguridad no le exige un cambio de comportamiento, que es justamente lo que ese principio pide. Un proxy que el usuario tuviera que configurar a mano fallaría en ese punto, aunque filtrara exactamente lo mismo.
 
 ## Tabla resumen: quién puede hablar con quién
 
@@ -73,13 +73,3 @@ Las etiquetas de margen de esta filmina son `Mediación Completa`, `Aceptación 
 | Cualquier otro caso | — | Rechazado por ambos firewalls |
 
 La fila que más se presta a error en un parcial es la de **DMZ → Interna**: de los cuatro flujos posibles, es el único reducido a un solo protocolo y un solo origen — reflejo directo de que, según la [[zona-desmilitarizada#Por qué la DMZ no es sólo "una subred con menos privilegios"|zona desmilitarizada]], un servidor de la DMZ comprometido no debería tener casi ningún camino de vuelta hacia adentro.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#6. Caso de estudio: reglas de los firewalls externo e interno (filminas 22-24)|Clase 10 — Seguridad en la empresa]] — la sección de la clase que esta nota desarrolla
-- [[netfilter-e-iptables|Netfilter e iptables]] — cómo se implementarían estas políticas en la práctica, regla por regla
-- [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]] — los servidores (mail, web, proxy) que estas reglas nombran como origen o destino permitido
-- [[zona-desmilitarizada|Zona desmilitarizada]] — la subred que estos dos firewalls delimitan
-- [[analisis-de-puntos-de-entrada|Análisis de puntos de entrada]] — qué pasa cuando, a pesar de estas reglas, algún ataque es exitoso
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#1. Política de seguridad y sistema seguro|Clase 06 — Políticas de seguridad y control de acceso]] — el modelo de política del que estas reglas son una implementación concreta, no una definición
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#1.8. Aceptación psicológica|Clase 08 — Principios de diseño y vulnerabilidades]] — aceptación psicológica, el principio detrás de la mediación transparente del proxy

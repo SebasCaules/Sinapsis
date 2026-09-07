@@ -52,11 +52,3 @@ Sobre esa CRL global, hay dos formas de consultarla:
 - **Consultar el estado de un certificado puntual online**, por conexión directa al servicio de la AC.
 
 > **El compromiso entre las dos formas de consulta** *(lectura nuestra, no está en la filmina)*: la validación offline es rápida y no depende de la disponibilidad de la AC en el momento de la verificación, pero introduce un desfasaje — la copia local de la CRL puede estar desactualizada, y una revocación reciente no se reflejaría hasta la próxima descarga. La validación online resuelve ese desfasaje al costo de depender de que el servicio de la AC esté disponible y responda a tiempo, lo cual reintroduce parte del problema de propagación que la CRL busca resolver. Ninguna de las dos opciones es estrictamente mejor; es el mismo tipo de compromiso que en otros contextos del curso se resuelve con [[riesgo-y-seguridad-relativa|riesgo y seguridad relativa]]: la elección depende de qué tan crítico es detectar una revocación en tiempo real.
-
-## Ver también
-
-- [[clase-05-protocolos-criptograficos#7. Revocación y listas CRL|Clase 05 — Protocolos criptográficos, sección 7]] — la sección de la que sale esta nota
-- [[x509|X.509]] — el estándar cuyo paso de verificación de vigencia esta nota complementa
-- [[certificados-digitales|Certificados digitales]] — el intervalo de validez que la revocación anticipa
-- [[cadenas-de-firmas-y-autoridades-raiz|Cadenas de firmas y autoridades raíz]] — por qué solo el emisor puede revocar es la misma lógica de confianza jerárquica de esta sección
-- [[riesgo-y-seguridad-relativa|Riesgo y seguridad relativa]] — el marco general para pensar el compromiso entre validación offline y online

@@ -52,16 +52,3 @@ El ejemplo de "cuenta conocida" de la filmina 30 (`root`, `administrator`, `gues
 ## Offline sin límite: el caso del PIN de Apple
 
 El [[video-12-proteccion-de-datos-personales#La anécdota de Apple contra el Estado (50:57)|Video 12]] trae un caso que ilustra, mejor que cualquier ejemplo del deck, qué significa que un ataque offline "corre sin límite de intentos": tras el atentado de la maratón de Boston, el iPhone bloqueado no pudo abrirse porque Apple no tenía forma de saltear el PIN — hasta que una empresa contratada por el Estado **hizo tampering del hardware y puenteó el contador de intentos**. Sin ese contador, probar las diez mil combinaciones de un PIN de cuatro dígitos deja de ser una defensa online (limitada, auditable) y se convierte en un ataque offline de fuerza bruta pura sobre un espacio de claves minúsculo. Es la misma lección que cierra [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]]: un espacio de claves chico no es un problema mientras el **control de ejecución** —acá, el contador de intentos— siga en pie; el ataque real fue romper ese control, no el PIN.
-
-## Ver también
-
-- [[clase-07-autenticacion#4. Ataques a un sistema de autenticación|Clase 07 — Autenticación § 4. Ataques a un sistema de autenticación]] — la sección de la que cuelga esta nota
-- [[clase-07-autenticacion#Estado de las fuentes|Clase 07 — Autenticación § Estado de las fuentes]] — por qué los cruces con los Videos 06, 07 y 12 no contradicen que ningún video dicte esta clase
-- [[autenticacion|Autenticación]] — el modelo $(A,C,F,L,S)$ con el que esta nota escribe el ataque
-- [[almacenamiento-de-claves|Almacenamiento de claves]] — el esquema Unix tradicional, blanco directo del ataque offline sobre `/etc/shadow`
-- [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] — cuánto cuesta en tiempo cada uno de los dos modos de ataque
-- [[ataque-de-fuerza-bruta#Principio de espacio de claves suficiente|Ataque de fuerza bruta]] — el piso de todo ataque offline, con o sin límite de intentos
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — cómo se reduce el costo del ataque offline por debajo de la fuerza bruta pura
-- [[video-06-principios-de-diseno-2026#8. Menor asombro|Video 06 — Principios de diseño (2026) § 8. Menor asombro]] — la anécdota `admin`/`admin`
-- [[video-07-principios-de-diseno-2024#2. Valores iniciales seguros|Video 07 — Principios de diseño (2024) § 2. Valores iniciales seguros]] — bloqueo por intentos y claves de fábrica
-- [[video-12-proteccion-de-datos-personales#La anécdota de Apple contra el Estado (50:57)|Video 12 — Protección de datos personales § La anécdota de Apple contra el Estado (50:57)]] — qué pasa cuando se rompe el control que hacía "online" a un ataque

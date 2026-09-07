@@ -7,7 +7,7 @@ type: catedra
 clase: catedra
 orden: 4
 created: 2026-08-10
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [catedra, bibliografia, katz-lindell, bishop, menezes]
 sources: [Reglamento_Cripto.pdf, 72.44 - Criptografía y Seguridad.pdf, "Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 02pt2-Transcripcion.VTT", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "Clase 05 - Protocolos.pdf", "Clase 06 - Politicas.pdf", "Clase 07 - Aplicaciones - Principios y autenticacion.pdf", "Clase 08 - Control de acceso.pdf", "Clase 10 - Aplicaciones - Flujo de informacion.pdf", "Clase 11 - Seguridad en Redes.pdf", "Clase 12 - Analisis de vulnerabilidades.pdf", "Clase 13 - Pentesing.pdf"]
 ---
@@ -137,15 +137,15 @@ Los siete decks nuevos —Clases 04 a 10— cierran, cada uno, con una filmina t
 
 | Clase (vault) | Deck, filmina de cierre | Lectura tal como la escribe la filmina | Lectura en la edición del vault |
 |---|---|---|---|
-| [[clase-04-criptografia-asimetrica-y-firma-digital#14. Cierre y bibliografía\|Clase 04]] | `Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf`, filmina 41 | Katz & Lindell, **capítulos 9-12** | No aplica el problema de Bishop — es Katz & Lindell, sin desfasaje. La tensión con lo que esta bibliografía ya tenía asignado al cap. 10 (Clase 05) se discute en detalle en la nota de Clase 04 |
-| [[clase-05-protocolos-criptograficos#14. Change Cipher Spec, Alert y panorama final\|Clase 05]] | `Clase 05 - Protocolos.pdf`, filmina 48 | Bishop, **cap. 11** (*Key Management*) · RFC 5246 (`TLS` 1.2) · vulnerabilidad de renegociación de `TLS` (2009, `g-sec.lu/practicaltls.pdf`) | Sin desfasaje — coincide letra por letra con la fila 11 de la tabla de arriba |
-| [[clase-06-politicas-de-seguridad-y-control-de-acceso#15. OAuth 2.0\|Clase 06]] | `Clase 06 - Politicas.pdf`, filmina 56 *(fusión con el deck de abajo — ver el encabezado de esta ingesta)* | Bishop, **cap. 4** completo · **5.1-5.4** · **6.1-6.2** · **7.1** · **8.1** | Sin desfasaje — coincide letra por letra con las filas 4 a 8 de arriba |
-| [[clase-06-politicas-de-seguridad-y-control-de-acceso#15. OAuth 2.0\|Clase 06]] | `Clase 08 - Control de acceso.pdf`, filmina 43 *(fusión con el deck de arriba)* | Bishop, **cap. 15** (*Representing Identity*) · `OAuth 2.0` — RFC 6749 | **Cap. 16** (*Access Control Mechanisms* — ACLs y capacidades), aplicando el mismo desfasaje de +1 que las tres filas de abajo — ver la discusión |
-| [[clase-07-autenticacion#10. Autenticación remota y SSO\|Clase 07]] | `Clase 07 - Aplicaciones - Principios y autenticacion.pdf`, filmina 46 *(cierre del deck completo — el mismo deck que, en sus páginas 2-15, alimenta la Clase 08)* | Bishop, **caps. 12-13** | **Caps. 13-14** (*Authentication* + *Design Principles*) — ver la discusión |
-| [[clase-08-principios-de-diseno-y-vulnerabilidades#7. Identificación de vulnerabilidades\|Clase 08]] | `Clase 12 - Analisis de vulnerabilidades.pdf`, filmina 22 | Bishop, **caps. 18-19** | **Caps. 19-20** (*Introduction to Assurance* + *Building Systems with Assurance*) — ver la discusión |
-| [[clase-08-principios-de-diseno-y-vulnerabilidades#11. Validez de las pruebas de penetración — para discutir\|Clase 08]] | `Clase 13 - Pentesing.pdf`, filmina 32 | Bishop, **cap. 23**, secc. 1-2 · `OSSTMM` | **Cap. 24** (*Vulnerability Analysis — penetration testing*) — ver la discusión |
-| [[clase-09-flujo-de-informacion#9. Métodos de aislación\|Clase 09]] | `Clase 10 - Aplicaciones - Flujo de informacion.pdf`, filmina 27 | Bishop, **cap. 16-1** (¿sección 16.1? no se puede confirmar sin la edición citada) y **cap. 17** | **Caps. 17-18** (*Information Flow* + *Confinement Problem*) — ver la discusión |
-| [[clase-10-seguridad-en-la-empresa#11. Variaciones de la arquitectura (filminas 34-35)\|Clase 10]] | `Clase 11 - Seguridad en Redes.pdf`, filmina 36 | Bishop, **cap. 26** — la propia filmina 4 del mismo deck ya cita ese número al pie de un diagrama, con título puesto: *"Figura tomada de Computer Security Art & Science – Matt Bishop. Cap 26 – Network Security – pp 780"* | **Cap. 28** (*Network Security*) — desfasaje propio, de +2, no de +1 — ver la discusión |
+| [[clase-04-criptografia-asimetrica-y-firma-digital#Estado de las fuentes\|Clase 04]] | `Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf`, filmina 41 | Katz & Lindell, **capítulos 9-12** | No aplica el problema de Bishop — es Katz & Lindell, sin desfasaje. La tensión con lo que esta bibliografía ya tenía asignado al cap. 10 (Clase 05) se discute en detalle en la nota de Clase 04 |
+| [[clase-05-protocolos-criptograficos\|Clase 05]] | `Clase 05 - Protocolos.pdf`, filmina 48 | Bishop, **cap. 11** (*Key Management*) · RFC 5246 (`TLS` 1.2) · vulnerabilidad de renegociación de `TLS` (2009, `g-sec.lu/practicaltls.pdf`) | Sin desfasaje — coincide letra por letra con la fila 11 de la tabla de arriba |
+| [[clase-06-politicas-de-seguridad-y-control-de-acceso\|Clase 06]] | `Clase 06 - Politicas.pdf`, filmina 56 *(fusión con el deck de abajo — ver el encabezado de esta ingesta)* | Bishop, **cap. 4** completo · **5.1-5.4** · **6.1-6.2** · **7.1** · **8.1** | Sin desfasaje — coincide letra por letra con las filas 4 a 8 de arriba |
+| [[clase-06-politicas-de-seguridad-y-control-de-acceso\|Clase 06]] | `Clase 08 - Control de acceso.pdf`, filmina 43 *(fusión con el deck de arriba)* | Bishop, **cap. 15** (*Representing Identity*) · `OAuth 2.0` — RFC 6749 | **Cap. 16** (*Access Control Mechanisms* — ACLs y capacidades), aplicando el mismo desfasaje de +1 que las tres filas de abajo — ver la discusión |
+| [[clase-07-autenticacion\|Clase 07]] | `Clase 07 - Aplicaciones - Principios y autenticacion.pdf`, filmina 46 *(cierre del deck completo — el mismo deck que, en sus páginas 2-15, alimenta la Clase 08)* | Bishop, **caps. 12-13** | **Caps. 13-14** (*Authentication* + *Design Principles*) — ver la discusión |
+| [[identificacion-de-vulnerabilidades\|Identificación de vulnerabilidades]] | `Clase 12 - Analisis de vulnerabilidades.pdf`, filmina 22 | Bishop, **caps. 18-19** | **Caps. 19-20** (*Introduction to Assurance* + *Building Systems with Assurance*) — ver la discusión |
+| [[validez-de-las-pruebas-de-penetracion\|Validez de las pruebas de penetración]] | `Clase 13 - Pentesing.pdf`, filmina 32 | Bishop, **cap. 23**, secc. 1-2 · `OSSTMM` | **Cap. 24** (*Vulnerability Analysis — penetration testing*) — ver la discusión |
+| [[clase-09-flujo-de-informacion\|Clase 09]] | `Clase 10 - Aplicaciones - Flujo de informacion.pdf`, filmina 27 | Bishop, **cap. 16-1** (¿sección 16.1? no se puede confirmar sin la edición citada) y **cap. 17** | **Caps. 17-18** (*Information Flow* + *Confinement Problem*) — ver la discusión |
+| [[variaciones-de-la-arquitectura\|Variaciones de la arquitectura]] | `Clase 11 - Seguridad en Redes.pdf`, filmina 36 | Bishop, **cap. 26** — la propia filmina 4 del mismo deck ya cita ese número al pie de un diagrama, con título puesto: *"Figura tomada de Computer Security Art & Science – Matt Bishop. Cap 26 – Network Security – pp 780"* | **Cap. 28** (*Network Security*) — desfasaje propio, de +2, no de +1 — ver la discusión |
 | Clase 11 — Protección de datos | — no hay deck | Sin lectura designada: no hay filmina de la que sacarla. La única fuente de esta clase sigue siendo [[video-12-proteccion-de-datos-personales\|video-12]] | — |
 
 ### El desfasaje de numeración de Bishop: qué edición, si es sistemático, y la lectura correcta
@@ -154,7 +154,7 @@ Esta bibliografía mapea, en toda su tabla de Bishop de más arriba, la **2ª ed
 
 - **Capítulos 1 a 11: sin desfasaje.** El deck de Políticas (caps. 4-8) y el de Protocolos (cap. 11) citan capítulos que coinciden, letra por letra y tema por tema, con la fila correspondiente de la tabla de Bishop de esta edición.
 - **Capítulos 12 en adelante: +1, confirmado de forma independiente en cuatro decks.** Principios y autenticación (12-13 → 13-14), Control de acceso (15 → 16), Flujo de información (16-17 → 17-18), Vulnerabilidades (18-19 → 19-20) y Pentesting (23 → 24) — cinco lecturas en total, repartidas en cuatro decks. En los cinco casos la corrección hace que el capítulo coincida exactamente con el tema del deck que lo cita, y sin corregir ninguno coincide: *Cipher Techniques* no es *Design Principles*, *Representing Identity* no es lo que recomendaría un deck que se llama, literalmente, "Control de acceso". Es además, en las cinco filas, exactamente el capítulo que esta misma bibliografía ya le tenía asignado a esa clase **antes** de esta ingesta, por inferencia de tema, sin haber visto ninguna de estas filminas todavía — la evidencia nueva confirma la inferencia vieja, capítulo por capítulo, en las filas 13, 14, 16, 17, 18, 19, 20 y 24 de la tabla de más arriba.
-- **Seguridad en Redes: un desfasaje propio, de +2, y no hace falta inferirlo por tema.** La filmina 36 recomienda "el capítulo 26", pero la filmina 4 del mismo deck ya había citado ese mismo número **con el título puesto**, al pie de un diagrama: *"Cap 26 – Network Security"* (cita completa y contexto en la nota de [[clase-10-seguridad-en-la-empresa#1. Seguridad a nivel de red (filminas 2-4)|Clase 10, §1]]). En la edición del vault, *Network Security* es el capítulo **28**. Es la única de las nueve lecturas que no depende de adivinar el tema: la propia filmina puso el número y el título juntos, así que el corrimiento de dos capítulos —no de uno— queda confirmado por texto explícito, no por inferencia.
+- **Seguridad en Redes: un desfasaje propio, de +2, y no hace falta inferirlo por tema.** La filmina 36 recomienda "el capítulo 26", pero la filmina 4 del mismo deck ya había citado ese mismo número **con el título puesto**, al pie de un diagrama: *"Cap 26 – Network Security"* (cita completa y contexto en la nota de [[seguridad-a-nivel-de-red#El diagrama de referencia (filmina 4)|Seguridad a nivel de red]]). En la edición del vault, *Network Security* es el capítulo **28**. Es la única de las nueve lecturas que no depende de adivinar el tema: la propia filmina puso el número y el título juntos, así que el corrimiento de dos capítulos —no de uno— queda confirmado por texto explícito, no por inferencia.
 
 **¿Es sistemático, entonces?** Parcialmente, y no para todo el libro por igual. El +1 se repite igual en cuatro decks que van del capítulo 12 al 24, lo cual sí sugiere una causa común: probablemente estas filminas retienen la numeración de una edición de Bishop anterior a la de 2018, una que no traía separado como capítulo propio lo que en esta edición es el capítulo 12, *Cipher Techniques* — desde ahí en adelante, cada capítulo de esa edición corre uno atrás del correspondiente en ésta. *(Inferencia nuestra. No se pudo confirmar contra un ejemplar de esa edición anterior, ni siquiera identificar con certeza cuál sería: una búsqueda no devolvió una fuente confiable con el índice exacto de una edición previa de Bishop, así que la hipótesis del capítulo insertado queda como la explicación más simple compatible con los datos, no como un hecho verificado.)* Pero el patrón no cubre el libro entero: dos decks (Políticas, Protocolos) ya citan la numeración de 2018 sin corrimiento, y uno (Seguridad en Redes) tiene un corrimiento distinto, de dos capítulos, confirmado por texto explícito y no por tema. La explicación más simple, coherente con que estos son **13 decks de numeración histórica propia** que la cátedra no armó todos en el mismo momento (ver el encabezado de esta ingesta): cada deck retiene la numeración de Bishop que tenía vigente la última vez que se lo revisó, y esa revisión no fue simultánea para los trece — algunos ya citan la edición de 2018, otros se quedaron una edición atrás, y al menos uno, más atrás todavía.
 
@@ -176,7 +176,7 @@ No están en el vault; se citan en el programa como complementarias.
 
 ### El Libro Verde: el único de estos cinco que se nombró en clase
 
-De los cinco complementarios, cuatro son una lista que nadie mencionó nunca. **Menezes es la excepción.** Al cerrar la [[clase-02-cifrado#El cierre del 20/08: el campus, los ejemplos de parcial y el libro de aritmética|Clase 02]] el 20/08, justo después de mandar los capítulos 2 y 3 de Katz, el docente agrega (cue pt2 517):
+De los cinco complementarios, cuatro son una lista que nadie mencionó nunca. **Menezes es la excepción.** Al cerrar la [[clase-02-cifrado|Clase 02]] el 20/08, justo después de mandar los capítulos 2 y 3 de Katz, el docente agrega (cue pt2 517):
 
 > *"El libro de Menezes, que es **el Libro Verde**, está también **en la biblioteca**. Es un libro más bien de consulta: **ahí tienen DES descripto**, y si es una buena edición **tiene AES también**."*
 
@@ -184,13 +184,30 @@ Eso lo mueve de enciclopedia genérica a **referencia designada para el detalle 
 
 > **La reserva sobre AES es del propio docente, y tiene fundamento.** *"Si es una buena edición"* apunta a un problema real: el *Handbook* que cita el programa es de **1997** y `AES` se estandarizó en **2001** (FIPS 197), así que **esa edición no puede traerlo** — `DES` sí está, `AES` no. *(Precisión nuestra.)* Para `AES` el vault ya tiene la nota de concepto, y para `DES` a nivel de bit está [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]], que es material que la cátedra publica en el campus.
 
+### El material del campus, recorrido en pantalla el 20/08
+
+La segunda fecha de la [[clase-02-cifrado|Clase 02]] cierra distinto: en vez de dejar tarea, el docente **comparte pantalla y recorre el campus carpeta por carpeta** (cues pt2 517-528). El inventario mapea casi uno a uno contra `raw/apuntes/`, y es de donde salen los dos datos de arriba —Menezes como referencia designada de `DES` y `AES`— más uno que no es bibliográfico: **hay ejemplos de parcial publicados**, bajo la carpeta de Prácticas (cue pt2 521). Es el único material de evaluación nombrado en todo lo ingerido hasta hoy, **no está en `raw/`**, y queda como pendiente prioritario → [[reglamento-y-evaluacion|Reglamento y evaluación]] y [[parciales-viejos|Parciales viejos]].
+
+> [!quote]- De la transcripción — el inventario del campus, carpeta por carpeta (cues pt2 517-528)
+> *"Éste es el capítulo 2 y el 3 del libro de Katz (…) **el libro de Menezes, que es el Libro Verde**, está también en la biblioteca. Es un libro más bien de consulta: **ahí tienen DES descripto, y si es una buena edición tiene AES también**."*
+>
+> Y el recorrido: en **Prácticas**, *"ahí tienen **los ejemplos de parcial**"*. En **Apuntes**, *"ejemplos de probabilidad, temas de probabilidad y estadística que los van a necesitar para todo lo que tiene que ver con las pruebas de secreto perfecto, **para los experimentos**"*; el apunte de **cuerpo finito**; *"el algoritmo de Euclides extendido y **las inversas modulares**, que sirven para entender un algoritmo que van a ver más adelante que se llama **RSA**, que es un algoritmo asimétrico"*; un *"cheat sheet de algunas de estas reglas de números"*; el apunte *"sobre números aleatorios y randomness"*; una *"nota sobre diseño seguro de aplicaciones actuales"*; la **implementación de DES en Java** y la **de AES en Java**; y *"ah, hay un apunte de **teoría de la información** también"*.
+>
+> *(El pasaje está muy degradado en el ASR: lo que se afirma acá es lo legible.)*
+
+**Un detalle que decide una numeración del vault:** el motivo que da para el inverso modular es **RSA**, o sea la Clase 4. Eso refuerza la decisión de numerar [[aritmetica-modular-y-divisibilidad|02.13]] a [[inverso-modular|02.15]] como conceptos de la **Clase 2** —material encargado ahí— en vez de adelantarlos a la clase donde se usan.
+
+**Y las dos implementaciones en Java son del propio docente**, dato que [[implementaciones-de-referencia|Implementaciones de referencia]] no podía afirmar antes: *"ahora les voy a mostrar en detalle **con una implementación mía** de hace muchos años en Java (…) es hiper mal performante, pero **hace lo que hace el algoritmo**"* (cue pt2 124); *"AES tiene una implementación en Java que yo les estoy subiendo"* (cue pt2 425).
+
+> **Cabo suelto:** la *"nota sobre diseño seguro de aplicaciones actuales"* (cue pt2 526) no se puede identificar — el ASR no permite recuperar la publicación.
+
 ---
 
 ## Recomendado en clase, fuera del programa
 
 Un libro que **no** figura en ninguna de las dos listas del programa —ni obligatoria ni complementaria— y que el docente recomendó igual. **Es material optativo**, y así lo presentó: *"para los que sean más nerds de ustedes"*. No entra en lo que el [[reglamento-y-evaluacion|reglamento]] declara evaluable.
 
-**Un libro de aritmética de María Lina Becquer y Carlos Sánchez**, para quien quiera profundizar en **teoría de números**. Lo recomienda en el último minuto de la [[clase-02-cifrado#El cierre del 20/08: el campus, los ejemplos de parcial y el libro de aritmética|Clase 02]], el 20/08 (cues pt2 536-540):
+**Un libro de aritmética de María Lina Becquer y Carlos Sánchez**, para quien quiera profundizar en **teoría de números**. Lo recomienda en el último minuto de la [[clase-02-cifrado|Clase 02]], el 20/08 (cues pt2 536-540):
 
 > *"Para los que sean **más nerds** de ustedes, si les copa el tema de teoría de números, les recomiendo este libro. Es un libro buenísimo **de aritmética**; es un libro que se usa para **las olimpíadas de matemática**, o se usaba, por lo menos. Es de **María Lina Becquer y Carlos Sánchez** (…) Tiene un montón de ejercicios súper interesantes de teoría de números, **divertidos** (…) y están basados en todo lo que tiene que ver con teoría de números **que se usa en criptografía**."*
 
@@ -201,18 +218,3 @@ Un libro que **no** figura en ninguna de las dos listas del programa —ni oblig
 Y el contraste que conviene no perder: la otra cosa que el docente encarga sobre teoría de números —los **dos videos** de [[teoria-de-numeros|Teoría de números]]— viene **atada al parcial**; este libro **no**. Son dos niveles distintos de obligación y la nota de ese apunte los mantiene separados.
 
 > Del mismo pasaje sale un dato al margen, el único del curso sobre la formación común del equipo docente: Becquer y Sánchez **fueron profesores de los tres** —Ramele, Pablo y Ana— en la **Escuela Superior Técnica del Ejército** (el ASR escribe *"la Escuela Savio del Ejército"*).
-
-## Ver también
-
-- [[programa-y-objetivos|Programa y objetivos]] — el mapeo tema ↔ clase
-- [[reglamento-y-evaluacion|Reglamento y evaluación]] — por qué esta nota importa: se evalúa **sobre la bibliografía**, no sobre lo dicho en clase
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — designa los caps. 2 y 3, y es de donde salen el Libro Verde y el de aritmética
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — designa el cap. 4 en su última filmina
-- [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] — designa Katz & Lindell, caps. 9-12
-- [[clase-05-protocolos-criptograficos|Clase 05 — Protocolos criptográficos]] — designa el cap. 11 de Bishop, sin desfasaje
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso|Clase 06 — Políticas de seguridad y control de acceso]] — dos decks fusionados, dos lecturas designadas (caps. 4-8 y cap. 15/16)
-- [[clase-07-autenticacion|Clase 07 — Autenticación]] — designa los caps. 12-13, corregidos a 13-14
-- [[clase-08-principios-de-diseno-y-vulnerabilidades|Clase 08 — Principios de diseño y vulnerabilidades]] — dos decks, dos lecturas, y el desfasaje de +1 que esta nota resuelve
-- [[clase-09-flujo-de-informacion|Clase 09 — Flujo de información]] — designa los caps. 16-17, corregidos a 17-18
-- [[clase-10-seguridad-en-la-empresa|Clase 10 — Seguridad en la empresa]] — designa el cap. 26, corregido a 28 (el único desfasaje de +2)
-- [[identificacion-de-vulnerabilidades|Identificación de vulnerabilidades]] y [[validez-de-las-pruebas-de-penetracion|Validez de las pruebas de penetración]] — las dos notas que detectaron el desfasaje de Bishop antes de que esta nota lo resolviera en conjunto

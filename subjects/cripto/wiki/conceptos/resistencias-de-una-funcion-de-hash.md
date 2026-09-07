@@ -290,17 +290,3 @@ Las tres propiedades no son tres niveles de exigencia sobre la misma amenaza: **
 **El caso de la firma es el que más se subestima.** La objeción natural es *"una colisión al azar no sirve para nada, van a ser dos cadenas de basura"*. Es falsa: el atacante no necesita colisionar mensajes aleatorios, necesita colisionar **dos mensajes que él quiere**. El ejemplo de Katz & Lindell es una empleada que quiere que una carta de despido colisione con una carta de recomendación: escribe la misma carta con palabras intercambiables por sinónimos y, con **64 palabras con un sinónimo cada una**, genera $2^{64}$ variantes del mismo texto. Después busca la colisión **entre los dos conjuntos**. El desarrollo completo, en [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]].
 
 **Y el caso de las contraseñas tiene una trampa.** La resistencia a preimágenes es **necesaria pero no suficiente**: dice que es inviable invertir el hash de una entrada **uniforme**, y una contraseña no es uniforme ni por casualidad. Contra un diccionario de $10^{9}$ candidatos, una función de hash perfecta no defiende nada — el atacante hashea el diccionario. Por eso lo que se usa no es un hash a secas sino **sal más una función deliberadamente lenta**. *(Lectura nuestra; el curso no lo desarrolla acá.)*
-
-## Ver también
-
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — la definición, y por qué el selector $s$ es público
-- [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — el teorema que traslada la resistencia a colisiones de la función de compresión al hash entero
-- [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — el ataque del cumpleaños, los $2^{L/2}$ y los tamaños de salida que hoy alcanzan
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — cuáles cayeron, por qué propiedad, y en qué año
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — el caso borde de la jerarquía: dominios chicos, donde resistir colisiones no protege nada
-- [[seguridad-de-un-mac|Seguridad de un MAC]] — el juego `Mac-Forge`, del que `Hash-Coll` es la versión sin secreto
-- [[seguridad-computacional|Seguridad computacional]] — `PPT` y función despreciable, el vocabulario que "computacionalmente imposible" traduce
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — seguro, debilitado y quebrado; una función rota para colisiones y sana para preimágenes es el caso de manual
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — las dos sesiones, 27/08 y 03/09
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — los "Niveles de Seguridad" de la filmina 8, con sus dos erratas
-- Katz & Lindell cap. 5 *Hash Functions and Applications*, §5.1.2 y §5.4 ([[bibliografia|bibliografía]])

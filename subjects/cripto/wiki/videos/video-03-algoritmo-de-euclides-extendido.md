@@ -282,19 +282,7 @@ que con $b > 0$ coincide con el piso y con $b < 0$ coincide con el techo. **No e
 
 **Nada.** No menciona parcial ni final en ningún momento de los quince minutos. Lo más cercano es el encuadre de apertura (00:05), que ubica el algoritmo como herramienta de práctica —*"ejercicios de salón"*— más que como tema teórico.
 
-El estatus de examen que el vault le asigna a este contenido **no sale de acá**: sale del encargo en la [[clase-02-cifrado#Cierre de la clase: la tarea que quedó para el intervalo|Clase 02]], donde el docente nombra el procedimiento y avisa que va a servir para el parcial. Este video es el desarrollo de ese encargo, no una fuente independiente sobre qué se toma.
+El estatus de examen que el vault le asigna a este contenido **no sale de acá**: sale del encargo en la [[teoria-de-numeros#1. De dónde sale esto: es tarea de la Clase 02|encargo de la Clase 02]], donde el docente nombra el procedimiento y avisa que va a servir para el parcial. Este video es el desarrollo de ese encargo, no una fuente independiente sobre qué se toma.
 
 ***(Lectura nuestra.)*** Sí vale como referencia de **formato esperado**: es el propio docente resolviendo el ejercicio con una disposición concreta —tabla de cuatro columnas, coeficientes rotulados sobre $x$ e $y$, verificación al costado de cada fila—. Copiar esa disposición en un parcial no puede salir mal, aunque nada en el video diga que se espera.
 
----
-
-## Ver también
-
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — la nota de concepto: el algoritmo, las demostraciones, dos corridas más y la complejidad. **Es la nota principal; ésta la complementa, no la reemplaza**
-- [[aritmetica-modular-y-divisibilidad#4. El algoritmo de la división|Aritmética modular y divisibilidad]] — el algoritmo de la división, que es lo que el video usa cuando insiste con el resto positivo
-- [[inverso-modular|Inverso modular]] — el caso $c = 1$, donde el escalado del que habla el video desaparece
-- [[teoria-de-numeros#Los dos videos son estos|Teoría de números]] — el manuscrito que este video acompaña, y la notación $(a{:}b)$ que usa
-- [[videografia#Los 13, con sus datos duros|Videografía]] — el mapeo de los 13 videos contra el cronograma. **Este video y el de teoría de números son los dos que no son grabaciones de clase**
-- [[clase-02-cifrado#Cierre de la clase: la tarea que quedó para el intervalo|Clase 02 — Cifrado simétrico]] — donde el docente encarga mirarlo
-- [[guia-02-resolucion|Guía 2 — Resolución]] — el Ej. 7c es el mismo procedimiento con $\operatorname{mcd}(7,32)$
-- [[cronograma|Cronograma]] — la Clase 4 (10/09, Criptografía Asimétrica) se apoya en esto

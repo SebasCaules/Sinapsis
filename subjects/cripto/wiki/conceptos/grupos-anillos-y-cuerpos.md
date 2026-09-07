@@ -8,7 +8,7 @@ unidad: 1
 clase: 4
 orden: 2
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, algebra, grupos, anillos, cuerpos, aritmetica-modular, clase-04, sin-dictar]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf"]
 ---
@@ -38,7 +38,7 @@ Lo que la filmina 10 nombra explícitamente y las notas de la Clase 2 no llegaba
 
 $$(G, +) \text{ es grupo}, \quad (G', +) \text{ es grupo}, \quad G' \subseteq G, \quad G' \neq \varnothing$$
 
-Es decir, un subconjunto no vacío de $G$ que **por sí mismo**, con la misma operación restringida, vuelve a satisfacer los cuatro axiomas de grupo. El caso que va a aparecer en `DSS` ([[clase-04-criptografia-asimetrica-y-firma-digital#13. Digital Signature Standard|§13 de la Clase 04]]) es exactamente éste: el generador $g$ de `DSS` genera un subgrupo de orden $q$ **dentro** de $\mathbb{Z}_p^{*}$, que tiene orden $p-1$ — un subgrupo propio, no todo el grupo.
+Es decir, un subconjunto no vacío de $G$ que **por sí mismo**, con la misma operación restringida, vuelve a satisfacer los cuatro axiomas de grupo. El caso que va a aparecer en [[digital-signature-standard|`DSS`]] es exactamente éste: el generador $g$ de `DSS` genera un subgrupo de orden $q$ **dentro** de $\mathbb{Z}_p^{*}$, que tiene orden $p-1$ — un subgrupo propio, no todo el grupo.
 
 ## Grupo cíclico, generador, orden, primitivo
 
@@ -87,17 +87,6 @@ $$a^{\varphi(n)} \equiv 1 \pmod n \qquad \text{(y si $p$ es primo: } a^{p-1} \eq
 
 $$\varphi(n\cdot m) = \varphi(n)\cdot\varphi(m) \text{ si } \gcd(n,m)=1, \qquad \varphi(p^{a}) = p^{a} - p^{a-1} = p^{a-1}(p-1) \text{ si $p$ es primo}$$
 
-> **Errata de la filmina (15), ya señalada en la [[clase-04-criptografia-asimetrica-y-firma-digital#3. Grupos, anillos y cuerpos: lo que la filmina agrega|Clase 04]].** La fórmula de $\varphi(p^{a})$ mezcla dos nombres para el mismo exponente ($a$ a la izquierda, $k$ a la derecha). Arriba va con un único nombre, $a$, siguiendo la demostración de [[cuerpos-finitos-y-campos-de-galois#Función phi de Euler|02.16]].
+> **Errata de la filmina (15).** La fórmula de $\varphi(p^{a})$ mezcla dos nombres para el mismo exponente ($a$ a la izquierda, $k$ a la derecha). Arriba va con un único nombre, $a$, siguiendo la demostración de [[cuerpos-finitos-y-campos-de-galois#Función phi de Euler|02.16]].
 
 **Dónde se usa cada una en el resto de la clase.** La primera identidad de Euler-Fermat es la que decide, en `RSA`, que $e \cdot d \equiv 1 \pmod{\varphi(n)}$ recupera exactamente $m$ al descifrar — porque $\varphi(n) = (p-1)(q-1)$ mide el tamaño del grupo multiplicativo $\mathbb{Z}_n^{*}$. La segunda, sobre el orden del grupo, decide en Diffie-Hellman que los exponentes $x$ e $y$ se sortean sobre $\mathbb{Z}_q$ — el tamaño exacto del grupo cíclico $G$.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#3. Grupos, anillos y cuerpos: lo que la filmina agrega|Clase 04 — Criptografía asimétrica y firma digital § 3. Grupos, anillos y cuerpos]] — la sección de la que sale esta nota, con la nota completa de por qué no repite la Clase 2
-- [[distribucion-de-claves-y-kdc|Distribución de claves y KDC]] — el problema que motiva necesitar esta álgebra
-- [[intercambio-de-claves|Intercambio de claves]] · [[diffie-hellman|Diffie-Hellman]] — donde se usa el grupo cíclico genérico $G$ con generador $g$ y tamaño $q$
-- [[rsa|RSA]] — donde se usa $\varphi(n) = (p-1)(q-1)$ y el inverso modular de $e$
-- [[el-gamal|El Gamal]] · [[digital-signature-standard|Digital Signature Standard]] — donde reaparecen generador, orden y subgrupo sin volver a definirlos
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] · [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] · [[inverso-modular|Inverso modular]] · [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — el desarrollo completo con demostraciones que esta nota no repite
-- Apunte: [[cuerpos-finitos|Cuerpos finitos]] · Apunte: [[teoria-de-numeros|Teoría de números]]
-- [[notacion-y-terminologia|Notación y terminología]] — el inventario de símbolos del vault

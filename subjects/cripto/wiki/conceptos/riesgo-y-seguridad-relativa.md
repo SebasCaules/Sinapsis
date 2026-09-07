@@ -104,13 +104,3 @@ El docente la da como consejo directo, y es la aplicación práctica del marco c
 > **El argumento a favor.** El docente le pone **nombre propio** al concepto y anuncia que se **formaliza más adelante en la materia**: por definición sobrevive a la clase de hash. Y hace falta desde varios lugares a la vez — [[primitivas-de-hash-estandar|03.09]] y [[seguridad-de-las-funciones-de-hash|03.11]] tabulan estados y exponentes sin dar el criterio para usarlos; [[estado-de-un-criptosistema|02.11]] clasifica sin decir qué escenario justifica cada clase; [[eleccion-de-primitivas|02.12]] decide sin nombrar el impacto. Sin esta nota, ese criterio queda repetido en pedazos o directamente ausente.
 >
 > **El argumento en contra, para dejarlo registrado.** Son unos veinte cues de digresión, sin ninguna filmina detrás, y la mitad de lo que dicen ya está —en otras palabras— en [[estado-de-un-criptosistema#Un criptosistema puede ser seguro y estar quebrado al mismo tiempo|Estado de un criptosistema]] y en la sección *Cómo decidir* de [[eleccion-de-primitivas#Cómo decidir, en la práctica|02.12]]. Un vault más conservador lo habría puesto como sección de `02.11`. Lo que inclina la balanza es el anuncio explícito de la unidad de seguridad: cuando llegue, esta nota es el punto de enganche, y moverla después rompe links.
-
-## Ver también
-
-- [[agilidad-criptografica|Agilidad criptográfica]] — el otro criterio no-matemático de esta sesión: el riesgo dice *cuánto* hace falta hoy, la agilidad dice qué pasa cuando eso deje de alcanzar
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el hecho técnico sobre el que esta nota construye la relación; ahí está el *"¿contra qué prueba?"*, acá el *"¿y contra quién?"*
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — la regla operativa que este marco **no** ablanda
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — la tabla de estados que sin este criterio no se sabe cómo usar
-- [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — de dónde salen el $2^{64}$ y el $2^{20}$ de `MD5`
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la sesión del 03/09, donde esto se dicta
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la práctica del 31/08, que llegó a estos temas tres días antes que la teoría

@@ -278,18 +278,3 @@ Y es la misma lógica —distinta escala— que la [[seguridad-computacional|seg
 > - **Ésta tiene además un anclaje que las otras tres no tienen:** el $\mathrm{GF}(2^{8})$ de `Byte Sub` está en las filminas de la Clase 2, no sólo en la transcripción. Es el argumento más fuerte del bloque para quedarse acá.
 > - **Si la cátedra lo introduce formalmente en la Clase 4** (Criptografía Asimétrica, 10/09), habrá que **renumerar** el bloque `02.13`–`02.16` como `04.xx`. Lo dejamos dicho para que el cambio sea barato: son cuatro archivos, sus campos de frontmatter y los links entrantes desde [[cuerpos-finitos|Cuerpos finitos]], [[teoria-de-numeros|Teoría de números]] y el [[indice|índice]].
 
----
-
-## Ver también
-
-- [[cuerpos-finitos|Cuerpos finitos]] — el apunte hermano: el recorrido completo del PDF de Arias Roig, con las tablas de $\mathbb{Z}_7$, $\mathbb{Z}_4$ y $\mathrm{GF}(2^{2})$, los ejemplos verificados y las erratas del original marcadas
-- [[aes|AES]] — dónde se cobra todo esto: `Byte Sub` es la **inversión multiplicativa en $\mathrm{GF}(2^{8})$**
-- [[inverso-modular|Inverso modular]] — el criterio $\operatorname{mcd}(a,n) = 1$ del que sale, entero, el *"$\mathbb{Z}_n$ es cuerpo si y sólo si $n$ es primo"*
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — congruencias, clases de equivalencia y $\mathbb{Z}_m$, que es el conjunto sobre el que esta nota pone estructura
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — cómo se calculan en la práctica los inversos que acá se postulan
-- [[teoria-de-numeros|Teoría de números]] — el otro apunte del bloque algebraico
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — el marco donde vive AES
-- [[des-y-3des|DES y 3-DES]] — la primitiva anterior, cuyas cajas $S$ **no** tienen estructura algebraica publicada: el contraste con AES es parte del punto
-- [[cifrado-por-rotacion|Cifrado por rotación]] — el primer grupo cíclico del curso, $(\mathbb{Z}_n, +)$, aunque ahí no se lo llame así
-- [[seguridad-computacional|Seguridad computacional]] — la otra vez que el curso cambia *"imposible"* por *"caro"*
-- [[cronograma|Cronograma]] — la **Clase 4 (10/09), Criptografía Asimétrica**, donde esta álgebra se convierte en criptosistemas

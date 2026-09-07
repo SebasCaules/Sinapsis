@@ -8,7 +8,7 @@ unidad: 2
 clase: 9
 orden: 7
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, flujo-de-informacion, confinamiento, aislacion, bloque-2, clase-09, sin-dictar]
 sources: ["Clase 10 - Aplicaciones - Flujo de informacion.pdf"]
 ---
@@ -25,7 +25,7 @@ Cubre las filminas **18 a 20** del deck `Clase 10 - Aplicaciones - Flujo de info
 
 | Requisito | Dificultad | Estado |
 |---|---|---|
-| Permitir que una entidad acceda **sólo** a los recursos para los que está autorizada | "Fácil" | Ya existen mecanismos seguros —es el [[clase-09-flujo-de-informacion#1. Control de acceso y por qué no alcanza\|control de acceso]] con el que arrancó la clase, y que la filmina 5 ya había marcado como insuficiente por sí solo |
+| Permitir que una entidad acceda **sólo** a los recursos para los que está autorizada | "Fácil" | Ya existen mecanismos seguros —es el [[control-de-acceso-y-flujo-de-informacion\|control de acceso]] con el que arrancó la clase, y que la filmina 5 ya había marcado como insuficiente por sí solo |
 | **No revelar información de ningún tipo** a quien no está autorizado | "Difícil" | Es la parte que esta clase entera viene tratando de resolver desde la filmina 8 |
 
 De ahí sale la definición formal, tal como la escribe la filmina: el **problema de confinamiento** es *prevenir que un servidor revele información que el usuario del servicio considere confidencial*.
@@ -60,13 +60,3 @@ Su consecuencia, si se cumpliera: el proceso no revela información —la iguald
 $a$ y $b$ nunca intercambiaron un mensaje en el sentido que la política prohíbe —no hay ninguna llamada de $a$ a $b$—, y sin embargo el bit llega. El canal existe porque la cuota de disco es un **recurso medible y compartido**, exactamente la categoría que enumera la filmina 19: no hace falta CPU ni memoria para que el argumento funcione, alcanza con cualquier recurso finito que ambos procesos toquen. El mecanismo exacto por el que este tipo de canal se clasifica y se explota está desarrollado en [[canales-ocultos-y-side-channels|Canales ocultos y side channels]]; este ejemplo de cuota de disco es, en esa clasificación, un canal **espacial** —usa un atributo del recurso (cuánto espacio queda), no su orden temporal de acceso—, a diferencia del ejemplo de CPU de la filmina 22, que es **temporal**.
 
 > **El origen del término, fuera del programa de la cátedra** *(lectura nuestra, contexto histórico)*. El "problema de confinamiento" no es una acuñación de esta clase: es el nombre que le dio Butler Lampson en 1973, en un trabajo corto que formuló exactamente este dilema —cómo confinar un programa de modo que no filtre los datos que procesa— y que introdujo el vocabulario que la filmina reproduce casi sin cambios. La cátedra no cita el trabajo en el deck; se deja constancia acá porque explica por qué la definición suena tan asentada pese a no traer ninguna demostración formal en la filmina: es un problema con más de cincuenta años y sin solución general conocida, no un ejercicio inventado para el curso.
-
-## Ver también
-
-- [[clase-09-flujo-de-informacion#7. El problema del confinamiento|Clase 09 — Flujo de información]] — la sección de la que cuelga esta nota
-- [[mecanismos-de-control-de-flujo|Mecanismos de control de flujo]] — la sección anterior: qué se puede hacer *mientras* el proceso corre bajo control
-- [[canales-ocultos-y-side-channels|Canales ocultos y side channels]] — la clasificación completa del mecanismo que este confinamiento fallido habilita
-- [[metodos-de-aislacion|Métodos de aislación]] — las dos respuestas prácticas de la cátedra a un problema que, en su forma total, no tiene solución
-- [[flujo-de-informacion|Flujo de información]] — la desigualdad de entropía condicional de la que el confinamiento es el caso límite (igualdad, para todo observable)
-- [[secreto-perfecto|Secreto perfecto]] — el mismo caso límite, $I(M;C)=0$, en la Unidad 1, pero acotado sólo al criptograma en vez de a todo lo observable
-- [[video-11-flujo-de-informacion#Confinamiento, aislación total y canales ocultos|Video 11 — Flujo de información]] — la misma definición, con la aclaración de Ramele de que hasta el calor y las señales electromagnéticas cuentan como recurso medible

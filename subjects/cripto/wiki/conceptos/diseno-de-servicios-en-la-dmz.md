@@ -8,7 +8,7 @@ unidad: 2
 clase: 10
 orden: 5
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad-en-redes, dmz, bastion-host, servidor-web, servidor-email, proxy, defensa-en-profundidad, clase-10, sin-dictar]
 sources: ["Clase 11 - Seguridad en Redes.pdf"]
 ---
@@ -23,13 +23,13 @@ sources: ["Clase 11 - Seguridad en Redes.pdf"]
 
 ## El patrón que se repite tres veces
 
-Cada uno de los tres servicios de esta nota sigue la misma estructura: primero **cómo se implementa**, después una filmina de **consecuencias** con etiquetas azules al margen que nombran el principio de diseño que la sostiene (`Mediación Completa`, `Separación de Privilegios`, `Mecanismos Exclusivos`, `Menor privilegio`, `Aceptación Psicológica` — el vocabulario de la [[clase-08-principios-de-diseno-y-vulnerabilidades#1. Los ocho principios de diseño de Saltzer y Schroeder|Clase 08]]). Esas filminas de consecuencias son, de las tres, las que conviene estudiar con más cuidado: la pregunta de examen más probable sobre este material tiene la forma *"si el servidor X es comprometido, ¿qué información queda expuesta?"*, y la respuesta correcta en los tres casos es **ninguna de la red interna**, con una razón de diseño específica detrás.
+Cada uno de los tres servicios de esta nota sigue la misma estructura: primero **cómo se implementa**, después una filmina de **consecuencias** con etiquetas azules al margen que nombran el principio de diseño que la sostiene (`Mediación Completa`, `Separación de Privilegios`, `Mecanismos Exclusivos`, `Menor privilegio`, `Aceptación Psicológica` — el vocabulario de [[principios-de-diseno|Principios de diseño]]). Esas filminas de consecuencias son, de las tres, las que conviene estudiar con más cuidado: la pregunta de examen más probable sobre este material tiene la forma *"si el servidor X es comprometido, ¿qué información queda expuesta?"*, y la respuesta correcta en los tres casos es **ninguna de la red interna**, con una razón de diseño específica detrás.
 
 ## Servicio web (filminas 16-17)
 
 Brindado por un **servidor web**, ubicado en la DMZ, de modo que los requerimientos externos **no llegan a la red interna**. Es un **servidor endurecido** (*Bastion Host*):
 
-- Sólo brinda los servicios necesarios: **web, SSH**. Nada más corre en esa máquina — es [[clase-08-principios-de-diseno-y-vulnerabilidades#1.1. Menor privilegio|menor privilegio]] aplicado al propio host, no sólo a sus usuarios.
+- Sólo brinda los servicios necesarios: **web, SSH**. Nada más corre en esa máquina — es [[principios-de-diseno#1. Menor privilegio|menor privilegio]] aplicado al propio host, no sólo a sus usuarios.
 - La conexión remota (SSH) está permitida **sólo desde el firewall interno**, y con certificados — no contraseña, no acceso desde cualquier punto de la red.
 - La **carga de nuevas órdenes está desacoplada** en tres pasos: la aplicación web procesa la orden y la graba; **otro proceso** la encripta y la mueve a una zona no accesible por el web server; un proceso en la **red interna** recupera los archivos.
 
@@ -105,12 +105,3 @@ Este servicio **no tiene una filmina de consecuencias propia**: sus consecuencia
 | Verifica origen contra | — | — | Dirección del firewall interno |
 | Control distintivo | Carga de órdenes desacoplada | Reescritura de headers/direcciones | Filtra uso indebido del protocolo |
 | Filmina de consecuencias propia | Sí (17) | Sí (20) | No — absorbida en la del firewall interno (24) |
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#5. Caso de estudio: diseño de servicios en la DMZ (filminas 16-21)|Clase 10 — Seguridad en la empresa]] — la sección de la clase que esta nota desarrolla
-- [[zona-desmilitarizada|Zona desmilitarizada]] — qué es la DMZ donde viven estos tres servicios
-- [[firewalls#Tipo 3 — Application firewalls (filminas 8-9)|Firewalls]] — el application firewall cuyo ejemplo de la filmina 9 es literalmente el flujo del servicio de email
-- [[reglas-de-los-firewalls-externo-e-interno|Reglas de los firewalls externo e interno]] — cómo el firewall interno fuerza el uso del proxy web
-- [[servicios-de-soporte-dns-log-y-proxy|Servicios de soporte: DNS, log y proxy]] — el Log Server, que reusa la misma lógica de "escribir sin poder leer" del servicio web
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#1. Los ocho principios de diseño de Saltzer y Schroeder|Clase 08 — Principios de diseño y vulnerabilidades]] — los principios que las etiquetas de margen de las filminas de consecuencias nombran

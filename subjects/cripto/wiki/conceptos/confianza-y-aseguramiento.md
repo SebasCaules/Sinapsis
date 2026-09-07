@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 2
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, confianza, aseguramiento, evidencia, verificacion-formal, clase-08, sin-dictar]
 sources: ["Clase 12 - Analisis de vulnerabilidades.pdf"]
 ---
@@ -43,6 +43,11 @@ La filmina 3 da cuatro caminos, con una jerarquía marcada por flechas en el pro
 
 El diagrama señala que la **revisión por expertos es la más efectiva cuando existen las otras tres**, y a la vez la **más costosa y la más compleja** — no reemplaza a las demás, las corona. Un experto que revisa un sistema sin procesos documentados, sin estándares y sin nada escrito revisa a ciegas; un experto que revisa sobre esa base encuentra lo que los procesos automáticos no ven.
 
+> [!nota]- Qué dibuja exactamente la filmina, y por qué la lectura de arriba es una interpretación
+> Alrededor de la lista de cuatro ítems, la lámina traza: una flecha rotulada *"Lleva a"* que sale de *Procesos de aseguramiento* y entra en una llave que agrupa *Documentación* y *Revisión por expertos*; una segunda llave que abarca los cuatro ítems, a la que llega una flecha rotulada *"Es más efectiva si existen"*; y dos cajas, *"Costosos"* y *"Complejos"*, a las que apuntan sendas flechas diagonales.
+>
+> Los orígenes de esa última flecha y de las dos diagonales **no están anclados a ningún ítem**: arrancan en espacio en blanco, a la derecha y por debajo del bloque de viñetas. Con los orígenes sin anclar, quién es el sujeto de *"Es más efectiva si existen"*, de *"Costosos"* y de *"Complejos"* queda a cargo de quien mira la lámina. *(Lectura nuestra del diagrama: puestos juntos, esos trazos se leen como que la revisión por expertos es la más efectiva cuando ya existen las otras tres vías, y a la vez la más costosa y la más compleja. Es una lectura, no algo que el diagrama rotule.)*
+
 ## La cadena de tres niveles
 
 La filmina 4 es la que la cátedra más repite, según `video-08`:
@@ -71,7 +76,7 @@ La filmina 5 clasifica la evidencia, de menos a más rigurosa:
 | **Semiformal** | Pseudocódigo, análisis caso por caso |
 | **Formal** | Métodos matemáticos, lenguajes formales de demostración de teoremas |
 
-Según `video-08`, la cátedra aclara que **probar formalmente una pieza de código sólo se justifica en criticidad extrema** —el ejemplo que da es un riesgo de explosión nuclear—, porque el costo de la verificación formal crece mucho más rápido que el del resto del desarrollo. Es la misma idea que retoma, con más detalle y con la razón técnica de por qué escala tan mal —la equivalencia con el problema `SAT`, `NP`-completo—, la sección de [[clase-08-principios-de-diseno-y-vulnerabilidades#8. Verificación formal contra prueba de penetración|verificación formal contra prueba de penetración]] del deck de Pentesting: los dos bloques convergen en el mismo punto desde ángulos distintos, uno hablando de evidencia y el otro de metodología.
+Según `video-08`, la cátedra aclara que **probar formalmente una pieza de código sólo se justifica en criticidad extrema** —el ejemplo que da es un riesgo de explosión nuclear—, porque el costo de la verificación formal crece mucho más rápido que el del resto del desarrollo. Es la misma idea que retoma, con más detalle y con la razón técnica de por qué escala tan mal —la equivalencia con el problema `SAT`, `NP`-completo—, la sección de [[verificacion-formal-y-prueba-de-penetracion|verificación formal contra prueba de penetración]] del deck de Pentesting: los dos bloques convergen en el mismo punto desde ángulos distintos, uno hablando de evidencia y el otro de metodología.
 
 **Por qué la escala tiene sólo tres escalones y no un continuo.** Cada nivel exige una inversión de orden de magnitud distinto sobre el anterior: pasar de un enunciado en prosa a pseudocódigo revisable es barato; pasar de pseudocódigo a una demostración matemática formal exige herramientas, tiempo de especialistas y, muchas veces, reescribir el sistema en un lenguaje formal desde cero. La clase no da una fórmula de costo, pero la conclusión operativa es clara: **el nivel de evidencia que se elige es una decisión de riesgo**, no un ideal a maximizar siempre — el mismo razonamiento que [[riesgo-y-seguridad-relativa|Riesgo y seguridad relativa]] aplica a la elección de con qué proteger un sistema criptográfico.
 
@@ -82,14 +87,3 @@ Esta nota da el vocabulario; las siguientes lo usan sin volver a definirlo:
 - [[aseguramiento-en-el-ciclo-de-vida|Aseguramiento en el ciclo de vida]] toma la cadena Política → Aseguramiento → Mecanismo y la distribuye sobre las etapas de un proyecto.
 - [[modelado-de-amenazas|Modelado de amenazas]] es, en el fondo, un proceso para **producir evidencia** de qué amenazas existen y qué tan bien están cubiertas — es aseguramiento aplicado al diseño, antes de que exista el sistema.
 - La distinción entre **verificación formal** (evidencia del nivel más alto, pero acotada a un ambiente controlado) y **prueba de penetración** (nunca alcanza evidencia formal, pero prueba el sistema real) que cierra la clase de Pentesting es, otra vez, la misma escala de esta nota aplicada a dos técnicas concretas.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#2. Confianza y aseguramiento|Clase 08 — Principios de diseño y vulnerabilidades § 2. Confianza y aseguramiento]]
-- [[principios-de-diseno|Principios de diseño]] — el criterio de diseño que este bloque aprende a **justificar** con evidencia
-- [[aseguramiento-en-el-ciclo-de-vida|Aseguramiento en el ciclo de vida]] — la misma cadena, distribuida sobre las etapas de un proyecto
-- [[modelado-de-amenazas|Modelado de amenazas]] — el proceso concreto que produce la evidencia de este bloque
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — la misma idea de confianza gradual, aplicada a un esquema criptográfico
-- [[riesgo-y-seguridad-relativa|Riesgo y seguridad relativa]] — por qué el nivel de evidencia que se elige es una decisión de riesgo
-- [[video-08-vulnerabilidades#Confianza y aseguramiento|video-08 — Vulnerabilidades]] — la fuente hablada de esta nota
-- [[videografia|Videografía]] — el mapa completo de los videos de la cátedra

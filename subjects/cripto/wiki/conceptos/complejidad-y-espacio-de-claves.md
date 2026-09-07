@@ -80,15 +80,3 @@ Es exactamente el mecanismo que ya tiene nota propia en el vault: [[ataque-de-di
 ## Cuando el control de ejecución falla, el espacio de claves queda desnudo
 
 *(Cruce con un video, no de la filmina.)* El [[video-12-proteccion-de-datos-personales#La anécdota de Apple contra el Estado (50:57)|Video 12]] da el ejemplo que mejor conecta esta sección con la anterior: un PIN de cuatro dígitos tiene $N=10^4$, un espacio minúsculo comparado con los tres ejemplos de arriba. Lo que lo vuelve razonablemente seguro en la práctica **no es el tamaño de $N$**, sino el contador de intentos del dispositivo — una defensa **online**, de las que la sección de "Prevenciones generales" lista arriba. Cuando ese contador se puentea (el caso real del iPhone de la maratón de Boston), el $N$ nominal queda expuesto sin ninguna protección adicional, y probar las diez mil combinaciones es trivial. Es el mismo punto, aplicado al revés, del [[ataque-de-fuerza-bruta#Principio de espacio de claves suficiente|principio de espacio de claves suficiente]]: la condición es necesaria, pero acá se ve que tampoco alcanza si el control que la rodea desaparece.
-
-## Ver también
-
-- [[clase-07-autenticacion#5. Complejidad y espacio de claves|Clase 07 — Autenticación § 5. Complejidad y espacio de claves]] — la sección de la que cuelga esta nota
-- [[clase-07-autenticacion#Estado de las fuentes|Clase 07 — Autenticación § Estado de las fuentes]] — por qué el cruce con el Video 12 no contradice que ningún video dicte esta clase
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — la distinción offline/online que esta fórmula y estas prevenciones dan por conocida
-- [[almacenamiento-de-claves|Almacenamiento de claves]] — el esquema Unix tradicional, sobre el que se aplicarían estas cuentas en un caso real
-- [[ataque-de-fuerza-bruta#Principio de espacio de claves suficiente|Ataque de fuerza bruta]] — el piso de todo ataque offline, y por qué un $N$ chico no basta ni sobra por sí solo
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — cómo se reduce el $N$ efectivo por debajo del nominal
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — por qué $f$ se da por conocida en la sección de "esconder información"
-- [[seguridad-computacional|Seguridad computacional]] — contraste entre el enfoque asintótico de la Unidad 1 y esta fórmula de ingeniería con cifras concretas
-- [[video-12-proteccion-de-datos-personales#La anécdota de Apple contra el Estado (50:57)|Video 12 — Protección de datos personales § La anécdota de Apple contra el Estado (50:57)]] — qué pasa cuando el control online que protegía un $N$ chico se rompe

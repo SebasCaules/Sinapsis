@@ -38,11 +38,3 @@ La señal atraviesa los tres rotores, **vuelve reflejada** y enciende una lámpa
 ## No fue un caso aislado
 
 Hay variantes de cuatro rotores, y **todas las potencias tenían su propia máquina** —alemanes, americanos, ingleses, japoneses—, todas con la misma idea de claves rotativas en un espacio tan grande que no se repite en la práctica. Todas fueron atacadas: no es que sólo cayó Enigma.
-
-## Ver también
-
-- [[historia-de-la-criptografia|Historia de la criptografía]] — dónde cae esto en la línea, y la crisis que abre
-- [[cifrado-de-vigenere|Cifrado de Vigenère]] — el polialfabético del que esto es el extremo
-- [[test-de-kasiski|Test de Kasiski]] — el ataque que un período astronómico esquiva
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el ataque que la Bombe automatiza
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — Enigma aguantó mientras el algoritmo fue secreto

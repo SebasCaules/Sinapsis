@@ -8,9 +8,9 @@ unidad: 1
 clase: 1
 orden: 2
 created: 2026-08-10
-updated: 2026-09-04
-tags: [criptografia, principios, kerckhoffs, clase-01, practica-01]
-sources: [Clase 01, Práctica 01]
+updated: 2026-09-06
+tags: [criptografia, principios, kerckhoffs, clase-01, practica-01, transcripcion]
+sources: [Clase 01, Práctica 01, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Principio de Kerckhoffs
@@ -46,16 +46,15 @@ Es el mismo principio dicho desde el lado de la práctica: dados los tres algori
 
 Lo opuesto se llama **seguridad por oscuridad** (*security through obscurity*) y no cuenta como seguridad.
 
-El mismo principio reaparece en la Unidad 2 como el quinto de los ocho principios de diseño de Saltzer y Schroeder, [[principios-de-diseno#5. Diseño abierto|Diseño abierto]]: la seguridad no debe depender del secreto del diseño ni de la implementación, y su violación recibe ahí exactamente el mismo nombre, "seguridad por oscuridad". Que sea *textualmente* este principio, extendido de los algoritmos criptográficos a cualquier mecanismo de seguridad, es *(lectura nuestra)*; lo que sí queda registrado de la cátedra es que `video-07` marca ese punto como pregunta de examen en cursadas anteriores, con la formulación *"lo único que tiene que estar oculto es la clave"*. El cruce está listado como material del **segundo parcial** en [[clase-08-principios-de-diseno-y-vulnerabilidades#1.5. Diseño abierto|Clase 08 § Diseño abierto]].
+> [!quote]- De la transcripción de la Clase 02 — el principio, dicho con más énfasis, y un contraejemplo histórico (cues pt1 23-29)
+> *"Este es un principio súper básico que tienen que tener y lo tienen que saber, **tienen que grabárselo a fuego**. Lo único que es secreto es la clave. Entonces nunca tienen que asumir que hay otra cosa más que es secreta, como el algoritmo."*
+>
+> Y el ejemplo que ninguna filmina da: *"durante muchos años Microsoft hacía seguridad informática por ofuscación o por ocultamiento (…) mucha gente creía que eso le daba seguridad"*, y de ahí buena parte de su historial de agujeros.
+
+El mismo argumento, un nivel más abajo —cuando **no hay ningún secreto**, ni el algoritmo— es la diferencia entre [[codificar-ofuscar-y-cifrar|codificar, ofuscar y cifrar]].
+
+El mismo principio reaparece en la Unidad 2 como el quinto de los ocho principios de diseño de Saltzer y Schroeder, [[principios-de-diseno#5. Diseño abierto|Diseño abierto]]: la seguridad no debe depender del secreto del diseño ni de la implementación, y su violación recibe ahí exactamente el mismo nombre, "seguridad por oscuridad". Que sea *textualmente* este principio, extendido de los algoritmos criptográficos a cualquier mecanismo de seguridad, es *(lectura nuestra)*; lo que sí queda registrado de la cátedra es que `video-07` marca ese punto como pregunta de examen en cursadas anteriores, con la formulación *"lo único que tiene que estar oculto es la clave"*. El cruce está listado como material del **segundo parcial** en [[principios-de-diseno#5. Diseño abierto|Principios de diseño § Diseño abierto]].
 
 ## Consecuencia directa: el César no es un criptosistema
 
 El cifrado del César clásico fija $k = 3$ y elimina `Gen`. Sin clave aleatoria no hay espacio de claves: el esquema es una función **pública y determinística**, y todo adversario que conozca el algoritmo descifra. El [[cifrado-por-rotacion|cifrado por rotación]] es su versión con clave — y aun así es inseguro, pero por otro motivo ($\lvert K\rvert = 27$, ver [[ataque-de-fuerza-bruta|fuerza bruta]]).
-
-## Ver también
-
-- [[criptosistema|Criptosistema]]
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el principio de espacio de claves suficiente
-- [[modelos-de-ataque|Modelos de ataque]]
-- [[principios-de-diseno#5. Diseño abierto|Principios de diseño § Diseño abierto]] — el mismo principio en la Unidad 2, extendido de los algoritmos a cualquier mecanismo de seguridad
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el recuadro del esquema $\Pi(\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})_{\text{priv}}$

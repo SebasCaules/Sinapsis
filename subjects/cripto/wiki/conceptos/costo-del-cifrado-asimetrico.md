@@ -43,12 +43,3 @@ La filmina marca 1024 bits como umbral **histórico**, no como recomendación vi
 ## Los bits asimétricos y los simétricos no se comparan uno a uno
 
 *(Precisión nuestra, fuera de la filmina.)* Esta relatividad —bits de clave asimétrica no comparables directamente con bits de clave simétrica— es la razón por la que un esquema híbrido (`RSA` o El Gamal para intercambiar una clave, un cifrado simétrico de bloque para el volumen de datos) no puede tratar "128 bits simétricos" y "128 bits de `RSA`" como si fueran equivalentes: el tamaño de $n$ que hace falta para igualar la fuerza de una clave simétrica de 128 bits ronda los 3072 bits en `RSA`, por encima del 2048 que la filmina da como recomendación actual. Este último dato es de la literatura general de criptografía (por ejemplo, NIST SP 800-57), no del PDF de esta clase.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#10. Costo del cifrado asimétrico|Clase 04 — Criptografía asimétrica y firma digital § 10. Costo del cifrado asimétrico]]
-- [[rsa|RSA]] · [[el-gamal|El Gamal]] — los dos esquemas cuyo $n$ mide esta nota
-- [[pkcs1-y-tamano-de-claves|PKCS#1 y tamaño de claves]] — el módulo `RSA-2048` exhibido como ilustración de escala
-- [[diffie-hellman|Diffie-Hellman]] — de dónde sale el $q$ que El Gamal reutiliza como tamaño del grupo
-- [[eleccion-de-primitivas|Elección de primitivas]] — el mismo criterio de "el umbral corre con el tiempo", aplicado a cifrado simétrico
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — la estructura algebraica sobre la que se mide este tamaño

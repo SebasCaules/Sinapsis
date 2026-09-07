@@ -1,14 +1,14 @@
 ---
 title: DES y 3-DES
 resumen: 'Primitiva de bloque de 64 bits con clave de 56 efectivos y red de Feistel de 16 rondas: la primera función de cifrado pública respaldada por un gobierno, con sus claves débiles y su erosión hasta 3-DES.'
-fuentes: ["[[clase-02-cifrado]]", "[[guia-02-criptografia-simetrica]]", "[[guia-02-resolucion]]", "[[practica-03-seudoaleatoriedad-y-modos]]"]
+fuentes: ["[[clase-02-cifrado]]", "[[guia-02-criptografia-simetrica]]", "[[guia-02-criptografia-simetrica]]", "[[practica-03-seudoaleatoriedad-y-modos]]"]
 aliases: [DES, 3DES, 3-DES, Triple DES, Data Encryption Standard, Red de Feistel, Feistel]
 type: concepto
 unidad: 1
 clase: 2
 orden: 9
 created: 2026-08-21
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, des, 3des, feistel, criptoanalisis-diferencial, criptoanalisis-lineal, claves-debiles, claves-semidebiles, key-schedule, guia-02, practica-03, clase-02, transcripcion]
 sources: ["Clase 02 - Criptografia - Cifrado.pdf", "raw/guias/guia2/Guia 2 - Criptografía Simétrica.pdf", "raw/practicas/Clase 3.pdf", "raw/clases/Clase 02pt2-Transcripcion.VTT"]
 ---
@@ -52,10 +52,15 @@ La primitiva de bloque que **inauguró la criptografía pública**, y el caso de
 > - Se **intercambian las dos mitades** de lugar.
 > - Se repiten los tres pasos anteriores (**una ronda**) **16 veces**.
 
-> **Lo que muestra el diagrama y la filmina no dice** *(lectura nuestra).* Nótense las dos columnas: **cifrar y descifrar son el mismo circuito**, y lo único que cambia es el **orden de las subclaves** ($K_0\dots K_n$ para cifrar, $K_n\dots K_0$ para descifrar). Esa es la gracia de Feistel:
+> **Lo que muestra el diagrama y la filmina no dice.** Nótense las dos columnas: **cifrar y descifrar son el mismo circuito**, y lo único que cambia es el **orden de las subclaves** ($K_0\dots K_n$ para cifrar, $K_n\dots K_0$ para descifrar). Esa es la gracia de Feistel:
 >
 > 1. **$F$ no necesita ser invertible.** Se puede diseñar la función de transformación pensando sólo en que mezcle bien, sin preocuparse por poder deshacerla. Por eso $F$ puede incluir una expansión de 32 a 48 bits, que destruye información.
 > 2. **Una sola implementación sirve para las dos direcciones** — media el costo en hardware, que en los 70 era determinante.
+>
+> Esto la nota lo deducía del diagrama; **el 20/08 está dicho**, y con dos precisiones que el dibujo no da: que $\mathrm{IP}$ y $\mathrm{IP}^{-1}$ **son inversas la una de la otra por diseño**, y que la consecuencia es visible en el `decrypt` de la [[implementaciones-de-referencia|implementación de referencia]]. Es la Pieza 1 del [[guia-02-criptografia-simetrica#Ejercicio 8|Ej. 8 de la Guía 2]].
+
+> [!quote]- De la transcripción — cifrar y descifrar con el mismo algoritmo, y cómo se ve en el código (cues pt2 368-373)
+> *"Una cosa importante que no les dije, una ventaja piolísima: **el cifrado y el descifrado se hacen con el mismo algoritmo**. Y lo único que cambia es que **se invierte la función de permutación** que se aplica de forma inicial y final —por cómo están diseñadas, se invierten entre ellas— **y se invierte el orden de las claves**. Por eso es lo que vieron en el `decrypt` que estaba en el código (…) No se necesita otro algoritmo: simplemente se cambia el orden de algunas cosas y nada más."*
 
 ### La función de transformación
 
@@ -104,7 +109,15 @@ Un dato de procedencia que conviene tener a mano al estudiar esta nota: **entre 
 - **Cómo una permutación agranda**: la expansión $E$ de $32$ a $48$ bits *"lo único que hace es repetir índices"* (cues pt2 260-271). No es una biyección, es una selección con repetición — y por eso $F$ **no es invertible**, que es justamente lo que la red de Feistel permite.
 - **Cómo se lee una caja $S$**: la fila sale de $2b_1 + b_6$ y la columna de los cuatro bits del medio (cues pt2 292-302), que es exactamente la regla que tabula [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]].
 
-El desarrollo completo, con las citas, está en la [[clase-02-cifrado#11. DES y 3-DES|§11 de la Clase 02]].
+> [!quote]- De la transcripción — qué es una matriz de permutación, y cómo una permutación agranda de 32 a 48 (cues pt2 182-188, 260-271)
+> *"La matriz me dice **los índices**: en cada posición tiene el índice que va en esa posición. Por ejemplo, en el 0 tiene 4 y en el 1 tiene 3; entonces, cuando aplico esa matriz de permutación, en la posición 0 pongo el 4 y en la 1 pongo el 3, de los originales que yo tenía. Con eso tengo un output que es permutar todos los valores (…) va a quedar lo mismo que tenía, pero ordenado de otra manera."*
+>
+> Y la pregunta que abre la función $E$: *"¿Se imaginan cómo puedo hacer un vector de permutación a nivel bits para que tenga de entrada 32 y de salida 48? (…) Es mucho más simple: **lo único que hacen es repetir índices**. Entonces van a tener de entrada un valor y de salida un valor más grande, porque se están repitiendo índices."*
+
+> [!quote]- De la transcripción — cómo se lee una caja $S$ (cues pt2 292-302)
+> *"Cada uno de esos $S_i$ (…) actúan como la entrada de **una fila y una columna a una matriz**. La fila se calcula como $2b_1 + b_6$, o sea el valor del bit que está en $b_6$ más el valor de $b_1$ por 2; **y la columna se calcula con los bits [del medio]** armados de esta manera. Con esto tienen la fila y la columna para las cajas $S$ (…) y ahí obtienen un valor de salida que tiene **4 bits fijo**."*
+
+> **Precisión nuestra sobre el tamaño de las cajas.** El docente dice *"son 8 matrices de 8 por 8"* (cue pt2 307). Las cajas son **ocho**, sí, pero cada una es $4\times 16$: 4 filas (los 2 bits de los extremos) por 16 columnas (los 4 del medio). El total es $8\cdot 4\cdot 16 = 512$ valores de 4 bits, o sea 256 bytes.
 
 ---
 
@@ -173,7 +186,7 @@ Cada mitad de 28 bits tiene **dos** valores constantes posibles, así que hay $2
 
 Las **dos mixtas**, `1F1F1F1F0E0E0E0E` y `E0E0E0E0F1F1F1F1`, son la respuesta a la pregunta del ejercicio *"¿cuáles serían otras dos?"*. El hexadecimal parece arbitrario y no lo es, pero la razón **no** es que la primera mitad de la clave alimente a $C_0$ y la segunda a $D_0$: los ocho bytes aportan bits a **las dos** mitades. Lo que PC-1 parte no es la clave, es **cada byte**. Numerando los bits del 1 (el más significativo) al 8 (el de paridad, que se descarta): los bits 1, 2 y 3 de los ocho bytes arman $C_0$, los bits 5, 6 y 7 de los ocho arman $D_0$, y el bit 4 es el único que cambia de bando, cayendo en $D_0$ si el byte es el 1, 2, 3 o 4 y en $C_0$ si es el 5, 6, 7 u 8.
 
-Entonces, para conseguir $C_0 = 0^{28}$ y $D_0 = 1^{28}$ hacen falta bytes con los **bits altos en cero y los bajos en uno**, y el bit 4 puesto según adónde vaya a caer: `1F` $= \texttt{0001\ 1111}$ en los primeros cuatro bytes y `0E` $= \texttt{0000\ 1110}$ en los últimos. Los dos bytes **difieren exactamente en ese bit 4** (más el de paridad, que se acomoda para que los dos queden impares). Por eso la clave es `1F` cuatro veces y después `0E` cuatro veces, en vez de un byte repetido ocho veces: el patrón se quiebra justo donde PC-1 le cambia el bando al bit 4. La tabla completa del reparto está en [[guia-02-resolucion#Las cuatro claves débiles|Guía 2 — Resolución, Ej. 8]].
+Entonces, para conseguir $C_0 = 0^{28}$ y $D_0 = 1^{28}$ hacen falta bytes con los **bits altos en cero y los bajos en uno**, y el bit 4 puesto según adónde vaya a caer: `1F` $= \texttt{0001\ 1111}$ en los primeros cuatro bytes y `0E` $= \texttt{0000\ 1110}$ en los últimos. Los dos bytes **difieren exactamente en ese bit 4** (más el de paridad, que se acomoda para que los dos queden impares). Por eso la clave es `1F` cuatro veces y después `0E` cuatro veces, en vez de un byte repetido ocho veces: el patrón se quiebra justo donde PC-1 le cambia el bando al bit 4. La tabla completa del reparto está en [[guia-02-criptografia-simetrica#Las cuatro claves débiles|Guía 2 — Resolución, Ej. 8]].
 
 ### Las claves semi-débiles
 
@@ -225,7 +238,7 @@ de sortear una por accidente con un generador decente. Las claves débiles **no 
 
 El riesgo real es otro y es de ingeniería: **un generador de claves mal inicializado**. Un buffer sin inicializar da todo ceros, y todo ceros **es** una clave débil; el sorteo deja de ser uniforme y cae justo en la única porción del espacio que había que evitar. Por eso las implementaciones serias **chequean y descartan explícitamente** estas 4 claves —y las 12 semi-débiles— antes de usarlas. Es un caso de manual del *"no inventes criptografía"* de [[eleccion-de-primitivas|Elección de primitivas]]: el algoritmo está bien, lo que falla es el `Gen` del [[criptosistema]].
 
-> **Dónde seguir.** El key schedule **a nivel de bits** —las tablas PC-1 y PC-2, el calendario de rotaciones ronda por ronda— está en [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]]; la resolución completa del ejercicio, en [[guia-02-resolucion#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]]; la filmina que define débiles y semi-débiles, en [[practica-03-seudoaleatoriedad-y-modos|Práctica 3]].
+> **Dónde seguir.** El key schedule **a nivel de bits** —las tablas PC-1 y PC-2, el calendario de rotaciones ronda por ronda— está en [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]]; la resolución completa del ejercicio, en [[guia-02-criptografia-simetrica#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]]; la filmina que define débiles y semi-débiles, en [[practica-03-seudoaleatoriedad-y-modos|Práctica 3]].
 
 ---
 
@@ -297,17 +310,3 @@ $$c = \mathsf{Enc}_{k_1}\big(\mathsf{Dec}_{k_2}(\mathsf{Enc}_{k_3}(p))\big)$$
 En la filmina de [[eleccion-de-primitivas|primitivas recomendadas]], **DES aparece tachado** y 3DES sobrevive pero sin la etiqueta de recomendado — esa se la lleva [[aes|AES]].
 
 **La voz va un paso más allá que la filmina: 3DES también sale de la lista.** El docente lo declara roto —*"durante muchos años se usó triple DES; ahora se considera que está roto y no se usa más"* (cue pt2 382)— y, al recorrer la tabla de recomendados, lo saca de los proyectos nuevos: *"eventualmente se puede utilizar, más o menos. No, yo no usaría para un proyecto nuevo"* (cue pt2 504). El único recomendado que nombra sin reservas es **AES en modo `CBC` o `CTR`** (cue pt2 507). Ver [[eleccion-de-primitivas|Elección de primitivas]] y [[estado-de-un-criptosistema|Estado de un criptosistema]].
-
-## Ver también
-
-- [[aes|AES]] — el reemplazo
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]]
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — `3DES-CBC`, `3DES-CTR`
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — DES como ejemplo de *quebrado*
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]]
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]]
-- [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]] — el algoritmo a nivel de bits: IP, cajas $S$, PC-1, PC-2 y el calendario de rotaciones que hace posibles las claves débiles
-- [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]] — el enunciado del Ej. 8
-- [[guia-02-resolucion#Ejercicio 8|Guía 2 — Resolución]] — el Ej. 8 desarrollado de punta a punta
-- [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] — la filmina del 24/08 con la caja Feistel y la definición de claves débiles y **semi-débiles** por cantidad de subclaves
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

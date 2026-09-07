@@ -237,17 +237,3 @@ La filmina no lo lista acá, pero es lo que da sentido al resto del bloque:
 - **Índice universal de contenido** — el uso que hizo popular a `MD5`: identificar un archivo por su hash en redes P2P, donde el mismo contenido vive con nombres distintos en máquinas distintas (cues pt2 393-400). Ver [[primitivas-de-hash-estandar#MD5|Primitivas de hash estándar]].
 
 Qué resistencia hace falta en cada caso, y por qué no son la misma: [[resistencias-de-una-funcion-de-hash#Qué ataque real cubre cada resistencia|Resistencias de una función de hash]].
-
-## Ver también
-
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — colisiones, preimágenes y segundas preimágenes, con la jerarquía entre las tres y el *commitment*
-- [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — cómo se fabrica una de estas funciones a partir de una pieza chica
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — `MD5`, `SHA-1`, `SHA-2`, `SHA-3`: las familias de un solo elemento
-- [[hmac|HMAC]] — el MAC que se construye con una función de hash
-- [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — cuánto cuesta romper cada resistencia y qué $L$ alcanza hoy
-- [[message-authentication-code|Message Authentication Code]] — el objeto análogo **con** clave
-- [[cbc-mac|CBC-MAC]] — la primera forma de construir un MAC, la que se dio el 27/08
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — la otra primitiva de tamaño fijo del curso; el paralelo es exacto y se desarrolla en [[construccion-de-merkle-damgard#El problema que resuelve|Merkle-Damgård]]
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — las dos sesiones, 27/08 y 03/09
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la práctica del 31/08, que se adelantó a esta teórica
-- Katz & Lindell cap. 5 *Hash Functions and Applications*, §5.1 ([[bibliografia|bibliografía]])

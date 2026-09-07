@@ -87,11 +87,3 @@ El umbral entre los dos regímenes tiene nombre y fórmula: la **distancia de un
 ## Nota histórica
 
 **1939 — Bombe / Enigma.** Los ataques de exploración sistemática por fuerza bruta motivaron las primeras protocomputadoras. La fuerza bruta no es un ataque "de juguete": es el que hizo falta industrializar el cómputo → [[maquinas-de-rotores-y-enigma|Máquinas de rotores y Enigma]].
-
-## Ver también
-
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]]
-- [[modelos-de-ataque|Modelos de ataque]]
-- [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]] — el ataque que *no* enumera claves
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el bullet "espacio de claves (necesario)"
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — el Ejemplo 2, contraejemplo numérico con $\lvert K\rvert \ge \lvert M\rvert$

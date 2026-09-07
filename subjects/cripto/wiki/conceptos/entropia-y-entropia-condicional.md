@@ -74,12 +74,3 @@ Estos dos casos son los extremos de la misma escala en la que va a caer el ejemp
 ## Qué aporta esta herramienta frente al secreto perfecto
 
 El [[secreto-perfecto|secreto perfecto]] de la Clase 1 ya usa esta misma familia de ideas, escrito en el lenguaje de independencia probabilística: $\Pr[M{=}m\mid C{=}c] = \Pr[M{=}m]$ para todo $m,c$. Es, en el vocabulario de esta nota, la afirmación $H(M\mid C) = H(M)$ —el caso de independencia total del Caso 1 de arriba, aplicado a mensaje y criptograma—. Pero el secreto perfecto es una afirmación de **todo o nada**: se cumple o no se cumple, y si no se cumple no dice cuánto se filtró. La entropía condicional, en cambio, da un **número** en cualquier punto intermedio de la escala: $1{,}5$ bits filtrados es una respuesta que "el cifrado no tiene secreto perfecto" no puede dar. *(Lectura nuestra: la comparación explícita con el secreto perfecto no está en la filmina 6 ni en la 7; se apoya en que $H(x)-H(x\mid y) = I(x;y)$ —la [[teoria-de-la-informacion#Información mutua|información mutua]] del apunte—, así que "la condicional bajó en tanto" y "la mutua vale tanto" son la misma cantidad expresada de dos maneras.)*
-
-## Ver también
-
-- [[clase-09-flujo-de-informacion#2. Entropía y entropía condicional|Clase 09 — Flujo de información § 2. Entropía y entropía condicional]]
-- [[control-de-acceso-y-flujo-de-informacion|Control de acceso y flujo de información]] — la motivación cualitativa que esta nota cuantifica
-- [[flujo-de-informacion|Flujo de información]] — dónde $H(X\mid Y)$ se convierte en el criterio formal de si hay flujo
-- [[teoria-de-la-informacion|Teoría de la información]] — entropía, entropía condicional, información mutua y el canal de Shannon, desarrollados con demostraciones
-- [[secreto-perfecto|Secreto perfecto]] — el caso límite de independencia total, del que esta nota da la versión graduada
-- [[video-11-flujo-de-informacion#Los quince minutos de teoría de la información|Video 11 — Flujo de información § Los quince minutos de teoría de la información]] y [[video-11-flujo-de-informacion#Entropía condicional y la definición formal de flujo|§ Entropía condicional y la definición formal de flujo]] — el mismo material, dictado

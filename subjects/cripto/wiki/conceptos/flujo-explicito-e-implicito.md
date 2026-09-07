@@ -64,10 +64,3 @@ La cuenta es formalmente idéntica a la del `if` —misma distribución de $x$, 
 | **Implícito** | Hay verificación de flujo **sin** asignaciones explícitas | El `if` y el `while` |
 
 Con la clasificación por tipo de canal de arriba: flujo por dato es siempre explícito; flujo por control y flujo por comportamiento son ambos implícitos —en el `if`, $x$ aparece en la condición pero cada rama asigna a $y$ una **constante**, nunca una función explícita de $x$; en el `while` no hay ninguna asignación de la que hablar—. La filmina deja planteado el problema que ordena el resto de la clase: **encontrar y controlar los flujos implícitos de información**, mucho más sutiles y mucho más difíciles de capturar que los explícitos — un analizador de flujo que sólo mira asignaciones se pierde tanto el `if` como el `while`, exactamente los dos casos de esta nota.
-
-## Ver también
-
-- [[clase-09-flujo-de-informacion#4. Flujo explícito e implícito|Clase 09 — Flujo de información § 4. Flujo explícito e implícito]]
-- [[flujo-de-informacion|Flujo de información]] — la definición formal y el ejemplo de flujo explícito sobre el que se construye esta nota
-- [[politicas-de-control-de-flujo|Políticas de control de flujo]] — qué requisitos debe cumplir una política capaz de cubrir también los flujos implícitos
-- [[video-11-flujo-de-informacion#2. Flujo indirecto por rama|Video 11 — Flujo de información § 2. Flujo indirecto por rama]], [[video-11-flujo-de-informacion#3. Flujo indirecto por comportamiento|§ 3. Flujo indirecto por comportamiento]] y [[video-11-flujo-de-informacion#Flujo explícito e implícito|§ Flujo explícito e implícito]] — los mismos dos ejemplos y la misma generalización, dictados

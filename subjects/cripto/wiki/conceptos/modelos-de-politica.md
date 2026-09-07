@@ -42,12 +42,3 @@ $$\begin{array}{l|l}
 \end{array}$$
 
 Cada uno responde a la formalización de [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]] con una partición de estados concreta y un par de reglas de transición (típicamente, condiciones separadas para lectura y para escritura) que garantizan no cruzarla nunca — la misma estructura de [[politica-de-seguridad-y-sistema-seguro|Política de seguridad y sistema seguro]], instanciada tres veces.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#5. Modelos de política|Clase 06 — Políticas de seguridad y control de acceso § 5. Modelos de política]]
-- [[politica-de-seguridad-y-sistema-seguro|Política de seguridad y sistema seguro]] — la partición de estados y la garantía sobre transiciones que cada modelo instancia
-- [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]] — la propiedad concreta que cada modelo protege
-- [[lenguajes-de-descripcion-de-politicas|Lenguajes de descripción de políticas]] — el nivel de abstracción anterior: una política puntual, no una familia
-- [[bell-lapadula|Bell-LaPadula]], [[modelos-de-integridad-de-biba|Modelos de integridad de Biba]], [[muralla-china|Muralla china]] — los tres modelos concretos que desarrolla el resto de la clase
-- [[composicion-de-politicas|Composición de políticas]] — qué pasa cuando hay que combinar dos instancias de un modelo, o dos modelos distintos

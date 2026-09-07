@@ -48,7 +48,7 @@ sources: [Reglamento_Cripto.pdf, "raw/clases/Clase 02pt2-Transcripcion.VTT"]
 - Escritos e **individuales**.
 - **Ausente en la fecha del parcial = va directo al recuperatorio**, sin posibilidad de recuperar ese examen después.
 - **Hay cuatro primeros parciales resueltos**, de 2018 a 2025, en [[parciales-viejos|Parciales viejos]]. No son los del campus: llegaron por otra vía.
-- **Hay ejemplos de parcial publicados en el campus**, en la carpeta de **Prácticas**. Es dato de clase y no del reglamento: el docente recorre el campus en pantalla al cerrar el 20/08 y, sobre esa carpeta, dice *"ahí tienen los ejemplos de parcial"* (cue pt2 521 — el pasaje completo, en el [[clase-02-cifrado#El cierre del 20/08: el campus, los ejemplos de parcial y el libro de aritmética|cierre del 20/08]] de la Clase 02). **No están en `raw/`**, así que el vault no los tiene: son el **único material de evaluación** nombrado en todo lo ingerido hasta hoy y bajarlos sigue **pendiente**. La transcripción no dice cuántos son, de qué año ni si vienen con solución.
+- **Hay ejemplos de parcial publicados en el campus**, en la carpeta de **Prácticas**. Es dato de clase y no del reglamento: el docente recorre el campus en pantalla al cerrar el 20/08 y, sobre esa carpeta, dice *"ahí tienen los ejemplos de parcial"* (cue pt2 521 — el pasaje completo, en el [[bibliografia#El material del campus, recorrido en pantalla el 20/08|inventario del campus]] de la Clase 02). **No están en `raw/`**, así que el vault no los tiene: son el **único material de evaluación** nombrado en todo lo ingerido hasta hoy y bajarlos sigue **pendiente**. La transcripción no dice cuántos son, de qué año ni si vienen con solución.
 
 ### Trabajo práctico
 
@@ -93,10 +93,3 @@ $$\text{Nota Curso} = 0{,}35 \cdot P_1 + 0{,}35 \cdot P_2 + 0{,}30 \cdot TP$$
 > La bibliografía obligatoria es el **material de referencia principal**. Salvo disposición expresa de la cátedra, **los temas tratados en la bibliografía constituyen el cuerpo de conocimiento sobre el cual se evalúa**.
 
 Esto es literal del reglamento y conviene tomarlo en serio: el alcance de un parcial no está acotado por lo que se dijo en clase. Ver [[bibliografia|bibliografía]].
-
-## Ver también
-
-- [[cronograma|Cronograma]] — fechas de parciales, recuperatorios y entrega del TP
-- [[programa-y-objetivos|Programa y objetivos]]
-- [[bibliografia|Bibliografía]]
-- [[clase-02-cifrado#El cierre del 20/08: el campus, los ejemplos de parcial y el libro de aritmética|Clase 02 — Cifrado simétrico]] — el recorrido del campus del 20/08, donde aparecen los **ejemplos de parcial**

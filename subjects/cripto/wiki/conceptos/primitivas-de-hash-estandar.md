@@ -8,7 +8,7 @@ unidad: 1
 clase: 3
 orden: 9
 created: 2026-08-28
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, hash, md5, sha1, sha2, sha3, keccak, clase-03]
 sources: ["Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "raw/practicas/Clase 4.pdf"]
 ---
@@ -230,7 +230,7 @@ Los tres slides dan el hash de `""` (cadena vacía), `"a"` y `"abc"`. **Los veri
 
 **Cómo reproducirlos:** `printf '%s' abc | md5`, `printf '%s' abc | shasum -a 1`, `printf '%s' abc | openssl dgst -sha3-256`. El `printf '%s'` en lugar de `echo` es esencial: `echo` agrega un `\n` y el digest cambia por completo — que es, de paso, la ilustración más barata del **efecto avalancha**.
 
-**Y no es una molestia de tipeo: hay un ejercicio que se decide acá.** En el [[guia-03-resolucion#Ejercicio 6|Ej. 6 de la Guía 3]] las ocho preimágenes buscadas son las que produce `echo`, o sea que **el `\n` final es parte de lo que se hashea**: sin él no coincide ninguno de los ocho digests y el ejercicio parece irresoluble.
+**Y no es una molestia de tipeo: hay un ejercicio que se decide acá.** En el [[guia-03-mac-y-funciones-de-hash#Ejercicio 6|Ej. 6 de la Guía 3]] las ocho preimágenes buscadas son las que produce `echo`, o sea que **el `\n` final es parte de lo que se hashea**: sin él no coincide ninguno de los ocho digests y el ejercicio parece irresoluble.
 
 **Para qué están estos ejemplos en la filmina, dicho por el docente.** No son verificación: son la demostración visual del efecto avalancha, y detrás hay un criterio de diseño formal que la cátedra nombra y declara fuera del programa — el **criterio estricto de avalancha**, desarrollado en [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]].
 
@@ -342,20 +342,3 @@ Ninguna de éstas se puede resolver contra el material de la cátedra: son datos
 | `SHA-0` fue **comisionada a IBM** y modificada por la NSA | 03/09 405-412 | Diseñadas por la **NSA**, publicadas por NIST (FIPS 180 y 180-1). El episodio IBM+NSA es el de `DES` | Que no hubo concurso, que `SHA-0` se retiró, y que los cambios nunca se explicaron |
 | `SHA-2` se estandariza **después** de 2004, como respuesta | 03/09 442-444 | 2001 borrador, **2002 FIPS 180-2**: es anterior al ataque | Que funcionó como punto de contención tras 2004, y el pliego del concurso |
 | `SHA-3` se estandariza **en reemplazo de** `SHA-2` | 03/09 455 | NIST **no deprecó** `SHA-2`; `SHA-3` es alternativa de diseño distinto, no sucesora | Que `SHA-3` es el estándar recomendado para lo nuevo |
-
-## Ver también
-
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — qué es lo que estas cuatro primitivas implementan, y el criterio estricto de avalancha completo
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — contra qué propiedad está rota cada una
-- [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — el molde que comparten `MD5`, `SHA-1` y `SHA-2`, y del que `SHA-3` se escapa
-- [[hmac|HMAC]] — cómo se convierte cualquiera de estas en un MAC, y por qué no alcanza con concatenar la clave
-- [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — de dónde salen los $2^{80}$ y por qué las salidas subieron de 128 a 256 bits
-- [[riesgo-y-seguridad-relativa|Riesgo y seguridad relativa]] — el criterio con el que se decide si un exponente alcanza, y por qué *"¿`MD5` es inseguro?"* no tiene respuesta sin escenario
-- [[agilidad-criptografica|Agilidad criptográfica]] — por qué toda primitiva de esta tabla tiene fecha de vencimiento y qué hay que dejar previsto
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el vocabulario seguro / debilitado / quebrado que usa la tabla
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — la misma decisión del lado del cifrado
-- [[des-y-3des|DES y 3-DES]] — las cajas $S$ secretas, que son el mismo episodio que los cambios sin explicar de `SHA-1`; y el 3-DES del que `SHA-2` es el análogo
-- [[aes|AES]] — el concurso abierto que `SHA-3` repite diez años después
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la filmina 10, con la taxonomía iterativo / esponja
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-- Katz & Lindell cap. 5 *Hash Functions and Applications* y §6.3 *Hash Functions in Practice* ([[bibliografia|bibliografía]])

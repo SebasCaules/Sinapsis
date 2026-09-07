@@ -110,12 +110,3 @@ La clase es por videollamada y **hay respuestas que llegan por el chat**: no que
 > - La **distancia de unicidad** se da con el número de la clase —5 letras para el castellano— pero sin la fórmula que lo produce. Queda pendiente contrastarlo con la definición de Shannon en [[teoria-de-la-informacion|Teoría de la información]].
 > - El **índice de coincidencia** se usa sin nombrarlo (cue 602). El nombre propio y la fórmula entran recién por la [[practica-01-esquemas-y-taxonomias|Práctica 01]].
 > - La **tarea que deja la clase** —repasar probabilidad y probabilidad condicional— no está escrita en ninguna filmina: sale sólo de la voz.
-
-## Ver también
-
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que sigue: del secreto perfecto a la criptografía que se usa
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — el árbol de cifrados y el de ataques, y la notación $\pi(\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})_{\text{priv}}$
-- [[guia-01-criptografia-clasica|Guía 1 — Criptografía Clásica]] — los 8 ejercicios que ejercitan esta clase, con su resolución
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — la tarea que deja la clase, con los dos ejemplos numéricos completos
-- Los quince conceptos de esta clase: [[criptosistema|Criptosistema]] · [[principio-de-kerckhoffs|Principio de Kerckhoffs]] · [[cifrado-por-rotacion|Cifrado por rotación]] · [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] · [[cifrado-de-sustitucion-monoalfabetica|Sustitución monoalfabética]] · [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]] · [[cifrado-de-vigenere|Cifrado de Vigenère]] · [[test-de-kasiski|Test de Kasiski]] · [[cifrado-por-transposicion|Cifrado por transposición]] · [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] · [[secreto-perfecto|Secreto perfecto]] · [[indice-de-coincidencia|Índice de coincidencia]] · [[modelos-de-ataque|Modelos de ataque]] · [[historia-de-la-criptografia|Historia de la criptografía]] · [[maquinas-de-rotores-y-enigma|Máquinas de rotores y Enigma]]
-- [[bibliografia|Bibliografía]] · [[cronograma|Cronograma]] · [[programa-y-objetivos|Programa y objetivos]]

@@ -68,13 +68,3 @@ Las dos secciones siguientes muestran que ACLs y capacidades son **teóricamente
 ## Un caso real: la matriz como política basada en atributos
 
 *(Cruce con video, no del deck.)* El [[video-12-proteccion-de-datos-personales#6.5. Data labeling y el ejemplo de AWS Tag Policy|Video 12]] trae un ejemplo de policy de AWS —JSON con versión `2012-10-17`— anotado con la terna clásica de control de acceso: el campo `Principal` es el **sujeto**, `Resource` es el **objeto**, y una condición sobre una etiqueta (`Condition`/`StringEquals` sobre `s3:ExistingObjectTag/environment`) reemplaza a la celda puntual de la matriz. Es la misma estructura sujeto-objeto-derecho de esta sección, con una variante que evita exactamente el problema de "altas y bajas" señalado arriba: en vez de una celda por objeto puntual, la condición se escribe contra una **etiqueta**, así que la política sobrevive a que aparezcan objetos nuevos sin tocar ninguna entrada — el mismo objetivo que persiguen ACLs y capacidades, resuelto por una tercera vía (control de acceso basado en atributos) que ninguno de los dos decks de esta clase desarrolla.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#10. Matriz de control de acceso|Clase 06 — Matriz de control de acceso]]
-- [[lenguajes-de-descripcion-de-politicas|Lenguajes de descripción de políticas]] — el lenguaje cerrado de la filmina 10-11 es, en el fondo, una matriz de acceso escrita como conjunto de triplas
-- [[composicion-de-politicas|Composición de políticas]] — la sección inmediatamente anterior del recorrido de la clase
-- [[listas-de-control-de-acceso|Listas de control de acceso]] — la proyección por columna
-- [[listas-de-capacidades|Listas de capacidades]] — la proyección por fila
-- [[video-12-proteccion-de-datos-personales#6.5. Data labeling y el ejemplo de AWS Tag Policy|Video 12 — Protección de datos personales]] — el ejemplo de policy de AWS anotado con sujeto/objeto/derecho
-- Matt Bishop, *Computer Security: Art and Science*, cap. 16 (*Access Control Mechanisms*) ([[bibliografia|Bibliografía]])

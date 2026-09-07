@@ -105,8 +105,8 @@ Las 64 filminas del PDF se reparten sin solapamiento entre las dos fechas de la 
 
 | Filminas | Fecha | Contenido | En el vault |
 |---|---|---|---|
-| **1–44** | 13/08 — **este video** | de la portada a *"Seguridad de cifrado por bloques"* con el cartel de las funciones pseudoaleatorias | [[clase-02-cifrado#1. Repaso: criptosistema y secreto perfecto\|§1]] a [[clase-02-cifrado#10. Modos de encadenamiento\|§10]] |
-| **45–64** | 20/08 — **no está en video** | DES, función de transformación, subclaves, 3-DES, AES, *round keys*, criptosistemas en proyectos, estados, recomendados, bibliografía | [[clase-02-cifrado#11. DES y 3-DES\|§11]] a [[clase-02-cifrado#13. Criptosistemas en proyectos\|§13]] |
+| **1–44** | 13/08 — **este video** | de la portada a *"Seguridad de cifrado por bloques"* con el cartel de las funciones pseudoaleatorias | [[clase-02-cifrado#El recorrido, tramo por tramo\|tramos 1 a 10]] |
+| **45–64** | 20/08 — **no está en video** | DES, función de transformación, subclaves, 3-DES, AES, *round keys*, criptosistemas en proyectos, estados, recomendados, bibliografía | [[clase-02-cifrado#El recorrido, tramo por tramo\|tramos 11 a 13]] |
 
 El corte se verifica en dos direcciones. Hacia adelante: `grep -icE "IBM|feistel|rijndael|AES|s-box"` da **0** en la transcripción del 13/08 y **12** en la del 20/08. Hacia atrás: el 20/08, a 1:18:10, el docente dice *"estos son los modos que vimos la clase pasada. Lo tienen al principio. Lo tienen grabado."*
 
@@ -128,11 +128,11 @@ Concretamente, tres cosas que sólo se saben mirando:
 
 | Lo que se dice y no está en ninguna lámina | Dónde ya está |
 |---|---|
-| Cómo descifra el receptor un cifrado probabilístico: la semilla se parte en clave secreta más IV público (1:29:40–1:32:00) | [[clase-02-cifrado#8. Cifrado probabilístico: nonce e IV\|§8]] · [[cifrado-probabilistico-nonce-e-iv\|02.06]] |
-| Propagación de errores modo por modo (1:52:00–2:00:00) | [[clase-02-cifrado#Propagación de errores\|Propagación de errores]] · [[modos-de-encadenamiento\|02.08]] |
-| El interludio sobre determinismo, semillas y el anillo de enteros (38:44–43:00) | [[clase-02-cifrado#6. Generadores pseudoaleatorios\|§6]] · [[numeros-aleatorios-y-randomness\|Números aleatorios]] |
+| Cómo descifra el receptor un cifrado probabilístico: la semilla se parte en clave secreta más IV público (1:29:40–1:32:00) | [[cifrado-probabilistico-nonce-e-iv\|02.06]] |
+| Propagación de errores modo por modo (1:52:00–2:00:00) | [[modos-de-encadenamiento#Propagación de errores\|02.08 Modos § Propagación de errores]] |
+| El interludio sobre determinismo, semillas y el anillo de enteros (38:44–43:00) | [[generador-pseudoaleatorio#La analogía del anillo\|02.04 Generador § La analogía del anillo]] · [[numeros-aleatorios-y-randomness\|Números aleatorios]] |
 | Secreto perfecto como aporte de información cero | [[teoria-de-la-informacion\|Teoría de la información]] |
-| *EAV da exactamente $0{,}5$* $\iff$ *secreto perfecto* (1:00:17) | [[clase-02-cifrado#El puente que la filmina no dibuja: el secreto perfecto como caso límite\|El puente que la filmina no dibuja]] |
+| *EAV da exactamente $0{,}5$* $\iff$ *secreto perfecto* (1:00:17) | [[pruebas-de-indistinguibilidad#El puente que la filmina no dibuja: el secreto perfecto como caso límite\|El puente que la filmina no dibuja]] |
 | Qué tan chico tiene que ser epsilon: la palabra es *negligible*, no hay valor fijo | [[seguridad-computacional\|02.02]] |
 | Efecto avalancha como defensa del modo `Counter` (2:00:07) | [[modos-de-encadenamiento\|02.08]] · [[funciones-de-hash-criptograficas\|03.06]] |
 | Katz en papel y *Cryptonomicon* de Neal Stephenson | [[bibliografia\|Bibliografía]] |
@@ -151,7 +151,7 @@ Concretamente, tres cosas que sólo se saben mirando:
 | 2:07:31 | *"ahora lo van a ver con Ana. Ana les va a hacer un súper repaso"* |
 | 2:07:48 – 2:08:14 | Intercambio sobre los ejemplares físicos en biblioteca: dos de la segunda edición más uno de la anterior |
 
-**Esto invierte el balance de la nota.** El video tiene **un solo** aviso explícito de parcial (a 1:12:52, sobre el formalismo de las pruebas de seguridad). El segundo, el de teoría de números, está justo en el tramo que falta. Quien mire el video y no lea la transcripción se pierde **la mitad de las indicaciones de parcial de esa jornada** y toda la tarea que quedó asignada — que está desarrollada en [[clase-02-cifrado#Cierre de la clase: la tarea que quedó para el intervalo|Cierre de la clase]] y que es de donde salen [[aritmetica-modular-y-divisibilidad|02.13]], [[algoritmo-de-euclides-extendido|02.14]] y [[inverso-modular|02.15]].
+**Esto invierte el balance de la nota.** El video tiene **un solo** aviso explícito de parcial (a 1:12:52, sobre el formalismo de las pruebas de seguridad). El segundo, el de teoría de números, está justo en el tramo que falta. Quien mire el video y no lea la transcripción se pierde **la mitad de las indicaciones de parcial de esa jornada** y toda la tarea que quedó asignada — que está desarrollada en [[teoria-de-numeros#1. De dónde sale esto: es tarea de la Clase 02|Teoría de números]] y que es de donde salen [[aritmetica-modular-y-divisibilidad|02.13]], [[algoritmo-de-euclides-extendido|02.14]] y [[inverso-modular|02.15]].
 
 **No se sabe por qué corta ahí.** No hay nada en el audio que lo explique. Puede ser un recorte deliberado o un fallo de subida; no hay evidencia para decidirlo.
 
@@ -191,7 +191,7 @@ $$\Pr[C{=}01 \mid M{=}00] = \Pr[K = 01\oplus 00] = \Pr[K{=}01] = 0{,}1$$
 
 $$\Pr[M{=}00 \mid C{=}01] = \frac{0{,}1 \cdot 0{,}6}{0{,}185} = 0{,}32 \;\ne\; 0{,}60 = \Pr[M{=}00]$$
 
-Con la clave no uniforme se pierde la independencia y el criptograma filtra información. Mencionó que en la práctica con Ana hay dos o tres ejercicios de este tipo. → [[clase-02-cifrado#El ejercicio de la clave sesgada|El ejercicio de la clave sesgada]]
+Con la clave no uniforme se pierde la independencia y el criptograma filtra información. Mencionó que en la práctica con Ana hay dos o tres ejercicios de este tipo. → [[one-time-pad#Ejercicio: qué pasa si la clave no es aleatoria|El ejercicio de la clave sesgada]]
 
 ### El ataque que gana la prueba MUL
 
@@ -208,7 +208,7 @@ Lo que se evalúa no es el resultado sino el procedimiento:
 >
 > *"Este es un procedimiento que apunta a dar formalismo a algo que normalmente no lo tiene, y lo poderoso de esto es el formalismo."* Y sobre cómo resolverlo: *"cuando lo tengan que hacer, es importante que hagan los pasos y que establezcan bien los pasos, qué son cada componente, y busquen hacer la demostración lo más formal posible"*.
 
-→ [[pruebas-de-indistinguibilidad|02.05 Pruebas de indistinguibilidad]] · [[clase-02-cifrado#El aviso más explícito de la clase sobre el parcial|El aviso más explícito de la clase sobre el parcial]]
+→ [[pruebas-de-indistinguibilidad|02.05 Pruebas de indistinguibilidad]] · [[pruebas-de-indistinguibilidad#Cómo se escribe la respuesta: el aviso de la clase sobre el parcial|El aviso más explícito de la clase sobre el parcial]]
 
 ### Los dos que quedan sin resolver
 
@@ -243,7 +243,7 @@ Verificados contra el PDF, no contra el ASR. Son cinco entradas: las dos primera
 
 > **Precisión (no es errata):** la página 12 escribe $\Pr[M{=}00 \mid C{=}01] = 0{,}32$ cuando la cuenta exacta da $0{,}06/0{,}185 = 0{,}3243$. Es un redondeo a dos decimales, no un error de la lámina.
 
-**El registro de la filmina 18 vale 14, y él dice 15.** El diagrama carga $0\,0\,0\,0\,1\,1\,1\,0$ y a 44:00 el docente duda en voz alta y termina diciendo *"es 15"*. **Verificado renderizando la página 18 del PDF a 200 dpi**: los ocho bits se leen sin ambigüedad y dan $14$. Es un desliz suyo, no de la lámina — y coincide con la lectura que la [[clase-02-cifrado#6. Generadores pseudoaleatorios|nota de clase]] ya hacía de la misma imagen.
+**El registro de la filmina 18 vale 14, y él dice 15.** El diagrama carga $0\,0\,0\,0\,1\,1\,1\,0$ y a 44:00 el docente duda en voz alta y termina diciendo *"es 15"*. **Verificado renderizando la página 18 del PDF a 200 dpi**: los ocho bits se leen sin ambigüedad y dan $14$. Es un desliz suyo, no de la lámina — y coincide con la lectura que [[generador-pseudoaleatorio|Generador pseudoaleatorio]] ya hacía de la misma imagen.
 
 > La filmina 17 escribe *"Por ejemplo: $\lvert K \rvert = 2^{128}$, $\lvert M \rvert = \lvert K \rvert^{128}$"*. La notación es rara y él la narra distinto en voz. Se reporta tal cual está escrita, sin corregirla.
 
@@ -256,16 +256,3 @@ Verificados contra el PDF, no contra el ASR. Son cinco entradas: las dos primera
 - **Dos frames en negro:** el arranque (00:00) y 1:40:58, que es cuando se levanta a abrirle la puerta al gato.
 - **A 1:09:05 se le ve el dock de macOS asomando abajo**, porque comparte pantalla completa y no la ventana de la presentación.
 
----
-
-## Ver también
-
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la nota completa de la clase, con las 64 filminas y las dos transcripciones. **Es lo que hay que leer; este video es su banda de imagen**
-- [[videografia|Videografía]] — los 13 videos de la playlist y su mapeo al cronograma
-- [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] — la práctica que ejercita este mismo tramo
-- [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]] · [[guia-02-resolucion|Resolución]] — los ejercicios de la unidad
-- [[one-time-pad|02.01 One Time Pad]] · [[seguridad-computacional|02.02 Seguridad computacional]] · [[criptosistema-de-flujo|02.03 Criptosistema de flujo]] · [[generador-pseudoaleatorio|02.04 Generador pseudoaleatorio]]
-- [[pruebas-de-indistinguibilidad|02.05 Pruebas de indistinguibilidad]] · [[cifrado-probabilistico-nonce-e-iv|02.06 Cifrado probabilístico, nonce e IV]] · [[primitiva-de-cifrado-en-bloque|02.07 Primitiva de cifrado en bloque]] · [[modos-de-encadenamiento|02.08 Modos de encadenamiento]]
-- [[secreto-perfecto|01.11 Secreto perfecto]] · [[principio-de-kerckhoffs|01.02 Principio de Kerckhoffs]] · [[modelos-de-ataque|01.13 Modelos de ataque]]
-- [[teoria-de-la-informacion|Teoría de la información]] · [[probabilidad-y-criptografia|Probabilidad y criptografía]] · [[numeros-aleatorios-y-randomness|Sobre números aleatorios y randomness]]
-- [[bibliografia|Bibliografía]] · [[cronograma|Cronograma]]

@@ -67,11 +67,3 @@ Es la conclusión más útil de toda la clase y la que evita la mitad de los mal
 | RC4, CSS, A5/1, A5/2, E0 | quebrados | **tachados** en la filmina de [[eleccion-de-primitivas\|recomendados]] |
 | [[aes\|AES]] | seguro | recomendado para proyectos nuevos |
 | [[modos-de-encadenamiento\|ECB]] | quebrado *como modo* | no es CPA-Secure, **aunque la primitiva esté sana** |
-
-## Ver también
-
-- [[seguridad-computacional|Seguridad computacional]] — de dónde salen "despreciable" y "practicable"
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — los escenarios concretos
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — qué hacer con esta clasificación
-- [[modelos-de-ataque|Modelos de ataque]] — la misma idea desde la taxonomía de la [[practica-01-esquemas-y-taxonomias|Práctica 01]]
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

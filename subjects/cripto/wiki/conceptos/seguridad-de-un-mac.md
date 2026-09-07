@@ -8,7 +8,7 @@ unidad: 1
 clase: 3
 orden: 4
 created: 2026-08-28
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, mac, mac-forge, infalsificable, integridad, juegos, replay, clase-03]
 sources: ["Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 03pt1-Transcripcion.VTT", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "raw/practicas/Clase 4.pdf"]
 ---
@@ -177,7 +177,7 @@ $$\begin{aligned}
 
 **Los tres se resolvieron en clase, y los tres son inseguros.** Las tres falsificaciones aciertan con **probabilidad 1** y usan **una sola consulta** al oráculo, así que ninguno cumple $\Pr[\mathsf{Mac\text{-}Forge}=1] \le \mathsf{negl}(n)$.
 
-**Este mismo ejercicio es el [[guia-03-mac-y-funciones-de-hash#Ejercicio 1|Ej. 1 de la Guía 3]]** —los tres MACs, misma notación y mismo orden, incluidas las barras de $\lvert m\rvert$ en el tercero—, así que el ejercicio que abre esa guía ya viene resuelto de acá; lo que la guía agrega, y lo que le quita de contexto, está en su [[guia-03-resolucion#Ejercicio 1|resolución]].
+**Este mismo ejercicio es el [[guia-03-mac-y-funciones-de-hash#Ejercicio 1|Ej. 1 de la Guía 3]]** —los tres MACs, misma notación y mismo orden, incluidas las barras de $\lvert m\rvert$ en el tercero—, así que el ejercicio que abre esa guía ya viene resuelto de acá; lo que la guía agrega, y lo que le quita de contexto, está en la [[guia-03-mac-y-funciones-de-hash#Ejercicio 1|resolución plegada de ese ejercicio]].
 
 ### Lo que falta antes de poder resolverlo
 
@@ -328,20 +328,3 @@ Es un hueco grande en una clase que se llama *integridad*, y conviene tenerlo pr
 - **La cátedra reconoce en voz alta una sola errata** en toda la Clase 03: la de la filmina 15 de teoría (*"Criptosistema"* por *"MAC"*), cue pt1 425. Las dos de la filmina 2 de la práctica —$\mathit{negl}(\ )$ y *"de igual longitud"*— **no se corrigen en ningún momento**, y están verificadas sobre el render de la lámina, no sobre el texto extraído.
 - **Aporte de la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] (31/08):** el experimento en tres pasos, el nombre corto de la propiedad, el aviso de replay con sus dos contramedidas y la condición de **etiquetas únicas** de la filmina 17.
 - **Lo que no sale de ninguna filmina ni de la clase, y va rotulado:** las tres justificaciones de las observaciones, la formalización de la moraleja del segundo MAC, la corrección sobre el determinismo, la resolución de la referencia 4.19/4.20 y el resto de la sección *Lo que la definición no cubre*.
-
-## Ver también
-
-- [[message-authentication-code|Message Authentication Code]] — la definición que esta nota vuelve exigible: la terna, los tres espacios y la propiedad básica
-- [[ataques-de-repeticion-y-frescura|Ataques de repetición y frescura]] — el hueco del punto 2, con la filmina de la cátedra que lo señala
-- [[construccion-de-macs-a-partir-de-una-prf|Construcción de MACs a partir de una PRF]] — los MACs que **sí** pasan `Mac-Forge`, empezando por el trivial de longitud fija
-- [[cbc-mac|CBC-MAC]] — la primera construcción que **sí** pasa `Mac-Forge`, y bajo qué condición de longitud
-- [[hmac|HMAC]] — la construcción sobre funciones de hash
-- [[cifrado-autenticado|Cifrado autenticado]] — dónde se usa la hipótesis de infalsificabilidad, y por qué en rigor hace falta la versión fuerte
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] y [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — el lado técnico del episodio de 2004 que sostiene la segunda observación: qué función cayó y cuánto cuesta hallar una colisión
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul` y `CPA`: la familia de pruebas con la que `Mac-Forge` contrasta, y de donde sale el $\tfrac12$ que acá no está
-- [[seguridad-computacional|Seguridad computacional]] — qué es $\mathrm{PPT}$ y qué es $\mathsf{negl}(n)$
-- [[maleabilidad|Maleabilidad]] y [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — el problema que el MAC viene a resolver
-- [[notacion-y-terminologia|Notación y terminología]] — los experimentos desarmados pieza por pieza
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — las dos sesiones, 27/08 y 03/09
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — el otro deck de `Mac-Forge`: tres pasos, dos erratas y el aviso de replay
-- Katz & Lindell cap. 4 *Message Authentication Codes* — Definiciones 4.1 a 4.3, Proposición 4.4, Teorema 4.19 sobre la Construcción 4.18, y Ejercicios 4.1, 4.5, 4.7, 4.20 y 4.21 ([[bibliografia|bibliografía]])

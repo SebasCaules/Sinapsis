@@ -56,13 +56,3 @@ $$H(x \mid y) = -\tfrac{1}{2}\log_2\tfrac{1}{2} - \tfrac14\log_2\tfrac14 - \tfra
 **Conclusión, con la desigualdad de la sección anterior aplicada.** $y$ no existía antes de ejecutar el comando —se crea recién con la asignación—, así que corresponde la segunda rama de la definición: $H(x_s\mid y_t) < H(x_s)$. Sustituyendo, $1{,}5 < 3$, la desigualdad se cumple, y **hay flujo de información de $x$ a $y$** — la propia filmina lo remata con un globo de texto. De los $3$ bits de incertidumbre original quedaron $1{,}5$: se filtró exactamente un bit y medio, ni todo ni nada, el punto intermedio entre los dos casos límite de [[entropia-y-entropia-condicional#Los dos casos límite, verificados|Entropía y entropía condicional]].
 
 *(Lectura nuestra.)* En el lenguaje de [[teoria-de-la-informacion#Información mutua|información mutua]] del apunte de teoría de la información, esta misma cuenta se lee como $I(x;y) = H(x) - H(x\mid y) = 3 - 1{,}5 = 1{,}5$ bits: la cantidad exacta de información que $y$ porta sobre $x$. La filmina nunca escribe $I(x;y)$; la equivalencia es una traducción propia entre las dos notaciones del vault.
-
-## Ver también
-
-- [[clase-09-flujo-de-informacion#3. Flujo de información: la definición|Clase 09 — Flujo de información § 3. Flujo de información: la definición]]
-- [[entropia-y-entropia-condicional|Entropía y entropía condicional]] — la herramienta con la que se construye esta definición
-- [[flujo-explicito-e-implicito|Flujo explícito e implícito]] — los dos ejemplos siguientes, donde el mismo criterio detecta flujo sin ninguna asignación aritmética
-- [[secreto-perfecto|Secreto perfecto]] — el caso "que el cifrado no revele nada de la clave" que la filmina 9 evoca en prosa
-- [[seguridad-computacional|Seguridad computacional]] — la versión relajada de esa misma exigencia bajo poder de cómputo acotado
-- [[teoria-de-la-informacion#Información mutua|Teoría de la información § Información mutua]] — la cantidad exacta que mide esta definición, en otra notación
-- [[video-11-flujo-de-informacion#Entropía condicional y la definición formal de flujo|Video 11 — Flujo de información § Entropía condicional y la definición formal de flujo]] y [[video-11-flujo-de-informacion#1. Flujo directo por asignación|§ 1. Flujo directo por asignación]] — la misma definición y el mismo ejemplo, dictados

@@ -25,7 +25,7 @@ Esta práctica **no trae material nuevo casi en ningún punto**: es el **mapa** 
 Dicho eso, hay **dos lugares donde la práctica va más lejos que las filminas de teoría**, y son los que justifican leerla aunque ya te sepas la Clase 02:
 
 1. **[[#8. Claves débiles y semi-débiles: el aporte más fuerte|Claves débiles y semi-débiles caracterizadas por cantidad de subclaves]]** — 1 para las débiles, 2 o 4 para las semi-débiles. Es el [[guia-02-criptografia-simetrica#Ejercicio 8|Ej. 8 de la Guía 2]] dicho por la cátedra, con un criterio más operativo que el del enunciado — y es la **única fuente de la cátedra** que nombra las semi-débiles.
-2. **[[#9. Modo CFB: cuatro láminas con bloque de 32 bits y segmento de 8|Las cuatro láminas de CFB con n = 32 y s = 8]]**, que incluyen un caso de falla —**bloques fuera de orden**— que no aparece en ninguna otra fuente del vault, y dejan planteado un ejercicio que es el [[guia-02-resolucion#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros.
+2. **[[#9. Modo CFB: cuatro láminas con bloque de 32 bits y segmento de 8|Las cuatro láminas de CFB con n = 32 y s = 8]]**, que incluyen un caso de falla —**bloques fuera de orden**— que no aparece en ninguna otra fuente del vault, y dejan planteado un ejercicio que es el [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros.
 
 ---
 
@@ -256,7 +256,7 @@ El mecanismo, en una línea por caso: con mitades constantes el acumulado no cam
 
 > **Por qué esta filmina importa para el vault.** Es la **única fuente de la cátedra** que nombra las claves semi-débiles: el [[guia-02-criptografia-simetrica#Ejercicio 8|enunciado del Ej. 8]] pregunta sólo por las débiles, y las filminas de teoría no las mencionan. Sin esta lámina serían un agregado externo; con ella, son material examinable.
 
-**Dónde seguir:** la resolución completa del ejercicio —las cuatro claves débiles en hexadecimal, el rol de los bits de paridad, y las dos "otras dos" que pide el enunciado— está en [[guia-02-resolucion#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]]; el desarrollo de las semi-débiles, en [[des-y-3des#Las claves semi-débiles|DES y 3-DES]].
+**Dónde seguir:** la resolución completa del ejercicio —las cuatro claves débiles en hexadecimal, el rol de los bits de paridad, y las dos "otras dos" que pide el enunciado— está en [[guia-02-criptografia-simetrica#Ejercicio 8|Guía 2 — Resolución, Ejercicio 8]]; el desarrollo de las semi-débiles, en [[des-y-3des#Las claves semi-débiles|DES y 3-DES]].
 
 ---
 
@@ -275,7 +275,7 @@ El mecanismo del modo —el registro de desplazamiento, qué entra y qué se des
 
 ### 9.1. El ejercicio de la lámina 4: llega mal el primer segmento
 
-**Es el [[guia-02-resolucion#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros**, y por eso conviene resolverlo con la fórmula y no de memoria. Un bit erróneo en el segmento cifrado tiene **dos efectos separados**:
+**Es el [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros**, y por eso conviene resolverlo con la fórmula y no de memoria. Un bit erróneo en el segmento cifrado tiene **dos efectos separados**:
 
 1. Sobre el segmento propio: $m_1 = c_1 \oplus \mathrm{ks}_1$, y $\mathrm{ks}_1$ todavía es correcto porque el error **aún no entró** al registro. Entra por **xor directo** → $m_1$ sale con **exactamente 1 bit mal**.
 2. Sobre los que siguen: el $c_1^{*}$ erróneo entra al registro y **sobrevive $n/s$ desplazamientos**. Mientras esté adentro, la entrada de la primitiva es incorrecta y esos $n/s$ segmentos quedan **destruidos por completo**.
@@ -284,7 +284,7 @@ $$\text{segmentos afectados} \;=\; \underbrace{1}_{\text{un bit mal}} \;+\; \und
 
 **Respuesta: 5 caracteres** — $m_1$ con un solo bit dado vuelta, y $m_2, m_3, m_4, m_5$ basura. A partir de $m_6$ el registro ya se limpió y el descifrado vuelve a ser correcto: **`CFB` es autosincronizante**. *(Verificado por simulación con $n = 32$, $s = 8$: los bits mal en $m_1 \dots m_5$ dieron $1, 4, 3, 6, 5$ y de $m_6$ en adelante, cero.)*
 
-> **El contraste con `DES` es el punto del ejercicio.** La [[guia-02-resolucion#Ejercicio 6|Guía 2]] se responde con **9** porque asume `DES` ($n = 64$); con `AES` serían **17**; con los parámetros de esta lámina son **5**. La respuesta correcta nunca es un número: es $1 + n/s$, y hay que decir con qué $n$ se trabaja. Que la cátedra use $n = 32$ en su propio material es la mejor prueba de que el número absoluto no es lo que se evalúa.
+> **El contraste con `DES` es el punto del ejercicio.** La [[guia-02-criptografia-simetrica#Ejercicio 6|Guía 2]] se responde con **9** porque asume `DES` ($n = 64$); con `AES` serían **17**; con los parámetros de esta lámina son **5**. La respuesta correcta nunca es un número: es $1 + n/s$, y hay que decir con qué $n$ se trabaja. Que la cátedra use $n = 32$ en su propio material es la mejor prueba de que el número absoluto no es lo que se evalúa.
 
 ### 9.2. La lámina 3: bloques fuera de orden
 
@@ -680,21 +680,3 @@ Qué cambia y qué no:
 - **No cambia la autoría.** [`des.pdf`](../../raw/apuntes/des.pdf) sigue siendo un texto de **Jorge Sánchez Arriazu (1999)**, externo a la cátedra: lo que ahora sabemos es que **la cátedra lo eligió y lo publicó**, no que lo escribió. → [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]]
 - **Sigue sin haber fecha de clase.** La filmina dice **dónde** está el material, no a qué clase pertenece. Se queda en la tabla de [[cronograma#Material sin fecha de clase|material sin fecha]].
 
----
-
-## Ver también
-
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — la otra práctica-mapa: taxonomía de cifrados clásicos y de ataques
-- [[practica-02-videos|Práctica 02 — Videos]] — los cuatro videos de la práctica anterior; la existencia de esta práctica 3 es lo que acota su fecha
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la teoría que esta práctica ordena, de punta a punta
-- [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]] · [[guia-02-resolucion|Guía 2 — Resolución]] — el Ej. 6c (propagación en `CFB`) y el Ej. 8 (claves débiles) salen directo de acá
-- [[secreto-perfecto|Secreto perfecto]] · [[seguridad-computacional|Seguridad computacional]] — las dos primeras estaciones del eje
-- [[one-time-pad|One Time Pad]] — el esquema que la filmina "redefine" con $G$
-- [[generador-pseudoaleatorio|Generador pseudoaleatorio]] · [[criptosistema-de-flujo|Criptosistema de flujo]] — la rama $G$ = *stream cipher*
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — la rama $F_k$ = *block cipher*
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — `Eav`, `Mul` y `CPA`, y el experimento de la sección 6
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — los modos sincrónico y asincrónico
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — los cinco modos, la propagación de errores y el caso de bloques fuera de orden
-- [[des-y-3des|DES y 3-DES]] — Feistel, key schedule y claves débiles
-- [[des-descripcion-del-algoritmo|Descripción del algoritmo DES]] · [[implementaciones-de-referencia|Implementaciones de referencia en Java]] — el material de `Material Didáctico/Extra/`
-- [[cronograma|Cronograma]] · [[indice|Índice del vault]]

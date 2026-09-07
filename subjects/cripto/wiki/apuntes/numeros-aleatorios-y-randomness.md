@@ -7,9 +7,9 @@ type: apunte
 clase: 2
 orden: 33
 created: 2026-08-24
-updated: 2026-09-04
-tags: [apunte, aleatoriedad, prg, one-time-pad, pendiente, recurso-externo]
-sources: ["Sobre números aleatorios y randomness.txt"]
+updated: 2026-09-06
+tags: [apunte, aleatoriedad, prg, one-time-pad, pendiente, recurso-externo, transcripcion]
+sources: ["Sobre números aleatorios y randomness.txt", "raw/clases/Clase 02pt2-Transcripcion.VTT"]
 ---
 
 # Sobre números aleatorios y randomness
@@ -52,7 +52,7 @@ La Clase 02 hace una pregunta y no la contesta. En la tercera de las "malas noti
 
 > La clave **DEBE** ser aleatoria. ¿Cómo puede garantizarse esto?
 
-Y sigue de largo. El resto de la clase construye la respuesta *computacional* —el [[generador-pseudoaleatorio|generador pseudoaleatorio]]— pero **nunca vuelve a la pregunta física**. Ese hueco es, muy probablemente, la razón de ser de este link *(lectura nuestra)*.
+Y sigue de largo. El resto del 13/08 construye la respuesta *computacional* —el [[generador-pseudoaleatorio|generador pseudoaleatorio]]— y **ninguna filmina vuelve a la pregunta física**. Ese hueco es, muy probablemente, la razón de ser de este link *(lectura nuestra)*. La segunda fecha sí la contesta, pero **en voz y fuera de filmina** — está abajo, en la [[#La respuesta hablada del 20/08|§ La respuesta hablada del 20/08]].
 
 ### El problema tiene tres capas, y la clase sólo cierra dos
 
@@ -60,7 +60,7 @@ Y sigue de largo. El resto de la clase construye la respuesta *computacional* �
 |---|---|---|
 | ¿Qué pasa si la clave **no** es uniforme? | [[one-time-pad#Ejercicio: qué pasa si la clave no es aleatoria\|ejercicio de la clave sesgada]] | **cerrada**: se mide la fuga con Bayes |
 | ¿Cómo consigo muchos bits que **parezcan** aleatorios a partir de pocos? | [[generador-pseudoaleatorio\|generador pseudoaleatorio]] | **cerrada**: definición formal de indistinguibilidad |
-| ¿De dónde sale la **semilla** $s$, que sí tiene que ser azar de verdad? | — | **abierta** en el curso hasta acá |
+| ¿De dónde sale la **semilla** $s$, que sí tiene que ser azar de verdad? | acá abajo, [[#La respuesta hablada del 20/08\|§ La respuesta hablada del 20/08]] | **contestada en voz**, fuera de filmina |
 
 La tercera fila es la que importa. El PRG **no elimina** el requisito de azar verdadero: lo **comprime**. Antes hacían falta $\lvert m\rvert$ bits genuinamente aleatorios (la cota de Shannon del [[secreto-perfecto|secreto perfecto]]); ahora alcanza con $s$ bits, digamos $128$, y $G$ los estira hasta $n \gg s$. Es una mejora enorme —de "tan larga como el mensaje" a "una constante"— pero **el piso sigue existiendo**: si esos $128$ bits no son azar, todo lo de arriba se cae, porque el generador es determinístico y la semilla lo determina entero.
 
@@ -71,6 +71,21 @@ La tercera fila es la que importa. El PRG **no elimina** el requisito de azar ve
 Vale traerlo porque es la evidencia de que esto **no es una preocupación teórica**. Con $P(K{=}00) = 0{,}3$, $P(K{=}01) = 0{,}1$, $P(K{=}10) = 0{,}4$, $P(K{=}11) = 0{,}2$ —una clave apenas torcida, ni siquiera predecible— el OTP deja de tener secreto perfecto y se puede **medir cuánto filtra**: observando $C = 01$, la a priori $P(M{=}00) = 0{,}60$ se derrumba a $0{,}32$ y el mensaje $11$ pasa de $0{,}15$ a $0{,}324$, empatando con el favorito. Las cuentas completas están en la [[one-time-pad#Ejercicio: qué pasa si la clave no es aleatoria|nota del OTP]].
 
 En la demostración de secreto perfecto los dos $1/N$ **se cancelan**: uno viene de que la clave es uniforme, el otro de que el criptograma resulta uniforme. Al romper la uniformidad de la clave no queda nada en pie. La aleatoriedad no es un detalle de implementación del OTP — **es la hipótesis sobre la que se apoya la prueba entera**.
+
+### La respuesta hablada del 20/08
+
+El pendiente que el 13/08 deja abierto lo contesta la segunda fecha, en una digresión larga que **no está en ninguna filmina**, y la respuesta tiene dos mitades.
+
+**La fuente del azar de verdad es física.** Un decaimiento radiactivo leído por un contador Geiger, la pared de lámparas de lava de Cloudflare: eventos que no se pueden calcular por adelantado porque no salen de un algoritmo.
+
+**Y el criterio no es *cuanto más azar mejor*.** Lo que se pide es que la distribución sea **uniforme**, que es lo mismo que **maximizar la entropía**. Un generador incontrolable no sirve para criptografía aunque sea impredecible: hace falta poder afirmar cómo está distribuida su salida. Es el mismo $H$ que formaliza [[teoria-de-la-informacion|Teoría de la información]], y es la razón por la que la tercera mala noticia del [[one-time-pad#3. La clave DEBE ser aleatoria|OTP]] pide *uniforme* y no simplemente *impredecible*.
+
+> [!quote]- De la transcripción — de dónde sale el azar de verdad, y por qué demasiado azar tampoco sirve (cues pt2 70-72, 80-93)
+> *"Una manera de generar números aleatorios puros es con algún mecanismo físico (…) el disparo de un rayo, de un neutrón o de un protón que se rompe en algo radiactivo."* Y el caso concreto: Random.org tenía *"un generador físico de eventos aleatorios asociados a un tema radiactivo (…) un contador Geiger que lo detectaba, y con eso generaba un bit"*, servido por una API primitiva de la época. Un alumno aporta el otro caso célebre: la pared de lámparas de lava de Cloudflare.
+>
+> El límite: *"ése es el problema de los generadores aleatorios de verdad en criptografía: necesitás algo que **no sea tan random**, porque si es demasiado random es incontrolable; no tenés ningún mecanismo para decir cómo va a ser esta distribución. Lo que uno quiere idealmente en cualquier función criptográfica es **maximizar la entropía**, y para que la entropía sea lo más alta posible **la función de probabilidad tiene que ser uniforme**."*
+
+> **Lo que esto no cierra.** La clase nombra fuentes físicas y fija el criterio, pero **no dice cómo se implementa** la recolección de entropía en un sistema real —`/dev/urandom`, pools del sistema operativo, instrucciones de hardware—. Eso sigue fuera del curso, y el bug de OpenSSL que cuenta la misma jornada muestra por qué importa: ver [[eleccion-de-primitivas#El escrutinio ayuda, pero no es una garantía|elección de primitivas]].
 
 ---
 
@@ -119,14 +134,3 @@ Para que quede explícito, porque es material de estudio:
 - [ ] **Contrastarlo con la definición formal** de [[generador-pseudoaleatorio|PRG]]: confirmar o corregir la lectura del título de la sección 3.
 - [ ] **Confirmar si tiene clase asignada** o si es material suelto de verdad. Hasta entonces la nota vive en `apuntes/`.
 - [ ] **Buscar la respuesta a la pregunta abierta** de la fila 3 de la tabla de la sección 2 —de dónde salen los bits de la semilla— en las clases que vienen o en la bibliografía. Katz & Lindell la trata; ver [[bibliografia|bibliografía]].
-
-## Ver también
-
-- [[one-time-pad|One Time Pad]] — la filmina que hace la pregunta y no la contesta, más el ejercicio de la clave sesgada
-- [[generador-pseudoaleatorio|Generador pseudoaleatorio]] — la respuesta computacional: azar juzgado por comportamiento
-- [[seguridad-computacional|Seguridad computacional]] — el mismo movimiento, aplicado a la seguridad en vez de al azar
-- [[criptosistema-de-flujo|Criptosistema de flujo]] — el consumidor de todo esto: el OTP con $G(k)$ en lugar de $k$
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — el otro lugar donde el curso pide azar, y donde se rompen los sistemas que en el papel estaban bien
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — el andamiaje con el que se mide la fuga cuando el azar falla
-- [[implementaciones-de-referencia|Implementaciones de referencia en Java]] — el otro apunte que es sólo links, y donde esta pregunta vuelve como "¿de dónde saca la clave este código?"
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]]

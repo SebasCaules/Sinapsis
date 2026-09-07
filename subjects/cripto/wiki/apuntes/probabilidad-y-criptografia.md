@@ -252,14 +252,3 @@ $$\lvert\mathcal{K}\rvert = 3 \;\ge\; \lvert\mathcal{M}\rvert = 2$$
 
 La moraleja de leer las dos filas juntas: la cota de claves no distingue los dos casos; **lo que los distingue es la estructura de la tabla de `Enc`**.
 
----
-
-## Ver también
-
-- [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] — el concepto atómico: definiciones y fórmulas generales, sin las cuentas
-- [[secreto-perfecto|Secreto perfecto]] — la definición, la caracterización equivalente y el teorema de Shannon
-- [[criptosistema|Criptosistema]] — los espacios $\mathcal{K}, \mathcal{M}, \mathcal{C}$ y la terna `(Gen, Enc, Dec)` sobre la que se monta todo esto
-- [[cifrado-por-rotacion|Cifrado por rotación]] — el caso $\ell = 1$ es el Ejemplo 1 con otro nombre
-- [[teoria-de-la-informacion|Teoría de la información]] — **otro de los apuntes del vault sin fecha de clase asignada** (la lista canónica es la tabla [[cronograma#Material sin fecha de clase|Material sin fecha de clase]] del cronograma), sobre la misma materia con otra herramienta: donde acá se compara a posteriori contra a priori con Bayes, allá se mide la fuga en bits ($I(M;C)$) y la cota de Shannon se vuelve $H(K) \ge H(M)$. El Ejemplo 2 de acá se cita allá como el mismo patrón —la cota se cumple y aun así hay fuga—, esa vez con una clave sesgada
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01 — Introducción y criptografía clásica]]
-- Katz & Lindell, cap. 2 — *Perfectly Secret Encryption* ([[bibliografia|bibliografía]])

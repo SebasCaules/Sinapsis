@@ -9,7 +9,7 @@ orden: 20
 practica: 1
 fecha: 2026-08-10
 created: 2026-08-11
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [practica, criptografia-clasica, taxonomia, modelos-de-ataque, indice-de-coincidencia, malvinas]
 sources: [Clase 1.pdf]
 ---
@@ -99,7 +99,7 @@ Los bullets **no describen** cada familia: dicen **por dónde se la ataca**. Le�
 Que $\lvert K\rvert$ sea grande es condición **necesaria pero no suficiente**. César tiene $\lvert K\rvert = n$ y cae por [[ataque-de-fuerza-bruta|fuerza bruta]] en un pizarrón; la sustitución monoalfabética general tiene $\lvert K\rvert = n!$ y **igual cae**, por el bullet de abajo. El "(necesario)" del paréntesis es exactamente ese matiz.
 
 > **Cuánto vale $n$ depende del alfabeto**, y en esta materia conviven los dos.
-> - $n = 26$ (inglés) es el del ejemplo de sustitución de la [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] (`a…z`, $26!$) y el que adopta **nuestra resolución** del Ej. 1 — ojo: el enunciado del [[guia-01-criptografia-clasica|Ej. 1]] **no fija ningún alfabeto**, el 26 lo elegimos [[guia-01-resolucion|nosotros]].
+> - $n = 26$ (inglés) es el del ejemplo de sustitución de la [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] (`a…z`, $26!$) y el que adopta **nuestra resolución** del Ej. 1 — ojo: el enunciado del [[guia-01-criptografia-clasica|Ej. 1]] **no fija ningún alfabeto**, el 26 lo elegimos [[guia-01-criptografia-clasica#Ejercicio 1|nosotros]].
 > - $n = 27$ (castellano) es el del **Ej. 3**, que lo dice explícito (*"texto en español (27 letras)"*), el del ejercicio de descifrado de la Clase 01 (*"el mensaje original está en castellano"*) y el que implica la sumatoria $\sum_{i=0}^{26}$ de la filmina del IC.
 >
 > Da $26! \approx 4\times10^{26}$ contra $27! \approx 1{,}1\times10^{28}$: el argumento no cambia (fuerza bruta inviable en los dos casos), el número sí. Por eso acá se escribe $n!$ y se aclara el $n$ en cada ejercicio — es el criterio de [[cifrado-de-sustitucion-monoalfabetica|sustitución monoalfabética]].
@@ -197,14 +197,3 @@ Cierre de la práctica. La filmina muestra la foto de una **máquina de cifrado 
 
 > La filmina **no trae texto**: sólo las imágenes y los dos enlaces. No hay desarrollo del caso en el material de la cátedra, así que acá no se afirma nada sobre él. Si en clase se dijo algo, va acá.
 
----
-
-## Ver también
-
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01 — Introducción y criptografía clásica]] — la teoría del jueves 06/08, que esta práctica ordena
-- [[guia-01-criptografia-clasica|Guía 1 — Criptografía Clásica]] — los ejercicios donde se aplica cada rama del árbol (Ej. 5 → taxonomía de cifrados, Ej. 6 → Kasiski/IC, Ej. 8 → CPA)
-- [[practica-02-videos|Práctica 02 — Videos]]
-- [[criptosistema|Criptosistema]] · [[principio-de-kerckhoffs|Principio de Kerckhoffs]]
-- [[modelos-de-ataque|Modelos de ataque]] · [[indice-de-coincidencia|Índice de coincidencia]] · [[test-de-kasiski|Test de Kasiski]]
-- [[notacion-y-terminologia|Notación y terminología]] — el glosario que toma de esta práctica la distinción $\leftarrow$ contra $:=$ y la extiende a todos los símbolos del vault
-- [[indice|Índice del vault]]

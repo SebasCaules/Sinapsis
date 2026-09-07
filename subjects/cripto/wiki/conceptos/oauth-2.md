@@ -122,13 +122,3 @@ code=aWekysIEeqM9PiThEfm0Cnr6MoLIfwWyRJcqOqHdF8f9INokharAS09ia7UNP6RiVScerfhc4w=
 **Verificación cruzada entre las láminas.** El campo `code` de la *Token Request* es, carácter por carácter, el mismo valor que llegó en la *Callback response* —ambos terminan en `...RiVScerfhc4w`, con la única diferencia de que la URL lo trae URL-encodeado (`%3D%3D` en vez de `==`, que es el mismo padding de Base64 escapado para viajar en una query string)—. Es la confirmación textual, dentro del propio material de la cátedra, de que el código de autorización pasa **intacto** del navegador (paso 5) al canal servidor-a-servidor (paso 6).
 
 **Lo que trae el `response`, y lo que no.** Nótese que el JSON de respuesta no incluye ningún dato de identidad del usuario más allá de un `id` que es una URL interna de Salesforce — sólo `access_token` (para usar el recurso) y `refresh_token` (para renovar el acceso sin repetir el login). OAuth puro **no autentica** al usuario ante el cliente: sólo le entrega una credencial de acceso al recurso. Ese hueco —saber *quién* es el usuario, no sólo tener permiso para acceder a algo suyo— es exactamente lo que agrega [[openid-connect-y-jwt|OpenID Connect]].
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#15. OAuth 2.0|Clase 06 — OAuth 2.0]]
-- [[acls-propagables|ACLs propagables]] — la sección inmediatamente anterior
-- [[openid-connect-y-jwt|OpenID Connect y JWT]] — la capa de autenticación que OAuth por sí solo no tiene
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — el mismo argumento de "un cliente público no puede guardar un secreto" aplicado en la Clase 01 al algoritmo de cifrado
-- [[autenticacion|Autenticación]] — la Clase 07 desarrolla el modelo formal de qué significa autenticar; OAuth por sí solo resuelve *autorización*, no esa pregunta
-- [[video-12-proteccion-de-datos-personales|Video 12 — Protección de datos personales]] — trae la advertencia *"ojo en el parcial con autenticación versus control de acceso"*, exactamente la distinción que separa OAuth de OpenID Connect
-- RFC 6749 (*The OAuth 2.0 Authorization Framework*) y RFC 5849 (*OAuth 1.0*) — Matt Bishop, *Computer Security: Art and Science*, cap. 15 (*Representing Identity*) ([[bibliografia|Bibliografía]])

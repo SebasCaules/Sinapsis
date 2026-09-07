@@ -74,13 +74,3 @@ $$A = \{(\mathit{usuario}, \mathit{clave})\}, \quad C = \{(\mathit{usuario}, h(\
 $$L\bigl((\mathit{usuario}, \mathit{clave}), (\mathit{usuario}', h)\bigr) = 1 \iff \mathit{usuario} = \mathit{usuario}' \ \wedge\ h(\mathit{clave}) = h, \qquad S = \{\texttt{signup}, \texttt{delete\_account}, \texttt{change\_password}\}$$
 
 con $h$ una [[funciones-de-hash-criptograficas|función de hash criptográfica]]. Completar las cinco letras de esta manera es, según la sección "Para el parcial" de la [[clase-07-autenticacion#Para el parcial|nota de clase]], el tipo de ejercicio más probable sobre este tema — el propio deck ya lo hace dos veces, con las claves en texto plano (filmina 24) y con el esquema Unix tradicional (filmina 28).
-
-## Ver también
-
-- [[clase-07-autenticacion#1. Autenticación|Clase 07 — Autenticación § 1. Autenticación]] — la sección de la que cuelga esta nota
-- [[factores-de-autenticacion|Factores de autenticación]] — de dónde puede salir el $a \in A$ que la entidad aporta
-- [[almacenamiento-de-claves|Almacenamiento de claves]] — dos instancias completas del modelo $(A,C,F,L,S)$: texto plano y Unix tradicional
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — el mecanismo de ataque escrito con las mismas cinco letras
-- [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] — cuánto cuesta atacar el par $(a,c)$ de este modelo
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — la instanciación típica de $F$ cuando la clave no se guarda en claro
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso|Clase 06 — Políticas de seguridad y control de acceso]] — qué se hace con el principal una vez que esta etapa lo produjo

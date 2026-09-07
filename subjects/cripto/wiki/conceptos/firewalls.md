@@ -83,11 +83,3 @@ El paso 2 es la clave de por qué esto sólo lo puede hacer un application firew
 **A mayor capacidad de inspección, mayor costo y mayor especificidad.** Un packet filter es barato y genérico pero ciego al contenido; un application firewall ve el contenido pero sólo entiende el protocolo para el que fue construido — un proxy de email no sirve para filtrar tráfico web. Es la base de cualquier pregunta de parcial que pida justificar por qué un firewall dado no alcanza para una tarea dada: si la tarea requiere mirar contenido de aplicación, ningún packet filter —con o sin estado— la resuelve.
 
 El caso de estudio de las filminas 16-27 combina los tres niveles a propósito, en distintos puntos de la misma red: `iptables` (tipo 1 y 2, ver [[netfilter-e-iptables|Netfilter e iptables]]) en los dos firewalls perimetrales, y proxies de aplicación —email, web— como una capa adicional dentro de la DMZ. Ningún nivel reemplaza a los otros; se apilan.
-
-## Ver también
-
-- [[clase-10-seguridad-en-la-empresa#2. Firewalls: los tres tipos (filminas 5-9)|Clase 10 — Seguridad en la empresa]] — la sección de la clase que esta nota desarrolla
-- [[seguridad-a-nivel-de-red|Seguridad a nivel de red]] — el diagrama de dos firewalls (externo/interno) sobre el que se define todo lo demás
-- [[netfilter-e-iptables|Netfilter e iptables]] — la implementación concreta de los tipos 1 y 2 en Linux
-- [[diseno-de-servicios-en-la-dmz|Diseño de servicios en la DMZ]] — dónde el caso de estudio usa un application firewall para email
-- [[reglas-de-los-firewalls-externo-e-interno|Reglas de los firewalls externo e interno]] — las políticas concretas de los dos firewalls perimetrales del diagrama

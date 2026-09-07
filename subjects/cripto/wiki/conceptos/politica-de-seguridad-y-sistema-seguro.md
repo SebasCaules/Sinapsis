@@ -42,14 +42,3 @@ Esa es la lógica del bloque entero: **política = partición**, **modelo = part
 ## Qué NO dice la definición de violación de seguridad
 
 *(Lectura nuestra.)* La definición no exige intención ni un adversario activo: "el sistema entra en un estado no autorizado" ocurre igual si lo provoca un atacante, un error de configuración o un bug. Esto la separa de las definiciones de seguridad de la Unidad 1 —por ejemplo la de un MAC, formulada como un juego contra un adversario `PPT` en [[seguridad-de-un-mac|Seguridad de un MAC]]—, que sí están escritas en términos de un adversario que intenta ganar una prueba. Acá el marco es más general: cualquier transición hacia un estado prohibido cuenta, venga de donde venga. Esto es consistente con que las políticas de este bloque (Bell-LaPadula, Biba) modelen jerarquías organizacionales y no primero un adversario formal — el "atacante" implícito es cualquier combinación de sujetos del propio sistema actuando dentro de las reglas que tiene permitidas, no alguien que rompe criptografía.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#1. Política de seguridad y sistema seguro|Clase 06 — Políticas de seguridad y control de acceso § 1. Política de seguridad y sistema seguro]]
-- [[confidencialidad-integridad-y-disponibilidad|Confidencialidad, integridad y disponibilidad]] — la primera partición concreta que da la clase
-- [[paradigmas-de-control-de-acceso|Paradigmas de control de acceso]] — quién puede fijar y alterar las reglas de transición
-- [[modelos-de-politica|Modelos de política]] — qué es, en general, dar una partición más una prueba de que se respeta
-- [[bell-lapadula|Bell-LaPadula]] — el Teorema básico de la seguridad, la instancia concreta de "sistema seguro" de esta nota
-- [[modelos-de-integridad-de-biba|Modelos de integridad de Biba]] y [[muralla-china|Muralla china]] — otras dos particiones con su propia regla de transición
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — otra definición de seguridad de un sistema por estados (seguro / debilitado / quebrado), aunque sobre un juego probabilístico y no sobre una partición de estados de acceso; el paralelismo es *(lectura nuestra)*
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso|Clase 06 — Políticas de seguridad y control de acceso]]

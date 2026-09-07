@@ -110,15 +110,3 @@ $$\mathrm{master} = \mathrm{MD5}\Bigl(\mathrm{pre}\,\Vert\,\mathrm{SHA}\bigl(\te
 > **Errata de la filmina.** En las filminas 42 y 43, la fórmula del mensaje `Finish` cierra con **dos** llaves seguidas — `...h(msgs || master | ipad)) } }` — cuando el anidado de paréntesis de la fórmula solo pide una. Confirmado contra la página renderizada a 150 dpi en las dos filminas: no es un artefacto de `pdftotext`, la llave duplicada está impresa tal cual. De paso, la barra entre `master` e `ipad` está escrita simple (`master | ipad`) mientras el resto de la fórmula usa `||` para concatenar — arriba se transcribe unificado con $\Vert$ en los dos casos, siguiendo la notación del resto de la clase.
 
 **Por qué el `Finish` va cifrado con las claves nuevas y no con las viejas** *(lectura nuestra)*: el `ChangeCipherSpec` que antecede a cada `Finish` es exactamente la señal de "a partir de acá uso los parámetros negociados" — así que el `Finish` es, en cada dirección, el **primer** mensaje cifrado con la [[sesion-y-conexion-tls|conexión]] recién establecida. Que ambos lados puedan calcular y verificar correctamente el `Finish` del otro es la prueba de que los dos derivaron exactamente el mismo Master Secret a partir del mismo *pre-master secret* — si un atacante hubiese logrado interponerse en el intercambio de clave de la Parte 3 (por ejemplo, sustituyendo su propia clave pública sin que el cliente lo note), los `Master Secret` de cada lado no coincidirían, y el `Finish` fallaría a verificar.
-
-## Ver también
-
-- [[tls-arquitectura-y-record|TLS: arquitectura y record]] — la unidad de récord que transporta cada uno de estos mensajes
-- [[suites-criptograficas-de-tls|Suites criptográficas de TLS]] — el menú que `Ciphers`/`Cipher` negocia en la Parte 1, y la distinción de *forward secrecy* entre `RSA` y `DHE`/`ECDHE` que le da sentido al `ClientKeyExchange`
-- [[sesion-y-conexion-tls|Sesión y conexión TLS]] — dónde terminan guardados $S_{id}$, la suite y el Master Secret que este handshake produce
-- [[change-cipher-spec-y-alert|Change Cipher Spec y Alert]] — el `ChangeCipherSpec` de la Parte 4, generalizado como mensaje que puede aparecer en cualquier momento, no solo acá
-- [[denning-sacco-y-frescura|Denning-Sacco y frescura]] — la misma lógica de atar una firma o un mensaje a nonces frescos, ya vista del lado simétrico
-- [[x509|X.509]] — el certificado que intercambian las Partes 2 y 3
-- [[cadenas-de-firmas-y-autoridades-raiz|Cadenas de firmas y autoridades raíz]] — cómo el cliente valida el certificado que recibe en la Parte 2
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — por qué `MD5`, usado en la fórmula del Master Secret de `SSL 3.0`, está quebrado
-- [[clase-05-protocolos-criptograficos#13. TLS Handshake|Clase 05 — Protocolos criptográficos]] — sección 13, de donde sale esta nota

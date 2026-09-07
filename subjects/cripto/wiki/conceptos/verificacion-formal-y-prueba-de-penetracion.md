@@ -78,15 +78,3 @@ La filmina 5 cierra el bloque definiendo el objetivo: probar la eficacia de los 
 > "Uno tiene que tratar de buscar la manera de destruirlo, y naturalmente, si uno es parte del equipo que lo desarrolló, va a tener cierta resistencia a destruirlo."
 
 Es la misma lógica que separa QA de desarrollo, ya señalada en [[confianza-y-aseguramiento|Confianza y aseguramiento]]: revisar el propio trabajo con la hostilidad necesaria para encontrarle fallas es, en la práctica, un conflicto de interés.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#8. Verificación formal contra prueba de penetración|Clase 08 — Principios de diseño y vulnerabilidades, §8 Verificación formal contra prueba de penetración]]
-- [[confianza-y-aseguramiento|Confianza y aseguramiento]] — los tres niveles de evidencia, del que la verificación formal es el más caro
-- [[aseguramiento-en-el-ciclo-de-vida|Aseguramiento en el ciclo de vida]] — por qué el pentest no reemplaza haber diseñado con seguridad desde el principio
-- [[identificacion-de-vulnerabilidades|Identificación de vulnerabilidades]] — de dónde sale la vulnerabilidad hipotetizada que precede a todo pentest
-- [[metodologia-de-hipotesis-de-falla|Metodología de hipótesis de falla]] — el procedimiento concreto que instancia la definición de "prueba de penetración" de esta nota
-- [[casos-de-prueba-de-penetracion|Casos de prueba de penetración]] — los dos ejemplos completos, uno técnico y uno de ingeniería social
-- [[validez-de-las-pruebas-de-penetracion|Validez de las pruebas de penetración]] — retoma esta misma asimetría existencia/ausencia para discutir qué tan válido es un pentest
-- [[video-09-pentesting-metodologia#3. Verificación formal versus prueba de penetración|Video 09 — Pentesting: metodología]] — desarrolla este bloque en voz, con el ejemplo del misil y el problema `SAT`
-- [[modelos-de-ataque|Modelos de ataque]] — el análogo criptográfico de precondiciones sobre el atacante: cuánta información se le concede antes de probar algo contra él

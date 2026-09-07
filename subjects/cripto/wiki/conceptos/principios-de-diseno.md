@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 1
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, principios-de-diseno, saltzer-schroeder, kerckhoffs, defensa-en-profundidad, clase-08, sin-dictar]
 sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 ---
@@ -19,7 +19,11 @@ sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 
 Cubre las filminas **2 a 15** del deck `Clase 07 - Aplicaciones - Principios y autenticacion.pdf` —las filminas 16-46, de autenticación, las desarrolla otra nota—. **Esta clase todavía no se dictó** (hoy es 04/09/2026, la clase es el 15/10), así que no hay transcripción propia: lo que sigue está escrito contra el PDF y contra dos grabaciones de cursadas anteriores sobre el mismo deck —[[video-06-principios-de-diseno-2026|video-06]] y [[video-07-principios-de-diseno-2024|video-07]]—, marcando siempre de cuál sale cada agregado.
 
-> **Qué deck es el vigente.** El texto de las filminas 2-15 coincide palabra por palabra con el que proyecta `video-07` (2024): mismos nombres, mismos ejemplos, misma redacción. `video-06` (2026) usa un deck **distinto**, con otros cinco nombres y otros ejemplos. Esta nota desarrolla el deck vigente y cita `video-06` sólo donde aporta algo que no está en ningún otro lado —la analogía del castillo y la distinción pivoting/side-channel—, marcándolo como material de otro deck. El detalle completo de la comparación está en la [[clase-08-principios-de-diseno-y-vulnerabilidades#Antes de los ocho: dos ideas madre (filmina 2)|clase]].
+> **Qué deck es el vigente, y por qué importa para estudiar.** Comparando el texto de las filminas 2 a 15 de este deck contra las tablas de nombres que traen las dos notas de video, **el deck de esta cursada (2026 2C) es textualmente el mismo que proyectó `video-07` en 2024**: mismos nombres en castellano (*Valores iniciales seguros*, *Economía de mecanismos*, *Diseño abierto*, *Separación de privilegios*, *Aceptación psicológica*), mismos ejemplos (`sshd` y el puerto 22, Oracle, el protocolo `finger`, los bancos y las dos firmas, los firewalls personales y `UAC`) y hasta la misma redacción literal de las viñetas.
+>
+> El deck de `video-06` (2026, primer cuatrimestre) es una versión **distinta**: cambia cinco de los ocho nombres (*Fallar de forma segura*, *Simplicidad*, *Sistema Abierto*, *Segregación de Tareas*, *Menor asombro*), trae otros ejemplos (el castillo medieval, el impuesto holandés a los barcos, los LLM, el *Threat Modeling Manifesto*) y no tiene bibliografía. *(Verificación nuestra, comparando el texto extraído del PDF contra las dos tablas de nombres de las notas de video.)*
+>
+> La consecuencia práctica: **la nomenclatura y los ejemplos que corresponde estudiar son los de este deck y los de `video-07`**, porque son los que se van a proyectar. Esta nota desarrolla el deck vigente y cita `video-06` sólo donde aporta algo que no está en ningún otro lado —la analogía del castillo, el impuesto holandés, el caso del flag reusado, la distinción pivoting/side-channel—, marcándolo siempre como material de otro deck. Queda afuera de esta nota, y vive únicamente en [[video-06-principios-de-diseno-2026#El bloque final: qué le pasa a los LLM|la nota de ese video]], su bloque final sobre seguridad de los LLM.
 
 ## Las dos ideas madre
 
@@ -49,7 +53,9 @@ La cátedra los llama *"principios guía de alto nivel"*, no recetas cerradas �
 
 *Filmina 3, ejemplo del CEO; filmina 4, ejemplo del web server.*
 
-> Un sujeto debe recibir **sólo los privilegios necesarios** para completar su tarea. Los privilegios se asignan **por función, no por identidad**. Si una tarea requiere derechos adicionales, se le asignan y se desechan luego de su uso.
+> Un sujeto debe recibir **sólo los privilegios necesarios** para completar su tarea. Los privilegios se asignan **por función, no por identidad**. Si una tarea requiere derechos adicionales, se le asignan y se desechan luego de su uso. **Muchas veces el sistema operativo o el sistema no posee el nivel de granularidad deseado.**
+
+El ejemplo que da la propia filmina 3 es el CEO de una compañía: no tiene por qué tener acceso a todos los archivos confidenciales sólo por ser CEO — el privilegio se sigue de la tarea, no del cargo.
 
 El ejemplo de la filmina 4 es el que rinde para un examen porque da una lista verificable:
 
@@ -61,7 +67,7 @@ El ejemplo de la filmina 4 es el que rinde para un examen porque da una lista ve
 
 La filmina remata con *"¿Alguien vio un web server configurado de esta manera?"* — la lámina sólo formula la pregunta y no la contesta. *(Lectura nuestra de la pregunta.)* Lo que la pregunta deja implícito es que casi ningún sistema real lo cumple al pie de la letra, y que el costo de no cumplirlo es que un compromiso parcial (un archivo leído, un directorio con permiso de más) se convierte en compromiso total.
 
-**El límite práctico** (`video-07`, 09:10): el sistema operativo **no siempre tiene la granularidad** que el principio pediría, y pedirla igual vuelve el esquema inadministrable — si hay que gestionar permiso por permiso a nivel de archivo, el costo operativo supera al riesgo evitado. El caso que trae `video-07` es **Apache**, que en una época reutilizaba las mismas *system calls* de logueo de Unix que procesos internos del sistema, permitiendo acceder a información de otros procesos — el mismo caso reaparece en el [[#7. Mecanismos exclusivos|principio 7]].
+**El límite práctico, que la filmina sólo enuncia y `video-07` desarrolla** (09:10): el sistema operativo **no siempre tiene la granularidad** que el principio pediría, y pedirla igual vuelve el esquema inadministrable — si hay que gestionar permiso por permiso a nivel de archivo, el costo operativo supera al riesgo evitado. El caso que trae `video-07` es **Apache**, que en una época reutilizaba las mismas *system calls* de logueo de Unix que procesos internos del sistema, permitiendo acceder a información de otros procesos — el mismo caso reaparece en el [[#7. Mecanismos exclusivos|principio 7]].
 
 ## 2. Valores iniciales seguros
 
@@ -131,7 +137,7 @@ El ejemplo de la filmina es doble: los bancos requieren **dos firmas** para apro
 
 > Los mecanismos de seguridad **no deben compartirse**: puede fluir información entre variables compartidas, y pueden generarse canales ocultos. El principio promueve **aislación** — máquinas virtuales, *sandboxing*.
 
-Es el principio que más conecta con el resto de la clase: un mecanismo de seguridad reutilizado para otra cosa es exactamente el tipo de hallazgo que busca la [[clase-08-principios-de-diseno-y-vulnerabilidades#9. Metodología de Hipótesis de Falla|metodología de hipótesis de falla]] en el paso de recolección de información. `video-07` retoma acá el caso de Apache del [[#1. Menor privilegio|principio 1]] y suma el **sandbox de iOS**: el sistema operativo le presenta a cada proceso su propia versión del hardware y del entorno, y el área de archivos a la que accede es exclusiva de ese proceso — si se compromete, se compromete sólo eso, no el resto de las aplicaciones.
+Es el principio que más conecta con el resto de la clase: un mecanismo de seguridad reutilizado para otra cosa es exactamente el tipo de hallazgo que busca la [[metodologia-de-hipotesis-de-falla|metodología de hipótesis de falla]] en el paso de recolección de información. `video-07` retoma acá el caso de Apache del [[#1. Menor privilegio|principio 1]] y suma el **sandbox de iOS**: el sistema operativo le presenta a cada proceso su propia versión del hardware y del entorno, y el área de archivos a la que accede es exclusiva de ese proceso — si se compromete, se compromete sólo eso, no el resto de las aplicaciones.
 
 **El caso desarrollado entero** (`video-06`, 43:20, deck distinto, pero es el ejemplo más nítido de por qué este principio importa en la práctica de desarrollo): un flag habilita a un cliente a comprar; llega un requerimiento nuevo, que quien puede comprar también pueda recibir un voucher. El atajo es reutilizar el flag existente en vez de crear uno nuevo, asumiendo que la correlación entre *poder comprar* y *poder recibir voucher* se mantiene para siempre —así lo describe la nota de video, en su propia prosa y no como cita textual del docente. Cuando la correlación se rompe —hay clientes que compran pero no deberían recibir voucher, o viceversa— el flag ya representa dos cosas a la vez, el código quedó mezclado entre los dos usos, y corregirlo después es mucho más caro que haber creado la abstracción exclusiva desde el principio. Es la misma lógica, en código de aplicación, que el caso de Apache en infraestructura.
 
@@ -151,17 +157,4 @@ El ejemplo es doble: los **firewalls personales**, que exigen que el usuario ide
 
 ## Por qué conviene memorizarlos como criterio de diagnóstico, no como lista
 
-Los ocho principios rara vez se preguntan como *"enumerar los ocho"*: `video-06` deja planteado, sin resolver, un ejercicio del tipo *"dado este sistema, qué principios viola y cómo se arregla"*, que es la forma más probable de pregunta de examen según esa nota de video —la propia nota de video rotula esa previsión como lectura suya, no como algo dicho en clase. Es también la forma en que opera el resto de la Clase 8: cuando la [[clase-08-principios-de-diseno-y-vulnerabilidades#7. Identificación de vulnerabilidades|identificación de vulnerabilidades]] encuentra un bug explotable, casi siempre se lo puede describir retrospectivamente como la violación de uno o más de estos ocho — un flag reusado es una violación de mecanismos exclusivos; un default abierto es una violación de valores iniciales seguros; una UI que nadie entiende es una violación de aceptación psicológica.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#1. Los ocho principios de diseño de Saltzer y Schroeder|Clase 08 — Principios de diseño y vulnerabilidades § 1. Los ocho principios de diseño de Saltzer y Schroeder]]
-- [[confianza-y-aseguramiento|Confianza y aseguramiento]] — el siguiente eslabón: cómo se justifica que un mecanismo efectivamente cumple estos principios
-- [[modelado-de-amenazas|Modelado de amenazas]] — el proceso que usa estos principios como vara para juzgar un diseño concreto
-- [[stride-y-arboles-de-ataque|STRIDE y árboles de ataque]] — la clasificación de amenazas que se aplica una vez identificadas las violaciones de estos principios
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — el principio 5, diseño abierto, ya desarrollado desde la Clase 1
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — el mismo razonamiento de costo-beneficio que decide fail-safe contra fail-deadly
-- [[eleccion-de-primitivas#El escrutinio ayuda, pero no es una garantía|Elección de primitivas]] — el escrutinio del open source, ya discutido para primitivas criptográficas
-- [[seguridad-computacional|Seguridad computacional]] — el nivel de seguridad como decisión de diseño, no como máximo
-- [[video-06-principios-de-diseno-2026|video-06 — Principios de diseño (2026)]] y [[video-07-principios-de-diseno-2024|video-07 — Principios de diseño (2024)]] — las dos grabaciones cruzadas en esta nota
-- [[videografia|Videografía]] — el mapa completo de los videos de la cátedra
+Los ocho principios rara vez se preguntan como *"enumerar los ocho"*: `video-06` deja planteado, sin resolver, un ejercicio del tipo *"dado este sistema, qué principios viola y cómo se arregla"*, que es la forma más probable de pregunta de examen según esa nota de video —la propia nota de video rotula esa previsión como lectura suya, no como algo dicho en clase. Es también la forma en que opera el resto de la Clase 8: cuando la [[identificacion-de-vulnerabilidades|identificación de vulnerabilidades]] encuentra un bug explotable, casi siempre se lo puede describir retrospectivamente como la violación de uno o más de estos ocho — un flag reusado es una violación de mecanismos exclusivos; un default abierto es una violación de valores iniciales seguros; una UI que nadie entiende es una violación de aceptación psicológica.

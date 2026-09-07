@@ -154,15 +154,3 @@ La última fila es la diferencia que importa. El nonce del cifrado es parte del 
 La advertencia de la filmina 2 es, en realidad, la semilla de un área entera. Todo el problema de **establecer frescura** —demostrarle a la contraparte que este mensaje es de ahora— es lo que motiva los desafíos y respuestas (*challenge-response*), los nonces de negociación y los números de sesión que arma cualquier protocolo real. En el [[cronograma]] eso es la **Clase 5 — Protocolos criptográficos (17/09)**, ya en el terreno donde el MAC deja de ser el objeto de estudio y pasa a ser una pieza.
 
 Hasta entonces conviene guardar la frase corta: **la primitiva garantiza que el mensaje no cambió y quién lo hizo; el protocolo tiene que garantizar cuándo.**
-
-## Ver también
-
-- [[seguridad-de-un-mac#El experimento Mac-Forge|Seguridad de un MAC]] — el experimento cuya condición $m \notin Q$ es la que deja el replay afuera
-- [[message-authentication-code|Message Authentication Code]] — la terna $(\mathsf{Gen}, \mathsf{Mac}, \mathsf{Vrfy})$, y por qué `Vrfy` devuelve un bit y no lleva estado
-- [[cbc-mac|CBC-MAC]] y [[hmac|HMAC]] — las dos construcciones del curso, las dos igual de indefensas ante este ataque
-- [[construccion-de-macs-a-partir-de-una-prf|Construcción de MACs a partir de una función pseudoaleatoria]] — otra aparición del mismo recurso: ahí el identificador aleatorio $r$ evita que se mezclen bloques de dos mensajes, acá el contador evita que se repita uno
-- [[cifrado-autenticado|Cifrado autenticado]] — lo más fuerte que construye la clase, y tampoco alcanza: los tres ataques de sesión lo sobreviven
-- [[cifrado-probabilistico-nonce-e-iv#Nonce e IV no son exactamente lo mismo|Cifrado probabilístico, nonce e IV]] — el mismo problema de unicidad, resuelto del lado de la confidencialidad
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la filmina 2, única fuente de cátedra de este tema
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-- Katz & Lindell cap. 4 — la discusión de replay al final de §4.2 (Definición 4.1 y el ejemplo bancario) y la sesión de comunicación completa en §4.5.3 ([[bibliografia|bibliografía]])

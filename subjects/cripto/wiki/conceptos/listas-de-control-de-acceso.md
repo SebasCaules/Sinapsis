@@ -111,14 +111,3 @@ El paso 3 es el que define el sabor del algoritmo: es una variante de **Grant-Al
 ## Confirmación de que este mecanismo se dicta con Pablo
 
 *(Cruce con video, no del deck.)* El [[video-07-principios-de-diseno-2024#Qué no cubre este video|Video 07]] —de otro cuatrimestre— trae un intercambio a 04:35 en el que Ramele le pregunta a la clase: *"la parte de control de acceso ya la vieron con Pablo, ¿no?… o todo el tema de AC[L] y lista de capacidades"*. Y el [[video-11-flujo-de-informacion|Video 11]] lo confirma desde el otro lado, a 03:28: *"las listas de control de acceso, llamadas ACLs… eso lo vemos todo en la clase de control de acceso"*. Ninguno de los dos videos desarrolla el mecanismo: son evidencia de que el tema existe como clase propia (ésta) y no tiene grabación en el canal — la misma conclusión que ya deja registrada la [[clase-06-politicas-de-seguridad-y-control-de-acceso|Clase 06]], en su nota introductoria sobre el docente.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#11. Listas de control de acceso|Clase 06 — Listas de control de acceso]]
-- [[matriz-de-control-de-acceso|Matriz de control de acceso]] — la matriz completa de la que ACL es la proyección por columnas
-- [[listas-de-capacidades|Listas de capacidades]] — la proyección por filas, teóricamente equivalente
-- [[lenguajes-de-descripcion-de-politicas|Lenguajes de descripción de políticas]] — de donde sale el principio de denegar por defecto
-- [[acls-propagables|ACLs propagables]] — una variante de ACL donde el control sigue a la información, no al objeto
-- [[video-07-principios-de-diseno-2024|Video 07 — Principios de diseño (2024)]] — confirma que ACL y capacidades son clase propia con Pablo, sin grabación
-- [[video-11-flujo-de-informacion|Video 11 — Flujo de información]] — confirma lo mismo desde el otro lado
-- Matt Bishop, *Computer Security: Art and Science*, cap. 16 (*Access Control Mechanisms*) ([[bibliografia|Bibliografía]])

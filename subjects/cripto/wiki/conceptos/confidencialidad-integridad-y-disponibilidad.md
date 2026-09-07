@@ -74,14 +74,3 @@ Las tres propiedades **no son intercambiables ni comparables entre sí**: están
 - **Disponible y no confidencial ni íntegro**: un servidor siempre responde, con datos públicos y posiblemente alterados.
 
 No hay una noción de "más seguro" que combine las tres en un único número: son tres condiciones independientes, y un sistema real casi siempre prioriza dos a costa de la tercera —es la tensión clásica que un firewall o un [[zona-desmilitarizada|DMZ]] resuelven de un modo y una política militar como Bell-LaPadula, de otro completamente distinto (sacrifica disponibilidad y usabilidad por confidencialidad extrema).
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#2. Confidencialidad, integridad y disponibilidad|Clase 06 — Políticas de seguridad y control de acceso § 2. Confidencialidad, integridad y disponibilidad]]
-- [[politica-de-seguridad-y-sistema-seguro|Política de seguridad y sistema seguro]] — el marco de partición de estados sobre el que estas tres propiedades definen la línea autorizado/no autorizado
-- [[bell-lapadula|Bell-LaPadula]] — modelo centrado exclusivamente en confidencialidad
-- [[modelos-de-integridad-de-biba|Modelos de integridad de Biba]] — modelo centrado exclusivamente en integridad, con los mismos requerimientos de la filmina 29-30 que esta nota no desarrolla
-- [[muralla-china|Muralla china]] — modelo híbrido, confidencialidad e integridad a la vez
-- [[message-authentication-code|Message Authentication Code]] y [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — los mecanismos de la Unidad 1 que implementan integridad de datos
-- [[clase-01-introduccion-y-criptografia-clasica#3. Seguridad (informal)|Clase 01 — Introducción y criptografía clásica § 3. Seguridad (informal)]] — el antecedente de "ni siquiera por vías indirectas", en su versión de un solo adversario y un solo mensaje
-- [[video-06-principios-de-diseno-2026|Video 06 — Principios de diseño (2026)]] — la disponibilidad leída del lado de los principios de diseño

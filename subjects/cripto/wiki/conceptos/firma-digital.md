@@ -60,14 +60,3 @@ para todo adversario `PPT` — el mismo umbral de despreciabilidad que gobierna 
 ## Qué exige Sig-forge que la propiedad de correctud no exige
 
 La propiedad de correctud de la terna dice que firmar y verificar el **mismo** mensaje siempre da $1$ — eso lo cumple cualquier esquema, incluso uno completamente roto. `Sig-forge` es la condición que separa "funciona" de "es seguro": exige que el adversario, con acceso al oráculo de firma y a $pk$, **no pueda producir** un par $(m,s)$ válido para un $m$ que nunca firmó. La distinción importa especialmente para los dos esquemas que siguen en la clase: [[rsa-signature-y-hashed-rsa|RSA-Signature y Hashed RSA]] muestra un esquema que cumple la correctud perfectamente y aun así pierde contra `Sig-forge` con probabilidad $1$.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#11. Firma digital: la terna y Sig-forge|Clase 04 — Criptografía asimétrica y firma digital § 11. Firma digital: la terna y Sig-forge]]
-- [[rsa-signature-y-hashed-rsa|RSA-Signature y Hashed RSA]] — la primera instancia concreta, y por qué la versión sin hash pierde `Sig-forge` con probabilidad 1
-- [[digital-signature-standard|Digital Signature Standard]] — el estándar del NIST que instancia esta terna sobre el logaritmo discreto
-- [[criptosistema-asimetrico|Criptosistema asimétrico]] — la otra terna de clave pública de esta clase, con su propia prueba de seguridad
-- [[message-authentication-code|Message Authentication Code]] — la terna simétrica de la que ésta es la versión de clave pública
-- [[seguridad-de-un-mac|Seguridad de un MAC]] — `Mac-Forge`, el experimento del que `Sig-forge` es la variante asimétrica
-- [[modelos-de-ataque|Modelos de ataque]] — el vocabulario de oráculo y adversario `PPT` que sostiene la lectura de `Sig-forge`
-- [[clase-01-introduccion-y-criptografia-clasica|Clase 01 — Introducción y criptografía clásica]] — el dato de la ley argentina de firma digital

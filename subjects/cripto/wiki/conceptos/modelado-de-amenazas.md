@@ -85,14 +85,3 @@ Dos ideas habladas, según `video-08`, que no están en ninguna filmina pero que
 - **Invertir en seguridad no tiene techo.** Se puede meter presupuesto y paranoia indefinidamente, y en algún punto hay que parar. La decisión de dónde parar se toma con la **ecuación de riesgo** —$\text{Riesgo} = \text{Amenazas} \times \text{Vulnerabilidades} \times \text{Bienes}$, según `video-08`—: si no se puede eliminar una amenaza, se bajan las vulnerabilidades (mejorando el código) o se reduce el impacto sobre los bienes (poniendo restricciones), en vez de bloquear funcionalidad sin límite.
 
 Es la misma idea de **seguridad *unbounded*** que cierra los [[principios-de-diseno#8. Aceptación psicológica|Principios de diseño]]: no hay un punto en el que un sistema esté "terminado" en materia de seguridad, sólo un punto en el que se decide, con criterio de riesgo, que ya es suficiente.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#4. Modelado de amenazas|Clase 08 — Principios de diseño y vulnerabilidades § 4. Modelado de amenazas]]
-- [[confianza-y-aseguramiento|Confianza y aseguramiento]] — el modelado de amenazas es, en el fondo, un proceso de aseguramiento aplicado al diseño
-- [[aseguramiento-en-el-ciclo-de-vida|Aseguramiento en el ciclo de vida]] — la cadena bug → vulnerabilidad → amenaza → efecto que este proceso recorre en reversa
-- [[descomposicion-de-la-aplicacion|Descomposición de la aplicación]] — el paso 3 del ciclo, desarrollado entero
-- [[stride-y-arboles-de-ataque|STRIDE y árboles de ataque]] — el paso 4 del ciclo, desarrollado entero
-- [[principios-de-diseno#8. Aceptación psicológica|Principios de diseño]] — la seguridad *unbounded* que también cierra este proceso
-- [[video-08-vulnerabilidades#El proceso de modelado de amenazas de Microsoft|video-08 — Vulnerabilidades]] — la fuente hablada de esta nota
-- [[videografia|Videografía]] — el mapa completo de los videos de la cátedra

@@ -402,15 +402,3 @@ La verificación adversarial dejó este balance, y ubica al Video 08 en la parte
 
 Dicho de otro modo: **este video cubre bien su casillero**, y lo que le falta —la taxonomía concreta— tampoco lo tapa ningún otro.
 
----
-
-## Ver también
-
-- [[videografia#Los 13, con sus datos duros|Videografía]] — los 13 videos mapeados contra el cronograma, y de dónde salió la playlist
-- [[cronograma#Segunda mitad — Seguridad (hasta el 2do parcial)|Cronograma]] — la Clase 8 del 15/10 y la Guía 9 del 02/11
-- [[programa-y-objetivos#Contenidos|Programa y objetivos]] — dónde el plan ubica *análisis de vulnerabilidades*
-- [[eleccion-de-primitivas#La regla|Elección de primitivas en un proyecto]] — la misma regla con la que abre este video (*no diseñes tu propio algoritmo*), pero desarrollada mucho más a fondo, con el ejemplo del commit de `OpenSSL` y la enmienda de 2026 sobre los modelos de lenguaje. **La apertura del video sobre `WEP` no agrega nada que esa nota no tenga.**
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — el fundamento de por qué la evidencia pública es lo que compra confianza
-- [[modelos-de-ataque|Modelos de ataque]] — la taxonomía de ataques del Bloque 1, que es el análogo criptográfico de `STRIDE`
-- [[estado-de-un-criptosistema|Estado de un criptosistema]] — seguro / debilitado / quebrado: la versión criptográfica de la cadena bug → vulnerabilidad → amenaza
-- [[bibliografia|Bibliografía]] — Bishop es el libro al que remiten las clases vecinas del bloque; este video no cita ninguna lectura

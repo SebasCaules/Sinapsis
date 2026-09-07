@@ -456,22 +456,3 @@ Tres cosas que salen de mirarlo y que la [[videografia#Quién dicta qué|Videogr
 
 Y una que **sigue pendiente de ajustar en la ficha**: el ancla al [[reglamento-y-evaluacion#Final|examen final]] es correcta, pero **la promesa de "escrito e integrador" hay que matizarla**. Este video cubre **una** parte del final —seguridad en aplicaciones—, no el integrador. Quien lo mire esperando repaso de criptografía va a perder tres horas.
 
----
-
-## Ver también
-
-- [[videografia#Los 13, con sus datos duros|Videografía]] — dónde está listado este video, con sus datos duros y su docente
-- [[reglamento-y-evaluacion#Final|Reglamento y evaluación]] — qué es el final contra el que se ancla este video
-- [[cronograma#Material sin fecha de clase|Cronograma]] — por qué este video no tiene fila propia
-- [[programa-y-objetivos#Contenidos|Programa y objetivos]] — *"Seguridad en aplicaciones · penetration testing · análisis de vulnerabilidades"*, la línea de la Clase 8 de la que cuelga el contenido
-- [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|Bibliografía]] — a dónde ir por autenticación y control de acceso, que es justo lo que este video avisa que entra y ningún video explica
-- [[video-09-pentesting-metodologia|Video 09 — Pentesting: metodología]] — **la metodología de hipótesis de falla**, que este video da por sabida y es la mitad de la consigna
-- [[video-10-pentesting-laboratorio|Video 10 — Pentesting: laboratorio]] — la otra clase de Pinilla, misma tanda; el laboratorio del que acá se ve sólo la teoría
-- [[video-08-vulnerabilidades|Video 08 — Vulnerabilidades]] — la clase que debería traer la taxonomía y no la trae
-- [[video-06-principios-de-diseno-2026|Video 06 — Principios de diseño]] — los ocho principios; varias de las fallas que acá se buscan son principios rotos
-- [[cifrado-probabilistico-nonce-e-iv#Nonce e IV no son exactamente lo mismo|Cifrado probabilístico, nonce e IV]] — la parte criptográfica de la discusión de timestamp contra nonce de 1:46:00
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el segundo paso del que user enumeration es el primero
-- [[ataque-de-diccionario-sobre-hashes#Contramedidas|Ataque de diccionario sobre hashes]] — política de contraseñas y límite de intentos, que es la hipótesis modelo del ejercicio
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — el criterio detrás de *"`TLS` 1.0 es una versión vieja y vulnerable"* de las notas extra
-- [[modelos-de-ataque|Modelos de ataque]] — el análogo criptográfico de la discusión de scope: cuánto sabe y cuánto puede el atacante
-- [[tp-implementacion|TP de Implementación]] — las hipótesis de autenticación insuficiente y de credenciales en el binario son el checklist más barato para revisarlo

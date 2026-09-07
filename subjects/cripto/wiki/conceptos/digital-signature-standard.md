@@ -62,15 +62,3 @@ Y por la definición de $s$: como $s = \bigl[H(m)+x\cdot r\bigr]\cdot k^{-1}$, s
 ## Qué no cubre esta filmina
 
 El deck desarrolla solo `DSA` — la variante sobre $\mathbb{Z}_p^{*}$. El estándar `DSS` completo del NIST admite además variantes sobre `RSA` y `ECDSA` (sobre curvas elípticas), ninguna de las dos desarrollada en este material. `ECDSA` es, en espíritu, la misma construcción de $\mathsf{Sign}$/$\mathsf{Vrfy}$ trasladada a un grupo de curva elíptica en vez de $\mathbb{Z}_p^{*}$ — coherente con el tamaño de clave mucho menor que [[costo-del-cifrado-asimetrico|Costo del cifrado asimétrico]] da para ese tipo de campo.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#13. Digital Signature Standard|Clase 04 — Criptografía asimétrica y firma digital § 13. Digital Signature Standard]]
-- [[firma-digital|Firma digital]] — la terna genérica y `Sig-forge`, que este esquema instancia
-- [[rsa-signature-y-hashed-rsa|RSA-Signature y Hashed RSA]] — la otra instancia de firma digital de la clase, con hash de por medio también
-- [[diffie-hellman|Diffie-Hellman]] — el mismo problema del logaritmo discreto, y la misma terna $(p,q,g)$ vista como protocolo de intercambio
-- [[grupos-anillos-y-cuerpos|Grupos, anillos y cuerpos]] — generador, orden y elemento primitivo, la terna que decide por qué $g$ tiene orden $q$ y no $p-1$
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — desarrollo completo de subgrupos, orden y generadores
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] · [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — $\mathrm{SHA1}$/$\mathrm{SHA2}$, las dos opciones que ofrece la generación de claves
-- [[costo-del-cifrado-asimetrico|Costo del cifrado asimétrico]] — por qué `ECDSA` puede usar módulos mucho más chicos
-- [[cbc-mac|CBC-MAC]] · [[one-time-pad|One Time Pad]] — otros dos casos de la materia donde un valor "efímero" mal manejado (IV, clave) rompe todo el esquema

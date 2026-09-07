@@ -98,7 +98,3 @@ Demostraciones en vivo con software específico y prácticas sobre computadora:
 - **OpenSSL** — Guía 5
 - **JCE** (Java Cryptography Extension) — Guía 5
 - **GCC** / JVM para los ejercicios de programación
-
-## Ver también
-
-- [[cronograma|Cronograma]] · [[reglamento-y-evaluacion|Reglamento y evaluación]] · [[bibliografia|Bibliografía]]

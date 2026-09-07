@@ -74,13 +74,3 @@ El árbol de la [[practica-01-esquemas-y-taxonomias|Práctica 01]] lo clasifica 
 - **Componer dos Vigenère da otro Vigenère.** Las claves forman grupo bajo suma módulo $n$; el largo resultante es $\operatorname{mcm}(t_1, t_2)$. Ej. 4c de la Guía 1.
 - **Bajo [[modelos-de-ataque|CPA]] cae trivialmente:** pedir el cifrado de una cadena suficientemente larga de $aaaa\dots$ devuelve la clave en claro, repetida. Ej. 8 de la Guía 1.
 
----
-
-## Ver también
-
-- [[test-de-kasiski|Test de Kasiski]] — cómo se obtiene $t$
-- [[indice-de-coincidencia|Índice de coincidencia]] — cómo se confirma $t$
-- [[criptoanalisis-por-frecuencias|Criptoanálisis por frecuencias]] — cómo se resuelve cada sub-bloque
-- [[cifrado-por-rotacion|Cifrado por rotación]] — el caso $t = 1$
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]]
-- [[guia-01-criptografia-clasica|Guía 1 — Ej. 1, 4, 6, 8]]

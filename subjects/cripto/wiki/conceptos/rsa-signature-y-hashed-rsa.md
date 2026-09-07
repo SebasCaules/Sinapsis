@@ -69,14 +69,3 @@ con $H$ una función de [[funciones-de-hash-criptograficas|hash]] **libre de col
 ## El límite honesto: sin prueba fuera del modelo ideal
 
 La filmina es explícita sobre lo que Hashed RSA **no** tiene: *"no posee una prueba de seguridad a menos que se asuma un modelo ideal de $H$"* — el modelo de oráculo aleatorio, donde $H$ se trata como una función verdaderamente aleatoria a la que solo se accede por consultas, no desarrollado en esta clase. Es una salvedad real, no una formalidad: significa que la seguridad de Hashed RSA no está reducida a una suposición estándar (como `RSA` de cifrado se reduce a la dificultad de factorizar) sino a una idealización de $H$ que ninguna función de hash real satisface exactamente. En la práctica el esquema se usa igual —es, con variantes de padding como `PSS`, la base de las firmas `RSA` reales— pero la garantía formal es más débil que la de otros esquemas de este bloque.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#12. RSA-Signature y Hashed RSA|Clase 04 — Criptografía asimétrica y firma digital § 12. RSA-Signature y Hashed RSA]]
-- [[firma-digital|Firma digital]] — la terna y el experimento `Sig-forge` contra el que se miden los dos ataques de esta nota
-- [[rsa|RSA]] — el esquema de cifrado del que éste invierte los papeles de las claves
-- [[digital-signature-standard|Digital Signature Standard]] — el estándar que la cátedra da como alternativa con demostración de seguridad más sólida
-- [[maleabilidad|Maleabilidad]] — la misma propiedad homomórfica de `RSA`, explotada del lado de la confidencialidad
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — qué significa "libre de colisiones" y por qué alcanza para bloquear el ataque multiplicativo
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — la distinción entre colisión, preimagen y segunda preimagen que decide contra qué protege $H$
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — cómo se calcula $d$ a partir de $e$ y $\varphi(n)$

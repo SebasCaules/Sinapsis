@@ -258,12 +258,12 @@ Sin inflar: **la teoría no es nueva y las cuentas de este tipo tampoco.** Lo qu
 - Las tres fórmulas y la hipótesis de independencia → [[modelo-probabilistico-de-un-criptosistema#Las tres fórmulas derivadas|Modelo probabilístico de un criptosistema]].
 - El experimento paso a paso, y su versión computacional con $\varepsilon(n)$ → [[pruebas-de-indistinguibilidad#Las tres pruebas|Pruebas de indistinguibilidad]].
 - **Un ejemplo casi idéntico, ya resuelto** → el [[probabilidad-y-criptografia#2. Ejemplo 1 — sí hay secreto perfecto|Ejemplo 1 de Probabilidad y criptografía]]: mismos dos mensajes, dos claves y dos cifrados, mismo cuadrado latino. La diferencia es que ahí $\Pr[M]$ es uniforme.
-- **Las cuatro maneras, en el caso negativo** → el [[guia-02-resolucion#b) Las cuatro demostraciones|Ejercicio 1 de la Guía 2]], que refuta el secreto perfecto por las mismas cuatro y en el mismo orden.
+- **Las cuatro maneras, en el caso negativo** → el [[guia-02-criptografia-simetrica#b) Las cuatro demostraciones|Ejercicio 1 de la Guía 2]], que refuta el secreto perfecto por las mismas cuatro y en el mismo orden.
 
 **Lo que sí aportan los videos:**
 
 1. **$\Pr[M]$ no uniforme.** Es la única fuente del vault que exhibe un esquema con **secreto perfecto y mensajes desbalanceados**. El apunte usa $0{,}5$ / $0{,}5$ en el caso que cumple, así que ahí la asimetría nunca se ve.
-2. **Las cuatro caracterizaciones sobre un esquema que sí cumple.** La [[guia-02-resolucion#Ejercicio 1|Guía 2]] hace las cuatro pero para **refutar**, que es más barato: alcanza un contraejemplo. Acá se ve el costo del caso afirmativo, que es la tabla entera.
+2. **Las cuatro caracterizaciones sobre un esquema que sí cumple.** La [[guia-02-criptografia-simetrica#Ejercicio 1|Guía 2]] hace las cuatro pero para **refutar**, que es más barato: alcanza un contraejemplo. Acá se ve el costo del caso afirmativo, que es la tabla entera.
 3. **El experimento `Eav` calculado por tabla de casos $(b, k)$**, con un resultado que da **exactamente** $0{,}5$. El vault tiene los cálculos que dan $3/4$ y $2/3$ —los dos casos que fallan— pero ninguno que dé el valor de borde.
 4. **El puente con la teórica del 13/08.** Ahí el docente enuncia esta cuarta caracterización en una línea, sin cuenta: *"si esto da exacto 0,5 es porque es secreto perfecto"* ([[clase-02-cifrado|Clase 02]], cue pt1 403). **Estos videos son esa línea hecha número.**
 
@@ -345,18 +345,3 @@ Siguen sin aparecer en la búsqueda de YouTube ni en la lista pública del canal
 - **Confirmar en clase o en el campus** que estos cuatro links son la Práctica 2 de 2026 y que corresponden al lunes 17/08. Es lo único que queda abierto de la datación, y ninguna fuente disponible lo dice.
 - Chequear si en el campus están acompañados de un enunciado escrito: el ejercicio que resuelven **no está numerado** en ninguna guía del vault, y su consigna original no aparece en los videos.
 
----
-
-## Ver también
-
-- [[secreto-perfecto|Secreto perfecto]] — la definición y las caracterizaciones que estos videos verifican una por una
-- [[modelo-probabilistico-de-un-criptosistema|Modelo probabilístico de un criptosistema]] — de dónde salen $\Pr[M]$, $\Pr[K]$ y la marginal de $C$
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — el apunte de la misma docente, con el ejemplo gemelo (mismo cuadrado latino, $\Pr[M]$ uniforme) y el caso que **no** cumple
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — el experimento de la Parte 3, y su versión computacional con $\varepsilon(n)$
-- [[one-time-pad|One Time Pad]] — de lo que el esquema del ejercicio es el caso de un bit
-- [[guia-02-resolucion#Ejercicio 1|Guía 2 — Resolución]] — las mismas cuatro maneras, en el mismo orden, sobre un esquema que **no** tiene secreto perfecto
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la teórica del 13/08 que estos videos repasan, y donde el docente enuncia la cuarta caracterización sin hacer la cuenta
-- [[practica-01-esquemas-y-taxonomias|Práctica 01 — Esquemas y taxonomías]] — la práctica del 10/08, con filminas
-- [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] — la del 24/08; es su fecha la que cierra la ventana de ésta
-- [[videografia|Videografía]] — el mapa de todos los videos del vault; **estos cuatro no son de la playlist de Ramele**, son de otro canal y de la clase práctica
-- [[cronograma|Cronograma]]

@@ -8,7 +8,7 @@ unidad: 2
 clase: 7
 orden: 6
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, autenticacion, claves, politicas-de-seguridad, usabilidad, clase-07, sin-dictar]
 sources: ["Clase 07 - Aplicaciones - Principios y autenticacion.pdf"]
 ---
@@ -29,11 +29,11 @@ La filmina 37 pone en tensión directa tres formas de generar una clave, y cada 
 | **Pronunciable** | fonemas encadenados, fácil de memorizar (`helgoret`, `mipoterjo`, `jusacila`) | **el espacio de claves efectivo se reduce mucho** frente al nominal |
 | **Elegida por el usuario** | máxima comodidad | tiende a ser fácil de adivinar — es la puerta de entrada al [[ataque-de-diccionario-sobre-hashes\|ataque de diccionario]] |
 
-Las tres opciones se leen mejor como los tres puntos de un mismo eje —cuánta entropía le queda a la clave una vez que se le exige que un humano la use— que como alternativas independientes. La aleatoria maximiza $N$ en la [[clase-07-autenticacion#La fórmula de Anderson|fórmula de Anderson]]; las otras dos la sacrifican a cambio de usabilidad, y la clase pronunciable **sólo parece** un punto intermedio.
+Las tres opciones se leen mejor como los tres puntos de un mismo eje —cuánta entropía le queda a la clave una vez que se le exige que un humano la use— que como alternativas independientes. La aleatoria maximiza $N$ en la [[complejidad-y-espacio-de-claves#La fórmula de Anderson|fórmula de Anderson]]; las otras dos la sacrifican a cambio de usabilidad, y la clase pronunciable **sólo parece** un punto intermedio.
 
 ### Cuánto vale realmente una clave pronunciable
 
-**Esto no está en la filmina: es una cuenta propia que usa exactamente los parámetros del [[clase-07-autenticacion#Ejemplo 2 — el mismo despeje con otro espacio (filmina 34)|Ejemplo 2]] de la clase, para mostrar el tamaño real de la reducción que la filmina sólo describe en palabras.**
+**Esto no está en la filmina: es una cuenta propia que usa exactamente los parámetros del [[complejidad-y-espacio-de-claves#Ejemplo 2 — el mismo despeje con otro espacio|Ejemplo 2]] de la clase, para mostrar el tamaño real de la reducción que la filmina sólo describe en palabras.**
 
 El Ejemplo 2 de [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] calcula, para una clave de 8 letras sobre un alfabeto de 26 caracteres —o sea, aleatoria— con $G = 10^{4}$ pruebas/segundo y $P > 0{,}5$:
 
@@ -77,15 +77,3 @@ Forzar el cambio de clave después de un tiempo o evento **limita el daño de un
 Los dos primeros requisitos son **mecánicos** — se implementan con un historial y un contador de tiempo mínimo. El tercero es distinto: es una concesión explícita a que la persona que elige la clave **necesita margen** para no degradar en el otro extremo del problema —eligiendo algo trivial por apuro—.
 
 > **Dónde aparece esta misma tensión, contada como chiste.** El [[video-06-principios-de-diseno-2026#8. Menor asombro|Video 06]] trae, en la filmina del principio de *aceptación psicológica*, el meme de Anakin y Padmé sobre una política de passwords: *"requerir un mínimo de 12 caracteres"* / *"pero los resets van a ser sólo anuales, ¿no?"* / silencio / *"¿no?"*. El propio video lo lee como una crítica al usuario, no a la política técnica —*"el chiste es sobre el lado del usuario"*—, y el requisito de "dar tiempo para pensar la nueva clave" de esta filmina es exactamente la mitad de la ecuación que el meme no menciona: una política de expiración que **no** avisa con anticipación ni da margen produce el mismo resultado que el chiste ridiculiza — el usuario harto que resuelve el problema con la clave más simple que el filtro le permite.
-
-## Ver también
-
-- [[clase-07-autenticacion#6. Políticas de selección y expiración de claves|Clase 07 — Autenticación § 6. Políticas de selección y expiración de claves]] — la sección de la que cuelga esta nota
-- [[complejidad-y-espacio-de-claves|Complejidad y espacio de claves]] — la fórmula de Anderson y sus tres despejes, base de la cuenta de la sección 1
-- [[salting|Salting]] — la otra defensa que actúa sobre las mismas claves, del lado del almacenamiento y no de la elección
-- [[pbkdf2|PBKDF2]] — sube el costo por intento en vez de exigirle más al usuario; los dos enfoques son complementarios
-- [[ataques-a-un-sistema-de-autenticacion|Ataques a un sistema de autenticación]] — la distinción offline/online que motiva por qué la revisión proactiva y la expiración importan más contra ataques offline
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — por qué reducir $N$ nominal a un dominio pequeño ataca sin romper ninguna propiedad criptográfica
-- [[ataque-de-fuerza-bruta#Principio de espacio de claves suficiente|Ataque de fuerza bruta § Principio de espacio de claves suficiente]] — el criterio de la Unidad 1 del que la fórmula de Anderson es la versión cuantitativa
-- [[video-06-principios-de-diseno-2026#8. Menor asombro|Video 06 — Principios de diseño (2026) § 8. Menor asombro]] — el meme sobre política de passwords y la aceptación del usuario
-- [[video-07-principios-de-diseno-2024#8. Aceptación psicológica|Video 07 — Principios de diseño (2024) § 8. Aceptación psicológica]] — por qué exigir el máximo nominal tampoco funciona

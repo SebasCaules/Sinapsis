@@ -8,9 +8,9 @@ unidad: 1
 clase: 2
 orden: 2
 created: 2026-08-21
-updated: 2026-08-24
-tags: [criptografia, seguridad-computacional, ppt, despreciable, nivel-de-seguridad, clase-02]
-sources: [Clase 02 - Criptografia - Cifrado.pdf]
+updated: 2026-09-06
+tags: [criptografia, seguridad-computacional, ppt, despreciable, nivel-de-seguridad, clase-02, transcripcion]
+sources: [Clase 02 - Criptografia - Cifrado.pdf, "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Seguridad computacional
@@ -33,6 +33,22 @@ La filmina lo dibuja como una caída con dos escalones:
 | **Limitar garantías** | **Aceptar una pequeña probabilidad de éxito** para el atacante. Se deja de lado la infalibilidad |
 
 El resultado de aplicar los dos es la **seguridad computacional**.
+
+### La pregunta que abre el resto de la materia
+
+Ninguna filmina la registra. Un alumno pregunta si los algoritmos actuales tienen secreto perfecto; la respuesta es que **ninguno lo tiene**. La repregunta —*no tenerlo, ¿implica ser inseguro?*— es la que contesta el resto de la clase y el resto del curso: hay que reemplazar una propiedad absoluta por una **medida relativa a un adversario y a una prueba**. Esta nota es la relajación, las [[pruebas-de-indistinguibilidad|pruebas de indistinguibilidad]] son el instrumento, y [[estado-de-un-criptosistema|seguro / debilitado / quebrado]] es el vocabulario final que sale de haber disgregado la palabra.
+
+> [!quote]- De la transcripción — el intercambio completo, y el programa de la materia enunciado (cues pt1 192-217, 245-250)
+> Pregunta: *"¿Y los algoritmos actuales tampoco tienen secreto perfecto? Si no tenés una clave del mismo tamaño que el mensaje, entonces no podés tener secreto perfecto de ninguna forma."*
+>
+> Respuesta, sin matices: ***"Ningún algoritmo actual, por más sofisticado que sea, superpower del ejército o lo que quieras, tiene el secreto perfecto"*** (cues pt1 209-211). *"Esa igualdad no se cumple, es decir, **el criptograma revela información**. Revela información en todos, por un tema pragmático."*
+>
+> El alumno repregunta: *"el hecho de que no tenga secreto perfecto, ¿no implica entonces que sea inseguro? Puede ser seguro igual."* Y ahí el docente enuncia el programa de la materia (cues pt1 216-217): ***"Vamos a empezar a jugar con qué (…) significa seguro y vamos a disgregar esa palabra. Seguro, en esta materia — la única materia donde 'seguro' (…) no se usa así de forma laxa—, sino que vamos a ir definiendo a dónde vamos."***
+>
+> Poco después lo aterriza contra un sistema real (cues pt1 245-250): *"ustedes podrían, con el acceso que se hace a un home banking, por ejemplo, que está encriptado (…) si ustedes ven sólo el ciphertext, determinar el texto plano original: sí es posible. Eventualmente es posible. No es que si tuviese secreto perfecto, sabemos que no es posible, no hay forma, no hay forma absoluta. Es lo mismo que vean random puro."*
+
+> [!quote]- De la transcripción — un cabo suelto sobre algoritmos públicos, marcado y no desarrollado (cues pt1 205-206)
+> Ante la pregunta de si ser públicos no vuelve vulnerables a los algoritmos, contesta que no y agrega: *"después hay una vuelta de rosca, eso más adelante"*. **No la desarrolla en esta clase** y la transcripción no permite saber a qué apuntaba.
 
 > **Por qué las dos relajaciones son inevitables, no arbitrarias.** *(lectura nuestra.)* Con $\lvert K\rvert < \lvert M\rvert$ la [[ataque-de-fuerza-bruta|fuerza bruta]] **siempre** funciona: probar las $\lvert K\rvert$ claves y quedarse con el descifrado que tenga sentido. Ese ataque no se puede prohibir — sólo se puede volver **caro** (de ahí *limitar escenarios*: el adversario no tiene tiempo infinito) y **poco confiable** (de ahí *limitar garantías*: puede acertar de casualidad). Las dos relajaciones son, respectivamente, las dos maneras de convivir con la fuerza bruta.
 
@@ -68,6 +84,29 @@ $$\varepsilon(n) \text{ es despreciable} \iff \lim \varepsilon(n) < 1/n^k$$
 
 > **La intuición del par PPT + despreciable.** Si el adversario da $p(n)$ pasos y cada uno tiene probabilidad despreciable de acertar, el total $p(n)\cdot \varepsilon(n)$ **sigue siendo despreciable**. Esa clausura es la que permite componer construcciones y demostrar por reducción — es toda la razón por la que "despreciable" se define así y no como "menor que 0,001".
 
+> **Errata de la filmina:** escribe *"Probabilistic **Polinomial** Time"* — es *Polynomial*. *(Precisión nuestra.)*
+
+### El nivel de seguridad tiene fecha de vencimiento
+
+$n$ es típicamente la longitud de la clave, y su función es que recorrer el espacio por [[ataque-de-fuerza-bruta|fuerza bruta]] cueste milenios; pero **el valor concreto que hace falta cambia con el hardware disponible**. De ahí que los algoritmos se reemplacen por dos motivos distintos, que conviene no mezclar:
+
+- porque **sube el $n$ necesario** — se migra de AES-128 a AES-256 y el algoritmo sigue;
+- porque el algoritmo **no admite un $n$ más grande** y hay que cambiarlo entero.
+
+[[des-y-3des|DES]] es el segundo caso, y [[aes#Los tres tamaños de clave son una defensa contra el paso del tiempo|AES]] está construido para no serlo nunca. Es también la explicación de por qué DES no se rompió de golpe sino que **se erosionó**.
+
+> [!quote]- De la transcripción — qué significa el $n$, en concreto, y cómo envejece (cues pt1 414-432, 437-438)
+> La filmina define el nivel de seguridad y no lo aterriza. El docente: $n$ es *"típicamente la longitud de la clave"*, y su función es que *"el tiempo de procesamiento que uno puede hacer probando todas las condiciones posibles, haciendo fuerza bruta, **sea de milenios**"*.
+>
+> Y el envejecimiento (cues pt1 437-438): *"Ese $N$ viene de un contexto, de un momento dado particular. En el 2026 ese $N$ tiene, para algún algoritmo particular, un número concreto, y en el 2040 va a tener otro número, y hace 10 años atrás tenía otro número, y así."*
+
+### La secuencia de las pruebas es una sola idea
+
+Las tres [[pruebas-de-indistinguibilidad|pruebas de indistinguibilidad]] —`Eav`, `Mul`, `CPA`— no son tres definiciones sueltas: son **un mismo adversario al que se le van dando recursos**. La metáfora es del docente y ordena todo el tramo.
+
+> [!quote]- De la transcripción — soltarle la soga al adversario (cues pt1 233-238)
+> *"Vamos a empezar a definir el concepto de un adversario y al adversario le vamos a dar límites (…) **es como que le vamos a ir soltando la soga al adversario**. Primero lo vamos a recontra-limitar y le vamos a ir diciendo: bueno, además de hacer esto, puede hacer esto, y esto. Arrancamos con un adversario que es lo menos poderoso posible y lo vamos a ir haciendo cada vez más poderoso."*
+
 ---
 
 ## Qué significa en la práctica
@@ -79,13 +118,3 @@ También explica por qué la clase insiste con la escala física —$2^{88}$ át
 > **Errata de la filmina:** el $2^{88}$ no es la cantidad de átomos del universo observable, que tiene $\approx 10^{80} \approx 2^{266}$; $2^{88}$ es del orden de los átomos de unos kilos de agua. El $2^{58}$ de los segundos sí está bien. **El argumento de la clase no cambia** —lo que vuelve inalcanzable a $2^{128}$ es el tiempo, no el conteo de átomos—; el detalle de la cuenta está en [[eleccion-de-primitivas#Tamaños|elección de primitivas]].
 
 > **Lo que la seguridad computacional NO es.** No es "todavía nadie lo rompió" —ese es el criterio pre-1949 que la [[clase-01-introduccion-y-criptografia-clasica|Clase 01]] descarta. Es una **demostración condicional**: *si* la primitiva subyacente es pseudoaleatoria, *entonces* la construcción pasa la prueba. La filmina lo remata sin anestesia: **no está demostrado que existan las funciones pseudoaleatorias.**
-
-## Ver también
-
-- [[one-time-pad|One Time Pad]] — lo que se abandona al dar este paso
-- [[secreto-perfecto|Secreto perfecto]] — la seguridad incondicional
-- [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — el instrumento con el que se mide $\varepsilon(n)$
-- [[generador-pseudoaleatorio|Generador pseudoaleatorio]] — la primitiva sobre la que se apoyan las reducciones
-- [[ataque-de-fuerza-bruta|Ataque de fuerza bruta]] — el ataque que esta definición admite y acota
-- [[estado-de-un-criptosistema|Estado de un criptosistema]]
-- Katz & Lindell §3.1 *Computational Security* ([[bibliografia|bibliografía]])

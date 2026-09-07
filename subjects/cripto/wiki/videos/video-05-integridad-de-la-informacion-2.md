@@ -288,16 +288,3 @@ O sea: **los ejercicios de aritmética modular y teoría de números que se dan 
 
 **Lo que quedó sin poder verificar:** el *"material adicional en Campus"* que la filmina 38 cita para la prueba de `CCM` no está en `raw/` ni se muestra en el video. Y varias intervenciones de alumnos entraron **por chat escrito**, así que no quedan en la transcripción: sólo se ve la reacción de él.
 
----
-
-## Ver también
-
-- [[video-04-integridad-de-la-informacion-1|Video 04 — Integridad de la información (1)]] — la primera mitad de la misma jornada, filminas 1 a 22 salteando la 17
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la nota de clase, con las 41 filminas; este video cubre sus [[clase-03-macs-y-cifrado-autenticado#12. La segunda sesión: cómo retoma el 03/09|§12 a §25]]
-- [[videografia|Videografía]] — el catálogo de los 13 videos y el mapeo contra el cronograma
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] · [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] · [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]] — filminas 22 a 29
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] · [[hmac|HMAC]] · [[seguridad-de-las-funciones-de-hash|Seguridad de las funciones de hash]] — filminas 30 a 35
-- [[privacidad-e-integridad|Privacidad e integridad]] · [[cifrado-autenticado|Cifrado autenticado]] · [[ccm-y-gcm|CCM y GCM]] — filminas 36 a 40
-- [[ataque-de-diccionario-sobre-hashes|Ataque de diccionario sobre hashes]] — el concepto de la unidad que **no** está en este video
-- [[guia-03-mac-y-funciones-de-hash|Guía 3 — MAC y Funciones de Hash]] · [[guia-03-resolucion|Guía 3 — Resolución]] — la práctica del tema
-- [[bibliografia|Bibliografía]] — Katz & Lindell, capítulos 4 y 5 y apéndices A y B, que es lo que manda a leer al cerrar

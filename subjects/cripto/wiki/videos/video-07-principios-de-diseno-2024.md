@@ -9,7 +9,7 @@ orden: 41
 video: 07
 youtube: 08hziQPewts
 created: 2026-09-03
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [video, seguridad, principios-de-diseno, saltzer-schroeder, hardening, bloque-2, clase-08, ramele]
 sources: ["https://www.youtube.com/watch?v=08hziQPewts"]
 ---
@@ -319,7 +319,7 @@ Y cierra el punto con un ejemplo actual que es, en el fondo, una violación de *
 - el principio de la cebolla
 - la tecnología no existe en aislamiento
 
-Ese cuarto punto engancha directo con [[seguridad-computacional|seguridad computacional]] y con [[eleccion-de-primitivas#Ver también|elección de primitivas]]: el terreno de la materia es la seguridad computacional, y ahí el largo de clave es un parámetro de diseño.
+Ese cuarto punto engancha directo con [[seguridad-computacional|seguridad computacional]] y con [[eleccion-de-primitivas#Tamaños|elección de primitivas]]: el terreno de la materia es la seguridad computacional, y ahí el largo de clave es un parámetro de diseño.
 
 ### Las filminas del anexo por las que pasa de largo
 
@@ -392,17 +392,3 @@ Este video y el [[video-11-flujo-de-informacion|Video 11 — Flujo de informaci�
 
 Y el Video 11 abre en 02:26 con *"va a heredar una mejor seguridad por varios de los principios de diseño [de los que] charlamos hoy"*. **Si se va a mirar uno, conviene mirar los dos seguidos y en ese orden**: el segundo se apoya explícitamente en el primero.
 
----
-
-## Ver también
-
-- [[video-06-principios-de-diseno-2026|Video 06 — Principios de diseño (2026)]] — la versión vigente del deck. Conviene ver ésa primero y ésta después, por los ejemplos.
-- [[video-11-flujo-de-informacion|Video 11 — Flujo de información]] — la segunda mitad de esta misma jornada.
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — el principio 5 ya desarrollado, con la consecuencia sobre el César.
-- [[seguridad-computacional|Seguridad computacional]] — el *"our realm"* de la filmina final y el fondo de la seguridad *unbounded*.
-- [[secreto-perfecto|Secreto perfecto]] — el otro extremo de la escala del anexo.
-- [[modelos-de-ataque|Modelos de ataque]] — la taxonomía de la filmina de 1:02:42, ya desarrollada.
-- [[eleccion-de-primitivas|Elección de primitivas en un proyecto]] — el largo de clave como decisión de diseño.
-- [[bibliografia#2. Matt Bishop — Computer Security: Art and Science|Bibliografía]] — Bishop, y el mapeo de capítulos que contradice el número de la filmina 16.
-- [[videografia#Los 13, con sus datos duros|Videografía]] — dónde encaja este video entre los 13.
-- [[cronograma|Cronograma]] — Clase 8, 15/10.

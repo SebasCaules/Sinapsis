@@ -8,7 +8,7 @@ unidad: 1
 clase: 4
 orden: 6
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [criptografia, rsa, textbook-rsa, cifrado-asimetrico, factorizacion, clase-04, sin-dictar]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf"]
 ---
@@ -56,7 +56,7 @@ $$c = m^{e} \bmod n = m^{e} \quad \text{(sin reducción)}$$
 
 Recuperar $m$ de ahí no requiere invertir nada módulo $n$: alcanza con calcular la **raíz $e$-ésima entera ordinaria** de $c$ sobre los números enteros —un problema mucho más fácil que invertir RSA en general—. Esto es exactamente lo que hace peligroso usar $e=3$ (histórico, elegido para acelerar el cifrado): con $e$ chico, la condición $m^{e}<n$ se cumple para una fracción mucho mayor de mensajes cortos.
 
-> **Errata de la filmina (25) y precisión, ya señaladas en la [[clase-04-criptografia-asimetrica-y-firma-digital#7. RSA: textbook RSA y sus problemas|Clase 04]].** La filmina escribe la condición como *"me < n"*, sin exponente — la condición correcta es $m^{e} < n$, no $m \cdot e < n$: verificado sobre la página renderizada, no es un aplanado de `pdftotext`, ahí nunca hubo superíndice. Y la propia filmina dice después *"se puede calcular el logaritmo"*: técnicamente **no es un logaritmo sino una raíz $e$-ésima** la que recupera $m$ — el logaritmo discreto es el problema de [[diffie-hellman|Diffie-Hellman]], un problema distinto.
+> **Errata de la filmina (25), y una precisión sobre la palabra "logaritmo".** La filmina escribe la condición como *"me < n"*, sin exponente — la condición correcta es $m^{e} < n$, no $m \cdot e < n$: verificado sobre la página renderizada, no es un aplanado de `pdftotext`, ahí nunca hubo superíndice. Y la propia filmina dice después *"se puede calcular el logaritmo"*: técnicamente **no es un logaritmo sino una raíz $e$-ésima** la que recupera $m$ — el logaritmo discreto es el problema de [[diffie-hellman|Diffie-Hellman]], un problema distinto.
 
 **Ejemplo numérico del ataque** *(lectura nuestra)*. Con $e=3$ y $n$ de $2048$ bits, si $m < n^{1/3}$ (es decir, $m$ cabe en menos de $\sim 683$ bits), entonces $m^{3} < n$ literalmente sobre los enteros, y $c = m^3$ sin reducción: calcular $\sqrt[3]{c}$ con aritmética de precisión arbitraria recupera $m$ exactamente, sin factorizar $n$ ni conocer $d$.
 
@@ -85,15 +85,3 @@ Descifrado de $c = 3\,650\,502$:
 $$\mathsf{Dec}(c) = 3\,650\,502^{\,422\,191} \bmod 6\,012\,707 = 5\,234\,673 \quad\checkmark$$
 
 Las tres cuentas cierran exactamente como las escribe la filmina — reverificadas acá con aritmética modular en Python (`pow(m, e, n)` y `pow(e, -1, phi)`), no sólo tomadas del PDF.
-
-## Ver también
-
-- [[clase-04-criptografia-asimetrica-y-firma-digital#7. RSA: textbook RSA y sus problemas|Clase 04 — Criptografía asimétrica y firma digital § 7. RSA: textbook RSA y sus problemas]] — la sección de la que sale esta nota, con las erratas de la filmina 25 desarrolladas
-- [[criptosistema-asimetrico|Criptosistema asimétrico]] — por qué el determinismo de textbook RSA es fatal para `CPA-Secure`, no cosmético
-- [[pkcs1-y-tamano-de-claves|PKCS#1 y tamaño de claves]] — el padding aleatorio que arregla el problema 1 de esta nota
-- [[el-gamal|El Gamal]] — el otro criptosistema concreto de la clase, probabilístico por construcción
-- [[rsa-signature-y-hashed-rsa|RSA-Signature y Hashed RSA]] — la misma exponenciación modular, invirtiendo el rol de las claves para firmar
-- [[grupos-anillos-y-cuerpos|Grupos, anillos y cuerpos]] — $\varphi(n)$ y el teorema de Euler-Fermat que hacen funcionar `Gen` y `Dec`
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] · [[inverso-modular|Inverso modular]] — cómo se calcula $d$ a partir de $e$
-- [[costo-del-cifrado-asimetrico|Costo del cifrado asimétrico]] — qué tamaño de $n$ hace falta para que factorizarlo sea inviable
-- Katz & Lindell, cap. 11 *Public-Key Encryption* — RSA "de libro de texto" y sus limitaciones ([[bibliografia|bibliografía]])

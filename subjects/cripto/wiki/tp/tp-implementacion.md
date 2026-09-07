@@ -58,9 +58,3 @@ Según el programa, las prácticas sobre computadora usan **OpenSSL**, **JCE** (
 - [ ] Stack / lenguaje
 - [ ] Criterios de corrección
 - [ ] Plan de trabajo hasta el 16/11
-
-## Ver también
-
-- [[reglamento-y-evaluacion|Reglamento y evaluación]]
-- [[cronograma|Cronograma]]
-- [[programa-y-objetivos|Programa y objetivos]]

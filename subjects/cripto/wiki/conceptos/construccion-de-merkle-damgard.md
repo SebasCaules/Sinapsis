@@ -255,16 +255,3 @@ Vale decirlo acá para que no se lea Merkle-Damgård como *la* forma de hacer un
 **La Práctica 04 lo tiene tabulado**, y con el mismo par que esta nota construye: su filmina 10 clasifica los *"Modelos de Aplicación (Construcciones)"* en dos ramas, **Iterativo → `CBC-MAC` / Merkle** y **Esponja → Keccak (`SHA-3`)**. La rama iterativa mete en la misma caja al MAC de bloque y al hash, que es exactamente el paralelo que el docente repite en los cues pt2 322-324.
 
 Y el puente al resto del bloque también lo dice él: *"a partir del modelo iterativo se empezaron a definir un montón de funciones $f$, y de ahí salen las funciones de hash por ahí más conocidas"* (cue pt2 372) — o sea, [[primitivas-de-hash-estandar|MD5, SHA-1 y SHA-2]].
-
-## Ver también
-
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — qué se está construyendo
-- [[resistencias-de-una-funcion-de-hash|Resistencias de una función de hash]] — la resistencia a colisiones que el teorema traslada de $h^{s}$ a $H^{s}$
-- [[primitivas-de-hash-estandar|Primitivas de hash estándar]] — quiénes usan este modelo (`MD5`, `SHA-1`, `SHA-2`) y quién no (`SHA-3`)
-- [[hmac|HMAC]] — la construcción cuya forma se explica por el length extension de esta nota
-- [[cbc-mac|CBC-MAC]] — el ataque hermano, sobre una primitiva de bloque en vez de un hash, y el mismo compromiso prefijo/sufijo
-- [[primitiva-de-cifrado-en-bloque|Primitiva de cifrado en bloque]] — la otra pieza de dominio fijo del curso, y el padding
-- [[modos-de-encadenamiento|Modos de encadenamiento]] — el paralelo estructural: encadenar estado para pasar de tamaño fijo a tamaño libre
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — las dos sesiones, 27/08 y 03/09
-- [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] — la filmina 11, con el teorema en recuadro y sin caja $g$
-- Katz & Lindell cap. 5 *Hash Functions and Applications*, §5.2 ([[bibliografia|bibliografía]])

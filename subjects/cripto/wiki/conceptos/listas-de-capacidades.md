@@ -84,14 +84,3 @@ La propia URI **es** la capacidad: quien la tiene puede descifrar y verificar el
 | Ejemplo | Windows / Linux | Sistemas de respuesta de incidentes (IDS) |
 
 **Lo que la filmina no dice, y conviene tener presente** *(lectura nuestra, no está en el deck)*: el motivo clásico por el que se prefieren capacidades en ciertos diseños de seguridad es el llamado **problema del deputy confundido** (*confused deputy problem*) — un ACL centraliza la decisión en un servicio con más privilegio que el usuario que lo invoca, y ese servicio puede terminar usando su propio privilegio en nombre de un pedido malicioso sin darse cuenta; una capacidad, en cambio, transporta el derecho junto con el pedido, así que el servicio nunca necesita más privilegio del que el propio pedido le entrega. No es contenido de esta clase — se deja acá sólo como contexto de por qué el modelo de capacidades, "menos común" según la filmina, sigue siendo relevante en el diseño de sistemas distribuidos como Tahoe.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#12. Listas de capacidades|Clase 06 — Listas de capacidades]]
-- [[matriz-de-control-de-acceso|Matriz de control de acceso]] — la matriz completa de la que ésta es la proyección por filas
-- [[listas-de-control-de-acceso|Listas de control de acceso]] — la proyección por columnas, teóricamente equivalente
-- [[message-authentication-code#La terna Gen, Mac y Vrfy|Message Authentication Code]] — la terna Gen/Mac/Vrfy usada para formalizar la implementación criptográfica de una capacidad
-- [[seguridad-de-un-mac#El experimento Mac-Forge|Seguridad de un MAC]] — la garantía de infalsificabilidad que hace que una capacidad protegida por MAC no se pueda alterar ni fabricar
-- [[acls-propagables|ACLs propagables]] — otra variante donde el control viaja con la información, no con el objeto
-- [[video-07-principios-de-diseno-2024#Qué no cubre este video|Video 07 — Principios de diseño (2024)]] y [[video-11-flujo-de-informacion|Video 11 — Flujo de información]] — confirman que ACL y capacidades son clase propia sin grabación
-- Matt Bishop, *Computer Security: Art and Science*, cap. 16 (*Access Control Mechanisms*) ([[bibliografia|Bibliografía]])

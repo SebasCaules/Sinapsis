@@ -8,7 +8,7 @@ unidad: 2
 clase: 8
 orden: 5
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-06
 tags: [seguridad, modelado-de-amenazas, zonas-de-confianza, web-app-security-frame, clase-08, sin-dictar]
 sources: ["Clase 12 - Analisis de vulnerabilidades.pdf"]
 ---
@@ -34,7 +34,7 @@ La filmina 14 da diez áreas que sirven como lista de verificación al modelar u
 9. Manejo de excepciones
 10. Auditoría y logs
 
-No es una lista de amenazas: es una lista de **superficies** — cada área es un lugar distinto donde puede vivir una vulnerabilidad, y sirve como checklist para no dejar afuera una superficie entera del análisis. La filmina 17 de la [[clase-08-principios-de-diseno-y-vulnerabilidades#6. STRIDE y árboles de ataque|siguiente sección de la clase]] remite a esta misma lista —bajo el nombre técnico de *Microsoft patterns & practices*— como catálogo de amenazas, ataques y contramedidas recurrentes por cada uno de estos diez aspectos.
+No es una lista de amenazas: es una lista de **superficies** — cada área es un lugar distinto donde puede vivir una vulnerabilidad, y sirve como checklist para no dejar afuera una superficie entera del análisis. La filmina 17, que desarrolla [[stride-y-arboles-de-ataque|STRIDE y árboles de ataque]], remite a esta misma lista —bajo el nombre técnico de *Microsoft patterns & practices*— como catálogo de amenazas, ataques y contramedidas recurrentes por cada uno de estos diez aspectos.
 
 ## Zonas donde cambia el nivel de confianza
 
@@ -60,12 +60,3 @@ La filmina 16 pide identificar el **flujo de datos** entre esas zonas, siguiendo
 ## El ejemplo que conecta esta nota con la siguiente
 
 El deck reutiliza, para la identificación de vulnerabilidades, un único ejemplo desarrollado: un sistema de historial médico que permite a médicos consultar y agregar entradas, y a pacientes acceder al propio historial, con una arquitectura **browser → firewall → web server (con su filesystem) → base de datos**. Esa arquitectura es exactamente el material sobre el que se aplica la descomposición de esta nota — dónde está la zona externa (el browser, del otro lado del firewall), dónde la zona privilegiada (probablemente el acceso de médicos frente al de pacientes, aunque el deck no lo detalla), y por dónde fluye el dato desde que un médico lo ingresa hasta que queda en la base.
-
-## Ver también
-
-- [[clase-08-principios-de-diseno-y-vulnerabilidades#5. Descomposición de la aplicación|Clase 08 — Principios de diseño y vulnerabilidades § 5. Descomposición de la aplicación]]
-- [[modelado-de-amenazas|Modelado de amenazas]] — el ciclo completo del que ésta es el paso 3
-- [[stride-y-arboles-de-ataque|STRIDE y árboles de ataque]] — el paso 4, que se aplica sobre cada zona de confianza que esta nota identifica
-- [[principios-de-diseno#4. Mediación completa|Principios de diseño]] — mediación completa exige verificar todos los accesos que cruzan estas zonas
-- [[video-08-vulnerabilidades#El proceso de modelado de amenazas de Microsoft|video-08 — Vulnerabilidades § El proceso de modelado de amenazas de Microsoft]] — la fuente hablada de esta nota
-- [[videografia|Videografía]] — el mapa completo de los videos de la cátedra

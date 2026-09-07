@@ -75,11 +75,3 @@ Tripwire:
 ## La advertencia que cierra la sección
 
 *"No confundir políticas con mecanismos"* — es la conclusión con la que termina la filmina 13, y ordena toda la sección: una **política** dice *qué* debe cumplirse (deny by default, allow by default, o cualquier condición formal); `xhost` y `Tripwire` son *cómo* se lo hace cumplir sobre un sistema concreto. Los dos ejemplos de lenguaje de bajo nivel son mecanismos, no políticas: implementan una decisión que ya fue tomada en otro lado, en un lenguaje de alto nivel o directamente en la cabeza de un administrador.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#4. Lenguajes de descripción de políticas|Clase 06 — Políticas de seguridad y control de acceso § 4. Lenguajes de descripción de políticas]]
-- [[paradigmas-de-control-de-acceso|Paradigmas de control de acceso]] — la misma tensión reglas-restrictivas-contra-permisivas, ahora del lado de quién fija las reglas
-- [[modelos-de-politica|Modelos de política]] — el siguiente paso: de un lenguaje que describe una política puntual a un marco que describe una familia entera
-- [[listas-de-control-de-acceso|Listas de control de acceso]] — el principio de denegar por defecto llevado a un mecanismo concreto
-- [[composicion-de-politicas|Composición de políticas]] — la misma disyuntiva abierto/cerrado, aplicada a los huecos de una política compuesta

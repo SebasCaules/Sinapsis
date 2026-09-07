@@ -383,18 +383,3 @@ Las erratas del deck ya están tabuladas en [[clase-03-macs-y-cifrado-autenticad
 - **La errata de la filmina 10** que se registra arriba **no está en la tabla de erratas de la [[clase-03-macs-y-cifrado-autenticado#Erratas y precisiones de las filminas|nota de Clase 03]]**; habría que agregarla ahí, porque es del deck y no del video.
 - **Este video y el #2 son una sola jornada.** El #1 corta en un recreo y el #2 arranca inmediatamente después, sin repasar nada; los dos se subieron el 27/03/2025.
 
----
-
-## Ver también
-
-- [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] — la versión de Abad del mismo deck, con el ejercicio de la filmina 17 y el del `CCA` resueltos
-- [[videografia|Videografía]] — el catálogo de los 13 videos y el mapeo al cronograma, con la [[videografia#Qué cubre y qué no|tabla de cobertura]] del corpus entero
-- [[video-05-integridad-de-la-informacion-2|Video 05 — Integridad de la información (2)]] — la segunda mitad de la misma jornada: retoma en la filmina 22 y llega hasta la 41
-- [[maleabilidad|Maleabilidad]] · [[ataque-de-texto-cifrado-escogido|Ataque de texto cifrado escogido]] — el arco ataque → prueba de la primera hora del video
-- [[message-authentication-code|Message Authentication Code]] · [[seguridad-de-un-mac|Seguridad de un MAC]] · [[cbc-mac|CBC-MAC]] — todo lo que va de 44:13 a 1:05:05
-- [[funciones-de-hash-criptograficas|Funciones de hash criptográficas]] — la filmina 22, los últimos 5 min 33 s
-- [[modelos-de-ataque|Modelos de ataque]] · [[pruebas-de-indistinguibilidad|Pruebas de indistinguibilidad]] — el `CPA` y su corolario probabilístico
-- [[principio-de-kerckhoffs|Principio de Kerckhoffs]] — el contrapunto militar del minuto 09:00
-- [[generador-pseudoaleatorio|Generador pseudoaleatorio]] · [[numeros-aleatorios-y-randomness|Sobre números aleatorios y randomness]] — la digresión de 22:10 a 27:55
-- [[cifrado-probabilistico-nonce-e-iv|Cifrado probabilístico, nonce e IV]] — el "grabarse a fuego" de las 29:14
-- [[guia-03-mac-y-funciones-de-hash|Guía 3 — MAC y Funciones de Hash]] · [[guia-03-resolucion|Guía 3 — Resolución]] — la práctica del tema

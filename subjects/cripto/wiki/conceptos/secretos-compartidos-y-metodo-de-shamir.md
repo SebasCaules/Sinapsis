@@ -99,13 +99,3 @@ $$P(0) = 4\cdot 2 + 6\cdot 9 + 0\cdot 1 = 8+54+0 = 62 \equiv 7 \pmod{11} \quad\c
 ## Cruce con un ejercicio de parcial ya documentado
 
 El vault ya tiene un ejercicio de Shamir resuelto en [[parciales-viejos#Los ejercicios de Shamir, de la Guía 6|parciales-viejos.md]]: un esquema $(2,3) \bmod 11$ con **cuatro** sombras, una de ellas impostora. Usa la misma mecánica de fondo —evaluar y reconstruir un polinomio en $\mathbb{Z}_{11}$— pero con umbral $t=2$: ahí $P$ es de **grado 1** (una recta, no una parábola), así que alcanza con tomar dos puntos, construir la recta, y ver cuál de las sombras restantes **no** cae en ella, en vez de reconstruir con Lagrange sobre tres puntos como acá. Esa nota registra, además, que la resolución manuscrita que documenta comete su **propio** error de aritmética modular — un patrón de arrastre parecido, en espíritu, al $2$ en vez de $0$ de esta filmina.
-
-## Ver también
-
-- [[clase-06-politicas-de-seguridad-y-control-de-acceso#13. Secretos compartidos y método de Shamir|Clase 06 — Secretos compartidos y método de Shamir]]
-- [[listas-de-capacidades|Listas de capacidades]] — la sección inmediatamente anterior; Shamir es, en la clase, un método más de separación de privilegios sobre capacidades
-- [[acls-propagables|ACLs propagables]] — la sección inmediatamente siguiente
-- [[inverso-modular|Inverso modular]] — el cálculo que hace posible dividir dentro de $\mathbb{Z}_{11}$ en toda la interpolación de Lagrange
-- [[secreto-perfecto|Secreto perfecto]] — el sentido en que $t-1$ sombras no filtran ninguna información sobre el secreto
-- [[parciales-viejos#Los ejercicios de Shamir, de la Guía 6|Ejercicios de Shamir, Guía 6]] — otro esquema resuelto, con umbral $t=2$ y su propio error documentado
-- Adi Shamir, *"How to Share a Secret"* (Communications of the ACM, 1979) — el paper original del método, no citado por número en el deck

@@ -39,7 +39,7 @@ Más abajo enumera el temario de los videos (cues 845-846, `02:05:36`-`02:06:01`
 
 Y aclara el alcance (cue 844): *"No es que nosotros nos concentremos en eso, porque esta es una materia de seguridad desde la perspectiva de criptografía general y no de cómo se implementan los esquemas criptográficos."* O sea: **se pide como herramienta, no como tema de estudio en sí**.
 
-> **Por qué importa la distinción.** Que sea "sólo repaso" hace fácil saltearlo, y es justo lo que no conviene: es lo único de esta clase que el docente marcó nominalmente como *"le va a servir para el parcial"*. El [[guia-02-resolucion|Ej. 7c de la Guía 2]] ya lo usa —hay que calcular $7^{-1} \bmod 32$ con Euclides extendido para poder descifrar en `CBC`— y es un ejercicio de la unidad de criptografía **simétrica**, no de la asimétrica. Es decir: el tema ya está en juego.
+> **Por qué importa la distinción.** Que sea "sólo repaso" hace fácil saltearlo, y es justo lo que no conviene: es lo único de esta clase que el docente marcó nominalmente como *"le va a servir para el parcial"*. El [[guia-02-criptografia-simetrica|Ej. 7c de la Guía 2]] ya lo usa —hay que calcular $7^{-1} \bmod 32$ con Euclides extendido para poder descifrar en `CBC`— y es un ejercicio de la unidad de criptografía **simétrica**, no de la asimétrica. Es decir: el tema ya está en juego.
 
 ### Los dos videos son estos
 
@@ -81,7 +81,7 @@ Es un libro **de aritmética** de **María Lina Becquer y Carlos Sánchez**, de 
 
 **Es optativo, no bibliografía obligatoria.** No figura en ninguna de las dos listas de la [[bibliografia|bibliografía]] —ni la obligatoria ni la de consulta— y por lo tanto no entra en lo que el [[reglamento-y-evaluacion|reglamento]] declara evaluable.
 
-**Lo que la transcripción NO da: el título exacto, el año y la editorial.** Ninguno de los tres aparece en ningún cue, así que acá no se completan — **sin título no hay cita bibliográfica posible**, y esto queda como pista para buscar, no como referencia. El encuadre completo está en [[bibliografia#Recomendado en clase, fuera del programa|Bibliografía § Recomendado en clase, fuera del programa]] y el pasaje citado entero, en el [[clase-02-cifrado#El cierre del 20/08: el campus, los ejemplos de parcial y el libro de aritmética|cierre del 20/08]] de la nota de clase.
+**Lo que la transcripción NO da: el título exacto, el año y la editorial.** Ninguno de los tres aparece en ningún cue, así que acá no se completan — **sin título no hay cita bibliográfica posible**, y esto queda como pista para buscar, no como referencia. El encuadre completo está en [[bibliografia#Recomendado en clase, fuera del programa|Bibliografía § Recomendado en clase, fuera del programa]].
 
 ---
 
@@ -276,7 +276,7 @@ $$\text{si } \bar{x} \text{ verifica} \;\Rightarrow\; \bar{x} = a^{-1}\ (m) \;=\
 
 > **Cuidado con la última igualdad.** El apunte escribe $\bar{x} = a^{-1}\ (m) = \bar{x} = \frac{1}{a}$. El $\frac{1}{a}$ es un **abuso de notación**, no una división: en $\mathbb{Z}_m$ no hay fracciones, y $a^{-1}$ es "el elemento que multiplicado por $a$ da $1$", definido por la congruencia y nada más. Escribirlo $1/a$ ayuda a la intuición —el inverso hace el papel del recíproco— pero **calcularlo como una división da cualquier cosa**: el inverso de $7$ módulo $32$ es $23$, no $0{,}142\ldots$ ni $1/7$. *(Advertencia nuestra; el manuscrito escribe la igualdad sin comentario.)*
 
-**Por qué esto es el destino de las dos hojas.** El inverso modular es lo que le devuelve a $\mathbb{Z}_m$ la operación que la congruencia no traía de fábrica: **dividir**. Y dividir es lo que hace falta para **descifrar** cualquier esquema que cifre multiplicando. El [[guia-02-resolucion|Ej. 7 de la Guía 2]] es exactamente eso: la primitiva es $E(K, M) = (M \cdot K) \bmod 32$, y para escribir `Dec` hay que calcular $K^{-1} \bmod 32$. Sin inverso no hay descifrado, y sin coprimalidad no hay inverso — por eso ahí las claves útiles son sólo las impares.
+**Por qué esto es el destino de las dos hojas.** El inverso modular es lo que le devuelve a $\mathbb{Z}_m$ la operación que la congruencia no traía de fábrica: **dividir**. Y dividir es lo que hace falta para **descifrar** cualquier esquema que cifre multiplicando. El [[guia-02-criptografia-simetrica|Ej. 7 de la Guía 2]] es exactamente eso: la primitiva es $E(K, M) = (M \cdot K) \bmod 32$, y para escribir `Dec` hay que calcular $K^{-1} \bmod 32$. Sin inverso no hay descifrado, y sin coprimalidad no hay inverso — por eso ahí las claves útiles son sólo las impares.
 
 ---
 
@@ -329,7 +329,7 @@ Esta sección es la razón de ser de los videos y de las notas de concepto: el m
 | **El algoritmo de Euclides.** El apunte define qué **es** el mcd, pero **en ninguna parte dice cómo calcularlo**. No hay cadena de divisiones sucesivas ni nada parecido | [[algoritmo-de-euclides-extendido\|Algoritmo de Euclides extendido]] · video *Algoritmo Euclides Extendido* |
 | **Euclides extendido.** Cómo obtener los $x, y$ de Bézout. El apunte afirma que existen y nunca los construye | [[algoritmo-de-euclides-extendido\|Algoritmo de Euclides extendido]] · video *Algoritmo Euclides Extendido* |
 | **Cómo se despeja $x_0$** en la ecuación lineal de congruencia. La fórmula $x = x_0 + t\,m/d$ describe la familia a partir de un dato que nunca se calcula | [[inverso-modular\|Inverso modular]] |
-| **Un solo ejemplo numérico.** Las dos hojas no traen **ningún** número concreto: son puro enunciado. No hay con qué verificar que entendiste | [[guia-02-resolucion\|Ej. 7c de la Guía 2]] ($7^{-1} \bmod 32 = 23$) y las notas de concepto |
+| **Un solo ejemplo numérico.** Las dos hojas no traen **ningún** número concreto: son puro enunciado. No hay con qué verificar que entendiste | [[guia-02-criptografia-simetrica\|Ej. 7c de la Guía 2]] ($7^{-1} \bmod 32 = 23$) y las notas de concepto |
 | **Números primos y factorización.** El docente los nombra entre los temas de los videos (cue 845), pero **el escaneo no los toca** | los videos |
 | **Aritmética de $\mathbb{Z}_m$ más allá de lo lineal:** exponenciación modular, $\varphi$ de Euler, teorema chino del resto, cuerpos finitos | fuera de estas fuentes. **Los cuerpos finitos y $\varphi$ de Euler sí tienen nota**: [[cuerpos-finitos\|Cuerpos finitos]] —el recorrido del PDF [`Cuerpos Finitos - ITBA 2021(1).pdf`](../../raw/apuntes/Cuerpos%20Finitos%20-%20ITBA%202021%281%29.pdf) de `raw/apuntes/`— y [[cuerpos-finitos-y-campos-de-galois\|Cuerpos finitos y campos de Galois]]. La **exponenciación modular** aparece ahí sólo mencionada al pasar, y el **teorema chino del resto** no está en ninguna nota del vault |
 | **Para qué sirve.** El manuscrito no menciona criptografía ni una vez. La motivación viene entera de la [[clase-02-cifrado\|Clase 02]] | esta nota, §1 |
@@ -355,21 +355,3 @@ Y lo que conviene tener afilado además, leyendo el apunte:
 - La **notación del apunte** ($(a{:}b)$, $r_m(x)$, $a \perp b$), por si el enunciado del parcial la usa.
 - El caso base **$(a{:}0) = \lvert a \rvert$**, que es donde termina Euclides y donde más se traba la gente al escribir el algoritmo.
 
----
-
-## Ver también
-
-- [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]] — el concepto atómico: divisibilidad, mcd, división entera y $\mathbb{Z}_m$ desarrollados, con demostraciones
-- [[algoritmo-de-euclides-extendido|Algoritmo de Euclides extendido]] — el procedimiento que el manuscrito **no** trae: cómo se calcula el mcd y cómo se obtienen los coeficientes de Bézout
-- [[inverso-modular|Inverso modular]] — existencia, unicidad y cálculo de $a^{-1} \bmod m$
-- [[cuerpos-finitos|Cuerpos finitos]] — el apunte hermano, con la aritmética de $\mathbb{Z}_m$ que este manuscrito deja afuera: $\varphi$ de Euler, grupos cíclicos y $\mathrm{GF}(2^{n})$
-- [[cuerpos-finitos-y-campos-de-galois|Cuerpos finitos y campos de Galois]] — el concepto: qué pasa con $\mathbb{Z}_m$ cuando el módulo es primo y todo elemento no nulo se vuelve inversible
-- [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] — la clase que encarga este material; el pedido está al final de la [transcripción](../../raw/clases/Clase%2002pt1-Transcripcion.VTT)
-- [[guia-02-resolucion|Guía 2 — Resolución]] — el **Ej. 7** es la primera vez que el vault necesita Euclides extendido en serio: $7^{-1} \bmod 32$ para descifrar en `CBC`
-- [[bibliografia#Recomendado en clase, fuera del programa|Bibliografía]] — el libro de aritmética de Becquer y Sánchez: la recomendación **optativa** del 20/08, con el detalle de lo que la fuente no dice
-- [[cifrado-por-rotacion|Cifrado por rotación]] — el criptosistema más simple que ya vive en $\mathbb{Z}_n$, aunque ahí alcance con sumar
-- [[criptosistema|Criptosistema]] — la condición de corrección que obliga a que `Dec` exista, y por eso a que la clave sea inversible
-- [[video-02-guia-rapida-a-teoria-de-numeros|video-02]] y [[video-03-algoritmo-de-euclides-extendido|video-03]] — los dos videos encargados, ya volcados · [[videografia|Videografía]], **la playlist entera**: estos dos más otros once, mapeados clase por clase
-- [[practica-02-videos|Práctica 02 — Videos]] — los otros videos del vault, **distintos de estos dos** (aquellos son de la clase práctica; estos son de teoría de números)
-- [[probabilidad-y-criptografia|Probabilidad y criptografía]] — otro de los apuntes del vault **sin fecha de clase asignada**, como éste
-- [[programa-y-objetivos|Programa y objetivos]] — dónde ubica el programa la criptografía asimétrica, que es donde este repaso se cobra de verdad
