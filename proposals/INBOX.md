@@ -24,3 +24,4 @@ rama, que se conserva 30 días, así que esta fila tiene que bastarse sola.
 | 2026-09-06 | cripto | Dibujar los diagramas Mermaid del wiki | proposal/cripto-20260906-dibujar-los-diagramas-mermaid-del-wiki | aprobada | `01ee8a9` |
 | 2026-09-06 | cripto | Publicar los adjuntos de imagen del wiki | proposal/cripto-20260906-publicar-los-adjuntos-de-imagen-del-wiki | aprobada | `14a01c7` |
 | 2026-09-06 | cripto | La placa de ejercicio pasa a ser decisión de la materia | proposal/cripto-20260906-la-placa-de-ejercicio-pasa-a-ser-decision-de-la-materia | aprobada | `7dbdc74` |
+| 2026-09-06 | cripto | Una imagen del wiki entra en la columna | proposal/cripto-20260906-una-imagen-del-wiki-entra-en-la-columna | aprobada | `975710e` |

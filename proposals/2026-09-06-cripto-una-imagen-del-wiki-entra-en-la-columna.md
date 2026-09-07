@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Una imagen del wiki entra en la columna"
 rama: proposal/cripto-20260906-una-imagen-del-wiki-entra-en-la-columna
-estado: abierta
+estado: aprobada
 pr: null
 ---
 
@@ -11,7 +11,7 @@ pr: null
 
 Una imagen del wiki desborda la columna del lector.
 
-Qué pasa. Desde que los adjuntos se publican (N0-61), las imágenes de una página se dibujan con su tamaño natural. Los diagramas que la cátedra de Criptografía usa en clase vienen escaneados o exportados a **entre 1000 y 1100 px de ancho**, y la hoja del lector mide **758**: la imagen se sale de la columna y arrastra la barra de desplazamiento horizontal de toda la página. Se ve en las 26 páginas con imágenes, y peor en las dos resoluciones de guía manuscritas, que son las más anchas.
+Qué pasa. Desde que los adjuntos se publican (N0-68), las imágenes de una página se dibujan con su tamaño natural. Los diagramas que la cátedra de Criptografía usa en clase vienen escaneados o exportados a **entre 1000 y 1100 px de ancho**, y la hoja del lector mide **758**: la imagen se sale de la columna y arrastra la barra de desplazamiento horizontal de toda la página. Se ve en las 26 páginas con imágenes, y peor en las dos resoluciones de guía manuscritas, que son las más anchas.
 
 La hoja del lector ya resuelve este mismo problema para todo lo demás que puede venir ancho —las tablas van en un contenedor con `overflow-x`, las fórmulas de display se encogen hasta 0,78 y recién ahí se vuelven desplazables, y el SVG de una figura interactiva tiene `max-width: 100%`—. La imagen de markdown es el único caso que quedó sin regla.
 
@@ -23,7 +23,7 @@ TEXTO PARA LA FILA DE docs/DECISIONS.md
 
 Qué se decide. Una imagen del cuerpo de una página nunca desborda la columna: se achica hasta entrar, conservando la proporción, y va centrada en su propio renglón.
 
-Por qué. Es la última pieza que faltaba de N0-61: publicar los adjuntos sin acotar su ancho deja que un diagrama de 1000 px rompa la medida de la hoja y agregue desplazamiento horizontal a toda la página. Achicar es preferible a desplazar para una imagen —al revés que para una tabla o una fórmula, donde encoger vuelve el contenido ilegible—: un diagrama sigue leyéndose a 758 px, y si no, se abre aparte.
+Por qué. Es la última pieza que faltaba de N0-68: publicar los adjuntos sin acotar su ancho deja que un diagrama de 1000 px rompa la medida de la hoja y agregue desplazamiento horizontal a toda la página. Achicar es preferible a desplazar para una imagen —al revés que para una tabla o una fórmula, donde encoger vuelve el contenido ilegible—: un diagrama sigue leyéndose a 758 px, y si no, se abre aparte.
 
 Costo de revertir. Nulo. Son cinco líneas de CSS sin nada que dependa de ellas.
 
@@ -129,4 +129,53 @@ apps/web build: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-06
+**Commit de merge:** `975710e`
+**Decisión:** `N0-71` en `docs/DECISIONS.md`.
+
+### Gates en la rama
+
+Corridos en un worktree limpio sobre la rama, con `pnpm install --frozen-lockfile`:
+
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — los mismos conteos que declara la propuesta (`packages/contract` 48,
+  `packages/runtime` 178, `packages/markdown` 119, `apps/web` 706, `packages/cli` 57, de las
+  cuales 2 quedan omitidas por el entorno). Ninguno bajó. Los conteos son los de la rama, que
+  nació antes de que entrara la propuesta de la placa de ejercicio; en `main` ya son 51 y 708.
+- `pnpm build`: OK (el cambio toca `apps/web`).
+- `pnpm e2e`: no corresponde — no cambia ningún texto, rol ni `data-*` de los que mira la
+  suite.
+
+El CI del PR #8 también quedó verde.
+
+### Hallazgos
+
+1. **(medio, corregido al mergear)** La propuesta y el comentario del CSS atribuían la
+   publicación de adjuntos a `N0-61`, que es «El progreso de una unidad suma los pasos que
+   declaran los bundles». La decisión de los adjuntos es `N0-68`. Se corrigieron las dos
+   referencias de la propuesta y la del comentario, que además ahora nombra su propia
+   decisión, `N0-71`.
+2. **(bajo, documentado)** «No toca la figura interactiva» no es exacto. La regla de abajo
+   —`.prose :global(.figura .fig-host) > :is(svg, canvas, img)`— solo redeclara `max-width`,
+   así que `display: block`, `margin: 18px auto` y `border-radius: var(--r)` **sí** alcanzan a
+   un `<img>` dentro de una figura. No bloquea: se revisaron los dos bundles de Proba y
+   ninguna figura dibuja un `<img>` (el único `img` de `ejercicios.js` es un `role="img"` en
+   un `div`, y el `& img` de `vocab.css` vive en el contenedor propio del bundle, fuera de
+   `.prose`). Queda escrito en el comentario del CSS y en la fila `N0-71` para que la próxima
+   figura que dibuje una imagen sepa qué hereda.
+3. **(bajo, aceptado)** `display: block` manda a su propio renglón también a una imagen que
+   se hubiera escrito en medio de un párrafo. Es la decisión de la propuesta —«es como se lee
+   un diagrama dentro de una nota»— y cae en lo que el contrato 00 §2 deja explícitamente del
+   lado de la plataforma (la estética no es contrato).
+
+Se buscó, sin encontrarlo: un token inexistente (`--r` vale 12 px en `styles/tokens.css`); un
+selector que le ganara por especificidad y dejara la regla muerta (`.prose img` es (0,1,1) y
+nada más apunta a esa imagen); contenido ancho que quedara sin resolver (la tabla y la
+fórmula ya tenían su propia regla); y una materia perjudicada (Proba no tiene imágenes en su
+wiki).
+
+### Efecto en las materias
+
+- Ninguna materia tiene que hacer nada: es una regla de la hoja del lector, no del contrato.
+  La imagen que ya entraba se ve igual; la que desbordaba se achica.
