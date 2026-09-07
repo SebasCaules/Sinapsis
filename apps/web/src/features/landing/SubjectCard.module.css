@@ -86,8 +86,9 @@
   display: grid;
   place-items: center;
   border-radius: var(--r-sm);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  /* R5/R7: sobre --surface, --surface-2 + --border no se separan en claustro. */
+  background: var(--surface-3);
+  border: 1px solid var(--border-2);
   box-shadow: var(--relief);
   font: 600 13px var(--font-display);
   color: var(--uink, var(--ucol, var(--u0)));
@@ -108,13 +109,15 @@
 .institution { font: 500 11px var(--font-ui); color: var(--text-3); }
 
 .progress { display: flex; flex-direction: column; gap: 6px; }
-/* La pista lleva --track también en el borde: al 0 % la barra es SOLO pista y
-   un aro de --border-2 (1.7:1 sobre la tarjeta) la disolvía contra el papel. */
+/* La pista lleva --track en el ARO: al 0 % la barra es SOLO pista y un aro de
+   --border-2 (1.7:1 sobre la tarjeta) la disolvía contra el papel. El interior
+   vuelve al papel de la tarjeta porque --ucol sobre --track no llegaba a 3:1 en
+   ningún tema (R6) y el tramo leído no se distinguía del pendiente. */
 .track {
   height: 6px;
   border: 1px solid var(--track);
   border-radius: 3px;
-  background: var(--track);
+  background: var(--surface);
   overflow: hidden;
 }
 .fill {
@@ -128,7 +131,8 @@
 .state { font: 600 10px var(--font-ui); letter-spacing: .05em; }
 .state[data-state="none"] { color: var(--text-3); }
 .state[data-state="doing"] { color: var(--warn-text, var(--warn)); }
-.state[data-state="done"] { color: var(--good); }
+/* R1: --good es mancha; el rótulo usa la tinta, igual que el estado vecino. */
+.state[data-state="done"] { color: var(--good-text, var(--good)); }
 
 /* Rejilla de dos filas SIEMPRE (D5): con una fila flexible, la tarjeta que trae
    la insignia «N para repasar» envolvía y su filete quedaba 30 px más arriba que
@@ -208,7 +212,8 @@
 
 .remove {
   font: 600 11px var(--font-ui);
-  color: var(--bad);
+  /* R1: --bad es mancha; el rótulo destructivo usa la tinta. */
+  color: var(--bad-text, var(--bad));
   border: 1px solid var(--bad-soft);
   background: var(--bad-soft);
   border-radius: var(--r-sm);
@@ -216,6 +221,9 @@
   cursor: pointer;
 }
 .remove:hover { border-color: var(--bad); }
+/* R9: mismo aro de foco que el resto de los controles de gestión. */
+.remove:focus-visible,
+.move:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 .move {
   font: 600 11px var(--font-mono);
@@ -243,7 +251,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1.5px dashed var(--border-2);
+  /* R6: el filete discontinuo es el único contorno de un control clicable. */
+  border: 1.5px dashed var(--border-3);
   border-radius: var(--r);
   background: none;
   color: var(--text-3);

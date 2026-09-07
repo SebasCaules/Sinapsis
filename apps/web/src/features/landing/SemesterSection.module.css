@@ -50,7 +50,8 @@
 .removeSemester {
   flex: none;
   font: 600 11px var(--font-ui);
-  color: var(--bad);
+  /* R1: --bad es mancha; el rótulo destructivo usa la tinta. */
+  color: var(--bad-text, var(--bad));
   border: 1px solid var(--bad-soft);
   background: var(--bad-soft);
   border-radius: var(--r-sm);
@@ -60,9 +61,9 @@
 .removeSemester:hover:not(:disabled) { border-color: var(--bad); }
 .removeSemester:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 /* Apagado, no escondido: sigue diciendo qué se puede hacer con el cuatrimestre.
-   0.75 es el piso de opacidad de los controles deshabilitados (N0-25). */
+   R10: el estado ya lo dicen --text-3 + --surface-2 + --border; la opacidad extra
+   bajaba el rótulo a 3.67:1 en claustro. */
 .removeSemester:disabled {
-  opacity: .75;
   cursor: not-allowed;
   color: var(--text-3);
   border-color: var(--border);
@@ -111,7 +112,9 @@
 .chip {
   flex: none;
   font: 600 10.5px var(--font-mono);
-  color: var(--text-2);
+  /* R1/R8: sobre --accent-soft va la tinta de la familia, como la insignia de
+     FlashcardsView; --text-2 dejaba la casilla fuera de la pauta. */
+  color: var(--accent-ink, var(--text-2));
   background: var(--accent-soft);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -150,7 +153,8 @@
   min-height: 92px;
   display: grid;
   place-items: center;
-  border: 1.5px dashed var(--border-2);
+  /* R6: en reposo el filete discontinuo es la única señal del destino de arrastre. */
+  border: 1.5px dashed var(--border-3);
   border-radius: var(--r);
   font: 600 12.5px var(--font-ui);
   color: var(--text-3);

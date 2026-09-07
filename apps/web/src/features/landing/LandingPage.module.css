@@ -88,8 +88,9 @@
   display: grid;
   place-items: center;
   border-radius: var(--r);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  /* R5/R7: misma placa que .mark de la tarjeta. */
+  border: 1px solid var(--border-2);
+  background: var(--surface-3);
   color: var(--text-3);
   box-shadow: var(--relief);
 }
@@ -113,7 +114,8 @@
 
 .addSemester {
   margin-top: 6px;
-  border: 1.5px dashed var(--border-2);
+  /* R6: el filete discontinuo es el único contorno de un control clicable. */
+  border: 1.5px dashed var(--border-3);
   border-radius: var(--r);
   background: none;
   padding: 14px;
@@ -127,6 +129,8 @@
   transition: border-color var(--t), color var(--t);
 }
 .addSemester:hover { border-color: var(--primary); color: var(--primary); }
+/* R9: aro de foco de la plataforma, como el de .ghost. */
+.addSemester:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; box-shadow: 0 0 0 5px var(--primary-ring); }
 
 .foot {
   margin-top: 18px;
