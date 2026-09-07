@@ -1,5 +1,5 @@
 /**
- * Diagramas Mermaid del wiki (N0-63).
+ * Diagramas Mermaid del wiki (N0-nn).
  *
  * Un bloque ```` ```mermaid ```` del cuerpo se dibuja como diagrama. La librería
  * es grande, así que **entra por import dinámico**: solo se descarga cuando una
@@ -21,6 +21,12 @@
  * Se muestra **el bloque de código original**. Nunca un hueco en blanco ni el
  * cartel de error de Mermaid: un diagrama con una errata sigue siendo el texto
  * que el autor escribió, y así se lee y se corrige.
+ *
+ * Eso pide dos cosas, porque Mermaid no falla lanzando: `suppressErrorRendering`
+ * en la configuración —sin él, un texto que no parsea deja **en el hueco** el
+ * SVG de error de la propia librería («Syntax error in text · mermaid version
+ * 11.17.2»)— y, además, mirar el SVG que quedó: un cartel de error también es
+ * un `<svg>`, y un `<svg>` vacío tampoco es un diagrama.
  */
 import { useEffect, useRef, useState } from "react";
 import css from "./markdown.module.css";
@@ -73,6 +79,23 @@ export function themeVariables(): Record<string, string> {
   };
 }
 
+/**
+ * ¿En el hueco quedó un diagrama de verdad?
+ *
+ * No alcanza con que haya un `<svg>`. Mermaid dibuja su propio cartel de error
+ * como un SVG más —lo marca con `aria-roledescription="error"` y escribe adentro
+ * «Syntax error in text»—, y un `<svg>` sin nada más que su hoja de estilos
+ * tampoco es un dibujo. Cualquiera de esos casos es un fallo y manda al bloque
+ * de código original.
+ */
+export function isDrawn(target: Element): boolean {
+  const svg = target.querySelector("svg");
+  if (svg === null) return false;
+  if (svg.getAttribute("aria-roledescription") === "error") return false;
+  if ((svg.textContent ?? "").includes("Syntax error in text")) return false;
+  return Array.from(svg.children).some((child) => child.tagName.toLowerCase() !== "style");
+}
+
 export function Mermaid({ chart }: MermaidProps) {
   const [drawn, setDrawn] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -109,6 +132,10 @@ export function Mermaid({ chart }: MermaidProps) {
              etiqueta antes de dibujarla. Los `<br/>` que el wiki usa en las
              etiquetas siguen partiendo la línea. */
           securityLevel: "strict",
+          /* Sin esto, un diagrama que no parsea deja el cartel de error de
+             Mermaid dentro del hueco y el lector lo muestra en vez del código
+             del autor. Con esto, el hueco queda vacío y cae al bloque. */
+          suppressErrorRendering: true,
           theme: "base",
           themeVariables: themeVariables(),
           fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--font-ui").trim() || "system-ui",
@@ -125,8 +152,8 @@ export function Mermaid({ chart }: MermaidProps) {
         target.removeAttribute("data-processed");
         await mermaid.run({ nodes: [target], suppressErrors: true });
         if (!alive) return;
-        /* `suppressErrors` no lanza: el diagrama salió bien si quedó un SVG. */
-        const ok = target.querySelector("svg") !== null;
+        /* `suppressErrors` no lanza: el resultado se lee del hueco. */
+        const ok = isDrawn(target);
         if (!ok) target.textContent = "";
         setDrawn(ok);
         setFailed(!ok);

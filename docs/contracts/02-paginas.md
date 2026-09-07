@@ -362,7 +362,7 @@ carácter por carácter lo que hay en el archivo `.md`.
 
 ---
 
-## 9 bis. Diagramas Mermaid (N0-63)
+## 9 bis. Diagramas Mermaid (N0-nn)
 
 Un bloque de código con el lenguaje `mermaid` se dibuja como diagrama:
 
@@ -542,4 +542,4 @@ N0-10 (markdown en el cliente, sin HTML crudo) · N0-13 (compilador propio) ·
 N0-21 (recorte del H1 duplicado) · N0-22 (el compilador es dueño de los ids de encabezado) ·
 N0-23 (divisiones sintéticas) · N0-42 (figuras en callouts) ·
 N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página) ·
-N0-66 (callouts plegables) · N0-63 (diagramas Mermaid).
+N0-66 (callouts plegables) · N0-nn (diagramas Mermaid).
