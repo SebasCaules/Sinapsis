@@ -22,4 +22,4 @@ rama, que se conserva 30 días, así que esta fila tiene que bastarse sola.
 | 2026-09-06 | cripto | Agregar el callout de cita al registro | proposal/cripto-20260906-agregar-el-callout-de-cita-al-registro | aprobada | `a7f9754` |
 | 2026-09-06 | cripto | Plegar los callouts que Obsidian marca como plegados | proposal/cripto-20260906-plegar-los-callouts-que-obsidian-marca-como-plegados | aprobada | `6a505b7` |
 | 2026-09-06 | cripto | Dibujar los diagramas Mermaid del wiki | proposal/cripto-20260906-dibujar-los-diagramas-mermaid-del-wiki | aprobada | `01ee8a9` |
-| 2026-09-06 | cripto | Publicar los adjuntos de imagen del wiki | proposal/cripto-20260906-publicar-los-adjuntos-de-imagen-del-wiki | aprobada | (merge en main, ver `git log`) |
+| 2026-09-06 | cripto | Publicar los adjuntos de imagen del wiki | proposal/cripto-20260906-publicar-los-adjuntos-de-imagen-del-wiki | aprobada | `14a01c7` |

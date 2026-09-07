@@ -141,7 +141,7 @@ Sobre los seis puntos de «Qué hace falta para aprobar»:
 
 **Veredicto:** aprobada
 **Revisó:** orquestador de la plataforma · 2026-09-07
-**Commit de merge:** `(merge de esta rama en main)`
+**Commit de merge:** `14a01c7`
 
 ### Gates en la rama
 - `pnpm typecheck`: OK
