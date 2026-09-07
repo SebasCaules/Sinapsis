@@ -101,27 +101,62 @@ describe("divisiones", () => {
     expect(m.divisionOf(pages[6] as PageMeta)).toBe(DIVISION_OTHER);
   });
 
-  it("crea la división transversal para las páginas sin división", () => {
+  it("las páginas sin división no forman una división del índice (N0-74)", () => {
     const m = model();
-    expect(m.division(DIVISION_NONE)?.short).toBe("Transv.");
-    expect(m.division(DIVISION_NONE)?.color).toBe("var(--umeta)");
+    /* Antes había un cajón sintético «Transversales»; hoy ni `divisions` ni
+       `visibleDivisions` lo traen, y `division()` no lo conoce. */
+    expect(m.division(DIVISION_NONE)).toBeUndefined();
+    expect(m.divisions.map((d) => d.key)).not.toContain(DIVISION_NONE);
+    expect(m.visibleDivisions.map((d) => d.key)).not.toContain(DIVISION_NONE);
+    /* Las páginas siguen agrupadas por clave para quien las necesite. */
     expect(slugs(m.pagesByDivision(DIVISION_NONE))).toEqual(["p-h"]);
+  });
+
+  it("el cajón de sueltas existe solo para las vistas que listan todo el wiki", () => {
+    const m = model();
+    expect(m.loose).toMatchObject({ key: DIVISION_NONE, name: "Sin división", short: "Sueltas", synthetic: true });
+    expect(m.loose?.color).toBe("var(--umeta)");
+    expect(m.bucket(DIVISION_NONE)).toBe(m.loose);
+    expect(m.bucket("1")).toBe(m.division("1"));
+    /* Al final del catálogo, después de las divisiones visibles. */
+    expect(m.catalogDivisions.map((d) => d.key)).toEqual([...m.visibleDivisions.map((d) => d.key), DIVISION_NONE]);
+    /* Sin páginas sin división no hay cajón. */
+    const sinSueltas = buildSubjectModel({
+      config,
+      pages: pages.filter((p) => p.division !== DIVISION_NONE),
+      studied: [],
+      placeholder: false,
+      lastSyncAt: null,
+    });
+    expect(sinSueltas.loose).toBeNull();
+    expect(sinSueltas.catalogDivisions).toEqual(sinSueltas.visibleDivisions);
+  });
+
+  it("las páginas sueltas son las de `wiki.standalone`, en ese orden y solo si existen", () => {
+    const withStandalone = SubjectConfig.parse({
+      ...rawProbaConfig,
+      wiki: { ...rawProbaConfig.wiki, standalone: ["p-h", "no-existe", "p-a"] },
+    });
+    const m = buildSubjectModel({ config: withStandalone, pages, studied: [], placeholder: false, lastSyncAt: null });
+    expect(slugs(m.standalone)).toEqual(["p-h", "p-a"]);
+    /* La config real de Proba fija el formulario maestro; con estas páginas no existe. */
+    expect(model().standalone).toEqual([]);
   });
 
   it("marca como sintéticas solo las que no declara la materia", () => {
     const m = model();
-    expect(m.division(DIVISION_NONE)?.synthetic).toBe(true);
     expect(m.division(DIVISION_OTHER)?.synthetic).toBe(true);
     expect(m.division("1")?.synthetic).toBe(false);
   });
 
   it("cuenta como unidades solo las divisiones declaradas (paridad con la landing)", () => {
     expect(model().divisionsCount).toBe(config.divisions.length);
-    expect(model().divisions.filter((d) => d.synthetic)).toHaveLength(2);
+    /* Solo «Otras»: las páginas sin división ya no forman una sintética (N0-74). */
+    expect(model().divisions.filter((d) => d.synthetic)).toHaveLength(1);
   });
 
   it("solo muestra las divisiones con páginas y respeta el orden del config", () => {
-    expect(model().visibleDivisions.map((d) => d.key)).toEqual(["1", "2", DIVISION_NONE, DIVISION_OTHER]);
+    expect(model().visibleDivisions.map((d) => d.key)).toEqual(["1", "2", DIVISION_OTHER]);
   });
 
   it("usa el rótulo corto del contrato", () => {
@@ -138,6 +173,8 @@ describe("progreso", () => {
   it("no cuenta las fuentes", () => {
     const m = model(["p-b", "p-d"]);
     expect(m.progress("1")).toMatchObject({ done: 1, total: 3 });
+    /* Las 7 incluyen la página suelta «p-h»: el total de la materia cuenta todo
+       su contenido, aunque las sueltas no estén en el recorrido (N0-74). */
     expect(m.progressTotal).toMatchObject({ done: 1, total: 7 });
     expect(m.sourcesCount).toBe(1);
   });
@@ -236,6 +273,8 @@ describe("portada de división", () => {
     expect(slugs(m.pagesByDivision(DIVISION_NONE))).toContain("indice");
     expect(slugs(m.sequence(DIVISION_NONE))).toEqual(["transversal"]);
     expect(m.progress(DIVISION_NONE)).toMatchObject({ done: 0, total: 1 });
+    /* …y las páginas sin división fuera del índice y de la cadena (N0-74). */
+    expect(m.visibleDivisions.map((d) => d.key)).not.toContain(DIVISION_NONE);
   });
 
   it("encadena las divisiones declaradas que tienen secuencia", () => {

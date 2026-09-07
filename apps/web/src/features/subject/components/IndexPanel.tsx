@@ -1,6 +1,8 @@
 /**
- * Panel índice de 250 px (regiones 05-06): hero de la materia y árbol
- * divisiones → bloques por tipo → páginas numeradas.
+ * Panel índice de 250 px (regiones 05-06): hero de la materia, las páginas
+ * sueltas de la materia (N0-74) y el árbol divisiones → bloques por tipo →
+ * páginas numeradas. No hay cajón «Transversales»: el índice y el registro del
+ * wiki se abren desde el rail.
  *
  * La mecánica es FIJA (la dibuja la plataforma); los datos son de la materia:
  * el rótulo sale de `division.plural`, los bloques de `pageTypes` y el color de
@@ -8,7 +10,7 @@
  */
 import { memo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { plural, routes } from "@sinapsis/contract";
+import { plural, routes, type PageMeta } from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { pad2, type DivisionNode, type ProgressGroup, type SubjectModel } from "../model";
 import { INDEX_PANEL_ID } from "./SubjectHeader";
@@ -75,6 +77,20 @@ export function IndexPanel({
         </p>
       ) : null}
 
+      {model.standalone.length ? (
+        <nav className={css.standalone} aria-label="Páginas sueltas">
+          {model.standalone.map((page) => (
+            <StandaloneRow
+              key={page.slug}
+              model={model}
+              page={page}
+              active={page.slug === activePage}
+              bookmarked={bookmarks.has(page.slug)}
+            />
+          ))}
+        </nav>
+      ) : null}
+
       <div className={css.treeLabel}>{config.division.plural.toUpperCase()}</div>
 
       <div className={css.tree}>
@@ -94,6 +110,42 @@ export function IndexPanel({
     </aside>
   );
 }
+
+/**
+ * Una página suelta (N0-74): la fila tiene el aire de una división —32 px, punto
+ * de color, rótulo— porque en la jerarquía del índice está a esa altura, pero es
+ * un enlace a la página. El punto lleva el color del TIPO (la división no tiene).
+ */
+const StandaloneRow = memo(function StandaloneRow({
+  model,
+  page,
+  active,
+  bookmarked,
+}: {
+  model: SubjectModel;
+  page: PageMeta;
+  active: boolean;
+  bookmarked: boolean;
+}) {
+  const studied = model.studied.has(page.slug);
+  return (
+    <Link
+      to={routes.page(model.slug, page.slug)}
+      className={css.standaloneRow}
+      style={{ ["--ucol" as string]: model.typeColor(page.type) }}
+      data-testid="standalone-row"
+      data-slug={page.slug}
+      data-active={active ? "true" : undefined}
+      aria-current={active ? "page" : undefined}
+      /* Sin `title`: la fila la cubre la tarjeta de vista previa del shell (N0-50). */
+    >
+      <span className={css.dot} aria-hidden="true" />
+      <span className={css.divisionLabel}>{page.title}</span>
+      {bookmarked ? <Icon name="star" size={11} className={css.star} title="Favorita" /> : null}
+      {studied ? <UiIcon name="check" size={12} className={css.check} title="Estudiada" /> : null}
+    </Link>
+  );
+});
 
 interface DivisionRowProps {
   model: SubjectModel;

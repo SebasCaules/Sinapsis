@@ -61,13 +61,34 @@ test("el índice lista las divisiones bajo el rótulo del contrato", async ({ pa
   await expect(panel(page).getByText(subject.divisionPlural, { exact: true })).toBeVisible();
 
   const filas = panel(page).getByTestId("division-row");
-  // Todas las divisiones DECLARADAS que tienen páginas, más las sintéticas que
-  // agrega la plataforma («meta» → Transversales para índice y registro).
+  // Todas las divisiones DECLARADAS que tienen páginas, más «Otras» si alguna
+  // página usa una clave no declarada. Las páginas sin división (índice,
+  // registro, sueltas) no forman una división: no hay cajón «Transversales» (N0-74).
   await expect(filas).toHaveCount(subject.divisionsVisible);
   for (const key of subject.divisionKeys) {
     await expect(panel(page).locator(`[data-division="${key}"]`)).toHaveCount(1);
   }
+  await expect(panel(page).locator('[data-division="meta"]')).toHaveCount(0);
   expect(subject.divisionsDeclared).toBe(subject.divisionKeys.length);
+});
+
+test("las páginas sueltas van arriba del árbol, una fila por página (N0-74)", async ({ page }) => {
+  const rows = panel(page).getByTestId("standalone-row");
+  await expect(rows).toHaveCount(subject.standalone.length);
+  for (const slug of subject.standalone) {
+    const row = panel(page).locator(`[data-testid="standalone-row"][data-slug="${slug}"]`);
+    await expect(row).toHaveAttribute("href", new RegExp(`${home}/p/${slug}$`));
+  }
+  if (subject.standalone.length) {
+    // Arriba de todo: antes del rótulo del árbol («UNIDADES»).
+    const rowBox = await rows.first().boundingBox();
+    const labelBox = await panel(page).getByText(subject.divisionPlural, { exact: true }).boundingBox();
+    expect(rowBox && labelBox && rowBox.y < labelBox.y).toBe(true);
+    // Abre la página y la fila queda marcada como la actual.
+    await rows.first().click();
+    await expect(page).toHaveURL(new RegExp(`${home}/p/${subject.standalone[0]}$`));
+    await expect(rows.first()).toHaveAttribute("aria-current", "page");
+  }
 });
 
 test("ocultar el índice desde el rail lo esconde y sobrevive a la recarga", async ({ page }) => {

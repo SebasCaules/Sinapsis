@@ -39,13 +39,30 @@ export function warningSink(max = MAX_WARNINGS) {
 
 export type Sink = ReturnType<typeof warningSink>;
 
-/** Páginas con una división o un tipo que el config no declara. */
+/**
+ * Páginas con una división o un tipo que el config no declara, y las páginas
+ * sin división que el índice no va a mostrar (N0-74): no existe el cajón
+ * «Transversales», así que una página sin división que no sea el índice ni el
+ * registro y no esté en `wiki.standalone` solo se llega por búsqueda, wikilinks
+ * o el catálogo. Se avisa una vez por página; también de cada entrada de
+ * `wiki.standalone` que no corresponde a ninguna página.
+ */
 export function pageWarnings(config: SubjectConfig, list: readonly Page[], sink: Sink): void {
   const divisions = new Set(config.divisions.map((d) => d.key));
   const types = new Set(config.pageTypes.map((t) => t.key));
+  const standalone = new Set(config.wiki.standalone);
+  const slugs = new Set(list.map((p) => p.slug));
+  for (const slug of config.wiki.standalone) {
+    if (!slugs.has(slug)) sink.push(`wiki.standalone: la página "${slug}" no existe`);
+  }
   for (const page of list) {
     if (page.division !== DIVISION_NONE && !divisions.has(page.division)) {
       sink.push(`página "${page.slug}": la división "${page.division}" no está declarada en el config`);
+    }
+    if (page.division === DIVISION_NONE && page.type !== PAGE_TYPE_META && !standalone.has(page.slug)) {
+      sink.push(
+        `página "${page.slug}": sin división y fuera de wiki.standalone; no aparece en el índice (se llega por búsqueda, wikilinks o el catálogo)`,
+      );
     }
     // "meta" es el tipo reservado de las páginas índice/registro: nunca se declara en pageTypes.
     if (page.type !== PAGE_TYPE_META && !types.has(page.type)) {

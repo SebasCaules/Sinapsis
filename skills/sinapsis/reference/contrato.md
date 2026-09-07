@@ -53,7 +53,7 @@ habituales: Unidad/U/Unidades, Semana/S/Semanas, Módulo/M/Módulos, Capítulo/C
 | `color` | opcional. Si falta, la plataforma lo deriva del índice. |
 | `order` | opcional. Si falta, manda el orden del array. |
 
-La clave `meta` está **reservada** para las páginas transversales; no la uses en `divisions`.
+La clave `meta` está **reservada** para las páginas sin división; no la uses en `divisions`.
 
 **Color paramétrico:** con N ≤ 9 divisiones numeradas se usa la escala heráldica
 `--u1`…`--u9`; con N > 9 se barre el matiz en `oklch` con luminosidad y croma fijos. No hay
@@ -96,7 +96,7 @@ Grupo: `{ id, label, color?, items[] }` — `id` `^[a-z][a-z0-9_-]*$`, 1..8 íte
 
 ```json
 { "root": "wiki", "index": "index.md", "log": "log.md", "ignore": [],
-  "divisionField": "unidad", "study": "estudio" }
+  "divisionField": "unidad", "study": "estudio", "standalone": ["formulario-maestro"] }
 ```
 
 | Campo | Default | Notas |
@@ -107,6 +107,7 @@ Grupo: `{ id, label, color?, items[] }` — `id` `^[a-z][a-z0-9_-]*$`, 1..8 íte
 | `ignore` | `[]` | Carpetas de `root` que no se compilan. |
 | `divisionField` | `"division"` | Campo del frontmatter que dice la división. |
 | `study` | `"estudio"` | Material de estudio (§7), **relativo al config**, no a `root`. |
+| `standalone` | `[]` | Páginas **sueltas** (N0-74): slugs de páginas sin división que el índice dibuja arriba del árbol, una fila por página. ≤ 12. Las demás páginas sin división no salen en el índice (sí en búsqueda, wikilinks y catálogo) y `publish` avisa por cada una. |
 
 ### Qué es FIJO y qué es SLOT
 
@@ -135,7 +136,7 @@ vista ancha 1120 · columna 248.
 ---
 titulo: Distribución Normal          # si falta: primer H1; si no, el slug capitalizado
 tipo: distribucion                    # clave de pageTypes; si falta, la de la carpeta
-unidad: 4                             # el campo de wiki.divisionField; vacío o ausente = transversal
+unidad: 4                             # el campo de wiki.divisionField; vacío o ausente = sin división
 orden: 8                              # opcional, entero positivo dentro de la división
 resumen: 'Una o dos frases…'          # alimenta tooltips y tarjetas
 formato: pdf                          # libre (apunte, guia, video, slides…)
@@ -179,7 +180,7 @@ página). Se desescapa `\|` (los pipes de las tablas de Obsidian). Se deduplica 
   title: string,           // ≤ 200
   type: string,            // clave de pageTypes, o "meta" para índice/registro
   folder: string,          // carpeta de origen; "meta" para las de la raíz
-  division: string,        // clave de división; "meta" si es transversal
+  division: string,        // clave de división; "meta" si no tiene (índice, registro, sueltas)
   order?: number,          // entero positivo
   summary: string,         // ≤ 1200, "" si falta
   format?: string,
@@ -203,6 +204,9 @@ página). Se desescapa `\|` (los pipes de las tablas de Obsidian). Se deduplica 
 3. `wiki.index` y `wiki.log` se agregan al final como los slugs `indice` y `log`, con
    `type` `meta`, `folder` `meta` y `division` `meta`.
 4. Si dos archivos producen el mismo slug, se conserva el primero y se avisa.
+5. Las páginas con `division` `meta` **no forman una división** (N0-74): el índice y el
+   registro se abren desde el rail; las de `wiki.standalone` van arriba del índice; el resto
+   solo se llega por búsqueda, wikilinks o el catálogo, con una advertencia por página.
 
 ### Advertencias que puede emitir
 

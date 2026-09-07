@@ -151,10 +151,12 @@ export function neighborsOf(
   const page = model.bySlug.get(pageSlug);
   if (!page) return { prev: null, next: null };
   const key = model.divisionOf(page);
-  /* El cajón sintético («Transversales», «Otras») no es un recorrido: sus
-     páginas caen al orden global, como en el baseline (`neighborsOf` solo mira
-     los pasos de la unidad cuando es una unidad DEL PROGRAMA). */
-  const inSequence = !model.division(key)?.synthetic;
+  /* Una división sintética («Otras») no es un recorrido, y las páginas sin
+     división (índice, registro, sueltas) no tienen división: unas y otras caen
+     al orden global, como en el baseline (`neighborsOf` solo mira los pasos de
+     la unidad cuando es una unidad DEL PROGRAMA). */
+  const node = model.division(key);
+  const inSequence = node !== undefined && !node.synthetic;
   const at = inSequence ? model.positions(key).get(pageSlug) : undefined;
 
   /* Primera o última página de la división vecina, con el cruce rotulado. */
@@ -176,7 +178,7 @@ export function neighborsOf(
     };
   }
 
-  /* Fuera de la secuencia (una fuente, o el cajón transversal): orden global.
+  /* Fuera de la secuencia (una fuente, o una página sin división): orden global.
      Si el vecino pertenece a OTRA división recorrible, se entra por su primera
      o su última página, no por la fuente suelta que quedó al lado. */
   const i = order.findIndex((p) => p.slug === pageSlug);
@@ -245,16 +247,18 @@ export function ReaderView() {
   const meta = model.bySlug.get(pageSlug);
   const divisionKey = meta ? model.divisionOf(meta) : (page?.division ?? null);
   const division = divisionKey ? model.division(divisionKey) : undefined;
-  const sequence = divisionKey ? model.sequence(divisionKey) : [];
-  const position = model.positionOf(pageSlug);
+  /* Una página sin división (una suelta, el índice) no está en ningún tramo:
+     sin secuencia, sin posición y sin barra (N0-74). */
+  const sequence = divisionKey && division ? model.sequence(divisionKey) : [];
+  const position = division ? model.positionOf(pageSlug) : 0;
   const order = useMemo(() => readingOrder(model), [model]);
   const { prev, next } = useMemo(() => readSteps(model, order, pageSlug), [model, order, pageSlug]);
   /* La secuencia EXTENDIDA de la unidad: las páginas y, al final, un paso por
      grupo de ejercicios (N0-61). Es lo que dibuja la barra del marco, y de ella
      sale el «+M ejercicios» de la posición. */
   const steps = useMemo(
-    () => (divisionKey ? model.unitSteps(divisionKey) : []),
-    [model, divisionKey],
+    () => (divisionKey && division ? model.unitSteps(divisionKey) : []),
+    [model, divisionKey, division],
   );
   const extrasTotal = steps.reduce((n, s) => (isGroupStep(s) ? n + s.total : n), 0);
   /* Callback estable: el pipeline de markdown se rearma solo si cambia la materia. */
@@ -400,8 +404,8 @@ export function ReaderView() {
 
   /* Fuera de la secuencia se describe el universo, como el baseline («11 páginas
      + 3 colecciones», reader.js:466-476), en vez de decir lo que la página NO es
-     (§ lector-20). En el cajón transversal no hay posición que contar. */
-  const positionLabel = division?.synthetic
+     (§ lector-20). Sin división o en una sintética no hay posición que contar. */
+  const positionLabel = !division || division.synthetic
     ? null
     : position
       ? /* Los ejercicios NO entran en «k de N» —eso cuenta páginas—, pero la

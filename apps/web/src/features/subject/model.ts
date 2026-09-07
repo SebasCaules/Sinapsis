@@ -7,15 +7,18 @@
  * páginas por su cuenta.
  *
  * Reglas del contrato que implementa (ninguna se reescribe acá):
- *  - Divisiones efectivas y sintéticas: `effectiveDivisions` + `divisionOf`.
+ *  - Divisiones efectivas y sintéticas: `effectiveDivisions` + `divisionOf`;
+ *    páginas sueltas: `standalonePages` (N0-74).
  *  - Rótulos y color: `divisionShort` / `divisionLong` / `divisionColor`.
  *  - Secuencia pedagógica: `order` asc → orden del tipo en `pageTypes` → título.
  *  - Progreso: solo tipos con `countsAsContent !== false` (las fuentes no cuentan).
  *  - Rail: FIXED_RAIL + rail del config (SLOT) + FIXED_RAIL_TAIL, sin ítems rotos.
  */
 import {
+  DIVISION_NONE,
   FIXED_RAIL,
   FIXED_RAIL_TAIL,
+  LOOSE_DIVISION,
   PAGE_TYPE_META,
   countsAsContent,
   cssColor,
@@ -26,6 +29,7 @@ import {
   effectiveDivisions,
   isExternalUrl,
   routes,
+  standalonePages,
   type BuiltinView,
   type DivisionDef,
   type DivisionKey,
@@ -47,7 +51,7 @@ export interface DivisionNode {
   key: DivisionKey;
   name: string;
   kind: DivisionDef["kind"];
-  /** Rótulo corto: "U3", "Transv.", "Eval." */
+  /** Rótulo corto: "U3", "Eval.", "Sueltas". */
   short: string;
   /** Rótulo largo: "Unidad 3 · Variables Aleatorias Discretas". */
   long: string;
@@ -55,7 +59,7 @@ export interface DivisionNode {
   label: string;
   /** Valor CSS listo para usar (var(--u3) o un hex del config). */
   color: string;
-  /** true si la derivó la plataforma (Transversales / Otras): no cuenta como unidad. */
+  /** true si la derivó la plataforma («Otras», el cajón de sueltas): no cuenta como unidad. */
   synthetic: boolean;
 }
 
@@ -182,10 +186,26 @@ export interface SubjectModel {
   studied: Set<string>;
   /** Slugs estudiados en el orden que devolvió el API (el más viejo primero). */
   studiedOrder: string[];
-  /** Todas las divisiones, en orden (declaradas + sintéticas, con o sin páginas). */
+  /** Todas las divisiones, en orden (declaradas + «Otras», con o sin páginas). */
   divisions: DivisionNode[];
   /** Solo las divisiones con páginas: es lo que dibuja el índice. */
   visibleDivisions: DivisionNode[];
+  /**
+   * Páginas sueltas (N0-74): las de `wiki.standalone` que existen, en ese orden.
+   * El índice las dibuja arriba del árbol, una fila por página.
+   */
+  standalone: PageMeta[];
+  /**
+   * El cajón de las páginas sin división (índice, registro y sueltas), o null si
+   * no hay ninguna. NO es una división del índice ni encadena: existe para que
+   * las vistas que listan TODO el wiki (catálogo, favoritos, grafo) no dejen
+   * páginas afuera. `division(DIVISION_NONE)` no lo devuelve; `bucket` sí.
+   */
+  loose: DivisionNode | null;
+  /** `visibleDivisions` más el cajón de sueltas si lo hay: lo que agrupa el catálogo. */
+  catalogDivisions: DivisionNode[];
+  /** La división de una clave, o el cajón de sueltas para DIVISION_NONE. */
+  bucket: (key: string) => DivisionNode | undefined;
   /**
    * Cuántas divisiones DECLARA la materia. Es el número que muestra la landing
    * (`SubjectCard.divisionsCount`): las sintéticas se ven, pero no se cuentan.
@@ -210,7 +230,7 @@ export interface SubjectModel {
   /**
    * División contigua entre las recorribles de punta a punta: las declaradas
    * (incluidas las `extra`) que tienen secuencia. Las sintéticas quedan afuera:
-   * un cajón transversal no es la unidad siguiente de nadie.
+   * una página sin división no es la unidad siguiente de nadie.
    */
   adjacentDivision: (key: string, dir: -1 | 1) => DivisionNode | null;
   /** slug → posición 1..N dentro de la secuencia de la división (mapa memorizado). */
@@ -326,9 +346,10 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
   const divisionOf = (page: PageMeta): string => divisionOfContract(cfg, page);
 
   // --- divisiones -----------------------------------------------------------
-  /* Las sintéticas («Transversales», «Otras») las decide el contrato: acá solo
-     se les pegan los rótulos y el color, con la lista efectiva como índice para
-     que la numeración U1…UN siga saliendo de las declaradas. */
+  /* La sintética («Otras») la decide el contrato: acá solo se le pegan los
+     rótulos y el color, con la lista efectiva como índice para que la
+     numeración U1…UN siga saliendo de las declaradas. Las páginas sin división
+     no forman una división (N0-74): ver `loose` más abajo. */
   const effective = effectiveDivisions(cfg, pages);
   const labelCfg = { ...cfg, divisions: effective };
   const declaredKeys = new Set(cfg.divisions.map((d) => d.key));
@@ -356,6 +377,28 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
     if (bucket) bucket.push(page);
     else byDivision.set(key, [page]);
   }
+
+  /* El cajón de las páginas sin división (N0-74): índice y registro del wiki
+     más las sueltas. Fuera de `nodes` a propósito —no es una fila del índice ni
+     un tramo del recorrido—, pero con rótulos y color propios para el catálogo,
+     los favoritos y el grafo. */
+  const loosePages = byDivision.get(DIVISION_NONE) ?? [];
+  const loose: DivisionNode | null = loosePages.length
+    ? {
+        key: DIVISION_NONE,
+        name: LOOSE_DIVISION.name,
+        kind: LOOSE_DIVISION.kind,
+        short: divisionShort(labelCfg, DIVISION_NONE),
+        long: divisionLong(labelCfg, DIVISION_NONE),
+        label: LOOSE_DIVISION.name,
+        color: cssColor(LOOSE_DIVISION.color),
+        synthetic: true,
+      }
+    : null;
+
+  /* Las páginas sueltas las declara la materia (`wiki.standalone`); el orden es
+     el suyo. Una entrada sin página se ignora: `publish` ya la avisó. */
+  const standalone = standalonePages(cfg, pages);
 
   /* `countsAsContent` es del contrato; acá solo se memoriza por tipo. */
   const contentByType = new Map<string, boolean>();
@@ -552,7 +595,11 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
 
   const progress = (key: string): Progress => combine(progressParts(key));
 
-  const allSequence = nodes.flatMap((n) => sequence(n.key));
+  /* El total de la materia cuenta TODAS sus páginas de contenido: las de las
+     divisiones y, al final, las sueltas (el formulario maestro también se lee).
+     El orden de lectura del lector (`readingOrder`) sí las deja afuera: no son
+     un tramo, no tienen vecinos. */
+  const allSequence = [...nodes.flatMap((n) => sequence(n.key)), ...(loose ? sequence(DIVISION_NONE) : [])];
   /* El total NO se recalcula sobre todos los pasos: se suman los desgloses de
      cada división, que ya están memorizados y que son los mismos que muestran
      las filas del inicio. */
@@ -642,9 +689,9 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
     return null;
   };
 
-  /* La cadena de divisiones recorribles: las DECLARADAS con secuencia. Las
-     sintéticas («Transversales», «Otras») se ven en el índice pero no encadenan:
-     no son la división siguiente de nadie. */
+  /* La cadena de divisiones recorribles: las DECLARADAS con secuencia. La
+     sintética («Otras») se ve en el índice pero no encadena, y el cajón de
+     sueltas ni siquiera está en el índice: no son la división siguiente de nadie. */
   let chain: DivisionNode[] | null = null;
   const divisionChain = (): DivisionNode[] => {
     if (!chain) chain = nodes.filter((n) => !n.synthetic && sequence(n.key).length > 0);
@@ -749,6 +796,8 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
       })
     : null;
 
+  const visibleDivisions = nodes.filter((n) => pagesByDivision(n.key).length > 0);
+
   return {
     slug: cfg.slug,
     config: cfg,
@@ -759,10 +808,14 @@ export function buildSubjectModel(detail: SubjectDetail, dark = false, opts: Sub
     studied,
     studiedOrder,
     divisions: nodes,
-    visibleDivisions: nodes.filter((n) => pagesByDivision(n.key).length > 0),
+    visibleDivisions,
+    standalone,
+    loose,
+    catalogDivisions: loose ? [...visibleDivisions, loose] : visibleDivisions,
     divisionsCount: cfg.divisions.length,
     divisionOf,
     division: (key: string) => nodeByKey.get(key),
+    bucket: (key: string) => nodeByKey.get(key) ?? (key === DIVISION_NONE && loose ? loose : undefined),
     pagesByDivision,
     contentPages,
     sources,

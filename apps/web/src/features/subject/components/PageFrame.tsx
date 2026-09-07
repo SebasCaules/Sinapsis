@@ -132,7 +132,7 @@ export function PageFrame({
   const pages = steps.filter((s): s is Extract<UnitStep, { kind: "page" }> => s.kind === "page");
   const groups = steps.filter(isGroupStep);
 
-  /* El cajón transversal no es un recorrido y el baseline no le dibuja la barra
+  /* Una división sintética no es un recorrido y el baseline no le dibuja la barra
      (`is-bare`, reader.js:432-445): queda la línea de identidad y nada más. Su
      navegación viene del orden global, al pie. */
   const showStrip = pages.length > 1 && !division?.synthetic;

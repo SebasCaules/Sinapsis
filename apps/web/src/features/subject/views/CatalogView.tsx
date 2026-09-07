@@ -165,10 +165,12 @@ export function CatalogView() {
 
   const typeOrder = useMemo(() => model.config.pageTypes.map((t) => t.key), [model]);
 
-  /** Divisiones con al menos una entrada de catálogo, en el orden del índice. */
+  /** Divisiones con al menos una entrada de catálogo, en el orden del índice,
+      más el cajón de las páginas sin división al final (N0-74): el catálogo es
+      la única lista que las tiene TODAS. */
   const allGroups = useMemo(() => {
     const present = new Set(catalogPages.map((p) => model.divisionOf(p)));
-    return model.visibleDivisions.filter((d) => present.has(d.key));
+    return model.catalogDivisions.filter((d) => present.has(d.key));
   }, [catalogPages, model]);
 
   /** Tipos presentes en el catálogo, en el orden declarado por la materia. */
@@ -342,10 +344,18 @@ export function CatalogView() {
           <div className={css.groupHead}>
             <span className={css.groupBar} aria-hidden="true" />
             <h2 className={css.groupTitle}>
-              <Link className={css.groupLink} to={routes.division(slug, division.key)}>
-                <span className={css.groupChip}>{division.short}</span>
-                <span className={css.groupName}>{division.name}</span>
-              </Link>
+              {/* El cajón de sueltas no tiene portada: no es una división. */}
+              {division === model.loose ? (
+                <span className={css.groupLink}>
+                  <span className={css.groupChip}>{division.short}</span>
+                  <span className={css.groupName}>{division.name}</span>
+                </span>
+              ) : (
+                <Link className={css.groupLink} to={routes.division(slug, division.key)}>
+                  <span className={css.groupChip}>{division.short}</span>
+                  <span className={css.groupName}>{division.name}</span>
+                </Link>
+              )}
             </h2>
             <span className={css.groupCount}>{total}</span>
           </div>

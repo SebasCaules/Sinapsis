@@ -191,6 +191,14 @@ export const WikiSource = z.object({
   divisionField: z.string().default("division"),
   /** Carpeta (relativa al config) con el material de estudio: mazos, quizzes, plan y kits. */
   study: SafeRelativePath.default("estudio"),
+  /**
+   * Páginas sueltas (N0-74): slugs de páginas SIN división que el índice dibuja
+   * arriba del árbol, cada una como una entrada propia (el formulario maestro de
+   * una materia, una hoja de referencia). No existe un cajón «Transversales»: las
+   * demás páginas sin división se llegan por el rail (índice y registro), por
+   * búsqueda, por wikilinks o por el catálogo, y `publish` avisa de cada una.
+   */
+  standalone: z.array(Slug).max(12).default([]),
 });
 export type WikiSource = z.infer<typeof WikiSource>;
 
@@ -242,7 +250,11 @@ export const PageHeading = z.object({
 });
 export type PageHeading = z.infer<typeof PageHeading>;
 
-/** Clave reservada para páginas sin división (transversales). */
+/**
+ * Clave reservada para las páginas sin división: el índice y el registro del wiki
+ * y las páginas sueltas (`wiki.standalone`). No forma una división del índice
+ * (N0-74): `effectiveDivisions` no la sintetiza.
+ */
 export const DIVISION_NONE = "meta" as const;
 /** Clave sintética que agrupa páginas cuya división no está declarada en el config. */
 export const DIVISION_OTHER = "otras" as const;
@@ -270,7 +282,7 @@ export const Page = z.object({
   title: z.string().min(1).max(200),
   type: z.string().min(1).max(32),
   folder: z.string().max(64).default(""),
-  /** Clave de división; DIVISION_NONE si la página es transversal. */
+  /** Clave de división; DIVISION_NONE si la página no tiene (índice, registro, sueltas). */
   division: DivisionKey.default(DIVISION_NONE),
   /** Orden pedagógico 1..M dentro de la división (opcional). */
   order: z.number().int().positive().optional(),
@@ -422,7 +434,7 @@ export type SearchHit = z.infer<typeof SearchHit>;
 export function divisionShort(cfg: Pick<SubjectConfig, "division" | "divisions">, key: DivisionKey): string {
   const idx = cfg.divisions.findIndex((d) => d.key === key);
   const d = cfg.divisions[idx];
-  if (!d) return key === DIVISION_NONE ? "Transv." : key;
+  if (!d) return key === DIVISION_NONE ? LOOSE_DIVISION_SHORT : key;
   if (d.kind === "extra") return d.name.length <= 8 ? d.name : d.name.slice(0, 6) + ".";
   const n = numberedIndex(cfg, key);
   return cfg.division.abbr + (n !== null ? String(n) : "");
@@ -431,7 +443,7 @@ export function divisionShort(cfg: Pick<SubjectConfig, "division" | "divisions">
 /** Rótulo largo: "Unidad 3 · Variables Aleatorias Discretas". */
 export function divisionLong(cfg: Pick<SubjectConfig, "division" | "divisions">, key: DivisionKey): string {
   const d = cfg.divisions.find((x) => x.key === key);
-  if (!d) return key === DIVISION_NONE ? "Transversales (toda la materia)" : key;
+  if (!d) return key === DIVISION_NONE ? LOOSE_DIVISION_LONG : key;
   if (d.kind === "extra") return d.name;
   const n = numberedIndex(cfg, key);
   return `${cfg.division.singular} ${n ?? ""} · ${d.name}`.replace("  ", " ");
@@ -579,10 +591,24 @@ export function divisionOf(cfg: Pick<SubjectConfigLoose, "divisions">, page: Pic
 }
 
 /**
+ * Rótulos del cajón de páginas sueltas (`DIVISION_NONE`). No es una división del
+ * índice: las vistas que listan TODO el wiki (catálogo, favoritos, grafo) lo
+ * usan para no dejar afuera al índice, al registro ni a las páginas sueltas.
+ */
+export const LOOSE_DIVISION_NAME = "Sin división" as const;
+export const LOOSE_DIVISION_SHORT = "Sueltas" as const;
+export const LOOSE_DIVISION_LONG = "Páginas sin división" as const;
+/** Definición del cajón de sueltas, para quien necesite una `DivisionDef` (color y `kind`). */
+export const LOOSE_DIVISION: DivisionDef = { key: DIVISION_NONE, name: LOOSE_DIVISION_NAME, kind: "extra", color: "--umeta" };
+
+/**
  * Divisiones que se muestran: las declaradas (ordenadas por `order`, luego por
- * posición) más las sintéticas que hagan falta: «Transversales» (DIVISION_NONE)
- * si hay páginas sin división y «Otras» (DIVISION_OTHER) si hay páginas con una
- * división no declarada. Las sintéticas son `kind: "extra"`.
+ * posición) más «Otras» (DIVISION_OTHER) si hay páginas con una división no
+ * declarada. Las páginas SIN división no forman una división (N0-74): antes se
+ * sintetizaba un cajón «Transversales» para ellas; hoy el índice y el registro
+ * del wiki se abren desde el rail, las páginas sueltas declaradas en
+ * `wiki.standalone` van arriba del índice, y el resto solo se llega por
+ * búsqueda, wikilinks o el catálogo. Las sintéticas son `kind: "extra"`.
  */
 export function effectiveDivisions(
   cfg: Pick<SubjectConfigLoose, "divisions">,
@@ -594,11 +620,26 @@ export function effectiveDivisions(
     .map((x) => x.d);
   const keys = new Set(pages.map((p) => divisionOf(cfg, p)));
   const out: DivisionDef[] = [...declared];
-  if (keys.has(DIVISION_NONE) && !declared.some((d) => d.key === DIVISION_NONE)) {
-    out.push({ key: DIVISION_NONE, name: "Transversales", kind: "extra", color: "--umeta" });
-  }
   if (keys.has(DIVISION_OTHER)) {
     out.push({ key: DIVISION_OTHER, name: "Otras", kind: "extra", color: "--u0" });
+  }
+  return out;
+}
+
+/**
+ * Páginas sueltas de una materia (N0-74): las que `wiki.standalone` declara, en
+ * ese orden, y que existen. Una entrada que no corresponde a ninguna página se
+ * ignora acá (`publish` la avisa).
+ */
+export function standalonePages<P extends Pick<Page, "slug">>(
+  cfg: { wiki?: Pick<WikiSource, "standalone"> | undefined },
+  pages: ReadonlyArray<P>,
+): P[] {
+  const bySlug = new Map(pages.map((p) => [p.slug, p]));
+  const out: P[] = [];
+  for (const slug of cfg.wiki?.standalone ?? []) {
+    const page = bySlug.get(slug);
+    if (page && !out.includes(page)) out.push(page);
   }
   return out;
 }

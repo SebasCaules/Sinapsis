@@ -51,6 +51,7 @@ interface SiteSubjectLike {
     divisions: Array<{ key: string }>;
     pageTypes: Array<{ key: string; countsAsContent?: boolean }>;
     rail: Array<{ label: string; items?: Array<{ id: string; label: string; kind: string; target: string }> }>;
+    wiki?: { standalone?: string[] };
   };
   pages: Array<{ slug: string; title: string; type: string; division: string; summary: string }>;
   study: {
@@ -146,9 +147,9 @@ function visibleDivisions(subject: SiteSubjectLike): number {
   const declared = new Set(subject.config.divisions.map((d) => d.key));
   return (
     subject.config.divisions.filter((d) => used.has(d.key)).length +
-    // Divisiones sintéticas del modelo del front: "meta" (Transversales) y
-    // "otras" (claves que las páginas usan y el config no declara).
-    (used.has("meta") ? 1 : 0) +
+    // La única división sintética del modelo del front es "otras" (claves que
+    // las páginas usan y el config no declara). Las páginas sin división
+    // ("meta") no forman una división (N0-74).
     ([...used].some((k) => k !== "meta" && !declared.has(k)) ? 1 : 0)
   );
 }
@@ -276,6 +277,7 @@ export default async function globalSetup(): Promise<void> {
       divisionsDeclared: config.divisions.length,
       divisionKeys: config.divisions.map((d) => d.key),
       divisionsVisible: visibleDivisions(subject),
+      standalone: (subject.config.wiki?.standalone ?? []).filter((slug) => subject.pages.some((p) => p.slug === slug)),
       pages: subject.pages.length,
       contentPages: subject.pages.filter((p) => contentTypes.has(p.type)).length,
     },

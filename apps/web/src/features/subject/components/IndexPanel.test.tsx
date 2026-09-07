@@ -45,20 +45,67 @@ const PASOS: Record<string, ExtraStep[]> = {
   ],
 };
 
-function renderPanel(pasos = false) {
-  const detail: SubjectDetail = { config, pages, studied: [], placeholder: false, lastSyncAt: null };
+function renderPanel(pasos = false, extra: { pages?: PageMeta[]; activePage?: string | null; studied?: string[] } = {}) {
+  const detail: SubjectDetail = {
+    config,
+    pages: extra.pages ?? pages,
+    studied: extra.studied ?? [],
+    placeholder: false,
+    lastSyncAt: null,
+  };
   const model = buildSubjectModel(detail, false, pasos ? { extraSteps: (d) => PASOS[d] ?? [] } : {});
   return render(
     <MemoryRouter initialEntries={["/m/proba"]}>
-      <IndexPanel model={model} activePage={null} activeDivision="1" bookmarks={new Set()} />
+      <IndexPanel model={model} activePage={extra.activePage ?? null} activeDivision="1" bookmarks={new Set()} />
     </MemoryRouter>,
   );
 }
+
+/* Páginas sin división: el formulario maestro (declarado en `wiki.standalone`
+   por la config real de Proba), una fuente suelta que no lo está, y el índice. */
+const SUELTAS: PageMeta[] = [
+  ...pages,
+  { ...page("formulario-maestro", "Formulario Maestro", "meta", 1), type: "formulario", folder: "formularios" },
+  { ...page("propuestos-lutzio", "Propuestos por Lutzio", "meta", 2), type: "fuente", folder: "fuentes" },
+  { ...page("indice", "Índice", "meta", 3), type: "meta", folder: "meta" },
+];
 
 afterEach(() => {
   cleanup();
   useSubjectUiStore.setState({ open: {}, collapsedTypes: {} });
   localStorage.clear();
+});
+
+describe("<IndexPanel/> · páginas sueltas (N0-74)", () => {
+  it("dibuja las de `wiki.standalone` arriba del árbol, y no hay cajón «Transversales»", () => {
+    renderPanel(false, { pages: SUELTAS, studied: ["formulario-maestro"] });
+    const rows = screen.getAllByTestId("standalone-row");
+    expect(rows.map((r) => r.getAttribute("data-slug"))).toEqual(["formulario-maestro"]);
+    expect(rows[0]!.getAttribute("href")).toBe("/m/proba/p/formulario-maestro");
+    expect(within(rows[0]!).getByTitle("Estudiada")).toBeTruthy();
+    /* Arriba del rótulo del árbol. */
+    const label = screen.getByText("UNIDADES");
+    expect(rows[0]!.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    /* Ni fila de división para «meta», ni las otras páginas sin división en el panel. */
+    expect(screen.queryByTestId("division-row", { exact: false })?.getAttribute("data-division")).not.toBe("meta");
+    expect(document.querySelector('[data-division="meta"]')).toBeNull();
+    expect(screen.queryByText("Transversales")).toBeNull();
+    expect(screen.queryByText("Propuestos por Lutzio")).toBeNull();
+    expect(screen.queryByText("Índice")).toBeNull();
+  });
+
+  it("la fila de la página suelta abierta queda marcada como actual", () => {
+    renderPanel(false, { pages: SUELTAS, activePage: "formulario-maestro" });
+    const row = screen.getByTestId("standalone-row");
+    expect(row.getAttribute("aria-current")).toBe("page");
+    expect(row.getAttribute("data-active")).toBe("true");
+  });
+
+  it("sin páginas sueltas no dibuja la sección", () => {
+    renderPanel();
+    expect(screen.queryByTestId("standalone-row")).toBeNull();
+    expect(screen.queryByLabelText("Páginas sueltas")).toBeNull();
+  });
 });
 
 describe("<IndexPanel/> · ejercicios de la unidad", () => {

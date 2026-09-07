@@ -127,7 +127,7 @@ describe("orden de lectura global", () => {
       "u2-a",
       "u2-b",
       "u3-a",
-      "transv",
+      /* «transv» no está: una página sin división no es un tramo (N0-74). */
     ]);
   });
 
@@ -177,11 +177,11 @@ describe("vecinos del lector", () => {
     expect(next?.division?.key).toBe("2");
   });
 
-  it("el cajón transversal no es un recorrido: sus vecinos salen del orden global", () => {
-    /* § lector-08: «Transversales» se trataba como una división más. */
-    const { prev, next } = vecinos("transv");
-    expect(prev?.page.slug).toBe("u3-a");
-    expect(next).toBeNull();
+  it("una página sin división no está en ningún recorrido: no tiene vecinos", () => {
+    /* § lector-08 trataba «Transversales» como una división más; desde N0-74 las
+       páginas sin división ni siquiera forman un cajón: quedan fuera del orden
+       de lectura, como el índice. */
+    expect(vecinos("transv")).toEqual({ prev: null, next: null });
   });
 
   it("una página `meta` no tiene vecinos", () => {

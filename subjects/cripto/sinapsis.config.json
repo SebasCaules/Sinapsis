@@ -195,6 +195,7 @@
     "index": "indice.md",
     "ignore": [],
     "divisionField": "clase",
-    "study": "estudio"
+    "study": "estudio",
+    "standalone": []
   }
 }

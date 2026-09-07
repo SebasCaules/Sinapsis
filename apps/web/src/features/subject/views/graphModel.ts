@@ -45,7 +45,7 @@ export const CONTENT_ONLY_DEFAULT = true;
 export const HUB_COUNT = 6;
 
 export interface GraphModelNode extends GraphNode {
-  /** División efectiva (la declarada, «Transversales» u «Otras»). */
+  /** División efectiva (la declarada, «Otras» o el cajón de sueltas). */
   divisionKey: string;
   /** Rótulo corto de la división: "U3". */
   divisionShort: string;
@@ -156,7 +156,9 @@ export function buildGraphModel(data: GraphData, model: SubjectModel, filters: G
     if (node.type === PAGE_TYPE_META && !wantsMeta) continue;
     const page = model.bySlug.get(node.slug);
     const key = page ? model.divisionOf(page) : node.division;
-    const division = model.division(key);
+    /* `bucket`: la división, o el cajón de sueltas para las páginas sin
+       división (N0-74), que así conservan rótulo y color en el lienzo. */
+    const division = model.bucket(key);
     const isSource = page ? !model.isContent(page) : false;
 
     if (filters.contentOnly && isSource) continue;
@@ -221,7 +223,10 @@ export function buildGraphModel(data: GraphData, model: SubjectModel, filters: G
 
   const counts = new Map<string, number>();
   for (const node of nodes) counts.set(node.divisionKey, (counts.get(node.divisionKey) ?? 0) + 1);
-  const legend: GraphLegendEntry[] = model.divisions
+  /* Las divisiones más el cajón de sueltas, para que la leyenda y el texto
+     alternativo cubran TODOS los nodos dibujados. */
+  const groups = model.loose ? [...model.divisions, model.loose] : model.divisions;
+  const legend: GraphLegendEntry[] = groups
     .filter((d) => counts.has(d.key))
     .map((d) => ({ key: d.key, label: d.short, color: d.color, count: counts.get(d.key) ?? 0 }));
 
@@ -234,7 +239,7 @@ export function buildGraphModel(data: GraphData, model: SubjectModel, filters: G
     if (list) list.push(node);
     else byDivision.set(node.divisionKey, [node]);
   }
-  const alt: GraphAltGroup[] = model.divisions
+  const alt: GraphAltGroup[] = groups
     .filter((d) => byDivision.has(d.key))
     .map((d) => ({
       key: d.key,

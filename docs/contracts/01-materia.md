@@ -85,8 +85,9 @@ Rótulos que derivan de esto (`divisionShort`, `divisionLong` del contrato):
 - El orden del array es el orden del índice, salvo que se declare `order` (se ordena por
   `order ?? posición`, con la posición como desempate).
 - Las claves no se repiten: `validate` sale 1 con `divisions: clave repetida "<key>"`.
-- `"meta"` está **reservada** para las páginas transversales: `validate` sale 1 con
-  `divisions: "meta" está reservada para las páginas transversales`.
+- `"meta"` está **reservada** para las páginas sin división (el índice, el registro y las
+  sueltas, ver §7.1): `validate` sale 1 con
+  `divisions: "meta" está reservada para las páginas sin división`.
 - `"otras"` no está prohibida, pero es la clave sintética que la plataforma usa para agrupar
   divisiones no declaradas (ver `02-paginas.md` §5): conviene no usarla.
 - Color automático (`divisionColor`, N0-12): con ≤ 9 divisiones numeradas se usan los tokens
@@ -233,6 +234,24 @@ Los mismos nombres valen para `RailItem.icon`, `Fab.icon`, `ToolView.icon`,
 | `ignore` | texto[] | no | `[]` | — | Nombres de carpetas de primer nivel que no se recorren. |
 | `divisionField` | texto | no | `"division"` | — | Campo del frontmatter que trae la división. En Proba es `"unidad"`. |
 | `study` | `SafeRelativePath` | no | `"estudio"` | relativa al **config**, dentro de su carpeta | Carpeta del material de estudio (N0-27). **No es relativa al wiki**: `--wiki <otro-vault>` no la desvía. |
+| `standalone` | `Slug[]` | no | `[]` | ≤ 12 slugs de páginas del wiki | Páginas **sueltas** (N0-74): páginas sin división que el índice dibuja **arriba del árbol**, una fila por página. Ver §7.1. |
+
+### 7.1 Páginas sin división (N0-74)
+
+Una página que no declara el campo de división queda con `division: "meta"`. **No forma una
+división**: no hay bloque «Transversales» en el índice, en el inicio ni en la cadena de
+lectura. Según qué sea, se llega a ella de una de tres maneras:
+
+| Página | Dónde se ve | Qué declara la materia |
+|---|---|---|
+| El índice y el registro del wiki (`wiki.index`, `wiki.log`) | Grupo fijo «Wiki» del rail. No se listan en el árbol. | Nada más. |
+| Una página que vale para toda la materia (un formulario maestro, una hoja de referencia) | **Arriba del árbol** del índice, como fila propia con el color de su tipo; también en el catálogo, los favoritos y el grafo bajo «Sin división». | Su slug en `wiki.standalone`, en el orden en que deben salir. |
+| Cualquier otra | Búsqueda, wikilinks y el catálogo («Sin división»). No aparece en el índice. | `publish` avisa: `página "<slug>": sin división y fuera de wiki.standalone`. Casi siempre lo que falta es el campo de división en el frontmatter. |
+
+`wiki.standalone` es para **pocas** páginas y **sin división**: una entrada que no
+corresponde a ninguna página se avisa (`wiki.standalone: la página "<slug>" no existe`) y se
+ignora. El total de progreso de la materia cuenta las sueltas de contenido; los mazos
+automáticos no generan uno para ellas.
 
 ---
 
@@ -324,7 +343,8 @@ es JSON estricto: **sin comentarios y sin comas finales**.
     "log": "log.md",
     "ignore": [],
     "divisionField": "unidad",
-    "study": "estudio"          // default; se puede omitir
+    "study": "estudio",         // default; se puede omitir
+    "standalone": ["formulario-maestro"]   // páginas sueltas, arriba del índice (N0-74)
   }
 }
 ```
@@ -343,7 +363,7 @@ puede expresar, en `extraChecks` y `checkTools`.
 | `divisions: clave repetida "<key>"` | Dos divisiones con la misma `key`. |
 | `pageTypes: clave repetida "<key>"` | Dos tipos con la misma `key`. |
 | `rail: clave repetida "<id>"` | Dos grupos con el mismo `id`. |
-| `divisions: "meta" está reservada para las páginas transversales` | Una división declara `key: "meta"`. |
+| `divisions: "meta" está reservada para las páginas sin división` | Una división declara `key: "meta"`. |
 | `pageTypes: carpeta repetida "<folder>"` | Dos tipos apuntan a la misma carpeta. |
 | `rail.<grupo>.<item>: id de ítem repetido "<id>"` | Dos ítems (o un ítem y el `fab`) comparten `id`. |
 | `rail.<grupo>.<item>: vista builtin desconocida "<target>" (válidas: …)` | Un `kind: "builtin"` apunta a algo que no está en `BUILTIN_VIEWS`. |
@@ -372,7 +392,7 @@ puede expresar, en `extraChecks` y `checkTools`.
 | El rail muestra «Próximamente» | El ítem es `kind: "tool"` y ningún bundle registra esa vista, o el `target` es el id del bundle en vez del de la vista. | Publicar el bundle (`sinapsis publish`) o corregir el `target`. |
 | Las divisiones salen en un orden raro | Se mezcló `order` en algunas divisiones y no en otras. | Poner `order` en todas o en ninguna. |
 | Todas las páginas caen en «Otras» | `wiki.divisionField` no coincide con el campo real del frontmatter. | Ajustar `divisionField` (Proba usa `unidad`). |
-| «Transversales» tiene todas las páginas | Las páginas no declaran el campo de división. | Completar el frontmatter, o aceptar que son transversales. |
+| Ninguna página sale en el índice y `publish` avisa «sin división y fuera de wiki.standalone» por cada una | Las páginas no declaran el campo de división (o `divisionField` no coincide). | Completar el frontmatter; declarar en `wiki.standalone` solo las pocas que de verdad valen para toda la materia (§7.1). |
 | Un tipo de página no se ve agrupado | La carpeta del wiki no está declarada en ningún `pageTypes[].folder`. | Agregar el tipo con su `folder`. |
 | `wiki.root: "<valor>" queda fuera de la carpeta del config` | `root` apunta afuera (`../vault/wiki`). | Poner el config al lado del wiki, o usar la bandera `--wiki <dir>` en el CLI. |
 | El material de estudio no aparece | `wiki.study` se resolvió contra el wiki en vez del config. | Es relativa **al config**; si el config vive en otro repositorio, `estudio/` va al lado del config. |

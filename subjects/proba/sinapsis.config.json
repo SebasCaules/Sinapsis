@@ -196,6 +196,7 @@
     "log": "log.md",
     "ignore": [],
     "divisionField": "unidad",
-    "study": "estudio"
+    "study": "estudio",
+    "standalone": ["formulario-maestro"]
   }
 }

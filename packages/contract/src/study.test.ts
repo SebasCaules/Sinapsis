@@ -90,7 +90,7 @@ describe("autoDecks", () => {
   it("agrupa por división, excluye fuentes y páginas sin resumen", () => {
     const decks = autoDecks(config, pages);
 
-    expect(decks.map((d) => d.id)).toEqual(["auto-1", "auto-2", "auto-meta"]);
+    expect(decks.map((d) => d.id)).toEqual(["auto-1", "auto-2"]);
     expect(decks.every((d) => d.source === "auto")).toBe(true);
 
     const primera = decks[0]!;
@@ -102,9 +102,10 @@ describe("autoDecks", () => {
 
     // "sin-resumen" no puede ser tarjeta: el reverso sería vacío.
     expect(decks[1]!.cards.map((c) => c.page)).toEqual(["tres"]);
-    // La división declarada sin páginas no genera mazo; las transversales sí.
+    // La división declarada sin páginas no genera mazo; las páginas sin división
+    // tampoco: no forman una división (N0-74).
     expect(decks.map((d) => d.division)).not.toContain("3");
-    expect(decks[2]!.cards.map((c) => c.page)).toEqual(["transversal"]);
+    expect(decks.map((d) => d.division)).not.toContain("meta");
   });
 
   it("sin páginas con resumen no genera ningún mazo", () => {

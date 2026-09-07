@@ -114,7 +114,7 @@ export function countsByDivision(ctx: Ctx, config: AnyConfig, pages: readonly An
     highlightEmpty: true,
     extraLabel: (key) =>
       key === DIVISION_NONE
-        ? { label: "Transversales (toda la materia)", mark: "", warn: false }
+        ? { label: "Sin división (índice, registro, sueltas)", mark: "", warn: false }
         : { label: `${key} (no está en config.divisions)`, mark: "", warn: true },
     footer: (empty) => (empty.length > 0 ? `    divisiones sin páginas: ${empty.join(", ")}` : null),
   });

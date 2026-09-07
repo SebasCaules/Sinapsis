@@ -34,8 +34,8 @@ export function FavoritesView() {
   if (query.isPending) return <WideSkeleton />;
 
   /* El orden lo pone el modelo (divisiones del temario + secuencia dentro de
-     cada una); los favoritos solo lo filtran. */
-  const groups = model.visibleDivisions
+     cada una, y al final las páginas sin división); los favoritos solo lo filtran. */
+  const groups = model.catalogDivisions
     .map((division) => ({
       division,
       pages: model.pagesByDivision(division.key).filter((p) => bookmarks.has(p.slug)),

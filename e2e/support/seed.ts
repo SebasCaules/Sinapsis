@@ -104,6 +104,8 @@ export interface SeedManifest {
     divisionKeys: string[];
     /** Divisiones que el índice llega a dibujar (las que tienen páginas). */
     divisionsVisible: number;
+    /** Páginas sueltas (`wiki.standalone`) que existen: filas arriba del árbol (N0-74). */
+    standalone: string[];
     /** Páginas compiladas (todas, fuentes incluidas). */
     pages: number;
     /** Páginas que cuentan como contenido (lo que muestra la landing). */

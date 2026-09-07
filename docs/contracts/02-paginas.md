@@ -83,7 +83,7 @@ listas `[a, b]`, comillas simples o dobles) por paridad con el `build.py` del ba
 |---|---|---|---|---|---|---|
 | `titulo` · `title` | `title` | texto | no | primer `# H1` del cuerpo; si no hay, el slug capitalizado con los guiones como espacios | 200 | Título de la página. |
 | `tipo` · `type` | `type` | texto | no | el tipo de la carpeta (`pageTypes[].folder`); si no, el nombre de la carpeta; si no, `pagina` | 32 | Clave de `pageTypes`. |
-| *(el campo de `wiki.divisionField`; por defecto `division`, en Proba `unidad`)* | `division` | `DivisionKey` | no | `meta` (transversal) | 24 | División del temario. Vacío o ausente = transversal. |
+| *(el campo de `wiki.divisionField`; por defecto `division`, en Proba `unidad`)* | `division` | `DivisionKey` | no | `meta` (sin división) | 24 | División del temario. Vacío o ausente = sin división (§5). |
 | `orden` · `order` | `order` | entero > 0 | no | — | — | Orden pedagógico dentro de la división. |
 | `resumen` · `summary` | `summary` | texto | no (pero se avisa si falta) | `""` | 1200 | Una o dos frases. Alimenta tooltips, tarjetas y los mazos automáticos. |
 | `formato` · `format` | `format` | texto libre | no | — | 40 | `apunte`, `pdf`, `guia`, `video`, `slides`… |
@@ -154,7 +154,7 @@ no está en la secuencia.
 | `title` | texto | — | 1–200 | Ver §3. |
 | `type` | texto | — | 1–32 | Ver §3. |
 | `folder` | texto | `""` | ≤ 64 | Carpeta de origen (`meta` para índice y registro). |
-| `division` | `DivisionKey` | `"meta"` | 1–24 | División declarada, o `meta` si es transversal. |
+| `division` | `DivisionKey` | `"meta"` | 1–24 | División declarada, o `meta` si no tiene (§5). |
 | `order` | entero > 0 | — | — | Opcional. |
 | `summary` | texto | `""` | ≤ 1200 | — |
 | `format` | texto | — | ≤ 40 | Opcional. |
@@ -206,13 +206,15 @@ descarta ni la inventa: la agrupa. Lo decide **el contrato**, no el cliente (N0-
 | Situación | `Page.division` | División efectiva (`divisionOf`) | Cómo se ve |
 |---|---|---|---|
 | Declara una división que está en el config | esa clave | esa clave | Bloque de esa división. |
-| No declara ninguna (campo vacío o ausente) | `meta` (`DIVISION_NONE`) | `meta` | Bloque sintético **«Transversales»**, `kind: "extra"`, color `--umeta`. |
+| No declara ninguna (campo vacío o ausente) | `meta` (`DIVISION_NONE`) | `meta` | **Ningún bloque** (N0-74). El índice y el registro se abren desde el rail; las páginas de `wiki.standalone` van arriba del árbol del índice; las demás solo se llegan por búsqueda, wikilinks o el catálogo, donde salen bajo «Sin división» (`--umeta`). Ver `01-materia.md` §7.1. |
 | Declara una división que **no** está en el config | esa clave | `otras` (`DIVISION_OTHER`) | Bloque sintético **«Otras»**, `kind: "extra"`, color `--u0`. |
 
 `effectiveDivisions(config, pages)` devuelve las divisiones declaradas (ordenadas por
-`order ?? posición`) y agrega «Transversales» y «Otras` **solo si hay páginas que caigan
-ahí**. Las sintéticas no cuentan como divisiones declaradas: no salen en el conteo de la
-tarjeta de la landing y no reciben número.
+`order ?? posición`) y agrega «Otras» **solo si hay páginas que caigan ahí**. `meta` nunca se
+convierte en división: antes se sintetizaba un bloque «Transversales», y desde N0-74 no. La
+sintética no cuenta como división declarada: no sale en el conteo de la tarjeta de la landing
+y no recibe número. `standalonePages(config, pages)` devuelve las sueltas, en el orden de
+`wiki.standalone` y solo las que existen.
 
 La misma función alimenta el índice, los filtros del grafo y los mazos automáticos, así que
 los tres coinciden siempre.

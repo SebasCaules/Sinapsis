@@ -883,7 +883,7 @@ export function GraphView() {
           >
             Todas
           </button>
-          {model.visibleDivisions.map((division) => (
+          {model.catalogDivisions.map((division) => (
             <button
               key={division.key}
               type="button"

@@ -77,7 +77,7 @@ export function placeholderConfig(placeholder: LocalPlaceholder, semester?: stri
     pageTypes: [],
     rail: [],
     fab: null,
-    wiki: { root: "wiki", ignore: [], divisionField: "division", study: "estudio" },
+    wiki: { root: "wiki", ignore: [], divisionField: "division", study: "estudio", standalone: [] },
   };
 }
 

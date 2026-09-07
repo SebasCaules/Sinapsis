@@ -58,7 +58,9 @@ Sinapsis y dejarla publicada, navegable y con material de estudio, usando la ski
    (el compilador solo recorre el primer nivel).
 2. Identifica la estructura pedagógica real: qué es la **división** de esta materia
    (unidad, módulo, semana, capítulo…), cuántas hay, en qué orden, y cuáles son secciones
-   «extra» (complementos, evaluaciones, transversales).
+   «extra» (complementos, evaluaciones). Si hay una o dos páginas que valen para toda la
+   materia (un formulario maestro), anótalas para `wiki.standalone` (N0-74): van arriba del
+   índice; no existe un bloque «Transversales».
 3. Identifica los **tipos de página** (por carpeta y por campo `tipo`): conceptos,
    teoremas, técnicas, formularios, fuentes (apuntes, guías, videos), ejercicios…
    Decide cuáles cuentan como contenido de lectura y cuáles no (`countsAsContent`).

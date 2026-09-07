@@ -51,6 +51,14 @@ describe("subjects/proba/sinapsis.config.json", () => {
     expect(proba.pageTypes).toHaveLength(6);
     expect(proba.wiki.divisionField).toBe("unidad");
     expect(proba.wiki.root).toBe("wiki");
+    /* N0-74: el formulario maestro es la página suelta de Proba. */
+    expect(proba.wiki.standalone).toEqual(["formulario-maestro"]);
+  });
+
+  it("`wiki.standalone` es opcional y vacío por defecto, y solo admite slugs", () => {
+    const base = { ...(JSON.parse(readFileSync(EXAMPLE, "utf8")) as Record<string, unknown>), wiki: { root: "wiki" } };
+    expect(SubjectConfig.parse(base).wiki.standalone).toEqual([]);
+    expect(() => SubjectConfig.parse({ ...base, wiki: { root: "wiki", standalone: ["Formulario Maestro"] } })).toThrow();
   });
 
   it("aplica los valores por defecto del esquema", () => {
@@ -91,13 +99,13 @@ describe("helpers de división — config de Proba (N = 9 numeradas)", () => {
     // Las extra usan su nombre, recortado si pasa de 8 caracteres.
     expect(divisionShort(proba, "0")).toBe("Comple.");
     expect(divisionShort(proba, "eval")).toBe("Evalua.");
-    expect(divisionShort(proba, DIVISION_NONE)).toBe("Transv.");
+    expect(divisionShort(proba, DIVISION_NONE)).toBe("Sueltas");
   });
 
   it("divisionLong", () => {
     expect(divisionLong(proba, "4")).toBe("Unidad 4 · Variables Aleatorias Continuas");
     expect(divisionLong(proba, "0")).toBe("Complementos Matemáticos");
-    expect(divisionLong(proba, DIVISION_NONE)).toBe("Transversales (toda la materia)");
+    expect(divisionLong(proba, DIVISION_NONE)).toBe("Páginas sin división");
   });
 
   it("divisionColor usa la escala heráldica y respeta el color fijo", () => {

@@ -174,7 +174,7 @@ export function extraChecks(config: SubjectConfigType): Problem[] {
     problems.push({
       level: "error",
       field: "divisions",
-      message: `"${DIVISION_NONE}" está reservada para las páginas transversales`,
+      message: `"${DIVISION_NONE}" está reservada para las páginas sin división`,
     });
   }
 

@@ -131,7 +131,7 @@ Probabilidad y Estadística · 93.24 · ITBA [proba]
   por división
     Unidad 1 · Estadística Descriptiva        18
     …
-    Transversales (toda la materia)            2
+    Sin división (índice, registro, sueltas)   2
     divisiones sin páginas: eval
 
   Estudio: 6 mazos (46 tarjetas) · 1 quiz (15 preguntas) · plan: 6 fases · 8 kits

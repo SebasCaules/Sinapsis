@@ -109,7 +109,8 @@ plataforma con sus valores fijos.
   ],
   "fab": null,                            // { icon, label, kind, target } o null
   "wiki": { "root": "wiki", "index": "index.md", "log": "log.md",
-            "ignore": [], "divisionField": "unidad" }
+            "ignore": [], "divisionField": "unidad",
+            "standalone": ["formulario-general"] }   // páginas SIN división, arriba del índice
 }
 ```
 
@@ -134,7 +135,7 @@ lector. La materia solo aporta **datos** (hero, nomenclatura, divisiones, tipos)
 ---
 titulo: Distribución Normal          # si falta: primer H1; si no, el slug
 tipo: distribucion                    # clave de pageTypes; si falta, la de la carpeta
-unidad: 4                             # el campo que diga wiki.divisionField; "" = transversal
+unidad: 4                             # el campo que diga wiki.divisionField; "" = sin división
 orden: 8                              # opcional, entero positivo dentro de la división
 resumen: 'Una o dos frases…'          # alimenta tooltips y tarjetas
 formato: pdf                          # libre (apunte, guia, video, slides…)
@@ -156,7 +157,12 @@ format?, tags[], sources[], updatedAt?, links[], headings[], body, words`.
   ignoran (con advertencia).
 - Las carpetas listadas en `wiki.ignore` no se compilan.
 - `wiki.index` y `wiki.log` se publican como los slugs `indice` y `log`, con
-  `type: "meta"` y `division: "meta"`.
+  `type: "meta"` y `division: "meta"`. Se abren desde el grupo fijo «Wiki» del rail.
+- Las páginas **sin división** no forman un bloque «Transversales» (N0-74). Las que la
+  materia lista en `wiki.standalone` van **arriba del índice** como filas propias (un
+  formulario maestro, una hoja de referencia); el resto solo se llega por búsqueda,
+  wikilinks o el catálogo, y `publish` avisa por cada una: casi siempre lo que falta es el
+  campo de división en el frontmatter.
 - Una división que no esté en `config.divisions` **no descarta la página**: levanta una
   advertencia y la página se conserva.
 - Un slug de archivo inválido se normaliza (con advertencia): `Distribución Normal.md`
@@ -364,7 +370,12 @@ archivo declarado exista y quede dentro de la carpeta, y **parsea cada script** 
 4. **Revisar las divisiones.** `init` deja nombres provisorios ("Unidad 1", "Unidad 2"…).
    Reemplácelos por los **nombres reales del programa** de la cátedra. Búsquelos en el
    `index.md` del wiki, en el programa de la materia o pregunte al usuario. Marque como
-   `"kind": "extra"` las que no llevan número (complementos, evaluaciones, transversales).
+   `"kind": "extra"` las que no llevan número (complementos, evaluaciones).
+
+4b. **Páginas sueltas.** Si el wiki tiene una o dos páginas que valen para toda la materia
+   (un formulario maestro, una hoja de referencia), lístelas en `wiki.standalone`: el
+   índice las dibuja arriba del árbol. No use ese campo para páginas que olvidaron su
+   división: complételo en el frontmatter.
 
 5. **Revisar la nomenclatura.** `division` debe decir cómo llama la cátedra a sus
    divisiones: Unidad/U/Unidades, Semana/S/Semanas, Módulo/M/Módulos, Capítulo/C/Capítulos.

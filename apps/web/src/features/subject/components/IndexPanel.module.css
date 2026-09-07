@@ -59,6 +59,38 @@
 }
 .placeholder code { font: 500 11px var(--font-mono); }
 
+/* Páginas sueltas (N0-74): arriba del árbol, una fila por página, con la altura
+   y el aire de una fila de división. Un filete las separa del árbol. */
+.standalone {
+  flex: none;
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.standaloneRow {
+  height: 32px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--t);
+}
+.standaloneRow:hover { background: var(--surface-2); }
+.standaloneRow[data-active="true"] { background: var(--primary-soft); }
+.standaloneRow[data-active="true"] .divisionLabel { color: var(--text); font-weight: 600; }
+.standaloneRow:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 6px var(--primary-ring);
+}
+
 .treeLabel {
   flex: none;
   padding: 12px 12px 6px;
