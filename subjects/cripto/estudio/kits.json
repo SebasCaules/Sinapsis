@@ -33,7 +33,9 @@
     "quizzes": [
       "quiz-bloque-1-criptografia"
     ],
-    "tools": []
+    "tools": [
+      "parciales"
+    ]
   },
   {
     "id": "tp",
@@ -106,6 +108,8 @@
     "quizzes": [
       "quiz-integrador"
     ],
-    "tools": []
+    "tools": [
+      "parciales"
+    ]
   }
 ]

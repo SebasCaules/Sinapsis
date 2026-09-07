@@ -1,0 +1,15 @@
+{
+  "id": "cripto-parciales",
+  "title": "Parciales resueltos de Criptografía y Seguridad",
+  "version": "1.0.0",
+  "description": "Los 19 ejercicios de los cuatro primeros parciales que circulan (2018 a 2025), con su resolución verificada contra el wiki. Se ordenan por tipo o por parcial, y la resolución de cada uno se abre a pedido.",
+  "runtime": 1,
+  "scripts": ["data/parciales-data.js", "parciales.js"],
+  "styles": ["css/parciales.css"],
+  "views": [
+    { "id": "parciales", "label": "Parciales resueltos", "icon": "quiz", "layout": "wide" }
+  ],
+  "figures": false,
+  "progress": false,
+  "data": []
+}

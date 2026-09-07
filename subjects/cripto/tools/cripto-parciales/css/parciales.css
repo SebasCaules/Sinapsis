@@ -1,0 +1,225 @@
+/* parciales.css — la vista «Parciales resueltos».
+
+   La estética es la de un enunciado de LaTeX: «Ejercicio 1.» en versalita al
+   principio del renglón, el enunciado corrido debajo, y la resolución plegada.
+   Nada de tarjetas: lo único que se dibuja como caja es el pliegue de la
+   resolución, que es la acción de la página. Los colores salen de los tokens
+   de la plataforma, así que la vista sigue los tres temas sin tocar nada. */
+
+.pv {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 8px 0 64px;
+}
+
+/* ---------- cabecera ---------- */
+
+.pv-head {
+  margin-bottom: 24px;
+}
+.pv-head h1 {
+  margin: 2px 0 8px;
+  font: 700 30px/1.15 var(--font-display, var(--font-ui));
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.pv-bajada {
+  margin: 0;
+  max-width: 40rem;
+  font: 400 14.5px/1.6 var(--font-ui);
+  color: var(--text-2);
+}
+
+/* ---------- controles ---------- */
+
+.pv-controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0 0 30px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pv-tabs {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.pv-tab {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font: 600 12.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+.pv-tab:hover { color: var(--text); }
+.pv-tab.is-on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.pv-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pv-chip {
+  padding: 4px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+}
+.pv-chip:hover { border-color: var(--text-3); color: var(--text); }
+.pv-chip.is-on {
+  background: color-mix(in srgb, var(--ueval) 14%, var(--surface));
+  border-color: var(--ueval);
+  color: var(--ueval-ink, var(--text));
+}
+/* Una instancia que el vault todavía no tiene: se ve, y se ve que no está. */
+.pv-chip.is-off {
+  opacity: 0.45;
+  cursor: default;
+  border-style: dashed;
+}
+
+.pv-cuenta {
+  margin-left: auto;
+  font: 500 12px var(--font-ui);
+  color: var(--text-3);
+}
+
+/* ---------- grupos ---------- */
+
+.pv-grupo { margin: 0 0 38px; }
+.pv-grupo-t {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-2, var(--border));
+  font: 700 11px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.pv-grupo-n {
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text-3);
+  opacity: 0.7;
+}
+
+/* ---------- el ejercicio ---------- */
+
+.pv-ejercicio {
+  margin: 0 0 30px;
+  scroll-margin-top: 80px;
+}
+.pv-titulo {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+  font: 400 16px/1.5 var(--font-body, var(--font-ui));
+  color: var(--text);
+}
+.pv-numero {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.pv-nombre {
+  margin-left: 6px;
+  font-style: italic;
+  color: var(--text-2);
+}
+.pv-contexto {
+  float: right;
+  margin-left: 12px;
+  font: 600 10.5px var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+
+.pv-enunciado {
+  font: 400 15px/1.7 var(--font-body, var(--font-ui));
+  color: var(--text);
+}
+.pv-enunciado > :first-child { margin-top: 0; }
+.pv-enunciado > :last-child { margin-bottom: 0; }
+.pv-enunciado img { display: block; max-width: 100%; height: auto; }
+.pv-enunciado table { font-size: 13.5px; }
+
+.pv-sin-solucion {
+  margin: 10px 0 0;
+  font: 400 13px var(--font-ui);
+  color: var(--text-3);
+}
+
+/* ---------- la resolución, plegada ---------- */
+
+.pv-solucion {
+  margin: 12px 0 0;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ueval);
+  border-radius: var(--r);
+  background: color-mix(in srgb, var(--ueval) 4%, var(--surface-2));
+}
+.pv-solucion > summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  font: 700 10.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ueval-ink, var(--text-2));
+}
+.pv-solucion > summary::-webkit-details-marker { display: none; }
+.pv-solucion > summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  transition: transform 120ms ease;
+}
+.pv-solucion[open] > summary::before { transform: rotate(90deg); }
+.pv-solucion > summary:focus-visible {
+  outline: 2px solid var(--ueval);
+  outline-offset: -2px;
+  border-radius: var(--r);
+}
+.pv-solucion-cuerpo {
+  padding: 2px 16px 14px;
+  font: 400 14.5px/1.7 var(--font-body, var(--font-ui));
+  color: var(--text);
+}
+.pv-solucion-cuerpo > :first-child { margin-top: 0; }
+.pv-solucion-cuerpo > :last-child { margin-bottom: 0; }
+.pv-solucion-cuerpo table { font-size: 13px; }
+.pv-solucion-cuerpo img { display: block; max-width: 100%; height: auto; }
+
+.pv-vacio {
+  margin: 40px 0;
+  text-align: center;
+  font: 400 14px var(--font-ui);
+  color: var(--text-3);
+}
+
+@media (max-width: 640px) {
+  .pv-contexto { float: none; display: block; margin: 2px 0 0; }
+  .pv-cuenta { margin-left: 0; width: 100%; }
+}

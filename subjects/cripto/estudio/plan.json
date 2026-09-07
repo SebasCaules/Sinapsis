@@ -199,9 +199,9 @@
             },
             {
               "id": "p1-repaso-parciales",
-              "label": "Resolver los primeros parciales de años anteriores",
-              "kind": "exercises",
-              "target": "parciales-viejos",
+              "label": "Resolver los parciales viejos en la herramienta",
+              "kind": "tool",
+              "target": "parciales",
               "detail": "4 parciales resueltos, de 2018 a 2025"
             }
           ]
