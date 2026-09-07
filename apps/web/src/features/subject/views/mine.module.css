@@ -418,7 +418,8 @@
   min-height: 180px;
   resize: vertical;
   padding: 9px 10px;
-  border: 1px solid var(--border);
+  /* R7: el borde es el único límite del campo; con --border medía 1.09:1. */
+  border: 1px solid var(--border-3);
   border-radius: var(--r-sm);
   background: var(--surface-2);
   font: 400 12.5px/1.65 var(--font-mono);
@@ -436,7 +437,8 @@
 .scratchPreview {
   min-height: 180px;
   padding: 9px 10px;
-  border: 1px dashed var(--border);
+  /* Mismo límite que .scratchArea: contorno discontinuo con --border-3. */
+  border: 1px dashed var(--border-3);
   border-radius: var(--r-sm);
   background: var(--surface-2);
   font-size: 12.5px;
@@ -470,7 +472,8 @@
   min-width: 0;
   height: 36px;
   padding: 0 12px 0 34px;
-  border: 1px solid var(--border-2);
+  /* R7/R8: mismo contorno que los buscadores de catálogo y grafo. */
+  border: 1px solid var(--border-3);
   border-radius: var(--r-ctrl);
   background: var(--surface);
   font: 400 13px var(--font-ui);

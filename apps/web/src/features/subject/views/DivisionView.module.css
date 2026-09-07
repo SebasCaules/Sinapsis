@@ -69,14 +69,15 @@
 
 .progress { display: flex; align-items: center; gap: 11px; }
 
-/* La pista se aclara con el color de la división en vez de usar el token global
-   `--track`: a 0 % la barra de 320 px se leía como una barra LLENA (unidad-08). */
+/* La pista lleva el color de la división mezclado sobre `--track`, no sobre
+   `--surface-2`: con `--surface-2` la barra vacía medía 1.05:1 contra la página
+   y a 0 % no se veía (R6, piso de 3:1 para la pista). */
 .track {
   width: 320px;
   max-width: 50vw;
   height: 8px;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--ucol) 14%, var(--surface-2));
+  background: color-mix(in srgb, var(--ucol) 22%, var(--track));
   box-shadow: inset 0 0 0 1px var(--border);
   overflow: hidden;
 }
@@ -200,7 +201,8 @@
   text-decoration: none;
   transition: background var(--t), border-color var(--t);
 }
-.item:hover { background: var(--surface); border-color: var(--border); }
+/* R5/R9: la veladura sube en los tres temas; --surface era 1.07:1 en claustro. */
+.item:hover { background: var(--hover-wash); border-color: var(--border-2); }
 .item:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
@@ -354,7 +356,7 @@ a.group:hover .arrow { color: var(--primary); transform: translateX(2px); }
 .groupTrack {
   height: 5px;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--ucol) 14%, var(--surface-2));
+  background: color-mix(in srgb, var(--ucol) 22%, var(--track));
   box-shadow: inset 0 0 0 1px var(--border);
   overflow: hidden;
   margin-top: 2px;

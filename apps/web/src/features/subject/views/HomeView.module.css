@@ -185,7 +185,7 @@
   text-decoration: none;
   transition: background var(--t);
 }
-.row:hover { background: var(--surface-2); }
+.row:hover { background: var(--hover-wash); }
 .row:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
@@ -361,7 +361,7 @@
 .todayLink:hover { color: var(--primary); }
 .todayLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 
-.todayStar { flex: none; color: var(--warn); fill: currentColor; }
+.todayStar { flex: none; color: var(--warn-text); fill: currentColor; }
 
 .todayMore {
   display: inline-flex;

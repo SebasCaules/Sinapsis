@@ -47,7 +47,8 @@
   height: 34px;
   padding: 0 12px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  /* R7: el contorno es la única señal del campo, va con --border-3 (≥ 3:1). */
+  border: 1px solid var(--border-3);
   border-radius: var(--r);
   box-shadow: var(--relief);
   color: var(--text-3);
@@ -122,17 +123,25 @@
 /* «Solo contenido» no es un filtro más de la fila: es un interruptor. Se separa
    con un margen y se enciende en verde, no en el color de los chips. */
 .chipToggle { margin-left: auto; color: var(--text-3); }
-.chipToggle svg { opacity: 0.35; }
+/* R10: sin opacity; el icono apagado hereda --text-3 y el encendido, --good-text. */
 .chipToggle[data-on="true"] {
   background: var(--good-soft);
   border-color: var(--good);
   color: var(--good-text);
 }
-.chipToggle[data-on="true"] svg { opacity: 1; }
 
 .chipDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
-.chipCount { font: 500 10px var(--font-mono); color: var(--text-3); }
-.chip[data-on="true"] .chipCount { color: var(--primary); }
+.chipCount {
+  font: 500 10px var(--font-mono);
+  color: var(--text-3);
+  background: var(--surface-3);
+  padding: 0 5px;
+  border-radius: 5px;
+}
+.chip[data-on="true"] .chipCount {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary);
+}
 
 /* ---------- escenario ---------- */
 .stage {
@@ -147,7 +156,8 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  border: 1px solid var(--border);
+  /* R7: el marco es la única separación entre el lienzo y la página (--bg). */
+  border: 1px solid var(--border-3);
   border-radius: var(--r-lg);
   background: var(--bg);
   box-shadow: var(--relief), var(--shadow);
@@ -356,7 +366,7 @@
   border-radius: 6px;
   text-decoration: none;
 }
-.topRow:hover { background: var(--surface-2); }
+.topRow:hover { background: var(--hover-wash); }
 .topRow:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
 
 .topMore {

@@ -42,7 +42,8 @@
      texto, el cursor saltaría al escribir la primera letra. */
   padding: 0 42px 0 14px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  /* R7: el contorno es la única señal del campo, va con --border-3 (≥ 3:1). */
+  border: 1px solid var(--border-3);
   border-radius: var(--r);
   box-shadow: var(--relief);
   color: var(--text-3);
@@ -141,13 +142,15 @@
 /* Chip que, con los otros filtros puestos, no dejaría nada: se apaga y no se
    puede pulsar. Prometer «3» y llevar a «Sin resultados» es un callejón. */
 .chip[data-empty="true"] {
-  opacity: 0.45;
+  /* R10: el estado se expresa con tokens, no con opacity (apagaba el rótulo a 2.2:1). */
+  background: var(--surface-2);
+  color: var(--text-3);
   border-style: dashed;
   cursor: default;
 }
 .chip[data-empty="true"]:hover {
-  background: var(--surface);
-  color: var(--text-2);
+  background: var(--surface-2);
+  color: var(--text-3);
   border-color: var(--border);
 }
 
@@ -225,10 +228,11 @@
   font: 700 10.5px var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 
-.typeCount { font-family: var(--font-mono); opacity: 0.7; margin-left: 3px; }
+/* R10: la cifra se separa del rótulo con otra tinta, no con opacity (caía a 2.6:1). */
+.typeCount { font-family: var(--font-mono); margin-left: 3px; color: var(--text-3); }
 
 .grid {
   display: grid;
@@ -268,8 +272,9 @@
   letter-spacing: 0.02em;
 }
 
-.markRead { display: inline-flex; align-items: center; gap: 3px; color: var(--good); }
-.markFav { display: inline-flex; align-items: center; gap: 3px; color: var(--warn); }
+/* R1: texto de la familia -> tinta (--good-text / --warn-text), igual que el resto del área. */
+.markRead { display: inline-flex; align-items: center; gap: 3px; color: var(--good-text); }
+.markFav { display: inline-flex; align-items: center; gap: 3px; color: var(--warn-text); }
 
 .cardStar { fill: currentColor; }
 .cardCheck { stroke-width: 2.4; }
@@ -300,7 +305,7 @@
   color: var(--text-3);
 }
 
-.empty svg { color: var(--border-2); margin-bottom: 6px; }
+.empty svg { color: var(--track); margin-bottom: 6px; }
 
 .emptyTitle { margin: 0; font: 700 16px var(--font-ui); color: var(--text-2); }
 .emptyHint { margin: 0; font: 400 13.5px var(--font-ui); color: var(--text-3); }
