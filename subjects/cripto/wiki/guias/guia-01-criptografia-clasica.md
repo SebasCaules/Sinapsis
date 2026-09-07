@@ -62,7 +62,7 @@ Dar una **definición formal** de los algoritmos `Gen`, `Enc` y `Dec` para los s
 >
 > ![Enunciado Ej. 1](../../assets/Pasted%20image%2020260810124920.png)
 >
-> > **Desarrollo completo del caso rotación** —espacios $K$/$M$/$C$, [[cifrado-por-rotacion#Formulación equivalente|formulación por permutaciones]], [[cifrado-por-rotacion#Corrección|demostración de corrección]] y [[cifrado-por-rotacion#Criptoanálisis|análisis de seguridad]]—: [[cifrado-por-rotacion|Cifrado por rotación]]. Acá abajo va sólo el resumen operativo de los tres esquemas.
+> **Desarrollo completo del caso rotación** —espacios $K$/$M$/$C$, [[cifrado-por-rotacion#Formulación equivalente|formulación por permutaciones]], [[cifrado-por-rotacion#Corrección|demostración de corrección]] y [[cifrado-por-rotacion#Criptoanálisis|análisis de seguridad]]—: [[cifrado-por-rotacion|Cifrado por rotación]]. Acá abajo va sólo el resumen operativo de los tres esquemas.
 >
 > En todos los casos el alfabeto es $\Sigma$ con $n = \lvert\Sigma\rvert$, y se identifica cada letra con su índice vía el orden alfabético. La aritmética es en $\mathbb{Z}_n$. Este ejercicio se escribe sobre el **inglés de 26** —es lo que usan las filminas, Katz y la solución de la cátedra—; del Ej. 3 en adelante la guía pasa al **castellano de 27**, y hay que decir cuál se está usando.
 >
@@ -106,9 +106,9 @@ Dar una **definición formal** de los algoritmos `Gen`, `Enc` y `Dec` para los s
 >
 > → [[cifrado-de-vigenere|Cifrado de Vigenère]]
 >
-> > **Chequeo antes de entregar:** la consigna pide *definición formal*, así que además de los tres algoritmos conviene explicitar los tres espacios ($K$, $M$, $C$) y la **condición de corrección** $\mathsf{Dec}_k(\mathsf{Enc}_k(m)) = m$. Para rotación está escrita en [[cifrado-por-rotacion#Definición formal|Cifrado por rotación]]; para sustitución monoalfabética y Vigenère falta escribirla.
-> >
-> > **Detalle de la solución de la cátedra:** para Vigenère aclara que, para que $\lvert K\rvert$ sea **finito**, hay que acotar el largo de la clave (por ejemplo $t \le L$ con $L$ el largo del texto plano) — si no, $K = \Sigma^{+}$ es infinito y `Gen` no puede ser uniforme. Es una precisión que el enunciado no pide pero que cierra la definición.
+> **Chequeo antes de entregar:** la consigna pide *definición formal*, así que además de los tres algoritmos conviene explicitar los tres espacios ($K$, $M$, $C$) y la **condición de corrección** $\mathsf{Dec}_k(\mathsf{Enc}_k(m)) = m$. Para rotación está escrita en [[cifrado-por-rotacion#Definición formal|Cifrado por rotación]]; para sustitución monoalfabética y Vigenère falta escribirla.
+>
+> **Detalle de la solución de la cátedra:** para Vigenère aclara que, para que $\lvert K\rvert$ sea **finito**, hay que acotar el largo de la clave (por ejemplo $t \le L$ con $L$ el largo del texto plano) — si no, $K = \Sigma^{+}$ es infinito y `Gen` no puede ser uniforme. Es una precisión que el enunciado no pide pero que cierra la definición.
 
 ### Ejercicio 2
 
@@ -193,9 +193,9 @@ VKXYKBKXGKSGWAKQQGYIUYGYWAKXKGQRKSZKJKYKKYIUSYKMAÑX
 >
 > **Control en sentido inverso:** volviendo a cifrar ese texto plano con $k=6$ se reobtiene el criptograma **letra por letra, los 51 símbolos**. Eso es lo que cierra la verificación — descifrar y que "parezca español" no alcanza como prueba.
 >
-> > **La `Ñ` no es decoración.** El criptograma trae `MAÑX` cerca del final. En el alfabeto de 27 la `Ñ` vale $14$, y $14 - 6 = 8 = \texttt{I}$, que es la `I` de `CONSEGUIR`. Con el alfabeto inglés de 26 ese símbolo directamente no existe: **la presencia de la `Ñ` confirma que hay que trabajar en $\mathbb{Z}_{27}$**, tal como dice el enunciado.
+> **La `Ñ` no es decoración.** El criptograma trae `MAÑX` cerca del final. En el alfabeto de 27 la `Ñ` vale $14$, y $14 - 6 = 8 = \texttt{I}$, que es la `I` de `CONSEGUIR`. Con el alfabeto inglés de 26 ese símbolo directamente no existe: **la presencia de la `Ñ` confirma que hay que trabajar en $\mathbb{Z}_{27}$**, tal como dice el enunciado.
 >
-> > **Ojo con la solución de la cátedra.** Su texto plano sigue: *"…CONSEGUIR PORQUE SI ES ASI LO CONSEGUIRAS"*. Esa continuación **no está en el criptograma del enunciado**: 51 símbolos alcanzan justo hasta `CONSEGUIR`. La cátedra parece estar citando la frase original completa, no el descifrado de lo que da a descifrar. Coincide con nosotros en lo que sí importa —la clave 6 y el mismo razonamiento del pico al 25 %—. *(Lectura nuestra de la diferencia, no una errata declarada.)*
+> **Ojo con la solución de la cátedra.** Su texto plano sigue: *"…CONSEGUIR PORQUE SI ES ASI LO CONSEGUIRAS"*. Esa continuación **no está en el criptograma del enunciado**: 51 símbolos alcanzan justo hasta `CONSEGUIR`. La cátedra parece estar citando la frase original completa, no el descifrado de lo que da a descifrar. Coincide con nosotros en lo que sí importa —la clave 6 y el mismo razonamiento del pico al 25 %—. *(Lectura nuestra de la diferencia, no una errata declarada.)*
 
 ### Ejercicio 4
 
@@ -234,18 +234,18 @@ VKXYKBKXGKSGWAKQQGYIUYGYWAKXKGQRKSZKJKYKKYIUSYKMAÑX
 >
 > Nótese que **ninguna suma desborda**: el mayor total es 24. Acá el módulo no llega a actuar, lo cual es una buena señal de que no hay error de wrap escondido.
 >
-> > **Discrepancia con el crudo.** El crudo escribe $C = \texttt{VNXVÑOFRNEUÑ}$ y anota la clave como "$1\ 0\ 2\ 14$". El $14$ es el problema: en el **alfabeto castellano de 27** la `Ñ` ocupa la posición 14 y la `O` corre a la **15**; el 14 es el índice de la `O` en el alfabeto **inglés de 26**. O sea: el crudo usó el alfabeto de 27 para el mensaje y la salida (por eso aparece la `Ñ` en el resultado) pero el índice de 26 para la `O` de la clave.
-> >
-> > El error es **sistemático, no aleatorio**: difieren exactamente las tres posiciones cifradas con la `O` —la 4, la 8 y la 12— y en todas el símbolo cae **uno antes** del correcto.
-> >
-> > | Posición | 4 | 8 | 12 |
-> > |---|---|---|---|
-> > | Verificado ($\texttt{O}=15$) | **W** | **S** | **O** |
-> > | Crudo ($\texttt{O}=14$) | V | R | Ñ |
-> >
-> > La [solución de la cátedra](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica%20-%20Soluciones.pdf) da `V N X W Ñ O F S N E U O`, que es lo verificado acá. **El resultado correcto es `VNXWÑOFSNEUO`.**
-> >
-> > Moraleja para el parcial: cuando el alfabeto es el de 27, conviene escribir la tabla de índices **antes** de empezar a sumar. Todo lo que está después de la `N` corre un lugar.
+> **Discrepancia con el crudo.** El crudo escribe $C = \texttt{VNXVÑOFRNEUÑ}$ y anota la clave como "$1\ 0\ 2\ 14$". El $14$ es el problema: en el **alfabeto castellano de 27** la `Ñ` ocupa la posición 14 y la `O` corre a la **15**; el 14 es el índice de la `O` en el alfabeto **inglés de 26**. O sea: el crudo usó el alfabeto de 27 para el mensaje y la salida (por eso aparece la `Ñ` en el resultado) pero el índice de 26 para la `O` de la clave.
+>
+> El error es **sistemático, no aleatorio**: difieren exactamente las tres posiciones cifradas con la `O` —la 4, la 8 y la 12— y en todas el símbolo cae **uno antes** del correcto.
+>
+> | Posición | 4 | 8 | 12 |
+> |---|---|---|---|
+> | Verificado ($\texttt{O}=15$) | **W** | **S** | **O** |
+> | Crudo ($\texttt{O}=14$) | V | R | Ñ |
+>
+> La [solución de la cátedra](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica%20-%20Soluciones.pdf) da `V N X W Ñ O F S N E U O`, que es lo verificado acá. **El resultado correcto es `VNXWÑOFSNEUO`.**
+>
+> Moraleja para el parcial: cuando el alfabeto es el de 27, conviene escribir la tabla de índices **antes** de empezar a sumar. Todo lo que está después de la `N` corre un lugar.
 >
 > #### b) CERO vs COMPADRE
 >
@@ -262,9 +262,9 @@ VKXYKBKXGKSGWAKQQGYIUYGYWAKXKGQRKSZKJKYKKYIUSYKMAÑX
 >
 > Ojo con el orden de importancia: el último renglón es el **argumento más débil**. Un espacio de claves grande es condición **necesaria y no suficiente** —es todo el punto de [[ataque-de-fuerza-bruta#Principio de espacio de claves suficiente|espacio de claves suficiente]]—, y Vigenère no cae por fuerza bruta sino por la factorización en sub-textos. Los tres primeros renglones son los que realmente contestan la pregunta.
 >
-> > **Un chequeo que hay que hacer y acá no muerde.** [[cifrado-de-vigenere#Consecuencias prácticas|Vigenère]] advierte que una clave con **letras repetidas** desperdicia período: dos posiciones con la misma letra producen sub-textos con el mismo corrimiento, y el atacante puede fusionarlos. `CERO` (C, E, R, O) y `COMPADRE` (C, O, M, P, A, D, R, E) **no repiten ninguna letra**, así que las dos aprovechan todo su período y la comparación se decide sólo por el largo: 4 contra 8.
+> **Un chequeo que hay que hacer y acá no muerde.** [[cifrado-de-vigenere#Consecuencias prácticas|Vigenère]] advierte que una clave con **letras repetidas** desperdicia período: dos posiciones con la misma letra producen sub-textos con el mismo corrimiento, y el atacante puede fusionarlos. `CERO` (C, E, R, O) y `COMPADRE` (C, O, M, P, A, D, R, E) **no repiten ninguna letra**, así que las dos aprovechan todo su período y la comparación se decide sólo por el largo: 4 contra 8.
 >
-> > **Hasta dónde llega el argumento.** La cátedra remata: *"si el período pudiera ser del mismo tamaño del mensaje, ¡mejor!, pero eso no sería práctico"*. Ese caso límite —clave tan larga como el mensaje y elegida al azar— **es el [[one-time-pad|One Time Pad]]**, y ahí Vigenère alcanza el [[secreto-perfecto|secreto perfecto]]. El "no sería práctico" es exactamente la tercera mala noticia del OTP. Se retoma en la [[guia-02-criptografia-simetrica#Ejercicio 3|Guía 2, Ej. 3c]].
+> **Hasta dónde llega el argumento.** La cátedra remata: *"si el período pudiera ser del mismo tamaño del mensaje, ¡mejor!, pero eso no sería práctico"*. Ese caso límite —clave tan larga como el mensaje y elegida al azar— **es el [[one-time-pad|One Time Pad]]**, y ahí Vigenère alcanza el [[secreto-perfecto|secreto perfecto]]. El "no sería práctico" es exactamente la tercera mala noticia del OTP. Se retoma en la [[guia-02-criptografia-simetrica#Ejercicio 3|Guía 2, Ej. 3c]].
 >
 > #### c) Componer dos Vigenère da otro Vigenère
 >
@@ -297,15 +297,15 @@ VKXYKBKXGKSGWAKQQGYIUYGYWAKXKGQRKSZKJKYKKYIUSYKMAÑX
 >
 > Y en un solo paso: $\mathsf{Enc}_{\texttt{EGIK}}(\texttt{HOLA}) = (7{+}4,\ 15{+}6,\ 11{+}8,\ 0{+}10) = (11, 21, 19, 10) = \texttt{LUSK}$. **Coincide con $C_2$.** ∎
 >
-> > **Discrepancia con el crudo.** El crudo tiene tres deslices en este ejemplo:
-> >
-> > | | Crudo | Verificado |
-> > |---|---|---|
-> > | $C_1 = \mathsf{Enc}_{\texttt{ABCD}}(\texttt{HOLA})$ | `HPNC` | **`HPND`** ($\texttt{A}+\texttt{D} = 0+3 = 3 = \texttt{D}$) |
-> > | $C_2 = \mathsf{Enc}_{\texttt{EFGH}}(C_1)$ | `LUSÑ` | **`LUSK`** ($\texttt{D}+\texttt{H} = 3+7 = 10 = \texttt{K}$) |
-> > | Clave compuesta | `EFHO` | **`EGIK`** |
-> >
-> > Los dos primeros son errores de arrastre en la última columna. El tercero no se deduce de ninguno de los dos: la suma correcta $(0{+}4,\,1{+}5,\,2{+}6,\,3{+}7)$ da $\texttt{E},\texttt{G},\texttt{I},\texttt{K}$, mientras que `EFHO` corresponde a $(4,5,7,15)$. **La clave compuesta correcta es `EGIK`**, y es la única que reproduce $C_2$ en un paso, que es justamente lo que el ejercicio pide mostrar.
+> **Discrepancia con el crudo.** El crudo tiene tres deslices en este ejemplo:
+>
+> | | Crudo | Verificado |
+> |---|---|---|
+> | $C_1 = \mathsf{Enc}_{\texttt{ABCD}}(\texttt{HOLA})$ | `HPNC` | **`HPND`** ($\texttt{A}+\texttt{D} = 0+3 = 3 = \texttt{D}$) |
+> | $C_2 = \mathsf{Enc}_{\texttt{EFGH}}(C_1)$ | `LUSÑ` | **`LUSK`** ($\texttt{D}+\texttt{H} = 3+7 = 10 = \texttt{K}$) |
+> | Clave compuesta | `EFHO` | **`EGIK`** |
+>
+> Los dos primeros son errores de arrastre en la última columna. El tercero no se deduce de ninguno de los dos: la suma correcta $(0{+}4,\,1{+}5,\,2{+}6,\,3{+}7)$ da $\texttt{E},\texttt{G},\texttt{I},\texttt{K}$, mientras que `EFHO` corresponde a $(4,5,7,15)$. **La clave compuesta correcta es `EGIK`**, y es la única que reproduce $C_2$ en un paso, que es justamente lo que el ejercicio pide mostrar.
 >
 > ##### El ejemplo de la cátedra, también verificado
 >
@@ -399,17 +399,17 @@ RESOX
 >
 > **Criptograma 1 → sustitución monoalfabética.** La forma es la correcta —dos letras se llevan 16 % y 14 %, hay cola larga, faltan 9 símbolos— pero **las etiquetas están corridas**: el pico es `Z` y el segundo `V`, y las vocales `AEIOU` suman apenas **12 %** cuando en castellano son ≈ 47 %. Perfil de idioma con nombres cambiados ⇒ monoalfabética.
 >
-> > **Por qué el IC no alcanza acá y hay que mirar las vocales.** Entre el Criptograma 1 (0,0653) y el Criptograma 3 (0,0695) hay una diferencia de 0,004 sobre textos de 50 y 60 letras — puro ruido muestral, no sirve para decidir. Es el límite conocido del IC: es **invariante ante sustitución monoalfabética**, así que por diseño no puede distinguir el caso 1 del caso 3. Lo que los separa es **cuáles** letras cargan la masa: en el 3 son `A` y `E`, en el 1 son `Z` y `V`. Ese es el matiz entre "conserva el perfil" y "conserva la asignación letra por letra" que marca la [[criptoanalisis-por-frecuencias#Identificar el tipo de cifrado a partir del histograma|nota de frecuencias]].
+> **Por qué el IC no alcanza acá y hay que mirar las vocales.** Entre el Criptograma 1 (0,0653) y el Criptograma 3 (0,0695) hay una diferencia de 0,004 sobre textos de 50 y 60 letras — puro ruido muestral, no sirve para decidir. Es el límite conocido del IC: es **invariante ante sustitución monoalfabética**, así que por diseño no puede distinguir el caso 1 del caso 3. Lo que los separa es **cuáles** letras cargan la masa: en el 3 son `A` y `E`, en el 1 son `Z` y `V`. Ese es el matiz entre "conserva el perfil" y "conserva la asignación letra por letra" que marca la [[criptoanalisis-por-frecuencias#Identificar el tipo de cifrado a partir del histograma|nota de frecuencias]].
 >
-> > **Discrepancia con el crudo.** En el crudo, debajo del histograma de cada criptograma quedó anotado el veredicto, y los del **1 y el 3 están intercambiados**:
-> >
-> > | | Crudo | Verificado (y solución de la cátedra) |
-> > |---|---|---|
-> > | Criptograma 1 | transposición | **monoalfabética** |
-> > | Criptograma 2 | polialfabética | **polialfabética** |
-> > | Criptograma 3 | monoalfabética | **transposición** |
-> >
-> > Los conteos del crudo son correctos —son los mismos que se reproducen acá—; lo que se dio vuelta es la etiqueta. La [solución de la cátedra](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica%20-%20Soluciones.pdf) coincide con la clasificación verificada, y lo justifica con las mismas dos frases: el 1 *"conserva frecuencias en las nuevas letras, pero usa una permutación del alfabeto original"*, el 3 *"conserva el alfabeto y la frecuencia de las letras originales"*.
+> **Discrepancia con el crudo.** En el crudo, debajo del histograma de cada criptograma quedó anotado el veredicto, y los del **1 y el 3 están intercambiados**:
+>
+> | | Crudo | Verificado (y solución de la cátedra) |
+> |---|---|---|
+> | Criptograma 1 | transposición | **monoalfabética** |
+> | Criptograma 2 | polialfabética | **polialfabética** |
+> | Criptograma 3 | monoalfabética | **transposición** |
+>
+> Los conteos del crudo son correctos —son los mismos que se reproducen acá—; lo que se dio vuelta es la etiqueta. La [solución de la cátedra](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica%20-%20Soluciones.pdf) coincide con la clasificación verificada, y lo justifica con las mismas dos frases: el 1 *"conserva frecuencias en las nuevas letras, pero usa una permutación del alfabeto original"*, el 3 *"conserva el alfabeto y la frecuencia de las letras originales"*.
 
 ### Ejercicio 6
 
@@ -463,9 +463,9 @@ Para ello:
 > | 16 | 10 / 37 |
 > | 3 · 6 · 12 | 6 / 37 |
 >
-> > **Cómo se lee esta tabla, que es donde se equivoca la intuición.** El 2 puntúa *más alto* que el 4 y aun así no es la respuesta: **todo divisor del período verdadero también divide todas las distancias**, así que los candidatos chicos siempre acumulan apoyo. La regla correcta es quedarse con el **mayor** candidato que todavía divide a casi todas las distancias — el 4 divide 34 de 37 (92 %), mientras que el 8 se cae a 22 de 37 (59 %). Las 3 distancias que el 4 no divide (hay repeticiones a 37, 8 y 20 de distancia) son **coincidencias del idioma**, no de la clave: en un texto de 478 letras es esperable que alguna secuencia de 3 letras se repita por azar.
-> >
-> > Eso es exactamente lo que hace `estimar_largo()`: el mayor candidato que divide al menos al 60 % de las distancias.
+> **Cómo se lee esta tabla, que es donde se equivoca la intuición.** El 2 puntúa *más alto* que el 4 y aun así no es la respuesta: **todo divisor del período verdadero también divide todas las distancias**, así que los candidatos chicos siempre acumulan apoyo. La regla correcta es quedarse con el **mayor** candidato que todavía divide a casi todas las distancias — el 4 divide 34 de 37 (92 %), mientras que el 8 se cae a 22 de 37 (59 %). Las 3 distancias que el 4 no divide (hay repeticiones a 37, 8 y 20 de distancia) son **coincidencias del idioma**, no de la clave: en un texto de 478 letras es esperable que alguna secuencia de 3 letras se repita por azar.
+>
+> Eso es exactamente lo que hace `estimar_largo()`: el mayor candidato que divide al menos al 60 % de las distancias.
 >
 > La cátedra llega a lo mismo por el camino corto: *"como todos son múltiplos de 4, el período debe ser 4 o 2 o 1"*, y descarta 2 y 1 al partir el texto. Y como el enunciado dice **comprobar**, el cierre natural es el [[indice-de-coincidencia|índice de coincidencia]]: partir en 4 sub-textos y verificar que el IC de cada uno salte de ≈ 0,04 (el del criptograma entero) a ≈ 0,0775. **Ese paso todavía no está hecho.**
 >
@@ -483,11 +483,11 @@ Para ello:
 >
 > Cada sub-texto es un [[cifrado-por-rotacion|César independiente]], así que se resuelve alineando su pico con el del castellano. Sobre el sub-texto 1:
 >
-> > **Cuidado con alinear el pico con la `E` de una.** En castellano la `A` y la `E` están **empatadas** en ≈ 13 % (la tabla del propio enunciado les da 13 a las dos). Lo que desempata es la **distancia entre los dos picos**: acá son `J` (17,50 %) y `N` (14,17 %), separadas por $13 - 9 = 4$ posiciones — exactamente la distancia entre `A` $(0)$ y `E` $(4)$. Entonces el par se lee $\texttt{J}\leftrightarrow\texttt{A}$ y $\texttt{N}\leftrightarrow\texttt{E}$, y sale
-> >
-> > $$k_1 = \sigma(\texttt{J}) - \sigma(\texttt{A}) = 9 - 0 = 9 = \texttt{J}$$
-> >
-> > Control: con $k_1 = 9$ el sub-texto descifrado queda `A` 17,5 % · `E` 14,2 % · `D` 10 % · `L` 9,2 % · `O` 7,5 % · `U` 6,7 % · `R` 5,8 %, que es un perfil de castellano creíble. Si en cambio se hubiera alineado $\texttt{J}\leftrightarrow\texttt{E}$ (o sea $k_1 = 5$), el segundo pico caería en una letra rara y el perfil no cerraría. *(Este desempate es lectura nuestra; el enunciado no lo menciona.)*
+> **Cuidado con alinear el pico con la `E` de una.** En castellano la `A` y la `E` están **empatadas** en ≈ 13 % (la tabla del propio enunciado les da 13 a las dos). Lo que desempata es la **distancia entre los dos picos**: acá son `J` (17,50 %) y `N` (14,17 %), separadas por $13 - 9 = 4$ posiciones — exactamente la distancia entre `A` $(0)$ y `E` $(4)$. Entonces el par se lee $\texttt{J}\leftrightarrow\texttt{A}$ y $\texttt{N}\leftrightarrow\texttt{E}$, y sale
+>
+> $$k_1 = \sigma(\texttt{J}) - \sigma(\texttt{A}) = 9 - 0 = 9 = \texttt{J}$$
+>
+> Control: con $k_1 = 9$ el sub-texto descifrado queda `A` 17,5 % · `E` 14,2 % · `D` 10 % · `L` 9,2 % · `O` 7,5 % · `U` 6,7 % · `R` 5,8 %, que es un perfil de castellano creíble. Si en cambio se hubiera alineado $\texttt{J}\leftrightarrow\texttt{E}$ (o sea $k_1 = 5$), el segundo pico caería en una letra rara y el perfil no cerraría. *(Este desempate es lectura nuestra; el enunciado no lo menciona.)*
 >
 > Repitiendo el mismo ataque sobre los sub-textos 2, 3 y 4 se obtienen $k_2 = \texttt{U}$, $k_3 = \texttt{A}$, $k_4 = \texttt{N}$:
 >
@@ -507,7 +507,7 @@ Para ello:
 > 2. **Falta la comprobación por IC** que pide el verbo *comprobar* de la parte (a): calcular el IC de cada sub-texto y ver el salto a ≈ 0,0775.
 > 3. **Falta volcar todo esto al [crudo](../../raw/guias/guia1/Resolucion%20Guia%201.md)**, donde hoy están pegadas las capturas de la salida pero no está escrito el razonamiento.
 >
-> > **Una errata menor de la solución de la cátedra:** su tabla ubica `NMON` en las posiciones 75 y 256, pero declara una distancia de 184 — y $256 - 75 = 181$. La posición correcta es **72** (que es la que devuelve el script), y con ella $256 - 72 = 184$. El número que usa el razonamiento es el correcto; el que está mal es el índice.
+> **Una errata menor de la solución de la cátedra:** su tabla ubica `NMON` en las posiciones 75 y 256, pero declara una distancia de 184 — y $256 - 75 = 181$. La posición correcta es **72** (que es la que devuelve el script), y con ella $256 - 72 = 184$. El número que usa el razonamiento es el correcto; el que está mal es el índice.
 
 ### Ejercicio 7
 
@@ -587,17 +587,17 @@ Se cuenta con un texto cifrado producto de **transposición por columnas** (cada
 > | 60 | 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60 | 12 | **324** | **39** | 1566 | 85 |
 > | 120 | 16 divisores | 16 | **432** | **43** | 3186 | 145 |
 >
-> > **Discrepancia con el crudo.** El crudo cierra con *"hay que probar cada combinación de $(k,n)$ a ciegas $\Rightarrow 27\cdot(m-2) = m+25$ pruebas"*. Ahí hay **dos problemas distintos**:
-> >
-> > **(i) Los dos números no son iguales.** $27(m-2) = 27m - 54$ y $m + 25 = 27 + (m-2)$. La igualdad $27m - 54 = m + 25$ pide $26m = 79$, que no tiene solución entera: **no coinciden para ningún $m$**. Lo que pasó es que se escribieron **dos ataques diferentes** con signo de igual entre medio — el producto es el ataque ciego, la suma es el ataque separado de la parte (a). Son las dos cuentas correctas de dos escenarios distintos, no dos formas de escribir la misma.
-> >
-> > **(ii) La cantidad de $n$ candidatos no es $m-2$, es $d(m)-2$.** Tratar como candidatos a todos los enteros entre 2 y $m-1$ ignora que la grilla tiene que cerrar. Para $m = 60$ eso son 58 candidatos contra los **12** divisores reales: se sobrecuenta por un factor ~5. El propio ejemplo de la cátedra lo muestra —con $m=9$, $n=2$ "falla"— y el crudo ya tenía escrito $m = n\cdot k$ dos renglones antes.
-> >
-> > **Corregido:** $27\,d(m)$ a ciegas, $27 + d(m)$ separando las capas.
+> **Discrepancia con el crudo.** El crudo cierra con *"hay que probar cada combinación de $(k,n)$ a ciegas $\Rightarrow 27\cdot(m-2) = m+25$ pruebas"*. Ahí hay **dos problemas distintos**:
 >
-> > **Qué contesta la cátedra, y por qué difiere.** Su solución dice: *"para obtener la clave de César, el máximo de pruebas es $q$ (el número de símbolos del alfabeto); por cada una hay que transponer $m$ veces, entonces $m \cdot q$"*, o sea $27m$. Es una **cota superior válida** —$d(m) \le m$ siempre— pero deja sin usar la restricción de divisibilidad, así que sobrecuenta igual que el crudo. Y llama la atención que su propia parte (a) usa la separación (primero $k$ por frecuencias, después reordenar), con lo cual su (b) le pone precio a un ataque más torpe que el que ella misma propone. *(Lectura nuestra; la cátedra no marca esta tensión.)*
+> **(i) Los dos números no son iguales.** $27(m-2) = 27m - 54$ y $m + 25 = 27 + (m-2)$. La igualdad $27m - 54 = m + 25$ pide $26m = 79$, que no tiene solución entera: **no coinciden para ningún $m$**. Lo que pasó es que se escribieron **dos ataques diferentes** con signo de igual entre medio — el producto es el ataque ciego, la suma es el ataque separado de la parte (a). Son las dos cuentas correctas de dos escenarios distintos, no dos formas de escribir la misma.
 >
-> > **Un supuesto que conviene declarar.** Todo esto asume que la grilla se llena **exacta**, sin relleno. Si el cifrador admite *padding* para completar la última fila, cualquier $n \le m$ vuelve a ser posible y el conteo ciego sube a $27m$ — la respuesta de la cátedra. El enunciado no aclara cuál de los dos casos es; en un parcial conviene escribir el supuesto antes de dar el número. *(Lectura nuestra.)*
+> **(ii) La cantidad de $n$ candidatos no es $m-2$, es $d(m)-2$.** Tratar como candidatos a todos los enteros entre 2 y $m-1$ ignora que la grilla tiene que cerrar. Para $m = 60$ eso son 58 candidatos contra los **12** divisores reales: se sobrecuenta por un factor ~5. El propio ejemplo de la cátedra lo muestra —con $m=9$, $n=2$ "falla"— y el crudo ya tenía escrito $m = n\cdot k$ dos renglones antes.
+>
+> **Corregido:** $27\,d(m)$ a ciegas, $27 + d(m)$ separando las capas.
+>
+> **Qué contesta la cátedra, y por qué difiere.** Su solución dice: *"para obtener la clave de César, el máximo de pruebas es $q$ (el número de símbolos del alfabeto); por cada una hay que transponer $m$ veces, entonces $m \cdot q$"*, o sea $27m$. Es una **cota superior válida** —$d(m) \le m$ siempre— pero deja sin usar la restricción de divisibilidad, así que sobrecuenta igual que el crudo. Y llama la atención que su propia parte (a) usa la separación (primero $k$ por frecuencias, después reordenar), con lo cual su (b) le pone precio a un ataque más torpe que el que ella misma propone. *(Lectura nuestra; la cátedra no marca esta tensión.)*
+>
+> **Un supuesto que conviene declarar.** Todo esto asume que la grilla se llena **exacta**, sin relleno. Si el cifrador admite *padding* para completar la última fila, cualquier $n \le m$ vuelve a ser posible y el conteo ciego sube a $27m$ — la respuesta de la cátedra. El enunciado no aclara cuál de los dos casos es; en un parcial conviene escribir el supuesto antes de dar el número. *(Lectura nuestra.)*
 
 ### Ejercicio 8
 

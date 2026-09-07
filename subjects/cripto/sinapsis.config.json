@@ -199,6 +199,7 @@
     }
   ],
   "fab": null,
+  "exercisePlates": false,
   "wiki": {
     "root": "wiki",
     "index": "indice.md",
