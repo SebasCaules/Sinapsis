@@ -52,6 +52,7 @@ const tools: ToolInfo[] = [
       views: [
         { id: "explorador", label: "Explorador de distribuciones", layout: "wide" },
         { id: "calc", label: "Calculadoras", layout: "wide" },
+        { id: "documento", label: "Documento", layout: "wide", frame: "sheet" },
       ],
       figures: false,
       progress: false,
@@ -495,5 +496,25 @@ describe("<ToolHost/>", () => {
     expect(await screen.findByText("Taller de resolución")).toBeTruthy();
     expect(screen.getByText("PRÓXIMAMENTE")).toBeTruthy();
     expect(mounted).toBe(0);
+  });
+});
+
+describe("<ToolHost/> · frame: \"sheet\" (N0-73)", () => {
+  it("dibuja la vista dentro de la hoja ajustable", async () => {
+    renderTool("/m/proba/t/documento");
+    await waitFor(() => expect(document.querySelector("[data-page-frame]")).not.toBeNull());
+    const hoja = document.querySelector("[data-page-frame]");
+    /* La vista queda ADENTRO de la hoja, y el host se marca para que el bundle
+       sepa que la caja ya está dibujada. */
+    expect(hoja?.querySelector('.sinapsis-tool[data-frame="sheet"]')).not.toBeNull();
+    /* Las dos asas de ancho son las mismas de una página del wiki. */
+    expect(hoja?.querySelectorAll('[role="separator"], [class*="handle"]').length).toBeGreaterThan(0);
+  });
+
+  it("una vista sin frame no dibuja la hoja", async () => {
+    renderTool("/m/proba/t/calc");
+    await waitFor(() => expect(hostNode()).not.toBeNull());
+    expect(document.querySelector("[data-page-frame]")).toBeNull();
+    expect(hostNode()?.getAttribute("data-frame")).toBeNull();
   });
 });
