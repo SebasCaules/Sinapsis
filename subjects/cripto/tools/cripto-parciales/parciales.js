@@ -252,7 +252,7 @@
         "p",
         "pv-bajada",
         "Los ejercicios de los parciales que circulan, con su resolución verificada contra el wiki. " +
-          "El enunciado primero; la resolución se abre cuando la querés ver.",
+          "El enunciado primero; la resolución se abre a pedido.",
       ),
     );
     raiz.appendChild(head);
