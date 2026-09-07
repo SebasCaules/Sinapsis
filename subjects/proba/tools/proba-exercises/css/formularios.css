@@ -79,8 +79,10 @@
     color: var(--text); border-bottom-color: var(--primary); font-weight: 600;
   }
   /* cuántas fórmulas tiene la unidad: el dato que antes solo aparecía al entrar */
+  /* R8: el conteo es un sufijo subordinado del rótulo, igual que .ej-group-n
+     y el contador de las colecciones de ejercicios: --text-3, no --text-2. */
   & .fm-tab-n {
-    font-family: var(--font-mono); font-size: 10px; color: var(--text-2);
+    font-family: var(--font-mono); font-size: 10px; color: var(--text-3);
     margin-left: 4px; font-variant-numeric: tabular-nums;
   }
   /* unidad sin fórmulas: se dice con el «0» y con el title, no atenuando el
@@ -94,9 +96,11 @@
   & .fm-tools {
     display: flex; align-items: center; gap: 18px;
   }
+  /* R6/WCAG 1.4.11: el filete inferior es la única señal del buscador (el input
+     va sin borde y transparente); --border-2 medía 1,33-1,80:1 sobre --bg. */
   & .fm-q {
     display: flex; align-items: center; gap: 6px;
-    border-bottom: 1px solid var(--border-2); padding: 3px 2px;
+    border-bottom: 1px solid var(--border-3); padding: 3px 2px;
   }
   & .fm-q-ico {
     color: var(--text-3); display: flex;
@@ -247,20 +251,12 @@
   & .fm-pick {
     display: inline-flex; align-items: center; justify-content: center;
     width: 14px; height: 14px; margin-right: .35em; vertical-align: -1px;
-    /* Visible en reposo: es la única afordancia de «mi hoja». Atenuada para no
-       competir con el rótulo, plena al apuntarla o al estar marcada. */
-    opacity: .35; transition: opacity var(--t);
+    /* R10/WCAG 1.4.11: es la única afordancia de «mi hoja», así que va plena en
+       reposo. Con opacity .35 quedaba en 1,55-1,65:1 y solo se veía al apuntarla
+       —con teclado o pantalla táctil no hay hover que la revele. */
   }
   & .fm-pick input {
     margin: 0; width: 12px; height: 12px; cursor: pointer; accent-color: var(--primary);
-  }
-  & .fmx-item:hover .fm-pick,
-  & .fm-pick:focus-within,
-  & .fm-doc.picking .fm-pick,
-  & .fmx-item.picked .fm-pick,
-  & .fmx-tab tr:hover .fm-pick,
-  & .fmx-tab tr.picked .fm-pick {
-    opacity: 1;
   }
   & .fmx-item.picked::before,
   & .fmx-tab tr.picked .fmx-tname::before {
@@ -277,6 +273,15 @@
   }
   & .fmx-tab tr.is-target > * {
     background: var(--hl);
+  }
+  /* R11: sobre --hl solo va --text. En claustro --text-3 sobre el resalte cae a
+     3,61:1, justo en el bloque al que apunta el enlace directo. */
+  & .fmx-item.is-target .fm-wiki,
+  & .fmx-item.is-target .fmx-var,
+  & .fmx-item.is-target .fmx-tcond,
+  & .fmx-tab tr.is-target .fmx-dash,
+  & .fmx-tab tr.is-target .fmx-tcond {
+    color: var(--text);
   }
   /* ---------------- tablas (booktabs, piel .tex-tab) ---------------- */
   & .fmx-tabwrap {
@@ -327,9 +332,6 @@
   @media (max-width: 720px) {
     & .fm-sheet {
       padding: 24px 16px 30px;
-    }
-    & .fm-pick {
-      opacity: 1;
     }
     & .fmx-item.picked::before,
     & .fmx-tab tr.picked .fmx-tname::before {

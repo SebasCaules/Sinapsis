@@ -173,8 +173,11 @@
   & .calc-copy {
     flex: none;
   }
+  /* Un solo deshabilitado en todo el bundle, sin opacity: con .35 la tinta caía
+     a 2.1-2.8:1 y el botón desaparecía de la tarjeta. [R10] */
   & .calc-copy[disabled] {
-    opacity: .35; cursor: default;
+    background: var(--surface-2); border-color: var(--border); color: var(--text-3);
+    box-shadow: none; cursor: default;
   }
   /* pasos plegables con los números sustituidos */
   & .calc-steps {
@@ -303,7 +306,8 @@
   & .ztable-scroll {
     position: relative;            /* el offsetTop de la celda .hot se mide contra este contenedor */
     overflow: auto; max-height: 460px; margin-top: 10px;
-    border: 1px solid var(--border); border-radius: var(--r);
+    /* mismo canto que la retícula de la tabla que enmarca [R7] */
+    border: 1px solid var(--border-2); border-radius: var(--r);
   }
   & .calc-tables .ztable-scroll {
     max-height: 300px;

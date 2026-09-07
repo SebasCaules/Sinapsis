@@ -171,7 +171,11 @@
   & .ej-doc .ej,
   & .ej-doc .tip,
   & .ej-doc .parcial {
+    /* --co es la MANCHA del callout (filete); --co-ink es su TINTA, la que
+       pinta el rótulo. R1/R2: --good, --warn, --u2… como texto no llegan a
+       4,5:1 sobre la hoja. Cada variante declara las dos. */
     --co: var(--border-2);
+    --co-ink: var(--text-2);
     border: 1px solid var(--border);
     border-radius: 3px;
     background: none;
@@ -211,52 +215,60 @@
     font-family: var(--font-tex); font-weight: 700;
     font-variant: small-caps; text-transform: none;
     font-size: .86em; letter-spacing: .06em;
-    color: var(--co); margin-bottom: .3em;
+    color: var(--co-ink, var(--co)); margin-bottom: .3em;
   }
   & .ej-doc .def {
     --co: var(--u2);
+    --co-ink: color-mix(in srgb, var(--u2) var(--ink-mix), var(--text));
   }
   & .ej-doc .def:not(.plain)::before {
     content: "Definición";
   }
   & .ej-doc .si {
     --co: var(--good);
+    --co-ink: var(--good-ink);
   }
   & .ej-doc .si:not(.plain)::before {
     content: "Cuándo sí";
   }
   & .ej-doc .no {
     --co: var(--bad);
+    --co-ink: var(--bad-text);
   }
   & .ej-doc .no:not(.plain)::before {
     content: "Cuándo no";
   }
   & .ej-doc .trade {
     --co: var(--warn);
+    --co-ink: var(--warn-ink);
   }
   & .ej-doc .trade:not(.plain)::before {
     content: "Compromiso";
   }
   & .ej-doc .cita {
     --co: var(--u3);
+    --co-ink: color-mix(in srgb, var(--u3) var(--ink-mix), var(--text));
   }
   & .ej-doc .cita:not(.plain)::before {
     content: "Fuente";
   }
   & .ej-doc .ej {
     --co: var(--u1);
+    --co-ink: color-mix(in srgb, var(--u1) var(--ink-mix), var(--text));
   }
   & .ej-doc .ej:not(.plain)::before {
     content: "Ejemplo";
   }
   & .ej-doc .tip {
     --co: var(--u5);
+    --co-ink: color-mix(in srgb, var(--u5) var(--ink-mix), var(--text));
   }
   & .ej-doc .tip:not(.plain)::before {
     content: "Regla de oro";
   }
   & .ej-doc .parcial {
     --co: var(--primary);
+    --co-ink: var(--primary-2);
   }
   & .ej-doc .parcial:not(.plain)::before {
     content: "En el parcial";
@@ -267,7 +279,7 @@
      se lo pinta igual que la caja .tex-box.resp que arma la vista para los ítems
      que sí traen respuestaHtml aparte, para que las dos se lean como lo mismo. */
   & .ej-doc .ej.resultado {
-    --co: var(--good); border-left: 3px solid var(--good);
+    --co: var(--good); --co-ink: var(--good-ink); border-left: 3px solid var(--good);
   }
   & .ej-doc .ej.resultado:not(.plain)::before {
     content: "Respuesta";
@@ -307,24 +319,30 @@
   & .ej-doc .hl-teal {
     --hl-co: var(--u1);
   }
+  /* R2: el color de unidad es mancha; como TEXTO va la tinta --uink
+     (color-mix con --ink-mix), que sobre la hoja llega a ≥ 4,5:1. */
   & .ej-doc .term {
-    font-style: italic; color: var(--u2);
+    font-style: italic; color: color-mix(in srgb, var(--u2) var(--ink-mix), var(--text));
   }
+  /* R1/R2: la mancha queda en el borde y en el fondo al 8 %; el texto usa la
+     tinta equivalente (--chip-ink), porque --warn, --u2 y --u3 como texto se
+     quedan entre 3,7 y 4,4:1 sobre la hoja. */
   & .ej-doc .chip {
     display: inline-block; white-space: nowrap;
-    border: 1px solid var(--chip-co, var(--u2)); color: var(--chip-co, var(--u2));
+    border: 1px solid var(--chip-co, var(--u2));
+    color: var(--chip-ink, color-mix(in srgb, var(--chip-co, var(--u2)) var(--ink-mix), var(--text)));
     background: color-mix(in srgb, var(--chip-co, var(--u2)) 8%, transparent);
     border-radius: 999px; padding: 0 .55em;
     font-family: var(--font-ui); font-size: .78em; line-height: 1.6;
   }
   & .ej-doc .chip.g {
-    --chip-co: var(--good);
+    --chip-co: var(--good); --chip-ink: var(--good-text);
   }
   & .ej-doc .chip.r {
-    --chip-co: var(--bad);
+    --chip-co: var(--bad); --chip-ink: var(--bad-text);
   }
   & .ej-doc .chip.a {
-    --chip-co: var(--warn);
+    --chip-co: var(--warn); --chip-ink: var(--warn-text);
   }
   & .ej-doc .chip.p {
     --chip-co: var(--u3);
@@ -560,12 +578,11 @@
   & .ej-toolbar .ej-seg-est button.ej-est-todos {
     width: auto; padding: 0 6px; font-size: 10.5px;
   }
+  /* R10/WCAG 1.4.11: el estado no elegido se distingue por RELLENO (círculo
+     lleno vs. anillo, más abajo), nunca por opacidad — atenuado dejaba los
+     cuatro glifos entre 1,9 y 2,7:1 en los tres temas. */
   & .ej-seg-est button .ej-sem-i {
-    flex: none; opacity: .55;
-  }
-  & .ej-seg-est button:hover .ej-sem-i,
-  & .ej-seg-est button.on .ej-sem-i {
-    opacity: 1;
+    flex: none;
   }
   & .ej-seg-est button.ej-k0 .ej-sem-i {
     color: var(--text-3);
@@ -586,10 +603,13 @@
   & .ej-buscar {
     position: relative; display: flex; align-items: center; flex: 1 1 120px; min-width: 120px;
   }
+  /* R6/WCAG 1.4.11: el filete es el único límite del campo y sobre la barra
+     (--elevated) --border medía 1.01-1.44:1. Con --border-3 llega a ≥ 3:1 y
+     --surface-2 alinea el relleno con .seg y .ej-prog de la misma fila. */
   & .ej-search {
     flex: 1 1 auto; min-width: 0;
     height: 30px; padding: 0 44px 0 11px; border-radius: var(--r-ctrl);
-    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-3); background: var(--surface-2); color: var(--text);
     font-family: var(--font-ui); font-size: 12.5px;
   }
   & .ej-search:focus {
@@ -611,16 +631,20 @@
     padding: 4px 5px; border: 1px solid var(--border); border-radius: var(--r);
     background: var(--surface-2);
   }
+  /* R6/WCAG 1.4.11: con la colección sin empezar la barra es solo pista, así
+     que el marco lleva --border-3 y el relleno --surface-2 (antes 1.0-1.4:1). */
   & .ej-bar {
     flex: none; width: 72px; display: flex; height: 6px; border-radius: 999px;
-    overflow: hidden; background: var(--surface-3); border: 1px solid var(--border);
+    overflow: hidden; background: var(--surface-2); border: 1px solid var(--border-3);
   }
   & .ej-bar i {
     display: block; height: 100%; transition: width var(--t-slow);
   }
   /* mismo orden que el semáforo: gris → rojo → ámbar → verde */
+  /* el tramo «sin resolver» es la pista de la barra: --track, no una veladura
+     de --text-3 al 30 % (medía 1,5-1,9:1 sobre la barra) */
   & .ej-bar .s0 {
-    background: color-mix(in srgb, var(--text-3) 30%, transparent);
+    background: var(--track);
   }
   & .ej-bar .s3 {
     background: var(--bad);
@@ -654,8 +678,12 @@
   & .ej-ib:hover {
     background: var(--surface); border-color: var(--border); color: var(--text);
   }
+  /* R5/R9: --primary-soft sobre la barra (--elevated) aporta 1,04:1 en claustro
+     y hunde el botón; el filete teñido devuelve forma al estado activo. */
   & .ej-ib.on {
-    background: var(--primary-soft); border-color: transparent; color: var(--primary-2);
+    background: var(--primary-soft);
+    border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+    color: var(--primary-2);
   }
   & .ej-ib svg {
     flex: none;
@@ -721,8 +749,10 @@
   & .ej-list.ej-practica .ej-item:not(.ej-rev).ej-reso-abierta .ej-oculta-dentro {
     display: inline-flex; align-items: center; gap: 7px;
     margin: 10px 0 2px; padding: 5px 11px;
-    border: 1px dashed var(--border-2); border-radius: var(--r-ctrl);
-    background: var(--surface); color: var(--text-2);
+    /* R6/WCAG 1.4.11: el discontinuo es el único límite del botón que revela la
+       respuesta; --border-2 sobre la hoja medía 1,25-1,80:1. */
+    border: 1px dashed var(--border-3); border-radius: var(--r-ctrl);
+    background: var(--surface-2); color: var(--text-2);
     font-family: var(--font-ui); font-size: 12.5px; line-height: 1.35;
     text-align: left; cursor: pointer;
   }

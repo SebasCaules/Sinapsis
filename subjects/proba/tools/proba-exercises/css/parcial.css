@@ -67,8 +67,11 @@
   & .exam-timer.low {
     color: var(--bad-text); background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 40%, transparent); animation: examPulse 1s ease-in-out infinite;
   }
+  /* R6: la pista va con --track (= --border-3), el token de las barras de
+     progreso; con --surface-3 quedaba en 1.00-1.25:1 sobre --bg y la barra
+     parecía desaparecer en vez de vaciarse. */
   & .exam-time-track {
-    flex: 1; height: 6px; border-radius: 999px; background: var(--surface-3); overflow: hidden;
+    flex: 1; height: 6px; border-radius: 999px; background: var(--track); overflow: hidden;
   }
   & .exam-time-track i {
     display: block; height: 100%; background: var(--primary); border-radius: 999px; transition: width 1s linear;
@@ -93,9 +96,11 @@
     border: 0; background: none; border-radius: 50%;
     display: grid; place-items: center;
   }
+  /* R6/WCAG 1.4.11: el aro es la ÚNICA señal del ítem sin responder, así que
+     lleva --border-3 (--border-2 quedaba en 1.4-1.7:1 sobre --bg). */
   & .exam-dot::before {
     content: ""; width: 12px; height: 12px; border-radius: 50%;
-    border: 1.5px solid var(--border-2); background: var(--surface); transition: all var(--t);
+    border: 1.5px solid var(--border-3); background: var(--surface); transition: all var(--t);
   }
   & .exam-dot:hover::before {
     border-color: var(--primary); transform: scale(1.12);
@@ -125,8 +130,10 @@
   & .exam-item .quiz-opt.selected-ans {
     border-color: var(--primary); background: var(--primary-soft);
   }
+  /* R4: tinta sobre sólido. En claustro --primary es oro claro y el blanco
+     quedaba en 2.57:1; --on-primary da 7.11-9.87:1 en los tres temas. */
   & .exam-item .quiz-opt.selected-ans .mark {
-    background: var(--primary); color: #fff;
+    background: var(--primary); color: var(--on-primary);
   }
   & .exam-simbolica {
     display: flex; align-items: center; gap: 7px; margin-top: 12px;

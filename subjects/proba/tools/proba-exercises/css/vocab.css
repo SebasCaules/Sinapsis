@@ -73,15 +73,9 @@
   & [hidden] {
     display:none !important;
   }
-  & ::-webkit-scrollbar {
-    width:11px; height:11px;
-  }
-  & ::-webkit-scrollbar-thumb {
-    background:var(--border-2); border-radius:8px; border:3px solid transparent; background-clip:content-box;
-  }
-  & ::-webkit-scrollbar-thumb:hover {
-    background:var(--text-3); background-clip:content-box;
-  }
+  /* La barra de desplazamiento la pinta base.css con --scroll-thumb /
+     --scroll-thumb-hover, que son los tokens hechos para eso. El bundle ya no
+     la repinta: era el mismo componente con dos apariencias. [R8] */
 
   /* ========================================================
      HEADER
@@ -103,7 +97,7 @@
     border:1px solid var(--border); border-radius:var(--r); background:var(--surface-2); color:var(--text-2);
     transition:background var(--t), color var(--t), border-color var(--t);
   }
-  & .icon-btn:hover {
+  & .icon-btn:hover:not(:disabled) {
     background:var(--surface); color:var(--text); border-color:var(--border-2);
   }
 
@@ -157,14 +151,17 @@
     background:var(--surface); color:var(--text); cursor:pointer; font-family:inherit;
     font-size:13.5px; font-weight:600; line-height:1; transition:all var(--t); white-space:nowrap;
   }
-  & .btn:hover {
+  & .btn:hover:not(:disabled) {
     background:var(--surface-2); border-color:var(--text-3); text-decoration:none;
   }
-  & .btn:active {
+  & .btn:active:not(:disabled) {
     transform:translateY(1px);
   }
+  /* Deshabilitado sin opacity: la tinta apagada y el canto tenue lo dicen, y así
+     el estado se lee igual en los tres temas (con .5 caía a 3.2:1). [R10] */
   & .btn:disabled {
-    opacity:.5; cursor:default; transform:none;
+    background:var(--surface-2); border-color:var(--border); color:var(--text-3);
+    box-shadow:none; cursor:default; transform:none;
   }
   & .btn.primary {
     background:var(--primary); border-color:var(--primary); color:var(--on-primary); box-shadow:var(--shadow-ctrl);
@@ -190,13 +187,16 @@
   & .btn.danger {
     color:var(--bad-text); border-color:color-mix(in srgb,var(--bad) 40%,transparent);
   }
+  /* El contorno es la única señal de que el chip es pulsable: mismo canto que
+     .btn y que el botón de la plataforma (--border no llega). [R7/R8] */
   & .chip-btn {
     display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:999px;
-    border:1px solid var(--border); background:var(--surface); color:var(--text-2); cursor:pointer;
+    border:1px solid var(--border-2); background:var(--surface); color:var(--text-2); cursor:pointer;
     font-family:inherit; font-size:12.5px; font-weight:600; transition:all var(--t);
   }
   & .chip-btn:hover {
-    background:var(--surface-2); color:var(--text); border-color:var(--border-2); text-decoration:none;
+    /* con el canto ya en --border-2, el hover sube al mismo tono que .btn:hover */
+    background:var(--surface-2); color:var(--text); border-color:var(--text-3); text-decoration:none;
   }
   & .chip-btn.on {
     background:var(--primary-soft); border-color:transparent; color:var(--primary-2);
@@ -217,8 +217,11 @@
   & .seg button:hover {
     color:var(--text);
   }
+  /* La ficha activa se levanta del carril (--surface-2) con la superficie que es
+     la más clara en los TRES temas: en Claustro --surface es MÁS OSCURA que el
+     carril y el activo se hundía; la sombra, negra, tampoco lo levantaba. [R5] */
   & .seg button.on {
-    background:var(--surface); color:var(--primary-2); box-shadow:var(--shadow-ctrl);
+    background:var(--elevated); color:var(--primary-2); box-shadow:var(--shadow-ctrl);
   }
   /* ---------- badges / pills ---------- */
   & .badge {
@@ -482,7 +485,9 @@
     content:attr(data-callout-title); display:block;
     font-family:var(--font-ui); font-weight:700; font-size:11px;
     text-transform:uppercase; letter-spacing:.08em;
-    color:var(--callout-color); margin-bottom:6px;
+    /* El rótulo es TEXTO: usa la tinta de la familia, no la mancha del filete
+       (--accent y --good como texto caen a 3.1-4.1:1). [R1] */
+    color:var(--callout-ink, var(--callout-color)); margin-bottom:6px;
   }
   & .doc blockquote.callout-info {
     --callout-color:var(--primary);
@@ -491,13 +496,13 @@
     --callout-color:var(--text-3);
   }
   & .doc blockquote.callout-tip {
-    --callout-color:var(--good);
+    --callout-color:var(--good); --callout-ink:var(--good-ink);
   }
   & .doc blockquote.callout-intuicion {
-    --callout-color:var(--accent);
+    --callout-color:var(--accent); --callout-ink:var(--accent-ink);
   }
   & .doc blockquote.callout-ejemplo {
-    --callout-color:var(--u3);
+    --callout-color:var(--u3); --callout-ink:color-mix(in srgb, var(--u3) var(--ink-mix), var(--text));
   }
   & .doc blockquote.callout-warn {
     --callout-color:var(--warn);
@@ -975,9 +980,11 @@
   & .eyebrow {
     display:inline-flex; align-items:center; gap:10px; font-family:var(--font-ui);
   }
+  /* Los filetes siguen al propio rótulo: fijados a --primary, en el hero de
+     unidad salían verde inglés junto a un rótulo del color de la unidad. [R8] */
   & .eyebrow::before,
   & .eyebrow::after {
-    content:""; height:1px; width:26px; background:color-mix(in srgb, var(--primary) 55%, transparent);
+    content:""; height:1px; width:26px; background:color-mix(in srgb, currentColor 55%, transparent);
   }
   /* Títulos de sección y display con un punto serif extra de carácter */
   & .section-title {
@@ -1518,8 +1525,10 @@
     content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px;
     border-radius: 3px; background: var(--ucol, var(--primary));
   }
+  /* El antetítulo es TEXTO: --ucol es mancha y como tinta cae a 3.7-4.0:1 en
+     laurel y claustro; --uink es el mismo color corrido hacia la tinta. [R2] */
   & .unit-hero .eyebrow {
-    color: var(--ucol, var(--primary));
+    color: var(--uink, var(--ucol, var(--primary)));
   }
   & .unit-hero .section-sub {
     margin-bottom: 18px;
