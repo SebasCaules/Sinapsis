@@ -58,7 +58,7 @@
   /* escala tipográfica de la matemática (KaTeX) */
   --math-scale: 1.10;
 
-  /* veladuras de estado (N0-66): resuelven con el --text del tema activo */
+  /* veladuras de estado (N0-67): resuelven con el --text del tema activo */
   --hover-wash: color-mix(in srgb, var(--text) 8%, transparent);
   --active-wash: color-mix(in srgb, var(--text) 13%, transparent);
 
@@ -82,7 +82,7 @@
              (campo, casilla, disparador del calendario, tarjeta fantasma discontinua,
              destino de arrastre, retícula de una tabla): WCAG 1.4.11 pide ≥ 3:1 y ni
              --border ni --border-2 llegan en ningún tema. --border y --border-2 son
-             para bordes que SIEMPRE tienen un cambio de fondo al lado. (N0-66)
+             para bordes que SIEMPRE tienen un cambio de fondo al lado. (N0-67)
 
    --hover-wash / --active-wash son el escalón de hover y de selección para lo
              que se apoya sobre CUALQUIER superficie, en especial --elevated (menús,
@@ -96,7 +96,7 @@
              tiene contenido al lado; una barra al 0 % es SOLO pista, y si no se
              ve sola la tarjeta miente («sin comenzar» parece «sin barra»). Por
              eso se mide contra --surface, que es el fondo de la tarjeta, y se
-             exige ≥ 3:1 (componente gráfico, WCAG 1.4.11). Desde N0-66 vale el
+             exige ≥ 3:1 (componente gráfico, WCAG 1.4.11). Desde N0-67 vale el
              mismo valor que --border-3 y se mide también sobre --bg y --elevated:
                  pergamino  #8a7c5f → 3.21 (--bg) · 3.77 (--surface) · 3.92 (--elevated)
                  laurel     #7e8161 → 3.21 · 3.73 · 3.83
@@ -113,7 +113,7 @@
   --surface:#faf5ea; --surface-2:#f2ebdb; --surface-3:#e2d7c0; --elevated:#fdfaf1; /* --surface-3: 1.12 sobre --bg (antes #eae0cd, 1.01: una píldora sobre la página desaparecía) */
   --text:#231c12; --text-2:#574b37; --text-3:#665c4b; /* --text-3: 4.70:1 sobre --bg-2, 5.16 sobre --bg (antes #6a6150: 4.37 sobre --bg-2) */
   --border:#ddd2bb; --border-2:#c9bca0;
-  --border-3:#8a7c5f; /* contorno que es la ÚNICA señal (N0-66): 3.21 sobre --bg · 3.77 sobre --surface · 3.92 sobre --elevated */
+  --border-3:#8a7c5f; /* contorno que es la ÚNICA señal (N0-67): 3.21 sobre --bg · 3.77 sobre --surface · 3.92 sobre --elevated */
   --track:#8a7c5f;   /* pista de progreso = --border-3: ≥ 3:1 sobre --bg, --surface y --elevated */
   --scroll-thumb:rgba(74,62,42,.34); --scroll-thumb-hover:rgba(74,62,42,.58); /* barras de desplazamiento propias */
   --ink-mix:68%;     /* cuánto color de unidad sobrevive en la TINTA (ver --uink) */
@@ -169,7 +169,7 @@
   --surface:#f8f6ec; --surface-2:#eff0df; --surface-3:#dedec7; --elevated:#fbf9f0; /* --surface-3: 1.09 sobre --bg (antes #e6e6d1, 1.005) */
   --text:#1b2117; --text-2:#3f4a38; --text-3:#5a604b; /* --text-3: 4.73 sobre --bg-2, 5.20 sobre --bg (antes #606751: 4.27 / 4.69) */
   --border:#d8dac1; --border-2:#c2c5a5;
-  --border-3:#7e8161; /* única señal (N0-66): 3.21 sobre --bg · 3.73 sobre --surface · 3.83 sobre --elevated */
+  --border-3:#7e8161; /* única señal (N0-67): 3.21 sobre --bg · 3.73 sobre --surface · 3.83 sobre --elevated */
   --track:#7e8161;   /* pista de progreso = --border-3 */
   --scroll-thumb:rgba(52,64,48,.34); --scroll-thumb-hover:rgba(52,64,48,.58);
   --ink-mix:68%;
@@ -225,11 +225,11 @@
   --bg:#15120c; --bg-2:#100e08;
   --surface:#1e1910; --surface-2:#251f14; --surface-3:#2d2618; --elevated:#332b1b;
   --text:#ece2cd; --text-2:#bcae93; --text-3:#a1957b;
-  /* Bordes subidos (N0-66): con #322a1a el borde era invisible sobre --elevated (1.01:1) y
+  /* Bordes subidos (N0-67): con #322a1a el borde era invisible sobre --elevated (1.01:1) y
      tenue sobre --surface (1.23): menús, diálogos, tablas y chips perdían su delimitación.
      Ahora --border 1.71 sobre --surface / 1.37 sobre --elevated; --border-2 2.34 / 1.87. */
   --border:#4a4028; --border-2:#5f5439;
-  --border-3:#847557; /* única señal (N0-66): 4.15 sobre --bg · 3.88 sobre --surface · 3.10 sobre --elevated */
+  --border-3:#847557; /* única señal (N0-67): 4.15 sobre --bg · 3.88 sobre --surface · 3.10 sobre --elevated */
   --track:#847557;   /* pista de progreso = --border-3 (antes #786a4b: 2.64 sobre la hoja --elevated) */
   --scroll-thumb:rgba(200,180,140,.30); --scroll-thumb-hover:rgba(200,180,140,.55);
   /* en el tema oscuro los colores de unidad ya contrastan: la tinta es casi el
