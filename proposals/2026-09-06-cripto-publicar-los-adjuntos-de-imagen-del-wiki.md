@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Publicar los adjuntos de imagen del wiki"
 rama: proposal/cripto-20260906-publicar-los-adjuntos-de-imagen-del-wiki
-estado: abierta
+estado: cambios-pedidos
 pr: https://github.com/SebasCaules/Sinapsis/pull/2
 ---
 
@@ -130,30 +130,28 @@ Sobre los seis puntos de «Qué hace falta para aprobar»:
 
 ## Revisión
 
-**Veredicto:** cambios-pedidos
+**Veredicto:** cambios-pedidos (segunda vuelta)
 **Revisó:** orquestador de la plataforma · 2026-09-06
 **Commit de merge:** no corresponde
 
 ### Gates en la rama
-- `pnpm typecheck`: no corresponde (`--skip-gates`; se comprobó con `git diff --stat main...rama` que la rama no cambia código ejecutable: solo trae este archivo)
-- `pnpm test`: no corresponde
-- `pnpm build`: no corresponde
-- `pnpm e2e`: no corresponde
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — contract 48, markdown 113, runtime 178, web 687, cli 55 + 2 omitidas (57; las omitidas exigen `packages/cli/dist`, que el worktree no tiene). Coinciden con la propuesta.
+- `pnpm build`: OK
+- `pnpm build:subjects`: OK. Cripto pasa a emitir **76 advertencias `asset-missing`** porque la copia publicada en `main` todavía no trae `assets/`: desaparecen con el primer `publish` posterior al merge. Proba, igual que antes.
+- `pnpm e2e`: 93 pasadas, 3 omitidas, 1 falla **preexistente en `main`**: `landing.spec.ts:47` («agrupa las materias por cuatrimestre») compara la lista exacta de cuatrimestres y asume una sola materia; falla igual en las otras dos ramas abiertas y en `main` desde que entró Cripto (2026-2C). No es de esta propuesta.
 
 ### Hallazgos
-1. **(alto)** La propuesta no trae implementación. El contrato 07 (§1 y §3.1, punto 3) pide que la materia implemente el cambio en una rama de la plataforma y pida revisión; esta rama solo trae el pedido. El motivo es válido y el problema es de la plataforma (el contrato 02 §11 lo lista como no soportado), así que no se rechaza: se pide la implementación, con la forma fijada abajo.
-2. **(medio)** «Alcance» — lista `.claude/devoluciones/2026-09-06-sprint4-sitio-estatico.md` como archivo cambiado. Es un archivo sin seguimiento, ajeno a la propuesta, que estaba en el árbol de la plataforma al proponer; ni siquiera viajó en el commit. La sección tiene que decir lo que la rama trae de verdad.
-3. **(bajo)** «Motivo» — dice «76 imágenes en 8 páginas»; en la rama `subject/cripto-20260906` son 76 referencias repartidas en 26 páginas (`grep -rl '](../../assets/' wiki`). Corregir el dato.
+1. **(alto)** `packages/markdown/src/assets.ts:56-62` y `:183-185`, `packages/cli/src/commands/site.ts:147` — el nombre publicado que llega por `assets/assets.json` **no se valida**. `isAssetIndex` solo exige que los valores sean cadenas no vacías, y `resolvePageAssets` arma `source = rootDir/assets/<named>` con ese valor tal cual. Un `assets.json` de una materia con `"assets/x.png": "../../../../algo"` hace que `site build` lea ese archivo desde fuera de la materia y lo copie con `copyFile(asset.source, path.join(assetsDir, asset.file))`, también fuera de `assets/` (site.ts no usa `resolveInside`, que sí usa `publish.ts:340`). Como `site build` corre en el CI de cada PR y en el despliegue, es lectura y escritura de archivos arbitrarios del runner desde un dato de la materia. El lector no se ve afectado (`isSafeFile` en `remarkAssets.ts` lo descarta), pero el compilador y el CLI sí. Hace falta: (a) que `isAssetIndex` o `resolvePageAssets` acepten solo nombres con la forma `^[0-9a-f]{16}\.(png|jpg|jpeg|gif|webp)$` (la que produce `assetFileName`) y descarten el resto con `asset-missing`; (b) que `site.ts` contenga el destino con `resolveInside`, como hace `publish.ts`; (c) un test por cada guarda con un índice malicioso (`..`, barra, `javascript:`).
+2. **(medio)** `packages/markdown/src/assets.ts:29` — `svg` en `IMAGE_EXTENSIONS`. Un SVG se publica tal cual en el **mismo origen** del sitio (`sebascaules.github.io`), y un SVG puede llevar `<script>` y manejadores de evento: abierto por su URL, ejecuta con acceso al estado personal de la plataforma (`localStorage` e IndexedDB). Servido en un `<img>` no ejecuta, pero la URL es pública. Cripto no usa ningún SVG (sus 57 archivos son PNG). Hace falta sacar `svg` de la lista, o sanearlo al publicar con un sanitizador documentado y probado (sin `<script>`, sin `on*`, sin `href` a `javascript:`), y decir en el contrato 02 §10 bis cuál de las dos.
+3. **(bajo)** Los comentarios del código y las secciones del contrato citan la decisión como **N0-61**, que ya existe (progreso por pasos de los bundles). El número lo asigna el orquestador al aprobar: escriba `N0-nn` en código y documentos y el orquestador lo reemplaza al mergear.
+4. **(bajo)** `packages/markdown/src/compile.ts` — la advertencia `asset-too-big` por tope de materia usa `page: asset.ref` (una ruta de archivo) donde las demás llevan el slug de la página: se lee «adjunto demasiado grande en "assets/x.png"». Preferible listar las páginas que lo referencian, o anteponer «archivo».
 
-### Qué hace falta para aprobar
-La plataforma fija la forma; la implementación viene en esta misma rama, con sus tests:
-
-1. **Compilador** (`packages/markdown`): reconocer `![alt](ruta relativa)` cuyo destino resuelve dentro del vault (relativo a la página), con estas guardas: solo extensiones de imagen (`png`, `jpg`, `jpeg`, `gif`, `svg`, `webp`); sin rutas absolutas ni URLs; un `..` que salga de la raíz del vault se descarta con advertencia; un destino que no existe se deja como está y se avisa. Emitir la lista de adjuntos de la materia (archivo de origen → nombre estable con hash de contenido) como salida **opcional con default vacío**, para que Proba y cualquier materia sin imágenes compilen exactamente igual.
-2. **`publish`** (`packages/cli`): copiar los adjuntos reconocidos a `subjects/<slug>/assets/<hash>.<ext>`, con un tope de tamaño por archivo y por materia decidido en la propuesta, documentado y con advertencia al superarlo.
-3. **`site build`**: emitir los adjuntos bajo una ruta estable de la salida (`subjects/<slug>/assets/…`), como hoy hace con los bundles, respetando `BASE_URL`.
-4. **Lector** (`apps/web`): reescribir el `src` relativo al renderizar (un plugin de remark que consulta el mapa de adjuntos de la página), **sin `rehype-raw`** y sin admitir `javascript:` ni `data:`. Una referencia que no está en el mapa se deja intacta.
-5. **Contrato y decisiones**: `docs/contracts/02-paginas.md` §4 (si `Page` gana un campo: opcional y con default) y §11 (la fila de adjuntos); una fila `N0-nn` en `docs/DECISIONS.md` con el porqué y el costo de revertir; si cambia un esquema de `packages/contract`, campo opcional con default y tests que validen los `sinapsis.config.json` existentes.
-6. **Gates** sin `--skip-gates`, y las secciones «Alcance» y «Compatibilidad» acordes con lo que la rama trae (Proba sigue publicando igual: sin imágenes, sin adjuntos).
+Lo demás pasa las siete lentes: la contención de la referencia (`..` fuera de la carpeta del config → `asset-outside`) está bien y probada; URLs, `data:`, `javascript:` y rutas absolutas se rechazan; los campos del contrato son opcionales con default y hay tests de compatibilidad; Proba compila igual; sin `rehype-raw`; español neutro. La respuesta a la primera revisión está completa y el índice `assets.json` está bien justificado.
 
 ### Efecto en las materias
-- Ninguno hasta que la propuesta vuelva con la implementación. Mientras tanto Cripto se publica con las imágenes rotas, que es la limitación vigente del contrato 02 §11.
+- Cuando se apruebe, Cripto tiene que volver a publicar (`/sinapsis publish`) para que `subjects/cripto/assets/` exista y las 76 advertencias desaparezcan.
+
+### Revisión anterior
+
+Primera vuelta (2026-09-06): cambios pedidos por falta de implementación, «Alcance» con un archivo ajeno y el conteo de páginas. Los tres puntos están respondidos en «Respuesta a la revisión»; los dos primeros hallazgos de esta vuelta son nuevos, sobre la implementación.
