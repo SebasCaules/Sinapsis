@@ -1,5 +1,5 @@
 /**
- * Diagramas Mermaid (N0-nn) — contra la librería DE VERDAD, sin mock.
+ * Diagramas Mermaid (N0-69) — contra la librería DE VERDAD, sin mock.
  *
  * El otro archivo (`Mermaid.test.tsx`) mockea `mermaid` para contar el import
  * dinámico. Ese mock no sirve para la promesa central de la propuesta —«si el

@@ -24,6 +24,13 @@ import {
   type SubjectConfig as SubjectConfigType,
   type SyncPayload as SyncPayloadType,
 } from "@sinapsis/contract";
+import {
+  capAssets,
+  formatBytes,
+  readAssetIndex,
+  resolvePageAssets,
+  type WikiAsset,
+} from "./assets.js";
 import { parseFrontmatter } from "./frontmatter.js";
 import { countWords, extractHeadings, extractLinks, firstH1Line, normalizeDisplayMath } from "./inline.js";
 import { compileStudy, isEmptyStudy } from "./study.js";
@@ -40,6 +47,12 @@ export type IssueKind =
   | "invalid-order"
   | "broken-link"
   | "nested-folder"
+  // Adjuntos de imagen (`assets.ts`, N0-68).
+  | "asset-missing"
+  | "asset-outside"
+  | "asset-too-big"
+  | "asset-unsupported"
+  | "asset-index-invalid"
   // Material de estudio (`wiki.study`, ver `study.ts`).
   | "study-invalid"
   | "study-empty"
@@ -344,6 +357,12 @@ export interface CompileWikiResult {
   study: StudyContentType;
   /** Carpeta del material de estudio, resuelta contra el config (absoluta). */
   studyDir: string;
+  /**
+   * Adjuntos de imagen que las páginas referencian, sin repetir y ya dentro del
+   * tope de la materia. Vacío cuando el wiki no tiene imágenes, que es el caso
+   * de toda materia anterior a N0-68.
+   */
+  assets: WikiAsset[];
 }
 
 /** Compila un wiki completo y devuelve el `SyncPayload` listo para el API. */
@@ -373,8 +392,10 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
   const linkOriginals = new Map<string, string>();
   const pages: PageType[] = [];
   const bySlug = new Map<string, string>();
+  /** Carpeta en disco de cada página emitida: contra ella resuelve `![](…)`. */
+  const pageDirs = new Map<string, string>();
 
-  const push = (page: PageType, origin: string) => {
+  const push = (page: PageType, origin: string, dir: string) => {
     const previous = bySlug.get(page.slug);
     if (previous !== undefined) {
       issues.push({
@@ -385,6 +406,7 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
       return;
     }
     bySlug.set(page.slug, origin);
+    pageDirs.set(page.slug, dir);
     pages.push(page);
   };
 
@@ -427,7 +449,7 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
         issues,
         linkOriginals,
       });
-      push(page, `${folder}/${name}`);
+      push(page, `${folder}/${name}`, path.join(wikiRoot, folder));
     }
   }
 
@@ -460,8 +482,60 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
       issues,
       linkOriginals,
     });
-    push(page, file);
+    push(page, file, path.dirname(path.resolve(wikiRoot, file)));
   });
+
+  // --- adjuntos de imagen (N0-68) -------------------------------------------
+  // La raíz de la contención es la carpeta del CONFIG, no la del wiki: un vault
+  // de Obsidian guarda los adjuntos fuera de `wiki/` (`../../assets/x.png`), y
+  // esa es justamente la forma que hay que reconocer.
+  const assetIndex = await readAssetIndex(rootDir);
+  const knownAssets = new Map<string, WikiAsset>();
+  /** Nombre publicado → páginas que lo referencian, para poder nombrarlas al avisar. */
+  const assetPages = new Map<string, string[]>();
+  for (let i = 0; i < pages.length; i += 1) {
+    const page = pages[i];
+    if (page === undefined) continue;
+    const dir = pageDirs.get(page.slug);
+    if (dir === undefined) continue;
+    const { assets: pageAssets, issues: assetIssues } = await resolvePageAssets({
+      body: page.body,
+      pageDir: dir,
+      rootDir,
+      index: assetIndex,
+      known: knownAssets,
+    });
+    for (const issue of assetIssues) issues.push({ kind: issue.kind, page: page.slug, detail: issue.detail });
+    for (const asset of pageAssets) {
+      const bucket = assetPages.get(asset.file) ?? [];
+      if (!bucket.includes(page.slug)) bucket.push(page.slug);
+      assetPages.set(asset.file, bucket);
+    }
+    if (pageAssets.length > 0) pages[i] = { ...page, assets: pageAssets };
+  }
+  const { kept: assets, dropped } = capAssets([...knownAssets.values()]);
+  if (dropped.length > 0) {
+    const droppedFiles = new Set(dropped.map((a) => a.file));
+    for (const asset of dropped) {
+      // `page` lleva un slug como todas las demás advertencias; el archivo va en
+      // el texto, porque el tope que se pasó es el de la materia, no el suyo.
+      const refs = assetPages.get(asset.file) ?? [];
+      const where = refs.length > 0 ? `; lo referencian: ${sample(refs)}` : "";
+      issues.push({
+        kind: "asset-too-big",
+        page: refs[0] ?? "(materia)",
+        detail: `el archivo "${asset.ref}" (${formatBytes(asset.bytes)}) no entra en el tope de la materia${where}`,
+      });
+    }
+    // Un adjunto que no se publica no se referencia: la página conserva el
+    // markdown original y el lector lo muestra tal cual.
+    for (let i = 0; i < pages.length; i += 1) {
+      const page = pages[i];
+      if (page === undefined || page.assets.length === 0) continue;
+      const keep = page.assets.filter((a) => !droppedFiles.has(a.file));
+      if (keep.length !== page.assets.length) pages[i] = { ...page, assets: keep };
+    }
+  }
 
   // --- wikilinks rotos ------------------------------------------------------
   const known = new Set(pages.map((p) => p.slug));
@@ -501,7 +575,7 @@ export async function compileWiki(opts: CompileWikiOptions): Promise<CompileWiki
     generator: opts.generator ?? `@sinapsis/markdown ${PACKAGE_VERSION}`,
   });
 
-  return { payload, warnings: formatIssues(issues), issues, wikiRoot, study, studyDir };
+  return { payload, warnings: formatIssues(issues), issues, wikiRoot, study, studyDir, assets };
 }
 
 /**
@@ -641,6 +715,22 @@ export function formatIssues(issues: readonly CompileIssue[]): string[] {
     for (const issue of broken) {
       out.push(`  · "${issue.page}" → ${issue.detail}`);
     }
+  }
+
+  for (const issue of of("asset-missing")) {
+    out.push(`adjunto sin archivo en "${issue.page}": ${issue.detail} (la imagen se deja como está)`);
+  }
+  for (const issue of of("asset-outside")) {
+    out.push(`adjunto fuera de la materia en "${issue.page}": ${issue.detail} (no se publica)`);
+  }
+  for (const issue of of("asset-too-big")) {
+    out.push(`adjunto demasiado grande en "${issue.page}": ${issue.detail}`);
+  }
+  for (const issue of of("asset-unsupported")) {
+    out.push(`adjunto no admitido en "${issue.page}": ${issue.detail} (se deja como está)`);
+  }
+  for (const issue of of("asset-index-invalid")) {
+    out.push(`índice de adjuntos inválido en "${issue.page}": ${issue.detail} (no se publica)`);
   }
 
   // --- material de estudio --------------------------------------------------

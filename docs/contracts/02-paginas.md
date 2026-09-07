@@ -164,10 +164,11 @@ no está en la secuencia.
 | `updatedAt` | texto | — | ≤ 40 | Opcional. |
 | `links` | `PageLink[]` | `[]` | — | Wikilinks salientes; ver §6. |
 | `headings` | `PageHeading[]` | `[]` | — | Tabla de contenidos; ver §7. |
+| `assets` | `PageAsset[]` | `[]` | ≤ 500 | Adjuntos de imagen del cuerpo; ver §10 bis. |
 | `body` | texto | — | — | Markdown crudo, sin frontmatter, ya normalizado (§8 y §9). |
 | `words` | entero ≥ 0 | `0` | — | Palabras del cuerpo: coincidencias de `[\p{L}\p{N}_]+`. |
 
-`PageMeta` es `Page` sin `body`, `links` ni `headings`: es lo que viaja en listados
+`PageMeta` es `Page` sin `body`, `links`, `headings` ni `assets`: es lo que viaja en listados
 (`SubjectDetail.pages`, backlinks, `App.PAGES`).
 
 ### Vista previa de página (la tarjeta de los enlaces, N0-50)
@@ -362,7 +363,7 @@ carácter por carácter lo que hay en el archivo `.md`.
 
 ---
 
-## 9 bis. Diagramas Mermaid (N0-nn)
+## 9 bis. Diagramas Mermaid (N0-69)
 
 Un bloque de código con el lenguaje `mermaid` se dibuja como diagrama:
 
@@ -479,6 +480,71 @@ no rompe nada**. Un `[!figura]` sin id se dibuja como figura vacía (sin `data-f
 
 ---
 
+## 10 bis. Adjuntos de imagen (N0-68)
+
+Un vault de Obsidian escribe `![alt](../../assets/des-feistel.png)` al pegar una imagen. El
+compilador reconoce esas referencias, copia el archivo con la materia y el lector reescribe el
+`src` al renderizar. **No hace falta declarar nada en el config**: alcanza con que la imagen
+esté dentro de la carpeta de la materia.
+
+### Qué se reconoce
+
+| Referencia | ¿Se publica? | Por qué |
+|---|---|---|
+| `![f](../../assets/des-feistel.png)` | **Sí** | Ruta relativa, dentro de la materia, extensión de imagen. |
+| `![f](figura.webp)` | **Sí** | Ídem, en la carpeta de la página. |
+| `![f](../../assets/x%20y.png)` | **Sí** | El `%20` de Obsidian se decodifica para buscar el archivo; la referencia se guarda tal como está escrita. |
+| `![f](https://…/a.png)` | No | Es una URL: se deja como está y el navegador la carga. |
+| `![f](data:image/png;base64,…)`, `![f](javascript:…)` | No | Ningún protocolo se admite. |
+| `![f](/assets/a.png)` | No | Ruta absoluta. |
+| `![f](../../../fuera.png)` | No | Sale de la carpeta de la materia: advertencia `asset-outside`. |
+| `![f](../../assets/logo.svg)` | No | Un SVG **no se publica**: advertencia `asset-unsupported` (ver abajo). |
+| `![f](../../raw/clase.pdf)` | No | No es una extensión de imagen: advertencia `asset-unsupported`. |
+| `` `![f](a.png)` `` o dentro de ``` ``` ``` | No | Es documentación de la sintaxis, no una imagen. |
+
+Extensiones admitidas: `png`, `jpg`, `jpeg`, `gif`, `webp`. Topes: **2 MB por archivo**
+y **25 MB por materia**; lo que no entra se avisa y se deja como está.
+
+**`svg` no está, y no es un olvido.** Un adjunto se publica tal cual y se sirve desde el
+**mismo origen** que la plataforma, y un SVG puede llevar `<script>`, manejadores `on*` o un
+`href` a `javascript:`: abierto por su URL ejecutaría con acceso al estado personal
+(`localStorage`, IndexedDB). Dentro de un `<img>` no ejecuta, pero la URL es pública igual. Una
+referencia `.svg` se avisa con `asset-unsupported` y el markdown queda intacto. Una materia que
+necesite un vector lo exporta a PNG, o lo dibuja con un bundle de figuras (`04`).
+
+### Cómo viaja
+
+1. El compilador emite `Page.assets`: la referencia **tal como está escrita** y el nombre
+   publicado, que son 16 caracteres del sha256 del contenido más la extensión
+   (`3f9c…a1.png`). Dos páginas que usan la misma imagen comparten el archivo.
+2. `sinapsis publish` copia los archivos a `subjects/<slug>/assets/<hash>.<ext>` y deja un
+   índice en `subjects/<slug>/assets/assets.json` (`ruta del vault → nombre publicado`).
+   Ese índice es lo que permite que `site build` compile la copia publicada al mismo
+   resultado, donde los archivos ya no se llaman como en el vault.
+   **El índice lo escribe una materia, así que se lee como dato ajeno**: cada nombre
+   publicado tiene que cumplir `^[a-f0-9]{16}\.(png|jpe?g|gif|webp)$` —un solo segmento, sin
+   barras ni `..`— y, ya resuelto, la ruta real tiene que caer dentro de
+   `<materia>/assets/`. Lo que no cumple se descarta con `asset-index-invalid` y la
+   referencia queda como si faltara el archivo.
+3. `sinapsis site build` los emite bajo `subjects/<slug>/assets/` de la salida.
+4. El lector reescribe el `src` con `BASE_URL + subjects/<slug>/assets/<hash>.<ext>`
+   (`siteAssetBase`). **Una referencia que no está en `Page.assets` se deja intacta**: el
+   lector muestra lo que el wiki dice, no una ruta inventada.
+
+### Advertencias
+
+| Advertencia | `IssueKind` | Qué significa |
+|---|---|---|
+| `adjunto sin archivo en "x": "…" (la imagen se deja como está)` | `asset-missing` | La referencia apunta a un archivo que no existe. |
+| `adjunto fuera de la materia en "x": "…" (no se publica)` | `asset-outside` | Un `..` que sale de la carpeta del config. |
+| `adjunto demasiado grande en "x": …` | `asset-too-big` | Supera el tope por archivo o el de la materia. Cuando el que se pasa es el tope de la materia, `x` es una página que lo referencia y el texto nombra el archivo. |
+| `adjunto no admitido en "x": … (se deja como está)` | `asset-unsupported` | La extensión no está en la lista: un `.svg`, un `.pdf`. |
+| `índice de adjuntos inválido en "x": … (no se publica)` | `asset-index-invalid` | El `assets.json` de la copia publicada trae un nombre que no tiene la forma de un adjunto. |
+
+Ninguna detiene la publicación: son advertencias como todas las demás (`00-principios.md` §6.1).
+
+---
+
 ## 11. Qué NO se soporta
 
 | Cosa | Por qué | Qué hacer en su lugar |
@@ -487,7 +553,8 @@ no rompe nada**. Un `[!figura]` sin id se dibuja como figura vacía (sin `data-f
 | Subcarpetas del wiki | El compilador recorre un solo nivel. | Aplanar la carpeta. |
 | Encabezados H5 y H6 en el índice de la página | `extractHeadings` solo mira H1–H4. | Usar hasta H4 para lo que deba aparecer en el índice. |
 | Enlaces markdown `[texto](otra-pagina)` como enlaces internos | Solo los wikilinks `[[…]]` se resuelven contra la materia y alimentan el grafo. | `[[slug|texto]]`. |
-| Adjuntos e imágenes locales del vault | No se publican: `Page` solo tiene texto. | Publicarlas dentro de un bundle de herramientas (`04`) o enlazarlas por URL. |
+| Adjuntos que no son imágenes (PDF, `.VTT`, audio) | Solo se publican las imágenes de §10 bis. Un `![](…)` a otra cosa no es una imagen y un `[texto](archivo.pdf)` es un enlace, no un adjunto. | Enlazarlos por URL, o meterlos en un bundle de herramientas (`04`). |
+| **Adjuntos `.svg`** | Se servirían en el mismo origen del sitio y un SVG puede ejecutar script (§10 bis). | Exportar a PNG, o dibujar la figura con un bundle (`04`). |
 | Un tipo de callout propio | El registro es cerrado. | Usar el más parecido; un tipo desconocido cae en `nota`. |
 | Resaltado de sintaxis en los bloques de código | El lector no trae ningún resaltador: un bloque de código es texto. La única excepción es `mermaid`, que se dibuja (§9 bis). | Nada: el bloque se ve tal como está escrito. |
 | Frontmatter con claves propias | El compilador ignora lo que no está en §3. | Si hace falta un campo nuevo, es una propuesta (`07`). |
@@ -519,6 +586,10 @@ Ninguna de ellas detiene la publicación. Las listas largas se recortan a 6 elem
   `formatIssues`, recorte del H1 (N0-21), orden de carpetas, páginas meta.
 - `packages/markdown/src/frontmatter.ts` — `parseFrontmatter`, parser tolerante y manual,
   `cleanWikilink`.
+- `packages/markdown/src/assets.ts` — `imageRefs`, `isLocalRef`, `isLocalImageRef`,
+  `assetFileName`, `isPublishedAssetName`, `resolveInsideAssets`, `resolvePageAssets`,
+  `capAssets`, `readAssetIndex`, los topes y el índice de la copia publicada.
+- `apps/web/src/features/subject/markdown/remarkAssets.ts` — la reescritura del `src`.
 - `packages/markdown/src/inline.ts` — `extractLinks`, `extractHeadings`, `countWords`,
   `firstH1Line`, `normalizeDisplayMath` (N0-47).
 - `packages/contract/src/index.ts` — `Page`, `PageMeta`, `PageLink`, `PageHeading`,
@@ -542,4 +613,4 @@ N0-10 (markdown en el cliente, sin HTML crudo) · N0-13 (compilador propio) ·
 N0-21 (recorte del H1 duplicado) · N0-22 (el compilador es dueño de los ids de encabezado) ·
 N0-23 (divisiones sintéticas) · N0-42 (figuras en callouts) ·
 N0-47 (normalización de los `$$` de display) · N0-50 (vista previa de página) ·
-N0-66 (callouts plegables) · N0-nn (diagramas Mermaid).
+N0-66 (callouts plegables) · N0-68 (adjuntos de imagen del wiki) · N0-69 (diagramas Mermaid).

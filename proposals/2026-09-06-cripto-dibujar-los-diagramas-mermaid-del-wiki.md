@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "Dibujar los diagramas Mermaid del wiki"
 rama: proposal/cripto-20260906-dibujar-los-diagramas-mermaid-del-wiki
-estado: cambios-pedidos
+estado: aprobada
 pr: https://github.com/SebasCaules/Sinapsis/pull/5
 ---
 
@@ -55,7 +55,7 @@ Al responder la revisión se suman dos:
 - `apps/web/src/features/subject/markdown/Mermaid.real.test.tsx` — nuevo (los tests contra
   la librería sin mockear)
 - `apps/web/src/features/subject/markdown/markdown.module.css` — modificado (dos comentarios:
-  `N0-63` → `N0-nn`; el archivo ya estaba en `main`)
+  `N0-63` → `N0-69`; el archivo ya estaba en `main`)
 
 Contratos afectados: ninguno (`packages/contract` no se toca).
 
@@ -128,6 +128,26 @@ Mermaid sigue en su propio trozo (659,13 kB; 158,99 kB comprimido) y el del lect
 
 ## Revisión
 
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-07
+**Commit de merge:** `01ee8a9`
+
+### Gates en la rama
+- `pnpm typecheck`: OK
+- `pnpm test`: OK (web 700, markdown 97; los demás sin cambios)
+- `pnpm build`: OK (`mermaid.core` en su propio trozo)
+- `pnpm e2e`: no corresponde (la suite completa corre en `main` tras el merge)
+
+### Hallazgos
+Sin hallazgos nuevos. Se buscó: que el cartel de error de Mermaid no llegue al lector (`isDrawn` descarta `aria-roledescription="error"`, el texto «Syntax error in text» y el SVG vacío; `suppressErrorRendering: true`), que el texto entre como `textContent` y no como HTML, `securityLevel: "strict"`, que el test real (`Mermaid.real.test.tsx`) falle al quitar la corrección, que el diff sea solo de Mermaid tras el rebase (9 archivos) y que ningún commit lleve coautoría.
+
+### Efecto en las materias
+- Ninguno: el dibujo lo hace el lector sobre el markdown ya publicado. Cripto verá sus diagramas en cuanto se despliegue `main`.
+
+## Revisiones anteriores
+
+### Revisión previa
+
 **Veredicto:** cambios-pedidos
 **Revisó:** orquestador de la plataforma · 2026-09-06
 **Commit de merge:** no corresponde
@@ -141,7 +161,7 @@ Mermaid sigue en su propio trozo (659,13 kB; 158,99 kB comprimido) y el del lect
 ### Hallazgos
 1. **(medio)** `apps/web/src/features/subject/markdown/Mermaid.tsx:111-129` — la promesa «si el diagrama no compila se muestra el bloque de código original, nunca el cartel de error de Mermaid» **no se cumple** con la librería real. Con `mermaid@11.17.2`, `securityLevel: "strict"` y `suppressErrors: true`, un texto que no parsea deja en el hueco el SVG de error de Mermaid («Syntax error in text · mermaid version 11.17.2»); `target.querySelector("svg")` lo encuentra, el componente marca `data-mermaid="dibujado"` y el lector muestra la bomba de Mermaid en vez del código. Lo comprobé en este worktree con un test contra la librería real (no mockeada). El test de la propuesta (`Mermaid.test.tsx:15-33`) no lo detecta porque el mock de `run` deja el nodo vacío al fallar, que no es lo que hace Mermaid. Hace falta: `suppressErrorRendering: true` en `initialize` (existe en la versión fijada: `config.type.d.ts:252`), y que el caso «no compila» se pruebe con la librería real o con un mock que reproduzca el SVG de error.
 2. **(medio)** La rama incluye el commit `3f20156` («Claustro: el grano pasa a ser una sola capa global…», N0-65), que no es de esta propuesta: nació de un `main` local que estaba adelante de `origin/main`, y ese commit además arrastró el CSS de Mermaid (`.prose .mermaid`, `.mermaidFallback`, `font-variant-ligatures: none`), como la propia propuesta anota. Para que el diff del PR sea solo la propuesta, `3f20156` tiene que llegar a `origin/main` antes (lo empuja quien lo hizo, desde `main`); si no llega, el CSS hay que traerlo a esta rama de forma explícita.
-3. **(bajo)** Los comentarios del código y el contrato citan la decisión como **N0-63**, que ya existe (dock del botón «Panel»). Escriba `N0-nn`; el número lo pone el orquestador al mergear.
+3. **(bajo)** Los comentarios del código y el contrato citan la decisión como **N0-63**, que ya existe (dock del botón «Panel»). Escriba `N0-69`; el número lo pone el orquestador al mergear.
 4. **(bajo)** El contrato 02 §11 sigue diciendo que los adjuntos de imagen no se publican; no lo toque acá (es de la propuesta de adjuntos), pero al rebasar sobre `main` puede aparecer el conflicto: la fila la resuelve la otra propuesta.
 
 Lo demás pasa las lentes: el texto del diagrama entra como `textContent` y no como HTML, sin `rehype-raw`; `securityLevel: "strict"` es correcto; la carga es diferida y medida; los `<br/>` se conservan; los colores salen de los tokens y se recomponen al cambiar el tema; una página sin Mermaid no importa la librería (probado). Español neutro.
@@ -216,7 +236,7 @@ Conflictos del rebase y cómo se resolvieron:
 - `docs/contracts/02-paginas.md` — dos choques, los dos por la propuesta de callouts plegables
   que ya entró a `main`. Se conservaron **los dos lados**: en «Fuente ejecutable» quedan
   `folded.ts` (de plegables) y `Mermaid.tsx` (de esta), y en «Decisiones relacionadas» quedan
-  `N0-66 (callouts plegables) · N0-nn (diagramas Mermaid)`.
+  `N0-66 (callouts plegables) · N0-69 (diagramas Mermaid)`.
 - `apps/web/src/features/subject/markdown/Markdown.tsx`, `apps/web/package.json` y
   `pnpm-lock.yaml` — se fusionaron solos, sin choque.
 - `e2e/shots/*.png` — el commit de revisión traía 18 capturas regeneradas que no son de esta
@@ -225,7 +245,7 @@ Conflictos del rebase y cómo se resolvieron:
 
 ### 3 (bajo) — `N0-63` ya existe
 
-Reemplazado por `N0-nn` en todo lo que es de esta propuesta:
+Reemplazado por `N0-69` en todo lo que es de esta propuesta:
 
 - `apps/web/src/features/subject/markdown/Mermaid.tsx:2`
 - `apps/web/src/features/subject/markdown/Mermaid.test.tsx:2`

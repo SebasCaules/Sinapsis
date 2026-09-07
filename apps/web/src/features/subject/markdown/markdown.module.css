@@ -85,7 +85,7 @@
   font: 500 13.5px/1.5 var(--font-mono);
   /* JetBrains Mono liga `->`, `-->` y `=>` en una flecha sola. En un wiki de
      criptografía eso es una errata a la vista: `-->` de un diagrama, `!=` de una
-     condición y `<-` de una asignación se leen literales o no se leen (N0-nn). */
+     condición y `<-` de una asignación se leen literales o no se leen (N0-69). */
   font-variant-ligatures: none;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -104,7 +104,7 @@
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: 13px; }
 
-/* ---------- diagramas Mermaid (N0-nn) ----------
+/* ---------- diagramas Mermaid (N0-69) ----------
    El SVG lo compone Mermaid con los tokens del tema; acá solo se lo centra y se
    lo deja achicarse. Un diagrama que no compila cae al bloque de código, que se
    marca para distinguirlo de uno escrito a propósito. */

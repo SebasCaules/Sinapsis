@@ -52,7 +52,7 @@ const detail: SubjectDetail = {
 /* Sin encabezados a propósito: el índice de la página monta un
    `IntersectionObserver`, que jsdom no tiene, y no es lo que se prueba acá. */
 const pageDetail: PageDetail = {
-  page: { ...meta, links: [], headings: [], body: "Un párrafo cualquiera." },
+  page: { ...meta, links: [], headings: [], assets: [], body: "Un párrafo cualquiera." },
   backlinks: [],
   studied: false,
 };

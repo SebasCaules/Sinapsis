@@ -1,5 +1,5 @@
 /**
- * Diagramas Mermaid (N0-nn) — con la librería mockeada.
+ * Diagramas Mermaid (N0-69) — con la librería mockeada.
  *
  * Acá se comprueba lo que el mock puede comprobar sin mentir: que la librería
  * **no se toca** en una página sin diagramas (el import dinámico pasa por el

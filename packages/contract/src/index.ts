@@ -243,6 +243,20 @@ export const PAGE_TYPE_META = "meta" as const;
 /** Slugs reservados de las páginas meta que emite el compilador. */
 export const META_PAGES = { index: "indice", log: "log" } as const;
 
+/**
+ * Un adjunto de imagen de una página: la referencia tal como está escrita en el
+ * cuerpo (`![alt](../../assets/des-feistel.png)`) y el nombre estable con que se
+ * publica (`<hash>.<ext>`). El lector reescribe el `src` con este mapa; una
+ * referencia que no está acá se deja intacta (N0-68).
+ */
+export const PageAsset = z.object({
+  /** El `src` literal del markdown, sin decodificar. */
+  ref: z.string().min(1).max(400),
+  /** Nombre publicado: hash del contenido más la extensión. */
+  file: z.string().min(1).max(80),
+});
+export type PageAsset = z.infer<typeof PageAsset>;
+
 export const Page = z.object({
   slug: Slug,
   title: z.string().min(1).max(200),
@@ -267,6 +281,12 @@ export const Page = z.object({
   updatedAt: z.string().max(40).optional(),
   links: z.array(PageLink).default([]),
   headings: z.array(PageHeading).default([]),
+  /**
+   * Adjuntos de imagen que el cuerpo referencia y que se publican con la
+   * materia. Opcional y vacío por default: una materia sin imágenes compila
+   * exactamente igual que antes.
+   */
+  assets: z.array(PageAsset).max(500).default([]),
   /** Markdown crudo (sin frontmatter). */
   body: z.string(),
   words: z.number().int().nonnegative().default(0),
@@ -275,7 +295,7 @@ export type Page = z.infer<typeof Page>;
 export type PageInput = z.input<typeof Page>;
 
 /** Page sin cuerpo: lo que viaja en listados e índices. */
-export const PageMeta = Page.omit({ body: true, links: true, headings: true });
+export const PageMeta = Page.omit({ body: true, links: true, headings: true, assets: true });
 export type PageMeta = z.infer<typeof PageMeta>;
 
 // ---------------------------------------------------------------------------

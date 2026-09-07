@@ -42,6 +42,7 @@ pnpm --dir "$SINAPSIS_HOME" sinapsis -- publish \
 | `sinapsis.config.json` | El config de la materia | Reescrito con `wiki.root: "wiki"` y `wiki.study: "estudio"`, que es la forma canónica dentro del repositorio. `index`, `log`, `ignore`, `divisionField` y todo lo demás viajan tal cual. |
 | `wiki/**/*.md` | El `wiki.root` real del vault | Todos los `.md` que **lee el compilador**: primer nivel de cada carpeta, respetando `wiki.ignore`, más `wiki.index` y `wiki.log`. |
 | `estudio/` | La carpeta `wiki.study` | Completa. |
+| `assets/<hash>.<ext>` | Los adjuntos de imagen que el compilador reconoció (`02` §10 bis) | Solo los que alguna página referencia, con el nombre del hash de su contenido. Al lado va `assets/assets.json`, el índice que traduce la ruta del vault a ese nombre y que hace que `site build` compile esta copia al mismo resultado. Al leerlo, cada nombre se valida contra `^[a-f0-9]{16}\.(png|jpe?g|gif|webp)$` y la ruta resuelta tiene que caer dentro de `assets/`: es dato de la materia y `site build` corre en el CI. |
 | `tools/<bundle>/` | Cada bundle de `tools/` | El `sinapsis.tools.json` más los archivos que `buildBundle` incluiría: los declarados (`scripts`, `styles`, `data`) y los assets sueltos que sirven en tiempo de ejecución. |
 
 **Nunca** se copian `dist/`, `.dist/`, `scripts/` ni `node_modules/`: son artefactos de
@@ -127,6 +128,7 @@ subjects/<slug>/subject.json        SiteSubject   — config, páginas sin cuerp
 subjects/<slug>/pages.json          SitePages     — cuerpos, enlaces y encabezados por slug
 subjects/<slug>/tools.json          SiteTools     — bundles con su `base`
 subjects/<slug>/tools/<id>/<path>   los archivos de cada bundle, tal cual
+subjects/<slug>/assets/<hash>.<ext> los adjuntos de imagen del wiki, tal cual
 ```
 
 Ninguna ruta del contrato asume el prefijo: se compone con `sitePaths.*(base, …)`, donde
@@ -139,6 +141,7 @@ en Pages, N0-59).
 | `sitePaths.subject(base, slug)` | `<base>subjects/<slug>/subject.json` |
 | `sitePaths.pages(base, slug)` | `<base>subjects/<slug>/pages.json` |
 | `sitePaths.tools(base, slug)` | `<base>subjects/<slug>/tools.json` |
+| `sitePaths.asset(base, slug, file)` | `<base>subjects/<slug>/assets/<file>` |
 | `sitePaths.toolBase(base, slug, toolId)` | Base de los archivos de un bundle, sin barra final |
 | `sitePaths.toolFile(base, slug, toolId, path)` | Un archivo concreto del bundle |
 

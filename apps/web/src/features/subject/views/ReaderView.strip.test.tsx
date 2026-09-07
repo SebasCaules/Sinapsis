@@ -45,7 +45,7 @@ const detail: SubjectDetail = { config, pages, studied: [], placeholder: false, 
 /* Sin encabezados: el índice de la página monta un `IntersectionObserver`, que
    jsdom no tiene, y no es lo que se prueba acá. */
 const bodyOf = (page: PageMeta): PageDetail => ({
-  page: { ...page, links: [], headings: [], body: "Un párrafo cualquiera." },
+  page: { ...page, links: [], headings: [], assets: [], body: "Un párrafo cualquiera." },
   backlinks: [],
   studied: false,
 });

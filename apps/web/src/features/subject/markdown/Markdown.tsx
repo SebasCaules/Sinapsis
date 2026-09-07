@@ -15,6 +15,8 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import type { PluggableList } from "unified";
 import { Mermaid } from "./Mermaid";
+import type { PageAsset } from "@sinapsis/contract";
+import { remarkAssets } from "./remarkAssets";
 import { rehypeExercisePlates } from "./rehypeExercisePlates";
 import { rehypeHeadingIds } from "./rehypeHeadingIds";
 import { remarkCallouts } from "./remarkCallouts";
@@ -32,6 +34,12 @@ export interface MarkdownProps {
    * markdown se vuelve a parsear.
    */
   exists: (slug: string) => boolean;
+  /**
+   * Adjuntos de imagen de la página (N0-68): `src` escrito → nombre publicado.
+   * Tiene que ser ESTABLE, como `exists`: si cambia de identidad en cada render,
+   * el pipeline se rearma. Sin adjuntos, el plugin no toca nada.
+   */
+  assets?: readonly PageAsset[];
 }
 
 type AnchorProps = ComponentPropsWithoutRef<"a"> & ExtraProps;
@@ -112,11 +120,19 @@ const REHYPE: PluggableList = [
   [rehypeKatex, { output: "htmlAndMathml" }],
 ];
 
-export const Markdown = memo(function Markdown({ body, subject, exists }: MarkdownProps) {
+const NO_ASSETS: readonly PageAsset[] = [];
+
+export const Markdown = memo(function Markdown({ body, subject, exists, assets = NO_ASSETS }: MarkdownProps) {
   const host = useRef<HTMLDivElement>(null);
   const remarkPlugins = useMemo<PluggableList>(
-    () => [remarkGfm, remarkMath, [remarkWikilinks, { subject, exists }], remarkCallouts],
-    [subject, exists],
+    () => [
+      remarkGfm,
+      remarkMath,
+      [remarkWikilinks, { subject, exists }],
+      [remarkAssets, { subject, assets, base: import.meta.env.BASE_URL || "/" }],
+      remarkCallouts,
+    ],
+    [subject, exists, assets],
   );
 
   /* Port del ajuste del baseline (`core.js` → `fitWideFormulas`): una placa que

@@ -26,6 +26,7 @@ import { z } from "zod";
 import {
   DivisionLabel,
   GraphEdge,
+  PageAsset,
   PageHeading,
   PageLink,
   PageMeta,
@@ -44,6 +45,9 @@ export const SITE_FORMAT = 1 as const;
 
 /** Carpeta (bajo `base`) donde viven los datos de las materias. Sin barras. */
 export const SITE_DATA_DIR = "subjects" as const;
+
+/** Carpeta de los adjuntos de imagen de una materia, bajo `subjects/<slug>/`. */
+export const SITE_ASSETS_DIR = "assets" as const;
 
 /** Nombre de la base IndexedDB y prefijo de las claves del estado personal. */
 export const LOCAL_DB_NAME = "sinapsis" as const;
@@ -68,6 +72,8 @@ export const sitePaths = {
   toolBase: (base: string, slug: string, toolId: string) => join(base, SITE_DATA_DIR, slug, "tools", toolId),
   toolFile: (base: string, slug: string, toolId: string, path: string) =>
     join(base, SITE_DATA_DIR, slug, "tools", toolId, path),
+  /** Un adjunto de imagen publicado: `<base>subjects/<slug>/assets/<hash>.<ext>`. */
+  asset: (base: string, slug: string, file: string) => join(base, SITE_DATA_DIR, slug, SITE_ASSETS_DIR, file),
 } as const;
 
 /**
@@ -77,6 +83,15 @@ export const sitePaths = {
  */
 export function siteToolBase(slug: string, toolId: string): string {
   return `${SITE_DATA_DIR}/${slug}/tools/${toolId}`;
+}
+
+/**
+ * Base de los adjuntos de una materia, RELATIVA al sitio y sin barra final
+ * (`subjects/cripto/assets`). El lector la prefija con `BASE_URL` al reescribir
+ * el `src` de una imagen (N0-68).
+ */
+export function siteAssetBase(slug: string): string {
+  return `${SITE_DATA_DIR}/${slug}/${SITE_ASSETS_DIR}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -134,6 +149,8 @@ export const SitePageBody = z.object({
   body: z.string(),
   links: z.array(PageLink),
   headings: z.array(PageHeading),
+  /** Adjuntos de imagen del cuerpo. Vacío por default: un `pages.json` anterior sigue validando. */
+  assets: z.array(PageAsset).default([]),
 });
 export type SitePageBody = z.infer<typeof SitePageBody>;
 

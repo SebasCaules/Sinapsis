@@ -1,5 +1,5 @@
 /**
- * Diagramas Mermaid del wiki (N0-nn).
+ * Diagramas Mermaid del wiki (N0-69).
  *
  * Un bloque ```` ```mermaid ```` del cuerpo se dibuja como diagrama. La librería
  * es grande, así que **entra por import dinámico**: solo se descarga cuando una
