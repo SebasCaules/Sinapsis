@@ -314,6 +314,17 @@
 /* Solo el hueco VACÍO (todavía sin figura) reserva altura: una vez montada, el
    alto lo pone el dibujo. */
 .prose :global(.figura .fig-host:empty) { min-height: 96px; }
+/* Una imagen del wiki entra en la columna: los diagramas de la cátedra vienen a
+   1000 px y la hoja mide 758 (N0-61). `height: auto` conserva la proporción al
+   achicarla, y `display: block` le saca el hueco de la línea base. */
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 18px auto;
+  border-radius: var(--r);
+}
+
 .prose :global(.figura .fig-host) > :is(svg, canvas, img) { max-width: 100%; }
 
 .prose :global(.figFrame) {

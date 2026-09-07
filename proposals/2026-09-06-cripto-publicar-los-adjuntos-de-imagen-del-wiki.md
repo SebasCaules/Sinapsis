@@ -50,6 +50,7 @@ Archivos cambiados en la rama:
 - `src/features/subject/markdown/remarkAssets.ts` — **nuevo**. Reescribe el `url` del nodo `image`; sin `rehype-raw`, sin `data:` ni `javascript:`, y solo para las referencias que están en el mapa.
 - `src/features/subject/markdown/remarkAssets.test.tsx` — **nuevo**. 6 casos.
 - `src/features/subject/markdown/Markdown.tsx` — modificado. Prop `assets`, opcional.
+- `src/features/subject/markdown/markdown.module.css` — modificado. `.prose img` con `max-width: 100%` y `height: auto`: sin eso, un diagrama de la cátedra de 1000 px desborda la columna de 758. Se vio al mirar las páginas publicadas.
 - `src/features/subject/views/ReaderView.tsx`, `src/local/client.ts` — modificados. Llevan los adjuntos de `pages.json` al lector.
 - `src/features/subject/mocks/proba-fixture.ts`, `src/local/client.test.ts`, `src/features/subject/views/ReaderView.resize.test.tsx`, `src/features/subject/views/ReaderView.strip.test.tsx` — modificados. Los fixtures tipados con la salida del esquema necesitan el campo; los datos JSON no (para eso está el default).
 
