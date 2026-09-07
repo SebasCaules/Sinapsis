@@ -56,11 +56,15 @@ test("agrupa las materias por cuatrimestre", async ({ page }) => {
   await expect(primero.locator(`[data-slug="${subject.slug}"]`)).toBeVisible();
   await expect(segundo.locator(`[data-slug="${placeholder.slug}"]`)).toBeVisible();
 
-  // El cuatrimestre más reciente va primero: 2026-1C antes que 2025-2C.
+  // El cuatrimestre más reciente va primero: 2026-1C antes que 2025-2C. El catálogo
+  // puede traer otras materias (y otros cuatrimestres) además de la sembrada, así que
+  // se comprueba el ORDEN relativo, no la lista exacta.
   const rotulos = await page.locator('section[aria-label^="Cuatrimestre"]').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute("aria-label") ?? ""),
   );
-  expect(rotulos).toEqual([subjectSemester, placeholderSemester]);
+  expect(rotulos).toContain(subjectSemester);
+  expect(rotulos).toContain(placeholderSemester);
+  expect(rotulos.indexOf(subjectSemester)).toBeLessThan(rotulos.indexOf(placeholderSemester));
 });
 
 test("gestionar: mover una materia de cuatrimestre y guardar sobrevive a la recarga", async ({ page }) => {
