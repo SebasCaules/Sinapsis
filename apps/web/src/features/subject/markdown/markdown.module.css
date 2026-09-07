@@ -17,7 +17,9 @@
 .prose h2 {
   margin: 30px 0 14px;
   padding-bottom: 7px;
-  border-bottom: 1px solid var(--border);
+  /* R7: sobre la hoja (--elevated) --border no se ve en claustro (1.01:1); el
+     filete que cierra el H2 usa --border-2. */
+  border-bottom: 1px solid var(--border-2);
   font: 600 16.5px var(--font-ui);
   letter-spacing: 0.005em;
   color: var(--text);
@@ -46,7 +48,8 @@
 
 .prose strong { font-weight: 600; color: var(--text); }
 .prose em { font-style: italic; }
-.prose hr { margin: 24px 0; border: 0; border-top: 1px solid var(--border); }
+/* R7: mismo filete que el H2, visible sobre la hoja en los tres temas. */
+.prose hr { margin: 24px 0; border: 0; border-top: 1px solid var(--border-2); }
 
 .prose a {
   color: var(--link);
@@ -61,7 +64,9 @@
 
 .prose :global(.wikilink-broken) {
   color: var(--text-3);
-  border-bottom: 1px dashed var(--border-2);
+  /* R7: el punteado es la ÚNICA marca de destino inexistente; anclado al propio
+     color del texto se ve en los tres temas (--border-2 daba 1.25 en claustro). */
+  border-bottom: 1px dashed currentColor;
   cursor: help;
 }
 
@@ -69,7 +74,8 @@
 .prose blockquote {
   margin: 18px 0;
   padding: 2px 0 2px 16px;
-  border-left: 2px solid var(--border-2);
+  /* R7/R6: la barra es la única señal de la cita: --border-3 (≥ 3:1 sobre la hoja). */
+  border-left: 2px solid var(--border-3);
   color: var(--text-2);
   font-style: italic;
 }
@@ -126,7 +132,9 @@
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--r);
-  background: var(--surface);
+  /* R5: --surface dentro de la hoja se hunde en claustro y desaparece en los
+     claros; --surface-2 es el único escalón que se comporta igual en los tres. */
+  background: var(--surface-2);
 }
 .tableWrap table { width: 100%; border-collapse: collapse; font: 400 13.5px/1.5 var(--font-ui); }
 .tableWrap th {
@@ -135,12 +143,13 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-3);
-  background: var(--surface-2);
+  background: var(--surface-3);
   padding: 9px 14px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-2);
   white-space: nowrap;
 }
-.tableWrap td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+/* R7: la separación de filas es la única señal; --border no se ve en claustro. */
+.tableWrap td { padding: 9px 14px; border-bottom: 1px solid var(--border-2); color: var(--text-2); }
 .tableWrap tr:last-child td { border-bottom: 0; }
 
 /* ---------- matemática ---------- */
@@ -221,7 +230,9 @@
   font: 600 10.5px var(--font-ui);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--callout);
+  /* R1/R2: el color del aviso es MANCHA; como texto va su tinta (receta de
+     --uink), que el filete y el triángulo siguen usando en crudo. */
+  color: color-mix(in srgb, var(--callout) var(--ink-mix), var(--text));
 }
 .prose :global(.callout .calloutTitle) {
   margin: 0 0 6px;
@@ -235,7 +246,8 @@
 .prose :global(.callout[data-type="warn"]) { --callout: var(--warn); }
 .prose :global(.callout[data-type="discrepancia"]) { --callout: var(--bad); }
 .prose :global(.callout[data-type="cita"]) { --callout: var(--u6); }
-.prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface); }
+/* R5: misma profundidad que el resto de los bloques de prosa (ver .figura). */
+.prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface-2); }
 
 /* ---------- avisos plegados (N0-66) ----------
    `> [!tipo]-` sale como <details>: la versalita es el <summary> y el cuerpo
@@ -265,9 +277,11 @@
 .prose :global(details.callout[open]) > :global(summary.calloutLabel)::before {
   transform: rotate(90deg);
 }
+/* R9: el aro de foco es siempre --primary + --primary-ring, no el color del aviso. */
 .prose :global(details.callout) > :global(summary.calloutLabel):focus-visible {
-  outline: 2px solid var(--callout);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-ring);
   border-radius: 3px;
 }
 /* Cerrado, el aviso es una línea: el margen del rótulo solo hace falta cuando
@@ -283,7 +297,9 @@
 .prose :global(.figura) {
   margin: 22px 0;
   padding: 12px 14px 13px;
-  background: var(--surface);
+  /* R5: --surface casi no se despega de la hoja en los claros (1.03-1.04) y se
+     hunde en claustro (1.25); --surface-2 es el mismo escalón en los tres. */
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-left: 3px solid var(--u0);
   border-radius: var(--r);
@@ -375,7 +391,8 @@
 .prose :global(.exercise-plate) {
   margin: 26px 0;
   padding: 20px 24px;
-  background: color-mix(in srgb, var(--ueval) 6%, var(--surface));
+  /* R5: mismo escalón que .callout y .figura sobre la hoja. */
+  background: color-mix(in srgb, var(--ueval) 6%, var(--surface-2));
   border: 1px solid var(--border);
   border-left: 3px solid var(--ueval);
   border-radius: var(--r-lg);
@@ -407,7 +424,9 @@
   text-transform: uppercase;
   color: var(--ueval-ink);
 }
-.prose :global(.exercise-plate .katex-display) { background: var(--surface-2); }
+/* Se cambia la VARIABLE de la placa, no la propiedad: así se conservan los
+   degradados que avisan del desborde de la fórmula. */
+.prose :global(.exercise-plate .katex-display) { --plate-bg: var(--surface-2); }
 
 .prose :global(.exercise-plate .solucion) {
   margin-top: 14px;

@@ -353,10 +353,11 @@
 .dialogDelete:hover { filter: brightness(1.08); }
 .dialogDelete:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
+/* Sin `opacity`: --text-3 ya es el gris más claro que la paleta admite como
+   texto (misma decisión que .prevOff). */
 .cardMissing {
   font: 500 12px var(--font-mono);
   color: var(--text-3);
-  opacity: 0.8;
 }
 
 /* ---------- pestaña vertical del panel ---------- */

@@ -121,8 +121,9 @@
   width: 4px;
   height: 38px;
   border-radius: 4px;
-  background: var(--text-3);
-  opacity: 0.5;
+  /* R6/R10: sin opacidad. --border-3 es el token del trazo que es la ÚNICA
+     señal de un control: 3.10-3.92:1 sobre la hoja en los tres temas. */
+  background: var(--border-3);
   transform-origin: center;
   /* Se alarga con `transform`, no con `height`: no dispara un relayout. */
   transition: opacity var(--t), background var(--t), transform var(--t);
@@ -171,7 +172,8 @@
   gap: 12px;
   align-items: center;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  /* R7: sobre la hoja (--elevated) --border no se ve en claustro (1.01:1). */
+  border-bottom: 1px solid var(--border-2);
   font: 500 11.5px var(--font-ui);
 }
 .segmentsTrack { flex: 1; min-width: 0; display: flex; gap: 4px; align-items: center; }
@@ -219,7 +221,9 @@
 /* Los colores dicen el ESTADO (pista = sin leer, color de la división al 45 % =
    leída, pleno = actual); el tipo de página lo dice la tarjeta de vista previa
    con una etiqueta, no el color (decisión del usuario). */
-.segment[data-state="studied"]::after { background: var(--ucol); opacity: 0.45; }
+/* R10: sin opacidad. El «leído» es una mezcla sólida del color de la división
+   con la pista, así se distingue del pendiente (--track) y del actual (--ucol). */
+.segment[data-state="studied"]::after { background: color-mix(in srgb, var(--ucol) 45%, var(--track)); }
 .segment[data-state="current"]::after { background: var(--ucol); }
 .segment:hover::after { transform: translateY(-50%) scaleY(1.8); }
 .segment:focus-visible {
@@ -248,7 +252,8 @@
   top: 50%;
   height: 5px;
   border-radius: 3px;
-  border: 1px dashed color-mix(in srgb, var(--ucol) 55%, transparent);
+  /* R6: la mancha plena llega a 3:1 sobre la hoja; al 55 % se quedaba en 1.8-2.7. */
+  border: 1px dashed var(--ucol);
   background:
     linear-gradient(to right, var(--ucol) 0 var(--fill, 0%), transparent var(--fill, 0%) 100%);
   transform: translateY(-50%);
@@ -279,7 +284,8 @@
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  /* R7: filete visible sobre la hoja también en claustro. */
+  border-bottom: 1px solid var(--border-2);
   font: 500 11.5px var(--font-ui);
 }
 
@@ -287,7 +293,7 @@
 .prevNextFoot {
   padding: 14px 0 0;
   border-bottom: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-2);
 }
 
 /* 24 px de objetivo (medidos 15-17 de alto). `inline-flex` + `align-items` para
