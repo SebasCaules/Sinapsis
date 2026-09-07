@@ -119,7 +119,7 @@ Se pide:
 >
 > ![Enunciado Ej. 1](../../assets/Pasted%20image%2020260821153134.png)
 >
-> > **Este sistema ya está trabajado en la wiki.** Es *exactamente* el **Ejemplo 2** de [[probabilidad-y-criptografia|Probabilidad y criptografía]] — mismos espacios, misma tabla, mismas distribuciones. Ahí están las cuentas de los dos criterios distribucionales y el análisis de qué filtra cada criptograma. Acá abajo se rehacen igual (porque es lo que hay que saber escribir en el parcial) y se agregan las dos maneras que el apunte no cubre: la indistinguibilidad de mensajes y el juego `Eav`.
+> **Este sistema ya está trabajado en la wiki.** Es *exactamente* el **Ejemplo 2** de [[probabilidad-y-criptografia|Probabilidad y criptografía]] — mismos espacios, misma tabla, mismas distribuciones. Ahí están las cuentas de los dos criterios distribucionales y el análisis de qué filtra cada criptograma. Acá abajo se rehacen igual (porque es lo que hay que saber escribir en el parcial) y se agregan las dos maneras que el apunte no cubre: la indistinguibilidad de mensajes y el juego `Eav`.
 >
 > ### Los datos
 >
@@ -160,7 +160,7 @@ Se pide:
 >
 > *Control de suma:* $\tfrac{2}{16} + \tfrac{7}{16} + \tfrac{4}{16} + \tfrac{3}{16} = \tfrac{16}{16} = 1$. **Cierra.**
 >
-> > **Lo que ya se ve acá.** $C{=}1$ y $C{=}4$ tienen **un solo término** en la suma: hay una única combinación (clave, mensaje) capaz de producirlos. Eso es el germen del problema — si sólo un mensaje puede generar ese criptograma, verlo delata el mensaje. El resto del ejercicio es formalizar esa intuición cuatro veces.
+> **Lo que ya se ve acá.** $C{=}1$ y $C{=}4$ tienen **un solo término** en la suma: hay una única combinación (clave, mensaje) capaz de producirlos. Eso es el germen del problema — si sólo un mensaje puede generar ese criptograma, verlo delata el mensaje. El resto del ejercicio es formalizar esa intuición cuatro veces.
 >
 > ### b) Las cuatro demostraciones
 >
@@ -176,7 +176,7 @@ Se pide:
 >
 > #### Manera 1 — Criterio del mensaje (la definición)
 >
-> > **Definición.** $\Pi$ tiene secreto perfecto si para toda distribución sobre $\mathcal{M}$, todo $m \in \mathcal{M}$ y todo $c \in \mathcal{C}$ con $\Pr[C{=}c] > 0$: $\ \Pr[M{=}m \mid C{=}c] = \Pr[M{=}m]$.
+> **Definición.** $\Pi$ tiene secreto perfecto si para toda distribución sobre $\mathcal{M}$, todo $m \in \mathcal{M}$ y todo $c \in \mathcal{C}$ con $\Pr[C{=}c] > 0$: $\ \Pr[M{=}m \mid C{=}c] = \Pr[M{=}m]$.
 >
 > Se calculan las a posteriori con **Bayes**. Como para cada par $(x, c)$ hay a lo sumo **una** clave que lleva $x$ a $c$ (ver la tabla: no hay repetidos en las columnas), la fórmula queda con un solo término arriba:
 >
@@ -199,11 +199,11 @@ Se pide:
 >
 > **No hay secreto perfecto.** El caso más elocuente es $c=1$: ver un 1 hace que $\Pr[M{=}a\mid C{=}1] = 1$, es decir que el adversario pasa de creer $1/4$ a **saber con certeza** que el mensaje fue $a$. Simétricamente, ver un 4 delata $b$. Eso es fuga total, no un sesguito.
 >
-> > **Detalle que hay que decir en voz alta:** $c=3$ **sí** cumple la definición ($1/4$ y $3/4$, clavadas en la a priori). No salva nada. La definición es un $\forall c$, así que **alcanza con que un solo $c$ falle** para que no haya secreto perfecto. Refutar un $\forall$ cuesta un contraejemplo; probarlo cuesta la tabla entera.
+> **Detalle que hay que decir en voz alta:** $c=3$ **sí** cumple la definición ($1/4$ y $3/4$, clavadas en la a priori). No salva nada. La definición es un $\forall c$, así que **alcanza con que un solo $c$ falle** para que no haya secreto perfecto. Refutar un $\forall$ cuesta un contraejemplo; probarlo cuesta la tabla entera.
 >
 > #### Manera 2 — Criterio del cifrado
 >
-> > **Caracterización equivalente.** Hay secreto perfecto si y sólo si $\ \Pr[C{=}c \mid M{=}m] = \Pr[C{=}c]\ $ para todo $m$ y todo $c$. → [[secreto-perfecto#Caracterización equivalente|Secreto perfecto § Caracterización equivalente]]
+> **Caracterización equivalente.** Hay secreto perfecto si y sólo si $\ \Pr[C{=}c \mid M{=}m] = \Pr[C{=}c]\ $ para todo $m$ y todo $c$. → [[secreto-perfecto#Caracterización equivalente|Secreto perfecto § Caracterización equivalente]]
 >
 > Es la lectura **por filas de la tabla de `Enc`**: fijado el mensaje, se pregunta qué masa de claves manda ese mensaje a cada criptograma.
 >
@@ -226,7 +226,7 @@ Se pide:
 >
 > #### Manera 3 — Indistinguibilidad de mensajes
 >
-> > **Tercera caracterización** (la de Katz & Lindell): hay secreto perfecto si y sólo si $\ \Pr[\mathsf{Enc}_K(m) = c] = \Pr[\mathsf{Enc}_K(m') = c]\ $ para todo par de mensajes $m, m'$ y todo $c$.
+> **Tercera caracterización** (la de Katz & Lindell): hay secreto perfecto si y sólo si $\ \Pr[\mathsf{Enc}_K(m) = c] = \Pr[\mathsf{Enc}_K(m') = c]\ $ para todo par de mensajes $m, m'$ y todo $c$.
 >
 > Es la más cómoda de las tres, y conviene entender **por qué**: no menciona $\Pr[M]$ **en absoluto**. La probabilidad es sólo sobre el sorteo de la clave. Eso importa porque la definición de secreto perfecto cuantifica sobre *toda* distribución de mensajes, y este criterio te ahorra tener que pensar en eso: si las dos filas de la tabla de la Manera 2 son iguales entre sí, hay secreto perfecto **para cualquier** $\Pr[M]$.
 >
@@ -278,9 +278,9 @@ Se pide:
 >
 > **No hay secreto perfecto**, y encima el sistema ni siquiera es indistinguible: el exceso $\varepsilon = 1/4$ es una constante, no algo despreciable.
 >
-> > **Esta es la estrategia óptima.** *(Verificado.)* La cota máxima de cualquier adversario en este juego es
-> > $$\tfrac12\sum_{c}\max\big(\Pr[\mathsf{Enc}_K(a){=}c],\ \Pr[\mathsf{Enc}_K(b){=}c]\big) = \tfrac12\left(\tfrac12 + \tfrac12 + \tfrac14 + \tfrac14\right) = \tfrac34$$
-> > o sea que $3/4$ no se puede mejorar. La cuenta también explica de dónde sale el exceso: cada columna en la que las dos filas difieren aporta $\tfrac12\lvert \text{diferencia}\rvert$ por encima del $1/2$ base. La columna $c=3$, donde son iguales, no aporta nada — es la misma observación de siempre, vista una cuarta vez.
+> **Esta es la estrategia óptima.** *(Verificado.)* La cota máxima de cualquier adversario en este juego es
+> $$\tfrac12\sum_{c}\max\big(\Pr[\mathsf{Enc}_K(a){=}c],\ \Pr[\mathsf{Enc}_K(b){=}c]\big) = \tfrac12\left(\tfrac12 + \tfrac12 + \tfrac14 + \tfrac14\right) = \tfrac34$$
+> o sea que $3/4$ no se puede mejorar. La cuenta también explica de dónde sale el exceso: cada columna en la que las dos filas difieren aporta $\tfrac12\lvert \text{diferencia}\rvert$ por encima del $1/2$ base. La columna $c=3$, donde son iguales, no aporta nada — es la misma observación de siempre, vista una cuarta vez.
 >
 > ### Resumen del Ejercicio 1
 >
@@ -318,7 +318,7 @@ Probar o encontrar un **contraejemplo** de la siguiente afirmación:
 >
 > es decir, **que la distribución sobre $\mathcal{M}$ sea uniforme**. Y ahí está el problema: la definición de secreto perfecto cuantifica sobre **toda** distribución sobre $\mathcal{M}$, no sólo sobre la uniforme. El sistema no tiene ningún control sobre qué mensajes decide emitir el usuario. Si la fuente es sesgada, sigue sesgada después de ver el criptograma — precisamente porque el criptograma **no aporta información**.
 >
-> > **La moraleja, que es lo que se lleva al parcial.** El secreto perfecto dice que el criptograma **no cambia** las creencias del adversario. **No** dice que las **iguale** entre sí. Lo que se preserva es la distribución a priori, sea la que sea — incluida una a priori muy desbalanceada. Un adversario que sabe que el 99 % de los mensajes son `ATACAR` sigue sabiéndolo después de ver el cifrado, y eso **no** es una falla del sistema: esa información ya la tenía antes.
+> **La moraleja, que es lo que se lleva al parcial.** El secreto perfecto dice que el criptograma **no cambia** las creencias del adversario. **No** dice que las **iguale** entre sí. Lo que se preserva es la distribución a priori, sea la que sea — incluida una a priori muy desbalanceada. Un adversario que sabe que el 99 % de los mensajes son `ATACAR` sigue sabiéndolo después de ver el cifrado, y eso **no** es una falla del sistema: esa información ya la tenía antes.
 >
 > ### El contraejemplo concreto
 >
@@ -407,7 +407,7 @@ Para los siguientes ejercicios, considerar el **alfabeto inglés (26 símbolos)*
 > - **La tabla de cifrado es un cuadrado latino** de orden 26: cada fila y cada columna contienen los 26 símbolos exactamente una vez. Cuadrado latino + clave uniforme $\Rightarrow$ secreto perfecto.
 > - **La cota de Shannon se cumple con igualdad**: $\lvert\mathcal{K}\rvert = \lvert\mathcal{M}\rvert = \lvert\mathcal{C}\rvert = 26$. No sobra ni falta una clave.
 >
-> > Ya está desarrollado en [[secreto-perfecto#Aplicación: ¿cuándo es perfecto el cifrado por rotación?|Secreto perfecto § ¿cuándo es perfecto el cifrado por rotación?]], con el recíproco incluido: con $\ell \ge 2$ **deja** de ser perfecto, y por dos razones distintas (el conteo $26 < 26^\ell$, y explícitamente porque la rotación preserva el patrón de repeticiones posicionales). Ese contraste con el $\ell \ge 2$ es lo que vuelve interesante al inciso (b).
+> Ya está desarrollado en [[secreto-perfecto#Aplicación: ¿cuándo es perfecto el cifrado por rotación?|Secreto perfecto § ¿cuándo es perfecto el cifrado por rotación?]], con el recíproco incluido: con $\ell \ge 2$ **deja** de ser perfecto, y por dos razones distintas (el conteo $26 < 26^\ell$, y explícitamente porque la rotación preserva el patrón de repeticiones posicionales). Ese contraste con el $\ell \ge 2$ es lo que vuelve interesante al inciso (b).
 >
 > ### b) Sustitución monoalfabética: el máximo es |M| = 26!
 >
@@ -447,7 +447,7 @@ Para los siguientes ejercicios, considerar el **alfabeto inglés (26 símbolos)*
 >
 > o sea **la cota de Shannon con igualdad**: es el máximo posible. $\blacksquare$
 >
-> > *(Verificado.)* La construcción fue chequeada por enumeración exhaustiva con alfabetos chicos: con $n=3$ y $n=4$, tomar $\mathcal{M}$ = cadenas de longitud $n$ sin letras repetidas da $\lvert\mathcal{M}\rvert = n! = \lvert\mathcal{K}\rvert$ y el sistema resulta perfecto.
+> *(Verificado.)* La construcción fue chequeada por enumeración exhaustiva con alfabetos chicos: con $n=3$ y $n=4$, tomar $\mathcal{M}$ = cadenas de longitud $n$ sin letras repetidas da $\lvert\mathcal{M}\rvert = n! = \lvert\mathcal{K}\rvert$ y el sistema resulta perfecto.
 >
 > #### Por qué falla el caso ingenuo M = Sigma^2
 >
@@ -480,7 +480,7 @@ Para los siguientes ejercicios, considerar el **alfabeto inglés (26 símbolos)*
 >
 > La receta es de una línea, pero cada palabra cuenta:
 >
-> > **Elegir el período de la clave igual a la longitud del mensaje ($t$), sortear $k = k_1\dots k_t$ uniforme en $\Sigma^t$, y usarla UNA SOLA VEZ.**
+> **Elegir el período de la clave igual a la longitud del mensaje ($t$), sortear $k = k_1\dots k_t$ uniforme en $\Sigma^t$, y usarla UNA SOLA VEZ.**
 >
 > Con eso, $\mathcal{M} = \mathcal{C} = \mathcal{K} = \Sigma^t$ y
 >
@@ -564,7 +564,7 @@ Dado un criptosistema $\Pi = (\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})$ de **Vi
 >
 > y $A$ responde según si $c_1 = c_2$ o no. O sea: **$A$ está preguntando si el cifrado conservó la igualdad entre las dos primeras posiciones.** Es el ataque del patrón de repeticiones, otra vez, adaptado al juego.
 >
-> > **Convención de notación para todo este inciso.** $m_0$ y $m_1$ son los dos **mensajes** del juego; a los **símbolos** de un mensaje los llamamos $x_1 x_2 x_3$, para que el subíndice de mensaje no choque con el de posición. Así, $m_0 = \texttt{aab}$ quiere decir $x_1 = x_2 = \texttt{a}$ y $x_3 = \texttt{b}$.
+> **Convención de notación para todo este inciso.** $m_0$ y $m_1$ son los dos **mensajes** del juego; a los **símbolos** de un mensaje los llamamos $x_1 x_2 x_3$, para que el subíndice de mensaje no choque con el de posición. Así, $m_0 = \texttt{aab}$ quiere decir $x_1 = x_2 = \texttt{a}$ y $x_3 = \texttt{b}$.
 >
 > La cuenta se hace **condicionando sobre $t$**, porque la respuesta cambia radicalmente entre $t=1$ y $t \in \{2,3\}$.
 >
@@ -624,7 +624,7 @@ Dado un criptosistema $\Pi = (\mathsf{Gen}, \mathsf{Enc}, \mathsf{Dec})$ de **Vi
 >
 > $$\Pr\big[\mathsf{PrivK}^{\mathsf{eav}}_{A,\Pi} = 1\big] = \tfrac12\cdot\tfrac{14}{39} + \tfrac12\cdot\tfrac{38}{39} = \tfrac{14 + 38}{78} = \tfrac{52}{78} = \boxed{\tfrac{2}{3}} \approx 0{,}6667$$
 >
-> > *(Verificado por enumeración exhaustiva de las $26 + 26^2 + 26^3$ claves.)*
+> *(Verificado por enumeración exhaustiva de las $26 + 26^2 + 26^3$ claves.)*
 >
 > **De dónde sale el $2/3$, contado a ojo:** un tercio de las veces ($t=1$) el adversario acierta con probabilidad $1$, y los otros dos tercios acierta con probabilidad $\tfrac12\left(\tfrac1{26} + \tfrac{25}{26}\right) = \tfrac12$, o sea como una moneda. Entonces $\tfrac13\cdot 1 + \tfrac23\cdot\tfrac12 = \tfrac13 + \tfrac13 = \tfrac23$. **Toda la ventaja viene del caso $t=1$**, y vale exactamente el peso de ese caso.
 >
@@ -663,9 +663,9 @@ Demostrar que los siguientes cifrados son **vulnerables a un ataque de texto pla
 >
 > El marco es la prueba `CPA` de [[pruebas-de-indistinguibilidad#Las tres pruebas|Pruebas de indistinguibilidad]]: el adversario tiene acceso a un **oráculo de cifrado** $f(x) = \mathsf{Enc}_k(x)$ **antes** de elegir sus mensajes, y lo puede consultar con lo que quiera. → [[modelos-de-ataque|Modelos de ataque]]
 >
-> > **La versión general ya está probada.** Los dos cifrados son **determinísticos**, y *determinístico $\Rightarrow$ no CPA-Secure* — la demostración de tres líneas está en [[pruebas-de-indistinguibilidad#Propiedades de CPA|CPA § Propiedades]]: $A$ pide $c^{*} = f(m_0)$, después emite $(m_0, m_1)$, y responde $0$ si el desafío coincide con $c^{*}$. Gana con probabilidad 1 sin saber nada del cifrado.
-> >
-> > Lo que se pide acá es más fuerte y más concreto: no distinguir, sino **recuperar la clave entera con una sola consulta**. Un ataque de *recuperación total de clave*, no de distinción.
+> **La versión general ya está probada.** Los dos cifrados son **determinísticos**, y *determinístico $\Rightarrow$ no CPA-Secure* — la demostración de tres líneas está en [[pruebas-de-indistinguibilidad#Propiedades de CPA|CPA § Propiedades]]: $A$ pide $c^{*} = f(m_0)$, después emite $(m_0, m_1)$, y responde $0$ si el desafío coincide con $c^{*}$. Gana con probabilidad 1 sin saber nada del cifrado.
+>
+> Lo que se pide acá es más fuerte y más concreto: no distinguir, sino **recuperar la clave entera con una sola consulta**. Un ataque de *recuperación total de clave*, no de distinción.
 >
 > ### Sustitución monoalfabética
 >
@@ -733,7 +733,7 @@ Demostrar que los siguientes cifrados son **vulnerables a un ataque de texto pla
 > [!nota]- Resolución del Ejercicio 6
 > *En `ECB` un error en un bloque del cifrado afecta sólo al bloque de texto claro correspondiente. a) En `CBC`, ¿a través de cuántos bloques de texto **cifrado** se propaga un error de un bit en $P_1$? b) En `CBC`, ¿a través de cuántos bloques de texto **descifrado** se propaga un error de un bit en $C_1$? c) ¿Hasta dónde se propaga un error de un bit en un carácter del cifrado en modo `CFB` de ocho bits?*
 >
-> > **La figura del enunciado** (el diagrama de `CBC` que la guía referencia con *"ver figura"*) está en el [PDF de la cátedra](../../raw/guias/guia2/Guia%202%20-%20Criptograf%C3%ADa%20Sim%C3%A9trica.pdf), página 2. No la tenemos capturada en `assets/`; los diagramas equivalentes de la clase están en [[modos-de-encadenamiento#Los cinco modos|Modos de encadenamiento § Los cinco modos]].
+> **La figura del enunciado** (el diagrama de `CBC` que la guía referencia con *"ver figura"*) está en el [PDF de la cátedra](../../raw/guias/guia2/Guia%202%20-%20Criptograf%C3%ADa%20Sim%C3%A9trica.pdf), página 2. No la tenemos capturada en `assets/`; los diagramas equivalentes de la clase están en [[modos-de-encadenamiento#Los cinco modos|Modos de encadenamiento § Los cinco modos]].
 >
 > **La idea que resuelve los tres incisos:** no hay nada que memorizar. Se escriben las **ecuaciones del modo**, se pregunta *"¿en qué expresiones aparece el bloque que cambió?"*, y se distingue si entra **por la primitiva** (efecto avalancha, el bloque se destruye entero) o **por un xor directo** (se da vuelta exactamente ese bit y nada más). Todo lo demás sale de ahí.
 >
@@ -757,7 +757,7 @@ Demostrar que los siguientes cifrados son **vulnerables a un ataque de texto pla
 >
 > El argumento inductivo, en una línea: si $C_{i-1}$ cambió, entonces la entrada de la primitiva en el paso $i$ cambió, y como $\mathsf{Enc}_K$ es una permutación pseudoaleatoria, su salida cambia por completo. Nunca se corta la cadena.
 >
-> > **La consecuencia práctica.** Esto es exactamente por qué `CBC` **no permite cifrado paralelo** ni **reescritura puntual** de un bloque: tocar un byte del plano obliga a recifrar todo lo que viene después. Es la fila "cifrado paralelo: encadenado" de la [[modos-de-encadenamiento#Tabla comparativa|tabla comparativa]]. Si hace falta reescritura puntual, el modo es `CTR`, donde cada bloque es independiente.
+> **La consecuencia práctica.** Esto es exactamente por qué `CBC` **no permite cifrado paralelo** ni **reescritura puntual** de un bloque: tocar un byte del plano obliga a recifrar todo lo que viene después. Es la fila "cifrado paralelo: encadenado" de la [[modos-de-encadenamiento#Tabla comparativa|tabla comparativa]]. Si hace falta reescritura puntual, el modo es `CTR`, donde cada bloque es independiente.
 >
 > ### b) CBC: un bit de error en C_1 afecta a exactamente **2** bloques descifrados
 >
@@ -778,16 +778,16 @@ Demostrar que los siguientes cifrados son **vulnerables a un ataque de texto pla
 >
 > Se dice que **`CBC` es autosincronizante ante errores de bit**: el error se contiene y el flujo se recupera sin intervención. Ojo con el alcance: *ante errores de bit*, no ante **pérdida o inserción de bloques** — si se pierde un bloque entero, todo lo que sigue queda desalineado y no se recupera nunca.
 >
-> > **El contraste (a) vs. (b) es el corazón del ejercicio.**
-> >
-> > | Dónde ocurre el error | Cómo se propaga |
-> > |---|---|
-> > | En el **texto claro**, antes de cifrar (a) | a **todos** los bloques de cifrado |
-> > | En el **canal**, sobre el cifrado (b) | a **2** bloques descifrados, y se corta |
-> >
-> > Es asimétrico y no es casualidad: al cifrar, el bloque modificado atraviesa la primitiva **en cada paso** de la cadena; al descifrar, cada $C_i$ sólo toca dos ecuaciones porque la cadena se recorre "hacia atrás" con un xor que no realimenta.
+> **El contraste (a) vs. (b) es el corazón del ejercicio.**
 >
-> > **Lectura de seguridad, que el enunciado no pide** *(lectura nuestra).* Que un bit de $C_1$ dé vuelta **exactamente** ese bit en $P_2$ no es sólo un dato sobre robustez: es **maleabilidad**. Un atacante activo puede modificar bits elegidos del plano descifrado sin conocer la clave, a cambio de destruir el bloque anterior. Por eso el cifrado por sí solo no da integridad y hace falta un **MAC** o un modo de cifrado autenticado — que es justo el tema de la **Clase 3** (27/08, ver [[cronograma]]).
+> | Dónde ocurre el error | Cómo se propaga |
+> |---|---|
+> | En el **texto claro**, antes de cifrar (a) | a **todos** los bloques de cifrado |
+> | En el **canal**, sobre el cifrado (b) | a **2** bloques descifrados, y se corta |
+>
+> Es asimétrico y no es casualidad: al cifrar, el bloque modificado atraviesa la primitiva **en cada paso** de la cadena; al descifrar, cada $C_i$ sólo toca dos ecuaciones porque la cadena se recorre "hacia atrás" con un xor que no realimenta.
+>
+> **Lectura de seguridad, que el enunciado no pide** *(lectura nuestra).* Que un bit de $C_1$ dé vuelta **exactamente** ese bit en $P_2$ no es sólo un dato sobre robustez: es **maleabilidad**. Un atacante activo puede modificar bits elegidos del plano descifrado sin conocer la clave, a cambio de destruir el bloque anterior. Por eso el cifrado por sí solo no da integridad y hace falta un **MAC** o un modo de cifrado autenticado — que es justo el tema de la **Clase 3** (27/08, ver [[cronograma]]).
 >
 > ### c) CFB de 8 bits: se propaga a 1 + n/s caracteres
 >
@@ -812,9 +812,9 @@ Demostrar que los siguientes cifrados son **vulnerables a un ataque de texto pla
 >
 > Si la primitiva fuera `AES` ($n = 128$), serían **17** caracteres. La respuesta **no** es un número absoluto: es $1 + n/s$, y hay que decir con qué $n$ se está trabajando. Un examen que pida "9" está asumiendo `DES` sin decirlo.
 >
-> > **El $n$ que dibuja la cátedra es 32, no 64.** Las cuatro láminas de [`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf) —material propio de la cátedra, del 24/08— trabajan con $n = 32$ y $s = 8$: las **tres primeras** lo llevan rotulado *"Ejemplo: n = 32; s = 8"*, y la cuarta, la del ejercicio abierto, no lo repite. Con esos parámetros la cuenta da $1 + 32/8 = \mathbf{5}$ caracteres: **es la primera fila de la tabla, y conviene tenerla a mano porque es el número que sale de su propio material.** El recorrido de las láminas está en [[practica-03-seudoaleatoriedad-y-modos|Práctica 3 — Seudoaleatoriedad y modos]].
-> >
-> > Esas mismas láminas plantean además **otros dos modos de falla que este ejercicio no pregunta**: bloques que llegan **fuera de orden** (la lámina 3 muestra $c_2, c_1, c_3, c_4, \dots$) y un ejercicio abierto —*"analizar"*— con $c_1$ corrupto. **La cátedra los deja planteados y no los resuelve**; la wiki sí, en [[modos-de-encadenamiento|Modos de encadenamiento § Bloques que llegan fuera de orden]] y en [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 §9]]. Ojo con la diferencia: un bloque **fuera de orden** no es el error de bit de este inciso, y la autosincronización que se afirma más arriba está establecida sólo para el error de bit.
+> **El $n$ que dibuja la cátedra es 32, no 64.** Las cuatro láminas de [`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf) —material propio de la cátedra, del 24/08— trabajan con $n = 32$ y $s = 8$: las **tres primeras** lo llevan rotulado *"Ejemplo: n = 32; s = 8"*, y la cuarta, la del ejercicio abierto, no lo repite. Con esos parámetros la cuenta da $1 + 32/8 = \mathbf{5}$ caracteres: **es la primera fila de la tabla, y conviene tenerla a mano porque es el número que sale de su propio material.** El recorrido de las láminas está en [[practica-03-seudoaleatoriedad-y-modos|Práctica 3 — Seudoaleatoriedad y modos]].
+>
+> Esas mismas láminas plantean además **otros dos modos de falla que este ejercicio no pregunta**: bloques que llegan **fuera de orden** (la lámina 3 muestra $c_2, c_1, c_3, c_4, \dots$) y un ejercicio abierto —*"analizar"*— con $c_1$ corrupto. **La cátedra los deja planteados y no los resuelve**; la wiki sí, en [[modos-de-encadenamiento|Modos de encadenamiento § Bloques que llegan fuera de orden]] y en [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 §9]]. Ojo con la diferencia: un bloque **fuera de orden** no es el error de bit de este inciso, y la autosincronización que se afirma más arriba está establecida sólo para el error de bit.
 
 ### Ejercicio 7
 
@@ -855,7 +855,7 @@ $$E(K, M) = (M \cdot K) \bmod 32$$
 >
 > aunque la clave se **escriba** con 5 bits (32 valores posibles). **La mitad del espacio nominal es basura**: con $K$ par la función no es inyectiva y el mensaje no se puede recuperar.
 >
-> > **Matiz que vale la pena señalar** *(lectura nuestra).* $K = 1$ es la **identidad**: $E(1, M) = M$, no cifra nada. Así que en la práctica quedan **15** claves con algún efecto. Es el mismo defecto que tiene la rotación con $k = 0$, y la razón por la que "espacio de clave nominal" y "espacio de clave efectivo" no son lo mismo. `DES` tiene el mismo fenómeno a otra escala: la clave se **escribe** con 64 bits pero sólo **56** son efectivos, porque PC-1 descarta los 8 bits de paridad — ver [[des-y-3des|DES y 3-DES]]. La tabla completa de los 16 inversos módulo 32 está en [[inverso-modular#La tabla completa de inversos|Inverso modular § La tabla completa de inversos]], y sirve para chequear a mano cualquier corrida de Euclides con este módulo.
+> **Matiz que vale la pena señalar** *(lectura nuestra).* $K = 1$ es la **identidad**: $E(1, M) = M$, no cifra nada. Así que en la práctica quedan **15** claves con algún efecto. Es el mismo defecto que tiene la rotación con $k = 0$, y la razón por la que "espacio de clave nominal" y "espacio de clave efectivo" no son lo mismo. `DES` tiene el mismo fenómeno a otra escala: la clave se **escribe** con 64 bits pero sólo **56** son efectivos, porque PC-1 descarta los 8 bits de paridad — ver [[des-y-3des|DES y 3-DES]]. La tabla completa de los 16 inversos módulo 32 está en [[inverso-modular#La tabla completa de inversos|Inverso modular § La tabla completa de inversos]], y sirve para chequear a mano cualquier corrida de Euclides con este módulo.
 >
 > ### b) Cifrar en modo CBC con IV = 19, K = 7
 >
@@ -885,11 +885,11 @@ $$E(K, M) = (M \cdot K) \bmod 32$$
 >
 > $$\boxed{C = 13,\ 4,\ 18,\ 13,\ 7}$$
 >
-> > **Detalle lindo para señalar** *(lectura nuestra).* Nótense los bloques 1 y 4: $C_1 = C_4 = 13$ **y sin embargo** $P_1 = 24 \ne 25 = P_4$. Dos bloques de texto claro **distintos** produjeron el **mismo** criptograma, porque el encadenamiento los mezcló con contextos distintos que casualmente colisionaron ($24 \oplus 19 = 11 = 25 \oplus 18$).
-> >
-> > Es justo **lo contrario** del problema de [[modos-de-encadenamiento|ECB]], donde bloques iguales dan siempre criptogramas iguales y el patrón del plano sobrevive. Acá la correspondencia bloque-a-bloque está rota en las dos direcciones: eso es lo que aporta el encadenamiento.
-> >
-> > Cuidado con leerlo de más: que **acá** colisionen es una casualidad de estos números y de un bloque de 5 bits ridículamente chico. Con bloques de 128 bits las colisiones son astronómicamente raras (y cuando aparecen, son un problema de seguridad, no una virtud — es el límite del *birthday bound*).
+> **Detalle lindo para señalar** *(lectura nuestra).* Nótense los bloques 1 y 4: $C_1 = C_4 = 13$ **y sin embargo** $P_1 = 24 \ne 25 = P_4$. Dos bloques de texto claro **distintos** produjeron el **mismo** criptograma, porque el encadenamiento los mezcló con contextos distintos que casualmente colisionaron ($24 \oplus 19 = 11 = 25 \oplus 18$).
+>
+> Es justo **lo contrario** del problema de [[modos-de-encadenamiento|ECB]], donde bloques iguales dan siempre criptogramas iguales y el patrón del plano sobrevive. Acá la correspondencia bloque-a-bloque está rota en las dos direcciones: eso es lo que aporta el encadenamiento.
+>
+> Cuidado con leerlo de más: que **acá** colisionen es una casualidad de estos números y de un bloque de 5 bits ridículamente chico. Con bloques de 128 bits las colisiones son astronómicamente raras (y cuando aparecen, son un problema de seguridad, no una virtud — es el límite del *birthday bound*).
 >
 > ### c) Descifrar en modo CBC
 >
@@ -914,9 +914,9 @@ $$E(K, M) = (M \cdot K) \bmod 32$$
 >
 > *Verificación directa:* $7 \cdot 23 = 161 = 5\cdot 32 + 1 \equiv 1 \pmod{32}$. **Correcto.**
 >
-> > **Dónde está esta cuenta desarrollada.** La corrida completa de Euclides extendido sobre $\operatorname{mcd}(7,32)$ —con las **dos formas**, la sustitución hacia atrás y la tabla de coeficientes, y el chequeo del último renglón— está en [[algoritmo-de-euclides-extendido#6. Ejemplo 1: el mcd de 7 y 32|Algoritmo de Euclides extendido § 6]]: es exactamente este ejemplo. Ahí se explica también por qué $2\cdot 32 - 9\cdot 7 = 1$ y $23\cdot 7 - 5\cdot 32 = 1$ son **la misma identidad de Bézout** escrita con otro representante, que es el paso que acá se resuelve de un saque con $-9 \bmod 32 = 23$.
-> >
-> > El criterio de **por qué** existe el inverso (y por qué sólo para las $K$ impares, que es el inciso (a)) está en [[inverso-modular#Quiénes son los inversibles|Inverso modular]]; las definiciones de base —divisibilidad, mcd, congruencia módulo $m$— en [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]]. El manuscrito de la cátedra que encarga el tema está recorrido en [[teoria-de-numeros|Teoría de números]]: **no trae ningún número concreto** y manda justamente a este Ej. 7c como su ejemplo numérico.
+> **Dónde está esta cuenta desarrollada.** La corrida completa de Euclides extendido sobre $\operatorname{mcd}(7,32)$ —con las **dos formas**, la sustitución hacia atrás y la tabla de coeficientes, y el chequeo del último renglón— está en [[algoritmo-de-euclides-extendido#6. Ejemplo 1: el mcd de 7 y 32|Algoritmo de Euclides extendido § 6]]: es exactamente este ejemplo. Ahí se explica también por qué $2\cdot 32 - 9\cdot 7 = 1$ y $23\cdot 7 - 5\cdot 32 = 1$ son **la misma identidad de Bézout** escrita con otro representante, que es el paso que acá se resuelve de un saque con $-9 \bmod 32 = 23$.
+>
+> El criterio de **por qué** existe el inverso (y por qué sólo para las $K$ impares, que es el inciso (a)) está en [[inverso-modular#Quiénes son los inversibles|Inverso modular]]; las definiciones de base —divisibilidad, mcd, congruencia módulo $m$— en [[aritmetica-modular-y-divisibilidad|Aritmética modular y divisibilidad]]. El manuscrito de la cátedra que encarga el tema está recorrido en [[teoria-de-numeros|Teoría de números]]: **no trae ningún número concreto** y manda justamente a este Ej. 7c como su ejemplo numérico.
 >
 > **Las ecuaciones de descifrado** de `CBC` con esta primitiva:
 >
@@ -974,7 +974,7 @@ Analizar **por qué** una clave formada por **todos sus bits en 0**, o **todos s
 > - ($\Leftarrow$) Si $C_0 = 0^{28}$ entonces $C_0 \lll r = 0^{28}$ para todo $r$; ídem con $1^{28}$.
 > - ($\Rightarrow$) Acá entra el calendario: DES **arranca con $r_1 = 1$**. Pedir $C_0 \lll 1 = C_0$ es pedir que cada bit sea igual a su vecino, y eso obliga a la cadena constante.
 >
-> > **El "sólo si" vale para la rotación de 1, no para una rotación cualquiera** *(precisión nuestra).* Una cadena de 28 bits queda fija bajo $\lll r$ cuando su período divide a $\operatorname{mcd}(r, 28)$, así que con $r = 2$ hay cadenas **no constantes** que también quedan fijas: $(01)^{14}$ rotada dos lugares es ella misma. Y no es un caso de laboratorio — el [[des-descripcion-del-algoritmo|calendario de DES]] usa $r_i = 2$ en **12 de las 16 rondas** (las de 1 bit son sólo las rondas 1, 2, 9 y 16). Lo que fuerza la constancia es **la ronda 1**. Enunciado para "una rotación circular" a secas, el lema es falso, y las cadenas de período 2 que se cuelan por esa grieta son justamente de donde salen las **claves semi-débiles** de más abajo.
+> **El "sólo si" vale para la rotación de 1, no para una rotación cualquiera** *(precisión nuestra).* Una cadena de 28 bits queda fija bajo $\lll r$ cuando su período divide a $\operatorname{mcd}(r, 28)$, así que con $r = 2$ hay cadenas **no constantes** que también quedan fijas: $(01)^{14}$ rotada dos lugares es ella misma. Y no es un caso de laboratorio — el [[des-descripcion-del-algoritmo|calendario de DES]] usa $r_i = 2$ en **12 de las 16 rondas** (las de 1 bit son sólo las rondas 1, 2, 9 y 16). Lo que fuerza la constancia es **la ronda 1**. Enunciado para "una rotación circular" a secas, el lema es falso, y las cadenas de período 2 que se cuelan por esa grieta son justamente de donde salen las **claves semi-débiles** de más abajo.
 >
 > Entonces, si $C_0$ y $D_0$ son **cada una** constante:
 >
@@ -1049,15 +1049,15 @@ Analizar **por qué** una clave formada por **todos sus bits en 0**, o **todos s
 >
 > **Lo que sí rompió a DES fue el tamaño de la clave**: $2^{56}$ es un espacio alcanzable por [[ataque-de-fuerza-bruta|fuerza bruta]] con hardware dedicado, y por eso el vault lo clasifica como [[estado-de-un-criptosistema|quebrado]]. El criptoanálisis **diferencial** (1990) y el **lineal** (1992) de la [[des-y-3des#Evolución: cómo se erosionó|tabla de evolución]] son ataques teóricamente más baratos que la fuerza bruta, pero **su costo se mide en textos, no en clave**: exigen $2^{47}$ textos planos **elegidos** y $2^{43}$ textos planos **conocidos** respectivamente.
 >
-> > **Cuidado con leer esos dos números como un espacio de clave achicado.** El espacio de clave de DES es $2^{56}$ en los tres renglones con número de esa tabla: ni el diferencial ni el lineal lo reducen. Lo que baja es el **costo del ataque** —así se llama la columna, justamente— y baja en una moneda distinta: pares plano/cifrado bajo la **misma** clave. Por eso en la práctica ninguno de los dos fue nunca viable, porque nadie consigue $2^{47}$ pares elegidos.
-> >
-> > *(Agregado nuestro: la filmina da la tabla de costos y no dice cuál de las tres vías se usó realmente. La que se usó fue la primera — la demostración pública fue el **Deep Crack** de la EFF, en 1998: una máquina dedicada que barrió el espacio de $2^{56}$ en cuestión de días.)*
+> **Cuidado con leer esos dos números como un espacio de clave achicado.** El espacio de clave de DES es $2^{56}$ en los tres renglones con número de esa tabla: ni el diferencial ni el lineal lo reducen. Lo que baja es el **costo del ataque** —así se llama la columna, justamente— y baja en una moneda distinta: pares plano/cifrado bajo la **misma** clave. Por eso en la práctica ninguno de los dos fue nunca viable, porque nadie consigue $2^{47}$ pares elegidos.
+>
+> *(Agregado nuestro: la filmina da la tabla de costos y no dice cuál de las tres vías se usó realmente. La que se usó fue la primera — la demostración pública fue el **Deep Crack** de la EFF, en 1998: una máquina dedicada que barrió el espacio de $2^{56}$ en cuestión de días.)*
 >
 > El problema real es otro: **un generador de claves mal hecho**. Un buffer sin inicializar da todo ceros, y todo ceros **es** una clave débil. Por eso las implementaciones serias chequean y descartan explícitamente estas 4 claves antes de usarlas. Es un caso de manual del *"no inventes criptografía"* de [[eleccion-de-primitivas|Elección de primitivas]]: el algoritmo está bien, lo que falla es el `Gen`.
 >
-> > **Las semi-débiles: el enunciado no las pide, pero la cátedra sí las nombra.** No en las filminas de la Clase 02, sino en el esquema de la [Práctica 3](../../raw/practicas/Clase%203.pdf) del 24/08, que las define así: *"Claves Semidébiles: (vienen de a pares) $E_{k_x}(E_{k_y}(m)) = m$ — en lugar de generar 16 subclaves distintas, generan 2 o 4"*. La misma lámina caracteriza las **débiles** con el mismo criterio: *"en lugar de generar 16 subclaves distintas, generan 1"* — que es exactamente lo que demuestra la Pieza 2 de arriba.
-> >
-> > **Esa caracterización por cantidad de subclaves distintas es la que conviene llevarse:** 1 subclave ⟹ débil; 2 o 4 ⟹ semi-débil. El mecanismo es el mismo un escalón más arriba — mitades de **período 2** bajo rotación en lugar de período 1, que son las que la rotación de 2 bits deja fijas (ver el recuadro de la Pieza 2). *(Que sean **6 pares** es agregado nuestro: la lámina da la definición y el conteo de subclaves, no el número de pares.)*
+> **Las semi-débiles: el enunciado no las pide, pero la cátedra sí las nombra.** No en las filminas de la Clase 02, sino en el esquema de la [Práctica 3](../../raw/practicas/Clase%203.pdf) del 24/08, que las define así: *"Claves Semidébiles: (vienen de a pares) $E_{k_x}(E_{k_y}(m)) = m$ — en lugar de generar 16 subclaves distintas, generan 2 o 4"*. La misma lámina caracteriza las **débiles** con el mismo criterio: *"en lugar de generar 16 subclaves distintas, generan 1"* — que es exactamente lo que demuestra la Pieza 2 de arriba.
+>
+> **Esa caracterización por cantidad de subclaves distintas es la que conviene llevarse:** 1 subclave ⟹ débil; 2 o 4 ⟹ semi-débil. El mecanismo es el mismo un escalón más arriba — mitades de **período 2** bajo rotación en lugar de período 1, que son las que la rotación de 2 bits deja fijas (ver el recuadro de la Pieza 2). *(Que sean **6 pares** es agregado nuestro: la lámina da la definición y el conteo de subclaves, no el número de pares.)*
 
 ---
 

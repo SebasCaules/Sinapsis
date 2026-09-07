@@ -88,7 +88,7 @@ Los **seis** ejercicios están resueltos más abajo, en el aviso plegado que sig
 >
 > La guía tiene una forma clara: **los Ej. 1 y 2 son MACs, los Ej. 3, 5 y 6 son hash, y el Ej. 4 es la lectura de teoría que une las dos mitades**. Los seis se contestan con material que la [[clase-03-macs-y-cifrado-autenticado|Clase 03]] ya dejó escrito — el Ej. 1 está literalmente resuelto en clase — salvo dos cosas que la guía agrega y ninguna filmina toca: **cómo se rompe un preprocesamiento débil** (Ej. 2) y **por qué hashear un dato de baja entropía no protege nada** (Ej. 6).
 >
-> > **Ojo con una diferencia respecto de las guías anteriores.** La Guía 3 **no tiene PDF de soluciones de la cátedra** —la Guía 1 sí lo tiene— ni transcripción propia: la clase práctica del **07/09 todavía no ocurrió**. Todo lo que sigue es resolución nuestra, contrastada contra las notas de concepto y contra Katz & Lindell. Las únicas partes que llevan respaldo de la cátedra son las del **Ej. 1**, que se resolvió en voz el 27/08 y está transcripto en [[seguridad-de-un-mac#El ejercicio de los tres MACs|03.04]].
+> **Ojo con una diferencia respecto de las guías anteriores.** La Guía 3 **no tiene PDF de soluciones de la cátedra** —la Guía 1 sí lo tiene— ni transcripción propia: la clase práctica del **07/09 todavía no ocurrió**. Todo lo que sigue es resolución nuestra, contrastada contra las notas de concepto y contra Katz & Lindell. Las únicas partes que llevan respaldo de la cátedra son las del **Ej. 1**, que se resolvió en voz el 27/08 y está transcripto en [[seguridad-de-un-mac#El ejercicio de los tres MACs|03.04]].
 >
 > Cada resolución va **plegada debajo del enunciado** correspondiente, y arranca con el resumen en cursiva de lo que se pide.
 >
@@ -124,7 +124,7 @@ Analizar **por qué no poseen seguridad** los siguientes MAC:
 > [!nota]- Resolución del Ejercicio 1
 > *Analizar por qué no poseen seguridad los MACs $\mathsf{Mac}_k(m) = G(k)\oplus m$, $\mathsf{Mac}_k(m) = k \oplus \mathsf{first\_k\_bits}(m)$ y $\mathsf{Mac}_k(m) = \mathsf{Enc}_k(\lvert m\rvert)$.*
 >
-> > **Este ejercicio ya está resuelto de punta a punta en el vault, y no acá.** Son **exactamente** los tres MACs de la **filmina 17 de la Clase 03**, que la cátedra derribó uno por uno en la clase del **27/08**. El desarrollo completo —cada adversario escrito, la reconstrucción de `Vrfy` en el tercero, los diálogos de clase con los alumnos que los resolvieron, y la **corrección al docente** sobre determinismo— está en [[seguridad-de-un-mac#El ejercicio de los tres MACs|Seguridad de un MAC § El ejercicio de los tres MACs]]. **Ir ahí para resolverlo.** Lo de acá abajo es el resumen y lo que la guía agrega respecto de la filmina.
+> **Este ejercicio ya está resuelto de punta a punta en el vault, y no acá.** Son **exactamente** los tres MACs de la **filmina 17 de la Clase 03**, que la cátedra derribó uno por uno en la clase del **27/08**. El desarrollo completo —cada adversario escrito, la reconstrucción de `Vrfy` en el tercero, los diálogos de clase con los alumnos que los resolvieron, y la **corrección al docente** sobre determinismo— está en [[seguridad-de-un-mac#El ejercicio de los tres MACs|Seguridad de un MAC § El ejercicio de los tres MACs]]. **Ir ahí para resolverlo.** Lo de acá abajo es el resumen y lo que la guía agrega respecto de la filmina.
 >
 > ### Los tres, en una línea cada uno
 >
@@ -159,7 +159,7 @@ Analizar **por qué no poseen seguridad** los siguientes MAC:
 >
 > **El veredicto no cambia en ningún caso, pero el camino sí.** Conviene escribirlo así en el parcial: declarar el supuesto sobre `Enc`, y mostrar que el ataque sobrevive a los dos. Es exactamente el tipo de razonamiento que la filmina 17 entrena.
 >
-> > **La corrección al docente que hay que conocer y no repetir mal.** Al cerrar el primer MAC, el docente saca la lección de que *"si los MACs son deterministas, tienen un problema latente de que va a ser muy difícil que sean infalsificables"* (cues 540-542). **Eso no es correcto**, y la propia clase lo desmiente una filmina después: [[cbc-mac|CBC-MAC]] y [[hmac|HMAC]] son determinísticos y son seguros. La intuición *"determinístico ⟹ inseguro"* viene del **cifrado** y no se transfiere a los MACs. Katz & Lindell va en la dirección contraria (Proposición 4.4): un MAC seguro con verificación canónica es automáticamente **fuertemente** seguro. El desarrollo está en [[seguridad-de-un-mac#Primer MAC: la clave expandida xor el mensaje|03.04]] y en [[message-authentication-code#Un MAC determinístico no es un problema|03.03 § Un MAC determinístico no es un problema]].
+> **La corrección al docente que hay que conocer y no repetir mal.** Al cerrar el primer MAC, el docente saca la lección de que *"si los MACs son deterministas, tienen un problema latente de que va a ser muy difícil que sean infalsificables"* (cues 540-542). **Eso no es correcto**, y la propia clase lo desmiente una filmina después: [[cbc-mac|CBC-MAC]] y [[hmac|HMAC]] son determinísticos y son seguros. La intuición *"determinístico ⟹ inseguro"* viene del **cifrado** y no se transfiere a los MACs. Katz & Lindell va en la dirección contraria (Proposición 4.4): un MAC seguro con verificación canónica es automáticamente **fuertemente** seguro. El desarrollo está en [[seguridad-de-un-mac#Primer MAC: la clave expandida xor el mensaje|03.04]] y en [[message-authentication-code#Un MAC determinístico no es un problema|03.03 § Un MAC determinístico no es un problema]].
 
 ### Ejercicio 2
 
@@ -197,7 +197,7 @@ Considerar el siguiente algoritmo de código de autenticación de mensaje (MAC):
 >
 > La observación que resuelve el ejercicio entero cabe en un renglón:
 >
-> > $\mathsf{MAC}_k$ es **una función**. Entonces $R(m) = R(m') \implies \mathsf{MAC}_k(R(m)) = \mathsf{MAC}_k(R(m'))$, **sea cual sea la función MAC y sin conocer la clave**.
+> $\mathsf{MAC}_k$ es **una función**. Entonces $R(m) = R(m') \implies \mathsf{MAC}_k(R(m)) = \mathsf{MAC}_k(R(m'))$, **sea cual sea la función MAC y sin conocer la clave**.
 >
 > O sea: **colisionar el MAC se reduce a colisionar $R$**, que es una operación pública, sin clave y trivial de invertir. No hace falta saber nada de $\mathsf{MAC}_k$ —puede ser `HMAC-SHA256`, `CBC-MAC` con `AES`, lo que sea— ni tocar la clave. El atacante trabaja **antes** de la primitiva segura, no contra ella.
 >
@@ -230,7 +230,7 @@ Considerar el siguiente algoritmo de código de autenticación de mensaje (MAC):
 >
 > Se le puede **agregar al mensaje cualquier texto que ocupe un número entero de bloques de 128 bits, repetido una cantidad par de veces** (o, más en general, cualquier multiconjunto de bloques donde cada uno aparezca con multiplicidad par). Otra vez: infinitas colisiones, todas con significado a elección del atacante.
 >
-> > **La hipótesis de alineación no es un tecnicismo** *(precisión nuestra).* La identidad se escribe sobre la **secuencia de bloques ya paddeada**, no sobre la concatenación de cadenas. Si $X$ no ocupa bloques enteros, $m \Vert X \Vert X$ **no** se vuelve a partir en los bloques de $m$ seguidos de $[X, X]$, y el XOR no se cancela: con $m$ de 48 bytes y $X = \texttt{"ANULAR"}$ (6 bytes), la cola de 12 bytes cae entera en un mismo bloque y $R$ cambia. Por eso el script usa $X = \texttt{"ANULAR LA ORDEN "}$, que mide **exactamente 16 bytes**.
+> **La hipótesis de alineación no es un tecnicismo** *(precisión nuestra).* La identidad se escribe sobre la **secuencia de bloques ya paddeada**, no sobre la concatenación de cadenas. Si $X$ no ocupa bloques enteros, $m \Vert X \Vert X$ **no** se vuelve a partir en los bloques de $m$ seguidos de $[X, X]$, y el XOR no se cancela: con $m$ de 48 bytes y $X = \texttt{"ANULAR"}$ (6 bytes), la cola de 12 bytes cae entera en un mismo bloque y $R$ cambia. Por eso el script usa $X = \texttt{"ANULAR LA ORDEN "}$, que mide **exactamente 16 bytes**.
 >
 > La versión más quirúrgica de la misma idea es **por complemento**: elegir un $\Delta \ne 0$ y aplicarlo a **dos** bloques,
 >
@@ -276,7 +276,7 @@ Considerar el siguiente algoritmo de código de autenticación de mensaje (MAC):
 >
 > Sin la hipótesis, no hay teorema; y sin teorema, hay ataque. **La primitiva fuerte no salva a la construcción débil que la envuelve.** Es la misma moraleja que el tercer MAC del Ej. 1 —*"una primitiva excelente aplicada al argumento equivocado no compra nada"*— y la misma que separa a `AES` de `ECB`.
 >
-> > **La precisión que hace interesante a este ejercicio** *(lectura nuestra).* El XOR-fold **sí** mira **todos** los bits del mensaje, así que **pasa** el criterio que derriba al segundo MAC del Ej. 1 (*"la etiqueta tiene que depender de todos los bits"*) y cae igual. Lo que le falta no es cobertura, es **inyectividad computacional**: el XOR-fold es una aplicación **lineal** de $\bigl((\mathbb{F}_2)^{128}\bigr)^{n}$ en $(\mathbb{F}_2)^{128}$, y toda lineal sobreyectiva de un espacio de dimensión $128n$ sobre uno de dimensión $128$ tiene un **núcleo de dimensión $128(n-1)$** — enorme y explícito, y de ahí salen las familias de arriba. La palabra que hace el trabajo no es *lineal* a secas —la identidad sobre $(\mathbb{F}_2)^{128}$ también es lineal y su núcleo es $\{0\}$— sino la **caída de dimensión**. Depender de todos los bits es **necesario y no suficiente**; la condición suficiente es la resistencia a colisiones. Buena línea de cierre para el parcial.
+> **La precisión que hace interesante a este ejercicio** *(lectura nuestra).* El XOR-fold **sí** mira **todos** los bits del mensaje, así que **pasa** el criterio que derriba al segundo MAC del Ej. 1 (*"la etiqueta tiene que depender de todos los bits"*) y cae igual. Lo que le falta no es cobertura, es **inyectividad computacional**: el XOR-fold es una aplicación **lineal** de $\bigl((\mathbb{F}_2)^{128}\bigr)^{n}$ en $(\mathbb{F}_2)^{128}$, y toda lineal sobreyectiva de un espacio de dimensión $128n$ sobre uno de dimensión $128$ tiene un **núcleo de dimensión $128(n-1)$** — enorme y explícito, y de ahí salen las familias de arriba. La palabra que hace el trabajo no es *lineal* a secas —la identidad sobre $(\mathbb{F}_2)^{128}$ también es lineal y su núcleo es $\{0\}$— sino la **caída de dimensión**. Depender de todos los bits es **necesario y no suficiente**; la condición suficiente es la resistencia a colisiones. Buena línea de cierre para el parcial.
 >
 > ### b) La implementación, corrida
 >
@@ -425,9 +425,9 @@ Considerar la siguiente función de hash $h()$:
 >
 > **Falla.** $h(\texttt{"a"}) = h(\texttt{"b"}) = 1^{32}$. Dos caracteres de trabajo.
 >
-> > **El atajo por la jerarquía, y su letra chica.** [[resistencias-de-una-funcion-de-hash#La jerarquía|La jerarquía]] es
-> > $$\text{res. a colisiones} \implies \text{res. a 2ª preimágenes} \implies \text{res. a preimágenes}$$
-> > así que, por contrarrecíproco, **romper la más débil rompe las tres**: exhibida la preimagen, las otras dos caen solas. La letra chica es que la segunda implicación **necesita que $h$ comprima** —si fuera inyectiva el argumento se cae— y acá comprime de infinito a 2, así que la hipótesis se cumple con holgura. Vale igual escribir los tres ataques explícitos, que es lo que el enunciado pide y lo que da puntos. *(Y ojo: K&L deja estas implicaciones enunciadas informalmente, ver [[resistencias-de-una-funcion-de-hash#La jerarquía|03.07]].)*
+> **El atajo por la jerarquía, y su letra chica.** [[resistencias-de-una-funcion-de-hash#La jerarquía|La jerarquía]] es
+> $$\text{res. a colisiones} \implies \text{res. a 2ª preimágenes} \implies \text{res. a preimágenes}$$
+> así que, por contrarrecíproco, **romper la más débil rompe las tres**: exhibida la preimagen, las otras dos caen solas. La letra chica es que la segunda implicación **necesita que $h$ comprima** —si fuera inyectiva el argumento se cae— y acá comprime de infinito a 2, así que la hipótesis se cumple con holgura. Vale igual escribir los tres ataques explícitos, que es lo que el enunciado pide y lo que da puntos. *(Y ojo: K&L deja estas implicaciones enunciadas informalmente, ver [[resistencias-de-una-funcion-de-hash#La jerarquía|03.07]].)*
 >
 > ### La respuesta: no, y no hace falta la jerarquía para descartarla
 >
@@ -435,7 +435,7 @@ Considerar la siguiente función de hash $h()$:
 >
 > Lo que **sí** cumple son los requisitos **no criptográficos** de la [[funciones-de-hash-criptograficas#Definición|definición de función de hash]]: acepta dominio ilimitado, devuelve salida de tamaño fijo, y es baratísima de evaluar. Eso es todo lo que tiene. Sirve como bit de paridad y no como hash — y de hecho **es** un bit de paridad, escrito 32 veces.
 >
-> > **La trampa del efecto avalancha** *(lectura nuestra).* Un test superficial de avalancha la aprobaría con honores: agregar **un solo carácter** da vuelta **los 32 bits de salida**, que es el 100 % de cambio, mejor que el 50 % que se espera de una función buena. La moraleja es que el efecto avalancha es un **síntoma**, no una definición: se mide sobre lo que la función hace, y esta función no hace nada. Las propiedades que definen un hash criptográfico son las tres resistencias, no las estadísticas de la salida.
+> **La trampa del efecto avalancha** *(lectura nuestra).* Un test superficial de avalancha la aprobaría con honores: agregar **un solo carácter** da vuelta **los 32 bits de salida**, que es el 100 % de cambio, mejor que el 50 % que se espera de una función buena. La moraleja es que el efecto avalancha es un **síntoma**, no una definición: se mide sobre lo que la función hace, y esta función no hace nada. Las propiedades que definen un hash criptográfico son las tres resistencias, no las estadísticas de la salida.
 >
 > ### b) La probabilidad de colisión
 >
@@ -445,7 +445,7 @@ Considerar la siguiente función de hash $h()$:
 >
 > $$\Pr[h(x_1) = h(x_2)] \;=\; \underbrace{\Pr[\text{ambas pares}]}_{\frac12\cdot\frac12} \;+\; \underbrace{\Pr[\text{ambas impares}]}_{\frac12\cdot\frac12} \;=\; \tfrac14 + \tfrac14 \;=\; \boxed{\tfrac12}$$
 >
-> > **La precisión formal que conviene decir en voz alta.** Una colisión pide además $x_1 \ne x_2$. Sobre un dominio de longitud ilimitada y con cualquier distribución razonable, $\Pr[x_1 = x_2]$ es despreciable, así que el $1/2$ queda intacto. Si el dominio fuera chico habría que restarlo. *(Precisión nuestra; el enunciado no lo menciona.)*
+> **La precisión formal que conviene decir en voz alta.** Una colisión pide además $x_1 \ne x_2$. Sobre un dominio de longitud ilimitada y con cualquier distribución razonable, $\Pr[x_1 = x_2]$ es despreciable, así que el $1/2$ queda intacto. Si el dominio fuera chico habría que restarlo. *(Precisión nuestra; el enunciado no lo menciona.)*
 >
 > **Y por qué el supuesto no es gratis.** Si los mensajes se sortearan de un espacio de **longitud fija** —por ejemplo, todos los bloques de 128 bits, o todas las contraseñas de 8 caracteres— las dos entradas tendrían **siempre** la misma paridad y
 >
@@ -528,7 +528,7 @@ Considerar la siguiente función de hash $h()$:
 > 3. **Sólo se emite el último bloque.** Es la consecuencia visible de (2), y lo que le da el nombre a la construcción: *"conceptualmente esto sería como el cifrado modo `CBC` bloque a bloque, salvo que tiramos todos los bloques y nos quedamos con el último"*.
 > 4. **No hay descifrado, porque no es un cifrado.** Un MAC no es invertible ni pretende serlo: `Vrfy` **recalcula** la etiqueta y compara, no desarma nada. De ahí que a la primitiva le alcance con ser `PRF` y no haga falta que sea `PRP`.
 >
-> > **La trampa de implementación más común del tema.** Muchas bibliotecas exponen *"una función CBC"* y **no distinguen** si se la va a usar para cifrar o para autenticar. Usar la de cifrado como MAC —con su IV aleatorio y sus bloques intermedios a la vista— reúne las roturas (1) y (2) a la vez. (K&L, pág. 124.)
+> **La trampa de implementación más común del tema.** Muchas bibliotecas exponen *"una función CBC"* y **no distinguen** si se la va a usar para cifrar o para autenticar. Usar la de cifrado como MAC —con su IV aleatorio y sus bloques intermedios a la vista— reúne las roturas (1) y (2) a la vez. (K&L, pág. 124.)
 >
 > → [[cbc-mac#En qué se parece al modo CBC, y en qué no|CBC-MAC § En qué se parece al modo CBC, y en qué no]] · [[modos-de-encadenamiento#Los cinco modos|Modos de encadenamiento]]
 >
@@ -573,7 +573,7 @@ Considerar la siguiente función de hash $h()$:
 >
 > **Por qué vale la pena, que es la parte que hay que saber.** Por el **Teorema 5.4** de Katz & Lindell:
 >
-> > Si la función de compresión $f$ es **resistente a colisiones**, entonces la función de hash $H$ que Merkle-Damgård construye a partir de ella **también lo es**.
+> Si la función de compresión $f$ es **resistente a colisiones**, entonces la función de hash $H$ que Merkle-Damgård construye a partir de ella **también lo es**.
 >
 > Eso es lo que la filmina resume como *"la seguridad está dada por la función de compresión"*, y es un resultado grande: **reduce el análisis de un objeto infinito a una pieza finita**. La demostración va por el contrarrecíproco —toda colisión en $H$ produce una colisión en $f$— y parte en dos casos: mensajes de **longitudes distintas** (colisionan en el último bloque, el de la longitud) y de **misma longitud** (se recorre la cadena hacia atrás hasta el primer punto donde las entradas difieren).
 >
@@ -583,7 +583,7 @@ Considerar la siguiente función de hash $h()$:
 >
 > → [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]], con el diagrama pieza por pieza, el teorema y [[construccion-de-merkle-damgard#La contra: length extension|§ La contra: length extension]].
 >
-> > **Errata del enunciado.** El PDF de la guía escribe **"Transformación de Merkle-Darmgard"**. El apellido es **Damgård**, no *Darmgard*: están permutadas las letras y falta la `å`. Son **Ralph Merkle** e **Ivan Damgård**, que publicaron la construcción de **forma independiente, los dos en CRYPTO '89**, y por eso lleva los dos nombres. *(La errata está verificada sobre la página renderizada del PDF, no sobre texto extraído.)* La filmina de la Clase 03 tiene **otra** errata sobre lo mismo —dice *"Propuesto por Merkle en 1989"*, omitiendo a Damgård—, marcada en [[construccion-de-merkle-damgard#Y ahí está la razón de ser del bloque de longitud|03.08]].
+> **Errata del enunciado.** El PDF de la guía escribe **"Transformación de Merkle-Darmgard"**. El apellido es **Damgård**, no *Darmgard*: están permutadas las letras y falta la `å`. Son **Ralph Merkle** e **Ivan Damgård**, que publicaron la construcción de **forma independiente, los dos en CRYPTO '89**, y por eso lleva los dos nombres. *(La errata está verificada sobre la página renderizada del PDF, no sobre texto extraído.)* La filmina de la Clase 03 tiene **otra** errata sobre lo mismo —dice *"Propuesto por Merkle en 1989"*, omitiendo a Damgård—, marcada en [[construccion-de-merkle-damgard#Y ahí está la razón de ser del bloque de longitud|03.08]].
 
 ### Ejercicio 5
 
@@ -667,7 +667,7 @@ verify filename] [-prverify filename] [-signature filename] [-hmac key]
 >
 > **4. El efecto avalancha, que es lo que se ve en la propia salida.** El texto es **el mismo** en los cuatro digests y los cuatro son irreconocibles entre sí. Conviene compararlo entre las dos filas de la tabla: cambiar **un solo byte** (el `\n`) cambia **toda** la salida, en `MD5` y en `SHA-1` por igual. Es la ilustración más barata de la propiedad, y no distingue una función de la otra: **las dos la tienen**. Lo que las separa es el punto 2, no éste.
 >
-> > **Precisión sobre la sinopsis del PDF** *(precisión nuestra).* El enunciado copia la sinopsis de `openssl dgst` con sus flags, entre ellas **`-dss1`, `-md2` y `-mdc2`**. **Esas flags ya no existen en OpenSSL 3.x**: verificado en `3.6.2`, `-dss1` y `-md2` devuelven `Unknown option or message digest`, y `-mdc2` devuelve `Error setting digest` porque el algoritmo quedó en el proveedor *legacy* y no se carga por defecto. La sinopsis del PDF es **de la era 1.0.x**. No cambia nada del ejercicio —`-md5` y `-sha1` siguen ahí—, pero si se copia la sinopsis literal, no corre.
+> **Precisión sobre la sinopsis del PDF** *(precisión nuestra).* El enunciado copia la sinopsis de `openssl dgst` con sus flags, entre ellas **`-dss1`, `-md2` y `-mdc2`**. **Esas flags ya no existen en OpenSSL 3.x**: verificado en `3.6.2`, `-dss1` y `-md2` devuelven `Unknown option or message digest`, y `-mdc2` devuelve `Error setting digest` porque el algoritmo quedó en el proveedor *legacy* y no se carga por defecto. La sinopsis del PDF es **de la era 1.0.x**. No cambia nada del ejercicio —`-md5` y `-sha1` siguen ahí—, pero si se copia la sinopsis literal, no corre.
 
 ### Ejercicio 6
 
@@ -714,7 +714,7 @@ Se tienen los **nombres de alumnos y el hash de sus notas**. Decir **cuál es la
 >
 > *(No aparecen las notas 3, 4 y 9: ningún alumno del listado se las sacó. No hay nada que inferir de eso.)*
 >
-> > La misma tabla, leída **desde el lado del candidato** —los diez de la enumeración, con las tres casillas vacías—, está en [[ataque-de-diccionario-sobre-hashes#El Ejercicio 6, hecho|03.15 § El Ejercicio 6, hecho]]. Acá va ordenada por alumno porque es lo que el enunciado pide; allá va ordenada por candidato porque es lo que muestra el ataque.
+> La misma tabla, leída **desde el lado del candidato** —los diez de la enumeración, con las tres casillas vacías—, está en [[ataque-de-diccionario-sobre-hashes#El Ejercicio 6, hecho|03.15 § El Ejercicio 6, hecho]]. Acá va ordenada por alumno porque es lo que el enunciado pide; allá va ordenada por candidato porque es lo que muestra el ataque.
 >
 > ### El script, y su salida real
 >
@@ -792,9 +792,9 @@ Se tienen los **nombres de alumnos y el hash de sus notas**. Decir **cuál es la
 > - **Una función deliberadamente lenta** —`PBKDF2`, `bcrypt`, `scrypt`, `Argon2`—, que no es un hash sino una **KDF** construida sobre uno, con un factor de trabajo ajustable. Ataca $c_h$ directamente, y es **la única de las dos contramedidas sin clave que mueve la aguja cuando el dominio es chico** — aunque sólo sube el costo, no lo cierra.
 > - **Un secreto fuera de la base** —la *pimienta*, o directamente $\mathsf{HMAC}_k(\text{nota})$ con $k$ guardada en la configuración de la aplicación y no en la base—. Es la única que **sigue funcionando con $\lvert D\rvert = 10$**, porque sin $k$ el atacante no puede evaluar la función y no hace ni una de las diez cuentas. Lo que se paga: deja de ser hashear y pasa a ser [[message-authentication-code|autenticar con clave]], con el problema nuevo de custodiar y rotar esa clave — y si se filtra junto con la base, no aportó nada.
 >
-> > **Y la conclusión incómoda, que es la que hay que decir en el parcial:** con $\lvert D\rvert = 10$ **ninguna de las dos contramedidas sin clave alcanza**. La sal es pública, así que el atacante la lee y rehace las diez cuentas; y una KDF cara al orden del medio segundo por evaluación compra **cinco segundos**. La KDF sube el piso, no cierra la puerta.
-> >
-> > **No hay defensa criptográfica *sin clave* para un dominio de diez elementos** — cualquier función pública y determinística se enumera. La que sí funciona es **meter un secreto** (`HMAC` con la clave fuera de la base), y la defensa **no criptográfica**, que para el Ej. 6 es la que corresponde, es **no publicar los hashes**.
+> **Y la conclusión incómoda, que es la que hay que decir en el parcial:** con $\lvert D\rvert = 10$ **ninguna de las dos contramedidas sin clave alcanza**. La sal es pública, así que el atacante la lee y rehace las diez cuentas; y una KDF cara al orden del medio segundo por evaluación compra **cinco segundos**. La KDF sube el piso, no cierra la puerta.
+>
+> **No hay defensa criptográfica *sin clave* para un dominio de diez elementos** — cualquier función pública y determinística se enumera. La que sí funciona es **meter un secreto** (`HMAC` con la clave fuera de la base), y la defensa **no criptográfica**, que para el Ej. 6 es la que corresponde, es **no publicar los hashes**.
 >
 > El desarrollo, con la fórmula, la pimienta y las *rainbow tables*, está en [[ataque-de-diccionario-sobre-hashes#Contramedidas|03.15 § Contramedidas]].
 >
