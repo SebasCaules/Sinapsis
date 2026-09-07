@@ -270,6 +270,14 @@ baseline de Proba: lo marcado «compat» existe para no reescribir código ya es
 | Miembro | Firma | Semántica |
 |---|---|---|
 | `go(target, opts?)` | `(string, { replace?: boolean }) => void` | Acepta rutas del baseline (`#/p/slug`, `#/unidad/3`, `#/explorador/normal`) y del SPA (`/m/…`). Una URL externa se abre en pestaña nueva. Las rutas desconocidas se leen como una herramienta: `#/<vista>/<arg>` → `/m/<materia>/t/<vista>?arg=<arg>`. |
+
+
+> **El base del sitio no se cuenta.** En GitHub Pages el `pathname` es
+> `/Sinapsis/m/<materia>/…` (N0-59), y tanto `go` como `parseRoute` descuentan el
+> prefijo de la materia buscándolo como segmento completo, no exigiendo que
+> empiece ahí. Es lo que hace que una navegación que solo cambia la consulta
+> —`#/vista?orden=x`— pida el redibujo también en producción, y no solo en
+> desarrollo, donde el base es `/`.
 | `setCrumbs(items)` | `(Array<{ label, href? }>) => void` | Migas de la vista. El host las borra al dejarla. |
 | `render()` | `() => void` | Compat: «vuelva a dibujarme». El host re-monta la vista. |
 | `toast(message, tone?)` | `(string, "ok" \| "bad") => void` | Aviso efímero. |

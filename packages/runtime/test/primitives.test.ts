@@ -90,6 +90,24 @@ describe("App.parseRoute — la ruta real del SPA con la gramática del baseline
     expect(parseLocation("proba", "/m/proba/quiz/u2")).toMatchObject({ view: "quiz", arg: "u2" });
   });
 
+  it("lee la ruta aunque el sitio cuelgue de un base (N0-59)", () => {
+    /* En GitHub Pages el pathname es `/Sinapsis/m/proba/…`: el prefijo de la
+       materia no está al principio. Sin esto la vista se leía «Sinapsis». */
+    expect(parseLocation("proba", "/Sinapsis/m/proba")).toMatchObject({ view: "inicio", arg: "" });
+    expect(parseLocation("proba", "/Sinapsis/m/proba/t/taller", "?arg=markov")).toMatchObject({
+      view: "taller",
+      arg: "markov",
+    });
+    expect(parseLocation("proba", "/Sinapsis/m/proba/p/normal")).toMatchObject({ view: "p", arg: "normal" });
+    /* Y un base de varios segmentos tampoco confunde. */
+    expect(parseLocation("proba", "/a/b/m/proba/d/2")).toMatchObject({ view: "unidad", arg: "2" });
+  });
+
+  it("no confunde un prefijo que no es un segmento completo", () => {
+    /* `/m/probabilidad` no es `/m/proba`: la materia es otra. */
+    expect(parseLocation("proba", "/m/probabilidad/p/x").view).not.toBe("p");
+  });
+
   it("es la inversa de translateRoute para las rutas del baseline", () => {
     const ida = translateRoute("proba", "#/taller/markov");
     expect(ida).toBe("/m/proba/t/taller?arg=markov");
@@ -325,6 +343,16 @@ describe("App.go — redibujo cuando solo cambia la consulta", () => {
     expect(isQueryOnlyChange("proba", "/m/proba/t/ejercicios?arg=5&sel=1", aqui)).toBe(false);
     /* La misma ruta exacta no borra lo que la vista tenga cargado. */
     expect(isQueryOnlyChange("proba", "/m/proba/t/formularios?arg=5", aqui)).toBe(false);
+  });
+
+  it("decide igual con el sitio colgado de un base (N0-59)", () => {
+    /* Es el caso de producción: `/Sinapsis/m/cripto/t/parciales`. Sin descontar
+       el base, las dos rutas se leían como la vista «Sinapsis» con el mismo
+       argumento vacío y el redibujo no se pedía nunca. */
+    const aqui = { pathname: "/Sinapsis/m/cripto/t/parciales", search: "" };
+    expect(isQueryOnlyChange("cripto", "/Sinapsis/m/cripto/t/parciales?orden=parcial", aqui)).toBe(true);
+    expect(isQueryOnlyChange("cripto", "/Sinapsis/m/cripto/t/parciales", aqui)).toBe(false);
+    expect(isQueryOnlyChange("cripto", "/Sinapsis/m/cripto/t/otra?orden=parcial", aqui)).toBe(false);
   });
 
   it("App.go pide el redibujo al anfitrión solo en ese caso", () => {
