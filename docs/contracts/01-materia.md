@@ -191,7 +191,7 @@ verificación de ítems `tool` y su presencia entra en el chequeo de ids repetid
 
 ---
 
-## 5 bis. `exercisePlates` — la placa de ejercicio (N0-64)
+## 5 bis. `exercisePlates` — la placa de ejercicio (N0-70)
 
 Con `true` —el default— un encabezado que empieza con **«Ejercicio»** en singular y todo lo
 que lo sigue se envuelven en una caja con antetítulo y filete lateral, y la resolución queda

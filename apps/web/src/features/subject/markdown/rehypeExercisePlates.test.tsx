@@ -104,7 +104,7 @@ describe("rehypeExercisePlates", () => {
   });
 });
 
-describe("exercisePlates: false (N0-64)", () => {
+describe("exercisePlates: false (N0-70)", () => {
   const EJ = "### Ejercicio 1\n\nAnalizar por qué no es seguro.\n\n> [!nota]- Resolución del Ejercicio 1\n> Porque el adversario gana con una consulta.";
 
   it("sin placas, «Ejercicio N» es un encabezado más", () => {

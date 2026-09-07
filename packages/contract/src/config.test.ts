@@ -174,7 +174,7 @@ describe("railSlotItemCount", () => {
   });
 });
 
-describe("exercisePlates (N0-64)", () => {
+describe("exercisePlates (N0-70)", () => {
   const base = {
     slug: "demo",
     name: "Materia Demo",

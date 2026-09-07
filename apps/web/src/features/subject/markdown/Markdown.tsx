@@ -36,7 +36,7 @@ export interface MarkdownProps {
   exists: (slug: string) => boolean;
   /**
    * ¿Se arma la placa de ejercicio? Lo decide la materia en su config
-   * (`exercisePlates`, N0-64). Con `false`, un «Ejercicio N» es un encabezado
+   * (`exercisePlates`, N0-70). Con `false`, un «Ejercicio N» es un encabezado
    * más y la página no encaja una caja adentro de otra.
    */
   exercisePlates?: boolean;

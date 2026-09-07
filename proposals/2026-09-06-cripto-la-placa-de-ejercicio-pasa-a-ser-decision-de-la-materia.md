@@ -3,7 +3,7 @@ fecha: 2026-09-06
 materia: cripto
 titulo: "La placa de ejercicio pasa a ser decision de la materia"
 rama: proposal/cripto-20260906-la-placa-de-ejercicio-pasa-a-ser-decision-de-la-materia
-estado: abierta
+estado: aprobada
 pr: null
 ---
 
@@ -137,4 +137,58 @@ apps/web build: Done
 
 ## Revisión
 
-(la completa el orquestador con `/sinapsis-review`: veredicto, motivos, commit de merge)
+**Veredicto:** aprobada
+**Revisó:** orquestador de la plataforma · 2026-09-06
+**Commit de merge:** `7dbdc74`
+**Decisión:** `N0-70` en `docs/DECISIONS.md`.
+
+### Gates en la rama
+
+Corridos en un worktree limpio sobre la rama, con `pnpm install --frozen-lockfile`:
+
+- `pnpm typecheck`: OK
+- `pnpm test`: OK — 1 113 pruebas, los mismos conteos que declara la propuesta
+  (`packages/contract` 51, `packages/markdown` 119, `packages/runtime` 178, `apps/web` 708,
+  `packages/cli` 57, de las cuales 2 quedan omitidas por el entorno). Ninguno bajó.
+- `pnpm build`: OK (el cambio toca `apps/web`).
+- `pnpm e2e`: no corresponde — la bandera no cambia el DOM de ninguna materia publicada,
+  que es lo que mira la suite.
+
+El CI del PR #7 también quedó verde.
+
+### Hallazgos
+
+1. **(medio, corregido al mergear)** Las referencias cruzadas apuntaban a `N0-64`, que ya
+   está tomada por «Marco de página compartido». El número de una decisión lo asigna el
+   orquestador **después** de mergear, así que la propuesta no podía saberlo. Se renumeraron
+   a `N0-70` cinco referencias, sin tocar ninguna de las de `PageFrame`:
+   `packages/contract/src/index.ts:218`, `packages/contract/src/config.test.ts:177`,
+   `apps/web/src/features/subject/markdown/Markdown.tsx:39`,
+   `apps/web/src/features/subject/markdown/rehypeExercisePlates.test.tsx:107` y
+   `docs/contracts/01-materia.md:194`.
+2. **(bajo, no bloqueante)** La bandera solo la lee el lector. Los otros seis lugares que
+   dibujan markdown de la materia —`PlanView` (alcance y guía de una fase), `QuizView`
+   (enunciado y explicación), `SessionView` (frente y dorso de una tarjeta)— y los dos de
+   apuntes personales siguen con el default `true`. Una materia con `exercisePlates: false`
+   que escribiera un encabezado «Ejercicio N» dentro de una tarjeta o de una fase todavía
+   vería la placa ahí. No bloquea: el contrato §5 bis dice explícitamente «el lector arma la
+   placa», el material de estudio rara vez lleva encabezados, y ampliarlo es aditivo.
+3. **(bajo, no bloqueante)** El título de la propuesta y el nombre de la rama escriben
+   «decision» sin tilde. La rama no admite tildes; el título del frontmatter sí. El commit
+   de merge quedó con la palabra bien escrita.
+
+Se buscó, sin encontrarlo: un `sinapsis.config.json` publicado que dejara de validar
+(`subjects/proba` y `subjects/cripto` parsean y reciben `exercisePlates: true` por el
+default); un camino donde la bandera cambiara los ids de encabezado y rompiera las anclas
+(`rehypeHeadingIds` sigue primero en las dos ramas de la cadena); una prueba que no pudiera
+fallar (las tres de `config.test.ts` y las dos de `rehypeExercisePlates.test.tsx` fallan sin
+el cambio); dato de la materia que entrara sin validar (es un booleano del esquema); y
+«mientras estaba acá también…» en el diff (la línea de `local/landing.ts` es obligatoria: el
+tipo de salida de `SubjectConfigLoose` exige el campo).
+
+### Efecto en las materias
+
+- **Proba y cualquier materia que no lo declare**: nada. El default `true` deja la placa como
+  estaba; no hace falta volver a publicar.
+- **Cripto**: puede declarar `exercisePlates: false` en su `sinapsis.config.json` y publicar
+  con `/sinapsis publish`.

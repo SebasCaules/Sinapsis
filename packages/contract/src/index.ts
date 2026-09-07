@@ -215,7 +215,7 @@ export const SubjectConfig = z.object({
    * «Ejercicio N» y lo que lo sigue se envuelven en una caja con antetítulo
    * (§ lector-05). Una materia cuyas guías ya traen su propia estructura —el
    * enunciado en prosa y la resolución en un aviso plegable— lo pone en `false`
-   * para no encajar una caja adentro de otra (N0-64).
+   * para no encajar una caja adentro de otra (N0-70).
    */
   exercisePlates: z.boolean().default(true),
   wiki: WikiSource.default({}),
