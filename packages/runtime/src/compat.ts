@@ -431,7 +431,17 @@ export function parseLocation(subject: string, pathname: string, search = ""): C
 
   let path = String(pathname || "");
   const prefix = routes.subject(subject);
-  if (subject && (path === prefix || path.startsWith(prefix + "/"))) path = path.slice(prefix.length);
+  if (subject) {
+    /* El sitio puede colgar de un base (`/Sinapsis/` en GitHub Pages, N0-59), y
+       entonces el prefijo de la materia NO está al principio del pathname:
+       `/Sinapsis/m/cripto/t/parciales`. Se lo busca como segmento completo en
+       vez de exigir que empiece ahí; si no, la ruta se lee como la vista
+       «Sinapsis» y todo lo que dependa de comparar dos rutas —el redibujo de
+       `App.go`, `App.parseRoute`— decide mal. */
+    const at = path.indexOf(prefix);
+    const corta = at + prefix.length;
+    if (at >= 0 && (path.length === corta || path[corta] === "/")) path = path.slice(corta);
+  }
   const parts = path.split("/").filter((x) => x !== "");
   const head = parts[0] || "";
   const rest = parts.slice(1).join("/");
