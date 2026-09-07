@@ -220,7 +220,9 @@
 .grade[data-grade="1"] .gradeLabel { color: var(--bad-text); }
 .grade[data-grade="2"] .gradeLabel { color: var(--warn-text); }
 .grade[data-grade="3"] .gradeLabel { color: var(--good-text); }
-.grade[data-grade="4"] .gradeLabel { color: var(--primary); }
+/* R8: en claustro y laurel --primary colapsaba con --warn-text / --good-text;
+   la cuarta nota sale de la familia del tema y usa una tinta neutra. */
+.grade[data-grade="4"] .gradeLabel { color: var(--umeta-ink); }
 
 /* ---------- resumen ---------- */
 .summary {
@@ -262,7 +264,7 @@
 .summaryCell[data-grade="1"] .summaryValue { color: var(--bad-text); }
 .summaryCell[data-grade="2"] .summaryValue { color: var(--warn-text); }
 .summaryCell[data-grade="3"] .summaryValue { color: var(--good-text); }
-.summaryCell[data-grade="4"] .summaryValue { color: var(--primary); }
+.summaryCell[data-grade="4"] .summaryValue { color: var(--umeta-ink); }
 
 .summaryActions { display: flex; gap: 10px; margin-top: 8px; }
 

@@ -47,8 +47,10 @@
   transition: background var(--t), color var(--t), border-color var(--t);
 }
 .segment:hover { color: var(--text); }
+/* R5: la pestana activa debe levantarse en los tres temas; con --surface se
+   hundia en claustro (mas oscura que --surface-2). */
 .segment[data-on="true"] {
-  background: var(--surface);
+  background: var(--elevated);
   border-color: var(--border-2);
   color: var(--text);
   box-shadow: var(--shadow-ctrl);
@@ -337,11 +339,13 @@
    tareas. En dos columnas los renglones de tarea quedaban demasiado cortos. */
 .milestones { display: flex; flex-direction: column; gap: 6px; padding: 8px 22px 20px; }
 
+/* R5: la ficha del hito se separa de la fase (que es --surface) con un escalon
+   de superficie propio y un borde perceptible. */
 .milestone {
   display: flex;
   flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
   border-radius: var(--r);
   overflow: hidden;
 }
@@ -352,8 +356,8 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 9px 13px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border-2);
 }
 
 .milestoneIcon { flex: none; color: var(--pink); }
@@ -390,7 +394,8 @@
   color: var(--text);
   border-color: var(--text-3);
 }
-.bulk:disabled, .bulkLg:disabled { opacity: 0.75; cursor: default; }
+/* R10: sin opacidad; el rotulo apagado baja a --text-3. */
+.bulk:disabled, .bulkLg:disabled { opacity: 1; color: var(--text-3); cursor: default; }
 .bulk:focus-visible, .bulkLg:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* ---------- tareas ---------- */
@@ -404,10 +409,11 @@
   gap: 10px;
   min-height: 34px;
   padding: 6px 13px;
-  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  /* R6: el filete entre tareas era la unica division y no llegaba a verse. */
+  border-top: 1px solid var(--border-2);
 }
 .tasks > .task:first-child { border-top: none; }
-.task:hover { background: var(--surface-2); }
+.task:hover { background: var(--hover-wash); }
 
 .check {
   position: relative;
@@ -464,7 +470,8 @@
 .task[data-done="true"] .taskLabel {
   color: var(--text-3);
   text-decoration: line-through;
-  text-decoration-color: var(--border-2);
+  /* R6: el tachado es una de las senales de «hecha»; necesita contraste. */
+  text-decoration-color: var(--text-3);
 }
 .task[data-done="true"] .taskIcon { opacity: 0.5; }
 

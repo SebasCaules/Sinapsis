@@ -29,7 +29,8 @@
   padding: 0 12px;
   min-width: 132px;
   border-radius: var(--r-ctrl);
-  border: 1px solid var(--border-2);
+  /* R6: el contorno es la unica senal del control sobre --surface. */
+  border: 1px solid var(--border-3);
   background: var(--surface);
   color: var(--text-2);
   font: 600 12.5px/1 var(--font-ui);
@@ -142,7 +143,8 @@
   transition: background var(--t), color var(--t), border-color var(--t);
 }
 .nav:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
-.nav:disabled { opacity: .4; cursor: not-allowed; }
+/* R10: control apagado con tokens, sin opacidad. */
+.nav:disabled { opacity: 1; color: var(--text-3); background: var(--surface-2); cursor: not-allowed; }
 .today {
   flex: none;
   height: 26px;
@@ -158,7 +160,7 @@
   transition: background var(--t), color var(--t);
 }
 .today:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
-.today:disabled { opacity: .4; cursor: not-allowed; }
+.today:disabled { opacity: 1; color: var(--text-3); background: var(--surface-2); cursor: not-allowed; }
 .nav:focus-visible, .today:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -195,10 +197,18 @@
   cursor: pointer;
   transition: background var(--t), color var(--t);
 }
-.cell[data-weekend="true"] { color: var(--text-3); }
-.cell[data-outside="true"] { opacity: .5; }
+.cell[data-weekend="true"] { color: var(--text-2); }
+/* R10: los dias del mes contiguo se apagan con --text-3, no con opacidad (con
+   opacidad se apilaba sobre el fin de semana y caia a 2:1). */
+.cell[data-outside="true"] { color: var(--text-3); }
 .cell:hover:not(:disabled) { background: var(--surface-2); }
-.cell:disabled { opacity: .28; cursor: not-allowed; }
+/* R10: dia bloqueado legible; el tachado lo separa del fin de semana. */
+.cell:disabled {
+  opacity: 1;
+  color: var(--text-3);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
 /* Hoy: anillo interior de --primary (el aro suave --primary-ring por fuera
    chocaría con las celdas vecinas, que están a 1 px). */
 .cell[data-today="true"] { box-shadow: inset 0 0 0 1.5px var(--primary); font-weight: 600; }

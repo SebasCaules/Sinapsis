@@ -144,7 +144,8 @@
 }
 
 .stat[data-tone="due"] .statValue { color: var(--warn-text); }
-.stat[data-tone="fresh"] .statValue { color: var(--link); }
+/* R8: en claustro --link y --warn-text son el mismo oro; «nuevas» es neutro. */
+.stat[data-tone="fresh"] .statValue { color: var(--text-2); }
 .stat[data-tone="mastered"] .statValue { color: var(--good-text); }
 
 /* ---------- tecla ---------- */
