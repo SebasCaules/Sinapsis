@@ -4,22 +4,42 @@
  * plan · seguir estudiando · herramientas—, más lo propio de la plataforma (los
  * favoritos y la próxima tarea del plan).
  *
+ * Encima de eso, lo que lo convierte en una portada de estudio y no en un
+ * informe: cada fila del programa lleva sus accesos directos (leer, ejercicios,
+ * repasar, quiz) al lado de la barra, y «Repaso general» junta lo que NO vive
+ * dentro de una unidad —las secciones de evaluación, las páginas sueltas (el
+ * formulario maestro) y el material entero por tipo—.
+ *
  * Es la vista ancha (1120) del contrato; no inventa datos: todo sale del modelo
  * de la materia, del modelo de estudio, del material que trajo el sync y de la
  * actividad local (`activity.ts`).
  */
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { plural, routes, type PageMeta, type PlanPhase } from "@sinapsis/contract";
+import {
+  PAGE_TYPE_META,
+  plural,
+  routes,
+  type IconName,
+  type PageMeta,
+  type PlanPhase,
+} from "@sinapsis/contract";
 import { Icon, UiIcon } from "@/components/platform";
 import { localToday, useActivity } from "../activity";
 import { PageTypeTag } from "../components/TypeTag";
 import { useSubjectCtx } from "../context";
-import type { RailGroupView, RailItemView, SubjectModel } from "../model";
-import type { StudyModel } from "../study/model";
+import type {
+  DivisionNode,
+  ProgressGroup,
+  RailGroupView,
+  RailItemView,
+  SubjectModel,
+} from "../model";
+import type { DeckStat, QuizStat, StudyModel } from "../study/model";
 import { ALL_DECKS } from "../study/session";
 import { Ring } from "../study/ui";
-import { useStudy } from "../study/useStudy";
+import { usePlanTrack } from "../store";
+import { useStudy, type UseStudyResult } from "../study/useStudy";
 import { useStudyState } from "../useSubject";
 import css from "./HomeView.module.css";
 
@@ -32,10 +52,14 @@ export function HomeView() {
   const { slug, model } = useSubjectCtx();
   const { progressTotal } = model;
   const activity = useActivity(slug);
+  /* El material de estudio se pide UNA vez para toda la pantalla: el repaso
+     general, el plan, las filas del programa y la tarjeta de hoy leen el mismo
+     modelo (y la tarjeta del plan necesita además `setTrack`). */
+  const study = useStudy(slug, model.studied);
+  const { state } = useStudyState(slug);
 
   const next = model.nextUnread();
   const started = progressTotal.done > 0;
-  const nextDivision = next ? model.division(model.divisionOf(next)) : null;
 
   /* «Continuar leyendo»: la última página que se abrió en el lector, siempre
      que siga existiendo y siga siendo contenido (una fuente o una página meta
@@ -61,14 +85,24 @@ export function HomeView() {
 
   return (
     <div className={css.view}>
-      {/* El baseline muestra «por dónde empezar» SOLO en el primer uso: con
-          progreso, el panel abre por el informe y «Seguir estudiando» es quien
-          ofrece por dónde continuar. */}
-      {!started ? <StartCard model={model} slug={slug} next={next} division={nextDivision} /> : null}
+      {/* El orden de la pantalla es el del estudio: primero lo que se consulta
+          siempre (evaluación y formularios), después el plan de la modalidad
+          elegida, y recién entonces el programa con sus accesos. */}
+      <GeneralSection model={model} slug={slug} />
 
-      <ProgressSection model={model} slug={slug} />
+      <PlanCard model={model} slug={slug} study={study} />
 
-      <StudyBlocks model={model} slug={slug} started={started} days={activity.days} streak={activity.streak} />
+      <ProgressSection model={model} slug={slug} study={study.model} />
+
+      <TodayCard
+        model={model}
+        slug={slug}
+        study={study.model}
+        bookmarks={state.bookmarks}
+        started={started}
+        days={activity.days}
+        streak={activity.streak}
+      />
 
       {started && (resume || next) ? <ResumeSection model={model} slug={slug} resume={resume} next={next} /> : null}
 
@@ -79,58 +113,6 @@ export function HomeView() {
   );
 }
 
-/* ---------------------------------------------------------------- primer uso */
-
-/**
- * «Por dónde empezar» del primer uso: el botón nombra la PÁGINA que abre (no su
- * división) y el secundario ofrece el plan de estudio, como en el baseline.
- */
-function StartCard({
-  model,
-  slug,
-  next,
-  division,
-}: {
-  model: SubjectModel;
-  slug: string;
-  next: PageMeta | null;
-  division: ReturnType<SubjectModel["division"]> | null;
-}) {
-  return (
-    <section className={css.startCard} aria-labelledby="home-start">
-      <div className={css.startBody}>
-        <span className={css.eyebrow}>
-          <Icon name="compass" size={14} />
-          POR DÓNDE EMPEZAR
-        </span>
-        <h2 className={css.startTitle} id="home-start">
-          Todavía no ha leído ninguna página
-        </h2>
-        {/* Sin mención al número de divisiones: el denominador de arriba suma
-            TODAS las filas del progreso (incluidas las sintéticas), así que
-            «de N unidades» se contradecía con la tabla (brecha inicio-13). */}
-        <p className={css.startText}>
-          Las {model.progressPartsTotal.pages.total} páginas de contenido están ordenadas para leerse en secuencia. El
-          progreso de abajo se llena a medida que las marca como leídas.
-        </p>
-      </div>
-      <div className={css.startActions}>
-        {next ? (
-          <Link className={css.primaryAction} to={routes.page(slug, next.slug)}>
-            <UiIcon name="file" size={15} />
-            Empezar por {division?.short ? `${division.short} · ` : ""}
-            {next.title}
-          </Link>
-        ) : null}
-        <Link className={css.secondaryAction} to={routes.plan(slug)}>
-          <Icon name="map" size={15} />
-          Ver el plan de estudio
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 /* ------------------------------------------------------------------ progreso */
 
 /**
@@ -138,7 +120,7 @@ function StartCard({
  * tramo por división con su color y su tooltip) y una fila por división con su
  * propio porcentaje.
  */
-function ProgressSection({ model, slug }: { model: SubjectModel; slug: string }) {
+function ProgressSection({ model, slug, study }: { model: SubjectModel; slug: string; study: StudyModel }) {
   /* El carril y las filas miden la unidad ENTERA: páginas leídas más los pasos
      que aportan los bundles de la materia (N0-61). La línea de la cabecera los
      nombra por separado. */
@@ -147,6 +129,20 @@ function ProgressSection({ model, slug }: { model: SubjectModel; slug: string })
   /* Doce «0 %» no informan nada: el baseline deja la columna vacía hasta que hay
      algo que medir. */
   const showPct = progressTotal.done > 0;
+  const rows = useMemo(() => unitRows(model, study), [model, study]);
+  /* Las columnas de acción son las mismas para todas las filas: una división sin
+     mazo deja el hueco, y así los iconos quedan alineados de arriba abajo en vez
+     de correrse fila por fila. Una columna que no usa NADIE no se dibuja. */
+  const slots = useMemo(
+    () => ({
+      read: rows.some((r) => r.read),
+      exercises: rows.some((r) => r.exercises),
+      exam: rows.some((r) => r.exam),
+      deck: rows.some((r) => r.deck),
+      quiz: rows.some((r) => r.quiz),
+    }),
+    [rows],
+  );
 
   return (
     <section className={css.progress} aria-labelledby="home-progress">
@@ -184,76 +180,235 @@ function ProgressSection({ model, slug }: { model: SubjectModel; slug: string })
       </div>
 
       <div className={css.rows}>
-        {model.visibleDivisions.map((division) => {
-          const p = model.progress(division.key);
-          const rowPct = Math.round(p.ratio * 100);
-          return (
-            <Link
-              key={division.key}
-              className={css.row}
-              to={routes.division(slug, division.key)}
-              style={{ ["--ucol" as string]: division.color }}
-            >
-              <span className={css.rowDot} aria-hidden="true" />
-              {/* El rótulo corto en su propia columna: así TODAS las filas
-                  tienen la misma forma, también las divisiones sin número
-                  (brecha inicio-14). */}
-              <span className={css.rowShort}>{division.short}</span>
-              <span className={css.rowLabel}>{division.name}</span>
-              <span className={css.rowTrack} aria-hidden="true">
-                <span className={css.rowFill} style={{ width: `${rowPct}%` }} />
-              </span>
-              <span className={css.rowCount}>
-                {p.done}/{p.total}
-              </span>
-              <span className={css.rowPct}>{showPct ? `${rowPct}%` : ""}</span>
-            </Link>
-          );
-        })}
+        {rows.map((row) => (
+          <UnitRow key={row.division.key} row={row} slug={slug} showPct={showPct} slots={slots} />
+        ))}
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------- para hoy · racha · plan (estudio) */
+/* ------------------------------------------------------ el programa, por fila */
 
 /**
- * Los dos bloques que dependen del material de estudio, que se piden UNA vez:
- * «Para hoy» (repaso, racha y favoritos) y la tarjeta del plan (anillos por
- * fase). Van juntos porque comparten `useStudy`.
+ * Qué grupos de ejercicios son de EXAMEN. La plataforma no tiene un campo para
+ * decirlo: los grupos los nombra la materia («Guía», «Lutzio», «Parciales»), así
+ * que se los reconoce por su propio nombre. Una materia que no use estas
+ * palabras simplemente no muestra el botón, y sus grupos siguen entrando por
+ * «Ejercicios».
  */
-function StudyBlocks({
-  model,
-  slug,
-  started,
-  days,
-  streak,
-}: {
-  model: SubjectModel;
-  slug: string;
+const EXAM_RE = /parcial|examen|final|evaluaci|recuperatorio/i;
+
+function isExamGroup(group: ProgressGroup): boolean {
+  return EXAM_RE.test(`${group.id} ${group.label} ${group.source ?? ""}`);
+}
+
+/** Una fila del programa: la división y los accesos que puede ofrecer. */
+interface UnitRow {
+  division: DivisionNode;
+  done: number;
+  total: number;
+  pct: number;
+  /** Adónde lleva «leer»: la primera sin leer, o la primera de la secuencia. */
+  read: PageMeta | null;
+  /** true si esa página continúa una lectura empezada (cambia el verbo). */
   started: boolean;
-  days: readonly string[];
-  streak: number;
+  /** Grupo de práctica al que salta la fila (el primero sin terminar). */
+  exercises: ProgressGroup | null;
+  /** Grupo de examen de la división (parciales, finales). */
+  exam: ProgressGroup | null;
+  /** Mazo de la división (el primero, si declara varios). */
+  deck: DeckStat | null;
+  /** Quiz de la división. */
+  quiz: QuizStat | null;
+}
+
+/**
+ * El programa, fila por fila. Nada se calcula acá que el modelo no sepa: el
+ * progreso y los grupos de ejercicios salen de `../model`, y el mazo y el quiz
+ * de la división salen del material de estudio (`Deck.division` / `Quiz.division`
+ * del contrato). Sin material declarado, la fila simplemente muestra menos
+ * botones: ninguna materia se nombra acá.
+ */
+function unitRows(model: SubjectModel, study: StudyModel): UnitRow[] {
+  return model.visibleDivisions.map((division) => {
+    const key = division.key;
+    const progress = model.progress(key);
+    const sequence = model.sequence(key);
+    const pending = sequence.find((page) => !model.studied.has(page.slug)) ?? null;
+    /* Un grupo sin destino del SPA no es un botón: la plataforma no navega a
+       donde no sabe. */
+    const groups = model.progressParts(key).groups.filter((g) => g.to && g.to.startsWith("/"));
+    const exams = groups.filter(isExamGroup);
+    const practice = groups.filter((g) => !isExamGroup(g));
+    /* El primero sin terminar: el botón lleva a donde quedó trabajo. */
+    const firstOpen = (list: ProgressGroup[]) => list.find((g) => g.done < g.total) ?? list[0] ?? null;
+    return {
+      division,
+      done: progress.done,
+      total: progress.total,
+      pct: Math.round(progress.ratio * 100),
+      read: pending ?? sequence[0] ?? null,
+      started: Boolean(pending) && sequence.some((page) => model.studied.has(page.slug)),
+      exercises: firstOpen(practice),
+      exam: firstOpen(exams),
+      deck: study.decks.find((d) => d.deck.division === key) ?? null,
+      quiz: study.quizzes.find((q) => q.quiz.division === key) ?? null,
+    };
+  });
+}
+
+/** El destino de una sesión de repaso: lo vencido primero, y si no hay nada, el mazo entero. */
+function deckSession(slug: string, deck: DeckStat): string {
+  const mode = deck.due > 0 ? "vencidas" : deck.fresh > 0 ? "nuevas" : "todo";
+  return `${routes.deck(slug, deck.deck.id)}?modo=${mode}`;
+}
+
+/** Qué columnas de acción dibuja la tabla (las que usa al menos una fila). */
+interface ActionSlots {
+  read: boolean;
+  exercises: boolean;
+  exam: boolean;
+  deck: boolean;
+  quiz: boolean;
+}
+
+/** Un acceso de la fila, ya resuelto: es lo que dibuja `<Act>`. */
+interface RowAction {
+  to: string;
+  label: string;
+  /** Rótulo accesible y tooltip: nombra la división, así ninguna fila repite nombre. */
+  title: string;
+  aria: string;
+  icon: IconName;
+  primary?: boolean;
+}
+
+/**
+ * Una fila del programa: el enlace a la portada de la división (con su barra y
+ * su recuento, que es lo que el informe siempre mostró) y, a la derecha, los
+ * accesos que ahorran el rodeo por esa portada —leer, ejercicios, el examen de
+ * la unidad, el mazo y el quiz—.
+ *
+ * Cada acceso ocupa su COLUMNA, esté o no en esa fila: una división sin mazo
+ * deja el hueco y los botones siguen alineados de arriba abajo.
+ */
+function UnitRow({
+  row,
+  slug,
+  showPct,
+  slots,
+}: {
+  row: UnitRow;
+  slug: string;
+  showPct: boolean;
+  slots: ActionSlots;
 }) {
-  const { state } = useStudyState(slug);
-  const study = useStudy(slug);
-  const task = study.nextTask();
+  const { division, done, total, pct, read, started, exercises, exam, deck, quiz } = row;
+  const short = division.short;
+  const verb = started ? "Seguir" : "Leer";
+
+  const readAction: RowAction | null = read
+    ? {
+        to: routes.page(slug, read.slug),
+        label: verb,
+        title: `${verb} ${short}: ${read.title}`,
+        aria: `${verb} ${short}`,
+        icon: "book",
+        primary: true,
+      }
+    : null;
+  const groupAction = (group: ProgressGroup | null, icon: IconName, what: string): RowAction | null =>
+    group
+      ? {
+          to: group.to as string,
+          /* El rótulo es el que puso la materia («Guía», «Parciales»): la
+             plataforma no le cambia el nombre a su propio material. */
+          label: group.label,
+          title: `${what} de ${short} · ${group.label} ${group.done}/${group.total}`,
+          aria: `${group.label} de ${short}`,
+          icon,
+        }
+      : null;
 
   return (
-    <>
-      <TodayCard
-        model={model}
-        slug={slug}
-        study={study.model}
-        bookmarks={state.bookmarks}
-        started={started}
-        days={days}
-        streak={streak}
-      />
-      <PlanCard model={model} slug={slug} study={study.model} task={task} />
-    </>
+    <div className={css.row} style={{ ["--ucol" as string]: division.color }}>
+      <Link className={css.rowMain} to={routes.division(slug, division.key)}>
+        <span className={css.rowDot} aria-hidden="true" />
+        {/* El rótulo corto en su propia columna: así TODAS las filas tienen la
+            misma forma, también las divisiones sin número (brecha inicio-14). */}
+        <span className={css.rowShort}>{short}</span>
+        <span className={css.rowLabel}>{division.name}</span>
+        <span className={css.rowTrack} aria-hidden="true">
+          <span className={css.rowFill} style={{ width: `${pct}%` }} />
+        </span>
+        <span className={css.rowCount}>
+          {done}/{total}
+        </span>
+        <span className={css.rowPct}>{showPct ? `${pct}%` : ""}</span>
+      </Link>
+
+      <span className={css.rowActions}>
+        {slots.read ? <Act action={readAction} width={css.slotRead} /> : null}
+        {slots.exercises ? <Act action={groupAction(exercises, "pencil", "Ejercicios")} width={css.slotWide} /> : null}
+        {slots.exam ? <Act action={groupAction(exam, "exam", "Examen")} width={css.slotWide} /> : null}
+        {slots.deck ? (
+          <Act
+            action={
+              deck
+                ? {
+                    to: deckSession(slug, deck),
+                    label: "Repasar",
+                    title: `Repasar ${short} · ${deck.pending || deck.total} ${plural(deck.pending || deck.total, "tarjeta", "tarjetas")}`,
+                    aria: `Repasar ${short}`,
+                    icon: "cards",
+                  }
+                : null
+            }
+            width={css.slotDeck}
+          />
+        ) : null}
+        {slots.quiz ? (
+          <Act
+            action={
+              quiz
+                ? {
+                    to: routes.quizOne(slug, quiz.quiz.id),
+                    label: "Quiz",
+                    title: `Quiz de ${short} · ${quiz.questions} ${plural(quiz.questions, "pregunta", "preguntas")}`,
+                    aria: `Quiz de ${short}`,
+                    icon: "quiz",
+                  }
+                : null
+            }
+            width={css.slotQuiz}
+          />
+        ) : null}
+      </span>
+    </div>
   );
 }
+
+/** Un acceso de la fila dentro de su columna; sin acción, la columna queda vacía. */
+function Act({ action, width }: { action: RowAction | null; width?: string }) {
+  return (
+    <span className={`${css.slot} ${width ?? ""}`}>
+      {action ? (
+        <Link
+          className={action.primary ? `${css.act} ${css.actRead}` : css.act}
+          to={action.to}
+          title={action.title}
+          aria-label={action.aria}
+        >
+          <Icon name={action.icon} size={14} />
+          <span className={css.actLabel}>{action.label}</span>
+        </Link>
+      ) : null}
+    </span>
+  );
+}
+
+/* --------------------------------------------------- para hoy · racha */
 
 /**
  * «PARA HOY»: lo único de la pantalla que caduca — las flashcards pendientes, la
@@ -436,24 +591,62 @@ function phaseColor(model: SubjectModel, phase: PlanPhase): string {
 }
 
 /**
- * La tarjeta del plan: porcentaje global, un anillo por fase (cada uno abre SU
- * fase dentro del plan), la próxima tarea pendiente y las dos salidas del
- * baseline —el plan y los kits—.
+ * La tarjeta del plan: la modalidad elegida (cursada + final o final directo),
+ * el porcentaje global, un anillo por fase (cada uno abre SU fase dentro del
+ * plan), la próxima tarea pendiente y las dos salidas del baseline —el plan y
+ * los kits—.
+ *
+ * La modalidad se elige acá y no solo dentro del plan: TODO lo que la tarjeta
+ * muestra (las fases, el porcentaje, la próxima tarea) depende de ella, y quien
+ * cursa no tiene por qué ver como próximo paso una fase que solo existe en el
+ * final directo. Es el MISMO estado que usa el plan (el store de la materia),
+ * así que las dos pantallas nunca discrepan.
  */
-function PlanCard({
-  model,
-  slug,
-  study,
-  task,
-}: {
-  model: SubjectModel;
-  slug: string;
-  study: StudyModel;
-  task: ReturnType<StudyModel["nextTask"]>;
-}) {
-  const { phases, planProgress } = study;
+function PlanCard({ model, slug, study }: { model: SubjectModel; slug: string; study: UseStudyResult }) {
+  const { phases, planProgress, plan, tracks, track, state } = study.model;
+  const task = study.nextTask();
+  /* Null mientras el alumno no haya elegido: `resolveTrack` cae en la primera
+     modalidad para poder dibujar algo, pero eso NO es una elección suya. */
+  const chosen = usePlanTrack(slug);
   if (!phases.length) return null;
   const pct = Math.round(planProgress.ratio * 100);
+
+  /* El plan se configura una vez: la modalidad (cuando la materia ofrece más de
+     una) y las fechas de las instancias obligatorias. Sin eso, la tarjeta no
+     muestra fases —el porcentaje y «lo próximo» serían de una modalidad que
+     nadie eligió—: lleva a configurarlo. */
+  const required = (plan?.instances ?? []).filter((instance) => !instance.optional);
+  const needsTrack = tracks.length > 1 && !chosen;
+  const needsDates = required.length > 0 && !required.some((instance) => state.planDates[instance.key]);
+  if (needsTrack || needsDates) {
+    return (
+      <section className={css.plan} aria-labelledby="home-plan">
+        <div className={css.planMain}>
+          <div className={css.planHead}>
+            <h2 className={css.planTitle} id="home-plan">
+              <Icon name="map" size={15} className={css.planIcon} />
+              Plan de estudio
+            </h2>
+            <p className={css.planNext}>
+              {needsTrack && needsDates
+                ? "Falta elegir la modalidad y cargar las fechas de las instancias."
+                : needsTrack
+                  ? `Falta elegir la modalidad: ${tracks.map((t) => t.label).join(" o ")}.`
+                  : "Faltan las fechas de las instancias evaluatorias."}
+              <br />
+              <span className={css.planWhere}>El plan ordena las fases con eso.</span>
+            </p>
+          </div>
+        </div>
+        <div className={css.planActions}>
+          <Link className={css.primaryAction} to={routes.plan(slug)}>
+            <Icon name="map" size={15} />
+            Configurar el plan
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={css.plan} aria-labelledby="home-plan">
@@ -463,6 +656,14 @@ function PlanCard({
             <Icon name="map" size={15} className={css.planIcon} />
             Plan de estudio{planProgress.done ? ` · ${pct}%` : ""}
           </h2>
+          {/* La modalidad elegida se MUESTRA, no se cambia acá: es una decisión
+              de cursada, y un conmutador en el inicio invita a tocarla sin ver
+              el plan entero. Se cambia dentro del plan. */}
+          {tracks.length > 1 && track ? (
+            <span className={css.planTrackTag} title={track.description}>
+              {track.label}
+            </span>
+          ) : null}
           {task ? (
             <p className={css.planNext}>
               <strong>{task.task.label}</strong>
@@ -479,7 +680,7 @@ function PlanCard({
         </div>
         <div className={css.planPhases}>
           {phases.map((phase) => {
-            const p = study.phaseProgress(phase.id);
+            const p = study.model.phaseProgress(phase.id);
             return (
               <Link
                 key={phase.id}
@@ -512,6 +713,139 @@ function PlanCard({
           <Icon name="grid" size={15} />
           Kits de estudio
         </Link>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------ repaso general */
+
+/** Cuántos tipos de referencia entran en el repaso general (los de más páginas). */
+const REFERENCE_TYPES = 3;
+
+/** Un acceso del repaso general: lo que se dibuja, ya resuelto a un destino. */
+interface GeneralTile {
+  id: string;
+  kicker: string;
+  title: string;
+  count: string;
+  icon: "exam" | "sigma" | "list";
+  to: string;
+  color?: string;
+}
+
+/**
+ * «Repaso general»: lo que se consulta SIEMPRE, sin importar por qué unidad se
+ * vaya —la sección de evaluación de la materia, las páginas sueltas (el
+ * formulario maestro) y el material de referencia por tipo (distribuciones,
+ * técnicas, formularios), cada uno contra el catálogo ya filtrado—.
+ *
+ * Es una banda corta a propósito: NO es el catálogo. De los tipos que declara la
+ * materia quedan afuera los que no son contenido (fuentes, videos, apuntes), el
+ * primero declarado y el más numeroso —el cuerpo de lectura, que es justamente
+ * lo que se recorre unidad por unidad en el programa de abajo—.
+ *
+ * Todo sale del config: la sección de evaluación es la división que declara el
+ * color `--ueval`, las sueltas son `wiki.standalone` y los tipos son
+ * `pageTypes`. Ninguna materia se nombra acá.
+ */
+function GeneralSection({ model, slug }: { model: SubjectModel; slug: string }) {
+  const tiles = useMemo<GeneralTile[]>(() => {
+    const out: GeneralTile[] = [];
+
+    /* La sección de evaluación: la división sin número que la materia tiñe con
+       `--ueval` («Evaluaciones» en Proba, «Cátedra y evaluación» en Cripto). Si
+       ninguna lo declara, valen todas las divisiones sin número. */
+    const extra = model.visibleDivisions.filter((d) => d.kind === "extra");
+    const evaluation = extra.filter((d) => d.color === "var(--ueval)");
+    for (const division of evaluation.length ? evaluation : extra) {
+      const n = model.pagesByDivision(division.key).length;
+      out.push({
+        id: `d-${division.key}`,
+        kicker: "EVALUACIÓN",
+        title: division.name,
+        count: `${n} ${plural(n, "entrada", "entradas")}`,
+        icon: "exam",
+        to: routes.division(slug, division.key),
+        color: division.color,
+      });
+    }
+
+    /* Las páginas sueltas que declara la materia (N0-74): el formulario maestro
+       de Proba es exactamente esto. */
+    for (const page of model.standalone) {
+      out.push({
+        id: `p-${page.slug}`,
+        kicker: model.typeLabel(page.type).toUpperCase(),
+        title: page.title,
+        count: model.studied.has(page.slug) ? "leída" : "abrir",
+        icon: "sigma",
+        to: routes.page(slug, page.slug),
+        color: model.typeColor(page.type),
+      });
+    }
+
+    /* El material de referencia por tipo, contra el catálogo filtrado (`?t=`):
+       un clic y quedan solo los formularios, o solo las distribuciones. Las
+       páginas reservadas del wiki (índice y registro) no son material. */
+    const counts = new Map<string, number>();
+    for (const page of model.pages) {
+      if (page.type === PAGE_TYPE_META) continue;
+      if (!model.isContent(page)) continue;
+      counts.set(page.type, (counts.get(page.type) ?? 0) + 1);
+    }
+    const content = model.config.pageTypes.filter((t) => t.countsAsContent !== false && counts.has(t.key));
+    const main = new Set<string>();
+    if (content[0]) main.add(content[0].key);
+    /* El tipo más numeroso es el cuerpo de lectura de la materia (los conceptos):
+       su tarjeta sería «todo el wiki» con otro nombre. */
+    const bySize = content.slice().sort((a, b) => (counts.get(b.key) ?? 0) - (counts.get(a.key) ?? 0));
+    if (bySize[0]) main.add(bySize[0].key);
+    /* La banda no crece con la materia: entran los tipos de referencia con más
+       páginas y el resto se busca en el catálogo, que para eso está. */
+    const shown = new Set(bySize.filter((t) => !main.has(t.key)).slice(0, REFERENCE_TYPES).map((t) => t.key));
+    for (const type of content) {
+      if (!shown.has(type.key)) continue;
+      const n = counts.get(type.key) ?? 0;
+      out.push({
+        id: `t-${type.key}`,
+        kicker: "CONSULTAR",
+        title: type.plural,
+        count: `${n} ${plural(n, "página", "páginas")}`,
+        icon: "list",
+        to: `${routes.wiki(slug)}?t=${encodeURIComponent(type.key)}`,
+        color: model.typeColor(type.key),
+      });
+    }
+
+    return out;
+  }, [model, slug]);
+
+  if (!tiles.length) return null;
+
+  return (
+    <section className={css.general} aria-labelledby="home-general">
+      <h2 className={css.h2} id="home-general">
+        <Icon name="sigma" size={16} />
+        Repaso general
+      </h2>
+
+      <div className={css.generalGrid}>
+        {tiles.map((tile) => (
+          <Link
+            key={tile.id}
+            className={css.generalTile}
+            to={tile.to}
+            style={{ ["--tcol" as string]: tile.color ?? "var(--primary)" }}
+          >
+            <span className={css.generalIcon} aria-hidden="true">
+              <Icon name={tile.icon} size={17} />
+            </span>
+            <span className={css.generalKicker}>{tile.kicker}</span>
+            <span className={css.generalTitle}>{tile.title}</span>
+            <span className={css.generalCount}>{tile.count}</span>
+          </Link>
+        ))}
       </div>
     </section>
   );
@@ -642,19 +976,25 @@ function toolHint(model: SubjectModel, view: RailItemView): string | null {
  * de qué hace. Sale de `model.railGroups`, así que incluye por igual las vistas
  * de la plataforma y lo que declara la materia, sin una segunda lista que
  * mantener (brecha inicio-01).
+ *
+ * Se dibuja GRUPO POR GRUPO, con el rótulo del rail como encabezado: el grupo
+ * que la materia llama «Evaluación» o «Resolver» es una sección buscable, y en
+ * una grilla única el rótulo quedaba al pie de cada tarjeta, donde no ordena
+ * nada.
  */
 function ToolsSection({ model }: { model: SubjectModel }) {
-  const cards = useMemo(
+  const groups = useMemo(
     () =>
-      model.railGroups.flatMap((group: RailGroupView) =>
-        group.items
+      model.railGroups
+        .map((group: RailGroupView) => ({
+          group,
           // «Inicio» es esta misma pantalla.
-          .filter((view) => !(view.item.kind === "builtin" && view.item.target === "home"))
-          .map((view) => ({ group, view })),
-      ),
+          items: group.items.filter((view) => !(view.item.kind === "builtin" && view.item.target === "home")),
+        }))
+        .filter(({ items }) => items.length),
     [model.railGroups],
   );
-  if (!cards.length) return null;
+  if (!groups.length) return null;
 
   return (
     <section className={css.tools} aria-labelledby="home-tools">
@@ -662,39 +1002,46 @@ function ToolsSection({ model }: { model: SubjectModel }) {
         <Icon name="grid" size={16} />
         Herramientas
       </h2>
-      <div className={css.toolGrid}>
-        {cards.map(({ group, view }) => {
-          const { item } = view;
-          const hint = toolHint(model, view);
-          const body = (
-            <>
-              <span className={css.toolIcon} aria-hidden="true">
-                <Icon name={item.icon} size={20} />
-              </span>
-              <span className={css.toolTitle}>{item.label}</span>
-              {hint ? <span className={css.toolText}>{hint}</span> : null}
-              <span className={css.toolGroupName}>{group.label}</span>
-            </>
-          );
-          const style = { ["--tcol" as string]: group.color };
-          return view.href ? (
-            <a
-              key={`${group.id}-${item.id}`}
-              className={css.tool}
-              href={view.href}
-              target="_blank"
-              rel="noreferrer"
-              style={style}
-            >
-              {body}
-            </a>
-          ) : (
-            <Link key={`${group.id}-${item.id}`} className={css.tool} to={view.to ?? "."} style={style}>
-              {body}
-            </Link>
-          );
-        })}
-      </div>
+      {groups.map(({ group, items }) => (
+        <div key={group.id} className={css.toolGroup}>
+          <h3 className={css.toolGroupTitle} style={{ ["--tcol" as string]: group.color }}>
+            <span className={css.toolGroupBar} aria-hidden="true" />
+            {group.label}
+          </h3>
+          <div className={css.toolGrid}>
+            {items.map((view) => {
+              const { item } = view;
+              const hint = toolHint(model, view);
+              const body = (
+                <>
+                  <span className={css.toolIcon} aria-hidden="true">
+                    <Icon name={item.icon} size={20} />
+                  </span>
+                  <span className={css.toolTitle}>{item.label}</span>
+                  {hint ? <span className={css.toolText}>{hint}</span> : null}
+                </>
+              );
+              const style = { ["--tcol" as string]: group.color };
+              return view.href ? (
+                <a
+                  key={`${group.id}-${item.id}`}
+                  className={css.tool}
+                  href={view.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={style}
+                >
+                  {body}
+                </a>
+              ) : (
+                <Link key={`${group.id}-${item.id}`} className={css.tool} to={view.to ?? "."} style={style}>
+                  {body}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </section>
   );
 }

@@ -294,12 +294,11 @@ describe("<HomeView/> · seguir estudiando", () => {
     expect(screen.getByText("SIGUIENTE RECOMENDADO")).toBeTruthy();
   });
 
-  it("en el primer uso el botón nombra la página que abre, no la división", async () => {
+  it("en el primer uso la fila de la unidad abre su primera página", async () => {
     renderHome([]);
-    const cta = await screen.findByRole("link", { name: "Empezar por U1 · Estadística descriptiva" });
+    // Sin nada leído el verbo es «Empezar», y el destino la primera de la unidad.
+    const cta = await screen.findByRole("link", { name: "Leer U1" });
     expect(cta.getAttribute("href")).toBe("/m/proba/p/u1-a");
-    // El secundario lleva al plan, no al catálogo.
-    expect(screen.getByRole("link", { name: "Ver el plan de estudio" }).getAttribute("href")).toBe("/m/proba/plan");
     // Y no se invita a «volver a leer» algo que nunca se abrió.
     expect(screen.queryByText(/VOLVER A LEER/)).toBeNull();
   });

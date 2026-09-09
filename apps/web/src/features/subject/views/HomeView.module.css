@@ -76,8 +76,6 @@
 }
 .command code { font: 500 12px var(--font-mono); color: var(--text-2); }
 
-.startActions { flex: none; width: 300px; display: flex; flex-direction: column; gap: 9px; }
-
 .primaryAction,
 .secondaryAction {
   height: 38px;
@@ -136,9 +134,11 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* No es el título de la pantalla —ese es el de la materia, en el hero—: es el
+   rótulo de una sección más, del tamaño de las otras. */
 .h1 {
   margin: 0;
-  font: 600 var(--h1-hero) / 1.05 var(--font-display);
+  font: 600 18px/1.2 var(--font-display);
   color: var(--text);
 }
 
@@ -172,29 +172,90 @@
 }
 .totalSeg:last-child { border-right: 0; }
 
-.rows { display: flex; flex-direction: column; gap: 2px; }
+.rows { display: flex; flex-direction: column; gap: 5px; }
 
+/* Una fila del programa: el enlace a la división ocupa todo lo que puede y los
+   accesos rápidos quedan a la derecha, del mismo alto que la fila. */
+/* Fila gruesa: el filete de color de la división a la izquierda la separa de la
+   de al lado sin necesidad de líneas, y deja sitio para que los accesos entren
+   con su rótulo escrito. */
 .row {
-  height: 34px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 0 8px;
-  margin: 0 -8px;
+  gap: 8px;
+  padding: 0 10px 0 0;
+  border-left: 3px solid var(--ucol);
   border-radius: var(--r-sm);
-  text-decoration: none;
+  background: var(--surface);
+  box-shadow: var(--relief);
   transition: background var(--t);
 }
 .row:hover { background: var(--hover-wash); }
-.row:focus-visible {
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding-left: 11px;
+  border-radius: var(--r-sm);
+  text-decoration: none;
+}
+.rowMain:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
   box-shadow: inset 0 0 0 6px var(--primary-ring);
 }
 
+/* Los cuatro atajos de la unidad: leer, ejercicios, repasar, quiz. Son iconos
+   con su rótulo en `aria-label` y en el tooltip —con once filas, cuatro rótulos
+   escritos por fila ocupan más ancho que el nombre de la unidad—. */
+.rowActions { flex: none; display: flex; align-items: center; gap: 4px; }
+
+/* Una ranura por columna de acción, del ancho de su botón: la fila sin mazo deja
+   el hueco y la columna sigue derecha. */
+.slot { flex: none; width: 30px; display: inline-flex; }
+.slotRead { width: 84px; }
+.slotWide { width: 104px; }
+.slotDeck { width: 96px; }
+.slotQuiz { width: 74px; }
+
+.act {
+  width: 100%;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  box-shadow: var(--relief);
+  font: 600 11.5px var(--font-ui);
+  color: var(--text-2);
+  text-decoration: none;
+  transition: border-color var(--t), background var(--t), color var(--t);
+}
+.act:hover { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+.act:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* La lectura es la acción primaria de la fila: lleva el color de la unidad. */
+.actRead {
+  border-color: color-mix(in srgb, var(--ucol) 50%, var(--border));
+  background: color-mix(in srgb, var(--ucol) 8%, var(--surface));
+  color: var(--ucol);
+}
+.actRead:hover { background: color-mix(in srgb, var(--ucol) 15%, var(--surface)); border-color: var(--ucol); color: var(--ucol); }
+
+.actLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .rowDot {
-  width: 9px;
-  height: 9px;
+  width: 7px;
+  height: 7px;
   flex: none;
   border-radius: 50%;
   background: var(--ucol);
@@ -222,19 +283,20 @@
   white-space: nowrap;
 }
 
-/* Misma pista vacía que `.totalTrack`: `--border-2`. */
+/* Misma pista vacía que `.totalTrack`: `--border-2`. Más gruesa que en el
+   informe original: en una fila de 44 px una línea de 5 px se pierde. */
 .rowTrack {
   flex: none;
-  width: 260px;
-  height: 5px;
-  border-radius: 3px;
+  width: 170px;
+  height: 8px;
+  border-radius: 4px;
   background: var(--border-2);
   overflow: hidden;
 }
 .rowFill {
   display: block;
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--ucol);
   transition: width var(--t-slow);
 }
@@ -255,10 +317,22 @@
   color: var(--text-3);
 }
 
-@container (max-width: 700px) {
+@container (max-width: 900px) {
+  /* Sin ancho para las palabras: el icono y su tooltip alcanzan. */
+  .actLabel { display: none; }
+  .slot, .slotRead, .slotWide, .slotDeck, .slotQuiz { width: 30px; }
   .rowTrack { width: 120px; }
+}
+
+@container (max-width: 700px) {
+  /* Sin sitio para las tres columnas de números: manda la barra, que es la que
+     se lee de un vistazo. */
+  .rowPct { display: none; }
   .startCard { flex-direction: column; align-items: stretch; }
-  .startActions { width: auto; }
+}
+
+@container (max-width: 560px) {
+  .rowTrack { display: none; }
 }
 
 /* ---------- para hoy ---------- */
@@ -427,6 +501,18 @@
 }
 .planIcon { color: var(--accent-ink); }
 
+/* Modalidad elegida: un sello, no un control. Se cambia dentro del plan. */
+.planTrackTag {
+  align-self: flex-start;
+  padding: 3px 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-ctrl);
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+
 .planNext {
   margin: 0;
   font: 400 13px/1.5 var(--font-ui);
@@ -593,10 +679,105 @@
   color: var(--text-3);
 }
 
+/* ---------- repaso general ---------- */
+.general {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 22px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--relief), var(--shadow);
+}
+
+.generalGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
+
+.generalTile {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto auto;
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 2px;
+  padding: 11px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--relief);
+  text-decoration: none;
+  transition: border-color var(--t), transform var(--t);
+}
+.generalTile:hover { border-color: var(--tcol); transform: translateY(-1px); }
+.generalTile:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--relief), 0 0 0 5px var(--primary-ring);
+}
+
+.generalIcon {
+  grid-row: 1 / span 3;
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--tcol) 16%, transparent);
+  color: var(--tcol);
+}
+
+.generalKicker {
+  grid-column: 2;
+  font: 600 9px var(--font-ui);
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dos líneas: los nombres largos («Complementos Matemáticos», el formulario
+   maestro con el código de la materia) no se leen recortados a una. */
+.generalTitle {
+  grid-column: 2;
+  font: 600 12.5px/1.25 var(--font-ui);
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.generalCount {
+  grid-column: 2;
+  font: 500 10.5px var(--font-mono);
+  color: var(--text-3);
+}
+
+/* ---------- herramientas, por grupo del rail ---------- */
+.toolGroup { display: flex; flex-direction: column; gap: 10px; }
+
+.toolGroupTitle {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 10.5px var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.toolGroupBar { width: 14px; height: 2px; border-radius: 1px; background: var(--tcol); }
+
 @container (max-width: 620px) {
   .todayItem { padding-left: 0; border-left: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .totalSeg, .rowFill, .mini, .tool, .primaryAction, .secondaryAction, .todayAction, .phase { transition: none; }
+  .totalSeg, .rowFill, .mini, .tool, .primaryAction, .secondaryAction, .todayAction, .phase,
+  .row, .act, .generalTile { transition: none; }
 }
