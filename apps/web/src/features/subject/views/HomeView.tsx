@@ -277,8 +277,13 @@ interface ActionSlots {
 interface RowAction {
   to: string;
   label: string;
-  /** Rótulo accesible y tooltip: nombra la división, así ninguna fila repite nombre. */
-  title: string;
+  /**
+   * Tooltip nativo, solo para lo que NO es una página del wiki: un enlace a
+   * `/p/<slug>` ya trae la tarjeta de vista previa de la plataforma, y el
+   * `title` del navegador le pisa encima (lo verifica `page-tip.spec`).
+   */
+  title?: string;
+  /** Rótulo accesible: nombra la división, así ninguna fila repite nombre. */
   aria: string;
   icon: IconName;
   primary?: boolean;
@@ -312,7 +317,8 @@ function UnitRow({
     ? {
         to: routes.page(slug, read.slug),
         label: verb,
-        title: `${verb} ${short}: ${read.title}`,
+        /* Sin `title`: es un enlace a una página, y de decir qué abre se encarga
+           la tarjeta de vista previa (`PageTip`), que además muestra su resumen. */
         aria: `${verb} ${short}`,
         icon: "book",
         primary: true,
