@@ -1,5 +1,5 @@
 ---
-titulo: Formulario Maestro — Probabilidad y Estadística (93.24)
+titulo: Formulario Maestro
 resumen: "Hoja integral de toda la materia, con las variables aleatorias como eje: probabilidad y combinatoria, discretas y continuas con sus tablas, bidimensionales, procesos estocásticos, suma de variables, inferencia y pruebas de hipótesis."
 tipo: formulario
 orden: 1
@@ -8,13 +8,24 @@ fuentes: ["[[variable-aleatoria]]", "[[variable-aleatoria-continua]]", "[[variab
 actualizado: 2026-09-04
 ---
 
-# Formulario Maestro — 93.24 Probabilidad y Estadística
+# Formulario Maestro
 
-Hoja de fórmulas **integral** de toda la materia, con el núcleo de **variables
-aleatorias** (V.A.D., V.A.C., bidimensionales, Normal) como centro. Cada sección
-enlaza a su página de detalle (demostraciones y ejercicios resueltos). Formularios
-por unidad ya existentes: [[formulario-va-continuas]] (U4), [[formulario-suma-de-va]]
-(U7), [[formulario-inferencia]] (U8), [[formulario-pruebas-de-hipotesis]] (U9).
+## Contenido
+
+1. U1 · [[#U1 · Estadística descriptiva|Estadística descriptiva]]
+2. U2 · [[#U2 · Probabilidad — axiomas, condicional, Bayes, combinatoria|Probabilidad — axiomas, condicional, Bayes, combinatoria]]
+3. U3 · [[#U3 · Variable aleatoria discreta (V.A.D.)|Variable aleatoria discreta (V.A.D.)]]
+4. U3 · [[#U3 · Distribuciones discretas (tabla)|Distribuciones discretas (tabla)]]
+5. U4 · [[#U4 · Variable aleatoria continua (V.A.C.)|Variable aleatoria continua (V.A.C.)]]
+6. U4 · [[#U4 · Distribuciones continuas (tabla)|Distribuciones continuas (tabla)]]
+7. U4 · [[#U4 · Normal estándar y estandarización|Normal estándar y estandarización]]
+8. U5 · [[#U5 · Función de variable aleatoria Y=g(X)|Función de variable aleatoria Y=g(X)]]
+9. U5 · [[#U5 · Variables bidimensionales (conjuntas)|Variables bidimensionales (conjuntas)]]
+10. U5 · [[#U5 · Covarianza, correlación e independencia|Covarianza, correlación e independencia]]
+11. U6 · [[#U6 · Procesos estocásticos (Bernoulli, Poisson, Markov)|Procesos estocásticos (Bernoulli, Poisson, Markov)]]
+12. U7 · [[#U7 · Suma de v.a., desigualdades, LGN y TCL|Suma de v.a., desigualdades, LGN y TCL]]
+13. U8 · [[#U8 · Inferencia: estimación e intervalos|Inferencia: estimación e intervalos]]
+14. U9 · [[#U9 · Pruebas de hipótesis|Pruebas de hipótesis]]
 
 > [!info] Convenciones
 > $E[X]$ esperanza · $V(X)=\sigma_X^2$ varianza · $\mathcal{R}_X$ recorrido/soporte ·
@@ -24,23 +35,70 @@ por unidad ya existentes: [[formulario-va-continuas]] (U4), [[formulario-suma-de
 > $\text{Expo}(\lambda)$, $E[X]=1/\lambda$. Geométrica y binomial negativa cuentan
 > **fracasos** hasta el éxito.
 
-## Contenido
+## U1 · Estadística descriptiva
 
-1. [[#1 · Probabilidad — axiomas, condicional, Bayes, combinatoria|Probabilidad — axiomas, condicional, Bayes, combinatoria]]
-2. [[#2 · Variable aleatoria discreta (V.A.D.)|Variable aleatoria discreta (V.A.D.)]]
-3. [[#3 · Distribuciones discretas (tabla)|Distribuciones discretas (tabla)]]
-4. [[#4 · Variable aleatoria continua (V.A.C.)|Variable aleatoria continua (V.A.C.)]]
-5. [[#5 · Distribuciones continuas (tabla)|Distribuciones continuas (tabla)]]
-6. [[#6 · Normal estándar y estandarización|Normal estándar y estandarización]]
-7. [[#7 · Función de variable aleatoria Y=g(X)|Función de variable aleatoria Y=g(X)]]
-8. [[#8 · Variables bidimensionales (conjuntas)|Variables bidimensionales (conjuntas)]]
-9. [[#9 · Covarianza, correlación e independencia|Covarianza, correlación e independencia]]
-10. [[#10 · Suma de v.a., desigualdades, LGN y TCL|Suma de v.a., desigualdades, LGN y TCL]]
-11. [[#11 · Procesos estocásticos (Bernoulli, Poisson, Markov)|Procesos estocásticos (Bernoulli, Poisson, Markov)]]
-12. [[#12 · Estadística descriptiva|Estadística descriptiva]]
-13. [[#13 · Inferencia y pruebas de hipótesis (resumen)|Inferencia y pruebas de hipótesis (resumen)]]
+Resumen de una muestra $\{x_i\}_{i=1}^n$: centro, dispersión, forma y posición, **sin** inferir sobre la población. Hub: [[estadistica-descriptiva|Estadística descriptiva]].
 
-## 1 · Probabilidad — axiomas, condicional, Bayes, combinatoria
+### Tendencia central
+
+| Medida | Fórmula (sin agrupar) | Nota |
+|---|---|---|
+| Media | $\bar x = \dfrac{1}{n}\sum_{i=1}^n x_i$ | sensible a outliers |
+| Mediana $q_2$ | $n$ impar: obs. central pos. $\frac{n+1}{2}$; $n$ par: promedio de pos. $\frac{n}{2}$ y $\frac{n}{2}+1$ (muestra ordenada) | **robusta** |
+| Moda | valor de frecuencia máxima (puede ser multimodal) | — |
+
+Detalle: [[medidas-de-tendencia-central|tendencia central]].
+
+### Dispersión
+
+| Medida | Fórmula | Nota |
+|---|---|---|
+| Rango | $R = \lvert\max_i x_i - \min_i x_i\rvert$ | 2 extremos, muy sensible |
+| Varianza muestral | $\;s^2 = \dfrac{1}{n-1}\displaystyle\sum_{i=1}^n (x_i-\bar x)^2\;$ | denominador $n-1$ |
+| Desvío | $s = \sqrt{s^2}$ | misma unidad que los datos |
+| Desvío abs. medio | $w = \dfrac{1}{n}\sum_{i=1}^n \lvert x_i-\bar x\rvert$ | — |
+| MAD | $\text{MAD} = \operatorname{mediana}\{\lvert x_i-\bar x\rvert\}$ | **robusta** |
+| IQR | $\text{IQR} = q_3 - q_1$ | 50% central, robusto |
+
+$$ s^2 = \frac{1}{n-1}\sum_{i=1}^n (x_i-\bar x)^2 \qquad s=\sqrt{s^2} $$
+
+Detalle: [[medidas-de-dispersion|dispersión]].
+
+### Cuartiles y percentiles
+Muestra ordenada $\tilde x_1 \le \dots \le \tilde x_n$. El $j$-ésimo cuartil $q_j\in[\tilde x_k,\tilde x_{k+1}]$ cumple
+$$ \frac{k}{n} \le j\cdot 0{,}25 < \frac{k+1}{n}. $$
+- $q_1$: 25% a izquierda · $q_2 = $ mediana (50%) · $q_3$: 75% a izquierda.
+- Deciles parten en 10, percentiles en 100. Detalle: [[cuartiles-y-percentiles|cuartiles y percentiles]].
+
+### Forma (asimetría y curtosis muestral)
+$$ \gamma = \frac{1}{n s^3}\sum_{i=1}^n (x_i-\bar x)^3 \qquad
+   \kappa = \frac{1}{n s^4}\sum_{i=1}^n (x_i-\bar x)^4 - 3 $$
+$\gamma$: signo del sesgo · $\kappa$: exceso de curtosis (Normal $\Rightarrow \kappa=0$). Ver [[asimetria-y-curtosis|asimetría y curtosis]].
+
+### Datos agrupados
+Tabla de frecuencias por intervalos $[L_i,L_{s,i})$; marca de clase $x_i=\dfrac{L_i+L_{s,i}}{2}$ como representante. Con $n=\sum f_i$, $L$ intervalos (todo **aproximado**):
+
+| Medida | Fórmula ponderada |
+|---|---|
+| Media | $\bar x_{Ag} = \dfrac{1}{n}\sum_{i=1}^L x_i\, f_i$ |
+| Desvío | $s_{Ag} = \sqrt{\dfrac{1}{n-1}\sum_{i=1}^L (x_i-\bar x_{Ag})^2\, f_i}$ |
+| Asimetría | $\gamma_{Ag} = \dfrac{1}{n\,s_{Ag}^3}\sum (x_i-\bar x_{Ag})^3 f_i$ |
+| Curtosis | $\kappa_{Ag} = \dfrac{1}{n\,s_{Ag}^4}\sum (x_i-\bar x_{Ag})^4 f_i - 3$ |
+
+**Mediana / cuartiles por interpolación lineal** sobre la frecuencia acumulada $F_i$ (localizar el intervalo que acumula la fracción $\alpha n$, ancho $L_{s}-L_{I}$, $F_{\text{ant}}$ acumulada previa):
+$$ q = L_I + \frac{\alpha n - F_{\text{ant}}}{F - F_{\text{ant}}}\,(L_{s}-L_I), \qquad \text{mediana: }\alpha=0{,}5. $$
+
+**Moda agrupada** (intervalo modal de frecuencia $f_M$, entre $L_I,L_D$; vecinas $f_I,f_D$): punto medio $M=\frac{L_I+L_D}{2}$, o interpolación
+$$ M = \frac{L_D(f_M-f_I) + L_I(f_M-f_D)}{(f_M-f_I)+(f_M-f_D)}. $$
+
+Detalle y ejemplos: [[datos-agrupados|datos agrupados]], [[tecnica-datos-agrupados-interpolacion|interpolación]].
+
+### Boxplot y outliers de Tukey
+Caja de $q_1$ a $q_3$ (línea en $q_2$), $\text{IQR}=q_3-q_1$. Cercas:
+$$ [\,q_1 - 1{,}5\,\text{IQR}\;,\;\; q_3 + 1{,}5\,\text{IQR}\,]. $$
+Todo dato fuera de ese rango es **outlier**. Ver [[boxplot|boxplot]].
+
+## U2 · Probabilidad — axiomas, condicional, Bayes, combinatoria
 
 Espacio de probabilidad $(S,\Sigma,P)$. Ver [[axiomas-de-probabilidad|axiomas de Kolmogorov]], [[probabilidad-condicional|condicional]], [[probabilidad-total-y-bayes|total y Bayes]], [[independencia|independencia]].
 
@@ -113,7 +171,7 @@ $$ P(B)=\sum_k P(B\cap A_k)=\sum_k P(B\mid A_k)\,P(A_k). $$
 **Teorema de Bayes** (a priori $P(A_i)$ → a posteriori $P(A_i\mid B)$):
 $$ P(A_i\mid B)=\frac{P(B\mid A_i)\,P(A_i)}{\sum_k P(B\mid A_k)\,P(A_k)}. $$
 
-## 2 · Variable aleatoria discreta (V.A.D.)
+## U3 · Variable aleatoria discreta (V.A.D.)
 
 Una [[variable-aleatoria|v.a.]] $X:\mathcal{S}\mapsto\mathbb{R}$ es **discreta** cuando su recorrido $\mathcal{R}_X$ es contable (valores separados). Se describe con su PMF o —equivalentemente— con su FDA, y se resume con [[esperanza|$E[X]$]] y [[varianza|$V(X)$]].
 
@@ -188,7 +246,7 @@ $$ M_X(t)=E\!\big[e^{tX}\big]=\sum_{k\in\mathcal{R}_X}e^{tk}\,p_X(k) $$
 
 Ver [[funcion-generadora-de-momentos|FGM]] para la tabla de $M_X(t)$ de cada distribución discreta. Distribuciones discretas usuales: [[distribucion-bernoulli|Bernoulli]], [[distribucion-binomial|Binomial]], [[distribucion-geometrica|Geométrica]], [[distribucion-binomial-negativa|Binomial negativa]], [[distribucion-hipergeometrica|Hipergeométrica]], [[distribucion-poisson|Poisson]] — para elegir cuál, ver [[reconocer-distribucion-discreta|cómo reconocer la distribución]].
 
-## 3 · Distribuciones discretas (tabla)
+## U3 · Distribuciones discretas (tabla)
 
 Convención de la cátedra: **Geométrica** y **Binomial Negativa (Pascal)** cuentan **fracasos** hasta el 1er / $r$-ésimo éxito, con soporte $\mathcal{R}=\mathbb{N}_0$. En todas, $q=1-p$.
 
@@ -211,7 +269,7 @@ En la Hipergeométrica, $p=M/N$ (proporción de especiales); el factor $\tfrac{N
 - **Hipergeométrica** = muestreo **sin reposición** de población finita; misma media que la Binomial ($np$) pero menor varianza; **se aproxima a $\text{Binomial}(n,M/N)$** cuando $N\gg n$.
 - **Poisson** aproxima a $\text{Binomial}(n,p)$ cuando $n$ grande y $p$ chico, con $\lambda=np$; media y varianza coinciden ($=\lambda$); suma de Poisson independientes es Poisson ($\lambda_1+\lambda_2$).
 
-## 4 · Variable aleatoria continua (V.A.C.)
+## U4 · Variable aleatoria continua (V.A.C.)
 
 $X$ es **v.a.c.** $\iff F_X$ continua $\iff P(X=\alpha)=0\ \forall\alpha\in\mathbb{R}$. Se describe por la [[funcion-de-densidad|densidad]] $f_X$; sumas del caso discreto $\to$ **integrales**. Ver [[variable-aleatoria-continua|V.A. continua]].
 
@@ -269,7 +327,7 @@ Caso idéntico ($\lambda_i=\lambda$): $T\sim\text{Expo}(n\lambda)$, $E[T]=\dfrac
 - Soporte no acotado $\Rightarrow$ **integrales impropias**: $\displaystyle\int_a^{+\infty} w(x)\,dx=\lim_{t\to+\infty}\int_a^{t} w(x)\,dx$. Ver [[tecnica-integrales-impropias|integrales impropias]].
 - Distribuciones continuas usuales: [[distribucion-uniforme-continua|Unif$(a,b)$]], [[distribucion-exponencial|Expo$(\lambda)$]], [[distribucion-normal|$N(\mu,\sigma)$]].
 
-## 5 · Distribuciones continuas (tabla)
+## U4 · Distribuciones continuas (tabla)
 
 > Núcleo. V.A.C.: densidad $f_X(x)$, FDA $F_X(x)=P(X\le x)=\int_{-\infty}^x f_X$. **Normal parametrizada por el DESVÍO $\sigma$** (segundo parámetro $=\sigma$, con $V=\sigma^2$; nunca $N(\mu,\sigma^2)$). **Exponencial por la TASA $\lambda$.** Fuera del soporte, $f_X=0$.
 
@@ -294,7 +352,7 @@ $\Gamma(\alpha)=\int_0^\infty u^{\alpha-1}e^{-u}\,du$; $\Gamma(n)=(n-1)!$ para $
 - **[[distribucion-ji-cuadrado\|Ji-cuadrado]]:** $\chi^2_k=\sum_{i=1}^k Z_i^2$ con $Z_i\sim N(0,1)$ i.i.d.; en inferencia $\dfrac{(n-1)S_n^2}{\sigma^2}\sim\chi^2_{n-1}$; es $\text{Gamma}\!\left(\tfrac{k}{2},\tfrac12\right)$.
 - **[[distribucion-t-de-student\|t-Student]]:** $T=\dfrac{\overline X_n-\mu}{S_n/\sqrt n}\sim t_{n-1}$; colas más pesadas que la [[distribucion-normal|normal]], converge a $N(0,1)$ cuando $m=n-1\to\infty$.
 
-## 6 · Normal estándar y estandarización
+## U4 · Normal estándar y estandarización
 
 Ver [[distribucion-normal|Normal $N(\mu,\sigma)$]] · [[estandarizacion-y-tabla-normal|estandarización y tabla]] · [[aproximacion-normal-de-la-binomial|aprox. normal de la binomial]].
 
@@ -356,7 +414,7 @@ P(a\le S_n\le b)&\approx\Phi\!\left(\tfrac{b+\frac12-np}{\sqrt{npq}}\right)-\Phi
 $$
 > Para $<$ / $>$ estrictos, mover el $\pm\tfrac12$ hacia adentro (excluir los extremos).
 
-## 7 · Función de variable aleatoria Y=g(X)
+## U5 · Función de variable aleatoria Y=g(X)
 
 Dada $X$ y $g:\mathbb{R}\to\mathbb{R}$, se define $Y=g(X)$; el objetivo es deducir la distribución de $Y$ desde la de $X$. Teoría en [[funcion-de-variable-aleatoria|Función de v.a.]]; receta en [[tecnica-distribucion-de-una-funcion-de-va|técnica $Y=g(X)$]].
 
@@ -399,7 +457,7 @@ es decir $Y$ tiene la misma distribución que $X$. Para no estrictamente crecien
 - Confundir el soporte: si $0<x<1$ y $Y=X^3$, entonces $0<y<1$, no todo $\mathbb{R}$.
 - Afín con $a<0$: $\sigma_Y=|a|\sigma_X$ (nunca $a\,\sigma_X$).
 
-## 8 · Variables bidimensionales (conjuntas)
+## U5 · Variables bidimensionales (conjuntas)
 
 Un vector $(X,Y)$ observado en el mismo experimento. La **conjunta** lo contiene todo: sumando/integrando una variable → **marginales**; dividiendo → **condicionales**. Detalle en [[variables-aleatorias-bidimensionales|bidimensionales]], [[esperanza-condicional|esperanza condicional]] y [[mezcla-de-distribuciones|mezcla]].
 
@@ -451,7 +509,7 @@ $$ P(M{=}k\mid X\in A)=\frac{P(X\in A\mid M{=}k)\,P(M{=}k)}{\sum_{j}P(X\in A\mid
 
 Detalle y ejercicios: [[mezcla-de-distribuciones|mezcla de distribuciones]] · [[esperanza-condicional|leyes total]] · [[probabilidad-total-y-bayes|Bayes]] · [[covarianza-y-correlacion|Cov y correlación]] · [[tecnica-integrales-dobles|integrales dobles]].
 
-## 9 · Covarianza, correlación e independencia
+## U5 · Covarianza, correlación e independencia
 
 ### Covarianza
 
@@ -498,68 +556,7 @@ Equivalente vía condicional: $f_{X\mid Y}(x\mid y)=f_X(x)$ (o $p_{X\mid Y}=p_X$
 
 Detalle en [[independencia-de-variables-aleatorias|Independencia de V.A.]].
 
-## 10 · Suma de v.a., desigualdades, LGN y TCL
-
-Hub: [[suma-de-variables-aleatorias|Suma de v.a.]] · hoja completa: [[formulario-suma-de-va|Formulario u.7]].
-
-### Esperanza y varianza de una suma
-- **Esperanza (siempre, sin hipótesis):** $\;E[X+Y]=E[X]+E[Y]$, y en general $\;E\!\left[\sum_{k=1}^n X_k\right]=\sum_{k=1}^n E[X_k]$.
-- **Varianza (caso general):** aparece la [[covarianza-y-correlacion|covarianza]]
-$$ V(X+Y)=V(X)+2\,\mathrm{Cov}(X,Y)+V(Y),\qquad V\!\left(\sum_{k=1}^n X_k\right)=\sum_{k=1}^n V(X_k)+2\!\!\sum_{i<j}\mathrm{Cov}(X_i,X_j). $$
-- **Independientes / no correlacionadas** ($\mathrm{Cov}=0$): $\;V(X\pm Y)=V(X)+V(Y)\;$ (la resta **también suma**); para $n$ indep. $\;V\!\left(\sum X_k\right)=\sum V(X_k)$.
-
-### Caso i.i.d.: suma $S_n$ y promedio $\bar X_n$
-$X_1,\dots,X_n$ i.i.d. con media $\mu$ y varianza $\sigma^2$. Sea $S_n=\sum_{i=1}^n X_i$ y $\bar X_n=\tfrac1n S_n$ ([[promedio-muestral|promedio muestral]]):
-
-| | $S_n=\sum X_i$ | $\bar X_n=\tfrac1n S_n$ |
-|---|---|---|
-| Media | $n\mu$ | $\mu$ (insesgado) |
-| Varianza | $n\sigma^2$ | $\dfrac{\sigma^2}{n}\xrightarrow{n\to\infty}0$ |
-| Desvío | $\sqrt n\,\sigma$ | $\dfrac{\sigma}{\sqrt n}$ (**error estándar**) |
-
-### Distribución de la suma: convolución ($X,Y$ independientes)
-$$ \text{discreta: } p_S(s)=\sum_{y\in \mathcal R_Y} p_X(s-y)\,p_Y(y),\qquad \text{continua: } f_S(s)=\int_{-\infty}^{+\infty} f_X(s-y)\,f_Y(y)\,dy. $$
-Atajo: con [[funcion-generadora-de-momentos|FGM]], $\;M_S(t)=M_X(t)\,M_Y(t)\;$ (indep.) suele identificar la familia sin integrar.
-
-### Sumas de independientes con nombre propio (reproductividad) — ver [[suma-de-va-independientes]]
-| Sumandos (independientes) | Suma $S$ |
-|---|---|
-| $n\times\mathrm{Bernoulli}(p)$ i.i.d. | $\mathrm{Bin}(n,p)$ |
-| $\mathrm{Bin}(n_1,p)+\mathrm{Bin}(n_2,p)$ (misma $p$) | $\mathrm{Bin}(n_1+n_2,p)$ |
-| $\mathrm{Poisson}(\lambda_1)+\mathrm{Poisson}(\lambda_2)$ | $\mathrm{Poisson}(\lambda_1+\lambda_2)$ |
-| $\mathcal N(\mu_1,\sigma_1)+\mathcal N(\mu_2,\sigma_2)$ | $\mathcal N\!\big(\mu_1+\mu_2,\sqrt{\sigma_1^2+\sigma_2^2}\big)$ |
-| $n\times\text{Expo}(\lambda)$ i.i.d. | $\mathrm{Gamma}(n,\lambda)=\mathrm{Erlang}_n(\lambda)$ |
-| $\mathrm{Unif}(0,1)+\mathrm{Unif}(0,1)$ | **triangular** en $(0,2)$ (**NO** uniforme) |
-| $\mathrm{Geo}(p)+\mathrm{Geo}(p)$ | $\mathrm{BinNeg}(2,p)$ |
-| $\sum_{i=1}^n \mathcal N(0,1)^2$ | $\chi^2_n$ |
-
-Normal + Normal: **suman medias y varianzas** (los desvíos NO suman). Gamma/Erlang: $\;f_{\Gamma(n,\lambda)}(x)=\dfrac{\lambda^n x^{n-1}e^{-\lambda x}}{(n-1)!}$ $(x>0)$, $E=\tfrac n\lambda$, $V=\tfrac n{\lambda^2}$.
-
-### Desigualdades (cotas universales) — ver [[desigualdad-de-chebyshev]]
-- **Markov** ($X\ge 0$), $\forall\,\alpha>0$: $\quad P(X\ge\alpha)\le\dfrac{E[X]}{\alpha}$.
-- **Chebyshev** (media $\mu$, varianza $\sigma^2$), $\forall\,\varepsilon>0$: $\quad P(|X-\mu|\ge\varepsilon)\le\dfrac{\sigma^2}{\varepsilon^2}$.
-- En términos de $k$ desvíos ($\varepsilon=k\sigma$): $\quad P(|X-\mu|\ge k\sigma)\le\dfrac1{k^2}$.
-- Promedio i.i.d.: $\quad P(|\bar X_n-\mu|\ge\varepsilon)\le\dfrac{\sigma^2}{n\,\varepsilon^2}\xrightarrow{n\to\infty}0$ (puente a la LGN).
-
-### Ley de los Grandes Números — ver [[ley-de-grandes-numeros]]
-- **Débil (en probabilidad):** $\;\displaystyle\lim_{n\to\infty} P(|\bar X_n-\mu|\ge\varepsilon)=0\quad\forall\,\varepsilon>0$ (se prueba con Chebyshev).
-- **Fuerte (casi segura):** $\;P\!\left(\displaystyle\lim_{n\to\infty}\bar X_n=\mu\right)=1$.
-
-### Teorema Central del Límite — ver [[teorema-central-del-limite]]
-$X_k$ i.i.d. con media $\mu$ y desvío $\sigma$; tipificada $\;Z_n=\dfrac{\bar X_n-\mu}{\sigma/\sqrt n}=\dfrac{S_n-n\mu}{\sqrt n\,\sigma}$:
-$$ \lim_{n\to\infty}P(Z_n\le z)=\Phi(z). $$
-Aproximaciones prácticas (regla usual $n>20$):
-$$ \bar X_n\overset{\text{aprox}}{\sim}\mathcal N\!\Big(\mu,\tfrac{\sigma}{\sqrt n}\Big),\qquad S_n\overset{\text{aprox}}{\sim}\mathcal N\!\big(n\mu,\sqrt n\,\sigma\big),\qquad P(S_n\le s)\approx\Phi\!\Big(\tfrac{s-n\mu}{\sqrt n\,\sigma}\Big). $$
-Frecuencia relativa ($\hat P_n=\tfrac1n\sum\mathbb 1_k(A)$, $p=P(A)$): $\;P(\hat P_n\le q)\approx\Phi\!\Big(\dfrac{q-p}{\sqrt{p(1-p)/n}}\Big)$.
-
-### Aproximación normal de la binomial — ver [[aproximacion-normal-de-la-binomial]]
-$$ \mathrm{Bin}(n,p)\approx\mathcal N\big(np,\sqrt{npq}\big),\qquad q=1-p. $$
-**Corrección por continuidad** (v.a. discreta $\to$ continua, extremos incluidos se mueven hacia afuera):
-$$ P(a\le S_n\le b)\approx\Phi\!\Big(\tfrac{b+\frac12-np}{\sqrt{npq}}\Big)-\Phi\!\Big(\tfrac{a-\frac12-np}{\sqrt{npq}}\Big),\qquad P(S_n=s)\approx\Phi\!\Big(\tfrac{s+\frac12-n\mu}{\sqrt n\,\sigma}\Big)-\Phi\!\Big(\tfrac{s-\frac12-n\mu}{\sqrt n\,\sigma}\Big). $$
-
-> **LGN vs TCL:** La LGN dice *adónde* va el promedio (a $\mu$); el TCL dice *cómo* fluctúa (tamaño $\sigma/\sqrt n$, reescalado $\to$ Normal).
-
-## 11 · Procesos estocásticos (Bernoulli, Poisson, Markov)
+## U6 · Procesos estocásticos (Bernoulli, Poisson, Markov)
 
 Tres procesos de conteo / evolución. Bernoulli y Poisson comparten esqueleto (conteo, incrementos indep. y estac., Markov); solo cambia discreto ↔ continuo. Detalle: [[proceso-de-bernoulli|Bernoulli]], [[proceso-de-poisson|Poisson]], [[relacion-bernoulli-poisson|relación B↔P]], [[cadenas-de-markov|cadenas de Markov]].
 
@@ -637,70 +634,68 @@ Tipos de estados: **accesible** ($p_{ij}^{(n)}>0$ algún $n$) · **comunican** (
 
 **Tiempo hasta absorción** (absorbentes $s_1,\dots,s_k$): $\mathbb{P}=\begin{pmatrix}\mathbb{I} & \mathbf{0}\\ \mathbb{F} & \mathbb{Q}\end{pmatrix}$, $\ \mathbb{M}=(\mathbb{I}-\mathbb{Q})^{-1}$ (tiempos esperados por estado), $\ \mathbb{G}=\mathbb{M}\,\mathbb{F}$ (prob. de absorción por cada $s_j$). Ver [[cadenas-de-markov|detalle y ejercicios]].
 
-## 12 · Estadística descriptiva
+## U7 · Suma de v.a., desigualdades, LGN y TCL
 
-Resumen de una muestra $\{x_i\}_{i=1}^n$: centro, dispersión, forma y posición, **sin** inferir sobre la población. Hub: [[estadistica-descriptiva|Estadística descriptiva]].
+Hub: [[suma-de-variables-aleatorias|Suma de v.a.]] · hoja completa: [[formulario-suma-de-va|Formulario u.7]].
 
-### Tendencia central
+### Esperanza y varianza de una suma
+- **Esperanza (siempre, sin hipótesis):** $\;E[X+Y]=E[X]+E[Y]$, y en general $\;E\!\left[\sum_{k=1}^n X_k\right]=\sum_{k=1}^n E[X_k]$.
+- **Varianza (caso general):** aparece la [[covarianza-y-correlacion|covarianza]]
+$$ V(X+Y)=V(X)+2\,\mathrm{Cov}(X,Y)+V(Y),\qquad V\!\left(\sum_{k=1}^n X_k\right)=\sum_{k=1}^n V(X_k)+2\!\!\sum_{i<j}\mathrm{Cov}(X_i,X_j). $$
+- **Independientes / no correlacionadas** ($\mathrm{Cov}=0$): $\;V(X\pm Y)=V(X)+V(Y)\;$ (la resta **también suma**); para $n$ indep. $\;V\!\left(\sum X_k\right)=\sum V(X_k)$.
 
-| Medida | Fórmula (sin agrupar) | Nota |
+### Caso i.i.d.: suma $S_n$ y promedio $\bar X_n$
+$X_1,\dots,X_n$ i.i.d. con media $\mu$ y varianza $\sigma^2$. Sea $S_n=\sum_{i=1}^n X_i$ y $\bar X_n=\tfrac1n S_n$ ([[promedio-muestral|promedio muestral]]):
+
+| | $S_n=\sum X_i$ | $\bar X_n=\tfrac1n S_n$ |
 |---|---|---|
-| Media | $\bar x = \dfrac{1}{n}\sum_{i=1}^n x_i$ | sensible a outliers |
-| Mediana $q_2$ | $n$ impar: obs. central pos. $\frac{n+1}{2}$; $n$ par: promedio de pos. $\frac{n}{2}$ y $\frac{n}{2}+1$ (muestra ordenada) | **robusta** |
-| Moda | valor de frecuencia máxima (puede ser multimodal) | — |
+| Media | $n\mu$ | $\mu$ (insesgado) |
+| Varianza | $n\sigma^2$ | $\dfrac{\sigma^2}{n}\xrightarrow{n\to\infty}0$ |
+| Desvío | $\sqrt n\,\sigma$ | $\dfrac{\sigma}{\sqrt n}$ (**error estándar**) |
 
-Detalle: [[medidas-de-tendencia-central|tendencia central]].
+### Distribución de la suma: convolución ($X,Y$ independientes)
+$$ \text{discreta: } p_S(s)=\sum_{y\in \mathcal R_Y} p_X(s-y)\,p_Y(y),\qquad \text{continua: } f_S(s)=\int_{-\infty}^{+\infty} f_X(s-y)\,f_Y(y)\,dy. $$
+Atajo: con [[funcion-generadora-de-momentos|FGM]], $\;M_S(t)=M_X(t)\,M_Y(t)\;$ (indep.) suele identificar la familia sin integrar.
 
-### Dispersión
-
-| Medida | Fórmula | Nota |
-|---|---|---|
-| Rango | $R = \lvert\max_i x_i - \min_i x_i\rvert$ | 2 extremos, muy sensible |
-| Varianza muestral | $\;s^2 = \dfrac{1}{n-1}\displaystyle\sum_{i=1}^n (x_i-\bar x)^2\;$ | denominador $n-1$ |
-| Desvío | $s = \sqrt{s^2}$ | misma unidad que los datos |
-| Desvío abs. medio | $w = \dfrac{1}{n}\sum_{i=1}^n \lvert x_i-\bar x\rvert$ | — |
-| MAD | $\text{MAD} = \operatorname{mediana}\{\lvert x_i-\bar x\rvert\}$ | **robusta** |
-| IQR | $\text{IQR} = q_3 - q_1$ | 50% central, robusto |
-
-$$ s^2 = \frac{1}{n-1}\sum_{i=1}^n (x_i-\bar x)^2 \qquad s=\sqrt{s^2} $$
-
-Detalle: [[medidas-de-dispersion|dispersión]].
-
-### Cuartiles y percentiles
-Muestra ordenada $\tilde x_1 \le \dots \le \tilde x_n$. El $j$-ésimo cuartil $q_j\in[\tilde x_k,\tilde x_{k+1}]$ cumple
-$$ \frac{k}{n} \le j\cdot 0{,}25 < \frac{k+1}{n}. $$
-- $q_1$: 25% a izquierda · $q_2 = $ mediana (50%) · $q_3$: 75% a izquierda.
-- Deciles parten en 10, percentiles en 100. Detalle: [[cuartiles-y-percentiles|cuartiles y percentiles]].
-
-### Forma (asimetría y curtosis muestral)
-$$ \gamma = \frac{1}{n s^3}\sum_{i=1}^n (x_i-\bar x)^3 \qquad
-   \kappa = \frac{1}{n s^4}\sum_{i=1}^n (x_i-\bar x)^4 - 3 $$
-$\gamma$: signo del sesgo · $\kappa$: exceso de curtosis (Normal $\Rightarrow \kappa=0$). Ver [[asimetria-y-curtosis|asimetría y curtosis]].
-
-### Datos agrupados
-Tabla de frecuencias por intervalos $[L_i,L_{s,i})$; marca de clase $x_i=\dfrac{L_i+L_{s,i}}{2}$ como representante. Con $n=\sum f_i$, $L$ intervalos (todo **aproximado**):
-
-| Medida | Fórmula ponderada |
+### Sumas de independientes con nombre propio (reproductividad) — ver [[suma-de-va-independientes]]
+| Sumandos (independientes) | Suma $S$ |
 |---|---|
-| Media | $\bar x_{Ag} = \dfrac{1}{n}\sum_{i=1}^L x_i\, f_i$ |
-| Desvío | $s_{Ag} = \sqrt{\dfrac{1}{n-1}\sum_{i=1}^L (x_i-\bar x_{Ag})^2\, f_i}$ |
-| Asimetría | $\gamma_{Ag} = \dfrac{1}{n\,s_{Ag}^3}\sum (x_i-\bar x_{Ag})^3 f_i$ |
-| Curtosis | $\kappa_{Ag} = \dfrac{1}{n\,s_{Ag}^4}\sum (x_i-\bar x_{Ag})^4 f_i - 3$ |
+| $n\times\mathrm{Bernoulli}(p)$ i.i.d. | $\mathrm{Bin}(n,p)$ |
+| $\mathrm{Bin}(n_1,p)+\mathrm{Bin}(n_2,p)$ (misma $p$) | $\mathrm{Bin}(n_1+n_2,p)$ |
+| $\mathrm{Poisson}(\lambda_1)+\mathrm{Poisson}(\lambda_2)$ | $\mathrm{Poisson}(\lambda_1+\lambda_2)$ |
+| $\mathcal N(\mu_1,\sigma_1)+\mathcal N(\mu_2,\sigma_2)$ | $\mathcal N\!\big(\mu_1+\mu_2,\sqrt{\sigma_1^2+\sigma_2^2}\big)$ |
+| $n\times\text{Expo}(\lambda)$ i.i.d. | $\mathrm{Gamma}(n,\lambda)=\mathrm{Erlang}_n(\lambda)$ |
+| $\mathrm{Unif}(0,1)+\mathrm{Unif}(0,1)$ | **triangular** en $(0,2)$ (**NO** uniforme) |
+| $\mathrm{Geo}(p)+\mathrm{Geo}(p)$ | $\mathrm{BinNeg}(2,p)$ |
+| $\sum_{i=1}^n \mathcal N(0,1)^2$ | $\chi^2_n$ |
 
-**Mediana / cuartiles por interpolación lineal** sobre la frecuencia acumulada $F_i$ (localizar el intervalo que acumula la fracción $\alpha n$, ancho $L_{s}-L_{I}$, $F_{\text{ant}}$ acumulada previa):
-$$ q = L_I + \frac{\alpha n - F_{\text{ant}}}{F - F_{\text{ant}}}\,(L_{s}-L_I), \qquad \text{mediana: }\alpha=0{,}5. $$
+Normal + Normal: **suman medias y varianzas** (los desvíos NO suman). Gamma/Erlang: $\;f_{\Gamma(n,\lambda)}(x)=\dfrac{\lambda^n x^{n-1}e^{-\lambda x}}{(n-1)!}$ $(x>0)$, $E=\tfrac n\lambda$, $V=\tfrac n{\lambda^2}$.
 
-**Moda agrupada** (intervalo modal de frecuencia $f_M$, entre $L_I,L_D$; vecinas $f_I,f_D$): punto medio $M=\frac{L_I+L_D}{2}$, o interpolación
-$$ M = \frac{L_D(f_M-f_I) + L_I(f_M-f_D)}{(f_M-f_I)+(f_M-f_D)}. $$
+### Desigualdades (cotas universales) — ver [[desigualdad-de-chebyshev]]
+- **Markov** ($X\ge 0$), $\forall\,\alpha>0$: $\quad P(X\ge\alpha)\le\dfrac{E[X]}{\alpha}$.
+- **Chebyshev** (media $\mu$, varianza $\sigma^2$), $\forall\,\varepsilon>0$: $\quad P(|X-\mu|\ge\varepsilon)\le\dfrac{\sigma^2}{\varepsilon^2}$.
+- En términos de $k$ desvíos ($\varepsilon=k\sigma$): $\quad P(|X-\mu|\ge k\sigma)\le\dfrac1{k^2}$.
+- Promedio i.i.d.: $\quad P(|\bar X_n-\mu|\ge\varepsilon)\le\dfrac{\sigma^2}{n\,\varepsilon^2}\xrightarrow{n\to\infty}0$ (puente a la LGN).
 
-Detalle y ejemplos: [[datos-agrupados|datos agrupados]], [[tecnica-datos-agrupados-interpolacion|interpolación]].
+### Ley de los Grandes Números — ver [[ley-de-grandes-numeros]]
+- **Débil (en probabilidad):** $\;\displaystyle\lim_{n\to\infty} P(|\bar X_n-\mu|\ge\varepsilon)=0\quad\forall\,\varepsilon>0$ (se prueba con Chebyshev).
+- **Fuerte (casi segura):** $\;P\!\left(\displaystyle\lim_{n\to\infty}\bar X_n=\mu\right)=1$.
 
-### Boxplot y outliers de Tukey
-Caja de $q_1$ a $q_3$ (línea en $q_2$), $\text{IQR}=q_3-q_1$. Cercas:
-$$ [\,q_1 - 1{,}5\,\text{IQR}\;,\;\; q_3 + 1{,}5\,\text{IQR}\,]. $$
-Todo dato fuera de ese rango es **outlier**. Ver [[boxplot|boxplot]].
+### Teorema Central del Límite — ver [[teorema-central-del-limite]]
+$X_k$ i.i.d. con media $\mu$ y desvío $\sigma$; tipificada $\;Z_n=\dfrac{\bar X_n-\mu}{\sigma/\sqrt n}=\dfrac{S_n-n\mu}{\sqrt n\,\sigma}$:
+$$ \lim_{n\to\infty}P(Z_n\le z)=\Phi(z). $$
+Aproximaciones prácticas (regla usual $n>20$):
+$$ \bar X_n\overset{\text{aprox}}{\sim}\mathcal N\!\Big(\mu,\tfrac{\sigma}{\sqrt n}\Big),\qquad S_n\overset{\text{aprox}}{\sim}\mathcal N\!\big(n\mu,\sqrt n\,\sigma\big),\qquad P(S_n\le s)\approx\Phi\!\Big(\tfrac{s-n\mu}{\sqrt n\,\sigma}\Big). $$
+Frecuencia relativa ($\hat P_n=\tfrac1n\sum\mathbb 1_k(A)$, $p=P(A)$): $\;P(\hat P_n\le q)\approx\Phi\!\Big(\dfrac{q-p}{\sqrt{p(1-p)/n}}\Big)$.
 
-## 13 · Inferencia y pruebas de hipótesis (resumen)
+### Aproximación normal de la binomial — ver [[aproximacion-normal-de-la-binomial]]
+$$ \mathrm{Bin}(n,p)\approx\mathcal N\big(np,\sqrt{npq}\big),\qquad q=1-p. $$
+**Corrección por continuidad** (v.a. discreta $\to$ continua, extremos incluidos se mueven hacia afuera):
+$$ P(a\le S_n\le b)\approx\Phi\!\Big(\tfrac{b+\frac12-np}{\sqrt{npq}}\Big)-\Phi\!\Big(\tfrac{a-\frac12-np}{\sqrt{npq}}\Big),\qquad P(S_n=s)\approx\Phi\!\Big(\tfrac{s+\frac12-n\mu}{\sqrt n\,\sigma}\Big)-\Phi\!\Big(\tfrac{s-\frac12-n\mu}{\sqrt n\,\sigma}\Big). $$
+
+> **LGN vs TCL:** La LGN dice *adónde* va el promedio (a $\mu$); el TCL dice *cómo* fluctúa (tamaño $\sigma/\sqrt n$, reescalado $\to$ Normal).
+
+## U8 · Inferencia: estimación e intervalos
 
 Resumen compacto. El detalle vive en [[formulario-inferencia|formulario de inferencia]] (estimación e IC) y [[formulario-pruebas-de-hipotesis|formulario de pruebas]]. Notación: $X_i$ i.i.d., $\mu=E[X_i]$, $\sigma^2=V(X_i)$, $\overline X_n=\frac1n\sum X_i$, confianza $\gamma$, significación $\alpha$.
 
@@ -753,7 +748,7 @@ IC_\gamma(\mu)=\overline X_n\pm t_{n-1,\frac{1+\gamma}{2}}\frac{S_n}{\sqrt n}.$$
 | Proporción (cota conservadora) | $n\ge z_{\frac{1+\gamma}{2}}^2\,\dfrac{1/4}{E^2}$ |
 | Proporción (con $\hat p$ previo) | $n\ge z_{\frac{1+\gamma}{2}}^2\,\dfrac{\hat p(1-\hat p)}{E^2}$ |
 
-### Pruebas de hipótesis
+## U9 · Pruebas de hipótesis
 
 $H_0$ (se presume, lleva la igualdad) vs $H_1$. Errores ([[error-tipo-i-y-tipo-ii|detalle]]): tipo I = rechazar $H_0$ verdadera ($P\le\alpha$); tipo II = aceptar $H_0$ falsa ($\beta$); **potencia $=1-\beta$**. [[prueba-de-hipotesis|Marco general]].
 
