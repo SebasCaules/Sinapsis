@@ -13,8 +13,29 @@ import { describe, expect, it } from "vitest";
 import { SubjectConfig, headingId, type PageMeta, type SubjectDetail } from "@sinapsis/contract";
 import rawProbaConfig from "../../../../../../subjects/proba/sinapsis.config.json";
 import { buildSubjectModel } from "../model";
+import { splitHeadingMark } from "../markdown/heading-mark";
 import { isGroupStep, neighborsOf, readSteps, readingOrder, savedAt, tocLabel } from "./ReaderView";
 import type { ExtraStep } from "../model";
+
+describe("splitHeadingMark", () => {
+  it("separa el rótulo corto de la unidad del título", () => {
+    expect(splitHeadingMark("U2 · Probabilidad — axiomas, condicional, Bayes")).toEqual({
+      mark: "U2",
+      label: "Probabilidad — axiomas, condicional, Bayes",
+    });
+  });
+
+  it("un encabezado sin marca queda entero", () => {
+    expect(splitHeadingMark("Contenido")).toEqual({ mark: null, label: "Contenido" });
+  });
+
+  /* El separador « · » es corriente en los títulos del wiki: solo cuenta como
+     marca cuando lo que lo precede es corto como un rótulo de división. */
+  it("un título largo antes del separador no es una marca", () => {
+    const texto = "Aproximación normal de la binomial · De Moivre–Laplace";
+    expect(splitHeadingMark(texto)).toEqual({ mark: null, label: texto });
+  });
+});
 
 describe("tocLabel", () => {
   it("un wikilink con etiqueta muestra la etiqueta", () => {

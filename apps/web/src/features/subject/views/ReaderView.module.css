@@ -150,20 +150,70 @@
 
 .toc { display: flex; flex-direction: column; gap: 1px; }
 
+/* Árbol: una rama por sección, con sus subsecciones colgando de un tronco. El
+   tronco toma el color de la unidad cuando el encabezado la declara («U2 · …»). */
+.tocBranch {
+  display: flex;
+  flex-direction: column;
+  --utint: color-mix(in srgb, var(--ucol, var(--border)) 40%, var(--border));
+}
+.tocBranch + .tocBranch { margin-top: 5px; }
+
 .tocItem,
 .tocSub {
+  display: block;
   padding: 4px 0 4px 9px;
-  border-left: 2px solid var(--border);
   font: 500 12.5px/1.35 var(--font-ui);
   color: var(--text-2);
   text-decoration: none;
   transition: color var(--t), border-color var(--t);
 }
-.tocSub { padding-left: 18px; font-size: 12px; color: var(--text-3); }
+
+/* La sección manda sobre su rama: filete grueso del color de la unidad y letra
+   más firme que la de sus hijas. */
+.tocItem {
+  border-left: 2px solid var(--ucol, var(--border-2));
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* El tronco de las subsecciones: la misma línea, corrida, y cada hoja con su
+   travesaño. Así se ve de un vistazo de qué sección cuelga cada renglón. */
+.tocChildren {
+  margin-left: 9px;
+  /* Tinte de la unidad, no su color pleno: el tronco tiene que verse como
+     estructura y no competir con el filete de la sección. */
+  border-left: 1px solid var(--utint, var(--border));
+}
+
+.tocSub {
+  position: relative;
+  padding-left: 15px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.tocSub::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  background: var(--utint, var(--border));
+}
+
+/* El rótulo de la unidad, con su color: es lo que hace que el índice de una
+   página suelta se lea con la paleta del programa. */
+.tocMark {
+  margin-right: 6px;
+  font: 600 10.5px var(--font-mono);
+  color: var(--ucol, var(--text-3));
+}
 .tocItem:hover,
 .tocSub:hover { color: var(--text); }
-.tocItem[data-active="true"],
-.tocSub[data-active="true"] { border-left-color: var(--primary); color: var(--primary); font-weight: 600; }
+.tocItem[data-active="true"] { border-left-color: var(--primary); color: var(--primary); }
+.tocSub[data-active="true"] { color: var(--primary); font-weight: 600; }
+.tocSub[data-active="true"]::before { background: var(--primary); }
 
 /* Idem `.prev`/`.next`: 24 px de objetivo sin mover el texto (U30). */
 .cardLink {

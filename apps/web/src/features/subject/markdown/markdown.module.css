@@ -26,6 +26,37 @@
   scroll-margin-top: 90px;
 }
 
+/* Sección con unidad («U2 · …»): más grande que un H2 corriente y con el filete
+   de su unidad, para que se lea como el arranque de una división y no como un
+   subtítulo más. */
+.prose .section {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 38px 0 16px;
+  padding: 0 0 9px 12px;
+  border-bottom: 2px solid var(--ucol);
+  border-left: 3px solid var(--ucol);
+  font: 600 21px/1.25 var(--font-display);
+  letter-spacing: 0;
+  color: var(--text);
+}
+.prose .section:first-child { margin-top: 0; }
+
+/* La etiqueta de la unidad, con su color: la misma marca que muestra el índice
+   de la página en el panel. */
+.prose .sectionMark {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--ucol) 45%, transparent);
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--ucol) 12%, transparent);
+  font: 600 12px var(--font-mono);
+  color: var(--ucol);
+}
+
+.prose .sectionTitle { min-width: 0; }
+
 .prose h3 {
   margin: 22px 0 10px;
   font: 600 14.5px var(--font-ui);
@@ -203,7 +234,12 @@
     radial-gradient(farthest-side at 100% 50%, var(--math-ink), transparent) 100% 0 / 13px 100% no-repeat scroll,
     var(--plate-bg);
 }
-.prose > :global(.katex-display) { margin-inline: calc(-1 * clamp(8px, 1.2vw, 17px)); }
+/* La placa mide lo MISMO que las tablas y los callouts: la sangría que recuperaba
+   34 px de ancho útil dejaba las fórmulas más anchas que todo lo demás y la
+   columna se veía torcida (pedido del usuario). El gobierno del desborde sigue
+   siendo el de arriba —encoger con `refitFormulas` y, si aun así sobra,
+   desplazar con el degradado que avisa—, que es lo que hace que quitar la
+   sangría no corte ninguna fórmula. */
 
 :global([data-theme="claustro"]) .prose :global(.katex-display) { --plate-bg: var(--bg-2); }
 

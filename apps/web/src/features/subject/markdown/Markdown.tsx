@@ -6,7 +6,7 @@
  * El H1 del cuerpo no se toca: el compilador ya lo recortó, y el lector pone el
  * título de la página por su cuenta.
  */
-import { memo, useEffect, useMemo, useRef, type ComponentPropsWithoutRef } from "react";
+import { memo, useEffect, useMemo, useRef, type ComponentPropsWithoutRef, type CSSProperties } from "react";
 import ReactMarkdown, { type Components, type ExtraProps } from "react-markdown";
 import { Link } from "react-router-dom";
 import { refitFormulas } from "@sinapsis/runtime";
@@ -18,6 +18,7 @@ import { Mermaid } from "./Mermaid";
 import type { PageAsset } from "@sinapsis/contract";
 import { remarkAssets } from "./remarkAssets";
 import { rehypeExercisePlates } from "./rehypeExercisePlates";
+import { splitHeadingMark } from "./heading-mark";
 import { rehypeHeadingIds } from "./rehypeHeadingIds";
 import { remarkCallouts } from "./remarkCallouts";
 import { remarkWikilinks } from "./remarkWikilinks";
@@ -46,9 +47,23 @@ export interface MarkdownProps {
    * el pipeline se rearma. Sin adjuntos, el plugin no toca nada.
    */
   assets?: readonly PageAsset[];
+  /**
+   * Resuelve la marca de unidad de un encabezado de sección («U2 · …»). Tiene
+   * que ser ESTABLE, como `exists`: si cambia de identidad en cada render, el
+   * mapa de componentes se rearma. Sin ella, los H2 son los de siempre.
+   */
+  divisionMark?: DivisionMark;
 }
 
+/**
+ * Qué unidad es una marca de encabezado («U2 · …»): devuelve su color y su
+ * rótulo largo, o null si esa marca no es una división de la materia. Lo provee
+ * el lector, que es quien tiene el modelo; el markdown no lo sabe.
+ */
+export type DivisionMark = (short: string) => { color: string; label: string } | null;
+
 type AnchorProps = ComponentPropsWithoutRef<"a"> & ExtraProps;
+type HeadingProps = ComponentPropsWithoutRef<"h2"> & ExtraProps;
 type PreProps = ComponentPropsWithoutRef<"pre"> & ExtraProps;
 type TableProps = ComponentPropsWithoutRef<"table"> & ExtraProps;
 type ImageProps = ComponentPropsWithoutRef<"img"> & ExtraProps;
@@ -100,6 +115,34 @@ function MarkdownPre({ node, children, ...rest }: PreProps) {
   return <pre {...rest}>{children}</pre>;
 }
 
+/**
+ * Encabezado de sección con su unidad: cuando el título empieza por el rótulo
+ * corto de una división («U2 · Probabilidad…»), el rótulo sale como etiqueta
+ * tintada y el resto como título. Es lo que hace que en una página suelta —el
+ * formulario maestro— se vea de qué unidad es cada tramo sin abrir el índice.
+ *
+ * El `id` y el texto del encabezado no se tocan: el id lo pone el compilador y
+ * el texto es lo que se escribe en `[[pagina#ancla]]` (N0-22).
+ */
+function SectionHeading({ node: _node, children, mark, ...rest }: HeadingProps & { mark: DivisionMark }) {
+  const list = Array.isArray(children) ? children : [children];
+  const first = typeof list[0] === "string" ? list[0] : null;
+  const split = first ? splitHeadingMark(first) : null;
+  const division = split?.mark ? mark(split.mark) : null;
+  if (!division || !split) return <h2 {...rest}>{children}</h2>;
+  return (
+    <h2 {...rest} className={css.section} style={{ ["--ucol"]: division.color } as CSSProperties}>
+      <span className={css.sectionMark} title={division.label}>
+        {split.mark}
+      </span>
+      <span className={css.sectionTitle}>
+        {split.label}
+        {list.slice(1)}
+      </span>
+    </h2>
+  );
+}
+
 const components: Components = {
   a: MarkdownLink,
   pre: MarkdownPre,
@@ -130,8 +173,24 @@ const REHYPE_SIN_PLACAS: PluggableList = [rehypeHeadingIds, [rehypeKatex, { outp
 
 const NO_ASSETS: readonly PageAsset[] = [];
 
-export const Markdown = memo(function Markdown({ body, subject, exists, assets = NO_ASSETS, exercisePlates = true }: MarkdownProps) {
+export const Markdown = memo(function Markdown({
+  body,
+  subject,
+  exists,
+  assets = NO_ASSETS,
+  exercisePlates = true,
+  divisionMark,
+}: MarkdownProps) {
   const host = useRef<HTMLDivElement>(null);
+  /* Sin resolutor de unidades, los encabezados son los de siempre: no se arma un
+     mapa de componentes nuevo por render. */
+  const componentMap = useMemo<Components>(
+    () =>
+      divisionMark
+        ? { ...components, h2: (props: HeadingProps) => <SectionHeading {...props} mark={divisionMark} /> }
+        : components,
+    [divisionMark],
+  );
   const remarkPlugins = useMemo<PluggableList>(
     () => [
       remarkGfm,
@@ -192,7 +251,7 @@ export const Markdown = memo(function Markdown({ body, subject, exists, assets =
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={exercisePlates ? REHYPE_CON_PLACAS : REHYPE_SIN_PLACAS}
-        components={components}
+        components={componentMap}
       >
         {body}
       </ReactMarkdown>

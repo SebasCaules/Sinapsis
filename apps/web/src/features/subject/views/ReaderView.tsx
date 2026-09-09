@@ -19,18 +19,19 @@
  * división siguiente, y se lo dice— y una página fuera de la secuencia (una
  * fuente) cae al orden de lectura global en vez de quedarse sin vecinos.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Link, useLocation, useNavigationType, useParams } from "react-router-dom";
 import { PAGE_TYPE_META, plural, routes, type PageHeading, type PageMeta } from "@sinapsis/contract";
 import { Dialog, Icon, UiIcon, useToast } from "@/components/platform";
 import { useSubjectCtx } from "../context";
 import { recordActivity, setLastRead } from "../activity";
 import { openFoldedAncestors } from "../markdown/folded";
+import { splitHeadingMark } from "../markdown/heading-mark";
 import { Markdown } from "../markdown/Markdown";
 import { MathText } from "../components/MathText";
 import { ErrorCard, SheetSkeleton } from "../components/States";
 import { PageFrame, isGroupStep, type Neighbor, type ReadStep } from "../components/PageFrame";
-import type { SubjectModel } from "../model";
+import type { DivisionNode, SubjectModel } from "../model";
 import {
   useDeleteNote,
   usePage,
@@ -269,6 +270,57 @@ export function ReaderView() {
   );
 
   /**
+   * El índice, en ÁRBOL: una rama por sección (H2) con sus subsecciones (H3)
+   * colgando. La lista plana no dejaba ver de qué sección era cada subsección
+   * —en el formulario maestro son 61 renglones seguidos—, y agrupar es lo único
+   * que lo resuelve sin recortar nada.
+   *
+   * De paso, cada rama resuelve su unidad: un H2 que empieza por el rótulo corto
+   * de una división («U2 · …») la fija para toda la rama, así el panel se lee con
+   * la paleta del programa. Un H2 sin marca es una rama sin unidad.
+   */
+  /* Qué unidad es una marca de encabezado: lo mismo que usa el índice, para el
+     cuerpo de la página. Se memoriza sobre el modelo porque `Markdown` rearma su
+     mapa de componentes cuando esta función cambia de identidad. */
+  const divisionMark = useMemo(() => {
+    const byShort = new Map(model.divisions.map((d) => [d.short, d]));
+    return (short: string) => {
+      const division = byShort.get(short);
+      return division ? { color: division.color, label: division.label } : null;
+    };
+  }, [model]);
+
+  const tocTree = useMemo(() => {
+    const byShort = new Map(model.divisions.map((d) => [d.short, d]));
+    const row = (h: PageHeading) => {
+      const text = tocLabel(h.text);
+      const { mark, label } = splitHeadingMark(text);
+      const division = mark ? byShort.get(mark) : undefined;
+      return { h, division, mark: division ? mark : null, label: division ? label : text };
+    };
+    const branches: Array<{
+      head: ReturnType<typeof row> | null;
+      children: ReturnType<typeof row>[];
+      color?: string;
+      title?: string;
+    }> = [];
+    for (const h of headings) {
+      if (h.level === 2 || !branches.length) {
+        const head = h.level === 2 ? row(h) : null;
+        branches.push({
+          head,
+          children: head ? [] : [row(h)],
+          color: head?.division?.color,
+          title: head?.division?.label,
+        });
+      } else {
+        (branches[branches.length - 1] as (typeof branches)[number]).children.push(row(h));
+      }
+    }
+    return branches;
+  }, [headings, model]);
+
+  /**
    * Al cambiar de página: arriba de todo, salvo que la URL traiga un ancla.
    *
    * Volver con Atrás es la excepción (§ lector-03): ahí la posición la repone el
@@ -433,29 +485,50 @@ export function ReaderView() {
             <UiIcon name="menu" size={13} />
             EN ESTA PÁGINA
           </div>
-          {headings.length ? (
+          {tocTree.length ? (
             <div className={css.toc}>
-              {headings.map((h: PageHeading, i: number) => (
-                <a
-                  /* Dos encabezados distintos pueden dar el MISMO id —el
-                     compilador es el dueño del algoritmo y no desambigua
-                     (N0-22)—: `formulario-maestro` tiene «Independencia» dos
-                     veces. El ancla se conserva tal cual; lo que se
-                     desambigua es solo la clave de React, con el índice. */
-                  key={`${i}-${h.id}`}
-                  href={`#${h.id}`}
-                  className={h.level === 3 ? css.tocSub : css.tocItem}
-                  data-active={activeHeading === h.id ? "true" : undefined}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const el = document.getElementById(h.id);
-                    if (el) scrollMainTo(el, "smooth");
-                    history.replaceState(null, "", `#${h.id}`);
-                  }}
-                >
-                  <MathText text={tocLabel(h.text)} />
-                </a>
-              ))}
+              {tocTree.map((branch, b: number) => {
+                /* Dos encabezados distintos pueden dar el MISMO id —el
+                   compilador es el dueño del algoritmo y no desambigua
+                   (N0-22)—: `formulario-maestro` tiene «Independencia» dos
+                   veces. El ancla se conserva tal cual; lo que se desambigua
+                   es solo la clave de React, con el índice. */
+                const link = (row: (typeof branch.children)[number], key: string, sub: boolean) => (
+                  <a
+                    key={key}
+                    href={`#${row.h.id}`}
+                    className={sub ? css.tocSub : css.tocItem}
+                    data-active={activeHeading === row.h.id ? "true" : undefined}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const el = document.getElementById(row.h.id);
+                      if (el) scrollMainTo(el, "smooth");
+                      history.replaceState(null, "", `#${row.h.id}`);
+                    }}
+                  >
+                    {row.mark ? (
+                      <span className={css.tocMark} title={branch.title}>
+                        {row.mark}
+                      </span>
+                    ) : null}
+                    <MathText text={row.label} />
+                  </a>
+                );
+                return (
+                  <div
+                    key={`${b}-${branch.head?.h.id ?? "sueltos"}`}
+                    className={css.tocBranch}
+                    style={branch.color ? ({ ["--ucol"]: branch.color } as CSSProperties) : undefined}
+                  >
+                    {branch.head ? link(branch.head, `${b}-h`, false) : null}
+                    {branch.children.length ? (
+                      <div className={css.tocChildren}>
+                        {branch.children.map((row, i) => link(row, `${b}-${i}-${row.h.id}`, true))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <p className={css.cardEmpty}>Esta página no tiene secciones.</p>
@@ -513,6 +586,7 @@ export function ReaderView() {
         exists={exists}
         assets={page.assets}
         exercisePlates={model.config.exercisePlates}
+        divisionMark={divisionMark}
       />
     </PageFrame>
   );
