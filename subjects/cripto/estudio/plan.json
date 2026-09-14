@@ -154,6 +154,13 @@
               "label": "Repasar clave pública y firma",
               "kind": "cards",
               "target": "asimetrica-y-firma"
+            },
+            {
+              "id": "p1-c4-guia",
+              "label": "Resolver la Guía 4 — Manejo de claves, cifrado asimétrico y firma digital",
+              "kind": "exercises",
+              "target": "guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital",
+              "detail": "18 ejercicios; once son de la Clase 5"
             }
           ]
         },

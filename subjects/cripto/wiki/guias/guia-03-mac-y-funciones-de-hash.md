@@ -1,6 +1,6 @@
 ---
 title: Guía 3 — MAC y Funciones de Hash
-resumen: 'Los seis ejercicios de la Guía 3 con enunciado y resolución en la misma página: cada resolución va plegada debajo de su enunciado, con el razonamiento completo y no sólo el resultado — MACs inseguros, CBC-MAC, las tres resistencias y digests con OpenSSL.'
+resumen: 'Los seis ejercicios de la Guía 3 con enunciado y resolución en la misma página: cada resolución va plegada debajo de su enunciado, con el razonamiento completo y no sólo el resultado — MACs inseguros, CBC-MAC, las tres resistencias y digests con OpenSSL — y contrastada, ejercicio por ejercicio, con el PDF de soluciones de la cátedra.'
 fuentes: ["[[clase-03-macs-y-cifrado-autenticado]]", "[[practica-04-macs-hash-y-cifrado-autenticado]]"]
 aliases: [Guía 3, Guia 3, MAC y Funciones de Hash, Resolución Guía 3, Guia 3 resolucion, Soluciones Guía 3]
 type: guia
@@ -9,19 +9,19 @@ orden: 21
 guia: 3
 fecha: 2026-09-07
 created: 2026-08-31
-updated: 2026-09-06
+updated: 2026-09-14
 tags: [guia, resolucion, mac, hash, cbc-mac, funciones-de-hash, merkle-damgard, colisiones, md5, sha-1, openssl, diccionario]
-sources: ["raw/guias/guia3/Guia 3 - MAC y Funciones de Hash.pdf", "raw/guias/guia3/G3-Ej2-xor-mac.py", "Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "Clase 03pt1-Transcripcion.VTT"]
+sources: ["raw/guias/guia3/Guia 3 - MAC y Funciones de Hash.pdf", "raw/guias/guia3/Guia 3 - MAC y Funciones de Hash - Soluciones.pdf", "raw/guias/guia3/G3-Ej2-xor-mac.py", "Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "Clase 03pt1-Transcripcion.VTT"]
 ---
 
 # Guía 3 — MAC y Funciones de Hash
 
-> **lun 07/09/2026** · [Enunciado](../../raw/guias/guia3/Guia%203%20-%20MAC%20y%20Funciones%20de%20Hash.pdf) · [Script del Ej. 2](../../raw/guias/guia3/G3-Ej2-xor-mac.py) · Teoría: [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
-> **Resolución:** los **6 ejercicios**, plegados debajo de cada enunciado.
+> **lun 07/09/2026** · [Enunciado](../../raw/guias/guia3/Guia%203%20-%20MAC%20y%20Funciones%20de%20Hash.pdf) · [Soluciones de la cátedra](../../raw/guias/guia3/Guia%203%20-%20MAC%20y%20Funciones%20de%20Hash%20-%20Soluciones.pdf) · [Script del Ej. 2](../../raw/guias/guia3/G3-Ej2-xor-mac.py) · Teoría: [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]]
+> **Resolución:** los **6 ejercicios**, plegados debajo de cada enunciado, y **contrastados con las soluciones de la cátedra**, que llegaron a `raw/` el 13/09: los seis coinciden.
 
 Esta nota reúne **los enunciados de la Guía 3 transcriptos y su resolución**, con el concepto que destraba cada uno. La cuenta hecha va en un **aviso plegado debajo de cada ejercicio**, que se abre con un clic: primero se intenta, después se mira.
 
-> **La guía es la del año pasado** *(lectura nuestra: el PDF sólo dice 2025).* El encabezado dice **2025** en las dos páginas, y es la **única de las tres guías que hay en `raw/`** con esa marca: la [Guía 1](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica.pdf) —enunciado y [soluciones](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica%20-%20Soluciones.pdf)— y la [Guía 2](../../raw/guias/guia2/Guia%202%20-%20Criptograf%C3%ADa%20Sim%C3%A9trica.pdf) dicen **2026**. *(Verificado sobre los encabezados de los cuatro PDFs.)* De ahí que el enunciado del Ej. 5 esté escrito contra una versión de OpenSSL que ya no es la que hoy viene instalada (ver más abajo).
+> **La guía es la del año pasado, y sus soluciones son de dos años atrás** *(lectura nuestra: los PDFs sólo dicen el año).* El encabezado del enunciado dice **2025** en las dos páginas, y es la **única de las cuatro guías que hay en `raw/`** con esa marca: la [Guía 1](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica.pdf) —enunciado y [soluciones](../../raw/guias/guia1/Guia%201%20-%20Criptograf%C3%ADa%20Cl%C3%A1sica%20-%20Soluciones.pdf)—, la [Guía 2](../../raw/guias/guia2/Guia%202%20-%20Criptograf%C3%ADa%20Sim%C3%A9trica.pdf) y la [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital|Guía 4]] dicen **2026**. Y el [PDF de soluciones](../../raw/guias/guia3/Guia%203%20-%20MAC%20y%20Funciones%20de%20Hash%20-%20Soluciones.pdf) de esta guía, que llegó al vault el 13/09, dice **2024** en sus cuatro páginas —su `pdfinfo` lo fecha el 06/04/2024—: la cátedra reparte un enunciado de 2025 con la resolución de 2024, y los seis ejercicios coinciden entre los dos, así que la guía no cambió entre esos años. *(Verificado sobre los encabezados de los seis PDFs.)* De ahí que el enunciado del Ej. 5 esté escrito contra una versión de OpenSSL que ya no es la que hoy viene instalada (ver más abajo).
 
 ---
 
@@ -58,7 +58,23 @@ Las Guías 1 y 2 eran de lápiz y papel: descifrar a mano, contar frecuencias, c
 
 | Dónde | Dice | Debería decir |
 |---|---|---|
-| Ej. 4d | *"Transformación de **Merkle-Darmgard**"* | **Merkle-Damgård** — por Ralph **Merkle** e Ivan **Damgård**. Están permutadas las letras del apellido (*Darmgard* por *Damgard*) y falta la `å`. **Verificado sobre la página renderizada**: está así en el PDF, no es un artefacto de la extracción de texto. Ver [[construccion-de-merkle-damgard\|Construcción de Merkle-Damgård]] |
+| Ej. 4d | *"Transformación de **Merkle-Darmgard**"* | **Merkle-Damgård** — por Ralph **Merkle** e Ivan **Damgård**. Están permutadas las letras del apellido (*Darmgard* por *Damgard*) y falta la `å`. **Verificado sobre la página renderizada**: está así en el PDF, no es un artefacto de la extracción de texto. Y **el PDF de soluciones la repite dos veces** —en el título del ítem y en la primera línea de la respuesta— antes de escribir *"Merkle – Damgard"* tres líneas después: la errata es de origen, no de tipeo. Ver [[construccion-de-merkle-damgard\|Construcción de Merkle-Damgård]] |
+| Soluciones, Ej. 5a | *"Si se calcula el hash MD5 de la cadena **"hoy es el ultimo lunes de marzo"**"* | la frase que el comando de la línea siguiente hashea —y la del enunciado— es *"hoy es el **primer lunes de abril**"*. Los digests corresponden a la segunda; el título del ítem quedó de una edición anterior de la guía |
+
+### Contraste con las soluciones de la cátedra
+
+El [PDF de soluciones](../../raw/guias/guia3/Guia%203%20-%20MAC%20y%20Funciones%20de%20Hash%20-%20Soluciones.pdf) tiene cuatro páginas y está fechado 2024. Es más escueto que esta nota —contesta cada ejercicio en el mínimo de líneas— y **coincide en los seis**. Lo que aporta, lo que omite, y dónde su redacción hay que leerla con cuidado:
+
+| Ej. | Veredicto de la cátedra | Coincide | Qué agrega, qué omite, qué precisar |
+|---|---|---|---|
+| 1 | *"No es seguro"* ×3, con un adversario por MAC: consultar $0^{n}$ para obtener $G(k)$; consultar $0^{2n}$ para obtener $k$; dos mensajes de la misma longitud con $\mathsf{Dec}_k(t) = \lvert m\rvert$ | **Sí**, los tres adversarios son los mismos | Confirma **dos lecturas nuestras**: que la `k` de `first_k_bits` es la longitud de la clave —la cátedra escribe $\mathsf{first\_n\_bits}$ con $n = \lvert k\rvert$— y que el tercer MAC cifra la **longitud** $\lvert m\rvert$ y se verifica descifrando. Enuncia `Mac-Forge` en prosa antes de empezar, como pide [[seguridad-de-un-mac#Lo que falta antes de poder resolverlo\|03.04]] |
+| 2 | Un solo par: *M = el auto es azul y el lapiz rojo · M' = el auto es rojo y el lapiz azul* | **Sí**: verificado con el script, $R(M) = R(M')$ | No explica **por qué** colisionan. Es la [[#Ejercicio 2\|familia del complemento]]: *azul* y *rojo* ocupan los bytes 11 a 14 de sus dos bloques, así que intercambiarlos aplica el mismo $\Delta = \texttt{azul}\oplus\texttt{rojo}$ a los dos bloques y el XOR lo cancela. No trae implementación para el (b) |
+| 3 | No cumple ninguna de las tres resistencias; $\Pr[\text{colisión}] = 0{,}5$, *"como obtener cara dos veces seguidas o ceca dos veces seguidas"* | **Sí** | La moneda es exactamente el supuesto de paridad uniforme e independiente que esta nota declara. Su argumento de preimagen es confuso —*"dado $y = 0$ no es posible decir qué mensaje lo produjo; sin embargo es posible encontrar algún $x'$"*—: la resistencia a preimagen pide **alguna** preimagen, no *la* original, y lo segundo es lo que la refuta |
+| 4 | Construcción 4.9 y cap. 4.5 de Katz; tabla `CBC-MAC` contra `CBC`; ataque con una consulta $m' = m \Vert (m\oplus t)$; las tres opciones; Merkle-Damgård con la figura 4.2 | **Sí** | Cita la **primera edición** de Katz & Lindell (2007), donde `CBC-MAC` es la Construcción 4.9 y Merkle-Damgård está en el cap. 4; esta nota usa la tercera (Construcción 4.11, Teorema 4.12; Construcción 5.3, Teorema 5.4). Su ataque de una consulta es el de [[cbc-mac#La versión de una sola consulta\|CBC-MAC]]. Y en el (a) dice que `CBC-MAC` *"sirve para mensajes de longitud variable"* para concluir tres líneas después que sólo es seguro *"a longitud fija"*: lo segundo es lo correcto |
+| 5 | `MD5 = 4893481c…0050`, `SHA1 = fcebd0e9…81fe`, generados con `echo "…" > salida`; *"SHA1 es de mayor longitud (128 bits vs 160 bits)"* | **Sí**: son los dos digests de la fila `echo` de esta nota, byte por byte | Confirma que la cátedra hashea **con el `\n`** de `echo`. Su (c) da una sola diferencia, la longitud; esta nota da cuatro, y las dos que la cátedra no dice —que la longitud compra $2^{16}$ veces más resistencia a colisión, y que **las dos están quebradas**— son las que valen para el parcial |
+| 6 | acuña 7 · centurión 6 · hernandez 8 · palacios 10 · rossi 5 · sanchez 2 · garcía 1 · zubeldía 10 — *"hacerlos con echo (ej. `echo 7 siete > siete.txt`)"* | **Sí**, las ocho | Confirma el `\n` por segunda vez. No dice nada de lo que hace valioso el ejercicio: que palacios y zubeldía **no son una colisión**, que no se rompió `SHA-1` sino que se enumeró un dominio de diez, ni las contramedidas |
+
+**Lo que el contraste deja.** La resolución nuestra queda **validada en los seis resultados** por una fuente independiente y anterior; lo que esta nota tiene de más —los argumentos, las familias de colisión, la jerarquía de resistencias con su letra chica, la escala de los ataques reales, las contramedidas— no está en el PDF y no lo contradice. Y una lección sobre el material: **la cátedra resuelve con la edición 2007 de Katz & Lindell**, así que los números de construcción y teorema que aparezcan en un parcial pueden ser los de esa edición.
 
 ### Lo que la guía no trae
 
@@ -88,7 +104,7 @@ Los **seis** ejercicios están resueltos más abajo, en el aviso plegado que sig
 >
 > La guía tiene una forma clara: **los Ej. 1 y 2 son MACs, los Ej. 3, 5 y 6 son hash, y el Ej. 4 es la lectura de teoría que une las dos mitades**. Los seis se contestan con material que la [[clase-03-macs-y-cifrado-autenticado|Clase 03]] ya dejó escrito — el Ej. 1 está literalmente resuelto en clase — salvo dos cosas que la guía agrega y ninguna filmina toca: **cómo se rompe un preprocesamiento débil** (Ej. 2) y **por qué hashear un dato de baja entropía no protege nada** (Ej. 6).
 >
-> **Ojo con una diferencia respecto de las guías anteriores.** La Guía 3 **no tiene PDF de soluciones de la cátedra** —la Guía 1 sí lo tiene— ni transcripción propia: la clase práctica del **07/09 todavía no ocurrió**. Todo lo que sigue es resolución nuestra, contrastada contra las notas de concepto y contra Katz & Lindell. Las únicas partes que llevan respaldo de la cátedra son las del **Ej. 1**, que se resolvió en voz el 27/08 y está transcripto en [[seguridad-de-un-mac#El ejercicio de los tres MACs|03.04]].
+> **Las soluciones de la cátedra llegaron después de la resolución, y coinciden.** Esta nota se resolvió el 31/08 sin PDF de soluciones —la Guía 1 sí lo tenía— ni transcripción propia; el [PDF de soluciones](../../raw/guias/guia3/Guia%203%20-%20MAC%20y%20Funciones%20de%20Hash%20-%20Soluciones.pdf) apareció en `raw/` el **13/09**, fechado 2024, y se contrastó el 14/09 ejercicio por ejercicio: **los seis veredictos y los seis resultados coinciden** —los mismos tres adversarios del Ej. 1, la misma probabilidad $1/2$ del Ej. 3, las mismas tres opciones de Katz del Ej. 4, los mismos dos digests del Ej. 5 con el `\n` de `echo` adentro, y las mismas ocho notas del Ej. 6—. Lo que la cátedra agrega, lo que omite y las dos cosas en las que su redacción es imprecisa están en [[#Contraste con las soluciones de la cátedra|Contraste con las soluciones de la cátedra]] y al pie de cada resolución. Las partes que además llevan respaldo de la voz son las del **Ej. 1**, que se resolvió en el aula el 27/08 y está transcripto en [[seguridad-de-un-mac#El ejercicio de los tres MACs|03.04]].
 >
 > Cada resolución va **plegada debajo del enunciado** correspondiente, y arranca con el resumen en cursiva de lo que se pide.
 >
@@ -160,6 +176,8 @@ Analizar **por qué no poseen seguridad** los siguientes MAC:
 > **El veredicto no cambia en ningún caso, pero el camino sí.** Conviene escribirlo así en el parcial: declarar el supuesto sobre `Enc`, y mostrar que el ataque sobrevive a los dos. Es exactamente el tipo de razonamiento que la filmina 17 entrena.
 >
 > **La corrección al docente que hay que conocer y no repetir mal.** Al cerrar el primer MAC, el docente saca la lección de que *"si los MACs son deterministas, tienen un problema latente de que va a ser muy difícil que sean infalsificables"* (cues 540-542). **Eso no es correcto**, y la propia clase lo desmiente una filmina después: [[cbc-mac|CBC-MAC]] y [[hmac|HMAC]] son determinísticos y son seguros. La intuición *"determinístico ⟹ inseguro"* viene del **cifrado** y no se transfiere a los MACs. Katz & Lindell va en la dirección contraria (Proposición 4.4): un MAC seguro con verificación canónica es automáticamente **fuertemente** seguro. El desarrollo está en [[seguridad-de-un-mac#Primer MAC: la clave expandida xor el mensaje|03.04]] y en [[message-authentication-code#Un MAC determinístico no es un problema|03.03 § Un MAC determinístico no es un problema]].
+>
+> **Contraste con la solución de la cátedra.** El PDF de soluciones da los tres adversarios con la misma consulta que acá —$0^{n}$, $0^{2n}$, y dos mensajes de igual longitud— y escribe el tercero como $\mathsf{Mac}_k(m) = \mathsf{Enc}_k(\lvert m\rvert)$ con verificación $\mathsf{Dec}_k(t) = \lvert m\rvert$, ejemplo $m_1 = 00000000$ y $m' = 11111111$ con $\mathsf{Dec}_k(t') = 8$: confirma la lectura de las barras y la reconstrucción de `Vrfy`. Escribe $\mathsf{first\_n\_bits}$ con $n = \lvert k\rvert$, que es la corrección de notación de arriba. Coincide en los tres veredictos.
 
 ### Ejercicio 2
 
@@ -368,6 +386,8 @@ Considerar el siguiente algoritmo de código de autenticación de mensaje (MAC):
 > - **El par 1 tiene la misma cantidad de bloques** (3 contra 3) y tampoco distingue **el orden** en que vienen. Son dos defectos separados, no uno.
 > - **El bloque final** de la corrida repite el experimento con **tres claves nuevas sorteadas al azar**: las etiquetas cambian todas —son otras claves— y **siguen coincidiendo entre sí**. Eso es la verificación empírica del argumento *"$\mathsf{MAC}_k$ es una función"*: la colisión no le pregunta nada a $k$.
 > - La clave se **sortea en cada corrida**, así que al ejecutarlo de nuevo las etiquetas van a dar otro valor. Lo que no cambia es que coincidan entre sí.
+>
+> **Contraste con la solución de la cátedra.** El PDF da un único par: *"M = el auto es azul y el lapiz rojo"* y *"M' = el auto es rojo y el lapiz azul"*, sin explicar por qué colisiona. **Verificado con el script**: los dos mensajes miden 31 bytes, se parten en `el auto es azul ` / `y el lapiz rojo\0` y `el auto es rojo ` / `y el lapiz azul\0`, y $R$ es `1c4c450d55180e500c090013151f0320` en los dos casos. Es la **familia del complemento** de arriba: *azul* y *rojo* caen en los bytes 11 a 14 de sus respectivos bloques, así que intercambiarlos equivale a aplicar $\Delta = \texttt{azul} \oplus \texttt{rojo}$ **a los dos bloques a la vez**, y el XOR lo cancela. Un ejemplo más elegante que el nuestro, porque el mensaje falsificado es castellano natural y el cambio de significado es total; y frágil por lo mismo: si *azul* y *rojo* no cayeran en la misma posición de bloque, no colisionarían. El PDF no trae implementación para el (b).
 
 ### Ejercicio 3
 
@@ -469,6 +489,8 @@ Considerar la siguiente función de hash $h()$:
 > **Los dos escriben 32 bits y difieren en diez órdenes de magnitud.** La última fila es la [[seguridad-de-las-funciones-de-hash#Por qué la raíz cuadrada: la paradoja del cumpleaños|paradoja del cumpleaños]]: el costo genérico de una colisión es $\lvert\mathcal{B}\rvert^{1/2}$, o sea $2^{L/2}$ para $L$ bits de salida — la regla *"$L$ bits de salida dan $L/2$ bits de seguridad"* de [[seguridad-de-las-funciones-de-hash#La consecuencia operativa: L bits de salida dan L/2 bits de seguridad|03.11]]. Aplicada acá: el $L$ que vale es el **efectivo**, $L = 1$, y $2^{1/2} \approx 1{,}4$ intentos. La cuenta de la seguridad se hace sobre el **tamaño de la imagen**, no sobre la cantidad de bits que la función se digna escribir.
 >
 > *(Y el $2^{-32}$ del contraste tampoco sería aceptable en producción: 32 bits de salida dan 16 bits de seguridad a colisión, cuando el mínimo hoy es 256 bits de salida → [[primitivas-de-hash-estandar#Qué usar, en la práctica|03.09 § Qué usar, en la práctica]]. El punto del contraste es el salto de $1/2$ a $2^{-32}$, no que $2^{-32}$ alcance.)*
+>
+> **Contraste con la solución de la cátedra.** Coincide en todo: las tres resistencias fallan, y en el (b) da $\Pr(\text{colisión}) = 0{,}5$ con la moneda —*"la misma que la de obtener cara dos veces seguidas o ceca dos veces seguidas"*—, que es exactamente el supuesto de paridad uniforme e independiente que esta nota declara. Dos precisiones sobre su redacción: para segunda preimagen usa $m = 0101 \to x' = 0100$, mismo largo, que es un caso particular del *"cualquier $x'$ con la misma paridad"* de arriba; y su argumento de preimagen —*"dado $y = 0$, no es posible decir qué mensaje lo produjo; sin embargo, es posible encontrar algún $x'$ tal que $H(x') = 0$"*— mezcla dos cosas: la resistencia a preimagen nunca pide recuperar *el* mensaje original, sólo *alguna* preimagen, y encontrarla es lo que la refuta. El veredicto es el mismo.
 
 ### Ejercicio 4
 
@@ -584,6 +606,8 @@ Considerar la siguiente función de hash $h()$:
 > → [[construccion-de-merkle-damgard|Construcción de Merkle-Damgård]], con el diagrama pieza por pieza, el teorema y [[construccion-de-merkle-damgard#La contra: length extension|§ La contra: length extension]].
 >
 > **Errata del enunciado.** El PDF de la guía escribe **"Transformación de Merkle-Darmgard"**. El apellido es **Damgård**, no *Darmgard*: están permutadas las letras y falta la `å`. Son **Ralph Merkle** e **Ivan Damgård**, que publicaron la construcción de **forma independiente, los dos en CRYPTO '89**, y por eso lleva los dos nombres. *(La errata está verificada sobre la página renderizada del PDF, no sobre texto extraído.)* La filmina de la Clase 03 tiene **otra** errata sobre lo mismo —dice *"Propuesto por Merkle en 1989"*, omitiendo a Damgård—, marcada en [[construccion-de-merkle-damgard#Y ahí está la razón de ser del bloque de longitud|03.08]].
+>
+> **Contraste con la solución de la cátedra.** Coincide en los cuatro ítems y **cita la primera edición de Katz & Lindell** (*"Katz Cap. 4.5"*, *"Construcción 4.9"*, *"Figure 4.2: The Merkle-Damgård transform"*), donde `CBC-MAC` y Merkle-Damgård están ambos en el capítulo 4; esta nota cita la tercera, donde son la Construcción 4.11 y el Teorema 4.12, y la Construcción 5.3 y el Teorema 5.4. En el (b) trae el mismo ejemplo del IV que [[cbc-mac#El IV: no es que no haga falta, es que no tiene que estar|CBC-MAC]] —con $m_0 = 01000000$ e $IV = 10100000$, cambiar a $IV' = 01011100$ y $m_0' = 10111100$ deja $F_k(11100000)$ intacto—, verificado. En el (c) demuestra la inseguridad a longitud variable con **una sola consulta**, $t = F_k(m)$ y $m' = m \Vert (m \oplus t)$: es la versión de [[cbc-mac#La versión de una sola consulta|una sola consulta]] del Anexo de la Práctica 04, no la de tres bloques de la teoría. Y lista las tres opciones con la derivación $k_1 = F_k(1)$, $k_2 = F_k(2)$ para la tercera, como Katz. Lo único a leer con cuidado: en el (a) dice que `CBC-MAC` *"sirve para generar un código de autenticación para mensajes de longitud variable (longitud mayor que $n$)"*, y tres líneas después que *"brinda un MAC seguro para mensajes de longitud fija"*; la segunda frase es la correcta, y la primera quiere decir "más largos que un bloque".
 
 ### Ejercicio 5
 
@@ -668,6 +692,8 @@ verify filename] [-prverify filename] [-signature filename] [-hmac key]
 > **4. El efecto avalancha, que es lo que se ve en la propia salida.** El texto es **el mismo** en los cuatro digests y los cuatro son irreconocibles entre sí. Conviene compararlo entre las dos filas de la tabla: cambiar **un solo byte** (el `\n`) cambia **toda** la salida, en `MD5` y en `SHA-1` por igual. Es la ilustración más barata de la propiedad, y no distingue una función de la otra: **las dos la tienen**. Lo que las separa es el punto 2, no éste.
 >
 > **Precisión sobre la sinopsis del PDF** *(precisión nuestra).* El enunciado copia la sinopsis de `openssl dgst` con sus flags, entre ellas **`-dss1`, `-md2` y `-mdc2`**. **Esas flags ya no existen en OpenSSL 3.x**: verificado en `3.6.2`, `-dss1` y `-md2` devuelven `Unknown option or message digest`, y `-mdc2` devuelve `Error setting digest` porque el algoritmo quedó en el proveedor *legacy* y no se carga por defecto. La sinopsis del PDF es **de la era 1.0.x**. No cambia nada del ejercicio —`-md5` y `-sha1` siguen ahí—, pero si se copia la sinopsis literal, no corre.
+>
+> **Contraste con la solución de la cátedra.** Los dos digests del PDF —`MD5(salida)= 4893481cf3c2fe18773dabb1bd990050` y `SHA1(salida)= fcebd0e92f4e5330390ef34c3010ab4908ae81fe`— son **exactamente la fila `echo` de la tabla de arriba**, y el PDF muestra cómo los generó: `echo "hoy es el primer lunes de abril" > salida`, o sea con el `\n` adentro del archivo. Es la confirmación de que la cátedra hashea con el salto de línea, que es lo que hace resolvible el Ej. 6. Su (c) se limita a *"SHA1 es de mayor longitud (128 bits vs 160 bits)"*: la diferencia 1 de las cuatro de arriba. Y su título del ítem (a) dice *"hoy es el ultimo lunes de marzo"* mientras el comando hashea *"hoy es el primer lunes de abril"* — un resto de otra edición de la guía, registrado en las [[#Erratas del PDF|erratas]].
 
 ### Ejercicio 6
 
@@ -803,6 +829,9 @@ Se tienen los **nombres de alumnos y el hash de sus notas**. Decir **cuál es la
 > La última observación no es técnica y es la que le da sentido al ejercicio. **La tabla del enunciado publica las calificaciones de ocho personas identificadas por apellido.** Alguien las hasheó pensando que eso las protegía; no las protege. Es una **fuga de privacidad real**, del mismo tipo que las que ocurren cuando se publican datasets *"anonimizados"* reemplazando el identificador por su hash — direcciones de correo, documentos, números de teléfono, todos dominios enumerables o comprables.
 >
 > El ejercicio está planteado como un juego de descifrado, y conviene leerlo como lo que muestra: **hashear no es anonimizar**.
+>
+> **Contraste con la solución de la cátedra.** Las ocho notas del PDF —*acuña: 7 siete · centurión: 6 seis · hernandez: 8 ocho · palacios: 10 diez · rossi: 5 cinco · sanchez: 2 dos · garcía: 1 uno · zubeldía: 10 diez*— son las ocho de la tabla de arriba, y la única indicación de método es *"hacerlos con echo (ej. `$echo 7 siete>siete.txt`)"*: la segunda confirmación de que la preimagen lleva el `\n`. El PDF no comenta el digest repetido de palacios y zubeldía ni dice nada sobre el costo del ataque o las contramedidas; los puntos 1 a 5 de arriba son enteramente nuestros.
+
 
 ---
 

@@ -288,7 +288,7 @@ Los tres son ejemplos incidentales mientras el video desarrolla otro tema —pri
 | Clase | Fecha | Qué hay en su lugar |
 |---|---|---|
 | **Clase 1** — Introducción y criptografía clásica | 06/08 | Sin video, pero con la [transcripción completa](../../raw/clases/Clase%2001-Transcripcion.VTT) del 06/08, ya ingerida. |
-| [[clase-04-criptografia-asimetrica-y-firma-digital\|Clase 4 — Criptografía asimétrica]] | 10/09 | Sin video propio, pero ya no es el hueco que era: tiene deck completo de 41 filminas desde el 04/09. Sólo el andamiaje previo de teoría de números sigue en video (`02`, `03`). |
+| [[clase-04-criptografia-asimetrica-y-firma-digital\|Clase 4 — Criptografía asimétrica]] | 10/09 | Sin video propio, pero ya no es un hueco: tiene deck completo de 41 filminas desde el 04/09 y **transcripción de la clase dictada** (1169 cues, 2h17) desde el 14/09. Sólo el andamiaje previo de teoría de números sigue en video (`02`, `03`). |
 | [[clase-05-protocolos-criptograficos\|Clase 5 — Protocolos criptográficos]] | 17/09 | Sin video, pero con deck completo desde el 04/09. |
 | [[clase-06-politicas-de-seguridad-y-control-de-acceso\|Clase 6 — Políticas de seguridad y control de acceso]] | 01/10 | Sin video que la dicte —sigue siendo uno de los [[#Los cuatro huecos del Bloque 2\|huecos de video de arriba]]—, pero con deck completo (dos decks fusionados) desde el 04/09. |
 | [[clase-07-autenticacion\|Clase 7 — Autenticación]] | 08/10 | Sin video que la dicte, idem, aunque tres la rozan de refilón — ver [[#La tensión de la Clase 07\|la tensión de la Clase 07]]. Con deck completo (mitad de un archivo compartido con la Clase 8) desde el 04/09. |
