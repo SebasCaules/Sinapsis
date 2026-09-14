@@ -17,7 +17,7 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf", "raw/parciales/Cripto - Primer
 # Clase 05 — Protocolos criptográficos
 
 > **17/09/2026** — jueves, **teoría** · [Filminas](../../raw/clases/Clase%2005%20-%20Protocolos.pdf) (48 filminas) · docente sin confirmar en la fuente
-> Práctica asociada, sin nota propia todavía: **Guía 4 — Manejo de claves · Protocolos · Firma digital**, lunes 14/09
+> Práctica asociada: [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital|Guía 4 — Manejo de claves · Cifrado asimétrico · Firma digital]], lunes 14/09 — **once de sus dieciocho ejercicios son material de esta clase**, resueltos antes de que se dicte
 > Lectura recomendada al cerrar (filmina 48): **Bishop, cap. 11** (*Key Management*) · **RFC 5246** (`TLS` 1.2) · una descripción de la vulnerabilidad de renegociación de `TLS` (`g-sec.lu/practicaltls.pdf`)
 > **Todavía no se dictó**: al 06/09/2026 la nota está escrita solo contra el PDF de filminas — ver [[#Estado de las fuentes|Estado de las fuentes]]
 > Viene de: [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]]
@@ -113,5 +113,5 @@ El múltiple choice sobre `SSL`/`TLS`/`PKI` aparece **idéntico** en el 1C-2023 
 
 > [!nota]- Tres cabos sueltos
 > - **El docente no está confirmado** en ninguna fuente: el [[cronograma|cronograma]] fija la fecha, no quién dicta.
-> - **La Guía 4** —*Manejo de claves · Protocolos · Firma digital*, del lunes 14/09— no tiene nota propia todavía, y es la práctica que acompaña a esta clase y a la [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04]].
+> - **La Guía 4** —[[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital|Manejo de claves · Cifrado asimétrico · Firma digital]], del lunes 14/09— ya tiene nota propia con los 18 ejercicios resueltos, y **se practicó tres días antes de esta clase**: los Ej. 1 a 5, 7, 9 a 14 y 18 —protocolos, Needham-Schroeder, certificados, PKI, `TLS`— están resueltos contra las notas de concepto escritas sólo desde el PDF. Cuando la clase se dicte, hay que volver sobre esas resoluciones con la voz. El docente de la Clase 04 anticipó dos cosas para ésta: *"la clase que viene vamos a ver algunos protocolos"* de KDC (cue 71) y *"una implementación de Diffie-Hellman con todo"* (cue 691).
 > - **Toda lectura o inferencia propia queda rotulada en el concepto donde vive**, no acá: el *Master Secret* como fórmula de `SSL 3.0` y no la `PRF` de `TLS 1.0+`, el doble sentido de $K_s$, el contenido del `header` del récord, el certificado autofirmado de la filmina 15, la causa de las claves de 40 y 512 bits, y la lectura de la filmina 48 como la vulnerabilidad de renegociación de 2009.
