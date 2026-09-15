@@ -1,0 +1,172 @@
+{
+  "contract": 1,
+  "slug": "soya",
+  "name": "Seguridad Ocupacional y Ambiental",
+  "code": "12.83",
+  "institution": "ITBA",
+  "color": "--u6",
+  "semester": "2026-2C",
+  "division": {
+    "singular": "Módulo",
+    "abbr": "M",
+    "plural": "Módulos"
+  },
+  "divisions": [
+    {
+      "key": "1",
+      "name": "Higiene y Seguridad Ocupacional",
+      "kind": "numbered"
+    },
+    {
+      "key": "2",
+      "name": "Medio Ambiente",
+      "kind": "numbered"
+    },
+    {
+      "key": "cursada",
+      "name": "Cursada y evaluación",
+      "kind": "extra",
+      "color": "--ueval"
+    },
+    {
+      "key": "vault",
+      "name": "Salud de la wiki",
+      "kind": "extra"
+    }
+  ],
+  "pageTypes": [
+    {
+      "key": "hub",
+      "label": "Guía",
+      "plural": "Guías",
+      "folder": "modulos",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "concepto",
+      "label": "Concepto",
+      "plural": "Conceptos",
+      "folder": "conceptos",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "ejercicio",
+      "label": "Ejercicio",
+      "plural": "Ejercicios",
+      "folder": "ejercicios",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "normativa",
+      "label": "Norma",
+      "plural": "Normativa",
+      "folder": "normativa",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "entidad",
+      "label": "Entidad",
+      "plural": "Entidades",
+      "folder": "entidades",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    },
+    {
+      "key": "fuente",
+      "label": "Fuente",
+      "plural": "Fuentes",
+      "folder": "fuentes",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    },
+    {
+      "key": "wiki",
+      "label": "Meta",
+      "plural": "Meta",
+      "folder": "meta",
+      "countsAsContent": false,
+      "collapsedByDefault": false
+    }
+  ],
+  "rail": [
+    {
+      "id": "estudiar",
+      "label": "Estudiar",
+      "color": "--accent",
+      "items": [
+        {
+          "id": "repaso-parcial-1",
+          "label": "Repaso parcial 1",
+          "icon": "book",
+          "kind": "page",
+          "target": "repaso-parcial-modulo-1",
+          "hint": "Definiciones literales, cuadros, trampas, números y 36 preguntas de autoevaluación del módulo 1"
+        },
+        {
+          "id": "banco-parcial-2",
+          "label": "Banco parcial 2",
+          "icon": "quiz",
+          "kind": "page",
+          "target": "banco-parcial-2-ambiental",
+          "hint": "Las 80 preguntas de la guía de cátedra del módulo 2, con respuesta"
+        },
+        {
+          "id": "guia-finales",
+          "label": "Guía de finales",
+          "icon": "exam",
+          "kind": "page",
+          "target": "guia-de-finales",
+          "hint": "Estructura del final, temas que cayeron y trampas verificadas"
+        }
+      ]
+    },
+    {
+      "id": "referencia",
+      "label": "Referencia",
+      "color": "--u3",
+      "items": [
+        {
+          "id": "programa",
+          "label": "Programa oficial",
+          "icon": "notebook",
+          "kind": "page",
+          "target": "programa-oficial-12-83",
+          "hint": "Las 14 unidades, los 6 trabajos prácticos y la bibliografía obligatoria"
+        },
+        {
+          "id": "contradicciones",
+          "label": "Contradicciones",
+          "icon": "diamond",
+          "kind": "page",
+          "target": "contradicciones",
+          "hint": "Los 30 puntos donde las fuentes no coinciden"
+        },
+        {
+          "id": "huecos",
+          "label": "Huecos",
+          "icon": "triangle",
+          "kind": "page",
+          "target": "huecos",
+          "hint": "Lo que falta y conviene pedirle a la cátedra"
+        }
+      ]
+    }
+  ],
+  "fab": null,
+  "exercisePlates": true,
+  "wiki": {
+    "root": "wiki",
+    "index": "index.md",
+    "log": "log.md",
+    "ignore": [],
+    "divisionField": "division",
+    "study": "estudio",
+    "standalone": [
+      "sintesis"
+    ]
+  }
+}
