@@ -20,6 +20,7 @@ import { remarkAssets } from "./remarkAssets";
 import { rehypeExercisePlates } from "./rehypeExercisePlates";
 import { splitHeadingMark } from "./heading-mark";
 import { rehypeHeadingIds } from "./rehypeHeadingIds";
+import { rehypeTypography } from "./rehypeTypography";
 import { remarkCallouts } from "./remarkCallouts";
 import { remarkWikilinks } from "./remarkWikilinks";
 import "katex/dist/katex.min.css";
@@ -166,10 +167,11 @@ const components: Components = {
 const REHYPE_CON_PLACAS: PluggableList = [
   rehypeHeadingIds,
   rehypeExercisePlates,
+  rehypeTypography,
   [rehypeKatex, { output: "htmlAndMathml" }],
 ];
 
-const REHYPE_SIN_PLACAS: PluggableList = [rehypeHeadingIds, [rehypeKatex, { output: "htmlAndMathml" }]];
+const REHYPE_SIN_PLACAS: PluggableList = [rehypeHeadingIds, rehypeTypography, [rehypeKatex, { output: "htmlAndMathml" }]];
 
 const NO_ASSETS: readonly PageAsset[] = [];
 
