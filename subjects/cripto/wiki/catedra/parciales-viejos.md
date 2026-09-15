@@ -33,7 +33,7 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 | **1C-2018** | 11-12 | 5 | 2 resueltos · los Ej. 3, 4 y 5 marcados *"Repetido"* (son los del 1C-2023) |
 | Shamir, Guía 6 | 13 | 2 | los 2 resueltos |
 
-> **Para estudiar por tipo de ejercicio** está la sección [[primer-parcial|1P]]: por cada tipo, un resumen que lo deja en receta y los ejercicios de esta nota reescritos como respuesta modelo, con tips. Esta nota sigue siendo el análisis parcial por parcial.
+> **Para estudiar por tipo de ejercicio** está la sección [[primer-parcial|1er Parcial]]: por cada tipo, un resumen que lo deja en receta y los ejercicios de esta nota reescritos como respuesta modelo, con tips. Esta nota sigue siendo el análisis parcial por parcial.
 
 **Los cuatro son primeros parciales**, o sea que cubren el bloque de Criptografía: clases 1 a 5 según el [[cronograma]]. Coincide con lo que se ve: hay criptografía clásica, secreto perfecto, modos de encadenamiento, MAC y hash, asimétrica y protocolos.
 

@@ -14,7 +14,8 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # Cuentas de asimétrica: RSA, Diffie-Hellman, El Gamal y firma
 
-Es el único tipo de esta sección que no apareció en ninguno de los cuatro parciales viejos: en [[parciales-viejos|Parciales viejos]] Diffie-Hellman se tomó una vez como pregunta de protocolo ([[parciales-viejos#1C-2025|1C-2025]], Ej. 1) y como ítem de verdadero o falso, nunca con números, y no hay un solo `RSA`, El Gamal ni firma calculados. Se incluye porque el parcial cubre la [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 4]] y el docente anunció «ejercicios básicos de aritmética» que la [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital|Guía 4]] no trae. La consigna esperable es del tipo «dados $p$, $q$ y $e$ (o $p$ y $g$), genere las claves, cifre, descifre o firme este número y muestre las cuentas», a veces con una pregunta corta de seguridad al final. Todos los ejemplos de esta página están verificados con Python.
+> [!ejemplo] Lo más parecido · Guía 4, Ejercicio 6 — ningún parcial viejo tomó cuentas de asimétrica
+> Considera el protocolo de intercambio de claves Diffie Hellman y escribe la secuencia de pasos para que en lugar de ser 2 los participantes que generan una clave compartida sean 3.
 
 ## Lo mínimo que hay que saber
 
@@ -124,7 +125,7 @@ Para Diffie-Hellman la misma plantilla se reduce a: datos públicos $(p, g)$; se
 
 ## Para profundizar
 
-- [[1p-asimetrica-en-las-guias|'Asimétrica: lo más parecido a un parcial está en la Guía 4']] — los ejercicios de la Guía 4 más parecidos a un parcial, con respuesta modelo, y tres prácticas con números.
+- [[1p-asimetrica-en-las-guias|Asimétrica: lo más parecido a un parcial está en la Guía 4]] — los ejercicios de la Guía 4 más parecidos a un parcial, con respuesta modelo, y tres prácticas con números.
 - [[primer-parcial|Primer parcial]] — el hub de la sección, con la tabla de los siete tipos y el orden sugerido.
 - [[rsa|RSA]]: la construcción, la demostración por Euler tal como se hizo en clase y los tres problemas de *textbook* `RSA`, con un ejemplo numérico grande verificado.
 - [[rsa-signature-y-hashed-rsa|RSA-Signature y Hashed RSA]]: los dos ataques a la firma sin hash, el problema del tamaño y el límite de la prueba de Hashed `RSA`.

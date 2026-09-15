@@ -49,7 +49,7 @@ Cripto/
 │   ├── guias/                  ← espeja raw/guias (4 notas, cada guía con su resolución)
 │   ├── apuntes/                ← espeja raw/apuntes (7 notas)
 │   ├── tp/                     ← espeja raw/tp (1 nota)
-│   ├── parciales/              ← secciones 1P, 2P y F: por tipo de ejercicio, resumen + ejercicios viejos resueltos (17 notas)
+│   ├── parciales/              ← secciones 1er Parcial, 2do Parcial y Finales: por tipo de ejercicio, resumen + ejercicios viejos resueltos (17 notas)
 │   ├── videos/                 ← capa transversal: un video de la cátedra por nota (13 notas)
 │   └── conceptos/              ← capa transversal: ideas atómicas (131 notas)
 └── assets/                 ← imágenes (attachment folder de Obsidian)
@@ -112,9 +112,9 @@ Todo lo institucional: qué se evalúa, cuándo y con qué material.
 
 ## Parciales
 
-Las secciones **1P**, **2P** y **F** van en el índice de Sinapsis después de la última clase de cada bloque. Están pensadas para rendir sin haber leído las clases: por cada tipo de ejercicio, una página que explica lo mínimo y lo deja en receta, y al lado otra con los ejercicios de ese tipo que ya se tomaron, resueltos como se escribirían en el examen.
+Las secciones **1er Parcial**, **2do Parcial** y **Finales** van en el índice de Sinapsis después de la última clase de cada bloque. Están pensadas para rendir sin haber leído las clases: por cada tipo de ejercicio, una página que explica lo mínimo y lo deja en receta, y al lado otra con los ejercicios de ese tipo que ya se tomaron, resueltos como se escribirían en el examen.
 
-- [[primer-parcial|Primer parcial]] *(24/09)* — el hub de la sección 1P: qué cubre, la tabla de los siete tipos de ejercicio y cómo usar la sección. Los tres primeros tipos salieron en los cuatro parciales viejos sin excepción; el séptimo no salió nunca y está porque el parcial cubre la Clase 4.
+- [[primer-parcial|Primer parcial]] *(24/09)* — el hub de la sección 1er Parcial: qué cubre, la tabla de los siete tipos de ejercicio y cómo usar la sección. Los tres primeros tipos salieron en los cuatro parciales viejos sin excepción; el séptimo no salió nunca y está porque el parcial cubre la Clase 4.
   - [[1p-analizar-un-protocolo|Analizar un protocolo]] · [[1p-protocolos-en-parciales-viejos|los 4 de los parciales viejos]] — el Ejercicio 1 de los cuatro: clasificar, leer qué servicio da cada mensaje, argumentar el ataque con lo que el atacante no tiene.
   - [[1p-esquema-de-bloque|¿Es válido este esquema de bloque?]] · [[1p-esquemas-de-bloque-en-parciales-viejos|los 5 de los parciales viejos]] — validez es invertibilidad, seguridad es un adversario CPA concreto, errores se siguen bloque por bloque contra `CBC`, `CTR` y `OFB`.
   - [[1p-verdadero-o-falso|Verdadero o Falso, con corrección]] · [[1p-verdadero-o-falso-en-parciales-viejos|los 5 de los parciales viejos]] — el catálogo de sentencias verdaderas por tema y el método: veredicto, sentencia reescrita, cambio identificado.
@@ -122,8 +122,8 @@ Las secciones **1P**, **2P** y **F** van en el índice de Sinapsis después de l
   - [[1p-criptoanalisis-clasico|Criptoanálisis clásico]] · [[1p-criptoanalisis-clasico-en-parciales-viejos|los 3 de los parciales viejos]] — Kasiski, índice de coincidencia y frecuencias en orden; qué es y qué no es un criptosistema; confusión, difusión y no linealidad.
   - [[1p-mac-hash-e-integridad|MAC, hash e integridad]] · [[1p-mac-y-hash-en-parciales-viejos|el ejercicio y las 3 sentencias de los parciales viejos]] — las tres combinaciones de cifrado y autenticación, el paso a paso del receptor, integridad, autenticación y no repudio con la razón correcta.
   - [[1p-cuentas-de-asimetrica|Cuentas de asimétrica]] · [[1p-asimetrica-en-las-guias|lo más parecido, en la Guía 4]] — RSA, Diffie-Hellman, El Gamal y firma con números, verificados; nunca salió en un parcial viejo.
-- [[segundo-parcial|Segundo parcial]] *(19/11)* — el hub de la sección 2P: qué cubre y por qué todavía no tiene resúmenes por tipo (sin segundo parcial viejo, sin Guías 5 a 10, Clases 6 a 11 sin dictar).
-- [[examen-final|Examen final]] — el hub de la sección F: escrito e integrador según el reglamento; el único material es el video de tips de 2021, y la mitad de criptografía se prepara con la 1P.
+- [[segundo-parcial|Segundo parcial]] *(19/11)* — el hub de la sección 2do Parcial: qué cubre y por qué todavía no tiene resúmenes por tipo (sin segundo parcial viejo, sin Guías 5 a 10, Clases 6 a 11 sin dictar).
+- [[examen-final|Examen final]] — el hub de la sección Finales: escrito e integrador según el reglamento; el único material es el video de tips de 2021, y la mitad de criptografía se prepara con la 1P.
 
 ## Apuntes
 

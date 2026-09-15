@@ -1,8 +1,8 @@
 ---
 title: Primer parcial
-resumen: 'Hub de la sección 1P: qué cubre el primer parcial del 24/09, los siete tipos de ejercicio que se toman y, por cada tipo, un resumen para mecanizarlo y los ejercicios que ya aparecieron en parciales viejos con su respuesta modelo.'
+resumen: 'Hub de la sección 1er Parcial: qué cubre el primer parcial del 24/09, los siete tipos de ejercicio que se toman y, por cada tipo, un resumen para mecanizarlo y los ejercicios que ya aparecieron en parciales viejos con su respuesta modelo.'
 fuentes: ["[[parciales-viejos]]", "[[cronograma]]", "[[reglamento-y-evaluacion]]"]
-aliases: [Primer parcial, 1P, Sección 1P, Parcial 1]
+aliases: [Primer parcial, 1er Parcial, 1P, Parcial 1]
 type: parcial
 clase: 1p
 orden: 1

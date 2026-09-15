@@ -201,7 +201,7 @@
           "tasks": [
             {
               "id": "p1-repaso-1p",
-              "label": "Leer la sección 1P: un resumen y los ejercicios viejos por tipo de ejercicio",
+              "label": "Leer la sección 1er Parcial: un resumen y los ejercicios viejos por tipo de ejercicio",
               "kind": "read",
               "target": "1p",
               "detail": "7 tipos de ejercicio, 15 páginas"

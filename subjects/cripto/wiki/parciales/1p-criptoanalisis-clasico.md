@@ -14,7 +14,23 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # Criptoanálisis clásico
 
-Aparece en tres de los cuatro parciales viejos, siempre en la primera mitad del examen. En el [[parciales-viejos#2C-2025|2C-2025]] es el Ej. 2: un criptograma de 30 letras con la tabla de frecuencias del castellano adjunta, y la consigna *"Detallar cómo sería el abordaje para criptoanalizar el mensaje"* e *"Intentar encontrar la clave y el mensaje"*. En el [[parciales-viejos#1C-2023|1C-2023]] es el Ej. 3: un banco usa base64 como "cifrado" y se pregunta si es un criptosistema válido, qué son confusión y difusión y qué es la no linealidad. En el [[parciales-viejos#1C-2018|1C-2018]] es el inciso 2.2 del múltiple choice: un cifrado homofónico y por qué el índice de coincidencia deja de servir. En el 1C-2025 no hubo. Es material de la Clase 1, más el paréntesis de la Clase 2 sobre codificar y cifrar.
+> [!ejemplo] Así se tomó · 2C-2025, Ejercicio 2
+> El siguiente texto fue encontrado en una botella en la guerra de los Roses
+>
+> "GWAOESFENITLAGEUGEDRVPHJVCDFDR"
+>
+> Se sabe que el mensaje fue encriptado con clave y estaba en castellano con un alfabeto de 26 letras.
+>
+> - (a) Detallar cómo sería el abordaje para criptoanalizar el mensaje.
+> - (b) Intentar encontrar la clave y el mensaje.
+>
+> Teniendo en cuenta que la frecuencia (aproximada) de aparición de letras en castellano es la siguiente:
+>
+> | Letra | A | B | C | D | E | F | G | H | I | J | K | L | M | N | Ñ | O | P | Q | R | S | T | U | V | W | X | Y | Z |
+> | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+> | % | 13 | 1 | 4 | 5 | 13 | 1 | 1 | 1 | 7 |  |  | 5 | 3 | 7 | 0 | 9 | 3 | 1 | 7 | 8 | 4 | 4 | 1 |  |  | 1 |  |
+>
+> Figura 1: Frecuencias de aparición de letras en castellano.
 
 ## Lo mínimo que hay que saber
 
