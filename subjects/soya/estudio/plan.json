@@ -1,0 +1,208 @@
+{
+  "title": "Plan de estudio · Seguridad Ocupacional y Ambiental",
+  "instances": [
+    { "key": "parcial1", "label": "Parcial del módulo 1 (Seguridad)" },
+    { "key": "parcial2", "label": "Parcial del módulo 2 (Medio Ambiente)" },
+    { "key": "recuperatorio", "label": "Recuperatorio único (uno o los dos parciales)", "optional": true },
+    { "key": "final", "label": "Final presencial integrador" }
+  ],
+  "phases": [
+    {
+      "id": "parcial-1",
+      "title": "Parcial del módulo 1",
+      "subtitle": "Higiene y Seguridad Ocupacional · clases 1 a 5",
+      "instance": "parcial1",
+      "retake": "recuperatorio",
+      "icon": "map",
+      "description": "Se aprueba con 4 o más, de forma independiente del módulo 2. No hay guía de preguntas de cátedra para este parcial: el temario es la lista de quince temas del slide 5 de la clase 1, y la cátedra dijo que puede ser de desarrollo, opción múltiple o mixto.",
+      "scope": "- **La cadena peligro → riesgo → accidente** (clase 1): las definiciones literales, $R = P \\times G$ y las tres definiciones de accidente.\n- **Barreras, prevención y protección** (clase 2): la definición de Hollnagel, el criterio preventiva/protectiva, la secuencia del accidente y la jerarquía de controles en sus tres versiones.\n- **El método** (clases 3 y 4): ASPT, clasificación de accidentes por forma y agente, colores y señales de la IRAM 10005, ergonomía, comportamiento, lock-out/tag-out, permisos de trabajo, relevamientos.\n- **El sistema de riesgos del trabajo**: contingencias, ART, prestaciones, in itinere, litigiosidad y el iceberg de costos.\n- **Riesgos específicos** (clase 5): contaminantes químicos y los tres límites, riesgo eléctrico y las cinco reglas de oro, protección contra incendios.\n- **Normativa**: Ley 19.587, Dec. 351/79, Ley 24.557, Dec. 658/96, ISO 45001, IRAM 10005.\n- Cuatro temas del programa que en 2026 sólo están por resumen de alumno (modelos de accidentes, programa de seguridad efectivo, sistemas de gestión, investigación de accidentes): muy probable que entren, pero sin slide de 2026 que los respalde.",
+      "guide": "Cada clase se lee en el orden del cronograma: primero la página de fuente (qué se dijo y en qué slide), después sus conceptos. El hub del módulo tiene la tabla tema → página con el estado de cada uno. Los dos ejercicios resueltos (barreras y ASPT del andamio) son la parte práctica: conviene rehacerlos antes de mirar la resolución.\n\nLa hoja de repaso junta las definiciones literales, los cuadros que hay que dibujar de memoria, las trampas y 36 preguntas de autoevaluación: es lo último que se lee antes del parcial.",
+      "milestones": [
+        {
+          "id": "p1-clase-1",
+          "title": "Clase 1 · La cadena peligro → riesgo → accidente",
+          "icon": "book",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "p1-clase-1-hub", "label": "Leer el hub del módulo 1 y ubicar los quince temas del temario", "kind": "custom", "target": "modulo-1-seguridad" },
+            { "id": "p1-clase-1-fuente", "label": "Leer la clase 1: presentación, régimen y definiciones", "kind": "custom", "target": "clase-01" },
+            { "id": "p1-clase-1-riesgo", "label": "Peligro, riesgo y las tres definiciones de accidente", "kind": "custom", "target": "01-05-riesgo", "detail": "9 conceptos · 1–2 h" },
+            { "id": "p1-clase-1-cards", "label": "Repasar las definiciones del módulo 1", "kind": "cards", "target": "definiciones-modulo-1" }
+          ]
+        },
+        {
+          "id": "p1-clase-2",
+          "title": "Clase 2 · Barreras, prevención y protección",
+          "icon": "layers",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "p1-clase-2-fuente", "label": "Leer la clase 2: siniestralidad, causas, barreras y secuencia del accidente", "kind": "custom", "target": "clase-02" },
+            { "id": "p1-clase-2-barrera", "label": "Barrera, prevención/protección y la jerarquía de controles", "kind": "custom", "target": "02-03-barrera", "detail": "7 conceptos · 1–2 h" },
+            { "id": "p1-clase-2-ejercicio", "label": "Resolver el ejercicio de barreras (caso First Chemical, 2002)", "kind": "exercises", "target": "ejercicio-barreras", "detail": "3 consignas · 2–3 h" },
+            { "id": "p1-clase-2-numeros", "label": "Repasar los números del módulo 1", "kind": "cards", "target": "numeros-modulo-1" }
+          ]
+        },
+        {
+          "id": "p1-clases-3-4",
+          "title": "Clases 3 y 4 · ASPT, controles y sistema de riesgos del trabajo",
+          "icon": "wrench",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "p1-clases-3-4-aspt", "label": "El método del ASPT: cuatro fases, planilla y jerarquía de control", "kind": "custom", "target": "03-01-aspt" },
+            { "id": "p1-clases-3-4-andamio", "label": "Rehacer el ASPT del andamio antes de mirar la resolución", "kind": "exercises", "target": "aspt-andamio", "detail": "7 pasos · 25 riesgos · 3–4 h" },
+            { "id": "p1-clases-3-4-color", "label": "Colores y señales de seguridad (IRAM 10005)", "kind": "custom", "target": "03-03-colores-y-senales-de-seguridad" },
+            { "id": "p1-clases-3-4-srt", "label": "Sistema de riesgos del trabajo: contingencias, prestaciones, in itinere y costos", "kind": "custom", "target": "03-09-sistema-de-riesgos-del-trabajo", "detail": "4 conceptos · 1–2 h" }
+          ]
+        },
+        {
+          "id": "p1-clase-5",
+          "title": "Clase 5 · Contaminantes, electricidad e incendios",
+          "icon": "flask",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "p1-clase-5-fuente", "label": "Leer la clase 5: el soporte de 2020 y las tres clases grabadas", "kind": "custom", "target": "clase-05" },
+            { "id": "p1-clase-5-cmp", "label": "Contaminantes químicos: CMP, CMP-CPT y valor techo", "kind": "custom", "target": "05-01-contaminantes-quimicos-y-cmp" },
+            { "id": "p1-clase-5-electrico", "label": "Riesgo eléctrico: tensiones, miliamperes y las cinco reglas de oro", "kind": "custom", "target": "05-02-riesgo-electrico" },
+            { "id": "p1-clase-5-incendios", "label": "Protección contra incendios: tetraedro, clases de fuego, agentes y art. 160", "kind": "custom", "target": "05-03-proteccion-contra-incendios" }
+          ]
+        },
+        {
+          "id": "p1-normativa",
+          "title": "Normativa y temas por resumen",
+          "icon": "notebook",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "p1-normativa-cards", "label": "Repasar la normativa en una línea", "kind": "cards", "target": "normativa" },
+            { "id": "p1-normativa-modelos", "label": "Modelos de accidentes: de Heinrich a Reason (por resumen de alumno)", "kind": "custom", "target": "modelos-de-accidentes" },
+            { "id": "p1-normativa-gestion", "label": "Sistemas de gestión: PDCA, auditorías y certificación (por resumen de alumno)", "kind": "custom", "target": "sistemas-de-gestion" },
+            { "id": "p1-normativa-investigacion", "label": "Investigación de accidentes (por resumen de alumno)", "kind": "custom", "target": "investigacion-de-accidentes" }
+          ]
+        },
+        {
+          "id": "p1-repaso",
+          "title": "Repaso final del módulo 1",
+          "icon": "star",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "p1-repaso-hoja", "label": "Leer la hoja de repaso completa y responder sus 36 preguntas", "kind": "custom", "target": "repaso-parcial-modulo-1", "detail": "2–3 h" },
+            { "id": "p1-repaso-quiz", "label": "Hacer el quiz del módulo 1", "kind": "quiz", "target": "quiz-modulo-1" },
+            { "id": "p1-repaso-contradicciones", "label": "Leer las contradicciones C-01 a C-12: son las trampas del parcial", "kind": "custom", "target": "contradicciones" },
+            { "id": "p1-repaso-srs", "label": "Repaso espaciado del día", "kind": "cards" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "parcial-2",
+      "title": "Parcial del módulo 2",
+      "subtitle": "Medio Ambiente · las 80 preguntas de la guía de cátedra",
+      "instance": "parcial2",
+      "retake": "recuperatorio",
+      "icon": "compass",
+      "description": "Se aprueba con 4 o más, de forma independiente del módulo 1. La cátedra publicó una guía de 80 preguntas tipo (código 12.83) que es, en los hechos, el temario evaluable. El módulo todavía no se dictó en 2026: todo el contenido de la wiki se apoya en respuestas de un alumno de 2017 y hay que cotejarlo con las clases cuando lleguen.",
+      "scope": "- **Bloque 1** (pregs. 1–10): ambiente y sus componentes, cuerpos lénticos y lóticos, clases texturales de suelo, acuíferos y ciclo hidrogeológico.\n- **Bloque 2** (pregs. 11–30): el tren de tratamiento de efluentes líquidos, DQO y DBO₅, procesos aeróbicos y anaeróbicos, terciarios, barros, toxicidad y efluentes gaseosos. Es el bloque más grande.\n- **Bloque 3** (pregs. 31–38): efecto invernadero, CFC y HFC, Kigali, inversión térmica, manchas solares y biomasa.\n- **Bloque 4** (pregs. 39–55): dominios, niveles de organización, Red List, nicho, biogeografía de islas, estrategias r y K, sucesión, biodiversidad α, β y γ, bioindicación.\n- **Bloque 5** (pregs. 56–61): códigos Y y H, responsabilidad del generador, contaminación y polución, material particulado.\n- **Bloque 6** (pregs. 62–80): desarrollo sustentable e indicadores, Gini, Kuznets, Van Hemel, huellas, art. 41, EIA, EsIA, auditoría, matriz de importancia, NCA, PGA y plan de contingencias.",
+      "guide": "El banco de preguntas es el eje: se lee tapando la respuesta y se sigue el enlace de cada pregunta a la página que la desarrolla. Conviene empezar por las marcadas como caídas en un final (veinte temas) y dejar para el final las nueve que ninguna fuente contesta, que son las preguntas para llevar a clase.\n\nEl mazo con las 80 preguntas repite el mismo recorrido en formato de tarjeta; el quiz del módulo cubre lo que más cae en los finales.",
+      "milestones": [
+        {
+          "id": "p2-hub",
+          "title": "El módulo 2 y su guía",
+          "icon": "book",
+          "divisions": ["2"],
+          "tasks": [
+            { "id": "p2-hub-leer", "label": "Leer el hub del módulo 2: unidades oficiales y los seis bloques", "kind": "custom", "target": "modulo-2-ambiente" },
+            { "id": "p2-hub-guia", "label": "Leer la guía de cátedra de 80 preguntas tal como está", "kind": "custom", "target": "guia-parcial-2-ambiental" },
+            { "id": "p2-hub-banco", "label": "Recorrer el banco de preguntas empezando por las que cayeron en finales", "kind": "custom", "target": "banco-parcial-2-ambiental", "detail": "80 preguntas · 3–4 h" }
+          ]
+        },
+        {
+          "id": "p2-bloques-1-2",
+          "title": "Bloques 1 y 2 · Ambiente, agua, suelo y efluentes",
+          "icon": "flask",
+          "divisions": ["2"],
+          "tasks": [
+            { "id": "p2-bloques-1-2-agua", "label": "Cuerpos lénticos y lóticos, suelo y acuíferos", "kind": "custom", "target": "cuerpos-de-agua-lenticos-y-loticos" },
+            { "id": "p2-bloques-1-2-efluentes", "label": "El tren de tratamiento de efluentes líquidos y el umbral de DQO", "kind": "custom", "target": "tratamiento-de-efluentes-liquidos", "detail": "20 preguntas · 2–3 h" },
+            { "id": "p2-bloques-1-2-dqo", "label": "DQO, DBO₅ y biodegradabilidad; efluentes gaseosos y toxicidad", "kind": "custom", "target": "dqo-dbo-y-biodegradabilidad" }
+          ]
+        },
+        {
+          "id": "p2-bloques-3-4",
+          "title": "Bloques 3 y 4 · Atmósfera, clima, ecología y biodiversidad",
+          "icon": "graph",
+          "divisions": ["2"],
+          "tasks": [
+            { "id": "p2-bloques-3-4-atmosfera", "label": "Capas de la atmósfera, efecto invernadero, ozono e inversión térmica", "kind": "custom", "target": "atmosfera-y-sus-capas" },
+            { "id": "p2-bloques-3-4-ecologia", "label": "Dominios, niveles de organización, estrategias r y K y sucesión", "kind": "custom", "target": "niveles-de-organizacion-y-dominios" },
+            { "id": "p2-bloques-3-4-biodiversidad", "label": "Biodiversidad α, β y γ: lo que más cae en finales", "kind": "custom", "target": "biodiversidad" }
+          ]
+        },
+        {
+          "id": "p2-bloques-5-6",
+          "title": "Bloques 5 y 6 · Contaminación, residuos, sustentabilidad y gestión ambiental",
+          "icon": "table",
+          "divisions": ["2"],
+          "tasks": [
+            { "id": "p2-bloques-5-6-residuos", "label": "Contaminación y polución, residuos peligrosos y material particulado", "kind": "custom", "target": "residuos-peligrosos" },
+            { "id": "p2-bloques-5-6-sustentable", "label": "Desarrollo sustentable, Gini, Kuznets, Van Hemel y las huellas", "kind": "custom", "target": "desarrollo-sustentable-e-indicadores" },
+            { "id": "p2-bloques-5-6-eia", "label": "EIA, EsIA, auditoría ambiental, matriz de importancia y NCA", "kind": "custom", "target": "evaluacion-de-impacto-ambiental" },
+            { "id": "p2-bloques-5-6-normativa", "label": "Art. 41, Ley 25.675, Basilea, Montreal y Kioto", "kind": "cards", "target": "normativa" }
+          ]
+        },
+        {
+          "id": "p2-repaso",
+          "title": "Repaso final del módulo 2",
+          "icon": "star",
+          "divisions": ["2"],
+          "tasks": [
+            { "id": "p2-repaso-cards", "label": "Repasar el mazo con las 80 preguntas de la guía", "kind": "cards", "target": "parcial-2-preguntas", "detail": "80 tarjetas" },
+            { "id": "p2-repaso-quiz", "label": "Hacer el quiz del módulo 2", "kind": "quiz", "target": "quiz-modulo-2" },
+            { "id": "p2-repaso-huecos", "label": "Anotar las nueve preguntas sin respuesta (H-18) para llevarlas a clase", "kind": "custom", "target": "huecos" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "final",
+      "title": "Final integrador",
+      "subtitle": "Sección Ocupacional y Sección Ambiental",
+      "instance": "final",
+      "icon": "exam",
+      "description": "El final no se rinde por módulo: los tres finales del compilado de alumnos (2019–2020) tienen una sección Ocupacional y una Ambiental, en opción múltiple de cuatro, con «ninguna de las anteriores» como opción frecuente y muchas veces correcta. La cátedra no confirmó el formato.",
+      "scope": "- **Sección Ocupacional**: ley y decreto reglamentario, CMP y valor techo, ASPT, jerarquía de control, barreras, agentes extintores, investigación de accidentes, iluminancias, efectos de la electricidad, certificación y auditorías, ART y prestaciones, enfermedad profesional, in itinere, sordera profesional, definición de peligro.\n- **Sección Ambiental**: rocas ígneas, troposfera, ionosfera, eutrofización, biodiversidad, residuos peligrosos, huella ecológica, EIA y auditoría, presupuesto mínimo, material particulado, efecto invernadero, dominios celulares, sucesión, manejo de ecosistemas, clases texturales, matriz de importancia, Gini, desarrollo sustentable, tratamientos anaeróbicos, guía CIQUIME.",
+      "guide": "La guía de finales tiene el inventario de qué cayó en cada sección y las once trampas verificadas contra exámenes reales. Se repasa con los dos quizzes y con el repaso espaciado de los cuatro mazos; las contradicciones C-23 y C-28 a C-30 son los puntos donde el compilado de alumnos se equivoca contra la cátedra.",
+      "milestones": [
+        {
+          "id": "final-guia",
+          "title": "La guía de finales",
+          "icon": "list",
+          "divisions": ["1", "2"],
+          "tasks": [
+            { "id": "final-guia-leer", "label": "Leer la guía de finales: estructura, temas y trampas", "kind": "custom", "target": "guia-de-finales" },
+            { "id": "final-guia-compilado", "label": "Mirar los tres finales del compilado con la guía al lado", "kind": "custom", "target": "finales-soa-compilado" }
+          ]
+        },
+        {
+          "id": "final-ocupacional",
+          "title": "Sección Ocupacional",
+          "icon": "map",
+          "divisions": ["1"],
+          "tasks": [
+            { "id": "final-ocupacional-quiz", "label": "Rehacer el quiz del módulo 1", "kind": "quiz", "target": "quiz-modulo-1" },
+            { "id": "final-ocupacional-cards", "label": "Definiciones y números del módulo 1", "kind": "cards", "target": "definiciones-modulo-1" }
+          ]
+        },
+        {
+          "id": "final-ambiental",
+          "title": "Sección Ambiental",
+          "icon": "compass",
+          "divisions": ["2"],
+          "tasks": [
+            { "id": "final-ambiental-quiz", "label": "Rehacer el quiz del módulo 2", "kind": "quiz", "target": "quiz-modulo-2" },
+            { "id": "final-ambiental-cards", "label": "Las 80 preguntas de la guía, en tarjetas", "kind": "cards", "target": "parcial-2-preguntas" },
+            { "id": "final-ambiental-contradicciones", "label": "Las contradicciones del compilado contra la cátedra (C-23, C-28 a C-30)", "kind": "custom", "target": "contradicciones" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "id": "parcial-1",
+    "title": "Parcial del módulo 1 · Higiene y Seguridad Ocupacional",
+    "description": "Todo lo que entra en el parcial del módulo 1: el hub con el temario y su estado, la hoja de repaso, los dos ejercicios resueltos, los tres mazos y el quiz. Más la página de evaluación, para tener claro cómo se aprueba.",
+    "divisions": ["1"],
+    "pages": [
+      "modulo-1-seguridad",
+      "repaso-parcial-modulo-1",
+      "evaluacion",
+      "clase-01",
+      "clase-02",
+      "clase-05",
+      "ejercicio-barreras",
+      "aspt-andamio",
+      "01-05-riesgo",
+      "02-03-barrera",
+      "02-06-jerarquia-de-controles",
+      "03-01-aspt",
+      "03-09-sistema-de-riesgos-del-trabajo",
+      "05-01-contaminantes-quimicos-y-cmp",
+      "05-02-riesgo-electrico",
+      "05-03-proteccion-contra-incendios"
+    ],
+    "decks": ["definiciones-modulo-1", "numeros-modulo-1", "normativa"],
+    "quizzes": ["quiz-modulo-1"],
+    "tools": []
+  },
+  {
+    "id": "parcial-2",
+    "title": "Parcial del módulo 2 · Medio Ambiente",
+    "description": "La guía de cátedra con las 80 preguntas, el banco que las responde, el hub del módulo con los seis bloques, el mazo con las 80 tarjetas y el quiz. Todo se apoya en respuestas de alumno de 2017: cotejar con las clases cuando se dicten.",
+    "divisions": ["2"],
+    "pages": [
+      "modulo-2-ambiente",
+      "guia-parcial-2-ambiental",
+      "banco-parcial-2-ambiental",
+      "preguntas-ambiental-2017",
+      "tratamiento-de-efluentes-liquidos",
+      "biodiversidad",
+      "evaluacion-de-impacto-ambiental",
+      "desarrollo-sustentable-e-indicadores"
+    ],
+    "decks": ["parcial-2-preguntas", "normativa"],
+    "quizzes": ["quiz-modulo-2"],
+    "tools": []
+  },
+  {
+    "id": "final",
+    "title": "Final integrador · las dos secciones",
+    "description": "La guía de finales con el inventario de temas y las once trampas, el compilado de alumnos, las contradicciones y los cuatro mazos y dos quizzes de la materia.",
+    "divisions": ["1", "2"],
+    "pages": [
+      "guia-de-finales",
+      "finales-soa-compilado",
+      "evaluacion",
+      "contradicciones",
+      "repaso-parcial-modulo-1",
+      "banco-parcial-2-ambiental"
+    ],
+    "decks": ["definiciones-modulo-1", "numeros-modulo-1", "normativa", "parcial-2-preguntas"],
+    "quizzes": ["quiz-modulo-1", "quiz-modulo-2"],
+    "tools": []
+  }
+]
