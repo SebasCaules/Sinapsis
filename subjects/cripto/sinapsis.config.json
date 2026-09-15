@@ -38,6 +38,12 @@
       "kind": "numbered"
     },
     {
+      "key": "1p",
+      "name": "1P",
+      "kind": "extra",
+      "color": "--ueval"
+    },
+    {
       "key": "6",
       "name": "Políticas de seguridad y control de acceso",
       "kind": "numbered"
@@ -66,6 +72,18 @@
       "key": "11",
       "name": "Protección de datos personales",
       "kind": "numbered"
+    },
+    {
+      "key": "2p",
+      "name": "2P",
+      "kind": "extra",
+      "color": "--ueval"
+    },
+    {
+      "key": "f",
+      "name": "F",
+      "kind": "extra",
+      "color": "--ueval"
     },
     {
       "key": "catedra",
@@ -112,6 +130,14 @@
       "label": "Trabajo práctico",
       "plural": "Trabajos prácticos",
       "folder": "tp",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "parcial",
+      "label": "Parcial",
+      "plural": "Parciales",
+      "folder": "parciales",
       "countsAsContent": true,
       "collapsedByDefault": false
     },

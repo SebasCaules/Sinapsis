@@ -42,13 +42,14 @@ Cripto/
 │   ├── guias/                  enunciados de guías + resoluciones crudas
 │   ├── apuntes/                apuntes sueltos, sin clase asignada
 │   └── tp/                     (vacío hasta el 28/09)
-├── wiki/                   ← esta wiki (180 notas)
+├── wiki/                   ← esta wiki (197 notas)
 │   ├── catedra/                ← espeja raw/material_Catedra (6 notas)
 │   ├── clases/                 ← espeja raw/clases (10 notas)
 │   ├── practicas/              ← espeja raw/practicas (4 notas)
 │   ├── guias/                  ← espeja raw/guias (4 notas, cada guía con su resolución)
 │   ├── apuntes/                ← espeja raw/apuntes (7 notas)
 │   ├── tp/                     ← espeja raw/tp (1 nota)
+│   ├── parciales/              ← secciones 1P, 2P y F: por tipo de ejercicio, resumen + ejercicios viejos resueltos (17 notas)
 │   ├── videos/                 ← capa transversal: un video de la cátedra por nota (13 notas)
 │   └── conceptos/              ← capa transversal: ideas atómicas (131 notas)
 └── assets/                 ← imágenes (attachment folder de Obsidian)
@@ -108,6 +109,21 @@ Todo lo institucional: qué se evalúa, cuándo y con qué material.
 - [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital|Guía 4 — Manejo de claves, cifrado asimétrico y firma digital]] *(14/09)* — los **18 enunciados** transcriptos + tablero, y las lecturas que ordenan la guía: **once de los dieciocho ejercicios son material de la Clase 05**, que se dicta tres días después; no es la práctica de aritmética que el docente anunció el 10/09; y sus tres familias —protocolos y claves de sesión (1-9), firma, certificados y PKI (8, 10-14), seguridad demostrable (15-17)— más `TLS` (18) son, en ese orden, el Ejercicio 1, el bloque de Verdadero/Falso y el segundo ejercicio de los parciales viejos. Con cinco erratas del PDF, entre ellas una referencia a un *"ejercicio 6"* que es el 10.
   Debajo de cada enunciado va **su resolución**, en un recuadro plegado: **los 18 de punta a punta**. Los protocolos con el mismo hilo —un mensaje válido usado fuera de su contexto, y la contramedida de meter el contexto adentro—: el eco del mensaje 4 que entrega $M$ (Ej. 2), la clave de sesión *firmada* en vez de cifrada (Ej. 3), el **ataque por reflexión** al challenge-response y lo que $A$ no debe permitir (Ej. 4), la variante de Needham-Schroeder de 1987 contra Denning-Sacco (Ej. 5), Diffie-Hellman a tres (Ej. 6), **Diffie-Hellman firmado que igual cae** porque la firma no dice para quién es (Ej. 7), y el protocolo de Denning-Sacco de clave pública con el ataque de Abadi-Needham (Ej. 9). La tabla firma-contra-MAC en cuatro escenarios (Ej. 8). Los **tres de `OpenSSL` corridos** —solicitud, autocertificado y una CA propia que firma un certificado de usuario, con la cadena verificada y comparada con la de un banco— (Ej. 10-12). La red de confianza de PGP argumentada desde Harold y Jane (Ej. 13). La **PKI argentina contra fuentes primarias**: los seis certificadores licenciados vigentes, las funciones del art. 19 de la Ley 25.506, y los dos certificados de la AC Raíz —2007 y 2016— descargados y leídos con `openssl` (Ej. 14). Los tres esquemas rotos con el adversario escrito —`CCA` sobre $r \Vert F_k(r) \oplus m$, el ataque de no mensaje a `RSA-Signature`, la maleabilidad multiplicativa de `RSA`— (Ej. 15-17). Y `TLS`: handshake y record, `AEAD`, `HKDF`, y los cuatro Verdadero/Falso, con el dato de que **37 es el número de suites de `TLS 1.2`, no de 1.3** (Ej. 18).
 - Guías 5-10 — **pendientes de ingerir**; ver el [[cronograma]]. Lo que la Clase 03 dejó planteado y la Guía 3 **no** pide —el ataque al sufijo del `CBC-MAC` y el esquema de `AES-CCM` del slide 38— está resuelto o encuadrado en las notas de concepto. Del primero apareció además la **resolución de la cátedra**, con diagramas, en el Anexo de la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]]; del segundo está verificado que **nadie lo asignó en voz** en ninguna de las dos sesiones.
+
+## Parciales
+
+Las secciones **1P**, **2P** y **F** van en el índice de Sinapsis después de la última clase de cada bloque. Están pensadas para rendir sin haber leído las clases: por cada tipo de ejercicio, una página que explica lo mínimo y lo deja en receta, y al lado otra con los ejercicios de ese tipo que ya se tomaron, resueltos como se escribirían en el examen.
+
+- [[primer-parcial|Primer parcial]] *(24/09)* — el hub de la sección 1P: qué cubre, la tabla de los siete tipos de ejercicio y cómo usar la sección. Los tres primeros tipos salieron en los cuatro parciales viejos sin excepción; el séptimo no salió nunca y está porque el parcial cubre la Clase 4.
+  - [[1p-analizar-un-protocolo|Analizar un protocolo]] · [[1p-protocolos-en-parciales-viejos|los 4 de los parciales viejos]] — el Ejercicio 1 de los cuatro: clasificar, leer qué servicio da cada mensaje, argumentar el ataque con lo que el atacante no tiene.
+  - [[1p-esquema-de-bloque|¿Es válido este esquema de bloque?]] · [[1p-esquemas-de-bloque-en-parciales-viejos|los 5 de los parciales viejos]] — validez es invertibilidad, seguridad es un adversario CPA concreto, errores se siguen bloque por bloque contra `CBC`, `CTR` y `OFB`.
+  - [[1p-verdadero-o-falso|Verdadero o Falso, con corrección]] · [[1p-verdadero-o-falso-en-parciales-viejos|los 5 de los parciales viejos]] — el catálogo de sentencias verdaderas por tema y el método: veredicto, sentencia reescrita, cambio identificado.
+  - [[1p-secreto-perfecto|Secreto perfecto, demostrado]] · [[1p-secreto-perfecto-en-parciales-viejos|los 2 de los parciales viejos]] — las caracterizaciones equivalentes, el conteo de claves, cómo se refuta y el teorema de Shannon.
+  - [[1p-criptoanalisis-clasico|Criptoanálisis clásico]] · [[1p-criptoanalisis-clasico-en-parciales-viejos|los 3 de los parciales viejos]] — Kasiski, índice de coincidencia y frecuencias en orden; qué es y qué no es un criptosistema; confusión, difusión y no linealidad.
+  - [[1p-mac-hash-e-integridad|MAC, hash e integridad]] · [[1p-mac-y-hash-en-parciales-viejos|el ejercicio y las 3 sentencias de los parciales viejos]] — las tres combinaciones de cifrado y autenticación, el paso a paso del receptor, integridad, autenticación y no repudio con la razón correcta.
+  - [[1p-cuentas-de-asimetrica|Cuentas de asimétrica]] · [[1p-asimetrica-en-las-guias|lo más parecido, en la Guía 4]] — RSA, Diffie-Hellman, El Gamal y firma con números, verificados; nunca salió en un parcial viejo.
+- [[segundo-parcial|Segundo parcial]] *(19/11)* — el hub de la sección 2P: qué cubre y por qué todavía no tiene resúmenes por tipo (sin segundo parcial viejo, sin Guías 5 a 10, Clases 6 a 11 sin dictar).
+- [[examen-final|Examen final]] — el hub de la sección F: escrito e integrador según el reglamento; el único material es el video de tips de 2021, y la mitad de criptografía se prepara con la 1P.
 
 ## Apuntes
 
