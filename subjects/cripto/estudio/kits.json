@@ -8,7 +8,8 @@
       "2",
       "3",
       "4",
-      "5"
+      "5",
+      "1p"
     ],
     "pages": [
       "clase-01-introduccion-y-criptografia-clasica",
@@ -20,7 +21,22 @@
       "guia-02-criptografia-simetrica",
       "guia-03-mac-y-funciones-de-hash",
       "guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital",
-      "parciales-viejos"
+      "parciales-viejos",
+      "primer-parcial",
+      "1p-analizar-un-protocolo",
+      "1p-protocolos-en-parciales-viejos",
+      "1p-esquema-de-bloque",
+      "1p-esquemas-de-bloque-en-parciales-viejos",
+      "1p-verdadero-o-falso",
+      "1p-verdadero-o-falso-en-parciales-viejos",
+      "1p-secreto-perfecto",
+      "1p-secreto-perfecto-en-parciales-viejos",
+      "1p-criptoanalisis-clasico",
+      "1p-criptoanalisis-clasico-en-parciales-viejos",
+      "1p-mac-hash-e-integridad",
+      "1p-mac-y-hash-en-parciales-viejos",
+      "1p-cuentas-de-asimetrica",
+      "1p-asimetrica-en-las-guias"
     ],
     "decks": [
       "criptografia-clasica",
@@ -65,7 +81,8 @@
       "8",
       "9",
       "10",
-      "11"
+      "11",
+      "2p"
     ],
     "pages": [
       "clase-06-politicas-de-seguridad-y-control-de-acceso",
@@ -73,7 +90,8 @@
       "clase-08-principios-de-diseno-y-vulnerabilidades",
       "clase-09-flujo-de-informacion",
       "clase-10-seguridad-en-la-empresa",
-      "video-12-proteccion-de-datos-personales"
+      "video-12-proteccion-de-datos-personales",
+      "segundo-parcial"
     ],
     "decks": [
       "politicas-y-control-de-acceso",
