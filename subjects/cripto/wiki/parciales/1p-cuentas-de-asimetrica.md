@@ -32,7 +32,8 @@ $$1 = 5 - 2 \cdot 2 = 5 - 2\,(7 - 1 \cdot 5) = 3 \cdot 5 - 2 \cdot 7 = 3\,(40 - 
 ### RSA: claves, cifrado y descifrado
 
 $$\begin{aligned}
-\mathsf{Gen}&:\ p, q \text{ primos},\ n = p \cdot q,\ \varphi(n) = (p-1)(q-1),\ e \text{ con } \gcd(e, \varphi(n)) = 1,\ d = e^{-1} \bmod \varphi(n);\quad pk = (n, e),\ sk = (n, d)\\
+\mathsf{Gen}&:\ p, q \text{ primos},\ n = p \cdot q,\ \varphi(n) = (p-1)(q-1),\\
+&\phantom{:\ } e \text{ con } \gcd(e, \varphi(n)) = 1,\ d = e^{-1} \bmod \varphi(n);\quad pk = (n, e),\ sk = (n, d)\\
 \mathsf{Enc}_{pk}(m) &= m^{e} \bmod n \ \ (m < n), \qquad \mathsf{Dec}_{sk}(c) = c^{d} \bmod n
 \end{aligned}$$
 
