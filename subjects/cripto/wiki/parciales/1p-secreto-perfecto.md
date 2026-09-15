@@ -109,7 +109,11 @@ La definición cuantifica sobre **toda** distribución de $M$, y la caracterizac
 
 *Modelo.* $K$ uniforme, $\Pr[K{=}k_0] = \Pr[K{=}k_1] = \tfrac12$, independiente de $M$; $\lvert\mathcal{K}\rvert = \lvert\mathcal{M}\rvert = 2$.
 *Condicionales.* En la fila $m_0$ el $1$ sale solo con $k_0$ y el $2$ solo con $k_1$; en la fila $m_1$, al revés. Cada casilla tiene una única clave, así que $\Pr[C{=}1 \mid M{=}m_0] = \Pr[K{=}k_0] = \tfrac12$, $\Pr[C{=}1 \mid M{=}m_1] = \Pr[K{=}k_1] = \tfrac12$, y lo mismo con $c = 2$.
-*Veredicto.* Las dos filas coinciden: $\Pr[C{=}c \mid M{=}m_0] = \Pr[C{=}c \mid M{=}m_1] = \tfrac12$ para $c = 1, 2$. Hay secreto perfecto, para toda distribución de $M$. Cierre: $\Pr[C{=}1] = 0{,}7\cdot\tfrac12 + 0{,}3\cdot\tfrac12 = \tfrac12$ y $\Pr[M{=}m_0 \mid C{=}1] = \dfrac{\tfrac12\cdot 0{,}7}{\tfrac12} = 0{,}7 = \Pr[M{=}m_0]$; el $0{,}7$ entra y sale sin tocar nada.
+*Veredicto.* Las dos filas coinciden: $\Pr[C{=}c \mid M{=}m_0] = \Pr[C{=}c \mid M{=}m_1] = \tfrac12$ para $c = 1, 2$. Hay secreto perfecto, para toda distribución de $M$. Cierre:
+
+$$\Pr[C{=}1] = 0{,}7\cdot\tfrac12 + 0{,}3\cdot\tfrac12 = \tfrac12, \qquad \Pr[M{=}m_0 \mid C{=}1] = \frac{\tfrac12\cdot 0{,}7}{\tfrac12} = 0{,}7 = \Pr[M{=}m_0];$$
+
+el $0{,}7$ entra y sale sin tocar nada.
 *Condiciones.* $\lvert\mathcal{K}\rvert = 2 = \lvert\mathcal{M}\rvert$, clave uniforme, una clave por mensaje. La tabla no repite valores en ninguna fila ni columna: es el OTP de un bit, con $m_0, 1 \mapsto 0$ y $m_1, 2 \mapsto 1$.
 
 ## Trampas

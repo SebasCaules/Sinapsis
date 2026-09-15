@@ -46,7 +46,11 @@ El veredicto depende de cómo se comparan $l$ y $n$.
 
 $$\Pr[C{=}c \mid M{=}m] = \frac{26^{\,l-n}}{26^{\,l}} = 26^{-n} \qquad \text{para todo } m \in \mathcal{M},\ c \in \mathcal{C},$$
 
-valor que no depende de $m$: $\Pr[C{=}c \mid M{=}m] = \Pr[C{=}c \mid M{=}m'] = 26^{-n}$ para todo par $m, m'$. Hay secreto perfecto. Para cerrarlo con la definición: $\Pr[C{=}c] = \sum_{m} \Pr[M{=}m]\,\Pr[C{=}c \mid M{=}m] = 26^{-n} \sum_m \Pr[M{=}m] = 26^{-n}$, y por Bayes
+valor que no depende de $m$: $\Pr[C{=}c \mid M{=}m] = \Pr[C{=}c \mid M{=}m'] = 26^{-n}$ para todo par $m, m'$. Hay secreto perfecto. Para cerrarlo con la definición:
+
+$$\Pr[C{=}c] = \sum_{m} \Pr[M{=}m]\,\Pr[C{=}c \mid M{=}m] = 26^{-n} \sum_m \Pr[M{=}m] = 26^{-n},$$
+
+y por Bayes
 
 $$\Pr[M{=}m \mid C{=}c] = \frac{\Pr[C{=}c \mid M{=}m]\,\Pr[M{=}m]}{\Pr[C{=}c]} = \frac{26^{-n}\,\Pr[M{=}m]}{26^{-n}} = \Pr[M{=}m],$$
 
@@ -95,7 +99,11 @@ $$\Pr[C{=}1 \mid M{=}0] = \Pr[k_0 \oplus k_1 = 1] = \tfrac12, \qquad \Pr[C{=}1 \
 
 Las dos filas son iguales: $\Pr[C{=}c \mid M{=}0] = \Pr[C{=}c \mid M{=}1] = \tfrac12$ para $c = 0, 1$. La distribución del criptograma no depende del mensaje, luego el esquema tiene secreto perfecto, para cualquier distribución de $M$.
 
-**Cierre con la definición (Bayes).** Con la distribución del enunciado, $\Pr[C{=}0] = \Pr[M{=}0]\,\Pr[C{=}0 \mid M{=}0] + \Pr[M{=}1]\,\Pr[C{=}0 \mid M{=}1] = 0{,}9 \cdot \tfrac12 + 0{,}1 \cdot \tfrac12 = \tfrac12$, y del mismo modo $\Pr[C{=}1] = \tfrac12$. Entonces
+**Cierre con la definición (Bayes).** Con la distribución del enunciado,
+
+$$\Pr[C{=}0] = \Pr[M{=}0]\,\Pr[C{=}0 \mid M{=}0] + \Pr[M{=}1]\,\Pr[C{=}0 \mid M{=}1] = 0{,}9 \cdot \tfrac12 + 0{,}1 \cdot \tfrac12 = \tfrac12,$$
+
+y del mismo modo $\Pr[C{=}1] = \tfrac12$. Entonces
 
 $$\Pr[M{=}0 \mid C{=}0] = \frac{\Pr[C{=}0 \mid M{=}0]\,\Pr[M{=}0]}{\Pr[C{=}0]} = \frac{\tfrac12 \cdot 0{,}9}{\tfrac12} = 0{,}9 = \Pr[M{=}0], \qquad \Pr[M{=}1 \mid C{=}0] = \frac{\tfrac12 \cdot 0{,}1}{\tfrac12} = 0{,}1 = \Pr[M{=}1],$$
 
