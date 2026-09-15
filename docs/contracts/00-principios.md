@@ -188,8 +188,11 @@ imprime como advertencia y el material se emite igual. Los `IssueKind` existente
 
 Esas advertencias viajan de tres maneras: las imprime el CLI (`publish`, con o sin
 `--dry-run`), van al cuerpo del pull request de la materia, y quedan guardadas en
-`SiteSubject.warnings` (tope 500) para el reporte de la plataforma. Ninguna detiene la
-publicación. `site build --strict` es la única excepción, y es una decisión del build, no del
+`SiteSubject.warnings` (tope 500) para el reporte de la plataforma. En los tres lugares es
+**la misma lista** (`subjectWarnings`, en `packages/cli/src/site/warnings.ts`): las
+`CompileIssue` más las advertencias de coherencia que antes levantaba el API —una página sin
+división y fuera de `wiki.standalone`, una referencia rota del material de estudio—. Ninguna
+detiene la publicación. `site build --strict` es la única excepción, y es una decisión del build, no del
 contrato: sirve para que el CI no deje pasar contenido roto sin que nadie lo mire.
 
 ### 6.2 Errores del compilador — solo contención de rutas

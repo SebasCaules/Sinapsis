@@ -38,6 +38,7 @@ import { ghReady, git, githubRemote, hasRef, repoRoot, runCommand } from "../git
 import { countsByDivision, countsByType, heading, studyLine, warnings as printWarnings, webUrl } from "../report.js";
 import { buildBundle, findBundles, formatBytes, MANIFEST_FILE, type BuiltBundle } from "../tools/bundle.js";
 import { GENERATOR } from "../version.js";
+import { subjectWarnings } from "../site/warnings.js";
 import { resolveInside } from "./site.js";
 import { DEFAULT_CONFIG, loadConfig } from "./validate.js";
 import { resolveRepo } from "./propose.js";
@@ -94,7 +95,12 @@ export async function runPublish(opts: PublishOptions, ctx: Ctx): Promise<number
     return 1;
   }
 
-  const { payload, warnings } = compiled;
+  const { payload } = compiled;
+  // Las mismas advertencias que `site build` escribe en `subject.json`: las del
+  // compilador más las de coherencia (página sin división y fuera de
+  // `wiki.standalone`, referencias rotas del estudio…). Van a la consola, al
+  // cuerpo del commit y al del PR.
+  const warnings = subjectWarnings(config, compiled);
 
   heading(ctx, config);
   ctx.out(`  wiki: ${pc.dim(compiled.wikiRoot)}`);
