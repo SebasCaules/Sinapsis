@@ -1,8 +1,8 @@
 ---
 title: Segundo parcial
-resumen: 'Hub de la sección 2P: qué cubre el segundo parcial del 19/11 y qué falta para armarle resúmenes por tipo de ejercicio, que hoy no se pueden escribir porque el vault no tiene ningún segundo parcial viejo ni las guías de esa mitad.'
+resumen: 'Hub de la sección 2do Parcial: qué cubre el segundo parcial del 19/11 y qué falta para armarle resúmenes por tipo de ejercicio, que hoy no se pueden escribir porque el vault no tiene ningún segundo parcial viejo ni las guías de esa mitad.'
 fuentes: ["[[cronograma]]", "[[reglamento-y-evaluacion]]", "[[parciales-viejos]]"]
-aliases: [Segundo parcial, 2P, Sección 2P, Parcial 2]
+aliases: [Segundo parcial, 2do Parcial, 2P, Parcial 2]
 type: parcial
 clase: 2p
 orden: 1
@@ -20,7 +20,7 @@ sources: ["raw/material_Catedra/Cronograma_Cripto.pdf", "raw/material_Catedra/Re
 
 ## Qué hay y qué falta
 
-Esta sección tendrá la misma forma que [[primer-parcial|1P]]: por cada tipo de ejercicio, una página que lo deja en receta y otra con los ejercicios que ya se tomaron. Todavía no se puede escribir, por tres razones que están medidas en el [[cronograma]]:
+Esta sección tendrá la misma forma que [[primer-parcial|1er Parcial]]: por cada tipo de ejercicio, una página que lo deja en receta y otra con los ejercicios que ya se tomaron. Todavía no se puede escribir, por tres razones que están medidas en el [[cronograma]]:
 
 - **No hay ningún segundo parcial viejo en el vault.** Los cuatro parciales de [[parciales-viejos|Parciales viejos]] son primeros parciales; sin muestras no se sabe qué tipos de ejercicio se toman ni con qué consigna.
 - **Las Guías 5 a 10 todavía no se publicaron.** Son la práctica de esta mitad y la fuente más directa de los enunciados de examen.
@@ -30,4 +30,4 @@ Lo que sí hay para empezar: las notas anticipadas [[clase-06-politicas-de-segur
 
 ## Cuándo se completa
 
-A medida que la cátedra publique cada guía y dicte cada clase, esta sección se arma con el mismo método que la 1P: primero la tabla de tipos de ejercicio a partir de las guías y de cualquier parcial viejo que aparezca, después el par de páginas por tipo.
+A medida que la cátedra publique cada guía y dicte cada clase, esta sección se arma con el mismo método que la 1er Parcial: primero la tabla de tipos de ejercicio a partir de las guías y de cualquier parcial viejo que aparezca, después el par de páginas por tipo.

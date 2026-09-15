@@ -14,7 +14,13 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # Verdadero o Falso, con corrección
 
-Es el ejercicio que cierra el parcial: Ej. 5 en [[parciales-viejos#2C-2025|2C-2025]], [[parciales-viejos#1C-2025|1C-2025]] y [[parciales-viejos#1C-2023|1C-2023]], y Ej. 2 en [[parciales-viejos#1C-2018|1C-2018]], donde toma la forma de múltiple choice; el 1C-2023 trae además un múltiple choice suelto sobre SSL, TLS y PKI. La consigna se repite textual: «Verdadero o Falso. Si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado». Son cuatro sentencias que mezclan temas de las Clases 1 a 5, y marcar «Falso» sin reescribir no vale puntos. En la variante de múltiple choice la consigna es «Elegir la opción correcta y justificar en una oración».
+> [!ejemplo] Así se tomó · 2C-2025, Ejercicio 5
+> Verdadero o Falso. Si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado.
+>
+> - a) MD5 es un criptosistema de encripción asimétrico que no debe ser utilizado porque usa una longitud de clave de 128 bits.
+> - b) Un protocolo de autenticación basado únicamente en un MAC simétrico provee confidencialidad, integridad y no repudio entre las partes.
+> - c) El uso de padding aleatorio en la implementación del algoritmo de clave pública de RSA es para que el algoritmo sea seguro a ataque de textos cifrados elegidos.
+> - d) Un certificado digital emitido por una autoridad certificante contiene siempre la clave pública de la CA.
 
 ## Lo mínimo que hay que saber
 

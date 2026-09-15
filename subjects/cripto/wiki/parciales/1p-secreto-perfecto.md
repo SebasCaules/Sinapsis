@@ -14,7 +14,12 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # Secreto perfecto, demostrado
 
-Aparece en dos de los cuatro parciales viejos —[[parciales-viejos#2C-2025|2C-2025]] y [[parciales-viejos#1C-2025|1C-2025]]— y en los dos como Ej. 4, justo antes del Verdadero o Falso; no está en 1C-2023 ni en 1C-2018. La consigna define un criptosistema pequeño con fórmulas —un Vigenère formal sobre $\mathbb{Z}_{26}$ con clave de largo $l$ y mensajes de largo $n$; un cifrado de un bit con clave de dos bits— y pide «demostrar si este sistema tiene secreto perfecto y ante qué condiciones sobre los parámetros» o «verificar si un atacante tiene éxito en un ataque de texto cifrado». Es material de la Clase 1, repasado en la Práctica 2; los dos ejercicios resueltos están en la página de viejos de este tipo.
+> [!ejemplo] Así se tomó · 1C-2025, Ejercicio 4
+> Dado el siguiente criptosistema $Exp_{eav}(\mathbf{A}, n)$, verificar si un atacante tiene éxito en un ataque de texto cifrado.
+>
+> $$c = E_k(m) = (m \oplus k_0) \oplus f(k_1),$$
+>
+> con $f(\cdot)$ la función identidad, $f(0) = 0$ y $f(1) = 1$ y $k = k_0k_1 \in \{0,1\}^2$ uniformemente distribuídas, y teniendo en cuenta $m, c \in \{0,1\}$ y que $Pr[m = 0] = 0{,}9$ y $Pr[m = 1] = 0{,}1$.
 
 ## Lo mínimo que hay que saber
 

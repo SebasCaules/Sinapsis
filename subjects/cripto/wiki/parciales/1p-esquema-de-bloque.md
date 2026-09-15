@@ -14,8 +14,13 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # ¿Es válido este esquema de bloque?
 
-Aparece en los cuatro parciales viejos, siempre en el medio del examen (Ej. 2, 3 o 4; nunca el primero, que es un protocolo, ni el último, que es Verdadero o Falso): seis ejercicios en cuatro parciales, dos en 1C-2023 y dos en 1C-2018. Nunca se pregunta qué es `CBC`: se inventa un esquema —un encadenamiento $C_i = \ldots$ o un criptosistema con parámetros— y hay que decidir si sirve.
-La consigna se repite casi textual en 2C-2025 y 1C-2025: *"¿Es este un esquema de cifrado en bloque válido? Explicar y eventualmente corregirlo para que lo sea"* y *"Comparar la confidencialidad y la tolerancia a errores de transmisión de este sistema contra CBC, CTR y OFB"*. Las variantes piden explicar un `CTR` con una primitiva sin inversa (1C-2023 Ej. 2), demostrar con un experimento $\mathrm{PrivK}^{\mathrm{CPA}}$ que un criptosistema no es seguro (1C-2023 Ej. 4) o razonar qué pasa al quitar o anteponer bloques de un `CBC` (1C-2018 Ej. 3).
+> [!ejemplo] Así se tomó · 1C-2025, Ejercicio 2
+> Consideren el siguiente sistema de encripción en bloque para los mensajes $M_1M_2 \ldots M_n$, que generan los cifrados $C_0C_1C_2 \ldots C_n$.
+>
+> $$\begin{aligned} C_0 &= IV \\ C_i &= E_k(M_i) \oplus C_{i-1}, i = 1, 2, \ldots \end{aligned}$$
+>
+> - a) ¿Es este un esquema de cifrado en bloque válido? Explicar.
+> - b) Comparar la confidencialidad y la tolerancia a errores de transmisión de este sistema contra CBC, CTR y OFB.
 
 ## Lo mínimo que hay que saber
 

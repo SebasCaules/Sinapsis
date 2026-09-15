@@ -14,9 +14,15 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # MAC, hash e integridad
 
-Aparece de dos formas. Como **ejercicio completo** salió una vez en cuatro parciales: el Ej. 3 del [[parciales-viejos#1C-2025|1C-2025]] da un criptosistema inventado, $c = E_{k_1}(m \Vert H(k_2 \Vert m))$, y pregunta *a)* qué hace el receptor paso a paso, *b)* si un atacante puede modificar el mensaje, *c)* si provee autenticación y *d)* si provee no repudio. Como **sentencias de Verdadero o Falso** —siempre con la consigna *"si es falso, corrija la sentencia para que sea verdadera e identifique el cambio realizado"*— salió en el [[parciales-viejos#2C-2025|2C-2025]] (Ej. 5b) y en el [[parciales-viejos#1C-2023|1C-2023]] (Ej. 5a y 5b); en el [[parciales-viejos#1C-2018|1C-2018]] no apareció, y el Ej. 1 del 2C-2025 lo roza, pero es un protocolo y se analiza con los protocolos.
-
-Ninguno de los cuatro tomó `CBC-MAC`, `HMAC`, Merkle-Damgård, la paradoja del cumpleaños ni `CCM`/`GCM` como ejercicio propio: la Clase 3 entra como *"¿este esquema da integridad?"* y como Verdadero o Falso. Eso ordena el estudio: el argumento de integridad, autenticación y no repudio hay que saberlo escribir; las construcciones con nombre hay que saberlas reconocer y corregir.
+> [!ejemplo] Así se tomó · 1C-2025, Ejercicio 3
+> Dado el siguiente criptosistema $c = E_{k1}(\,m \Vert H(k2 \Vert m)\,)$.
+>
+> donde $m$ es un mensaje de tamaño fijo, $H$ es una función de hash criptográfica, $E_k(\cdot)$ es una primitiva de encripción simétrica y $\Vert$ implica concatenación; $k1$ y $k2$ son claves compartidas entre Bob y Alice.
+>
+> - a) Detallar el paso a paso itemizado de lo que debería hacer el receptor al recibir $c$.
+> - b) ¿Puede un atacante modificar el mensaje? Explicar la integridad del criptosistema.
+> - c) ¿Provee el protocolo algún esquema de autenticación? Explicar.
+> - d) ¿Provee el esquema algún mecanismo de no-repudio? Explicar.
 
 ## Lo mínimo que hay que saber
 

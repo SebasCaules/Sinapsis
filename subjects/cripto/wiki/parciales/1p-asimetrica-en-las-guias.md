@@ -16,7 +16,7 @@ sources: ["raw/guias/guia4/Guia 4 - Manejo de claves - Cifrado Asimétrico - Fir
 
 Esta página no es «los que ya se tomaron»: **ningún parcial viejo tomó cuentas de asimétrica**. En los cuatro parciales de [[parciales-viejos|Parciales viejos]] no hay un solo `RSA`, El Gamal ni firma con números. Diffie-Hellman apareció una vez, en el [[parciales-viejos#1C-2025|1C-2025]] Ej. 1, y se tomó como protocolo —qué es, por qué el módulo tiene que ser primo, dónde reside la seguridad y qué problemas tiene—, sin cuentas; está resuelto en [[1p-protocolos-en-parciales-viejos|Protocolos en los parciales viejos]]. Por eso lo que sigue son los cuatro ejercicios de la [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital|Guía 4]] que más se parecen a lo que puede tomarse de la Clase 4 —dos de Diffie-Hellman y dos ataques a *textbook* `RSA`—, cada uno con enunciado completo, respuesta modelo y tips, y al final tres ejercicios con números inventados para practicar la aritmética que la guía no trae. Todas las cuentas están verificadas con Python.
 
-La receta y las trampas de este tipo están en [[1p-cuentas-de-asimetrica|'Cuentas de asimétrica: RSA, Diffie-Hellman, El Gamal y firma']]; la sección entera empieza en [[primer-parcial|Primer parcial]].
+La receta y las trampas de este tipo están en [[1p-cuentas-de-asimetrica|Cuentas de asimétrica: RSA, Diffie-Hellman, El Gamal y firma]]; la sección entera empieza en [[primer-parcial|Primer parcial]].
 
 ## Guía 4 · Ej. 6 — Diffie-Hellman entre tres
 

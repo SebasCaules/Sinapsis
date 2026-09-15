@@ -14,7 +14,22 @@ sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 
 # Analizar un protocolo
 
-El Ej. 1 de los cuatro parciales viejos —2C-2025, 1C-2025, 1C-2023 y 1C-2018— es siempre un protocolo: una tabla de mensajes numerados entre $A$ y $B$ (o $C$ y $S$, a veces con un tercero $T$) y tres preguntas en el mismo orden. La primera es textual en tres de los cuatro: *«¿Qué tipo de protocolo sería? ¿Qué es lo que el protocolo intenta construir?»*. La segunda pregunta para qué sirve un mensaje o un campo, y la tercera si es susceptible a un ataque —man in the middle, replay— o qué problema tiene. Es el ejercicio que abre el examen y es material de la [[clase-05-protocolos-criptograficos|Clase 05]]; los cuatro resueltos están en [[parciales-viejos|Parciales viejos]].
+> [!ejemplo] Así se tomó · 2C-2025, Ejercicio 1
+> Dado el siguiente protocolo
+>
+> |  |  |  |  |
+> | --- | --- | --- | --- |
+> | (1.1) | $A \to B$ | $r_A$ | $r_A$ es un número al azar que elige A |
+> | (1.2) | $A \leftarrow B$ | $(B, A, r_A, r_B), h_K(B, A, r_A, r_B, K')$ | $r_B$ número al azar de B, $h_K(\cdot)$ MAC |
+> | (1.3) | $A \to B$ | $(A, r_B), h_K(A, r_B, K')$ |  |
+> | (1.4) | $A$ |  | $W = h'_{K'}(r_B)$ |
+> | (1.5) | $B$ |  | $W = h'_{K'}(r_B)$ |
+>
+> donde A y B comparten dos claves simétricas $K$ y $K'$. $h'_{K'}(\cdot)$ es una función de MAC diferente de $h_K(\cdot)$ .
+>
+> - a) ¿Qué tipo de protocolo sería? ¿Qué es lo que el protocolo intenta construir?
+> - b) ¿Qué le permiten hacer a A y B los mensajes cruzados 1.2 y 1.3?
+> - c) ¿Es este protocolo suceptible a un ataque MiTM? Justificar.
 
 ## Lo mínimo que hay que saber
 

@@ -39,7 +39,7 @@
     },
     {
       "key": "1p",
-      "name": "1P",
+      "name": "1er Parcial",
       "kind": "extra",
       "color": "--ueval"
     },
@@ -75,13 +75,13 @@
     },
     {
       "key": "2p",
-      "name": "2P",
+      "name": "2do Parcial",
       "kind": "extra",
       "color": "--ueval"
     },
     {
       "key": "f",
-      "name": "F",
+      "name": "Finales",
       "kind": "extra",
       "color": "--ueval"
     },
