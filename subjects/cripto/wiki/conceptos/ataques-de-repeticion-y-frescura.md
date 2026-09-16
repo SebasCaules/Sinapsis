@@ -1,14 +1,14 @@
 ---
 title: Ataques de repetición y frescura
 resumen: 'Un MAC infalsificable no impide que un atacante reenvíe tal cual un mensaje válido: el experimento Mac-Forge deja el replay afuera por definición, y la frescura la aporta el protocolo con números de secuencia o timestamps.'
-fuentes: ["[[practica-04-macs-hash-y-cifrado-autenticado]]", "[[seguridad-de-un-mac]]"]
+fuentes: ["[[practica-04-macs-hash-y-cifrado-autenticado]]", "[[seguridad-de-un-mac]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Ataques de repetición y frescura, Ataque de repetición, Replay, Replay attack, Frescura, Freshness, Número de secuencia, Números de secuencia, Timestamp, Timestamps, Ataque de reflexión]
 type: concepto
 unidad: 1
 clase: 3
 orden: 18
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-15
 tags: [criptografia, mac, replay, frescura, integridad, protocolos, nonce, numero-de-secuencia, timestamp, clase-03, practica-04]
 sources: ["Clase 4.pdf (Práctica 4, 31/08/2026)", "Katz & Lindell cap. 4"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 4.pdf (Práctica 4, 31/08/2026)", "Katz & Lindell cap. 4"]
 **Un MAC puede ser demostrablemente infalsificable y no impedir que un atacante reenvíe diez veces la misma orden de transferencia bancaria.** El agujero no está en la construcción: está en la **definición**, y por lo tanto lo heredan por igual todos los esquemas que la cumplen. Ésta es la nota donde se ve que la frontera entre lo que resuelve la primitiva y lo que tiene que resolver el protocolo que la usa no es difusa —está trazada con precisión, y este ataque cae del otro lado.
 
 Sale de una sola fuente de la cátedra: **la filmina 2 de la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] (31/08)**, donde aparece con un triángulo rojo de advertencia. En todo el resto del material de la Clase 03 no existe.
+
+> **Desde el 14/09 hay una segunda mención**: la filmina 8 de la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] lista *Replay* y *Key Reuse* entre los cuatro ataques a un protocolo —junto a *masquerading* y *man in the middle*, que sí define—, sin desarrollarlos. Sigue siendo la Práctica 04 la única que explica el replay y da sus contramedidas.
 
 ---
 

@@ -1,14 +1,14 @@
 ---
 title: RSA
 resumen: 'El criptosistema asimétrico de exponenciación modular en su versión de libro de texto, con la demostración por Euler que el docente hizo en pantalla, y los tres problemas que impiden usarlo así: determinismo, mensajes pequeños y módulos repetidos.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[criptosistema-asimetrico]]", "[[grupos-anillos-y-cuerpos]]", "[[pkcs1-y-tamano-de-claves]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[criptosistema-asimetrico]]", "[[grupos-anillos-y-cuerpos]]", "[[pkcs1-y-tamano-de-claves]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [RSA, Textbook RSA, Rivest Shamir Adleman, Cifrado RSA, Ataque de módulos repetidos]
 type: concepto
 unidad: 1
 clase: 4
 orden: 6
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, rsa, textbook-rsa, cifrado-asimetrico, factorizacion, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **El criptosistema asimétrico más conocido del curso, en su versión "de libro de texto" — y los tres problemas concretos que hacen que nadie lo use exactamente así en producción.** Es la nota que explica por qué RSA necesita el padding de [[pkcs1-y-tamano-de-claves|PKCS#1]] para ser utilizable, no un capricho de estandarización.
 
 > **Fuentes de esta nota.** Filminas **24 a 26** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT), bloque de `RSA` en los cues **746-899**. La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09. Lo que la voz agregó: la **demostración en pantalla** de que descifrar deshace cifrar —que esta nota traía como lectura propia—, la anécdota de los ataques algebraicos, y el ejemplo del mensaje $1$. El ejemplo numérico de la filmina 26 se pasó *"más o menos rápido"* (cue 899).
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) escribe la generación de claves como $\mathsf{GenRSA}$ sobre $\mathsf{GenModulus}(1^{n})$** —la separación en capas de Katz & Lindell §11.5.1, que la filmina 24 no hace— y la **corre**: `openssl genrsa` y `openssl rsa -text`, con lo que hay dentro de `privada.txt` ($p$, $q$, $N$, $e = 65537$, $d$ y los tres parámetros del teorema chino del resto). Su demostración de que descifrar deshace cifrar cabe en una línea, y esa línea se salta justo el paso de Euler que la voz desarrolló en pantalla → [[practica-05-de-la-clave-privada-a-la-clave-publica#8. GenRSA, y la clave por dentro con openssl|Práctica 05 §8]] y [[practica-05-de-la-clave-privada-a-la-clave-publica#La demostración en una línea, y el paso que se saltea|§9]].
 
 **Cómo lo ubica la clase.** `RSA` es *"uno de los algoritmos más famosos, ya no el más usado"*; hereda el nombre de las iniciales de Rivest, Shamir y Adleman, y *"tiene la bondad de ser muy simple: si no fuese por otros problemas que se le encontraron, sería como el Diffie-Hellman de los asimétricos, lo usaría todo el mundo"* (cues 746-753). Y una observación general sobre el mundo asimétrico que `RSA` ilustra mejor que nadie: como hay que generar **un par** de claves que no son independientes, **la complejidad se traslada a la generación de claves** —hasta ahora `Gen` elegía una clave al azar y nada más (cues 754-757).
 

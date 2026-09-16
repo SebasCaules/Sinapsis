@@ -1,14 +1,14 @@
 ---
 title: Distribución de claves y KDC
 resumen: 'El problema de compartir una clave simétrica cuando el único canal es inseguro: una clave por par crece de forma cuadrática y el KDC lo baja a $n$ claves con claves de sesión, a costa de un único punto de falla y de una base mínima de confianza que nunca desaparece.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[clase-03-macs-y-cifrado-autenticado]]", "[[intercambio-de-claves]]", "[[cifrado-autenticado]]", "[[needham-schroeder]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[clase-03-macs-y-cifrado-autenticado]]", "[[intercambio-de-claves]]", "[[cifrado-autenticado]]", "[[needham-schroeder]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Distribución de claves y KDC, KDC, Key Distribution Center, Trusted Third Party, Clave de sesión, Kerberos, Base mínima de confianza]
 type: concepto
 unidad: 1
 clase: 4
 orden: 1
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, distribucion-de-claves, kdc, gestion-de-claves, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **El problema que hace falta resolver antes de poder usar cualquiera de los esquemas simétricos de las clases 2 y 3: cómo llegan $A$ y $B$ a compartir una clave si el único canal que tienen es inseguro.** Es la nota que explica por qué el curso da un giro hacia una maquinaria completamente distinta —la criptografía asimétrica— apenas termina de cerrar el cifrado autenticado.
 
 > **Fuentes de esta nota.** Filminas **2 a 5** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT), bloque de distribución de claves en los cues **1-114**, los primeros catorce minutos de la clase. La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09: lo que la voz agregó es la **base mínima de confianza**, la respuesta a un alumno sobre las claves iniciales, y la confirmación de lo que las imágenes de la filmina 5 sólo insinuaban.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) vuelve sobre este tramo cuatro días después, y trae dos cosas que la teoría no.** Primero, **la lista de las tres limitaciones** de la clave privada —distribución, almacenamiento, sistemas abiertos—, con una flecha que dice que el KDC resuelve las dos primeras y que la tercera es la que obliga a la clave pública: es Katz & Lindell §10.1-10.2, y ninguna filmina de la Clase 04 la enumera. Segundo, un diagrama de KDC en el que el centro le manda la clave de sesión **a cada parte** y que la lámina rotula *"Ej: Needham Schroeder"* — y no lo es: ése es el KDC simplificado del libro, y Needham-Schroeder es la variante en la que $A$ recibe las dos partes y reenvía el ticket. Detalle en [[practica-05-de-la-clave-privada-a-la-clave-publica#3. Las tres limitaciones de la clave privada, y qué resuelve el KDC|Práctica 05 §3]].
 
 ## El problema
 

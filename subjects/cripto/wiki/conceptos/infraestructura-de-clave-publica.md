@@ -1,14 +1,14 @@
 ---
 title: Infraestructura de clave pública
 resumen: 'Conjunto de mecanismos organizativos y criptográficos cuyo objetivo es asociar una identidad a una clave pública y evitar la suplantación; no aplica a criptosistemas simétricos, donde el análogo es un KDC.'
-fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[ataques-activos-y-man-in-the-middle]]", "[[clase-04-criptografia-asimetrica-y-firma-digital]]"]
+fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[ataques-activos-y-man-in-the-middle]]", "[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Infraestructura de clave pública, PKI, Public Key Infrastructure, Asociar identidad y clave]
 type: concepto
 unidad: 1
 clase: 5
 orden: 2
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-15
 tags: [criptografia, protocolos, pki, administracion-de-claves, clase-05, sin-dictar]
 sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 ---
@@ -18,6 +18,8 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 **La respuesta de administración de claves al problema que deja planteado el ataque man in the middle: cómo atar una clave pública a la identidad correcta, para que sustituirla deje de ser gratis.** Es la nota más corta de la clase — una sola filmina — pero es la que fija el objetivo que las tres secciones siguientes (certificados, cadenas de firmas, X.509) van a resolver en detalle.
 
 Cubre la **filmina 7** del PDF de teoría de la Clase 05. **Esta clase todavía no se dictó** — hoy es 04/09/2026, la fecha del [[cronograma]] es el 17/09 —, así que la nota está escrita contra el PDF de filminas, Katz & Lindell y lecturas propias rotuladas; no hay transcripción de esta clase. La filmina es de puro texto en viñetas, sin fórmulas ni diagramas, y coincide entre el texto extraído y la página renderizada.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) resumió esta sección tres días antes de que se dicte**, en su filmina 19: *"PKI: Public Key Infrastructure. Define cómo distribuir $\langle pk, sk\rangle$"*, una caja *Certificados*, y las viñetas *Jerarquías* y *Validez* (expiración, revocación), con el enlace a `https://pki.jgm.gov.ar/`, la AC Raíz argentina. Una palabra de más: la PKI distribuye **claves públicas**; $sk$ no se distribuye nunca. Ver [[practica-05-de-la-clave-privada-a-la-clave-publica#13. PKI en una lámina|Práctica 05 §13]].
 
 ## Definición y objetivo
 

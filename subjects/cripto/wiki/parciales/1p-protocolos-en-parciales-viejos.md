@@ -7,7 +7,7 @@ type: parcial
 clase: 1p
 orden: 11
 created: 2026-09-14
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [parcial, primer-parcial, protocolos, parciales-viejos, diffie-hellman, needham-schroeder, tls]
 sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 ---
@@ -94,7 +94,7 @@ Los valores válidos de $q$ son los **primos**: con $q$ primo existe una raíz p
 
 ### Tips
 
-- El ejemplo numérico se verifica antes de escribirlo: liste las potencias de $g$ para mostrar que es raíz primitiva y elija exponentes con $h_1, h_2 \neq 1$. Con $g = 2$, $x = 3$, $y = 4$ en $\mathbb{Z}_5$ las cuentas cierran pero $h_2 = 2^4 \equiv 1$ y la clave sale $k = 1$: un ejemplo degenerado no muestra nada.
+- El ejemplo numérico se verifica antes de escribirlo: liste las potencias de $g$ para mostrar que es raíz primitiva y elija exponentes con $h_1, h_2 \neq 1$ **y $k \neq 1$**. Con $g = 2$, $x = 3$, $y = 4$ en $\mathbb{Z}_5$ las cuentas cierran pero $h_2 = 2^4 \equiv 1$ y la clave sale $k = 1$: un ejemplo degenerado no muestra nada. Y no alcanza con mirar $h_1$ y $h_2$: el ejemplo de la cátedra en la [[practica-05-de-la-clave-privada-a-la-clave-publica#Por qué da 1, y qué enseña|Práctica 05]] —$\mathbb{Z}_7$, $g = 3$, los mismos $x = 3$, $y = 4$— tiene $h_1 = 6$, $h_2 = 4$ y aun así $k = 1$, porque $xy = 12$ es múltiplo del orden $6$. Un par que sirve ahí: $x = 2$, $y = 5$, $k = 4$.
 - «$q$ primo» vale puntos solo con el porqué: existencia de la raíz primitiva. Agregue «y grande» en una línea.
 - En (c) la frase que se espera es «$x$ e $y$ nunca se transmiten y obtenerlos de $g^x$, $g^y$ es el logaritmo discreto». Diga «sin algoritmo eficiente conocido», no «NP-hard»; nombrar DDH como la hipótesis fuerte suma.
 - En (d) escriba el MitM como secuencia, no como adjetivo. «No autentica a las partes» y «es vulnerable a MitM» son el mismo problema: no los cuente como dos. El segundo es el costo de la exponenciación.

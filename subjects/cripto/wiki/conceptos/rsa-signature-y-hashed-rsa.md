@@ -1,14 +1,14 @@
 ---
 title: RSA-Signature y Hashed RSA
 resumen: 'Firma que invierte los papeles de las claves de RSA, rota por dos falsificaciones de probabilidad 1 —elegir la firma al azar y multiplicar dos firmas— y además limitada al tamaño del módulo; su arreglo con un hash previo resuelve las dos cosas, sin prueba fuera de un modelo ideal.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[firma-digital]]", "[[rsa]]", "[[maleabilidad]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[firma-digital]]", "[[rsa]]", "[[maleabilidad]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [RSA-Signature, RSA Signature, Hashed RSA, Firma RSA sin hash, Ataque multiplicativo sobre RSA-Signature, Ataque de no mensaje]
 type: concepto
 unidad: 1
 clase: 4
 orden: 11
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, firma-digital, rsa, hashed-rsa, maleabilidad, sig-forge, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **Por qué invertir los papeles de las claves de `RSA` para firmar es, tal cual, un esquema roto —dos ataques con probabilidad de éxito 1— y cómo agregar un hash lo arregla, aunque sin demostración fuera de un modelo ideal.**
 
 > **Fuentes de esta nota.** Filminas **36-38** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT), cues **1133-1156**. La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09. La voz dio el ataque multiplicativo y **agregó una razón que la filmina no trae** —la firma sin hash mide lo mismo que el mensaje—; el ataque de la firma al azar no se mencionó en el aula, aunque es el que la [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital#Ejercicio 16|Guía 4]] pide en su Ej. 16.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) le pone nombre de cátedra al primer ataque**: su filmina 17 sentencia *Textbook RSA para firma* como **"INSEGURO (Ataque de no mensaje)"**, el nombre de la literatura para la firma al azar que la voz no mencionó y que el Ej. 16 de la Guía 4 pide. Y su filmina 18 titula *"Hash RSA **reduce riesgo**"* —no *"es seguro"*—, la formulación honesta que coincide con el límite de esta nota. Ver [[practica-05-de-la-clave-privada-a-la-clave-publica#12. Textbook RSA para firma, el ataque de no mensaje y el hash que reduce el riesgo|Práctica 05 §12]].
 
 **Cómo lo ubica la clase.** *"Hay 2 firmas digitales muy utilizadas"*: ésta, que es *"una variante de RSA que usa la idea de RSA pero pensada al revés"*, y [[digital-signature-standard|DSS]] (cues 1133-1134).
 

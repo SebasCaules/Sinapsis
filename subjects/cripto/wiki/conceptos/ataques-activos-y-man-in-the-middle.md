@@ -1,14 +1,14 @@
 ---
 title: Ataques activos y man in the middle
 resumen: 'Los cuatro poderes de un adversario que además de escuchar puede escribir en el canal —omitir, reescribir, reordenar y repetir— y la sustitución de clave pública que rompe todo esquema de intercambio visto hasta la Clase 04.'
-fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[modelos-de-ataque]]", "[[infraestructura-de-clave-publica]]"]
+fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[modelos-de-ataque]]", "[[infraestructura-de-clave-publica]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Ataques activos, Man in the middle, MITM, Repositorio de claves públicas, Sustitución de clave pública, Ataque activo sobre el intercambio de claves]
 type: concepto
 unidad: 1
 clase: 5
 orden: 1
 created: 2026-09-04
-updated: 2026-09-06
+updated: 2026-09-15
 tags: [criptografia, protocolos, mitm, ataques-activos, administracion-de-claves, clase-05, sin-dictar]
 sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 ---
@@ -18,6 +18,8 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 **Por qué ningún protocolo de intercambio de claves visto hasta la Clase 04 sobrevive a un adversario que puede modificar mensajes, y no solo leerlos.** Es la nota que explica el salto de modelo de amenaza que motiva toda la clase: pasar de "alguien escucha" a "alguien puede mentir en el medio".
 
 Cubre las filminas **2 a 6** del PDF de teoría de la Clase 05. **Esta clase todavía no se dictó** — hoy es 04/09/2026 y la fecha del [[cronograma]] es el 17/09 — así que la nota está escrita contra el PDF de filminas, Katz & Lindell y lecturas propias rotuladas; no hay transcripción ni callouts *De la transcripción*. Verificado renderizando las filminas 5 y 6 a 150 dpi.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) cataloga los ataques por nombre y no por poder** (filmina 8): *masquerading* cuando **uno solo** de los participantes ejecuta el protocolo y el adversario se hace pasar por el otro; *man in the middle* cuando **las dos** partes lo ejecutan y el adversario intercepta y modifica lo que se cruzan; y *replay* y *key reuse* sin definir. Es la única definición de la cátedra de los cuatro nombres que pide el Ej. 1 de la Guía 4, y es complementaria de los cuatro poderes de esta nota: la teoría dice qué puede hacer el adversario, la práctica cómo se llama el resultado. Ver [[practica-05-de-la-clave-privada-a-la-clave-publica#6. Los cuatro ataques, con la definición que la Guía 4 no daba|Práctica 05 §6]].
 
 ## El punto de partida: un canal seguro exige una clave ya compartida
 

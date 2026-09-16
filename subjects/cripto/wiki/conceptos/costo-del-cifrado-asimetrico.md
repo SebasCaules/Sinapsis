@@ -1,14 +1,14 @@
 ---
 title: Costo del cifrado asimétrico
 resumen: 'En criptografía asimétrica el nivel de seguridad es relativo al tamaño del conjunto donde vive el problema difícil: hacen falta 2048 bits en RSA o El Gamal frente a unos 320 sobre curvas elípticas, porque lo que cambia entre grupos es el mejor ataque conocido.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[rsa]]", "[[el-gamal]]", "[[eleccion-de-primitivas]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[rsa]]", "[[el-gamal]]", "[[eleccion-de-primitivas]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Costo del cifrado asimétrico, Tamaño de n en criptografía asimétrica, Nivel de seguridad relativo al tamaño del grupo, Criptografía de curva elíptica (motivación)]
 type: concepto
 unidad: 1
 clase: 4
 orden: 9
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, criptografia-asimetrica, tamano-de-claves, curvas-elipticas, rsa, el-gamal, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **Por qué "128 bits de clave" no significa lo mismo en cifrado simétrico que en asimétrico, y qué tamaño de módulo hace falta hoy según el tipo de grupo que se use.**
 
 > **Fuentes de esta nota.** Filmina **32** de la Clase 04 —la más corta del bloque—, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT), cues **1049-1055**, más el argumento que la precede sobre curvas elípticas (cues 1033-1045) y el de la factorización subexponencial (cues 937-947). La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09.
+
+> **La respuesta operativa a esta nota tiene ahora concepto propio.** La filmina 9 de la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) anota una sola desventaja del esquema asimétrico, *"más lento"*, y su filmina 15 da la solución con teorema: el [[cifrado-hibrido|cifrado híbrido]], que paga la parte asimétrica una vez por mensaje y cifra el volumen con clave simétrica. Es la construcción que esta nota mencionaba al pasar en su última sección.
 
 ## El punto central: el tamaño es relativo al conjunto, no un número absoluto
 

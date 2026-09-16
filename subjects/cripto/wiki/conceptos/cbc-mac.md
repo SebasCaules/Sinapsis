@@ -8,16 +8,16 @@ unidad: 1
 clase: 3
 orden: 5
 created: 2026-08-28
-updated: 2026-09-04
+updated: 2026-09-15
 tags: [criptografia, mac, cbc-mac, integridad, prf, prefix-free, extension-attacks, emac, clase-03]
-sources: ["Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 03pt1-Transcripcion.VTT", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "raw/practicas/Clase 4.pdf", "raw/practicas/Anexo Clase 4.pdf"]
+sources: ["Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 03pt1-Transcripcion.VTT", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "raw/practicas/Clase 4.pdf", "raw/practicas/Clase 4 - Anexo.pdf"]
 ---
 
 # CBC-MAC
 
 **Cómo se construye un MAC a partir de una [[primitiva-de-cifrado-en-bloque|primitiva de cifrado en bloque]], y por qué la construcción obvia sólo funciona si todos los mensajes miden lo mismo.** Es la nota donde se ve, con una cuenta de tres líneas, que un esquema puede ser demostrablemente seguro bajo una hipótesis y romperse **con probabilidad 1** apenas se la afloja.
 
-Cubre las filminas **18 a 21** del PDF de teoría de la Clase 03, más las **cinco filminas del `Anexo Clase 4.pdf`** y la **filmina 5 del deck de la Práctica 04** — material de la clase práctica del **31/08**, que trae los mismos ataques resueltos y dibujados. *(Algunas listas de referencia citan las cuatro filminas de teoría corridas en dos —"22" y "23" para las extensiones y el sufijo—; en el PDF son la 20 y la 21.)* Es el último bloque que alcanzó a darse el **27/08**, y el docente lo desarrolló casi entero en pizarra: la transcripción cubre los cues pt1 600-789. La sesión del **03/09** lo retoma dos veces: para generalizar el ataque a todo modelo iterativo (cues pt2 320-351) y para comparar su costo con el de `HMAC` (cues pt2 626-638).
+Cubre las filminas **18 a 21** del PDF de teoría de la Clase 03, más las **cinco filminas del `Clase 4 - Anexo.pdf`** y la **filmina 5 del deck de la Práctica 04** — material de la clase práctica del **31/08**, que trae los mismos ataques resueltos y dibujados. *(Algunas listas de referencia citan las cuatro filminas de teoría corridas en dos —"22" y "23" para las extensiones y el sufijo—; en el PDF son la 20 y la 21.)* Es el último bloque que alcanzó a darse el **27/08**, y el docente lo desarrolló casi entero en pizarra: la transcripción cubre los cues pt1 600-789. La sesión del **03/09** lo retoma dos veces: para generalizar el ataque a todo modelo iterativo (cues pt2 320-351) y para comparar su costo con el de `HMAC` (cues pt2 626-638).
 
 > **Cómo se citan los cues acá.** La Clase 03 se dictó en **dos sesiones** —27/08 y 03/09— y cada transcripción numera sus cues desde 1, así que un número suelto no identifica nada. Por eso todo cue lleva **prefijo de parte**: `(cues pt1 N-M)` para el 27/08 y `(cues pt2 N-M)` para el 03/09.
 
@@ -29,7 +29,7 @@ Cubre las filminas **18 a 21** del PDF de teoría de la Clase 03, más las **cin
 
 Los ataques de esta nota están en **dos decks distintos de la cátedra**, y cada uno usa símbolos distintos para las mismas cosas. Sin esta tabla parece que las fuentes se contradicen.
 
-| Concepto | Teoría, filminas 18-21 | `Anexo Clase 4.pdf` | Esta nota |
+| Concepto | Teoría, filminas 18-21 | `Clase 4 - Anexo.pdf` | Esta nota |
 |---|---|---|---|
 | Etiqueta que devuelve el oráculo | $t_i$ | $T_i$ **mayúscula** | $t_i$ |
 | Estado intermedio de la cadena | $t_i$, los mismos símbolos | $t_i$ **minúscula** | $\mathrm{st}(\cdot)$, y los auxiliares $v_i$, $w_i$, $p$, $q$ |
@@ -192,7 +192,7 @@ $$\Pr[\mathsf{Mac\text{-}Forge} = 1] = 1$$
 
 ### La versión de una sola consulta
 
-**Esta variante sí es material de cátedra, y hasta el 04/09 el vault creía que no.** Es la filmina 2 del [`Anexo Clase 4.pdf`](../../raw/practicas/Anexo%20Clase%204.pdf), y no como apéndice marginal: el Anexo la presenta **primero**, como su ejemplo principal, y recién en la lámina siguiente pasa a la de dos consultas —la de teoría— bajo el título *"Otra forma de hacerlo"*. La nota había llegado a la misma construcción por su cuenta, derivándola del Ejercicio 4.13(a) de K&L; queda registrado porque la coincidencia vale como verificación cruzada, pero **la atribución correcta es la cátedra**.
+**Esta variante sí es material de cátedra, y hasta el 04/09 el vault creía que no.** Es la filmina 2 del [`Clase 4 - Anexo.pdf`](../../raw/practicas/Clase%204%20-%20Anexo.pdf), y no como apéndice marginal: el Anexo la presenta **primero**, como su ejemplo principal, y recién en la lámina siguiente pasa a la de dos consultas —la de teoría— bajo el título *"Otra forma de hacerlo"*. La nota había llegado a la misma construcción por su cuenta, derivándola del Ejercicio 4.13(a) de K&L; queda registrado porque la coincidencia vale como verificación cruzada, pero **la atribución correcta es la cátedra**.
 
 El ataque sale más corto que el de la filmina 19: pedir $t_1 = \mathsf{Mac}_k(A)$ para un $A$ de **un** bloque, y emitir el mensaje de **dos**
 
@@ -238,7 +238,7 @@ Hay dos arreglos alternativos igual de válidos: dejar el tercer bloque en $B \o
 
 ![Falsificación de CBC-MAC con dos consultas, tal como la dibuja el Anexo](../../assets/anexo04-cbcmac-falsificacion-2-consultas.png)
 
-> **Errata de la filmina:** en la filmina 3 del `Anexo Clase 4.pdf`, el tercer bloque del mensaje falsificado dice $A \oplus t_1$ y la etiqueta emitida dice $t_2$. Bajo el etiquetado de esa misma lámina —$t_1$ es la etiqueta de $A$ y $t_2$ la de $A\Vert B$— corresponde $A \oplus t_2$ y $t_1$. El error está en el texto **y** en el diagrama, cuya tercera caja se lee *"A xor t₁"*. La filmina 19 de teoría, con su propio etiquetado, está **bien**.
+> **Errata de la filmina:** en la filmina 3 del `Clase 4 - Anexo.pdf`, el tercer bloque del mensaje falsificado dice $A \oplus t_1$ y la etiqueta emitida dice $t_2$. Bajo el etiquetado de esa misma lámina —$t_1$ es la etiqueta de $A$ y $t_2$ la de $A\Vert B$— corresponde $A \oplus t_2$ y $t_1$. El error está en el texto **y** en el diagrama, cuya tercera caja se lee *"A xor t₁"*. La filmina 19 de teoría, con su propio etiquetado, está **bien**.
 
 ## Las tres extensiones seguras
 
@@ -302,7 +302,7 @@ $$m' := m \,\Vert\, \lvert m\rvert, \qquad \mathsf{Mac}_k(m) := \mathsf{CBC\text
 >
 > *(En el cue pt1 768 el ASR transcribe "la longitud de la clave"; por el contexto de la filmina 20 es **la longitud del mensaje**. Corrección nuestra.)*
 
-> **La cátedra tenía la resolución hecha, y la repartió por el otro lado.** El ataque que Abad dejó de tarea el 27/08 está **resuelto y dibujado paso a paso** en la filmina 5 del [`Anexo Clase 4.pdf`](../../raw/practicas/Anexo%20Clase%204.pdf), que acompañó a la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] del **31/08** — cuatro días después de que la tarea se encargara, y por la vía de los lunes en vez de la de los jueves. El Anexo está fechado **7 de abril de 2025**, o sea que es material del cuatrimestre anterior reusado; no hay en ninguna fuente una declaración de que se haya repartido con ese propósito, así que la conexión es *(lectura nuestra)*.
+> **La cátedra tenía la resolución hecha, y la repartió por el otro lado.** El ataque que Abad dejó de tarea el 27/08 está **resuelto y dibujado paso a paso** en la filmina 5 del [`Clase 4 - Anexo.pdf`](../../raw/practicas/Clase%204%20-%20Anexo.pdf), que acompañó a la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] del **31/08** — cuatro días después de que la tarea se encargara, y por la vía de los lunes en vez de la de los jueves. El Anexo está fechado **7 de abril de 2025**, o sea que es material del cuatrimestre anterior reusado; no hay en ninguna fuente una declaración de que se haya repartido con ese propósito, así que la conexión es *(lectura nuestra)*.
 >
 > Lo que sigue en esta sección se escribió **antes** de tener el Anexo a la vista, y se contrastó después: la resolución del vault y la de la cátedra **coinciden bloque por bloque** —los tres mensajes consultados, el $X = t_1\oplus t_2\oplus C$, el mensaje forjado y la identidad $T_1 = t_4$ que sostiene todo—. Queda como validación cruzada, no como duplicado. Lo que el vault agrega y el Anexo no tiene: la verificación de que el mensaje forjado está **fuera de $Q$**, las cinco aclaraciones de lectura, la variante con un solo $C$ y el encuadre en el criterio *prefix-free*. Lo que el Anexo agrega y el vault no tenía: los **diagramas**, y el rótulo $T_1 = t_4$ escrito adentro de la cadena.
 
