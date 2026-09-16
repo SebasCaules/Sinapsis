@@ -1,14 +1,14 @@
 ---
 title: Criptosistema asimétrico
 resumen: 'Terna Gen, Enc, Dec con par de claves pública y privada, y experimento Eav en el que el adversario recibe pk. De ahí que ser indistinguible ante escucha ya implique CPA-Secure y que el cifrado deba ser probabilístico — y el aviso del docente: las dos claves no son intercambiables.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[pruebas-de-indistinguibilidad]]", "[[criptosistema]]", "[[cifrado-probabilistico-nonce-e-iv]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[pruebas-de-indistinguibilidad]]", "[[criptosistema]]", "[[cifrado-probabilistico-nonce-e-iv]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Criptosistema asimétrico, Cifrado de clave pública, Terna Gen Enc Dec asimétrica, Prueba Eav asimétrica, Cifrado no determinístico]
 type: concepto
 unidad: 1
 clase: 4
 orden: 5
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, criptosistema-asimetrico, clave-publica, indistinguibilidad, cpa-secure, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **La terna de algoritmos y la prueba de indistinguibilidad que definen qué significa "cifrar con clave pública" — y por qué, en este mundo, ser seguro contra un adversario pasivo ya implica ser `CPA-Secure` sin necesidad de ningún oráculo.** Es la maquinaria formal que después instancian `RSA` y `El Gamal`.
 
 > **Fuentes de esta nota.** Filminas **6 a 8 y 21 a 23** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT). La idea de 1976 está en los cues **115-172** —desarrollada en [[diffie-hellman#La cita que abre el bloque|Diffie-Hellman]]— y la terna con su prueba en los cues **702-745**. La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) condensa esta nota en dos láminas**: la 9, con las ventajas del esquema asimétrico —resuelve la distribución, una sola $sk$ para hablar con varios, el par se genera por anticipado— y la única desventaja, *"más lento"*, que motiva el [[cifrado-hibrido|cifrado híbrido]]; y la 13, con la terna escrita con la flecha $\leftarrow$ para $\mathsf{Enc}$ y el $:=$ para $\mathsf{Dec}$, y el corolario en caja: *"si el cifrado público es determinístico, NO es CPA-Secure"*. Da la conclusión sin el argumento de la filmina 23; lo que no tiene es la advertencia de que las claves no son intercambiables. Y escribe $p_k$, $s_k$ con la $k$ como subíndice, que no es un índice: ver [[practica-05-de-la-clave-privada-a-la-clave-publica#7. Esquemas asimétricos: qué ganan y qué cuestan|Práctica 05 §7]].
 
 ## La idea: dos claves, y una se publica a propósito
 

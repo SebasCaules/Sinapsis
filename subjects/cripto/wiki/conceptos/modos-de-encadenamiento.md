@@ -8,9 +8,9 @@ unidad: 1
 clase: 2
 orden: 8
 created: 2026-08-21
-updated: 2026-09-06
+updated: 2026-09-15
 tags: [criptografia, bloque, modos, ecb, cbc, cfb, ofb, ctr, propagacion-de-errores, fuera-de-orden, autosincronizacion, guia-02, practica-03, clase-02, transcripcion]
-sources: ["Clase 02 - Criptografia - Cifrado.pdf", "raw/guias/guia2/Guia 2 - Criptografía Simétrica.pdf", "raw/practicas/Modo CFB.pdf", "raw/clases/Clase 02pt1-Transcripcion.VTT"]
+sources: ["Clase 02 - Criptografia - Cifrado.pdf", "raw/guias/guia2/Guia 2 - Criptografía Simétrica.pdf", "raw/practicas/Clase 3 - Modo CFB.pdf", "raw/clases/Clase 02pt1-Transcripcion.VTT"]
 ---
 
 # Modos de encadenamiento
@@ -217,7 +217,7 @@ $$\text{caracteres afectados} \;=\; \underbrace{1}_{\text{un bit mal}} \;+\; \un
 
 Con `DES` son **9 caracteres** —uno con un solo bit mal y ocho destruidos—, y a partir del décimo el registro ya se limpió: **`CFB` también es autosincronizante**. Con `AES` serían **17**. La respuesta correcta no es un número absoluto sino $1 + n/s$; un examen que pida "9" está asumiendo `DES` sin decirlo.
 
-> **Y la propia cátedra usa un tercer valor en su material.** Las cuatro láminas de [`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf) del 24/08 trabajan con **$n = 32$ y $s = 8$** — ni `DES` ni `AES` —, parámetros que están impresos en las tres primeras y que la cuarta, la del ejercicio, da por heredados, y ahí la respuesta es $1 + 32/8 = \mathbf{5}$ caracteres. La lámina 4 deja el cálculo planteado como ejercicio (*"analizar: llega mal $c_1$"*), que es el mismo [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros. Es la mejor prueba de que lo evaluable es la fórmula: la cátedra le cambia el $n$ a su propio ejemplo. → [[practica-03-seudoaleatoriedad-y-modos#9.1. El ejercicio de la lámina 4: llega mal el primer segmento|Práctica 03 § El ejercicio de la lámina 4]]
+> **Y la propia cátedra usa un tercer valor en su material.** Las cuatro láminas de [`Clase 3 - Modo CFB.pdf`](../../raw/practicas/Clase%203%20-%20Modo%20CFB.pdf) del 24/08 trabajan con **$n = 32$ y $s = 8$** — ni `DES` ni `AES` —, parámetros que están impresos en las tres primeras y que la cuarta, la del ejercicio, da por heredados, y ahí la respuesta es $1 + 32/8 = \mathbf{5}$ caracteres. La lámina 4 deja el cálculo planteado como ejercicio (*"analizar: llega mal $c_1$"*), que es el mismo [[guia-02-criptografia-simetrica#Ejercicio 6|Ej. 6c de la Guía 2]] con otros parámetros. Es la mejor prueba de que lo evaluable es la fórmula: la cátedra le cambia el $n$ a su propio ejemplo. → [[practica-03-seudoaleatoriedad-y-modos#9.1. El ejercicio de la lámina 4: llega mal el primer segmento|Práctica 03 § El ejercicio de la lámina 4]]
 
 ### Tabla: propagación de errores en los cinco modos
 

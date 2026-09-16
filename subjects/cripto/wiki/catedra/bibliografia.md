@@ -7,7 +7,7 @@ type: catedra
 clase: catedra
 orden: 4
 created: 2026-08-10
-updated: 2026-09-06
+updated: 2026-09-15
 tags: [catedra, bibliografia, katz-lindell, bishop, menezes]
 sources: [Reglamento_Cripto.pdf, 72.44 - Criptografía y Seguridad.pdf, "Clase 03 - Criptografia - MACs y Cifrado Autenticado.pdf", "raw/clases/Clase 02pt2-Transcripcion.VTT", "raw/clases/Clase 03pt2 - Transcripcion.VTT", "Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "Clase 05 - Protocolos.pdf", "Clase 06 - Politicas.pdf", "Clase 07 - Aplicaciones - Principios y autenticacion.pdf", "Clase 08 - Control de acceso.pdf", "Clase 10 - Aplicaciones - Flujo de informacion.pdf", "Clase 11 - Seguridad en Redes.pdf", "Clase 12 - Analisis de vulnerabilidades.pdf", "Clase 13 - Pentesing.pdf"]
 ---
@@ -170,7 +170,7 @@ No están en el vault; se citan en el programa como complementarias.
 |---|---|
 | **Anderson, R.** (2008). *Security Engineering* (2nd ed.). Wiley | Seguridad como disciplina de ingeniería, casos reales a escala. Ideal para el TP y para la parte de "seguridad en la empresa" |
 | **Menezes, van Oorschot, Vanstone** (1997). *Handbook of Applied Cryptography*. CRC — *"el Libro Verde"* | **El único de esta lista que el docente recomendó en clase**, y con un destino concreto: **el detalle de DES y AES**. Referencia enciclopédica, de consulta puntual y no de lectura lineal. Hay ejemplar **en la biblioteca**; además está libre en [cacr.uwaterloo.ca/hac](https://cacr.uwaterloo.ca/hac/) |
-| **Schneier, B.** (1996). *Applied Cryptography* (2nd ed.). Wiley | Clásico; muy legible pero desactualizado en recomendaciones concretas |
+| **Schneier, B.** (1996). *Applied Cryptography* (2nd ed.). Wiley | Clásico; muy legible pero desactualizado en recomendaciones concretas. La única filmina de la cátedra que lo cita es la última de la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09), junto con las RFC 2246 y 8446 de `TLS` |
 | **Howard, LeBlanc, Viega** (2009). *24 Deadly Sins of Software Security*. McGraw-Hill | Catálogo de vulnerabilidades de aplicación. Útil para Clases 8-9 y Guía 9 |
 | **Pfleeger & Pfleeger** (2006). *Security in Computing* (4th ed.). Prentice Hall | Panorama general de seguridad |
 

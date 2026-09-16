@@ -1,14 +1,14 @@
 ---
 title: Firma digital
 resumen: 'Versión de clave pública de un MAC: se firma con la clave privada y se verifica con la pública, lo que aporta verificación pública, transferibilidad y no repudio — la propiedad que le da nombre y peso legal. Su seguridad se mide con el experimento Sig-forge.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[message-authentication-code]]", "[[seguridad-de-un-mac]]", "[[rsa-signature-y-hashed-rsa]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[message-authentication-code]]", "[[seguridad-de-un-mac]]", "[[rsa-signature-y-hashed-rsa]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Firma digital, Digital signature, Sig-forge, Terna Gen Sign Vrfy, No repudio (firma digital), Firma electrónica, Ley 25.506]
 type: concepto
 unidad: 1
 clase: 4
 orden: 10
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, firma-digital, no-repudio, sig-forge, clave-publica, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **La versión de clave pública de un MAC: la terna $(\mathsf{Gen}, \mathsf{Sign}, \mathsf{Vrfy})$ y el experimento `Sig-forge` con el que se mide si es falsificable.**
 
 > **Fuentes de esta nota.** Filminas **33-35** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT), cues **1058-1132**, la última media hora de la clase, después de la segunda pausa. La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09. Lo que la voz agregó: por qué se llama *firma* y no *MAC asimétrico*, el argumento del no repudio hecho desde la clave compartida, y el marco **legal** —firma registrada, presunción de validez, la ley argentina y la diferencia con la firma electrónica—, que es lo que la [[guia-04-manejo-de-claves-cifrado-asimetrico-y-firma-digital#Ejercicio 14|Guía 4]] pide investigar en su Ej. 14.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) pone las dos ternas lado a lado y las compara en una tabla** (filmina 16): fácil distribución de clave, una sola firma verificable por cualquier receptor, verificación pública y no repudio del lado de la firma; una clave y una etiqueta **por cada receptor**, sin verificación pública ni no repudio, pero **más eficiente**, del lado del MAC. Es el argumento de esta nota más el costo que la voz dijo y la filmina 33 no escribe. Ver [[practica-05-de-la-clave-privada-a-la-clave-publica#11. Firma digital contra MAC, en una tabla|Práctica 05 §11]].
 
 ## El mismo objetivo que un MAC, con otra clave
 

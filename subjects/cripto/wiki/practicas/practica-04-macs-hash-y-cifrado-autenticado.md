@@ -9,14 +9,14 @@ orden: 20
 practica: 4
 fecha: 2026-08-31
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-15
 tags: [practica, mac, mac-forge, replay, prf, cbc-mac, hash, colisiones, merkle-damgard, nmac, hmac, cifrado-autenticado, cca, encrypt-then-mac, clase-03]
-sources: ["Clase 4.pdf", "Anexo Clase 4.pdf"]
+sources: ["Clase 4.pdf", "Clase 4 - Anexo.pdf"]
 ---
 
 # Práctica 04 — MACs, hash y cifrado autenticado
 
-> **31/08/2026** · Filminas: [`Clase 4.pdf`](../../raw/practicas/Clase%204.pdf) (18 pp., **Ana Arias Roig**, creado el 30/08/2026) y [`Anexo Clase 4.pdf`](../../raw/practicas/Anexo%20Clase%204.pdf) (5 pp., fechado **7 de abril de 2025**) · Teoría: [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] · Guía: [[guia-03-mac-y-funciones-de-hash|Guía 3 — MAC y Funciones de Hash]]
+> **31/08/2026** · Filminas: [`Clase 4.pdf`](../../raw/practicas/Clase%204.pdf) (18 pp., **Ana Arias Roig**, creado el 30/08/2026) y [`Clase 4 - Anexo.pdf`](../../raw/practicas/Clase%204%20-%20Anexo.pdf) (5 pp., fechado **7 de abril de 2025**) · Teoría: [[clase-03-macs-y-cifrado-autenticado|Clase 03 — MACs y cifrado autenticado]] · Guía: [[guia-03-mac-y-funciones-de-hash|Guía 3 — MAC y Funciones de Hash]]
 
 Esta práctica **no es un mapa de la teoría**, a diferencia de la [[practica-03-seudoaleatoriedad-y-modos|Práctica 03]]. Es material que **va por delante** de las filminas de teoría en cinco puntos distintos, y en cuatro de ellos es la **única fuente de la cátedra** que existe:
 
@@ -653,7 +653,7 @@ Este ejercicio es, literalmente, el pasaje *"The need for independent keys"* de 
 
 ## 15. El Anexo: los ataques al CBC-MAC resueltos por la cátedra
 
-[`Anexo Clase 4.pdf`](../../raw/practicas/Anexo%20Clase%204.pdf), cinco filminas, fechado **7 de abril de 2025** — o sea **material del cuatrimestre anterior reusado**. Su contenido son los ataques al `CBC-MAC` de las filminas 19 y 21 del deck de teoría, **dibujados**: nueve cadenas `CBC` completas contra cero en teoría.
+[`Clase 4 - Anexo.pdf`](../../raw/practicas/Clase%204%20-%20Anexo.pdf), cinco filminas, fechado **7 de abril de 2025** — o sea **material del cuatrimestre anterior reusado**. Su contenido son los ataques al `CBC-MAC` de las filminas 19 y 21 del deck de teoría, **dibujados**: nueve cadenas `CBC` completas contra cero en teoría.
 
 **Dos cosas que hay que decir de entrada:**
 

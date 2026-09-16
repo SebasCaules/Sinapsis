@@ -7,7 +7,7 @@ type: parcial
 clase: 1p
 orden: 22
 created: 2026-09-14
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [parcial, primer-parcial, cuentas-de-asimetrica, rsa, diffie-hellman, el-gamal, firma-digital]
 sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 ---
@@ -120,6 +120,7 @@ Para Diffie-Hellman la misma plantilla se reduce a: datos públicos $(p, g)$; se
 - **Un $e$ que no es coprimo con $\varphi(n)$** no tiene inverso: no hay $d$ y el par no existe. Si el enunciado lo da así, la respuesta es señalarlo.
 - **Firmar sin hash.** *Textbook* `RSA` como firma se rompe con probabilidad $1$ sin conocer $d$ (ataque de no mensaje y multiplicatividad). Se firma $H(m)$, siempre.
 - **Reutilizar el $k$ de El Gamal.** El mismo $k$ produce el mismo $c_1$, que viaja en claro y delata la repetición, y la misma máscara $h^{k}$: entonces $c_2' \cdot c_2^{-1} = m' \cdot m^{-1}$, y conocer un mensaje revela el otro. $k$ nuevo en cada cifrado; es lo mismo que exigir cifrado no determinístico.
+- **El ejemplo degenerado.** Antes de escribir un ejemplo de Diffie-Hellman, comprobar $K \ne 1$: con $p = 7$, $g = 3$, $x = 3$, $y = 4$ —el ejemplo de la [[practica-05-de-la-clave-privada-a-la-clave-publica#Por qué da 1, y qué enseña|Práctica 05]]— los valores enviados son $6$ y $4$ y la clave es $1$, porque $xy$ es múltiplo de $p - 1 = 6$. El ejemplo de arriba con $p = 23$ está elegido para que no pase.
 - **Diffie-Hellman sin autenticar.** La clave acordada no vale nada si Mallory eligió los dos valores: el protocolo solo resiste adversarios pasivos. Hay que decirlo cada vez que se lo nombra, y la solución son firmas con certificados que cubran los valores **y** las identidades.
 - **Intercambiar los roles de las claves.** Confidencialidad: se cifra con la pública y se descifra con la privada. Firma: se firma con la privada y se verifica con la pública. Los exponentes son intercambiables en la fórmula; los roles, no.
 - **Mensaje fuera de rango.** `RSA` exige $m < n$; y si además $m^{e} < n$, no hubo reducción y $m$ sale con una raíz entera.
