@@ -3,7 +3,7 @@ title: Índice de la wiki
 aliases: [Índice, Index, Home, Cripto]
 type: meta
 created: 2026-08-10
-updated: 2026-09-15
+updated: 2026-09-17
 tags: [index, moc, criptografia, seguridad]
 sources: []
 ---
@@ -50,6 +50,7 @@ Cripto/
 │   ├── apuntes/                ← espeja raw/apuntes (7 notas)
 │   ├── tp/                     ← espeja raw/tp (1 nota)
 │   ├── parciales/              ← secciones 1er Parcial, 2do Parcial y Finales: por tipo de ejercicio, resumen + ejercicios viejos resueltos (17 notas)
+│   ├── resumenes/              ← el resumen de las diez clases en una sola página, con tooltips (1 nota)
 │   ├── videos/                 ← capa transversal: un video de la cátedra por nota (13 notas)
 │   └── conceptos/              ← capa transversal: ideas atómicas (131 notas)
 └── assets/                 ← imágenes (attachment folder de Obsidian)
@@ -58,6 +59,10 @@ Cripto/
 > **Ojo con los nombres.** `raw/practicas/` son las **clases prácticas de los lunes**, no las guías: las guías viven en `raw/guias/`. Y el PDF `raw/practicas/Clase 1.pdf` es la **práctica** del 10/08, no la teórica del 06/08.
 
 ---
+
+## Resumen de las clases
+
+- [[resumen-de-las-clases|Resumen de las clases]] — **toda la materia en una página**: las Clases 1 a 10 comprimidas a definiciones, fórmulas, tablas y trampas, con un tooltip en cada sigla y en cada concepto (al pasar el puntero por un enlace aparece el resumen de esa página). Pensada para refrescar un tema en un minuto en medio de la práctica de parciales; cada clase cierra con «Para el parcial» y remite a la sección 1P. En Sinapsis va arriba del índice, como página suelta.
 
 ## Cátedra
 

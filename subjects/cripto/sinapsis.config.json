@@ -142,6 +142,14 @@
       "collapsedByDefault": false
     },
     {
+      "key": "resumen",
+      "label": "Resumen",
+      "plural": "Resúmenes",
+      "folder": "resumenes",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    },
+    {
       "key": "apunte",
       "label": "Apunte",
       "plural": "Apuntes",
@@ -196,6 +204,14 @@
       "color": "--ueval",
       "items": [
         {
+          "id": "resumen",
+          "label": "Resumen de las clases",
+          "icon": "layers",
+          "kind": "page",
+          "target": "resumen-de-las-clases",
+          "hint": "Toda la materia en una página, con tooltips: para refrescar un concepto en medio de la práctica"
+        },
+        {
           "id": "parciales",
           "label": "Parciales resueltos",
           "icon": "exam",
@@ -222,6 +238,8 @@
     "ignore": [],
     "divisionField": "clase",
     "study": "estudio",
-    "standalone": []
+    "standalone": [
+      "resumen-de-las-clases"
+    ]
   }
 }
