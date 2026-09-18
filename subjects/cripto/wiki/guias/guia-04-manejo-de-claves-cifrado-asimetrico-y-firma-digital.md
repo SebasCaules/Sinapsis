@@ -1,7 +1,7 @@
 ---
 title: Guía 4 — Manejo de claves, cifrado asimétrico y firma digital
 resumen: 'Los dieciocho ejercicios de la Guía 4 con enunciado y resolución en la misma página: protocolos con claves de sesión y sus ataques, Diffie-Hellman a tres y firmado, firma digital contra MAC, certificados con OpenSSL de punta a punta, la PKI argentina, y los tres ejercicios de seguridad demostrable sobre CCA y textbook RSA.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[clase-05-protocolos-criptograficos]]", "[[clase-03-macs-y-cifrado-autenticado]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[clase-05-protocolos-criptograficos]]", "[[clase-03-macs-y-cifrado-autenticado]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Guía 4, Guia 4, Manejo de claves, Resolución Guía 4, Guia 4 resolucion, Soluciones Guía 4]
 type: guia
 clase: 4
@@ -9,14 +9,14 @@ orden: 21
 guia: 4
 fecha: 2026-09-14
 created: 2026-09-14
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [guia, resolucion, protocolos, claves-de-sesion, replay, man-in-the-middle, diffie-hellman, firma-digital, certificados, openssl, pki, cca, rsa, tls]
 sources: ["raw/guias/guia4/Guia 4 - Manejo de claves - Cifrado Asimétrico - Firma Digital.pdf", "Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT", "raw/clases/Clase 05 - Protocolos.pdf"]
 ---
 
 # Guía 4 — Manejo de claves, cifrado asimétrico y firma digital
 
-> **lun 14/09/2026** (mismo día: consultas del 1er parcial) · [Enunciado](../../raw/guias/guia4/Guia%204%20-%20Manejo%20de%20claves%20-%20Cifrado%20Asim%C3%A9trico%20-%20Firma%20Digital.pdf) (6 páginas, 18 ejercicios) · Teoría: [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] y [[clase-05-protocolos-criptograficos|Clase 05 — Protocolos criptográficos]]
+> **lun 14/09/2026** (mismo día: consultas del 1er parcial y la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]], que repasa la Clase 04 y anticipa tres láminas de la Clase 05) · [Enunciado](../../raw/guias/guia4/Guia%204%20-%20Manejo%20de%20claves%20-%20Cifrado%20Asim%C3%A9trico%20-%20Firma%20Digital.pdf) (6 páginas, 18 ejercicios) · Teoría: [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04 — Criptografía asimétrica y firma digital]] y [[clase-05-protocolos-criptograficos|Clase 05 — Protocolos criptográficos]]
 > **Resolución:** los **18 ejercicios**, plegados debajo de cada enunciado. Los tres de `OpenSSL` están **corridos de verdad**, con la salida pegada.
 
 Esta nota reúne **los enunciados de la Guía 4 transcriptos y su resolución**, con el concepto que destraba cada uno. La cuenta hecha va en un **aviso plegado debajo de cada ejercicio**, que se abre con un clic: primero se intenta, después se mira.
@@ -56,7 +56,7 @@ La guía se practica el **lunes 14/09**, entre la Clase 04 (jueves 10/09, dictad
 
 > **Qué dice esa columna** *(precisión nuestra)*. Indica de qué clase sale **la teoría que hace falta para atacar cada ejercicio**, no que la guía la presuponga: los ejercicios de protocolos se resuelven con las ideas de la Clase 04 —claves de sesión, KDC, firma digital, *man in the middle*— más el sentido común que la Clase 05 va a formalizar. Es el mismo fenómeno que la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] adelantándose tres días a la teoría del hash, pero a mayor escala: acá la práctica se adelanta **una semana entera** a once de sus dieciocho ejercicios. Las notas de concepto de la Clase 05 existen desde el 04/09 y están escritas contra el PDF; cuando la clase se dicte, habrá que volver sobre las resoluciones que citan filminas.
 
-> **Y no es la práctica que el docente anunció.** Al cerrar el repaso de álgebra el 10/09, Abad dijo que *"en la práctica probablemente repasemos con algunos ejercicios básicos, especialmente de aritmética"* (cue 298). **No hay un solo ejercicio de aritmética en la guía**: nada de Euclides, inversos modulares, ejemplos numéricos de `RSA` ni de El Gamal. Lo más cerca que está de una cuenta es el Ej. 6, y es una cuenta en exponentes. Si esos ejercicios existen, no están en `raw/`.
+> **Y no es la práctica que el docente anunció.** Al cerrar el repaso de álgebra el 10/09, Abad dijo que *"en la práctica probablemente repasemos con algunos ejercicios básicos, especialmente de aritmética"* (cue 298). **No hay un solo ejercicio de aritmética en la guía**: nada de Euclides, inversos modulares, ejemplos numéricos de `RSA` ni de El Gamal. Lo más cerca que está de una cuenta es el Ej. 6, y es una cuenta en exponentes. Tampoco están en las filminas de la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] del mismo lunes, que son un repaso de la Clase 04 con un único ejemplo numérico —Diffie-Hellman en $\mathbb{Z}_7$, que además da clave $1$—. Si esos ejercicios existen, no están en `raw/`.
 
 ### Tres familias, y un ejercicio de cada clase anterior
 
@@ -141,7 +141,7 @@ Escribe un ejemplo de los siguientes ataques que pueden darse contra un protocol
 3. **Man in the middle**
 4. **Masquerading** (suplantación de identidades)
 
-> Los cuatro nombres son los que la [[clase-05-protocolos-criptograficos|Clase 05]] va a usar para catalogar lo que sale mal en un protocolo, y **tres de ellos ya tienen ejemplo en el vault**: *replay* y *key reuse* son exactamente los dos problemas de la [[needham-schroeder#Primera aproximación, y por qué no alcanza|primera aproximación de Needham-Schroeder]], y *man in the middle* es el ataque que [[diffie-hellman#En la práctica: el problema del atacante activo|Diffie-Hellman]] no resiste. El cuarto, la suplantación, es lo que el ataque a la [[needham-schroeder#El ataque: una clave de sesión vieja alcanza|segunda aproximación]] logra. La pregunta *"¿pueden evitarse?"* es la parte con contenido: la respuesta es sí para los cuatro, pero **con mecanismos distintos**, y conviene decir cuál.
+> Los cuatro nombres son los que la [[clase-05-protocolos-criptograficos|Clase 05]] va a usar para catalogar lo que sale mal en un protocolo — y desde el 14/09 **dos de ellos tienen definición de la cátedra**: la filmina 8 de la [[practica-05-de-la-clave-privada-a-la-clave-publica#6. Los cuatro ataques, con la definición que la Guía 4 no daba|Práctica 05]] distingue *masquerading* (**uno solo** de los participantes ejecuta el protocolo, y el adversario se hace pasar por el otro) de *man in the middle* (**las dos** partes lo ejecutan, y el adversario intercepta y modifica lo que se cruzan). **Tres de ellos ya tienen ejemplo en el vault**: *replay* y *key reuse* son exactamente los dos problemas de la [[needham-schroeder#Primera aproximación, y por qué no alcanza|primera aproximación de Needham-Schroeder]], y *man in the middle* es el ataque que [[diffie-hellman#En la práctica: el problema del atacante activo|Diffie-Hellman]] no resiste. El cuarto, la suplantación, es lo que el ataque a la [[needham-schroeder#El ataque: una clave de sesión vieja alcanza|segunda aproximación]] logra. La pregunta *"¿pueden evitarse?"* es la parte con contenido: la respuesta es sí para los cuatro, pero **con mecanismos distintos**, y conviene decir cuál.
 
 > [!nota]- Resolución del Ejercicio 1
 > *Un ejemplo de cada uno de cuatro ataques a un protocolo —replay, key reuse, man in the middle, masquerading— y si pueden evitarse.*

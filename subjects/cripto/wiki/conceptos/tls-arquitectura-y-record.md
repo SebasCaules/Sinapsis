@@ -1,14 +1,14 @@
 ---
 title: "TLS: arquitectura y record"
 resumen: 'Capa de seguridad a nivel transporte intercalada entre aplicación y transporte, y su unidad de trabajo, el récord: parte el mensaje en bloques de hasta 65536 bytes, los comprime, los hashea y los cifra.'
-fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[infraestructura-de-clave-publica]]", "[[x509]]", "[[pruebas-de-indistinguibilidad]]"]
+fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[infraestructura-de-clave-publica]]", "[[x509]]", "[[pruebas-de-indistinguibilidad]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [TLS arquitectura, TLS Record, Registro TLS, SSL Record, Capa TLS, Record de TLS]
 type: concepto
 unidad: 1
 clase: 5
 orden: 9
 created: 2026-09-04
-updated: 2026-09-04
+updated: 2026-09-15
 tags: [criptografia, protocolos, tls, ssl, tls-record, capas-de-red, clase-05, sin-dictar]
 sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 ---
@@ -18,6 +18,8 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 **Dónde vive TLS en la pila de red, y cómo convierte un mensaje de aplicación en la unidad de datos que efectivamente sale cifrada por el cable.** Es la nota de arranque de todo el bloque TLS: sin el TLS Record no hay unidad sobre la que aplicar nada de lo que viene después —suites (05.10), sesión y conexión (05.11), handshake (05.12)—, porque el Record es literalmente el contenedor que las demás secciones llenan.
 
 Sale de las **filminas 29 a 31** del PDF de teoría de la Clase 05. La clase todavía no se dictó — hoy es 04/09/2026, la Clase 05 es el 17/09 según el [[cronograma]] — así que esta nota está escrita contra el PDF de filminas y contra lecturas propias rotuladas. No hay transcripción ni callouts *De la transcripción*.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) resume `TLS` en tres líneas** (filmina 20): confidencialidad, *"combina cifrado simétrico y asimétrico"* —es el [[cifrado-hibrido|cifrado híbrido]]—; autenticación, *"autentica cliente y autentica servidor"* —el cliente sólo si el servidor lo pide—; integridad, *"usa hash"* —la misma palabra que la filmina 31, y en los dos casos es un MAC o un `AEAD`—. Y cita dos RFC que la filmina 48 no cita: **2246** (`TLS` 1.0, la primera versión) y **8446** (`TLS` 1.3); la teoría manda a la 5246 (`TLS` 1.2). Ver [[practica-05-de-la-clave-privada-a-la-clave-publica#14. TLS en una lámina, y las dos RFC|Práctica 05 §14]].
 
 ## Qué es SSL/TLS
 

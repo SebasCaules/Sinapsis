@@ -1,14 +1,14 @@
 ---
 title: Needham-Schroeder
 resumen: 'Protocolo simétrico de intercambio de claves con un KDC que comparte una clave previa con cada entidad y genera claves de sesión entre pares; base de Kerberos, y vulnerable a la reinyección de una clave de sesión vieja.'
-fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[distribucion-de-claves-y-kdc]]", "[[ataques-de-repeticion-y-frescura]]", "[[parciales-viejos]]"]
+fuentes: ["[[clase-05-protocolos-criptograficos]]", "[[distribucion-de-claves-y-kdc]]", "[[ataques-de-repeticion-y-frescura]]", "[[parciales-viejos]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Needham-Schroeder, Protocolo Needham-Schroeder, Ataque de reuso de clave de sesión, Segunda aproximación de Needham-Schroeder, Impersonación con clave de sesión vieja]
 type: concepto
 unidad: 1
 clase: 5
 orden: 7
 created: 2026-09-04
-updated: 2026-09-06
+updated: 2026-09-15
 tags: [criptografia, protocolos, needham-schroeder, kdc, frescura, replay, clase-05, sin-dictar]
 sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 ---
@@ -18,6 +18,8 @@ sources: ["raw/clases/Clase 05 - Protocolos.pdf"]
 **El protocolo de intercambio de claves simétrico, con un tercero de confianza (`KDC`), que resuelve del lado simétrico el mismo problema de identidad que la PKI resuelve del lado asimétrico — y el protocolo con más chance de aparecer, casi literal, en el primer parcial.** Es la nota más larga de esta clase, porque encadena dos intentos fallidos y un ataque exitoso, cada uno construido sobre el defecto del anterior.
 
 Cubre las filminas **22 a 27** del PDF de teoría de la Clase 05. **Esta clase todavía no se dictó** — hoy es 04/09/2026, la fecha del [[cronograma]] es el 17/09 —, así que la nota está escrita contra el PDF de filminas, Katz & Lindell y lecturas propias rotuladas; no hay transcripción de esta clase. Las seis filminas fueron verificadas renderizando la página a 150 dpi: el texto extraído reproduce fielmente las fórmulas de los tres protocolos.
+
+> **Un diagrama que dice "Needham Schroeder" y no lo es.** La filmina 2 de la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) dibuja un KDC que le manda $\{s\}_{k_A}$ a $A$ **y** $\{s\}_{k_B}$ a $B$, y lo rotula *"Ej: Needham Schroeder"*. Ése es el KDC simplificado de Katz & Lindell §10.2 —*"demasiado simplista para usarse en la práctica"*, dice el libro—; en Needham-Schroeder el KDC le entrega **a $A$** las dos partes y es $A$ quien reenvía el ticket, como en la primera aproximación de abajo. Ver [[practica-05-de-la-clave-privada-a-la-clave-publica#3. Las tres limitaciones de la clave privada, y qué resuelve el KDC|Práctica 05 §3]].
 
 > **Por qué esta nota es la más rentable del temario de la Clase 05 para el primer parcial.** La nota [[parciales-viejos|Parciales viejos]] audita cuatro primeros parciales reales (2018 a 2025) y encuentra que **el Ejercicio 1 es siempre un protocolo**, con la estructura *"¿qué construye, qué problema tiene?"*. El examen **1C-2018** es, literalmente, este protocolo — con `T` en lugar de `KDC` como nombre del tercero de confianza, y sin el timestamp de la corrección de la sección final. El detalle completo, con los cuatro exámenes, está en la sección [[clase-05-protocolos-criptograficos#Para el parcial|Para el parcial]] de la nota de clase.
 

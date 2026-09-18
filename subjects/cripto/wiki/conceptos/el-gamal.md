@@ -8,7 +8,7 @@ unidad: 1
 clase: 4
 orden: 8
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, criptografia-asimetrica, el-gamal, diffie-hellman, ddh, cpa-secure, curvas-elipticas, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -21,7 +21,7 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 
 **Por qué existe, según la clase.** La sección arranca del *"dolor de cabeza"* de `RSA`: que no se haya podido demostrar que la única forma de romperlo sea factorizar, con lo cual *"siempre estuvo con la espada de Damocles de 'che, ¿y habrá otro ataque algebraico que haga tambalear la seguridad?'"*. El Gamal *"ganó mucha preponderancia, un poco por eso"*, y el docente lo presenta como *"hoy día, les diría, el criptosistema asimétrico más usado"* (cues 971-977). Desde afuera tiene la misma interfaz —una terna `Gen`/`Enc`/`Dec`—, es *"un poco más complejo que RSA, aunque no tanto"*, y conceptualmente es *"una adaptación muy creativa del intercambio de claves de Diffie-Hellman, pero para cifrar información"*.
 
-> **Sobre "el más usado"** *(precisión nuestra)*. Como afirmación literal es discutible: lo que domina en la práctica es el **intercambio** Diffie-Hellman sobre curvas elípticas combinado con un cifrado simétrico —el esquema híbrido de `TLS` y de la mensajería—, y El Gamal como criptosistema aparece sobre todo en OpenPGP y, en su versión sobre curvas (`ECIES`), en algunos estándares. Lo que sí es exacto es la idea que sostiene la afirmación: **el mecanismo de El Gamal —derivar una máscara de un secreto Diffie-Hellman— es el que está debajo de casi todo el cifrado asimétrico que se usa hoy**, mucho más que la exponenciación `RSA`.
+> **Sobre "el más usado"** *(precisión nuestra)*. Como afirmación literal es discutible: lo que domina en la práctica es el **intercambio** Diffie-Hellman sobre curvas elípticas combinado con un cifrado simétrico —el [[cifrado-hibrido|esquema híbrido]] de `TLS` y de la mensajería—, y El Gamal como criptosistema aparece sobre todo en OpenPGP y, en su versión sobre curvas (`ECIES`), en algunos estándares. Lo que sí es exacto es la idea que sostiene la afirmación: **el mecanismo de El Gamal —derivar una máscara de un secreto Diffie-Hellman— es el que está debajo de casi todo el cifrado asimétrico que se usa hoy**, mucho más que la exponenciación `RSA`.
 
 ## La construcción
 

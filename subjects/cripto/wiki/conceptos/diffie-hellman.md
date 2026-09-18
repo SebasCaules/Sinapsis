@@ -1,14 +1,14 @@
 ---
 title: Diffie-Hellman
 resumen: 'Primer protocolo de intercambio de claves (1976): ambas partes derivan el secreto $g^{xy}$ sin transmitirlo nunca. Su seguridad se apoya en el logaritmo discreto y la conjetura DDH, solo resiste adversarios pasivos, y domina en la práctica por ser el más simple.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[intercambio-de-claves]]", "[[grupos-anillos-y-cuerpos]]", "[[ataques-activos-y-man-in-the-middle]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[intercambio-de-claves]]", "[[grupos-anillos-y-cuerpos]]", "[[ataques-activos-y-man-in-the-middle]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Diffie-Hellman, DH, Intercambio Diffie-Hellman, Problema del logaritmo discreto, Conjetura de decisión Diffie-Hellman, DDH, Asimetría entre resolver y verificar]
 type: concepto
 unidad: 1
 clase: 4
 orden: 4
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, diffie-hellman, logaritmo-discreto, ddh, intercambio-de-claves, man-in-the-middle, complejidad, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **El primer protocolo de intercambio de claves de la historia (1976) y la razón exacta por la que resulta seguro contra un adversario pasivo, pero no contra uno activo.** Es la instancia concreta que satisface la definición abstracta de [[intercambio-de-claves|Intercambio de claves]] — y es, según los parciales viejos que el vault tiene resueltos, el ejercicio de examen completo más probable de toda esta unidad.
 
 > **Fuentes de esta nota.** Filminas **6-7 y 18 a 20** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT). La idea de 1976 y el candado están en los cues **115-172**, la presentación del protocolo en los **273-289**, y su desarrollo —protocolo, seguridad, la digresión sobre complejidad y el límite práctico— en los **518-701**, justo después de la primera pausa. La nota se escribió el 04/09 sólo contra el PDF y se revisó contra la voz el 14/09; la sección sobre P y NP y la pregunta sobre computación cuántica son enteramente de la voz.
+
+> **La [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] (14/09) escribe el protocolo en los cinco pasos de la Construcción 10.2 de Katz & Lindell —contra los siete de la filmina 18— y trae el único ejemplo con números que dio la cátedra:** $\mathbb{Z}_7^{*}$, $g = 3$, $x = 3$, $y = 4$. Las cuentas cierran ($h_1 = 6$, $h_2 = 4$) y **la clave da $1$**: $xy = 12$ es múltiplo del orden $6$, que no es primo. Es el mejor contraejemplo que hay a mano de por qué el orden del grupo tiene que ser primo, y la lámina no lo advierte. La misma lámina escribe $q = 7$ —el módulo— donde el libro y la voz de esta clase ponen el **orden** del grupo. Todo en [[practica-05-de-la-clave-privada-a-la-clave-publica#5. Diffie-Hellman en cinco pasos, y un ejemplo que da clave 1|Práctica 05 §5]].
 
 ## La cita que abre el bloque
 

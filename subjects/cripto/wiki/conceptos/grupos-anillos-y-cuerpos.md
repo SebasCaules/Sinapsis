@@ -1,14 +1,14 @@
 ---
 title: Grupos, anillos y cuerpos
 resumen: 'Vocabulario algebraico con el que la Clase 04 escribe sus esquemas sin volver a definirlo: grupo, subgrupo, anillo, cuerpo, generador, orden, elemento primitivo y el grupo multiplicativo $\mathbb{Z}_p^{*}$; con el repaso que el docente reconstruyó en el aula porque los alumnos lo pidieron.'
-fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[cuerpos-finitos-y-campos-de-galois]]", "[[teoria-de-numeros]]", "[[cuerpos-finitos]]"]
+fuentes: ["[[clase-04-criptografia-asimetrica-y-firma-digital]]", "[[cuerpos-finitos-y-campos-de-galois]]", "[[teoria-de-numeros]]", "[[cuerpos-finitos]]", "[[practica-05-de-la-clave-privada-a-la-clave-publica]]"]
 aliases: [Grupos anillos y cuerpos, Grupo algebraico, Anillo algebraico, Subgrupo, Elemento generador de un grupo, Grupo multiplicativo Zp*, Grupo finito cíclico]
 type: concepto
 unidad: 1
 clase: 4
 orden: 2
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [criptografia, algebra, grupos, anillos, cuerpos, aritmetica-modular, clase-04, transcripcion]
 sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "raw/clases/Clase 04 - Transcripcion.VTT"]
 ---
@@ -18,6 +18,8 @@ sources: ["Clase 04 - Criptografia - Cifrado asimetrico y firma digital.pdf", "r
 **El vocabulario algebraico exacto —subgrupo, generador, orden, elemento primitivo, $\mathbb{Z}_p^{*}$— con el que el resto de la Clase 04 escribe Diffie-Hellman, RSA y El Gamal.** Esta nota no vuelve a demostrar lo que ya está probado en las notas de la Clase 2: dice específicamente qué agrega el repaso de filminas por encima de ellas y linkea el resto.
 
 > **Fuentes de esta nota.** Filminas **9 a 15** de la Clase 04, dictada el **10/09** por Pablo Abad, con transcripción: [`Clase 04 - Transcripcion.VTT`](../../raw/clases/Clase%2004%20-%20Transcripcion.VTT), repaso de álgebra en los cues **290-517**. **El repaso no estaba planeado como lectura de filminas**: el docente preguntó si hacía falta —*"¿alguien entendió lo que dije? ¿alguien sabe de qué estoy hablando?"*, cue 289—, un alumno contestó *"bastante poco"* y otro pidió refrescar, y los veintiséis minutos que siguen son una reconstrucción con los alumnos aportando las definiciones. Para profundizar, el docente remite a **los primeros capítulos de Menezes** (cues 296-298), y aclara el nivel: *"no necesitan una licenciatura en matemáticas para diseñar cosas; es un repaso para que no estén perdidos"* (cues 300-303).
+
+> **El ejemplo multiplicativo que el aula no dio lo trae la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]]** (14/09, filmina 7): $\mathbb{Z}_7^{*}$ generado por $3$, con la tabla $3^{0} = 1$, $3^{1} = 3$, $3^{2} = 2$, $3^{3} = 6$, $3^{4} = 4$, $3^{5} = 5$ — las seis unidades módulo $7$, o sea $3$ es primitivo. En el aula el ejemplo módulo $7$ fue con la **suma**, generado por el $1$. La misma lámina muestra qué pasa cuando el orden del grupo, $6$, no es primo: el ejemplo de Diffie-Hellman que la acompaña termina en la clave $1$ → [[practica-05-de-la-clave-privada-a-la-clave-publica#Por qué da 1, y qué enseña|Práctica 05 §5]].
 
 ## Por qué esta nota no repite la Clase 2
 

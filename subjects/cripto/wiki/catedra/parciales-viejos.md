@@ -7,7 +7,7 @@ type: catedra
 clase: catedra
 orden: 6
 created: 2026-09-04
-updated: 2026-09-14
+updated: 2026-09-15
 tags: [catedra, parcial, examenes, resoluciones, protocolos, secreto-perfecto, modos, certificados, shamir]
 sources: ["raw/parciales/Cripto - Primeros Parciales.pdf"]
 ---
@@ -219,6 +219,8 @@ donde $A(G, q, g)$ elige un Grupo $G$ $\mathbb{Z}_q$ con una raíz primitiva $g$
 La resolución del apunte cubre los cuatro ítems: es **Diffie-Hellman**, genera un secreto compartido sobre un canal inseguro; $q$ tiene que ser **primo** para que exista la raíz primitiva; la seguridad computacional reside en que $x$ e $y$ **nunca se transmiten** y obtenerlos de $g^x$ y $g^y$ es el **problema del logaritmo discreto**, sin solución eficiente conocida; y los dos problemas son que **no resiste atacantes activos** —necesita un canal autenticado, o sea MitM— y que la exponenciación modular es cara al crecer los bits.
 
 **El ejemplo numérico del apunte tiene un problema** *(precisión nuestra)*: usa $\mathbb{Z}_5$ con $g=2$, $x=3$, $y=4$, y llega a $h_1 = 2^3 = 8 \equiv 3$, $h_2 = 2^4 = 16 \equiv 1$, $k_A = 1^3 = 1$, $k_B = 3^4 = 81 \equiv 1$. Las cuentas cierran y el secreto coincide, **pero el ejemplo es degenerado**: da $k = 1$, que es el peor valor posible para ilustrar nada. Conviene rehacerlo con otros exponentes —por ejemplo $x=2$, $y=3$ sobre $\mathbb{Z}_5$ con $g=2$: $h_1 = 4$, $h_2 = 3$, $k_A = 3^2 = 9 \equiv 4$, $k_B = 4^3 = 64 \equiv 4$— antes de usarlo como modelo de respuesta.
+
+**Y no es el único ejemplo que termina ahí.** El de la cátedra —filmina 7 de la [[practica-05-de-la-clave-privada-a-la-clave-publica#Por qué da 1, y qué enseña|Práctica 05]] del 14/09, el único con números que dio— usa $\mathbb{Z}_7$, $g = 3$ y **los mismos exponentes $x = 3$, $y = 4$**, y también llega a $k = 1$, esta vez con $h_1 = 6$ y $h_2 = 4$ distintos de $1$: falla porque $xy = 12$ es múltiplo del orden $6$. La verificación que hay que hacer antes de escribir el ejemplo es $k \ne 1$, no sólo $h_1, h_2 \ne 1$.
 
 > Esto es el concepto [[diffie-hellman|Diffie-Hellman]] de la [[clase-04-criptografia-asimetrica-y-firma-digital|Clase 04]], que el vault tiene ingerida **con la transcripción del 10/09** —hasta el 14/09 estaba escrita sólo contra las filminas—. Los siete pasos que formaliza esa nota coinciden exactamente con los ocho de este enunciado, y confirman los cuatro puntos de la resolución del apunte: el problema del **logaritmo discreto**, la necesidad de **canal autenticado** contra `MITM`, y que la seguridad reposa en que $x$ e $y$ nunca viajan.
 

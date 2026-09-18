@@ -3,7 +3,7 @@ title: Índice de la wiki
 aliases: [Índice, Index, Home, Cripto]
 type: meta
 created: 2026-08-10
-updated: 2026-09-14
+updated: 2026-09-17
 tags: [index, moc, criptografia, seguridad]
 sources: []
 ---
@@ -50,6 +50,7 @@ Cripto/
 │   ├── apuntes/                ← espeja raw/apuntes (7 notas)
 │   ├── tp/                     ← espeja raw/tp (1 nota)
 │   ├── parciales/              ← secciones 1er Parcial, 2do Parcial y Finales: por tipo de ejercicio, resumen + ejercicios viejos resueltos (17 notas)
+│   ├── resumenes/              ← el resumen de las diez clases en una sola página, con tooltips (1 nota)
 │   ├── videos/                 ← capa transversal: un video de la cátedra por nota (13 notas)
 │   └── conceptos/              ← capa transversal: ideas atómicas (131 notas)
 └── assets/                 ← imágenes (attachment folder de Obsidian)
@@ -58,6 +59,10 @@ Cripto/
 > **Ojo con los nombres.** `raw/practicas/` son las **clases prácticas de los lunes**, no las guías: las guías viven en `raw/guias/`. Y el PDF `raw/practicas/Clase 1.pdf` es la **práctica** del 10/08, no la teórica del 06/08.
 
 ---
+
+## Resumen de las clases
+
+- [[resumen-de-las-clases|Resumen de las clases]] — **toda la materia en una página**: las Clases 1 a 10 comprimidas a definiciones, fórmulas, tablas y trampas, con un tooltip en cada sigla y en cada concepto (al pasar el puntero por un enlace aparece el resumen de esa página). Pensada para refrescar un tema en un minuto en medio de la práctica de parciales; cada clase cierra con «Para el parcial» y remite a la sección 1P. En Sinapsis va arriba del índice, como página suelta.
 
 ## Cátedra
 
@@ -96,7 +101,8 @@ Todo lo institucional: qué se evalúa, cuándo y con qué material.
 - [[practica-02-videos|Práctica 02 — Videos]] — los 4 links de YouTube y nada más: la fuente no dice ni el tema ni la fecha. Pendiente mirarlos y volcar el contenido. Con la Práctica 3 ya fechada, la numeración la encierra en el **17/08** — el feriado no descarta esa fecha, la explica *(lectura nuestra, ver el [[cronograma#Material sin fecha de clase|cronograma]])*. La transcripción del 20/08 lo corrobora desde el otro lado: el docente abre esa clase con *"como tampoco vieron el lunes"* — ver [[clase-02-cifrado|Clase 02]].
 - [[practica-03-seudoaleatoriedad-y-modos|Práctica 03 — Seudoaleatoriedad y modos]] *(24/08)* — **el mapa de todo el bloque de la Clase 02 en una sola lámina**: el eje secreto perfecto → seguridad computacional → seudoaleatoriedad, y la identificación que la teoría no hace tan de frente, **generador $G$ = cifrado de flujo, función $F_k$ = cifrado de bloque**. Trae la construcción CPA-segura $c := \langle r, F_k(r)\oplus m\rangle$ escrita entera y el experimento `CPA` en sus 5 pasos. Sus **dos aportes propios**, que no están en ninguna filmina de teoría: la caracterización de las claves **débiles y semi-débiles por cantidad de subclaves distintas** (1, contra 2 o 4), que es el Ej. 8 de la Guía 2; y las cuatro láminas de `CFB` con bloque de 32 y segmento de 8, que resuelven el Ej. 6c con otros parámetros y agregan el caso —nuevo en el vault— de **bloques que llegan fuera de orden**.
 - [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04 — MACs, hash y cifrado autenticado]] *(31/08)* — **la práctica que se adelantó tres días a su teoría**: cubrió hash, Merkle-Damgård, `NMAC`, `HMAC` y cifrado autenticado el lunes 31/08, y la teoría los dictó el jueves 03/09. Sus cuatro aportes que **ninguna filmina de teoría trae**: el aviso de que un MAC **no protege contra replay** (con número de secuencia y timestamps como contramedidas), el MAC de longitud fija $t \leftarrow F_k(m)$, las **tres sugerencias fallidas** para pasar a longitud variable —XOR de los bloques, un MAC por bloque, un MAC por bloque con número de secuencia— cada una con su ataque, y **`NMAC`**, el escalón que hace comprensible a `HMAC`. Cierra con el ejercicio de que **claves iguales rompen `Encrypt-then-MAC`**, que es Katz §4.5.2 y donde la etiqueta resulta ser el texto plano.
-  Viene con el [`Anexo Clase 4.pdf`](../raw/practicas/Anexo%20Clase%204.pdf) —material de 2025 reusado— que trae **los ataques al `CBC-MAC` resueltos y dibujados por la cátedra**, incluido el **ataque de sufijo que Abad había dejado de tarea el 27/08**: la wiki lo había resuelto por su cuenta y las dos resoluciones coinciden bloque por bloque. De ahí sale además la **única errata de contenido** que el vault le encontró al material de la Práctica 04: la filmina 3 del Anexo invierte el etiquetado de las consultas respecto de la filmina 19 de teoría pero copia la fórmula sin ajustar los subíndices, y así **la falsificación que escribe no cierra**.
+  Viene con el [`Clase 4 - Anexo.pdf`](../raw/practicas/Clase%204%20-%20Anexo.pdf) —material de 2025 reusado— que trae **los ataques al `CBC-MAC` resueltos y dibujados por la cátedra**, incluido el **ataque de sufijo que Abad había dejado de tarea el 27/08**: la wiki lo había resuelto por su cuenta y las dos resoluciones coinciden bloque por bloque. De ahí sale además la **única errata de contenido** que el vault le encontró al material de la Práctica 04: la filmina 3 del Anexo invierte el etiquetado de las consultas respecto de la filmina 19 de teoría pero copia la fórmula sin ajustar los subíndices, y así **la falsificación que escribe no cierra**.
+- [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05 — De la clave privada a la clave pública]] *(14/09)* — **la imagen espejo de la Práctica 04**: llega **cuatro días después** de la Clase 04 y la recorre de nuevo en el orden de los capítulos 10 a 12 de Katz & Lindell, con tres láminas de anticipo de la Clase 05 (ataques, PKI, `TLS`). Lo que agrega: **las tres limitaciones de la clave privada** —distribución, almacenamiento, sistemas abiertos— con la flecha que dice cuáles dos resuelve el KDC; Diffie-Hellman en los cinco pasos del libro con **el único ejemplo numérico de la cátedra, que da clave $1$** —degenerado por la misma razón por la que el orden del grupo tiene que ser primo—; la **definición de masquerading y de man in the middle** por cuántos participantes honestos ejecutan el protocolo, que la Guía 4 pide sin definir; `GenRSA` sobre `GenModulus` y **una clave generada y abierta con `openssl`**, con los parámetros del teorema chino del resto verificados; el **cifrado híbrido** con las dos hipótesis de su teorema, única construcción de la práctica sin otra fuente en la cátedra, que pasa a concepto propio (`04.13`); y el nombre *"ataque de no mensaje"* para el ataque a `RSA-Signature` que la voz no dio. Sin `El Gamal`, sin `PKCS#1`, sin `DSS`.
 
 ## Guías
 
@@ -282,6 +288,12 @@ Los doce se revisaron contra la transcripción del 10/09: cada uno abre con un r
 - `04.10` [[firma-digital|Firma digital]] — la versión de clave pública de un MAC: la terna $(\mathsf{Gen}, \mathsf{Sign}, \mathsf{Vrfy})$ y el experimento `Sig-forge`. Con por qué se llama *firma* y no *MAC asimétrico*, el no repudio argumentado desde la clave compartida, y el **marco legal** —la ley argentina, la presunción de validez, firma digital contra firma electrónica— que la Guía 4 pide investigar.
 - `04.11` [[rsa-signature-y-hashed-rsa|RSA-Signature y Hashed RSA]] — por qué invertir las claves de RSA para firmar es, tal cual, un esquema roto con dos ataques de probabilidad de éxito 1, y cómo agregar un hash lo arregla sin demostración fuera de un modelo ideal. La voz agregó el tercer problema: sin hash, **la firma mide lo mismo que el mensaje**.
 - `04.12` [[digital-signature-standard|Digital Signature Standard]] — el estándar del NIST sobre el logaritmo discreto: la variante `DSA`, con generación de clave, firma y verificación completas. En el aula **quedó de lectura**; lo que se dijo es por qué se lo prefiere: está definido sobre grupos, va a curvas elípticas, y está más homologado.
+
+### Lo que la Clase 4 deja fuera de filmina, y la Práctica 05
+
+Un concepto que **ninguna lámina de teoría sostiene** y que la [[practica-05-de-la-clave-privada-a-la-clave-publica|Práctica 05]] del 14/09 trae completo, numerado `04.13` porque el contador de la clase se continúa después de los de teoría.
+
+- `04.13` [[cifrado-hibrido|Cifrado híbrido]] — cifrar con la clave pública una clave simétrica **fresca**, y con esa clave el mensaje: la construcción que vuelve utilizable en volumen al cifrado asimétrico y que está debajo de `TLS`, `PGP` y de la frase *"combina cifrado simétrico y asimétrico"*. Con el teorema de Katz & Lindell §11.3 y la parte que vale la pena entender: al cifrado simétrico **sólo se le pide resistir una escucha**, no `CPA`, porque cada clave se usa una vez. Trae la cuenta de eficiencia —la parte asimétrica se paga una vez por mensaje— y el paradigma `KEM/DEM`.
 
 ### PKI y protocolos de distribución (Clase 5)
 

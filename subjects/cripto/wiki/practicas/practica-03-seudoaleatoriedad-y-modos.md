@@ -9,14 +9,14 @@ orden: 23
 practica: 3
 fecha: 2026-08-24
 created: 2026-08-24
-updated: 2026-09-04
+updated: 2026-09-15
 tags: [practica, seudoaleatoriedad, prg, prf, stream-cipher, block-cipher, otp, cpa, des, 3des, claves-debiles, cfb, modos, propagacion-de-errores, lfsr, rc4, golomb, berlekamp-massey, videos, criptored, clase-02]
-sources: ["Clase 3.pdf", "Modo CFB.pdf", "Píldora formativa 33 — ¿Cómo se usan los registros de desplazamiento en la cifra? (Criptored/UPM, guion de Jorge Ramió)", "Píldora formativa 35 — ¿Cómo funciona el algoritmo RC4? (Criptored/UPM, guion de Jorge Ramió)", "Píldora formativa 28 — ¿Cómo funcionan los algoritmos DES y 3DES? (Criptored/UPM, guion de Jorge Ramió)"]
+sources: ["Clase 3.pdf", "Clase 3 - Modo CFB.pdf", "Píldora formativa 33 — ¿Cómo se usan los registros de desplazamiento en la cifra? (Criptored/UPM, guion de Jorge Ramió)", "Píldora formativa 35 — ¿Cómo funciona el algoritmo RC4? (Criptored/UPM, guion de Jorge Ramió)", "Píldora formativa 28 — ¿Cómo funcionan los algoritmos DES y 3DES? (Criptored/UPM, guion de Jorge Ramió)"]
 ---
 
 # Práctica 03 — Seudoaleatoriedad y modos
 
-> **24/08/2026** · Filminas: [`Clase 3.pdf`](../../raw/practicas/Clase%203.pdf) (10 pp.) y [`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf) (4 pp.), las dos de **Ana Arias Roig** · Teoría: [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] · Guía: [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]]
+> **24/08/2026** · Filminas: [`Clase 3.pdf`](../../raw/practicas/Clase%203.pdf) (10 pp.) y [`Clase 3 - Modo CFB.pdf`](../../raw/practicas/Clase%203%20-%20Modo%20CFB.pdf) (4 pp.), las dos de **Ana Arias Roig** · Teoría: [[clase-02-cifrado|Clase 02 — Cifrado simétrico]] · Guía: [[guia-02-criptografia-simetrica|Guía 2 — Criptografía Simétrica]]
 
 > **Ojo con el nombre del archivo.** El PDF se llama `Clase 3.pdf`, pero vive en `raw/practicas/`: es la **clase práctica 3, del lunes 24/08**, no la clase teórica 3 (ésa son los jueves **27/08 y 03/09**, y está ingerida en [[clase-03-macs-y-cifrado-autenticado|clase-03]]). Es exactamente el mismo patrón que ya documenta la [[practica-01-esquemas-y-taxonomias|Práctica 01]], donde `Clase 1.pdf` resultó ser la práctica del 10/08 y no la teórica del 06/08, y que la [[practica-04-macs-hash-y-cifrado-autenticado|Práctica 04]] repite con `Clase 4.pdf`. **Dos numeraciones paralelas con nombres de archivo idénticos**: la de las teóricas (jueves) y la de las prácticas (lunes). Y el patrón no se queda en `raw/practicas/`: `raw/clases/Clase 03pt2 - Transcripcion.VTT` tampoco es la Clase 4, sino la **segunda sesión de la Clase 3** — ahí la cátedra numera por sesión.
 
@@ -262,7 +262,7 @@ El mecanismo, en una línea por caso: con mitades constantes el acumulado no cam
 
 ## 9. Modo CFB: cuatro láminas con bloque de 32 bits y segmento de 8
 
-El segundo PDF ([`Modo CFB.pdf`](../../raw/practicas/Modo%20CFB.pdf)) son **cuatro diagramas** de *Cipher Feedback Mode*. Las **tres primeras** llevan los parámetros escritos arriba a la derecha —*"Ejemplo: n = 32; s=8"*—: **$n = 32$ bits de bloque, $s = 8$ bits de segmento**. **La cuarta, que es justo la del ejercicio, no los repite**: su texto completo es sólo el enunciado, así que los parámetros hay que **arrastrarlos de las láminas anteriores** — y conviene decirlo en voz alta al resolver, porque la respuesta depende de $n$. Vale la pena registrar la elección: **no es `DES`**. El registro de desplazamiento se llena con $n/s = 4$ segmentos, no con 8.
+El segundo PDF ([`Clase 3 - Modo CFB.pdf`](../../raw/practicas/Clase%203%20-%20Modo%20CFB.pdf)) son **cuatro diagramas** de *Cipher Feedback Mode*. Las **tres primeras** llevan los parámetros escritos arriba a la derecha —*"Ejemplo: n = 32; s=8"*—: **$n = 32$ bits de bloque, $s = 8$ bits de segmento**. **La cuarta, que es justo la del ejercicio, no los repite**: su texto completo es sólo el enunciado, así que los parámetros hay que **arrastrarlos de las láminas anteriores** — y conviene decirlo en voz alta al resolver, porque la respuesta depende de $n$. Vale la pena registrar la elección: **no es `DES`**. El registro de desplazamiento se llena con $n/s = 4$ segmentos, no con 8.
 
 | Lámina | Título | Qué muestra |
 |---|---|---|
