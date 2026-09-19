@@ -1,0 +1,133 @@
+{
+  "contract": 1,
+  "slug": "bdii",
+  "name": "Base de Datos II",
+  "code": "72.41",
+  "institution": "ITBA",
+  "color": "--u5",
+  "semester": "2026-2C",
+  "division": {
+    "singular": "Unidad",
+    "abbr": "U",
+    "plural": "Unidades"
+  },
+  "divisions": [
+    {
+      "key": "1",
+      "name": "Bases de datos relacionales — SQL avanzado sobre MySQL",
+      "kind": "numbered"
+    },
+    {
+      "key": "2",
+      "name": "NoSQL y MongoDB",
+      "kind": "numbered"
+    }
+  ],
+  "pageTypes": [
+    {
+      "key": "teorica",
+      "label": "Teórica",
+      "plural": "Teóricas",
+      "folder": "clases",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "practica",
+      "label": "Práctica",
+      "plural": "Prácticas",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "concepto",
+      "label": "Concepto",
+      "plural": "Conceptos",
+      "folder": "conceptos",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "motor",
+      "label": "Motor",
+      "plural": "Motores",
+      "folder": "motores",
+      "countsAsContent": false,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "referencia",
+      "label": "Referencia",
+      "plural": "Referencias",
+      "folder": "meta",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    }
+  ],
+  "rail": [
+    {
+      "id": "motores",
+      "label": "Motores",
+      "items": [
+        {
+          "id": "mysql",
+          "label": "MySQL",
+          "icon": "table",
+          "kind": "page",
+          "target": "mysql"
+        },
+        {
+          "id": "mongodb",
+          "label": "MongoDB",
+          "icon": "layers",
+          "kind": "page",
+          "target": "mongodb"
+        },
+        {
+          "id": "postgresql",
+          "label": "PostgreSQL",
+          "icon": "square",
+          "kind": "page",
+          "target": "postgresql"
+        }
+      ]
+    },
+    {
+      "id": "catedra",
+      "label": "Cátedra",
+      "items": [
+        {
+          "id": "cronograma",
+          "label": "Cronograma",
+          "icon": "clock",
+          "kind": "page",
+          "target": "cronograma"
+        },
+        {
+          "id": "campus",
+          "label": "Campus",
+          "icon": "link",
+          "kind": "link",
+          "target": "https://campus.itba.edu.ar"
+        }
+      ]
+    }
+  ],
+  "fab": null,
+  "exercisePlates": true,
+  "wiki": {
+    "root": "wiki",
+    "ignore": [
+      "assets"
+    ],
+    "divisionField": "unidad",
+    "study": "estudio",
+    "standalone": [
+      "cronograma",
+      "index-clases",
+      "mysql",
+      "mongodb",
+      "postgresql"
+    ]
+  }
+}
