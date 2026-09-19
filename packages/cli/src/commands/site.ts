@@ -44,7 +44,7 @@ import { compileWiki, isPublishedAssetName, type WikiAsset } from "@sinapsis/mar
 import { resolveUserPath, type Ctx } from "../context.js";
 import { buildBundle, findBundles, type BuiltBundle } from "../tools/bundle.js";
 import { GENERATOR } from "../version.js";
-import { pageWarnings, resolveLinks, studyWarnings, warningSink } from "../site/warnings.js";
+import { resolveLinks, subjectWarnings } from "../site/warnings.js";
 
 export interface SiteBuildOptions {
   /** Carpeta con las materias fuente (`subjects/`). */
@@ -67,9 +67,6 @@ export const CONFIG_FILE = "sinapsis.config.json";
  * exige un color, porque la landing pinta la tarjeta con él.
  */
 export const DEFAULT_SUBJECT_COLOR = "--u1";
-
-/** Tope de advertencias que admite `SiteSubject.warnings`. */
-const MAX_SUBJECT_WARNINGS = 500;
 
 /** Lo que se escribe de una materia; se arma entero antes de tocar el disco. */
 interface CompiledSubject {
@@ -242,12 +239,9 @@ async function compileSubject(ctx: Ctx, dir: string, builtAt: string): Promise<C
   const pages: PageType[] = compiled.payload.pages;
   const slugs = new Set(pages.map((p) => p.slug));
 
-  // Advertencias: las del compilador (wikilinks rotos, slugs normalizados…) más
-  // las de coherencia que levantaba el API al recibir el sync.
-  const sink = warningSink();
-  pageWarnings(config, pages, sink);
-  studyWarnings(config, compiled.study, slugs, sink);
-  const warnings = capWarnings([...compiled.warnings, ...sink.drain()], MAX_SUBJECT_WARNINGS);
+  // Advertencias: las del compilador más las de coherencia, con la misma
+  // composición que imprime `publish` (`subjectWarnings`).
+  const warnings = subjectWarnings(config, compiled);
 
   // --- bundles --------------------------------------------------------------
   const bundles: BuiltBundle[] = [];
@@ -443,10 +437,4 @@ export async function listSubjects(base: string): Promise<string[] | null> {
     }),
   );
   return dirs.filter((_, i) => withConfig[i]);
-}
-
-/** Recorta la lista al tope del contrato, resumiendo lo que queda afuera. */
-export function capWarnings(lines: readonly string[], max: number): string[] {
-  if (lines.length <= max) return [...lines];
-  return [...lines.slice(0, max - 1), `…y ${lines.length - (max - 1)} advertencia(s) más`];
 }

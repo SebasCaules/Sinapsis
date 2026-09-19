@@ -464,6 +464,15 @@ function page(titulo: string, unidad: string, cuerpo = "Cuerpo."): string {
   return `---\ntitulo: ${titulo}\nunidad: ${unidad}\nresumen: 'Resumen de ${titulo}.'\n---\n\n${cuerpo}\n`;
 }
 
+/** Una página sin división (sin `unidad`), que solo entra al índice vía `wiki.standalone`. */
+function loosePage(titulo: string): string {
+  return `---\ntitulo: ${titulo}\nresumen: 'Resumen de ${titulo}.'\n---\n\nCuerpo.\n`;
+}
+
+/** La advertencia de coherencia que levanta `loosePage("Suelta")` con `DEMO_CONFIG`. */
+const SUELTA_WARNING =
+  'página "suelta": sin división y fuera de wiki.standalone; no aparece en el índice (se llega por búsqueda, wikilinks o el catálogo)';
+
 /** El vault de la materia «demo»: config, wiki, estudio y un bundle. */
 async function makeVault(base: string): Promise<string> {
   const dir = path.join(base, "vault");
@@ -585,6 +594,23 @@ describe("sinapsis publish --no-pr", () => {
     // 6. El informe dice dónde quedó, sin hablar de PR ni de red.
     expect(ctx.stdout.join("\n")).toContain("--no-pr: la rama queda local");
     expect(ctx.stdout.join("\n")).toContain("https://sebascaules.github.io/Sinapsis/m/demo");
+  });
+
+  it("el cuerpo del commit lleva las advertencias de coherencia, no solo las del compilador", async () => {
+    const vault = await makeVault(base);
+    const repo = await makePlatform(base);
+    const git = (...args: string[]) => run("git", ["-C", repo, ...args]);
+    await writeFile(path.join(vault, "wiki", "conceptos", "suelta.md"), loosePage("Suelta"), "utf8");
+
+    const ctx = testCtx(vault);
+    expect(await main(["publish", "--repo", repo, "--no-pr", "--branch", "subject/demo-avisos"], ctx)).toBe(0);
+    expect(ctx.stderr.join("\n")).toBe("");
+    expect(ctx.stdout.join("\n")).toContain(SUELTA_WARNING);
+
+    const message = (await git("log", "-1", "--format=%B", "subject/demo-avisos")).stdout;
+    expect(message).toContain("Advertencias: 1");
+    expect(message).toContain(`- ${SUELTA_WARNING}`);
+    expect(message).not.toContain("Advertencias: ninguna");
   });
 
   it("una segunda publicación sin cambios no crea ninguna rama", async () => {
@@ -827,6 +853,32 @@ describe("sinapsis site build", () => {
     expect(await main(["site", "build", "--subjects", subjects, "--out", out], ctx)).toBe(0);
     const warnings = SiteSubject.parse(await json("demo", "subject.json")).warnings.join("\n");
     expect(warnings).toContain('la división "9" no está declarada en el config');
+  });
+
+  it("publish --dry-run informa las mismas advertencias de coherencia que site build", async () => {
+    const dir = await makeSource("demo", { tools: false });
+    // Una página sin división que `wiki.standalone` no declara: el índice no
+    // la muestra. No es un problema del compilador sino de coherencia, así que
+    // `publish` no la veía (PR #21 de soya: «Advertencias: Ninguna» con una
+    // advertencia en el build).
+    await writeFile(path.join(dir, "wiki", "conceptos", "suelta.md"), loosePage("Suelta"), "utf8");
+    const expected = SUELTA_WARNING;
+
+    const build = testCtx(base);
+    expect(await main(["site", "build", "--subjects", subjects, "--out", out], build)).toBe(0);
+    const built = SiteSubject.parse(await json("demo", "subject.json")).warnings;
+    expect(built).toEqual([expected]);
+    expect(build.stdout.join("\n")).toContain(expected);
+
+    const publish = testCtx(base);
+    expect(
+      await main(["publish", "--config", path.join(dir, "sinapsis.config.json"), "--dry-run", "--repo", path.join(base, "no-existe")], publish),
+    ).toBe(0);
+    expect(publish.stderr.join("\n")).toBe("");
+    const stdout = publish.stdout.join("\n");
+    expect(stdout).toContain(`${built.length} advertencia(s)`);
+    expect(stdout).toContain(expected);
+    expect(stdout).not.toContain("sin advertencias");
   });
 
   it("sale 1 si la carpeta de materias no existe", async () => {

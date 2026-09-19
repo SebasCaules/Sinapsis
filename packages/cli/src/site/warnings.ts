@@ -3,8 +3,12 @@
  *
  * Son las que levantaba el API al recibir un sync (`services/sync.ts`:
  * `pageWarnings` y `studyWarnings`). Sin API, las tiene que levantar quien
- * compila el sitio: `sinapsis site build` las escribe en `subject.json` para
- * que el informe de la materia siga diciendo lo mismo que decía antes.
+ * compila la materia, y la lista completa —las del compilador más estas— se
+ * arma en un solo lugar, `subjectWarnings`: `sinapsis site build` la escribe en
+ * `subject.json` y `sinapsis publish` la imprime y la lleva al commit y al PR.
+ * Así los dos comandos cuentan lo mismo de la misma materia; con dos
+ * composiciones distintas, `publish` decía «sin advertencias» de una materia a
+ * la que `site build` le encontraba una.
  *
  * Se conservan tal cual estaban, incluido el tope: por encima de `MAX_WARNINGS`
  * el resto se resume en una línea, así una materia con el config a medio
@@ -17,9 +21,13 @@ import {
   type StudyContent,
   type SubjectConfig,
 } from "@sinapsis/contract";
+import type { CompileWikiResult } from "@sinapsis/markdown";
 
 /** Tope de advertencias acumuladas; el resto se resume en una línea final. */
 export const MAX_WARNINGS = 120;
+
+/** Tope de advertencias que admite `SiteSubject.warnings` (contrato del sitio). */
+export const MAX_SUBJECT_WARNINGS = 500;
 
 /** Acumulador con tope: el excedente se cuenta y se resume al drenar. */
 export function warningSink(max = MAX_WARNINGS) {
@@ -38,6 +46,30 @@ export function warningSink(max = MAX_WARNINGS) {
 }
 
 export type Sink = ReturnType<typeof warningSink>;
+
+/**
+ * Todas las advertencias de una materia compilada, en el orden en que se
+ * informan: primero las del compilador (wikilinks rotos, slugs normalizados…) y
+ * después las de coherencia (`pageWarnings`, `studyWarnings`), recortadas al
+ * tope del contrato del sitio. Es la única composición: la usan `site build` y
+ * `publish` sobre el mismo resultado de `compileWiki`.
+ */
+export function subjectWarnings(
+  config: SubjectConfig,
+  compiled: Pick<CompileWikiResult, "payload" | "study" | "warnings">,
+): string[] {
+  const pages = compiled.payload.pages;
+  const sink = warningSink();
+  pageWarnings(config, pages, sink);
+  studyWarnings(config, compiled.study, new Set(pages.map((p) => p.slug)), sink);
+  return capWarnings([...compiled.warnings, ...sink.drain()], MAX_SUBJECT_WARNINGS);
+}
+
+/** Recorta la lista al tope del contrato, resumiendo lo que queda afuera. */
+export function capWarnings(lines: readonly string[], max: number): string[] {
+  if (lines.length <= max) return [...lines];
+  return [...lines.slice(0, max - 1), `…y ${lines.length - (max - 1)} advertencia(s) más`];
+}
 
 /**
  * Páginas con una división o un tipo que el config no declara, y las páginas
