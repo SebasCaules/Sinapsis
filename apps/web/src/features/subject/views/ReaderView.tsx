@@ -242,6 +242,8 @@ export function ReaderView() {
   }, []);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
   const sheetRef = useRef<HTMLElement>(null);
+  /* La lista de «EN ESTA PÁGINA»: ahora se desplaza por dentro de su tarjeta. */
+  const tocRef = useRef<HTMLDivElement>(null);
 
   const detail = query.data;
   const page = detail?.page;
@@ -413,6 +415,30 @@ export function ReaderView() {
     return () => observer.disconnect();
   }, [headings, detail]);
 
+  /* La lista del índice conserva su desplazamiento entre páginas (es el mismo
+     nodo): al cambiar de página vuelve arriba. */
+  useEffect(() => {
+    if (tocRef.current) tocRef.current.scrollTop = 0;
+  }, [pageSlug]);
+
+  /**
+   * La lista sigue la lectura: el renglón activo se mantiene a la vista DENTRO
+   * de la lista, que es lo único que se desplaza en la columna. Sin
+   * `scrollIntoView` (ver `scrollMainTo`): desplazaría también a `main` y a los
+   * ancestros con `overflow: hidden` mientras el lector está leyendo.
+   */
+  useEffect(() => {
+    const toc = tocRef.current;
+    if (!toc || !activeHeading) return;
+    const link = toc.querySelector<HTMLElement>('a[data-active="true"]');
+    if (!link) return;
+    const box = toc.getBoundingClientRect();
+    const row = link.getBoundingClientRect();
+    const margin = 8;
+    if (row.top < box.top + margin) toc.scrollTop += row.top - box.top - margin;
+    else if (row.bottom > box.bottom - margin) toc.scrollTop += row.bottom - box.bottom + margin;
+  }, [activeHeading, sideOpen]);
+
   /* El error manda sobre la carga: un 404 no puede quedarse en el esqueleto. */
   if (query.isError || (!query.isPending && (!detail || !page))) {
     return <ErrorCard error={query.error} notFound="Esta página no existe en la materia" subject={slug} />;
@@ -480,13 +506,13 @@ export function ReaderView() {
         className={wide ? css.side : `${css.side} ${css.sideFloating}`}
         data-floating={wide ? undefined : "true"}
       >
-        <section className={css.card} aria-labelledby="reader-toc">
+        <section className={`${css.card} ${css.tocCard}`} aria-labelledby="reader-toc">
           <div className={css.cardHead} id="reader-toc">
             <UiIcon name="menu" size={13} />
             EN ESTA PÁGINA
           </div>
           {tocTree.length ? (
-            <div className={css.toc}>
+            <div className={css.toc} ref={tocRef}>
               {tocTree.map((branch, b: number) => {
                 /* Dos encabezados distintos pueden dar el MISMO id —el
                    compilador es el dueño del algoritmo y no desambigua
@@ -789,7 +815,7 @@ function NotesCard({ slug, page, exists }: { slug: string; page: string; exists:
   const chars = draft.length;
 
   return (
-    <section className={css.card} aria-labelledby="reader-notes">
+    <section className={`${css.card} ${css.notesCard}`} aria-labelledby="reader-notes">
       <div className={css.cardHead} id="reader-notes">
         <Icon name="pencil" size={13} />
         APUNTES
