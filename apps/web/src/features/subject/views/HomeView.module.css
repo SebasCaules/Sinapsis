@@ -135,11 +135,27 @@
 }
 
 /* No es el título de la pantalla —ese es el de la materia, en el hero—: es el
-   rótulo de una sección más, del tamaño de las otras. */
-.h1 {
+   rótulo de una sección más, del tamaño de las otras. Por eso es un <h2>: como
+   <h1> llegaba tercero, detrás de dos <h2>, y no nombraba la página. */
+.progressTitle {
   margin: 0;
   font: 600 18px/1.2 var(--font-display);
   color: var(--text);
+}
+
+/* El título de la pantalla, solo para tecnologías de apoyo: en pantalla lo
+   dicen la cabecera y el hero del índice, que no son encabezados del panel. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .progressNum { display: inline-flex; align-items: baseline; gap: 10px; }
@@ -148,6 +164,12 @@
 /* Desglose de los pasos de los bundles («· 8 / 34 ejercicios»): mismo renglón
    que las páginas, sin partirse en dos líneas al angostar. */
 .progressExtra { white-space: nowrap; }
+/* En teléfono la cifra entera se va debajo del título en vez de salirse de la
+   pantalla (a 375 px terminaba en x = 390, auditoría 2026-09-19). */
+@media (max-width: 720px) {
+  .progressHead { flex-wrap: wrap; align-items: baseline; }
+  .progressNum { flex-wrap: wrap; row-gap: 2px; }
+}
 
 /* La pista VACÍA es `--border-2`, no `--track`.
    `--track` es la tinta de «trazo que se tiene que ver» (3,2:1 sobre la hoja) y
@@ -333,6 +355,12 @@
 
 @container (max-width: 560px) {
   .rowTrack { display: none; }
+  /* Teléfono: con los cuatro atajos al lado, al nombre de la unidad le quedaban
+     50 px («E…», medido a 375 px, auditoría 2026-09-19). La fila pasa a dos
+     renglones: arriba el nombre con su cifra, abajo los atajos a la derecha. */
+  .row { flex-wrap: wrap; padding-right: 8px; }
+  .rowMain { flex: 1 1 100%; }
+  .rowActions { margin-left: auto; padding-bottom: 6px; }
 }
 
 /* ---------- para hoy ---------- */
@@ -371,7 +399,7 @@
 .todayItem:first-child { padding-left: 0; border-left: 0; }
 
 .todayLabel {
-  font: 600 9.5px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.1em;
   color: var(--text-3);
 }
@@ -473,7 +501,7 @@
 .streakOn .streakCell { background: var(--good); }
 .streakToday .streakCell { outline: 2px solid var(--primary); outline-offset: 1px; }
 
-.streakDay { font: 500 9.5px var(--font-mono); color: var(--text-3); }
+.streakDay { font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
 /* ---------- plan ---------- */
 .plan {
@@ -568,7 +596,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font: 600 9.5px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.1em;
   color: var(--text-3);
 }
@@ -673,7 +701,7 @@
 .toolGroupName {
   margin-top: auto;
   padding-top: 4px;
-  font: 600 9.5px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-3);
@@ -731,7 +759,7 @@
 
 .generalKicker {
   grid-column: 2;
-  font: 600 9px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.1em;
   color: var(--text-3);
   overflow: hidden;

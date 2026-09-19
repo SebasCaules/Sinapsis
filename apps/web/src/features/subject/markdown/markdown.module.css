@@ -16,6 +16,13 @@
   hyphenate-limit-chars: 8 4 4;
   text-wrap: pretty;
 }
+/* En teléfono la medida baja a unos 40 caracteres y el bloque justificado abre
+   ríos entre las palabras que ni los guiones cierran (medido a 375 px,
+   auditoría 2026-09-19): ahí manda la bandera derecha. El bloque del pedido del
+   usuario sigue en cualquier ancho de lectura normal. */
+@media (max-width: 720px) {
+  .prose { text-align: start; }
+}
 
 /* Lo que no se justifica: títulos, tablas, código y rótulos de callout —donde
    el espacio estirado se nota más que la bandera—. */
@@ -76,7 +83,10 @@
   border-radius: var(--r-sm);
   background: color-mix(in srgb, var(--ucol) 12%, transparent);
   font: 600 12px var(--font-mono);
-  color: var(--ucol);
+  /* Es TEXTO: va en la tinta de la unidad, no en la mancha (regla --ucol/--uink
+     de tokens.css). Con --ucol crudo medía 3,56:1 (U6, pergamino) y 3,76-4,42
+     en claustro (auditoría 2026-09-19). */
+  color: var(--uink, var(--ucol));
 }
 
 .prose .sectionTitle { min-width: 0; }

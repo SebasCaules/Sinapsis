@@ -132,7 +132,7 @@
 
 .chipDot { width: 8px; height: 8px; border-radius: 50%; background: var(--ucol); }
 .chipCount {
-  font: 500 10px var(--font-mono);
+  font: 500 10.5px var(--font-mono);
   color: var(--text-3);
   background: var(--surface-3);
   padding: 0 5px;
@@ -239,7 +239,7 @@
 
 .tipChip {
   align-self: flex-start;
-  font: 600 9.5px var(--font-mono);
+  font: 600 10.5px var(--font-mono);
   color: var(--uink, var(--ucol));
   border: 1px solid var(--ucol);
   border-radius: 4px;
@@ -473,6 +473,8 @@
 .altLink {
   flex: 1;
   min-width: 0;
+  /* El enlace llena los 24 px de su fila: el objetivo es la fila, no el renglón. */
+  padding: 3px 0;
   font: 400 12px/1.5 var(--font-ui);
   color: var(--text-2);
   text-decoration: none;
@@ -483,7 +485,7 @@
 .altLink:hover { color: var(--primary); text-decoration: underline; }
 .altLink:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
 
-.altCount { flex: none; font: 500 10px var(--font-mono); color: var(--text-3); }
+.altCount { flex: none; font: 500 10.5px var(--font-mono); color: var(--text-3); }
 
 /* Con la lista abierta la vista deja de caber: pasa a alto automático. El
    lienzo pasa a llevar alto propio, como en anchos chicos — sin eso el alto del
@@ -513,6 +515,14 @@
   .head { flex-direction: column; align-items: stretch; }
   .searchField { width: auto; }
   .altBody { columns: 1; }
+}
+
+/* En teléfono las dos tarjetas de la columna (leyenda y «Más citadas») no
+   caben una al lado de la otra (220 + 220 en 315 px: «Más citadas» quedaba
+   cortada con scroll lateral, auditoría 2026-09-19): se apilan. */
+@media (max-width: 720px) {
+  .side { flex-direction: column; overflow-x: visible; }
+  .card { min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

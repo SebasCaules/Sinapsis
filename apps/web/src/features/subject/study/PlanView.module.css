@@ -18,7 +18,7 @@
 .tracks { display: flex; flex-direction: column; gap: 7px; }
 
 .tracksLabel {
-  font: 600 10px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.09em;
   color: var(--text-3);
 }
@@ -193,7 +193,7 @@
 .totalOf { font-size: 16px; color: var(--text-3); }
 
 .totalLabel {
-  font: 600 9.5px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.08em;
   color: var(--text-3);
 }

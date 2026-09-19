@@ -205,7 +205,7 @@ test("volver al inicio de la materia y regresar vuelve a montar la vista", async
 
   await rail(page).getByRole("link", { name: "Inicio", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/m/${subject.slug}$`));
-  await expect(page.getByRole("heading", { name: "Progreso", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Progreso", level: 2 })).toBeVisible();
   await expect(mounted(page, view.id)).toHaveCount(0);
 
   await page.goBack();
@@ -224,7 +224,7 @@ test("una herramienta que la materia no reservó devuelve al inicio", async ({ p
   await openTool(page, VISTA_INEXISTENTE);
 
   await expect(page).toHaveURL(new RegExp(`/m/${subject.slug}$`));
-  await expect(page.getByRole("heading", { name: "Progreso", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Progreso", level: 2 })).toBeVisible();
   await expect(page.getByText("PRÓXIMAMENTE")).toHaveCount(0);
   await expect(host(page)).toHaveCount(0);
 

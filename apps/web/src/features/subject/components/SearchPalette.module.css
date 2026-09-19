@@ -52,7 +52,7 @@
 /* R8: LA tecla de la plataforma se dibuja igual en todas partes (misma receta
    que ShortcutsDialog .kbd); con --kbd-bg + --border la caja desaparecía en claustro. */
 .kbd {
-  font: 600 10px var(--font-mono);
+  font: 600 10.5px var(--font-mono);
   color: var(--text-2);
   background: var(--surface-2);
   border: 1px solid var(--border-2);
@@ -80,7 +80,7 @@
    cuánto hay antes de recorrer la lista (.pr-group del baseline). */
 .groupHead {
   padding: 10px 10px 4px;
-  font: 600 9.5px var(--font-mono);
+  font: 600 10.5px var(--font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-3);

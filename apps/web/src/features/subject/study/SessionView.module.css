@@ -36,7 +36,7 @@
 .headTitle { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 
 .eyebrow {
-  font: 600 10px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.09em;
   color: var(--primary);
 }
@@ -103,7 +103,7 @@
 .faceTag { display: flex; align-items: center; gap: 8px; }
 
 .faceKind {
-  font: 600 9.5px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.1em;
   color: var(--text-3);
 }
@@ -259,7 +259,7 @@
 }
 
 .summaryValue { font: 600 22px var(--font-mono); color: var(--text); line-height: 1.1; }
-.summaryLabel { font: 600 9.5px var(--font-ui); letter-spacing: 0.08em; color: var(--text-3); }
+.summaryLabel { font: 600 10.5px var(--font-ui); letter-spacing: 0.08em; color: var(--text-3); }
 
 .summaryCell[data-grade="1"] .summaryValue { color: var(--bad-text); }
 .summaryCell[data-grade="2"] .summaryValue { color: var(--warn-text); }

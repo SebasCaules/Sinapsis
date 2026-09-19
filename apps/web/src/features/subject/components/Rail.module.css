@@ -52,8 +52,12 @@
   top: 50%;
   transform: translateY(-50%) rotate(180deg);
   writing-mode: vertical-rl;
-  font: 600 calc(8px * max(var(--rs), 0.85)) var(--font-mono);
-  letter-spacing: 0.12em;
+  /* 10,5 px es el escalón más chico del sistema (metadatos); el rótulo baja con
+     el rail hasta 9 px y no más: a 8 × 0,85 = 6,8 px (auditoría 2026-09-19) no
+     se leía ni con la vista puesta. «PRACTICAR» a 10,5 px mono mide ≈68 px y el
+     grupo de dos ítems, 87 (75 a escala 0,85): entra. */
+  font: 600 clamp(9px, calc(10.5px * var(--rs)), 10.5px) var(--font-mono);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-3);
   white-space: nowrap;
@@ -182,6 +186,36 @@
 
 /* Con el rail achicado, los iconos acompañan a su caja. */
 .item > svg { width: calc(18px * var(--rs)); height: calc(18px * var(--rs)); }
+
+/* ---------- teléfono: el rail es parte del cajón ----------
+   Bajo 720 px los 52 px del rail se comían el 14 % del ancho y la hoja del
+   lector quedaba en 251 px (auditoría 2026-09-19). Como en el baseline, el rail
+   pasa a vivir DENTRO del cajón del índice: sale de pantalla y vuelve, a la
+   izquierda del panel, con la marca `data-drawer-open` que pone el shell. El
+   velo del cajón ya deja libres estos 52 px (`SubjectShell.module.css`). El
+   conmutador del índice no tiene sentido ahí (el cajón siempre lo muestra) y
+   se oculta; el sello sigue siendo la vuelta a Sinapsis. */
+@media (max-width: 720px) {
+  .rail {
+    position: fixed;
+    top: 40px;
+    bottom: 0;
+    left: 0;
+    z-index: 21;
+    box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform var(--t), visibility var(--t);
+  }
+  :global([data-drawer-open="true"]) .rail {
+    transform: none;
+    visibility: visible;
+  }
+  .toggleRow { display: none; }
+}
+@media (max-width: 720px) and (prefers-reduced-motion: reduce) {
+  .rail { transition: none; }
+}
 
 /* El rail no se imprime (nav.css:557). */
 @media print {

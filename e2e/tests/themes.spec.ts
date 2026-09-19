@@ -74,7 +74,7 @@ test("capturas de las ocho vistas en los tres temas", async ({ page }) => {
       abrir: async () => {
         await page.goto(`/m/${subject.slug}`);
         await waitForSubjectShell(page);
-        await expect(page.getByRole("heading", { name: "Progreso", level: 1 })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Progreso", level: 2 })).toBeVisible();
       },
     },
     {

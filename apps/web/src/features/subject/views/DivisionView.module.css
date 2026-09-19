@@ -67,7 +67,10 @@
 
 .heroRow { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 4px; }
 
-.progress { display: flex; align-items: center; gap: 11px; }
+/* La cifra puede bajar debajo de la pista cuando no entra al lado (a 1024 px con
+   el índice abierto «· 0 / 13 ejercicios resueltos» salía de la pantalla,
+   auditoría 2026-09-19); con sitio, siguen en el mismo renglón. */
+.progress { display: flex; align-items: center; gap: 6px 11px; flex-wrap: wrap; }
 
 /* La pista lleva el color de la división mezclado sobre `--track`, no sobre
    `--surface-2`: con `--surface-2` la barra vacía medía 1.05:1 contra la página
@@ -84,6 +87,10 @@
 .fill { display: block; height: 100%; border-radius: 4px; background: var(--ucol); }
 
 .count { font: 500 11.5px var(--font-mono); color: var(--text-3); white-space: nowrap; }
+/* En teléfono ni la cifra sola entra en un renglón (352 px en 333): se parte. */
+@media (max-width: 720px) {
+  .count { white-space: normal; }
+}
 /* El desglose de los pasos que aportan los bundles («· 8 / 34 ejercicios
    resueltos»): mismo renglón que las páginas, un punto más apagado. */
 .countExtra { color: var(--text-3); }
@@ -150,7 +157,7 @@
 
 .hub {
   flex: none;
-  font: 600 10px/1 var(--font-ui);
+  font: 600 10.5px/1 var(--font-ui);
   letter-spacing: 0.06em;
   color: var(--primary-2);
   background: var(--primary-soft);
@@ -182,7 +189,7 @@
   color: var(--text-3);
 }
 .listN {
-  font: 500 10px var(--font-mono);
+  font: 500 10.5px var(--font-mono);
   color: var(--text-3);
   background: var(--surface-3);
   padding: 0 6px;
@@ -348,7 +355,7 @@ a.group:hover .arrow { color: var(--primary); transform: translateX(2px); }
   color: var(--text-3);
 }
 .groupDone {
-  font: 700 9.5px var(--font-ui);
+  font: 700 10.5px var(--font-ui);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--good-text);

@@ -73,7 +73,7 @@
 }
 
 .eyebrow {
-  font: 600 10px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.09em;
   color: var(--text-3);
 }

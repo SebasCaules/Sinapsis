@@ -14,7 +14,7 @@
  * navegar actualiza la activa, ⌘-clic abre una nueva sin moverse, cada una
  * recuerda el scroll de `main`.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { Outlet, useLocation, useNavigate, useNavigationType, useParams } from "react-router-dom";
 import { routes } from "@sinapsis/contract";
 import { Seal, useToast } from "@/components/platform";
@@ -22,7 +22,6 @@ import { isTypingTarget } from "@/lib/keyboard";
 import { Crumbs, type Crumb } from "./components/Crumbs";
 import { Fab } from "./components/Fab";
 import { IndexPanel } from "./components/IndexPanel";
-import { PageTip } from "./components/PageTip";
 import { Rail } from "./components/Rail";
 import { SearchPalette } from "./components/SearchPalette";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
@@ -37,6 +36,13 @@ import { useStudy } from "./study/useStudy";
 import { useStudyState, useSubject, useSubjectModel } from "./useSubject";
 import type { ExtraStep } from "./model";
 import css from "./SubjectShell.module.css";
+
+/* La tarjeta de vista previa trae `MathText` y, con él, KaTeX entero (~280 kB
+   sin comprimir). Diferida, KaTeX sale del chunk principal —que también carga
+   la landing, donde no hay una sola fórmula— y llega con el shell ya dibujado:
+   la delegación de puntero se instala en cuanto el módulo aterriza, antes de
+   que haya tiempo de posar el puntero sobre un enlace. */
+const PageTip = lazy(() => import("./components/PageTip").then((m) => ({ default: m.PageTip })));
 
 /**
  * Ancho angosto (`NARROW_Q` del baseline, core.js:1584-1585): por debajo de este
@@ -550,6 +556,9 @@ export function SubjectShell() {
     <div
       className={css.shell}
       ref={shellRef}
+      /* En teléfono el rail vive dentro del cajón: `Rail.module.css` lo saca de
+         pantalla bajo 720 px y lo trae con esta marca (N0-29). */
+      data-drawer-open={narrow && drawerOpen ? "true" : undefined}
       onClick={(event) => openLinkInNewTab(event, false)}
       onAuxClick={(event) => openLinkInNewTab(event, event.button === 1)}
     >
@@ -604,7 +613,9 @@ export function SubjectShell() {
       <SearchPalette model={model} open={searchOpen} onClose={closeSearch} />
       {/* Una sola tarjeta de vista previa para todo el shell: cubre por
           delegación los enlaces a páginas de cualquier vista (N0-50). */}
-      <PageTip model={model} subject={subject} rootRef={shellRef} currentPage={route.page} />
+      <Suspense fallback={null}>
+        <PageTip model={model} subject={subject} rootRef={shellRef} currentPage={route.page} />
+      </Suspense>
       <ShortcutsDialog open={shortcutsOpen} onClose={closeShortcuts} />
     </div>
   );

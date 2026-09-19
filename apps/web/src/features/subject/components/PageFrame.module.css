@@ -355,6 +355,27 @@
   .prevNextFoot { grid-template-columns: 1fr; }
 }
 
+/* ---------- teléfono ----------
+   Medido a 375 px (auditoría 2026-09-19): con el rail, las canaletas de 36 y el
+   relleno de 40 la hoja quedaba en 251 px y el texto en ≈170 px. Sin rail (va en
+   el cajón), con canaletas de 12 y relleno de 18, la hoja mide 351 y el texto
+   315: unos 40 caracteres de Spectral a 17 px, la medida de un libro de bolsillo.
+   Las asas de ancho no tienen sentido con el pulgar —y su `touch-action: none`
+   se comía el gesto de desplazar en los bordes—: fuera. */
+@media (max-width: 720px) {
+  .layout {
+    --reader-gutter: 12px;
+    padding-bottom: 40px;
+  }
+  .layout[data-side="open"] { padding-right: 12px; }
+  .sheet {
+    padding: 18px 18px 28px;
+    border-radius: var(--r);
+  }
+  .handle { display: none; }
+  .title { font-size: 32px; }
+}
+
 /* ---------- pie de la hoja ---------- */
 .foot {
   display: flex;

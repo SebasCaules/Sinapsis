@@ -138,7 +138,7 @@
 }
 
 .statLabel {
-  font: 600 9.5px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: 0.08em;
   color: var(--text-3);
 }
@@ -159,7 +159,7 @@
   border-bottom-width: 2px;
   border-radius: 5px;
   background: var(--kbd-bg);
-  font: 600 10px var(--font-mono);
+  font: 600 10.5px var(--font-mono);
   color: var(--text-3);
 }
 

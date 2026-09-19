@@ -174,7 +174,7 @@ function renderHome(studied: string[] = ["u1-a"], pasos = false) {
 describe("<HomeView/> · progreso", () => {
   it("muestra el porcentaje global y el de cada división", async () => {
     renderHome(["u1-a"]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
 
     // 1 de 4 páginas de contenido.
     expect(screen.getByText("25%")).toBeTruthy();
@@ -187,7 +187,7 @@ describe("<HomeView/> · progreso", () => {
 
   it("el carril y las filas suman los ejercicios; la cabecera los desglosa", async () => {
     renderHome(["u1-a"], true);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
 
     /* 1 de 4 páginas + 1 de 3 ejercicios = 2 de 7 → 29 %. */
     expect(screen.getByText("29%")).toBeTruthy();
@@ -201,19 +201,19 @@ describe("<HomeView/> · progreso", () => {
 
   it("sin pasos de bundles la cabecera solo habla de páginas", async () => {
     renderHome(["u1-a"]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
     expect(screen.queryByText(/ejercicios/)).toBeNull();
   });
 
   it("sin nada leído no repite una columna de ceros", async () => {
     renderHome([]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
     expect(screen.queryByText("0%")).toBeNull();
   });
 
   it("la barra total tiene nombre accesible y un tramo por división con su tooltip", async () => {
     const { container } = renderHome(["u1-a", "u2-a"]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
 
     expect(screen.getByRole("img", { name: "Progreso total: 50%" })).toBeTruthy();
     const tramos = [...container.querySelectorAll("i[title]")].map((n) => n.getAttribute("title"));
@@ -222,7 +222,7 @@ describe("<HomeView/> · progreso", () => {
 
   it("cada fila lleva el código corto además del nombre", async () => {
     renderHome(["u1-a"]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
     const fila = screen.getByRole("link", { name: "U1 Estadística Descriptiva 1/2 50%" });
     expect(within(fila).getByText("U1")).toBeTruthy();
     expect(within(fila).getByText("Estadística Descriptiva")).toBeTruthy();
@@ -253,7 +253,7 @@ describe("<HomeView/> · para hoy", () => {
   it("dibuja la racha de 14 días y cuenta el día de hoy", async () => {
     recordActivity("proba");
     const { container } = renderHome(["u1-a"]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
 
     expect(screen.getByText("RACHA · 1 día")).toBeTruthy();
     const tira = screen.getByRole("img", { name: /Racha de 1 día: 1 de los últimos 14 días con estudio/ });
@@ -278,7 +278,7 @@ describe("<HomeView/> · plan", () => {
   it("sin plan no dibuja la tarjeta", async () => {
     api.study.content = async () => EMPTY_STUDY;
     renderHome(["u1-a"]);
-    await screen.findByRole("heading", { name: "Progreso", level: 1 });
+    await screen.findByRole("heading", { name: "Progreso", level: 2 });
     expect(screen.queryByText(/PLAN DE ESTUDIO/)).toBeNull();
   });
 });
