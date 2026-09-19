@@ -21,43 +21,44 @@ estado: procesado
 
 # Clase 03 — Derivación a Esquema Lógico
 
+## Resumen general
+
+La clase convierte el MER de la [[Clase 02 - Modelo Entidad-Relacion]] en tablas SQL con un conjunto
+cerrado de reglas, una por constructo: el paso del diseño conceptual al lógico. Se practica en el TP 2
+([[Práctica 2026-08-04]]) y cada regla es directamente aplicable en el parcial. El deck es de
+PostgreSQL y la cursada corre sobre MySQL (§ [[#PostgreSQL vs. MySQL en este deck]]), pero el SQL de
+sus ejemplos corre igual, salvo dos tipeos del propio deck.
+
+Las reglas: una entidad es una tabla con su identificador como clave; los atributos obligatorios llevan
+`NOT NULL`, los compuestos se despliegan en sus partes y los multivaluados van a otra tabla con clave
+compuesta. En una 1:N, la clave del lado 1 pasa como FK al lado N, renombrada si la relación es unaria.
+Una N:N genera una tabla nueva con clave yuxtapuesta y una FK por separado hacia cada entidad. Una
+jerarquía da una tabla por nodo, todas con la clave del supertipo, y discriminador en el supertipo
+solo si el corte es exclusivo. Una entidad débil lleva como clave su clave parcial más la de la
+fuerte, que además es FK.
+
+Las trampas: no hay regla para relaciones 1:1 ni n-arias, identificadores alternativos ni atributos
+derivados, y el deck trae errores que no hay que copiar (`varchar(6 0)`, `PK_ ALUMNOSXCARRERA`,
+atributos que desaparecen entre el MER y la tabla, `LUTutor NOT NULL` con cardinalidad `(0,1)`). Al
+parcial van la chuleta de reglas, el patrón SQL de la N:N (PK compuesta en el `CREATE TABLE`, cada FK
+en su propio `ALTER TABLE`) y la lectura de los diagramas: línea llena y FK dentro de la PK,
+identificatoria; punteada y FK como un atributo más, no identificatoria.
+
 > [!info] Fuente
-> `raw/Unidad-01/Teorica/BD2_Clase 03 - Derivación a Esquema Lógico.pdf` · **24 slides**
-> Dictado en la **teórica del lunes 03/08**. El `03` del nombre del archivo **es el número de clase**:
-> la numeración de la cátedra (`BD2_Clase NN`) es la que manda. Índice de todas las clases en
-> [[_index-clases]].
-> Viene inmediatamente después de [[Clase 02 - Modelo Entidad-Relacion]] y **cierra dos de las preguntas que esa clase
-> dejó abiertas** (ver § más abajo). Sigue en [[Clase 04 - AlteraciónActualizaciónTablas]].
-> Se practica con `ITBA TP 2 Creates.pdf` → [[Práctica 2026-08-04]].
-> Bibliografía: [[_index-bibliografia]].
-
-> [!warning] El deck es de PostgreSQL, la cursada corre sobre MySQL
-> Slide 10 linkea el catálogo de tipos de **PostgreSQL 9.5**, y la gramática de `CREATE TABLE` de los
-> slides 23–24 es la del *synopsis* de PostgreSQL (`index_parameters`, `DEFAULT default_expr`).
-> Detalle de qué corre igual y qué no en § [[#PostgreSQL vs. MySQL en este deck]].
-
-## Resumen
-
-La clase anterior terminó con un **MER**; esta lo convierte en **tablas**. En el medio hay un
-conjunto cerrado de **reglas de transformación**, una por cada constructo del MER. El deck las da en
-cuatro tandas —entidades, relaciones, jerarquías, entidades débiles— y las ilustra con capturas de
-un modelador tipo ERwin: el MER y el modelo físico en el mismo slide (la disposición cambia de slide
-en slide) y, en varios de ellos, flechas rojas uniendo el antes y el después.
-
-| Tanda | Qué transforma | Slides |
-| --- | --- | --- |
-| **Preliminares** | Qué es una tabla, clave, F.K., comprensión vs. extensión | 2–6 |
-| **Entidades** | Las 7 reglas + ejemplo `ALUMNO` + `CREATE TABLE` | 7–10 |
-| **Relaciones** | 1:N binaria y unaria · N:N binaria y unaria · atributos de la relación | 11–18 |
-| **Jerarquías** | Supertipo/subtipo, discriminador, exclusiva vs. compartida | 19–21 |
-| **Entidades débiles** | Clave parcial + clave de la fuerte | 22 |
-| **Sintaxis** | Gramática completa de `CREATE TABLE` | 23–24 |
+> `raw/Unidad-01/Teorica/BD2_Clase 03 - Derivación a Esquema Lógico.pdf` · **24 slides** · teórica del
+> lunes 03/08. Anterior: [[Clase 02 - Modelo Entidad-Relacion]] (cierra dos de sus preguntas
+> abiertas); siguiente: [[Clase 04 - AlteraciónActualizaciónTablas]]; práctica: `ITBA TP 2 Creates.pdf`
+> → [[Práctica 2026-08-04]]. Índices: [[_index-clases]] · [[_index-bibliografia]].
 
 ---
 
 ## Chuleta: tabla de reglas de transformación
 
-Toda la clase comprimida. Cada fila es directamente aplicable en el parcial y en el **TP 2**.
+Cada fila es directamente aplicable en el parcial y en el **TP 2**. El deck da las reglas en cuatro
+tandas —**entidades** (slides 7–10), **relaciones** (11–18), **jerarquías** (19–21) y **entidades
+débiles** (22)—, precedidas por los preliminares (2–6: tabla, clave, F.K., comprensión vs. extensión)
+y cerradas por la gramática de `CREATE TABLE` (23–24), e ilustra cada una con capturas de un modelador
+tipo ERwin: el MER y el modelo físico en el mismo slide, con flechas rojas uniendo el antes y el después.
 
 | Constructo del MER | Cómo queda en el esquema relacional | Slide |
 | --- | --- | --- |
@@ -86,35 +87,34 @@ Toda la clase comprimida. Cada fila es directamente aplicable en el parcial y en
 | **Relación ternaria / n-aria** | Solo se la nombra al pasar en el slide 18; **no hay regla ni ejemplo** | — |
 
 > [!missing] Dos huecos grandes del deck
-> **1:1** y **n-arias** no tienen regla. Las dos aparecen en cualquier enunciado de parcial, así que
-> hay que traerlas de otra fuente o de clase. Ver § Dudas abiertas.
+> **1:1** y **n-arias** no tienen regla y aparecen en cualquier enunciado de parcial: hay que traerlas
+> de otra fuente o de clase (ver § Dudas abiertas).
 
 ---
 
 ## Slides 1–2 · De dónde a dónde
 
-Portada: **Bases de Datos II** / **ESQUEMAS DE TABLAS**. El slide 2 se titula **DISEÑO LÓGICO** y da
-el diagrama completo de la clase:
+Portada: **Bases de Datos II** / **ESQUEMAS DE TABLAS**. El slide 2, **DISEÑO LÓGICO**, da el diagrama
+de la clase:
 
 ```
-        Modelo de Entidades y Relaciones
-                     │
-                     ▼   Reglas de Transformación
-        Esquema Lógico según el Modelo Relacional
-        Esquema Post-relacional (tablas en SQL)
+  Modelo de Entidades y Relaciones
+  │
+  ▼  Reglas de Transformación
+  Esquema Lógico según el Modelo Relacional
+  Esquema Post-relacional (tablas en SQL)
 ```
 
-Dos nombres para el destino, subrayados los dos en el slide: **esquema lógico según el modelo
-relacional** y **esquema post-relacional (tablas en SQL)**. El título del slide (**DISEÑO LÓGICO**) lo
-ubica solo: es la tercera caja de [[1.02.01 - Etapas del diseño de datos|Etapas del diseño de datos]] — el paso del diseño conceptual al
-diseño lógico.
+El destino tiene dos nombres, subrayados los dos en el slide: **esquema lógico según el modelo
+relacional** y **esquema post-relacional (tablas en SQL)**. Es la tercera caja de
+[[1.02.01 - Etapas del diseño de datos|Etapas del diseño de datos]]: del diseño conceptual al lógico.
 
 ## Slide 3 · Lenguaje SQL
 
 > *"La definición de los datos se realiza a través de sentencia de **DDl**"* ← así, con la `l`
 > minúscula, en el slide.
 
-- Sus comandos permiten definir **la semántica del esquema relacional**: *"que tablas o relaciones se
+- Sus comandos definen **la semántica del esquema relacional**: *"que tablas o relaciones se
   establecen, sus posibles valores (dominios), asociaciones, restricciones, etc."*
 - *"Los datos o información de dichas tablas las guarda el **SGBD** en tablas propias denominadas
   tablas de **metadatos**."*
@@ -130,19 +130,17 @@ diseño lógico.
 | **Clave** (o clave alternativa) | *"Una clave (o clave alternativa) en una tabla es un subconjunto de las columnas de la tabla que identifica a cada tupla."* |
 | **Clave extranjera (F. K.)** | *"Un F. K. en una tabla T es un conjunto de columnas F que hace referencia a la clave de otra tabla T 'e impone una restricción (**Restricción de Integridad Referencial**)"* ← el `'` que cierra `T'` quedó pegado a la `e` en el slide |
 
-> [!note] El deck fija la abreviatura
-> *"La clave y clave extranjera (en adelante abreviado como **F. K.** foreign key)"*. En el resto del
-> deck aparece como `(FK)` en los diagramas y como `FOREIGN KEY` en el SQL.
-
-> [!bug] "Clave (o clave alternativa)" mete las dos en la misma definición
-> El slide define **clave** y entre paréntesis dice *"o clave alternativa"*, como si fueran lo mismo.
-> En la clase anterior eran cosas distintas: **IP** vs. **identificador alternativo**
-> ([[Clase 02 - Modelo Entidad-Relacion]], slides 14–19). El slide 8 sí las distingue, con
-> la marca `(AK1:1)`. **Verificar en clase** si acá "clave" está usado como *clave candidata*.
+> [!bug] Abreviatura fijada, y "clave (o clave alternativa)" en la misma definición
+> *"La clave y clave extranjera (en adelante abreviado como **F. K.** foreign key)"*; en el resto del
+> deck es `(FK)` en los diagramas y `FOREIGN KEY` en el SQL.
+> El slide presenta **clave** y **clave alternativa** como si fueran lo mismo; en la clase anterior
+> eran **IP** vs. **identificador alternativo** ([[Clase 02 - Modelo Entidad-Relacion]], slides 14–19),
+> y el slide 8 sí las distingue con la marca `(AK1:1)`. **Verificar en clase** si acá "clave" está
+> usado como *clave candidata*.
 
 ## Slide 5 · Ejemplo `MÉDICO` — comprensión y extensión
 
-Las relaciones **pueden visualizarse en forma tabular**. El slide rotula cada parte de una tabla:
+Las relaciones **pueden visualizarse en forma tabular**:
 
 | MÉDICO | | | | |
 | --- | --- | --- | --- | --- |
@@ -152,26 +150,18 @@ Las relaciones **pueden visualizarse en forma tabular**. El slide rotula cada pa
 | 365478 | Pedro Jara | Traumatología | 23546987 | Cons. Privado |
 | …. | ………. | ……….. | ………. | …………. |
 
-| Rótulo del slide | Qué señala |
-| --- | --- |
-| **Nombre de la tabla (relación)** | `MÉDICO` |
-| **Nombre de la columna (atributo)** | `Matricula`, `NyApell`, … |
-| **Esquema de una tabla o cabecera — (comprensión)** | la fila de encabezados |
-| **Fila (tupla)** | cada renglón de datos |
-| **Valor o estado de de la tabla (extensión)** — *"de de"*, así en el slide | el conjunto de las filas |
-
-> *"Cada columna tiene un **dominio de definición** que incluye los valores posibles que puede tomar"*.
-
-> [!tip] Razonamiento propio, no está en el deck
-> El par **comprensión / extensión** es el mismo par *esquema / instancia*: la cabecera no cambia, el
-> contenido sí. El slide da los dos términos y no los relaciona con nada más.
+Rótulos del slide: **nombre de la tabla (relación)**, **nombre de la columna (atributo)**, **esquema de
+una tabla o cabecera (comprensión)** = la fila de encabezados, **fila (tupla)**, y **valor o estado de
+de la tabla (extensión)** —*"de de"*, así en el slide— = el conjunto de las filas. *"Cada columna tiene
+un **dominio de definición** que incluye los valores posibles que puede tomar"*. **Razonamiento
+propio:** comprensión / extensión es el par *esquema / instancia* (la cabecera no cambia, el contenido
+sí); el slide no relaciona los dos términos con nada más.
 
 ## Slide 6 · Tablas en SQL
 
-- **En SQL no existe un orden para las filas de una tabla.** Cuando se lee una tabla, las filas
-  aparecerán en un **orden aleatorio**, a menos que se especifique uno.
-- Las **columnas** contienen la información de los campos de la tabla: **nombre, tipo de dato y
-  restricciones** asociadas a la columna.
+- **En SQL no existe un orden para las filas de una tabla**: al leerla aparecen en **orden aleatorio**,
+  a menos que se especifique uno.
+- Las **columnas** contienen **nombre, tipo de dato y restricciones** del campo.
 - *"Las filas **contiene** los registros o instancias."* ← sin la `n`, así en el slide.
 
 ---
@@ -188,36 +178,29 @@ Las relaciones **pueden visualizarse en forma tabular**. El slide rotula cada pa
 5. Los **atributos obligatorios** llevan una leyenda de **`NOT NULL`**.
 6. Los **atributos opcionales** se indican de la misma manera que los obligatorios **sin la leyenda**.
 7. Los **atributos multivaluados** se **proyectan en otra tabla** conjuntamente con la clave de la
-   entidad **o de la (inter)relación**.
+  entidad **o de la (inter)relación**.
 
-> [!important] La regla 7 es la que rompe la correspondencia 1 entidad = 1 tabla
-> Un atributo multivaluado agrega **una tabla más**, y esa tabla tiene clave **compuesta**: clave de
-> la entidad + el propio atributo. Es el mismo mecanismo que va a resolver la entidad débil (slide 22).
-> El *"o de la (inter)relación"* del final cubre el caso de un atributo multivaluado colgado de un
-> rombo, que el deck **no ejemplifica**.
+> [!important] La regla 7 rompe la correspondencia 1 entidad = 1 tabla
+> Un multivaluado agrega **una tabla más**, con clave **compuesta** (clave de la entidad + el propio
+> atributo): el mismo mecanismo de la entidad débil (slide 22). El *"o de la (inter)relación"* cubre un
+> multivaluado colgado de un rombo, caso que el deck **no ejemplifica**.
 
 > [!warning] Cuarta sigla para el modelo extendido
-> Acá dice **DERExt**. La clase anterior usaba `MER`, `MERExt` y `MERE` para lo mismo
-> ([[Clase 02 - Modelo Entidad-Relacion]], slides 7–8). Cuatro nombres, un solo modelo.
+> **DERExt** acá; `MER`, `MERExt` y `MERE` en la clase anterior ([[Clase 02 - Modelo Entidad-Relacion]],
+> slides 7–8). Cuatro nombres, un solo modelo.
 
 ## Slide 8 · Derivación de entidades — el ejemplo `ALUMNO`
 
-*"Aplicando las reglas anteriores…"*. A la derecha, el **MER** de la clase anterior; a la izquierda,
-el **modelo físico** resultante.
+*"Aplicando las reglas anteriores…"*: a la derecha el **MER**, a la izquierda el **modelo físico**.
 
-**MER de partida** (el `ALUMNO` del slide 19 de la [[Clase 02 - Modelo Entidad-Relacion]], pero **no idéntico**: acá
-aparece `Documento` como identificador alternativo, `e-mails` se llama `Mails` y `Dirección` se
-desagrega en `Calle`/`Nro`/`Ciudad` en vez de `Calle`/`Número`):
-
-| Atributo | Notación en el diagrama | Lectura |
-| --- | --- | --- |
-| `LU` | bolita **rellena** ● | identificador principal |
-| `Documento` | bolita **mitad** ◐ | identificador **alternativo** |
-| `Apellido`, `Nombre` | bolita vacía ○, línea continua | descriptor obligatorio |
-| `Telefonos` | línea **punteada** + **pata de gallo** `>` | **opcional y multivaluado** |
-| `Tutor` | línea **punteada** | opcional |
-| `Mails` | **pata de gallo** `>`, línea continua | obligatorio y **multivaluado** |
-| `Dirección` | bolita de la que **cuelgan** `Calle`, `Nro`, `Ciudad` | **compuesto** |
+**MER de partida** — el `ALUMNO` del slide 19 de la [[Clase 02 - Modelo Entidad-Relacion]], **no
+idéntico**: acá `Documento` es identificador alternativo, `e-mails` se llama `Mails` y `Dirección` se
+desagrega en `Calle`/`Nro`/`Ciudad` en vez de `Calle`/`Número`. Notación: `LU` bolita **rellena** ●
+(identificador principal); `Documento` bolita **mitad** ◐ (identificador **alternativo**); `Apellido`,
+`Nombre` bolita vacía ○ con línea continua (obligatorios); `Telefonos` línea **punteada** + **pata de
+gallo** `>` (**opcional y multivaluado**); `Tutor` línea punteada (opcional); `Mails` pata de gallo con
+línea continua (obligatorio y **multivaluado**); `Dirección` bolita de la que **cuelgan** `Calle`,
+`Nro`, `Ciudad` (**compuesto**).
 
 **Modelo físico resultante — tres tablas:**
 
@@ -227,31 +210,24 @@ desagrega en `Calle`/`Nro`/`Ciudad` en vez de `Calle`/`Número`):
 | **`TELEF_ALUM`** | `LU (FK)` NOT NULL · `Telefono` NOT NULL — **las dos en el compartimento de la clave** | esquinas **redondeadas** |
 | **`MAILS_ALUM`** | `LU (FK)` NOT NULL · `e_mails` NOT NULL — **las dos en el compartimento de la clave** | esquinas **redondeadas** |
 
-Lo que hay que leer de acá:
-
-- El **compuesto** `Dirección` **desapareció como tal**: quedaron `Calle`, `Nro`, `Ciudad` sueltos
-  dentro de `ALUMNO`. No hay tabla `DIRECCION`.
-- Los dos **multivaluados** se fueron cada uno a **su propia tabla**, con `LU` como FK y **clave
-  compuesta** `{LU, atributo}`. Nombres: `TELEF_ALUM`, `MAILS_ALUM` — o sea, **el deck no da regla de
-  nombre**, los inventa.
-- El **opcional** `Tutor` es el único que dice **`NULL`** explícito en vez de `NOT NULL`.
-- El **identificador alternativo** se marca **`(AK1:1)`** — *alternate key 1, posición 1*.
-
-Y el slide cierra con una clasificación nueva, sin definirla:
+Lectura: el compuesto `Dirección` **desapareció como tal** (no hay tabla `DIRECCION`; `Calle`, `Nro`,
+`Ciudad` quedan sueltos en `ALUMNO`); cada multivaluado se fue a **su propia tabla**, con `LU` como FK
+y **clave compuesta** `{LU, atributo}`, con nombres inventados (**el deck no da regla de nombre**); el
+opcional `Tutor` es el único con **`NULL`** explícito; `(AK1:1)` = *alternate key 1, posición 1*.
 
 > [!quote] Slide 8, al pie
 > *"Relaciones entre tablas: **Identificatorias** / **No Identificatorias**"*
 
 > [!important] Qué son, leído de los diagramas del propio deck
-> **Razonamiento propio, no está en el deck** — el deck enuncia los dos nombres y nunca los define,
-> pero la notación es consistente en todas las capturas del modelo físico:
+> **Razonamiento propio, no está en el deck:** el deck enuncia los dos nombres y nunca los define, pero
+> la notación es consistente en todas las capturas del modelo físico:
 >
 > | | Línea en el diagrama | La FK del hijo… | Ejemplos del deck |
 > | --- | --- | --- | --- |
 > | **Identificatoria** | **llena** | **forma parte de su clave primaria** (FK en rojo, arriba de la línea divisoria, caja de esquinas **redondeadas**) | `ALUMNO`→`TELEF_ALUM` (8) · `ALUMNO`→`ALUMNOSXCARRERA` (14) · `CAMPO`→`PARCELA` (22) · supertipo→subtipos (20) |
 > | **No identificatoria** | **punteada** | es **un atributo más** (FK en azul, debajo de la línea, caja de esquinas **rectas**) | `CIUDAD`→`ALUMNO` (11) · `ALUMNO`→`ALUMNO` por `LUTutor` (12) |
 >
-> **Confirmar en clase**, porque es exactamente la distinción que hace falta para el TP 2.
+> **Confirmar en clase**: es la distinción que hace falta para el TP 2.
 
 ## Slide 9 · Creación de tablas
 
@@ -260,15 +236,15 @@ Y el slide cierra con una clasificación nueva, sin definirla:
 
 ```sql
 CREATE TABLE ALUMNO(
-    LU             integer      NOT NULL,
-    Documento      integer      NOT NULL,
-    Apellido       varchar(30)  NOT NULL,
-    Nombre         varchar(30)  NOT NULL,
-    Tutor          varchar(50),
-    Calle          varchar(40)  NOT NULL,
-    Nro            integer      NOT NULL,
-    Ciudad         varchar(6 0) NOT NULL,
-    CONSTRAINT PK_ALUMNO PRIMARY KEY (LU)
+  LU  integer  NOT NULL,
+  Documento  integer  NOT NULL,
+  Apellido  varchar(30)  NOT NULL,
+  Nombre  varchar(30)  NOT NULL,
+  Tutor  varchar(50),
+  Calle  varchar(40)  NOT NULL,
+  Nro  integer  NOT NULL,
+  Ciudad  varchar(6 0) NOT NULL,
+  CONSTRAINT PK_ALUMNO PRIMARY KEY (LU)
 );
 ```
 
@@ -279,25 +255,19 @@ ALTER TABLE ALUMNO
 ADD CONSTRAINT PK_ALUMNO PRIMARY KEY (LU);
 ```
 
-El slide repite además, a la izquierda, la caja `ALUMNO` del modelo físico del slide 8 (con
-`Documento NOT NULL (AK1:1)` incluido).
+A la izquierda, el slide repite la caja `ALUMNO` del slide 8 (con `Documento NOT NULL (AK1:1)`).
+Convención de nombres de constraint de **los ejemplos** del deck (nunca enunciada como regla):
+**`PK_<TABLA>`** y **`FK_<TABLA>_<TABLAREFERENCIADA>`**.
 
-Convención de nombres de constraint que siguen **los ejemplos** del deck (nunca la enuncia como
-regla): **`PK_<TABLA>`** y **`FK_<TABLA>_<TABLAREFERENCIADA>`**.
-
-> [!bug] `varchar(6 0)` — está así en el slide
-> Con un espacio en el medio. Es un tipeo por `varchar(60)`; tal cual está **no compila**. Se
-> transcribe literal porque así lo van a ver en el PDF.
-
-> [!bug] El `CREATE TABLE` **no** implementa el identificador alternativo
-> El diagrama dice `Documento NOT NULL (AK1:1)`, pero el SQL no tiene ningún `UNIQUE (Documento)` ni
-> `CONSTRAINT AK1_ALUMNO UNIQUE (Documento)`. La regla del slide 7 tampoco menciona los alternativos.
-> **Falta la regla para identificadores alternativos.** ← esto entra en el TP 2.
-
-> [!note] La `PK` está declarada dos veces
-> **Razonamiento propio, no está en el deck:** si se ejecuta el `CREATE TABLE` **y después** el
-> `ALTER TABLE`, el segundo falla porque ya existe una PK. El slide los presenta como **alternativas**
-> (*"O puede colocarse…"*), no como una secuencia.
+> [!bug] Tres cosas para no copiar tal cual
+> - `varchar(6 0)`, con espacio en el medio, está así en el slide: tipeo por `varchar(60)`, **no compila**.
+> - El `CREATE TABLE` **no implementa el identificador alternativo**: el diagrama dice
+> `Documento NOT NULL (AK1:1)`, pero no hay `UNIQUE (Documento)` ni
+> `CONSTRAINT AK1_ALUMNO UNIQUE (Documento)`, y la regla del slide 7 tampoco los menciona.
+> **Falta la regla para identificadores alternativos** ← entra en el TP 2.
+> - **Razonamiento propio:** la PK está declarada dos veces; si se ejecuta el `CREATE TABLE` **y
+> después** el `ALTER TABLE`, el segundo falla porque ya existe una PK. El slide los presenta como
+> **alternativas** (*"O puede colocarse…"*), no como secuencia.
 
 ## Slide 10 · Tipos de datos
 
@@ -307,16 +277,11 @@ El slide entero es:
 > <https://www.postgresql.org/docs/9.5/static/datatype.html>
 
 > [!warning] Motor equivocado, y versión vieja
-> La cursada corre sobre **MySQL** ([[_cronograma]] § Diferencias con el programa oficial), y encima
-> **PostgreSQL 9.5** es una versión ya sin soporte. El catálogo de tipos que hay que mirar para el TP
-> es el de MySQL. Ver § [[#PostgreSQL vs. MySQL en este deck]].
-
-Tipos que efectivamente usa el deck en sus ejemplos: **`integer`**, **`varchar(n)`**, **`char(n)`**,
-**`date`**.
-
-> [!tip] Razonamiento propio, no está en el deck
-> Los cuatro tipos existen igual en MySQL, así que **el SQL de los slides 9, 15 y 16 corre en MySQL sin
-> cambios** (salvo los dos tipeos, `varchar(6 0)` y `PK_ ALUMNOSXCARRERA`). Inventario completo en
+> La cursada corre sobre **MySQL** ([[_cronograma]] § Diferencias con el programa oficial) y
+> **PostgreSQL 9.5** ya no tiene soporte: el catálogo de tipos para el TP es el de MySQL. Los tipos que
+> usa el deck —**`integer`**, **`varchar(n)`**, **`char(n)`**, **`date`**— existen igual en MySQL, así
+> que **el SQL de los slides 9, 15 y 16 corre en MySQL sin cambios**, salvo los tipeos `varchar(6 0)` y
+> `PK_ ALUMNOSXCARRERA` *(razonamiento propio, no está en el deck)*. Inventario en
 > § [[#PostgreSQL vs. MySQL en este deck]].
 
 ---
@@ -332,8 +297,8 @@ Tipos que efectivamente usa el deck en sus ejemplos: **`integer`**, **`varchar(n
 
 ```
 ALUMNO ──(1,N)──◇ CURSA_EN ◇──(1,1)── CIUDAD
-  ●LU                 │                  ●IdCiudad
-  ○Apellido      ○FechaInsc              ○SedeUnicen
+  ●LU  │  ●IdCiudad
+  ○Apellido  ○FechaInsc  ○SedeUnicen
   ○Nombre
   ○FechaNac
 ```
@@ -348,38 +313,32 @@ ALUMNO ──(1,N)──◇ CURSA_EN ◇──(1,1)── CIUDAD
 | **`IdCiudad (FK)`** | **NOT NULL** | | |
 | `FechaInsc` | **NULL** | | |
 
-Las dos flechas rojas del slide señalan exactamente esto: `IdCiudad` viaja del lado 1 al lado N (con
-el cartel **CLAVE EXTRANJERA**), y `FechaInsc` —que es atributo **del rombo**— viaja también a la
-tabla del lado N. Es el caso "designativa" que el slide 18 va a enunciar como regla.
-
-La relación se dibuja con **línea punteada**: es **no identificatoria**.
+Las dos flechas rojas del slide muestran `IdCiudad` viajando del lado 1 al lado N (cartel **CLAVE
+EXTRANJERA**) y `FechaInsc` —atributo **del rombo**— viajando también a la tabla del lado N: el caso
+"designativa" que el slide 18 enuncia como regla. Línea **punteada**: **no identificatoria**.
 
 > [!note] Por qué la FK queda `NOT NULL`
-> **Razonamiento propio, no está en el deck:** la cardinalidad `(1,1)` pegada a `CIUDAD` dice, en la
-> lectura **look-across** que fijó la clase anterior, que **cada alumno tiene exactamente una
-> ciudad**; de ahí el `NOT NULL` de `IdCiudad (FK)`. El slide no lo justifica
-> (ver [[1.02.02 - Modelo Entidad-Relación|Modelo Entidad-Relación]]).
+> **Razonamiento propio, no está en el deck:** la cardinalidad `(1,1)` pegada a `CIUDAD`, en lectura
+> **look-across** ([[1.02.02 - Modelo Entidad-Relación|Modelo Entidad-Relación]]), dice que cada alumno
+> tiene exactamente una ciudad. El slide no lo justifica.
 
-> [!bug] `FechaNac` desaparece
-> El MER de arriba tiene `FechaNac` en `ALUMNO`; la tabla de abajo **no la tiene**. No hay regla que
-> justifique perderla — es un descuido del armado del slide. **Verificar en clase.**
-
-> [!note] `SedeUnicen` / `SedeUNICEN`
-> El MER escribe `SedeUnicen` y la tabla `SedeUNICEN`. **UNICEN** es la Universidad Nacional del
-> Centro, no el ITBA: el deck viene reciclado de otra cursada. No cambia nada del contenido.
+> [!bug] `FechaNac` desaparece; `SedeUnicen` / `SedeUNICEN`
+> El MER tiene `FechaNac` en `ALUMNO` y la tabla **no**; ninguna regla justifica perderla. **Verificar
+> en clase.** El MER escribe `SedeUnicen` y la tabla `SedeUNICEN`: **UNICEN** es la Universidad
+> Nacional del Centro, no el ITBA; el deck viene reciclado de otra cursada.
 
 ## Slide 12 · Relaciones unarias 1:N (ó N:1)
 
 **MER de partida** — una relación **reflexiva** sobre `ALUMNO`:
 
 ```
-        ┌──(0,N)──◇ ES TUTOR DE ◇
-        │                      │
-        └──(0,1)───────────────┘
-     ALUMNO (●LU, ○Apellido, ○Nombre)
+  ┌──(0,N)──◇ ES TUTOR DE ◇
+  │  │
+  └──(0,1)───────────────┘
+  ALUMNO (●LU, ○Apellido, ○Nombre)
 ```
 
-**Modelo físico resultante:** una sola tabla, `ALUMNO`, con la FK apuntándose a sí misma:
+**Modelo físico resultante:** una sola tabla, con la FK apuntándose a sí misma:
 
 | `ALUMNO` | |
 | --- | --- |
@@ -388,20 +347,15 @@ La relación se dibuja con **línea punteada**: es **no identificatoria**.
 | `Apellido` | NOT NULL |
 | `Nombre` | NOT NULL |
 
-Todo el contenido del slide es un cartel verde apuntando a `LUTutor`:
-
-> [!quote] Slide 12
-> **DEBE renombrarse**
-
-Es la única diferencia con el caso binario: la FK y la PK conviven en la misma tabla, así que la FK
-**no puede** llamarse `LU`. La relación se dibuja **punteada** (no identificatoria) y con pata de
-gallo apuntando a la propia `ALUMNO`.
+Todo el texto del slide es un cartel verde sobre `LUTutor`: **DEBE renombrarse**. FK y PK conviven en
+la misma tabla, así que la FK **no puede** llamarse `LU`; es la única diferencia con el caso binario.
+Relación **punteada** (no identificatoria), con pata de gallo hacia la propia `ALUMNO`.
 
 > [!bug] `LUTutor NOT NULL` contradice la cardinalidad `(0,1)`
-> **Razonamiento propio, no está en el deck:** el `(0,1)` dice que un alumno **puede no tener tutor**,
-> y de hecho el `Tutor` del slide 8 era opcional; la columna tendría que admitir `NULL`. Además, con
-> `NOT NULL` el modelo es imposible de poblar: no se puede insertar el primer alumno, porque
-> necesitaría un tutor que todavía no existe. **Verificar en clase.**
+> **Razonamiento propio, no está en el deck:** `(0,1)` dice que un alumno **puede no tener tutor** (el
+> `Tutor` del slide 8 era opcional), así que la columna tendría que admitir `NULL`. Con `NOT NULL` el
+> modelo no se puede poblar: el primer alumno necesitaría un tutor que todavía no existe. **Verificar
+> en clase.**
 
 ## Slide 13 · Relaciones unarias y binarias N:N — la regla
 
@@ -412,9 +366,8 @@ gallo apuntando a la propia `ALUMNO`.
   la cual proviene."* ← sin coma después de *separado* y sin espacio en `tabla(entidad)`, así en el slide.
 
 > [!tip] "Por separado" es la parte que se olvida
-> **Razonamiento propio, no está en el deck:** la tabla tiene **una PK compuesta** `(A, B)` **y dos FK
-> sueltas**, una a la tabla de `A` y otra a la de `B`; no es una sola FK compuesta. El slide 16 lo
-> muestra con dos `ALTER TABLE` distintos.
+> **Razonamiento propio:** la tabla tiene **una PK compuesta** `(A, B)` **y dos FK sueltas**, no una
+> sola FK compuesta. El slide 16 lo muestra con dos `ALTER TABLE` distintos.
 
 ## Slide 14 · Relaciones binarias N:N — el ejemplo
 
@@ -422,9 +375,9 @@ gallo apuntando a la propia `ALUMNO`.
 
 ```
 ALUMNO ──(0,N)──◇ CURSA ◇──(0,N)── CARRERA
-  ●LU                                 ●IdCarrera
-  ○Apellido                           ○NombreCarrera
-  ○Nombre                             ○PlanEstudio
+  ●LU  ●IdCarrera
+  ○Apellido  ○NombreCarrera
+  ○Nombre  ○PlanEstudio
   ○FechaNac
 ```
 
@@ -437,43 +390,41 @@ ALUMNO ──(0,N)──◇ CURSA ◇──(0,N)── CARRERA
 | `Nombre` | NOT NULL | | | `PlanEstudio` | NOT NULL |
 | `FechaNac` | **NULL** | | | | |
 
-El rombo se llamaba `CURSA` y la tabla se llama **`ALUMNOSXCARRERA`**: el deck ejerce el *"o puede
-renombrarse"*. La convención que usa es **`<A>X<B>`** (`ALUMNOSXCARRERA`, `TUTORXALUMNO`).
-
-Las dos relaciones se dibujan con **línea llena**: son **identificatorias**, porque las dos FK forman
-la PK de la tabla intermedia. Notar que `ALUMNOSXCARRERA` **no tiene ninguna columna propia** — es
-una tabla de dos columnas, las dos FK.
+El rombo `CURSA` pasa a llamarse **`ALUMNOSXCARRERA`**: el deck ejerce el *"o puede renombrarse"* con
+la convención **`<A>X<B>`** (`ALUMNOSXCARRERA`, `TUTORXALUMNO`). Las dos relaciones van con **línea
+llena** (**identificatorias**: las dos FK forman la PK de la intermedia), y `ALUMNOSXCARRERA` **no
+tiene ninguna columna propia**.
 
 ## Slide 15 · `CREATE TABLE` de las dos entidades
 
 ```sql
 CREATE TABLE ALUMNO(
-   LU              integer      NOT NULL,
-   Apellido        varchar(30)  NOT NULL,
-   Nombre          varchar(30)  NOT NULL,
-   FechaNac        date,
+  LU  integer  NOT NULL,
+  Apellido  varchar(30)  NOT NULL,
+  Nombre  varchar(30)  NOT NULL,
+  FechaNac  date,
 CONSTRAINT PK_ALUMNO PRIMARY KEY (LU)
 );
 
 CREATE TABLE CARRERA(
-   IdCarrera     char(5)       NOT NULL,
-   NombreCarrera varchar(100)  NOT NULL,
-   PlanEstudio   char(6)       NOT NULL,
-   CONSTRAINT PK_CARRERA PRIMARY KEY (IdCarrera)
+  IdCarrera  char(5)  NOT NULL,
+  NombreCarrera varchar(100)  NOT NULL,
+  PlanEstudio  char(6)  NOT NULL,
+  CONSTRAINT PK_CARRERA PRIMARY KEY (IdCarrera)
 );
 ```
 
-`FechaNac` es el único atributo opcional del ejemplo y es el único **sin** `NOT NULL` — regla 6 del
-slide 7 en acción. Tipos: `integer`, `varchar(n)`, **`char(n)`** para códigos de longitud fija
-(`IdCarrera char(5)`, `PlanEstudio char(6)`) y **`date`**.
+`FechaNac`, el único opcional, es el único **sin** `NOT NULL` (regla 6 del slide 7). Tipos: `integer`,
+`varchar(n)`, **`char(n)`** para códigos de longitud fija (`IdCarrera char(5)`, `PlanEstudio char(6)`)
+y **`date`**.
 
 ## Slide 16 · `CREATE TABLE` de la tabla intermedia
 
 ```sql
 CREATE TABLE ALUMNOSXCARRERA(
-   LU        integer NOT NULL,
-   IdCarrera char(5) NOT NULL,
-   CONSTRAINT PK_ ALUMNOSXCARRERA PRIMARY KEY (LU, IdCarrera)
+  LU  integer NOT NULL,
+  IdCarrera char(5) NOT NULL,
+  CONSTRAINT PK_ ALUMNOSXCARRERA PRIMARY KEY (LU, IdCarrera)
 );
 
 ALTER TABLE ALUMNOSXCARRERA ADD CONSTRAINT FK_ALUMNOSXCARRERA_CARRERA
@@ -485,28 +436,28 @@ ALTER TABLE ALUMNOSXCARRERA ADD CONSTRAINT FK_ALUMNOSXCARRERA_ALUMNO
   REFERENCES ALUMNO(LU);
 ```
 
-Este es **el patrón completo de una N:N** y conviene memorizarlo tal cual: PK compuesta en el
-`CREATE`, cada FK en su propio `ALTER`, y los tipos de las columnas **copiados exactos** de la tabla
-referenciada (`LU integer`, `IdCarrera char(5)`).
+Es **el patrón completo de una N:N**, para memorizar tal cual: PK compuesta en el `CREATE`, cada FK
+en su propio `ALTER`, y los tipos **copiados exactos** de la tabla referenciada (`LU integer`,
+`IdCarrera char(5)`).
 
 > [!bug] `PK_ ALUMNOSXCARRERA` — espacio después del guion bajo
-> Está así en el slide. Tal cual escrito, el parser lee `PK_` como nombre del constraint y después se
-> encuentra un identificador suelto → **error de sintaxis**. Igual que el `varchar(6 0)` del slide 9.
+> Así en el slide: el parser lee `PK_` como nombre del constraint y después un identificador suelto →
+> **error de sintaxis**. Igual que el `varchar(6 0)` del slide 9.
 
 > [!tip] El orden de ejecución importa
-> **Razonamiento propio, no está en el deck:** las FK se agregan **después** de que existan las tres
-> tablas. Declararlas con `ALTER TABLE` en vez de inline evita el problema de las dependencias
-> circulares al crear el esquema. El deck usa `ALTER TABLE` pero **no dice por qué**.
+> **Razonamiento propio:** las FK se agregan **después** de que existan las tres tablas; con
+> `ALTER TABLE` en vez de inline se evitan las dependencias circulares al crear el esquema. El deck usa
+> `ALTER TABLE` pero **no dice por qué**.
 
 ## Slide 17 · Relaciones unarias N:N
 
-**MER de partida** — la misma `ES TUTOR DE` del slide 12, pero ahora `(0,N)` de los **dos** lados:
+**MER de partida** — la misma `ES TUTOR DE` del slide 12, ahora `(0,N)` de los **dos** lados:
 
 ```
-        ┌──(0,N)──◇ ES TUTOR DE ◇
-        │                      │
-        └──(0,N)───────────────┘
-     ALUMNO (●LU, ○Apellido, ○Nombre)
+  ┌──(0,N)──◇ ES TUTOR DE ◇
+  │  │
+  └──(0,N)───────────────┘
+  ALUMNO (●LU, ○Apellido, ○Nombre)
 ```
 
 **Modelo físico resultante:**
@@ -517,24 +468,18 @@ referenciada (`LU integer`, `IdCarrera char(5)`).
 | `Apellido` | NOT NULL | **`LUTutor (FK)`** *(PK)* | NOT NULL |
 | `Nombre` | NOT NULL | | |
 
-Las **dos** FK apuntan a `ALUMNO`, y en el diagrama salen **dos líneas** de `ALUMNO` hacia
-`TUTORXALUMNO`. Se aplica a la vez la regla de la N:N (tabla nueva, clave yuxtapuesta, dos FK) y la
-del caso unario (una de las dos **debe renombrarse** → `LUTutor`).
+Las **dos** FK apuntan a `ALUMNO` (dos líneas en el diagrama): regla de la N:N (tabla nueva, clave
+yuxtapuesta, dos FK) más la del caso unario (una **debe renombrarse** → `LUTutor`).
 
-> [!tip] Comparación 1:N vs. N:N en el caso unario
-> **Es el mismo enunciado** con la cardinalidad cambiada, y da dos esquemas completamente distintos:
-> con `(0,1)` la FK se queda **dentro de `ALUMNO`** (slide 12); con `(0,N)` aparece **una tabla
-> aparte** (slide 17). Es el mejor ejemplo del deck de por qué las cardinalidades del MER no son
-> decorativas.
+> [!tip] 1:N vs. N:N en el caso unario
+> **Mismo enunciado** con la cardinalidad cambiada, y dos esquemas distintos: con `(0,1)` la FK queda
+> **dentro de `ALUMNO`** (slide 12); con `(0,N)` aparece **una tabla aparte** (slide 17). Las
+> cardinalidades del MER no son decorativas.
 
 ## Slide 18 · Derivación de atributos en relaciones
 
-- Los atributos de una relación **pueden ser del mismo tipo que los de una entidad** (o sea: valen los
-  mismos cinco ejes de la clase anterior — obligatorio/opcional, uni/multivaluado, etc.).
-- Si la relación que describen es **designativa (1:N)** → se incluyen en la **tabla del lado N**,
-  derivándolos en forma **análoga a los de las entidades**.
-- Si la relación es **asociativa (binaria N:N o ternaria)** → se derivan en la **tabla producto de la
-  relación**, *"también de forma análoga a los de las entidades"*.
+Los atributos de una relación **pueden ser del mismo tipo que los de una entidad** (los mismos cinco
+ejes de la clase anterior) y se derivan *"también de forma análoga a los de las entidades"*:
 
 | Término del slide | Qué relación es | Dónde van sus atributos |
 | --- | --- | --- |
@@ -542,15 +487,14 @@ del caso unario (una de las dos **debe renombrarse** → `LUTutor`).
 | **Asociativa** | N:N binaria **o ternaria** | tabla **producto de la relación** |
 
 > [!note] Vocabulario nuevo: *designativa* y *asociativa*
-> Aparece acá por primera vez en toda la cursada y no está en la [[Clase 02 - Modelo Entidad-Relacion]]. El deck **no
-> los define**: los usa como sinónimos de 1:N y de N:N/ternaria.
-> **Razonamiento propio, no está en el deck:** sirve como regla mental que una relación
-> **designativa** no genera tabla (solo una FK) y una **asociativa** sí.
+> Primera aparición en la cursada; no está en la [[Clase 02 - Modelo Entidad-Relacion]] y el deck **no
+> los define**: los usa como sinónimos de 1:N y de N:N/ternaria. **Razonamiento propio:** una
+> **designativa** no genera tabla (solo una FK), una **asociativa** sí.
 
 > [!missing] La ternaria se nombra pero no se deriva
-> El slide dice *"binaria N:N o ternaria"* y ahí termina: **no hay ningún ejemplo ni regla de
-> derivación de relaciones n-arias en todo el deck**. Por analogía sería una tabla con la
-> yuxtaposición de las tres claves, pero **eso no está en el deck** — hay que confirmarlo.
+> *"binaria N:N o ternaria"* y ahí termina: **no hay ningún ejemplo ni regla de derivación de
+> relaciones n-arias en todo el deck**. Por analogía sería una tabla con las tres claves yuxtapuestas,
+> pero **eso no está en el deck**.
 
 ---
 
@@ -565,14 +509,12 @@ del caso unario (una de las dos **debe renombrarse** → `LUTutor`).
 - *"Para las jerarquías **exclusivas**, que deben incluir el **atributo discriminante (tipo)**, éste se
   debe agregar a la tabla correspondiente a la **entidad supertipo**"*.
 
-O sea: **una tabla por nodo del árbol**, todas con la misma clave, y el discriminador **arriba**, no
-abajo.
+O sea: **una tabla por nodo del árbol**, todas con la misma clave, y el discriminador **arriba**.
 
 > [!note] Razonamiento propio, no está en el deck
-> En la literatura esta estrategia se llama *class-table inheritance* o *vertical partitioning*, y hay
+> En la literatura esta estrategia se llama *class-table inheritance* o *vertical partitioning*; hay
 > otras dos (todo en una sola tabla, o una tabla por hoja). **El deck no le da nombre a la suya ni
-> menciona las alternativas**: da una sola forma de derivar jerarquías. Los nombres van sin verificar
-> contra bibliografía — ver [[_index-bibliografia]].
+> menciona alternativas.** Nombres sin verificar contra bibliografía: ver [[_index-bibliografia]].
 
 ### Slide 20 · El ejemplo `PRODUCTO`
 
@@ -582,12 +524,12 @@ Es la jerarquía del slide 35 de la [[Clase 02 - Modelo Entidad-Relacion]], ahor
 
 ```
 PRODUCTO (●IdProducto, ○Descripcion, ○Marca)
-    │ <Tipo>
-    ├── SOLIDO  (○CantxPaq)
-    └── LIQUIDO (○CuidaddoManip)          ← "CuidaddoManip", con dos 'd', en el slide
-            │
-            ├── ENVASADO (>○Presentacion) ← multivaluado (pata de gallo)
-            └── A_GRANEL (○CantMinima)
+  │ <Tipo>
+  ├── SOLIDO  (○CantxPaq)
+  └── LIQUIDO (○CuidaddoManip)  ← "CuidaddoManip", con dos 'd', en el slide
+  │
+  ├── ENVASADO (>○Presentacion) ← multivaluado (pata de gallo)
+  └── A_GRANEL (○CantMinima)
 ```
 
 **Modelo físico resultante — cinco tablas:**
@@ -600,48 +542,40 @@ PRODUCTO (●IdProducto, ○Descripcion, ○Marca)
 | **`ENVASADO`** | `IdProducto (FK)` *(PK)* — **y nada más** |
 | **`A_GRANEL`** | `IdProducto (FK)` *(PK)* · `CantMinima` |
 
-El slide **no tiene texto**: son los dos diagramas (MER arriba a la izquierda, modelo físico a la
-derecha) y una **flecha roja grande** que arranca sobre los atributos de `PRODUCTO` en el MER —a la
-altura de `IdProducto`/`Marca`, **no** sobre el `<Tipo>`— y termina apuntando a la columna `Tipo` de la
-tabla `PRODUCTO` del modelo físico. Es la ilustración de la tercera regla.
-
-Notación de los conectores de jerarquía en el modelo físico (símbolos de tipo ERwin):
-
-| Nivel | Símbolo | Rótulo |
-| --- | --- | --- |
-| `PRODUCTO` → `SOLIDO`/`LIQUIDO` | semicírculo **con trazos cruzados** | **`Tipo`** |
-| `LIQUIDO` → `ENVASADO`/`A_GRANEL` | semicírculo **liso** | **sin rótulo** |
+El slide **no tiene texto**: los dos diagramas y una **flecha roja grande** que arranca sobre los
+atributos de `PRODUCTO` en el MER (a la altura de `IdProducto`/`Marca`, **no** sobre el `<Tipo>`) y
+termina en la columna `Tipo` de la tabla `PRODUCTO`: la tercera regla ilustrada. Conectores del modelo
+físico: `PRODUCTO` → `SOLIDO`/`LIQUIDO` es un **semicírculo con trazos cruzados** rotulado **`Tipo`**;
+`LIQUIDO` → `ENVASADO`/`A_GRANEL`, un **semicírculo liso**, **sin rótulo**.
 
 > [!important] Los dos niveles no son del mismo tipo
-> El primer nivel es la jerarquía **exclusiva** (lleva discriminador, y por eso `PRODUCTO` tiene la
-> columna `Tipo`) y el segundo es la **compartida** (no lo lleva). Esto **no está rotulado en este
-> slide**, pero sí en el mismo diagrama de la clase anterior
-> ([[Clase 02 - Modelo Entidad-Relacion]], slide 35), y el slide 21 lo dice con letras en el
-> caso general.
-> **Razonamiento propio:** lo que no dice ningún slide es qué significan los dos **símbolos** del
-> conector (semicírculo con trazos cruzados vs. semicírculo liso); la correspondencia
-> *cruzado = exclusiva* / *liso = compartida* sale de comparar los slides 20 y 21. **Confirmar en clase.**
+> El primero es la jerarquía **exclusiva** (lleva discriminador: por eso `PRODUCTO` tiene la columna
+> `Tipo`) y el segundo la **compartida**. No está rotulado en este slide, pero sí en el mismo diagrama
+> de la clase anterior (slide 35) y en el slide 21 para el caso general. **Razonamiento propio:** la
+> correspondencia *cruzado = exclusiva* / *liso = compartida* sale de comparar los slides 20 y 21;
+> ningún slide define los símbolos. **Confirmar en clase.**
 
 > [!bug] `Presentacion` se pierde
-> En el MER, `Presentacion` es un atributo **multivaluado** de `ENVASADO` (tiene pata de gallo). Por la
-> **regla 7 del slide 7** tendría que haber una tabla extra tipo `PRESENTACION_ENVASADO
-> (IdProducto, Presentacion)`. En el modelo físico del slide, `ENVASADO` queda con **una sola columna**
-> y `Presentacion` **desaparece**. **Verificar en clase**: o falta la tabla, o el atributo no debía ser
-> multivaluado.
+> En el MER es un atributo **multivaluado** de `ENVASADO` (pata de gallo); por la **regla 7 del
+> slide 7** tendría que haber una tabla extra tipo `PRESENTACION_ENVASADO (IdProducto, Presentacion)`.
+> En el modelo físico `ENVASADO` queda con **una sola columna** y `Presentacion` **desaparece**.
+> **Verificar en clase**: o falta la tabla, o el atributo no debía ser multivaluado.
 
 ### Slide 21 · El caso general — y la respuesta a la duda de la clase anterior
 
 El slide es **una sola imagen pegada de otra fuente**, titulada **"Jerarquías: subtipos-supertipos"**:
 `A` (supertipo, atributos `a1`, `a2`) → `B` (`b1`) y `C` (`c1`), y `C` → `D` (`d1`) y `E` (`e1`). Los
-dos niveles están rotulados con llaves a los costados:
+dos niveles están rotulados con llaves:
 
 | Nivel | Rótulo textual del slide |
 | --- | --- |
 | `A` → `B`, `C` | **Exclusivas (o disjuntas)** — discriminador `< tipo_a >` |
 | `C` → `D`, `E` | **Compartidas (o superpuestas)** — sin discriminador |
 
-**Esquema resultante,** transcripto tal cual (en la imagen, `a1` va **subrayado** en las cinco tablas
-—es la clave— y en `TablaB`…`TablaE` lleva **además un subrayado punteado** debajo):
+**Esquema resultante,** transcripto tal cual. En la imagen, `a1` va **subrayado** en las cinco tablas
+—es la clave— y en `TablaB`…`TablaE` lleva **además un subrayado punteado** (**razonamiento propio:**
+ese punteado marca que ahí `a1` es además **clave extranjera** hacia `TablaA`; la imagen no trae
+referencias de notación):
 
 ```
 TablaA ( a1, a2, …., tipo_a )
@@ -651,34 +585,21 @@ TablaD ( a1, d1 )
 TablaE ( a1, e1 )
 ```
 
-> [!note] El subrayado punteado
-> **Razonamiento propio, no está en el deck:** el punteado extra de `a1` en `TablaB`…`TablaE` marca que
-> ahí `a1` es además **clave extranjera** hacia `TablaA`. La imagen no trae referencias de notación.
-
-Con dos anotaciones en la propia imagen, en itálica y con flecha:
-
 > [!quote] Las dos flechas del slide 21
 > Apuntando a `tipo_a` en `TablaA`: *"al ser una jerarquía exclusiva se debe incluir el atributo
 > 'tipo'"*
 > Apuntando a `TablaD`/`TablaE`: *"en este caso no, porque la jerarquía es compartida"*
 
-> [!success] Esto responde una de las dos preguntas abiertas de la clase anterior
-> La [[Clase 02 - Modelo Entidad-Relacion]] cerraba el slide 35 con *"¿Cómo representar los
-> distintos casos? → **esquema lógico**"*, y la duda quedó anotada como "¿qué distingue una jerarquía
-> exclusiva de una compartida?". **La respuesta está acá:**
+> [!success] Responde una de las dos preguntas abiertas de la clase anterior
+> La [[Clase 02 - Modelo Entidad-Relacion]] cerraba el slide 35 con *"¿Cómo representar los distintos
+> casos? → **esquema lógico**"*. La respuesta, con los sinónimos textuales del deck:
 > - **exclusiva = disjunta** → un ejemplar del supertipo cae en **un solo** subtipo → hace falta el
->   **discriminador** en la tabla del supertipo;
-> - **compartida = superpuesta** → un ejemplar puede caer en **varios** subtipos → **no** hace falta.
+> **discriminador** en la tabla del supertipo;
+> - **compartida = superpuesta** → puede caer en **varios** subtipos → **no** hace falta.
 >
-> La hipótesis que había anotado la clase anterior (exclusiva = disjuntos, compartida = solapados)
-> queda **confirmada por el propio deck**, con los sinónimos textuales.
->
-> Lo que **sigue sin responderse** es la **participación total o parcial**: no aparece en ningún slide
-> de esta clase.
-
-> [!note] La clasificación es **por nivel**, no por jerarquía
-> En el ejemplo `A/B/C/D/E`, un mismo árbol tiene un nivel exclusivo y otro compartido. Lo mismo en
-> `PRODUCTO`. No se pregunta "¿esta jerarquía es exclusiva?" sino "¿este **corte** lo es?".
+> La clasificación es **por nivel**, no por jerarquía: en `A/B/C/D/E` —y en `PRODUCTO`— un mismo árbol
+> tiene un corte exclusivo y otro compartido. Lo que **sigue sin responderse** es la **participación
+> total o parcial**: no aparece en ningún slide de esta clase.
 
 ---
 
@@ -694,9 +615,9 @@ doble rectángulo y la línea de la relación duplicada:
 
 ```
 CAMPO ══(1,1)══◇ TIENE ◇══(0,N)══ ║ PARCELA ║
- ●IdCampo                            ●NroParcela
- ○NombreCampo                        ○Superficie
-                                     ○UltimoCultivo
+ ●IdCampo  ●NroParcela
+ ○NombreCampo  ○Superficie
+  ○UltimoCultivo
 ```
 
 **Modelo físico resultante:**
@@ -708,42 +629,38 @@ CAMPO ══(1,1)══◇ TIENE ◇══(0,N)══ ║ PARCELA ║
 | | | `Superficie` | |
 | | | `UltimoCultivo` | |
 
-Las dos flechas rojas del slide unen `IdCampo` del MER con `IdCampo (FK)` de `PARCELA`, y `NroParcela`
-del MER con `NroParcela` de la tabla. `PARCELA` se dibuja con **esquinas redondeadas** y la relación
-con **línea llena**: es **identificatoria**.
+Las flechas rojas unen `IdCampo` del MER con `IdCampo (FK)` de `PARCELA`, y `NroParcela` con
+`NroParcela`. `PARCELA` va con **esquinas redondeadas** y la relación con **línea llena**:
+**identificatoria**.
 
-> [!success] Esto responde la otra pregunta abierta de la clase anterior
-> El slide 34 de la [[Clase 02 - Modelo Entidad-Relacion]] cerraba con *"¿cómo se representa la dependencia de
-> identificación? → **esquema lógico**"*. **La respuesta es esta:** la dependencia de identificación
-> se representa haciendo que la **clave de la fuerte forme parte de la clave primaria de la débil** —
-> no como un atributo más, sino **dentro de la PK**.
->
-> **Razonamiento propio, no está en el deck:** la dependencia de **existencia** viene de yapa —como la
-> FK está en la PK no puede ser `NULL`, así que ninguna parcela existe sin campo— y eso explica el
-> *"siempre (1,1) del lado fuerte"* que la clase anterior dejaba con un "¿Por qué?" sin responder: si fuera
-> `(0,1)` la PK admitiría `NULL`, y si fuera `(*,N)` la clave no sería única.
+> [!success] Responde la otra pregunta abierta de la clase anterior
+> El slide 34 de la [[Clase 02 - Modelo Entidad-Relacion]] cerraba con *"¿cómo se representa la
+> dependencia de identificación? → **esquema lógico**"*. Respuesta: la **clave de la fuerte forma
+> parte de la clave primaria de la débil**, no como un atributo más sino **dentro de la PK**.
+> **Razonamiento propio, no está en el deck:** la dependencia de **existencia** viene de yapa (la FK
+> está en la PK, no puede ser `NULL`: ninguna parcela existe sin campo), y eso explica el *"siempre
+> (1,1) del lado fuerte"* que la clase anterior dejó sin responder: con `(0,1)` la PK admitiría
+> `NULL`, con `(*,N)` la clave no sería única.
 
 > [!tip] Entidad débil vs. atributo multivaluado — mismo esquema, distinta lectura
-> **Razonamiento propio, no está en el deck:**
-> `PARCELA(NroParcela, IdCampo, …)` y `TELEF_ALUM(LU, Telefono)` tienen la **misma forma**: PK
-> compuesta = clave del padre + algo propio, relación identificatoria. La diferencia es semántica: la
-> parcela **es una entidad** (tiene atributos propios, `Superficie`, `UltimoCultivo`), el teléfono es
-> **solo un valor**. En el examen, si la "tabla del multivaluado" empieza a ganar columnas, era una
-> entidad débil.
+> **Razonamiento propio:** `PARCELA(NroParcela, IdCampo, …)` y `TELEF_ALUM(LU, Telefono)` tienen la
+> **misma forma** (PK compuesta = clave del padre + algo propio, relación identificatoria). La
+> diferencia es semántica: la parcela **es una entidad** con atributos propios (`Superficie`,
+> `UltimoCultivo`); el teléfono, **solo un valor**. En el examen, si la "tabla del multivaluado"
+> empieza a ganar columnas, era una entidad débil.
 
 ---
 
 ## Slides 23–24 · Sintaxis de `CREATE TABLE`
 
-Los dos últimos slides son la gramática, en notación de *synopsis* (corchetes = opcional, llaves +
-`|` = alternativas).
+Gramática en notación de *synopsis* (corchetes = opcional, llaves + `|` = alternativas).
 
 ```
 CREATE [ TABLE [ IF NOT EXISTS ] nombre_tabla (
 [
   { nombre_columna tipo_dato [ column_constraint [ ... ], ]
-    | table_constraint }
-    [, ... ]
+  | table_constraint }
+  [, ... ]
 ] );
 ```
 
@@ -759,7 +676,7 @@ CREATE [ TABLE [ IF NOT EXISTS ] nombre_tabla (
   REFERENCES reftable [ ( refcolumn ) ] }
 ```
 
-**`table_constraint`** — se escribe **como un ítem más de la lista**, después de las columnas:
+**`table_constraint`** — **un ítem más de la lista**, después de las columnas:
 
 ```
 [ CONSTRAINT constraint_name ]
@@ -774,71 +691,65 @@ CREATE [ TABLE [ IF NOT EXISTS ] nombre_tabla (
 | | `column_constraint` | `table_constraint` |
 | --- | --- | --- |
 | Afecta a | **una** columna | **una o varias** columnas |
-| `NOT NULL` / `NULL` / `DEFAULT` | ✅ | ❌ |
-| `UNIQUE` | ✅ (sin lista) | ✅ **con lista** de columnas |
-| `PRIMARY KEY` | ✅ (sin lista) | ✅ **con lista** de columnas |
-| `CHECK` | ❌ **no está en la lista del slide** | ✅ |
+| `NOT NULL` / `NULL` / `DEFAULT` | ✓ | ✗ |
+| `UNIQUE` | ✓ (sin lista) | ✓ **con lista** de columnas |
+| `PRIMARY KEY` | ✓ (sin lista) | ✓ **con lista** de columnas |
+| `CHECK` | ✗ **no está en la lista del slide** | ✓ |
 | Referencia a otra tabla | `REFERENCES reftable` | `FOREIGN KEY (…) REFERENCES reftable` |
 
-> [!important] Por qué las claves compuestas van sí o sí como `table_constraint`
-> **Razonamiento propio, no está en el deck** — pero es la razón de forma detrás de todos sus ejemplos:
+> [!important] Las claves compuestas van sí o sí como `table_constraint`
+> **Razonamiento propio, no está en el deck**, pero es la razón de forma detrás de todos sus ejemplos:
 > `CONSTRAINT PK_ALUMNOSXCARRERA PRIMARY KEY (LU, IdCarrera)` **solo** se puede escribir como
-> `table_constraint`, porque la versión de columna no acepta lista. Toda PK compuesta —N:N, entidad
-> débil, tabla de multivaluado— cae acá.
+> `table_constraint`, porque la versión de columna no acepta lista. Toda PK compuesta (N:N, entidad
+> débil, tabla de multivaluado) cae acá.
 
 > [!bug] El corchete del slide 23 no cierra
-> `CREATE [ TABLE [ IF NOT EXISTS ] nombre_tabla (` abre dos `[` y cierra uno solo: el corchete que
-> abre justo después de `CREATE` nunca se cierra en todo el fragmento.
-> **Razonamiento propio, no está en el deck:** en el *synopsis* real de PostgreSQL ese primer corchete
-> envuelve las variantes `TEMPORARY`/`TEMP`/`UNLOGGED`, que el deck borró dejando el `[` huérfano. Se
-> lee como si dijera `CREATE TABLE [ IF NOT EXISTS ] nombre_tabla ( … )`.
+> `CREATE [ TABLE [ IF NOT EXISTS ] nombre_tabla (` abre dos `[` y cierra uno solo. **Razonamiento
+> propio:** en el *synopsis* real de PostgreSQL ese primer corchete envuelve las variantes
+> `TEMPORARY`/`TEMP`/`UNLOGGED`, que el deck borró dejando el `[` huérfano. Se lee como
+> `CREATE TABLE [ IF NOT EXISTS ] nombre_tabla ( … )`.
 
 ---
 
 ## PostgreSQL vs. MySQL en este deck
 
-Punto abierto #2 del vault ([[CLAUDE]] § Puntos abiertos): la cursada corre sobre **MySQL** y varios
-decks están escritos contra **PostgreSQL**. Este es uno de ellos.
-
-> [!warning] Toda esta sección es **razonamiento propio, no está en el deck**
-> El deck no menciona MySQL en ningún slide. La columna "¿Corre en MySQL?" hay que **verificarla contra
-> el manual de MySQL y contra la versión que use la cursada**, no darla por buena.
-
-Inventario:
+> [!warning] El deck es de PostgreSQL, la cursada corre sobre MySQL
+> Slide 10 linkea el catálogo de tipos de **PostgreSQL 9.5**, y la gramática de `CREATE TABLE` de los
+> slides 23–24 es la del *synopsis* de PostgreSQL (`index_parameters`, `DEFAULT default_expr`). El deck
+> no menciona MySQL en ningún slide, así que **toda esta sección es razonamiento propio, no está en el
+> deck**: la columna "¿Corre en MySQL?" hay que **verificarla contra el manual de MySQL y contra la
+> versión que use la cursada**. Es el punto abierto 2 del vault ([[CLAUDE]] § Puntos abiertos).
 
 | Elemento del deck | Motor | ¿Corre en MySQL? |
 | --- | --- | --- |
-| `CREATE TABLE` de los slides 9, 15, 16 | estándar | ✅ **sí, sin cambios** (salvo los dos tipeos) |
-| Tipos `integer`, `varchar(n)`, `char(n)`, `date` | estándar | ✅ **sí**, los cuatro existen en MySQL |
-| `CONSTRAINT nombre PRIMARY KEY (…)` | estándar | ✅ sí |
-| `ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY … REFERENCES …` | estándar | ✅ sí |
-| `CREATE TABLE IF NOT EXISTS` | ambos | ✅ sí, también existe en MySQL |
-| **Link de tipos de datos** (slide 10) | **PostgreSQL 9.5** | ❌ hay que usar el manual de MySQL |
-| **`index_parameters`** en `UNIQUE`/`PRIMARY KEY` (slide 23) | **PostgreSQL** | ❌ no existe en MySQL |
-| **`DEFAULT default_expr`** con expresión arbitraria | **PostgreSQL** | ⚠️ MySQL lo restringe |
-| **`REFERENCES`** como *column_constraint* (slide 23) | **PostgreSQL** | ⚠️ ver abajo |
-| `CHECK (expression)` como *table_constraint* (slide 24) | estándar | ⚠️ depende de la versión de MySQL |
+| `CREATE TABLE` de los slides 9, 15, 16 | estándar | ✓ **sí, sin cambios** (salvo los dos tipeos) |
+| Tipos `integer`, `varchar(n)`, `char(n)`, `date` | estándar | ✓ **sí**, los cuatro existen en MySQL |
+| `CONSTRAINT nombre PRIMARY KEY (…)` | estándar | ✓ sí |
+| `ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY … REFERENCES …` | estándar | ✓ sí |
+| `CREATE TABLE IF NOT EXISTS` | ambos | ✓ sí, también existe en MySQL |
+| **Link de tipos de datos** (slide 10) | **PostgreSQL 9.5** | ✗ hay que usar el manual de MySQL |
+| **`index_parameters`** en `UNIQUE`/`PRIMARY KEY` (slide 23) | **PostgreSQL** | ✗ no existe en MySQL |
+| **`DEFAULT default_expr`** con expresión arbitraria | **PostgreSQL** | (atención) MySQL lo restringe |
+| **`REFERENCES`** como *column_constraint* (slide 23) | **PostgreSQL** | (atención) ver abajo |
+| `CHECK (expression)` como *table_constraint* (slide 24) | estándar | (atención) depende de la versión de MySQL |
 
 > [!warning] Las dos trampas concretas para el TP 2
-> **Razonamiento propio, no está en el deck** — y por eso van también a Dudas abiertas:
 > 1. En **MySQL/InnoDB**, la forma *inline* `columna tipo REFERENCES otra_tabla(col)` se **acepta
->    sintácticamente pero no crea la foreign key**. Hay que declararla como `table_constraint`
->    (`FOREIGN KEY (col) REFERENCES …`) o con `ALTER TABLE`. **El deck usa siempre `ALTER TABLE`, así
->    que sus ejemplos están del lado seguro** — el riesgo es copiar la gramática del slide 23.
-> 2. **`CHECK`** en MySQL fue ignorado silenciosamente durante muchos años y recién se empezó a
->    aplicar en versiones recientes. **Verificar contra la versión del contenedor de la cursada**
->    antes de apoyarse en él.
+> sintácticamente pero no crea la foreign key**: hay que declararla como `table_constraint`
+> (`FOREIGN KEY (col) REFERENCES …`) o con `ALTER TABLE`. **El deck usa siempre `ALTER TABLE`, así
+> que sus ejemplos están del lado seguro**; el riesgo es copiar la gramática del slide 23.
+> 2. **`CHECK`** en MySQL fue ignorado silenciosamente durante muchos años y recién se aplica en
+> versiones recientes. **Verificar contra la versión del contenedor de la cursada.**
 >
-> Ninguna de las dos cosas la dice el deck. **Confirmar en clase / contra el manual de MySQL.**
+> Ninguna de las dos la dice el deck. **Confirmar en clase / contra el manual de MySQL.**
 
 ---
 
 ## Notación de los diagramas del deck
 
-Todas las capturas del modelo físico salen del mismo modelador (símbolos de tipo **ERwin / IE**), y
-aparecen en los slides 8, 9, 11, 12, 14, 15, 16, 17, 20 y 22 (las de los slides 15 y 16 repiten la
-del 14). El deck **nunca explica la notación**; esta tabla es **razonamiento propio**, de leer todas
-las capturas juntas.
+Todas las capturas del modelo físico salen del mismo modelador (símbolos de tipo **ERwin / IE**):
+slides 8, 9, 11, 12, 14, 15, 16, 17, 20 y 22 (las de los slides 15 y 16 repiten la del 14). El deck
+**nunca explica la notación**; la tabla es **razonamiento propio**, de leer todas las capturas juntas.
 
 | Elemento | Significado |
 | --- | --- |
@@ -860,10 +771,9 @@ las capturas juntas.
 | **Semicírculo con trazos cruzados** en una jerarquía (slide 20, rotulado `Tipo`) | corte supertipo→subtipos **exclusivo** |
 | **Semicírculo liso** (slide 20, sin rótulo) | corte supertipo→subtipos **compartido** |
 
-Comparar con la notación del **MER** en [[1.02.02 - Modelo Entidad-Relación|Modelo Entidad-Relación]]: son dos notaciones distintas y el
-deck las muestra **juntas en el mismo slide**, sin avisarlo. La disposición **cambia de slide en
-slide**: en el 8 el MER va a la derecha y el físico a la izquierda; en el 12 al revés; en los slides 11,
-14, 17, 20 y 22 el MER va arriba (o arriba-izquierda) y el modelo físico debajo.
+Es una notación distinta de la del **MER** ([[1.02.02 - Modelo Entidad-Relación|Modelo Entidad-Relación]])
+y el deck las muestra **juntas en el mismo slide** sin avisarlo, cambiando la disposición: MER a la
+derecha en el 8, a la izquierda en el 12, y arriba (o arriba-izquierda) en los slides 11, 14, 17, 20 y 22.
 
 ## Receta para el TP 2 y para el parcial
 
@@ -871,45 +781,39 @@ slide**: en el 8 el MER va a la derecha y el físico a la izquierda; en el 12 al
 
 1. **Una tabla por entidad fuerte.** Nombre = nombre de la entidad. IP → `PRIMARY KEY`.
 2. **Bajar los atributos**: simples → columnas; compuestos → desplegar en componentes; obligatorios →
-   `NOT NULL`; opcionales → sin nada.
+  `NOT NULL`; opcionales → sin nada.
 3. **Sacar los multivaluados** a su propia tabla `(clave_entidad, atributo)`, PK compuesta por las dos.
 4. **Entidades débiles**: PK = clave parcial + clave de la fuerte, y esa segunda parte también FK.
 5. **Relaciones 1:N** (binarias o unarias): FK del lado 1 en la tabla del lado N. Si es unaria,
-   **renombrar**. `NOT NULL` si el mínimo del otro lado es 1.
+  **renombrar**. `NOT NULL` si el mínimo del otro lado es 1.
 6. **Relaciones N:N** (binarias o unarias): tabla nueva, PK = las dos claves, dos FK sueltas. Si es
-   unaria, **renombrar** una.
+  unaria, **renombrar** una.
 7. **Atributos del rombo**: si la relación es 1:N van a la tabla del lado N; si es N:N o ternaria, a la
-   tabla de la relación.
+  tabla de la relación.
 8. **Jerarquías**: tabla por supertipo + tabla por subtipo, todas con la clave del supertipo. Si el
-   corte es **exclusivo**, agregar el discriminador **en el supertipo**.
+  corte es **exclusivo**, agregar el discriminador **en el supertipo**.
 9. Escribir el SQL: `CREATE TABLE` con `CONSTRAINT PK_<TABLA> PRIMARY KEY (…)` adentro, y las FK
-   después con `ALTER TABLE … ADD CONSTRAINT FK_<TABLA>_<REFERENCIADA> FOREIGN KEY (…) REFERENCES …`.
+  después con `ALTER TABLE … ADD CONSTRAINT FK_<TABLA>_<REFERENCIADA> FOREIGN KEY (…) REFERENCES …`.
 
 ## Dudas abiertas
 
-- [ ] **¿Cómo se deriva una relación 1:1?** El deck no la trata en ningún slide, y es el caso más
-      preguntado (¿FK de qué lado? ¿se fusionan las tablas?).
-- [ ] **¿Cómo se deriva una relación ternaria / n-aria?** El slide 18 la nombra (*"asociativa (binaria
-      N:N o ternaria)"*) y nunca la deriva.
-- [ ] **¿Cuál es la regla para los identificadores alternativos?** El slide 8 los dibuja `(AK1:1)`
-      pero el `CREATE TABLE` del slide 9 no los implementa y ninguna regla los menciona. ¿`UNIQUE`?
-- [ ] **¿Y los atributos derivados?** La [[Clase 02 - Modelo Entidad-Relacion]] los define como quinto eje; esta
-      clase no dice qué hacer con ellos (¿columna calculada? ¿no se guardan? ¿vista?).
-- [ ] **¿Qué es la participación *total* o *parcial* de una jerarquía?** Sigue sin definirse: la
-      Clase 02 la nombró y la Clase 03 la ignoró. *(Lo de exclusiva/compartida sí quedó respondido,
-      slide 21.)*
-- [ ] **Confirmar la definición de relación identificatoria / no identificatoria** (slide 8 las nombra
-      y nunca las define). La lectura de arriba sale de los diagramas.
-- [ ] **`ENVASADO` sin `Presentacion`** (slide 20): ¿falta la tabla del multivaluado o el atributo no
-      era multivaluado?
+- [ ] **¿Cómo se deriva una relación 1:1?** El deck no la trata (¿FK de qué lado? ¿se fusionan las tablas?).
+- [ ] **¿Cómo se deriva una relación ternaria / n-aria?** El slide 18 la nombra y nunca la deriva.
+- [ ] **¿Cuál es la regla para los identificadores alternativos?** ¿`UNIQUE`? El slide 8 los dibuja
+  `(AK1:1)` y el `CREATE TABLE` del slide 9 no los implementa.
+- [ ] **¿Y los atributos derivados?** La [[Clase 02 - Modelo Entidad-Relacion]] los define como quinto
+  eje; esta clase no dice qué hacer con ellos (¿columna calculada? ¿no se guardan? ¿vista?).
+- [ ] **¿Qué es la participación *total* o *parcial* de una jerarquía?** Sigue sin definirse.
+- [ ] **Confirmar la definición de relación identificatoria / no identificatoria** (slide 8): la lectura
+  de arriba sale de los diagramas.
+- [ ] **`ENVASADO` sin `Presentacion`** (slide 20): ¿falta la tabla del multivaluado o no era multivaluado?
 - [ ] **`ALUMNO` sin `FechaNac`** (slide 11): ¿descuido del slide?
 - [ ] **`LUTutor (FK) NOT NULL`** con cardinalidad `(0,1)` (slide 12): ¿es un error?
 - [ ] **¿La cursada exige `ALTER TABLE` para las FK o acepta declararlas inline?** En MySQL/InnoDB la
-      forma inline `columna tipo REFERENCES …` no crea la FK. Verificar con el TP 2.
-- [ ] **¿Qué versión de MySQL corre en el contenedor de la cursada?** Define si `CHECK` se aplica o se
-      ignora.
-- [ ] ¿Hay convención de la cátedra para el **nombre de la tabla de una N:N** más allá del `AXB` que
-      usan los ejemplos (`ALUMNOSXCARRERA`, `TUTORXALUMNO`)?
+  forma inline no crea la FK. Verificar con el TP 2.
+- [ ] **¿Qué versión de MySQL corre en el contenedor de la cursada?** Define si `CHECK` se aplica.
+- [ ] ¿Hay convención de la cátedra para el **nombre de la tabla de una N:N** más allá del `AXB` de los
+  ejemplos (`ALUMNOSXCARRERA`, `TUTORXALUMNO`)?
 
 ## Enlaces
 

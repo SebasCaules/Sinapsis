@@ -24,22 +24,42 @@ estado: procesado
 
 # Clase 06 — Vistas (Parte 1)
 
-> [!info] Fuente
-> `raw/Unidad-01/Teorica/BD2_Clase 06 - Vistas-Parte 1.pdf` · **18 slides**
-> El slide 1 es la **portada** (*"Bases de Datos II · Vistas"*, sin contenido); el recorrido de abajo
-> arranca en el slide 2 y llega al 18.
-> Dictado en la **teórica del lunes 10/08**. El `06` del nombre del archivo **es el número de clase**:
-> la cátedra numera sus decks y ésa es la única numeración de clases que existe.
-> El mismo lunes se dictaron también la [[Clase 07 - Vistas-Parte 2]] (vistas, segunda clase del tema) y la
-> [[Clase 08 - Explicando el plan]] (índices y plan de ejecución): varias clases pueden caer en la misma fecha.
-> Clase anterior: [[Clase 05 - Consultas de Datos–Parte 3]]. Se practica con el **TP4 Vistas** del martes
-> 11/08 → [[Práctica 2026-08-11]].
-> Bibliografía: [[_index-bibliografia]].
+## Resumen general
 
-> [!info] Las Clases 01–08 viven todas en `raw/Unidad-01/Teorica/`
-> No es un error de archivado: una carpeta de unidad **agrupa varias clases**, y la Unidad-01 agrupa
-> las Clases 01 a 08. El path no dice a qué clase pertenece un archivo — eso lo registra
-> [[_index-clases]].
+Una vista es una **relación derivada**: una consulta con nombre, que vive en el esquema externo y se
+comporta como una **tabla virtual** sin guardar datos. El deck cubre `CREATE VIEW` (con renombrado de
+columnas, que es todo o nada), `DROP VIEW` con `RESTRICT`/`CASCADE`, y el problema central del tema:
+qué vistas se pueden actualizar y cómo evitar que una actualización haga desaparecer tuplas. Se
+practica en el **TP4 Vistas** sobre **MySQL**, y la actualizabilidad es lo que más cae en el parcial.
+
+Lo que hay que saber:
+
+- El criterio genérico es la **preservación de la clave**: cada fila de la tabla aparece como máximo
+  una vez en la vista. Es una propiedad **del esquema, no de los datos**: se decide leyendo el
+  `CREATE VIEW`.
+- Según el estándar SQL, una vista es actualizable si conserva la clave primaria, no tiene agregación
+  ni campos derivados, no usa `DISTINCT` y no tiene subconsultas en el `SELECT`: son las **vistas
+  σ-π**. En una cadena `T→V1→…→Vn`, `Vi` es actualizable solo si `Vi-1` lo es.
+- Una vista actualizable puede sufrir **migración de tuplas** (un `UPDATE` saca las filas de la vista).
+  `WITH CHECK OPTION` rechaza esas operaciones: `CASCADED` (default) chequea también las vistas
+  subyacentes, `LOCAL` solo la propia, y Date critica `LOCAL`. WCO solo vale en vistas actualizables.
+- Motor: MySQL ignora `RESTRICT`/`CASCADE` en `DROP VIEW`, no tiene vistas materializadas y sí soporta
+  WCO con `CASCADED` por defecto.
+- Trampas del deck: comillas tipográficas que no compilan, nombres reutilizados con definiciones
+  distintas (`PROV_COMP`, `PROV_TANDIL`, `PROV_COMP_TANDIL`/`PR_COMP_TANDIL`) y un `UPDATE` con
+  errores de sintaxis en el slide 17.
+
+Para el parcial: decidir si una vista es actualizable leyendo su definición contra las cuatro
+condiciones, y resolver los ejercicios de `Envios500` (con y sin WCO; `CASCADED` vs. `LOCAL`).
+
+## Fuente y bibliografía del deck
+
+> [!info] Fuente
+> `raw/Unidad-01/Teorica/BD2_Clase 06 - Vistas-Parte 1.pdf` · **18 slides** (el slide 1 es la portada;
+> el recorrido va del slide 2 al 18). Teórica del lunes 10/08, el mismo día que la
+> [[Clase 07 - Vistas-Parte 2]] y la [[Clase 08 - Explicando el plan]]; anterior:
+> [[Clase 05 - Consultas de Datos–Parte 3]]. Se practica con el **TP4 Vistas** del martes 11/08 →
+> [[Práctica 2026-08-11]]. Qué archivo es de qué clase lo registra [[_index-clases]].
 
 > [!quote] La bibliografía que declara el deck (slide 18)
 > - Date, C., *"An Introduction to Database Systems"*. 8º ed., Addison Wesley, 2004
@@ -47,42 +67,14 @@ estado: procesado
 > - Ramakrishnan R., Gehrke J., *"Database Management Systems"*, 3° ed., McGraw-Hill, 2003 **(Cap. 3 y 25)**
 > - Silberschatz, A., Korth, H, Sudarshan, S., *"Database System Concepts"*, McGraw Hill, 2001 **(Cap. 4)**
 >
-> Los capítulos entre paréntesis son los que **el propio slide** resalta. **No verifiqué ninguno contra
-> las fichas del vault** — el mapeo real va en [[_index-bibliografia]].
-
-## Resumen
-
-Una **vista** es una **relación derivada**: una consulta a la que se le pone nombre. Vive en el
-**esquema externo** (nivel externo de la arquitectura de tres niveles) y sirve para mostrarle a cada
-grupo de usuarios sólo la parte de la BD que le interesa, ocultando el resto. Es una **tabla virtual**:
-no guarda datos, las tuplas se generan al operar sobre ella.
-
-Consultar una vista es gratis conceptualmente — se consulta *como cualquier tabla*. **El problema real
-del tema es actualizarla**: las modificaciones sobre la vista tienen que propagarse a las tablas base
-sin ambigüedad, y eso no siempre se puede. El criterio genérico que decide si se puede es la
-**preservación de la clave**. Y aun cuando la vista *sea* actualizable, aparece un segundo problema —
-la **migración de tuplas** — que se ataja con **`WITH CHECK OPTION`**.
-
-| Sección del deck | Qué establece | Slides |
-| --- | --- | --- |
-| **Esquema externo** | Las vistas son el nivel externo de los tres niveles | 2 |
-| **Concepto de vista** | Relación derivada · tabla virtual · no materializada | 3 |
-| **`CREATE VIEW`** | Sintaxis, renombrado de columnas, reglas de nombres | 4 |
-| **Ejemplos de creación** | Sobre una tabla · sobre otra vista · sobre varias tablas | 5–6 |
-| **Consulta y `DROP VIEW`** | `RESTRICT` (default) vs. `CASCADE` | 7 |
-| **Tabla base → vista** | Los cambios se reflejan solos: recálculo o mantenimiento incremental | 8 |
-| **Vista → tabla base** | Las ambigüedades que impiden propagar | 9–10 |
-| **Preservación de clave** | La condición estructural de actualizabilidad | 11 |
-| **Vistas actualizables** | Las 4 condiciones del estándar SQL · vistas **σ-π** | 12–13 |
-| **Migración de tuplas** | La tupla actualizada deja de pertenecer a la vista | 14 |
-| **`WITH CHECK OPTION`** | `CASCADED` (default) vs. `LOCAL` · dos ejercicios | 15–17 |
+> Los capítulos los resalta el propio slide; no están verificados contra las fichas del vault. Mapeo
+> real: [[_index-bibliografia]].
 
 ---
 
-## El esquema de ejemplo (diagramas laterales de los slides 5, 6, 13, 16, 17)
+## El esquema de ejemplo (diagrama lateral de los slides 5, 6, 13, 16, 17)
 
-Cinco slides traen a la derecha el **mismo diagrama** de tres tablas. Es el esquema contra el que se
-escriben *todos* los ejemplos del deck, así que va primero.
+Cinco slides repiten el mismo diagrama de tres tablas; contra él se escriben todos los ejemplos del deck.
 
 **`PROVEEDOR`**
 
@@ -112,72 +104,54 @@ escriben *todos* los ejemplos del deck, así que va primero.
 
 ```
 PROVEEDOR ──┼──o<── ENVIO ──>o──┼── ARTICULO
-   (1)                              (1)
+  (1)  (1)
 ```
 
-> [!note] Cómo leer ese diagrama — razonamiento propio, no está en el deck
-> La notación del diagrama es **pata de gallo (crow's foot)**, no la que usa la cátedra para el MER en
-> la [[Clase 02 - Modelo Entidad-Relacion]]:
-> el trazo `┼` del lado de `PROVEEDOR` y `ARTICULO` es *exactamente uno*, y el `o<` del lado de `ENVIO`
-> es *cero o muchos*. O sea `ENVIO` es la tabla de cruce N:N entre proveedores y artículos, con
-> `(id_proveedor, id_articulo)` como **clave primaria compuesta** y `cantidad` como atributo de la
-> relación. **Esto importa para el resto del deck**: la clave de `ENVIO` son las dos columnas juntas.
-
-> [!important] `ciudad` está en dos tablas
-> Aparece en `PROVEEDOR` y en `ARTICULO`. Es justo el caso que el slide 4 obliga a resolver: *"se debe
-> especificar con diferente nombre las columnas provenientes de distintas tablas pero con igual
-> nombre"*.
+> [!note] Cómo leer el diagrama (razonamiento propio, no está en el deck)
+> Notación **pata de gallo (crow's foot)**, no la del MER de la [[Clase 02 - Modelo Entidad-Relacion]]:
+> `┼` es *exactamente uno* y `o<` es *cero o muchos*. `ENVIO` es la tabla de cruce N:N, con
+> `(id_proveedor, id_articulo)` como **clave primaria compuesta**: la clave de `ENVIO` son las dos
+> columnas juntas. `ciudad` está en `PROVEEDOR` y en `ARTICULO`: el caso que el slide 4 obliga a renombrar.
 
 ---
 
 ## Slide 2 · Vistas – Esquema Externo
 
-- **Forman parte del *esquema externo*** de la base de datos.
-- **Presentan** una parte de la BD que es de interés para **grupos particulares de usuarios**
-  (**ocultando** el resto de la información).
-
-El slide ilustra esto con el diagrama clásico de los **tres niveles**, con el **nivel externo
-recuadrado en rojo** (es el nivel donde viven las vistas):
+Las vistas **forman parte del esquema externo**: presentan a **grupos particulares de usuarios** la
+parte de la BD que les interesa, **ocultando** el resto. El slide lo ilustra con el diagrama de los
+**tres niveles** de la [[Clase 01 - Introducción_BasesDeDatos]], con el nivel externo recuadrado en
+rojo: **una vista es el mecanismo con el que SQL materializa el nivel externo**.
 
 ```
-   👥  👤  🖥️            ← distintos grupos de usuarios
+  ← distintos grupos de usuarios
  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
- │External View1│ │External View2│ │External View3│   ◀── NIVEL EXTERNO
+ │External View1│ │External View2│ │External View3│  ◀── NIVEL EXTERNO
  └──────▲───────┘ └──────▲───────┘ └──────▲───────┘
-        └──── logical to external mappings ────┘
- ┌───────┐         ┌──────────────┐
- │ tabla │ ◀────▶  │ Logical Schema│                  ◀── NIVEL CONCEPTUAL
- └───────┘         └──────▲───────┘
-                internal to logical mapping
- ┌───────┐         ┌───────────────┐
- │ disk  │ ◀────▶  │Internal Schema│                  ◀── NIVEL INTERNO
- └───────┘         └───────────────┘
+  └──── logical to external mappings ────┘
+ ┌───────┐  ┌──────────────┐
+ │ tabla │ ◀────▶  │ Logical Schema│  ◀── NIVEL CONCEPTUAL
+ └───────┘  └──────▲───────┘
+  internal to logical mapping
+ ┌───────┐  ┌───────────────┐
+ │ disk  │ ◀────▶  │Internal Schema│  ◀── NIVEL INTERNO
+ └───────┘  └───────────────┘
 ```
 
 > [!quote] Atribución al pie del slide
 > *"de: S. Sumathi, S. Esakkirajan, **Fundamentals of Relational Database Management Systems** (2007)"*
 
 > [!missing] Esa fuente no está en el vault
-> **Sumathi & Esakkirajan (2007)** no figura en `raw/Material_Catedra/bibliografia/` — ni en
-> obligatoria, ni en complementaria, ni en papers. Es una fuente que **la cátedra usa y el vault no
-> tiene**. Vale la pena registrarla en [[_index-bibliografia]] como fuente citada-pero-ausente, y
-> eventualmente pedirle al humano el PDF. La bibliografía *declarada* del deck (slide 18) tampoco la
-> incluye: el diagrama es la única aparición.
-
-Este es el mismo esquema de tres niveles que introdujo la [[Clase 01 - Introducción_BasesDeDatos]]. La conexión
-conceptual es la que da
-sentido a todo el tema: **una vista es el mecanismo con el que SQL materializa el nivel externo**.
-Lo que en la teoría de tres niveles es "vista externa", en SQL se llama `VIEW`.
+> **Sumathi & Esakkirajan (2007)** no figura en `raw/Material_Catedra/bibliografia/` ni en la
+> bibliografía declarada del slide 18: el diagrama es su única aparición. Fuente citada-pero-ausente,
+> pendiente en [[_index-bibliografia]].
 
 ## Slide 3 · Concepto de Vista
-
-Cuatro afirmaciones, en el orden del slide:
 
 1. Es una **relación derivada** de **una o más tablas y/o vistas definidas previamente**.
 2. **Su contenido se define dando un nombre a una expresión de consulta.**
 3. Se considera una **tabla virtual** (habitualmente **no materializada**)
-   → **las tuplas se generan al operar sobre la vista**.
-4. De lo anterior se desprenden tres consecuencias:
+  → **las tuplas se generan al operar sobre la vista**.
+4. Tres consecuencias, textuales:
 
 | Consecuencia | Textual del slide |
 | --- | --- |
@@ -185,15 +159,10 @@ Cuatro afirmaciones, en el orden del slide:
 | **Actualización** | *"Para poder realizar **actualizaciones** deben cumplirse ciertas condiciones (que surgen de su carácter de datos derivados)"* |
 | **Criterio** | *"La característica genérica que define la posibilidad de actualización es la **preservación de la clave** (reconocimiento de la tabla que 'hereda' su clave a la vista)"* |
 
-> [!tip] Las dos palabras que hay que retener del slide
-> **"derivada"** y **"virtual"**. Todo el resto del deck es consecuencia de esas dos: si los datos son
-> derivados, escribir sobre ellos exige poder deshacer la derivación; si la tabla es virtual, no hay
-> dónde guardar la escritura salvo en la tabla base.
-
-> [!note] "habitualmente no materializada"
-> El paréntesis es importante: el slide deja abierta la puerta a las **vistas materializadas**, que
-> reaparecen en el slide 8. Una vista materializada **sí** guarda una copia física del resultado.
-> El deck no las desarrolla acá. → [[Clase 07 - Vistas-Parte 2|Vistas materializadas]]
+Las dos palabras a retener son **"derivada"** y **"virtual"**: escribir sobre datos derivados exige
+deshacer la derivación, y en una tabla virtual la escritura solo puede ir a la tabla base. El
+*"habitualmente no materializada"* deja la puerta abierta a las **vistas materializadas** (copia física
+del resultado), que reaparecen en el slide 8 → [[Clase 07 - Vistas-Parte 2|Vistas materializadas]].
 
 ## Slide 4 · Creación de Vistas — sintaxis
 
@@ -208,24 +177,21 @@ AS expresión_consulta
 | `nom_vista` | nombre de la vista |
 | `(n_col_1, …, n_col_n)` | nombres de columnas de la vista *(opcional)* |
 | `expresión_consulta` | **consulta SQL que define la relación derivada** |
-| `WITH [opción] CHECK OPTION` | *(opcional — se explica recién en el slide 15)* |
+| `WITH [opción] CHECK OPTION` | *(opcional — se explica en el slide 15)* |
 
 Las **tres reglas de nombres de columna**, textuales:
 
 1. *"Las columnas de la vista se pueden renombrar especificando **la lista completa** de atributos de la
-   vista entre paréntesis."*
+  vista entre paréntesis."*
 2. *"Si no, los nombres son los de las columnas de las tablas especificadas en la sentencia SELECT"*
 3. *"Se debe especificar con diferente nombre las columnas provenientes de distintas tablas pero con
-   igual nombre"*
+  igual nombre"*
 
 > [!important] La lista es *completa* o no es
-> No se pueden renombrar dos columnas de cinco: o se listan las cinco, o ninguna. Esto explica por qué
-> el ejemplo `TOTAL_ARTICULO` del slide 13 escribe `(articulo, total)` y no sólo `(total)`, aun cuando
-> lo único que necesitaba nombre era el `sum(cantidad)`.
+> Se renombran todas las columnas o ninguna. Por eso `TOTAL_ARTICULO` (slide 13) escribe
+> `(articulo, total)` y no solo `(total)`, aunque solo el `sum(cantidad)` necesitaba nombre.
 
 ## Slides 5–6 · Ejemplos de creación
-
-Tres casos, uno por cada origen posible de una vista.
 
 ### Vista a partir de **una tabla** (slide 5)
 
@@ -233,9 +199,9 @@ Tres casos, uno por cada origen posible de una vista.
 
 ```sql
 CREATE VIEW PROV_COMP AS
-    SELECT id_proveedor, nombre, ciudad
-    FROM  PROVEEDOR
-    WHERE rubro = 'Computadoras';
+  SELECT id_proveedor, nombre, ciudad
+  FROM  PROVEEDOR
+  WHERE rubro = 'Computadoras';
 ```
 
 ### Vista a partir de **otra vista** (slide 5)
@@ -244,13 +210,10 @@ CREATE VIEW PROV_COMP AS
 
 ```sql
 CREATE VIEW PROV_COMP_TANDIL AS
-    SELECT *
-    FROM  PROV_COMP
-    WHERE ciudad = 'Tandil';
+  SELECT *
+  FROM  PROV_COMP
+  WHERE ciudad = 'Tandil';
 ```
-
-El `FROM PROV_COMP` está resaltado en negrita azul en el slide: el punto del ejemplo es que el `FROM`
-de una vista puede ser **otra vista**, no sólo una tabla.
 
 ### Vista a partir de **más de una tabla** (slide 6)
 
@@ -259,34 +222,30 @@ de una vista puede ser **otra vista**, no sólo una tabla.
 
 ```sql
 CREATE VIEW PROV_ENVIOS_TANDIL AS
-    SELECT P.id_proveedor, P.nombre, E.id_articulo
-    FROM   PROVEEDOR P JOIN ENVIO E
-    ON     P.id_proveedor = E.id_proveedor
-    WHERE  P.rubro  = 'Computadoras'
-    AND    P.ciudad = 'Tandil';
+  SELECT P.id_proveedor, P.nombre, E.id_articulo
+  FROM  PROVEEDOR P JOIN ENVIO E
+  ON  P.id_proveedor = E.id_proveedor
+  WHERE  P.rubro  = 'Computadoras'
+  AND  P.ciudad = 'Tandil';
 ```
 
-Y la **misma vista escrita sobre la vista anterior** — el slide la introduce con un *"o…"*:
+O la misma vista sobre la vista anterior, sin `WHERE` porque los filtros de `rubro` y `ciudad` ya están
+en la vista intermedia:
 
 ```sql
 CREATE VIEW PROV_ENVIOS_TANDIL AS
-    SELECT P.id_proveedor, nombre, E.id_articulo
-    FROM   PR_COMP_TANDIL P JOIN ENVIO E
-    ON     P.id_proveedor = E.id_proveedor;
+  SELECT P.id_proveedor, nombre, E.id_articulo
+  FROM  PR_COMP_TANDIL P JOIN ENVIO E
+  ON  P.id_proveedor = E.id_proveedor;
 ```
 
-La segunda versión **no necesita `WHERE`**: los dos filtros (`rubro` y `ciudad`) ya están adentro de la
-vista intermedia. Es el argumento práctico a favor de encadenar vistas.
-
 > [!bug] El deck cambia el nombre de la vista a mitad de camino
-> El slide 5 la crea como **`PROV_COMP_TANDIL`** y los slides 6 y 7 la referencian como
-> **`PR_COMP_TANDIL`** (sin la `OV`). Son dos identificadores distintos: tal como está escrito, el
-> segundo `CREATE VIEW` del slide 6 **fallaría** con *table doesn't exist*. Es un tipeo del deck —
-> transcripto tal cual. **Verificar en clase cuál es el nombre canónico.**
+> El slide 5 la crea como **`PROV_COMP_TANDIL`**; los slides 6 y 7 la referencian como
+> **`PR_COMP_TANDIL`**. Tal como está escrito, el segundo `CREATE VIEW` del slide 6 **fallaría** con
+> *table doesn't exist*. Transcripto tal cual; nombre canónico por confirmar.
 
 > [!bug] Las comillas del deck no son comillas SQL
-> El PDF trae comillas tipográficas y **cierres inconsistentes**, distintos en cada slide. Extraído
-> carácter por carácter del PDF:
+> Extraídas carácter por carácter del PDF:
 >
 > | Slide | Literal tal cual está en el deck | Qué cierra |
 > | --- | --- | --- |
@@ -297,13 +256,11 @@ vista intermedia. Es el argumento práctico a favor de encadenar vistas.
 > | 14 | `‘Tandil´` · `„Azul„` | la de `Azul` **abre y cierra con comilla baja** |
 > | 16–17 | `‘P1’`, `‘A1’`, `‘P2’`, `‘A2’` | comillas tipográficas de apertura/cierre |
 >
-> En SQL sólo vale la comilla simple recta `'`. Si se copia y pega del PDF al cliente MySQL, **no
-> compila** ninguno de estos ejemplos. En esta página los bloques ```sql``` están transcriptos con
-> comillas rectas para que sean ejecutables — **el original está mal en todos los casos**.
+> En SQL solo vale la comilla simple recta `'`: copiado del PDF al cliente MySQL, **ninguno de estos
+> ejemplos compila**. Los bloques `sql` de esta página llevan comillas rectas; **el original está mal en
+> todos los casos**.
 
 ## Slide 7 · Consulta y eliminación
-
-### Consultar
 
 > *"Una vista puede ser consultada como cualquier tabla."*
 
@@ -311,11 +268,11 @@ Ejemplo: *"Listar alfabéticamente los proveedores de `PR_COMP_TANDIL`"*
 
 ```sql
 SELECT nombre
-FROM   PR_COMP_TANDIL
+FROM  PR_COMP_TANDIL
 ORDER BY nombre;
 ```
 
-### Eliminar
+Eliminación:
 
 ```sql
 DROP VIEW nom_vista [opción];
@@ -328,12 +285,10 @@ DROP VIEW nom_vista [opción];
 
 > [!warning] Motor: `RESTRICT` / `CASCADE` en `DROP VIEW` es sintaxis del estándar, y **MySQL las ignora**
 > La cursada corre sobre **MySQL** ([[_cronograma]] § Diferencias con el programa oficial). MySQL
-> **acepta** `DROP VIEW … RESTRICT` y `… CASCADE` sin error de sintaxis, pero **las palabras clave no
-> hacen nada**: el `DROP` procede igual y las vistas que dependían de la borrada quedan *inválidas*
-> (fallan recién al consultarlas). PostgreSQL sí implementa las dos semánticas de verdad.
-> **Consecuencia práctica para el TP4:** en MySQL no se puede confiar en `RESTRICT` como red de
-> seguridad — hay que chequear las dependencias a mano antes de dropear.
-> **Verificar en clase / contra la doc de la versión de MySQL que use la cátedra.**
+> acepta `DROP VIEW … RESTRICT` y `… CASCADE` sin error, pero **las palabras clave no hacen nada**: el
+> `DROP` procede igual y las vistas dependientes quedan *inválidas* (fallan recién al consultarlas).
+> PostgreSQL sí implementa las dos semánticas. Para el TP4, `RESTRICT` no es red de seguridad: revisar
+> las dependencias a mano antes de dropear. Confirmar contra la versión de MySQL de la cátedra.
 
 ## Slide 8 · Actualizaciones Tabla Base → Vista
 
@@ -345,19 +300,16 @@ La dirección fácil. Textual:
 > *"Las vistas no mantienen copias de los datos (**salvo que sean materializadas**)
 > → el SGBD asegura que las vistas siempre estén actualizadas."*
 
-Dos mecanismos, según el tipo de vista:
-
 | Mecanismo | Cómo funciona | Aplica a |
 | --- | --- | --- |
 | **Por recálculo** | *"las tuplas actualizadas se generan al acceder a la vista"* | vistas normales (virtuales) |
-| **Por mantenimiento incremental** | el SGBD propaga sólo el delta a la copia guardada | **vistas materializadas** |
+| **Por mantenimiento incremental** | el SGBD propaga solo el delta a la copia guardada | **vistas materializadas** |
 
 > [!warning] Motor: MySQL no tiene vistas materializadas
-> **MySQL no soporta `CREATE MATERIALIZED VIEW`.** PostgreSQL y Oracle sí. En MySQL, si se necesita el
-> efecto, se emula con una tabla real más algún mecanismo de refresco (job, trigger, `REPLACE INTO …
-> SELECT`). O sea: en esta cursada, la columna "mantenimiento incremental" de la tabla de arriba es
-> **teoría, no práctica** — todo lo que se haga en el TP4 va por recálculo.
-> El *"habitualmente no materializada"* del slide 3 es, en MySQL, *siempre* no materializada.
+> **MySQL no soporta `CREATE MATERIALIZED VIEW`**; PostgreSQL y Oracle sí. Se emula con una tabla real
+> más un mecanismo de refresco (job, trigger, `REPLACE INTO … SELECT`). En esta cursada el
+> mantenimiento incremental es **teoría, no práctica**: todo lo del TP4 va por recálculo. El
+> *"habitualmente no materializada"* del slide 3 es, en MySQL, *siempre* no materializada.
 
 ## Slides 9–10 · Actualizaciones Vista → Tabla Base
 
@@ -371,40 +323,24 @@ La dirección difícil, y el corazón del deck.
 > *"Sin embargo… al propagarse podrían generarse **ambigüedades** o **carecer de sentido** o **provocar
 > efectos no deseados**."*
 
-Los dos ejemplos de ambigüedad, textuales:
+Los dos ejemplos de ambigüedad, textuales (el deck escribe `=>` y no abre los signos de pregunta):
 
 - *"Borrar una tupla en una vista => borrar la tupla de la tabla base? (una modificación también
   podría hacerla "desaparecer" de la vista)"*
 - *"Insertar una fila en una vista => insertar una tupla en la tabla base? (si se actualiza alguna
   tupla también podría incorporarse en la vista)"*
 
-> [!note] El deck escribe `=>`, no `⇒`, y **no abre los signos de pregunta**
-> Textual: *"Borrar una tupla en una vista **=>** borrar la tupla de la tabla base**?**"*. Transcripto
-> tal cual.
+Y las **cinco preguntas abiertas** del slide (en rojo; la cátedra no las responde acá): *"Cómo se
+propaga una actualización en caso de:"*. Es el índice del resto del deck: la columna de la derecha
+(**razonamiento propio, no está en el deck**) dice dónde las contestan los slides 11 y 12.
 
-Y las **cinco preguntas abiertas** del slide (marcadas en rojo, con el ícono de interrogación — la
-cátedra no las responde acá). *"Cómo se propaga una actualización en caso de:"*
-
-> *"- una vista resultante de un **ensamble**?"*
-> *"- un **campo derivado**?"*
-> *"- una **función de agregación**?"*
-> *"- una tupla que **no conserva la clave**?"*
-> *"- una selección con **distinct**?"*
-
-**Razonamiento propio, no está en el deck** — el slide sólo enumera las cinco preguntas y no dice dónde
-se contestan. Esta es *mi* correspondencia con el resto del deck:
-
-| # | Caso *(textual del slide)* | Dónde lo leo contestado |
+| # | Caso *(textual del slide)* | Dónde se contesta |
 | --- | --- | --- |
 | 1 | una vista resultante de un **ensamble** *(join)* | slide 11 — preservación de clave |
 | 2 | un **campo derivado** | slide 12 — condición ✓2 |
 | 3 | una **función de agregación** | slide 12 — condición ✓2 · ejemplo `TOTAL_ARTICULO` |
 | 4 | una tupla que **no conserva la clave** | slides 11–12 — condición ✓1 · ejemplo `PROV_COMP` |
 | 5 | una selección con **`distinct`** | slide 12 — condición ✓3 |
-
-> [!tip] Este slide es el índice del resto del deck
-> Las cinco preguntas se contestan una por una en los slides 11 y 12. Si en el parcial piden *"¿por qué
-> una vista con `GROUP BY` no es actualizable?"*, la respuesta está en el par pregunta-3 / condición-✓2.
 
 ### Slide 10 · La regla general
 
@@ -419,35 +355,29 @@ se contestan. Esta es *mi* correspondencia con el resto del deck:
 > a la/s tabla/s base, se deberá recurrir a **algún procedimiento específico** para implementar la que
 > sea requerida."*
 
-Y el recuadro al pie, que define la **recursión sobre jerarquías de vistas**:
-
 > [!important] Regla de la cadena de vistas (recuadro `(*)` del slide 10)
 > *"(\*) Puede ser otra vista, que debe ser actualizable.*
 > *Si se **si** tienen definidas vistas a partir de vistas : **T→ V1→ V2→ … →Vn***
 > ***Vi será actualizable si Vi-1 lo es** y así sucesivamente"*
 >
-> El *"Si se si tienen"* es un **tipeo del deck**, transcripto tal cual [sic].
->
-> **Razonamiento propio, no está en el deck:** la actualizabilidad se propaga hacia adelante y **se
-> corta en el primer eslabón que falla** — un solo `GROUP BY` en `V2` vuelve no-actualizables a
-> `V3 … Vn`. El slide sólo enuncia la recursión, no saca esta consecuencia.
+> El *"Si se si tienen"* es un tipeo del deck [sic]. **Razonamiento propio:** la actualizabilidad **se
+> corta en el primer eslabón que falla**: un `GROUP BY` en `V2` vuelve no actualizables a `V3 … Vn`.
 
-> [!note] "algún procedimiento específico" es el pie para la clase siguiente
-> El deck no dice cuál. **Razonamiento propio, no está en el deck:** el mecanismo estándar para esto es
-> un **trigger `INSTEAD OF`** sobre la vista, y en MySQL —que **no tiene `INSTEAD OF`**— se resuelve con
-> stored procedures. Muy probablemente sea contenido de [[Clase 07 - Vistas-Parte 2]], donde sigue el tema, o
-> de la clase de triggers más adelante en la cursada. **Confirmar.**
+> [!note] "algún procedimiento específico"
+> El deck no dice cuál. **Razonamiento propio, no está en el deck:** el mecanismo estándar es un
+> **trigger `INSTEAD OF`** sobre la vista; MySQL **no tiene `INSTEAD OF`** y lo resuelve con stored
+> procedures. Probablemente sea contenido de la [[Clase 07 - Vistas-Parte 2]] o de la clase de triggers.
 
 ## Slide 11 · Propiedad de Preservación de Clave
 
-El slide abre con *"**Establece la condición para que una vista sea actualizable:**"*. Dos incisos:
+*"**Establece la condición para que una vista sea actualizable:**"*
 
 1. *"debe tratarse de **una única actualización y del mismo tipo** en la/s tabla/s`(*)` base, cuya clave
-   'heredó' la vista"*
+  'heredó' la vista"*
 2. *"se satisface si **cada fila en la tabla aparece como máximo una vez en la vista**"*
 
-Con las dos aclaraciones de cómo se determina la clave de la vista — el `(*)` es el mismo marcador del
-recuadro del slide 10, o sea *"puede ser otra vista, que debe ser actualizable"*:
+De dónde sale la clave de la vista (el `(*)` es el marcador del slide 10: *"puede ser otra vista, que
+debe ser actualizable"*):
 
 | Tipo de vista | De dónde sale la clave |
 | --- | --- |
@@ -458,28 +388,20 @@ recuadro del slide 10, o sea *"puede ser otra vista, que debe ser actualizable"*
 > *"en una jerarquía de vistas, **basta que una de las vistas involucradas no preserve la clave**, para
 > que esta propiedad ya no se cumpla"*
 
-Y el punto que más cae en parcial:
-
-> [!important] Es una propiedad **del esquema**, no de los datos
+> [!important] Es una propiedad **del esquema**, no de los datos (clave para el parcial)
 > Textual: *"La propiedad **NO depende de los datos actuales en las tablas**, sino que es una **propiedad
-> estructural de su esquema**."*
->
-> Traducción: que hoy, con los datos que hay, cada fila aparezca una sola vez **no alcanza**. Tiene que
-> ser imposible que aparezca dos veces, por cómo está definida la vista. Se decide leyendo el
-> `CREATE VIEW`, sin mirar una sola fila.
+> estructural de su esquema**."* Que hoy cada fila aparezca una sola vez **no alcanza**: tiene que ser
+> imposible por cómo está definida la vista. Se decide leyendo el `CREATE VIEW`, sin mirar una fila.
 
 > [!quote] Genealogía del concepto (línea en rojo al pie del slide 11)
 > *"Este concepto ha sido explicado por distintos autores (ej: **Date**), aplicado por el **estándar
 > SQL** como forma de operar, y popularizado por **Oracle** que lo implementó y denominó propiedad
 > **'key-preserved'** (los SGBD suelen hacer interpretaciones particulares)."*
->
-> El paréntesis final es una advertencia práctica: **cada motor decide un poco distinto**. → duda abierta.
+> El paréntesis final avisa que cada motor decide un poco distinto → duda abierta.
 
 → Página propia del concepto: [[Preservación de clave]].
 
 ## Slide 12 · Vistas Actualizables (a partir de una tabla/vista)
-
-Las **cuatro condiciones del estándar SQL** (el slide las lista con ✓):
 
 > *"Según el estándar SQL, una vista definida sobre una tabla base (u otra vista actualizable) **es
 > actualizable si**:"*
@@ -493,12 +415,8 @@ Las **cuatro condiciones del estándar SQL** (el slide las lista con ✓):
 
 > [!important] El nombre que hay que saber: **vistas σ-π**
 > Textual: *"→ se denominan **vistas σ-π** (se obtienen a partir de **selección** de tuplas y
-> **proyección** de columnas)"*.
->
-> Es decir: una vista es actualizable si su definición se puede escribir usando **sólo** los operadores
-> **σ (selección = `WHERE`)** y **π (proyección = lista del `SELECT`)** del álgebra relacional — y
-> siempre que la π conserve la clave. Cualquier otro operador (agregación, `DISTINCT`, subconsulta en
-> el `SELECT`) la saca de la categoría.
+> **proyección** de columnas)"*. Solo **σ (`WHERE`)** y **π (lista del `SELECT`)**, con la π
+> conservando la clave; agregación, `DISTINCT` o subconsulta en el `SELECT` la sacan de la categoría.
 
 Los tres aclarados finales del slide (el tercero, en rojo):
 
@@ -509,17 +427,15 @@ Los tres aclarados finales del slide (el tercero, en rojo):
 - Nota en rojo: *"Algunos SGBD **soportan otras posibilidades** que las especificadas por el estándar
   SQL."*
 
-> [!warning] El segundo aclarado tiene consecuencia directa sobre el esquema del deck
-> **Todas** las columnas de `PROVEEDOR`, `ENVIO` y `ARTICULO` son `NOT NULL` y ninguna tiene `DEFAULT`.
-> Entonces, **razonamiento propio, no está en el deck:** una vista actualizable que proyecte *sólo
-> algunas* columnas es actualizable para `UPDATE` y `DELETE`, pero **un `INSERT` a través de ella falla
-> siempre** — las columnas no proyectadas quedarían en `NULL` y no lo aceptan. Es exactamente el caso
-> de `PROV_TANDIL` del slide 13, que es ✓ actualizable pero deja afuera `rubro` y `ciudad`.
-> **Verificar en clase**, porque cambia la respuesta de "¿se puede insertar en `PROV_TANDIL`?".
+> [!warning] El segundo aclarado, aplicado al esquema del deck
+> Todas las columnas de las tres tablas son `NOT NULL` sin `DEFAULT`. **Razonamiento propio, no está en
+> el deck:** una vista actualizable que proyecta solo algunas columnas admite `UPDATE` y `DELETE`, pero
+> **un `INSERT` a través de ella falla siempre**: las columnas no proyectadas quedarían en `NULL`. Es el
+> caso de `PROV_TANDIL` del slide 13, ✓ actualizable pero sin `rubro` ni `ciudad`. Verificar en clase.
 
 ## Slide 13 · Los tres ejemplos, con veredicto
 
-El slide marca cada uno con **✓ verde** o **✗ roja** al costado. Esa marca es el contenido del slide.
+El slide marca cada uno con **✓ verde** o **✗ roja** al costado; esa marca es el contenido del slide.
 
 ### ✓ `PROV_TANDIL` — actualizable
 
@@ -527,13 +443,13 @@ El slide marca cada uno con **✓ verde** o **✗ roja** al costado. Esa marca e
 
 ```sql
 CREATE VIEW PROV_TANDIL AS
-    SELECT id_proveedor, nombre
-    FROM PROVEEDOR WHERE ciudad = 'Tandil';
+  SELECT id_proveedor, nombre
+  FROM PROVEEDOR WHERE ciudad = 'Tandil';
 ```
 
-**Por qué ✓:** proyecta `id_proveedor`, que es la **PK de `PROVEEDOR`** → condición ✓1 cumplida. Sin
-agregación, sin `DISTINCT`, sin subconsulta. Es una vista σ-π de manual: σ por `ciudad`, π sobre dos
-columnas que incluyen la clave.
+**Por qué ✓:** proyecta `id_proveedor`, la **PK de `PROVEEDOR`** (condición ✓1); sin agregación, sin
+`DISTINCT`, sin subconsulta. Vista σ-π de manual: σ por `ciudad`, π sobre dos columnas que incluyen la
+clave.
 
 ### ✗ `PROV_COMP` — **no** actualizable
 
@@ -545,16 +461,14 @@ AS SELECT nombre, ciudad
 FROM PROVEEDOR WHERE rubro = 'Computadoras';
 ```
 
-**Por qué ✗:** **no proyecta `id_proveedor`** → viola ✓1. La vista no heredó la clave, así que dos
-proveedores homónimos de la misma ciudad son **indistinguibles** dentro de la vista: un `UPDATE` sobre
-una fila de la vista no tiene forma de saber a cuál de las dos filas base corresponde. Es la ambigüedad
-del slide 9 en su forma más pura.
+**Por qué ✗:** **no proyecta `id_proveedor`** (viola ✓1). Dos proveedores homónimos de la misma ciudad
+son **indistinguibles** en la vista, y un `UPDATE` sobre esa fila no sabe a cuál fila base corresponde:
+la ambigüedad del slide 9 en su forma más pura.
 
-> [!warning] Ojo: es **otra** `PROV_COMP` distinta de la del slide 5
-> El slide 5 definió `PROV_COMP` como `SELECT id_proveedor, nombre, ciudad` (**con** la clave) y el
-> slide 13 la redefine como `SELECT nombre, ciudad` (**sin** la clave). Mismo nombre, distinta
-> definición, distinto veredicto. **El deck reusa el nombre para hacer el contraste** — pero si en el
-> parcial preguntan por "`PROV_COMP`" hay que aclarar cuál. La del slide 5 **sí** preserva la clave.
+> [!warning] Es **otra** `PROV_COMP`, distinta de la del slide 5
+> El slide 5 la definió como `SELECT id_proveedor, nombre, ciudad` (**con** la clave, ✓ preserva) y el
+> slide 13 la redefine como `SELECT nombre, ciudad` (**sin** la clave). El deck reusa el nombre para el
+> contraste; si en el parcial preguntan por "`PROV_COMP`", hay que aclarar cuál.
 
 ### ✗ `TOTAL_ARTICULO` — **no** actualizable
 
@@ -563,24 +477,15 @@ del slide 9 en su forma más pura.
 
 ```sql
 CREATE VIEW TOTAL_ARTICULO (articulo, total) AS
-    SELECT id_articulo, sum(cantidad)
-    FROM ENVIO
-    GROUP BY id_articulo;
+  SELECT id_articulo, sum(cantidad)
+  FROM ENVIO
+  GROUP BY id_articulo;
 ```
 
-**Por qué ✗:** tiene **función de agregación** (`sum`) → viola ✓2. Y además cada fila de la vista
-resume **muchas** filas de `ENVIO`, con lo que la fila base aparece agregada, no *"como máximo una vez"*
-→ tampoco preserva la clave (slide 11). Un `UPDATE … SET total = 700` es **irresolublemente ambiguo**:
-hay infinitas formas de repartir 700 entre los envíos del artículo.
-
-Este ejemplo es también el que justifica la lista de columnas del slide 4: `(articulo, total)` le pone
-nombre al `sum(cantidad)`, que si no quedaría con un nombre generado por el motor.
-
-| Vista | Veredicto | Condición violada |
-| --- | --- | --- |
-| `PROV_TANDIL` | ✓ actualizable | — |
-| `PROV_COMP` *(la del slide 13)* | ✗ | ✓1 — no conserva la clave |
-| `TOTAL_ARTICULO` | ✗ | ✓2 — función de agregación *(y ✓1 por el `GROUP BY`)* |
+**Por qué ✗:** tiene **función de agregación** (`sum`), viola ✓2. Además cada fila de la vista resume
+**muchas** filas de `ENVIO`, así que tampoco preserva la clave (slide 11): un `UPDATE … SET total = 700`
+es **irresolublemente ambiguo**, con infinitas formas de repartir 700 entre los envíos del artículo.
+La lista `(articulo, total)` le pone nombre al `sum(cantidad)` (regla del slide 4).
 
 ## Slide 14 · ¿Migración de Tuplas?
 
@@ -589,8 +494,8 @@ nombre al `sum(cantidad)`, que si no quedaría con un nombre generado por el mot
 
 ```sql
 CREATE VIEW PROV_TANDIL AS
-    SELECT * FROM PROVEEDOR
-    WHERE ciudad = 'Tandil';
+  SELECT * FROM PROVEEDOR
+  WHERE ciudad = 'Tandil';
 ```
 
 > *"¿Cuál sería el resultado de la siguiente operación?"*
@@ -605,31 +510,21 @@ La respuesta, textual del slide:
 > diferente a Tandil…"*
 > *"→ y entonces **dejarían de pertenecer a la vista** (migración de tuplas de la vista)"*
 
-> [!important] El chiste del ejemplo
-> La vista es **perfectamente actualizable** (es `SELECT *`, conserva la clave, es σ-π pura). El
-> `UPDATE` se ejecuta sin error. Y sin embargo el resultado es absurdo: **la vista queda vacía** y las
-> filas se fueron a Azul. La actualizabilidad no alcanza — hace falta un segundo mecanismo.
+> [!important] El punto del ejemplo
+> La vista es **perfectamente actualizable** (`SELECT *`, conserva la clave, σ-π pura) y el `UPDATE`,
+> sin `WHERE`, se ejecuta sin error sobre todas las filas de Tandil. Resultado: **la vista queda vacía**.
+> La actualizabilidad no alcanza; hace falta un segundo mecanismo.
 >
-> Nótese además que este `UPDATE` **no tiene `WHERE`**: afecta a *todas* las filas de la vista, que son
-> todas las de Tandil.
-
-> [!note] `PROV_TANDIL` cambia de definición otra vez
-> Slide 13: `SELECT id_proveedor, nombre FROM PROVEEDOR WHERE ciudad='Tandil'`.
-> Slide 14: `SELECT * FROM PROVEEDOR WHERE ciudad='Tandil'`.
-> Mismo nombre, dos definiciones. Con la del slide 13 el `UPDATE … SET ciudad` ni siquiera compilaría,
-> porque `ciudad` no está proyectada — por eso el slide 14 la redefine con `*`. **Transcripto tal cual.**
+> `PROV_TANDIL` cambia de definición otra vez. Slide 13: `SELECT id_proveedor, nombre FROM PROVEEDOR
+> WHERE ciudad='Tandil'`. Slide 14: `SELECT * FROM PROVEEDOR WHERE ciudad='Tandil'`. Con la del slide 13
+> el `UPDATE … SET ciudad` ni compilaría (`ciudad` no está proyectada); por eso el slide 14 la redefine
+> con `*`. Transcripto tal cual.
 
 ## Slide 15 · Vistas con Opción de Chequeo (WCO)
 
 > *"**Solución a la migración de tuplas** → incluir la cláusula `WITH CHECK OPTION` (WCO)"*
 
-Vuelve a mostrar la sintaxis completa, ahora con la tercera línea resaltada:
-
-```sql
-CREATE VIEW nom_vista [(n_col_1, …, n_col_n)]
-AS expresión_consulta
-[WITH [opción] CHECK OPTION];
-```
+Repite la sintaxis del slide 4 con la tercera línea (`[WITH [opción] CHECK OPTION]`) resaltada.
 
 > *"Si se especifica WCO → **una actualización sobre la vista procede si satisface la condición de
 > consulta que la define** (se rechaza cualquier inserción o actualización que haga migrar una tupla de
@@ -645,17 +540,15 @@ Dos notas finales del slide:
 - **"Sólo está soportado en vistas automáticamente actualizables"** *(resaltado en el slide).*
 - Nota en rojo: *"**Date recomienda usar WCO en vistas actualizables y critica la opción 'local'**."*
 
-> [!tip] Por qué Date critica `LOCAL`
-> **Razonamiento propio, no está en el deck:** con `LOCAL` una actualización puede satisfacer la
-> condición de la vista sobre la que se opera y **violar la de la vista de abajo**, con lo que la tupla
-> migra igual — sólo que un nivel más abajo. `LOCAL` no elimina la migración, la esconde. El ejercicio
-> del slide 17 es exactamente esa situación. **Confirmar el razonamiento contra Date.**
+> [!tip] Por qué Date critica `LOCAL` (razonamiento propio, no está en el deck)
+> Con `LOCAL` una actualización puede satisfacer la condición de la vista sobre la que se opera y
+> **violar la de la vista de abajo**: la tupla migra igual, un nivel más abajo. `LOCAL` no elimina la
+> migración, la esconde. El ejercicio del slide 17 es exactamente esa situación. Confirmar contra Date.
 
 > [!success] Motor: acá MySQL sí acompaña
-> **MySQL soporta `WITH CASCADED CHECK OPTION` y `WITH LOCAL CHECK OPTION`, y el default es
-> `CASCADED`** — igual que el estándar y que el slide. Este pedazo del deck se puede probar tal cual en
-> la cursada. (El único cuidado: hay que definir la vista sobre una vista/tabla actualizable, como dice
-> el slide.)
+> **MySQL soporta `WITH CASCADED CHECK OPTION` y `WITH LOCAL CHECK OPTION`, con `CASCADED` por
+> defecto**, igual que el estándar y que el slide. Se puede probar tal cual en la cursada, siempre sobre
+> una vista/tabla actualizable.
 
 ## Slide 16 · Ejercicio 1 — `Envios500` con y sin WCO
 
@@ -677,9 +570,8 @@ INSERT INTO Envios500 VALUES ('P2', 'A2', 300);
 UPDATE Envios500 SET cantidad=100 WHERE id_proveedor= 'P1';
 ```
 
-> [!question] El deck **no da las respuestas**
-> El slide plantea el ejercicio y termina. Lo que sigue es **razonamiento propio, no está en el deck** —
-> **verificar en clase o en el TP4.**
+El deck **no da las respuestas**; la tabla es **razonamiento propio, no está en el deck**, a verificar
+en clase o en el TP4.
 
 | Operación | Sin WCO | Con WCO |
 | --- | --- | --- |
@@ -687,18 +579,14 @@ UPDATE Envios500 SET cantidad=100 WHERE id_proveedor= 'P1';
 | `INSERT … ('P2','A2',300)` | **Procede** sobre `ENVIO`, pero `300 < 500` → la fila **se inserta y desaparece**: no es visible en la vista que la insertó | **Se rechaza.** Es el caso *"cualquier inserción … que haga migrar una tupla"* |
 | `UPDATE … SET cantidad=100 WHERE id_proveedor='P1'` | **Procede.** Las filas de P1 pasan a 100 y **migran fuera** de la vista | **Se rechaza:** `100 < 500` viola la condición |
 
-> [!note] Detalles de integridad que el ejercicio no menciona
-> **Razonamiento propio:** los dos `INSERT` van a parar a `ENVIO`, que tiene `id_proveedor` e
-> `id_articulo` como **FK**. Si `'P2'` no existe en `PROVEEDOR` o `'A2'` no existe en `ARTICULO`, la
-> inserción falla por **violación de FK antes de cualquier consideración sobre la vista** — es el caso
-> *"siempre que no se viole ninguna restricción de integridad"* del slide 12. Lo mismo con la PK
-> compuesta `(id_proveedor, id_articulo)`: si `('P1','A1')` ya existía, el primer `INSERT` falla por
-> clave duplicada. El slide 17 asume que esa fila **sí** existe.
-
-> [!tip] El caso "sin WCO" del segundo `INSERT` es el más contraintuitivo
-> Insertás una fila **a través de la vista** y después `SELECT * FROM Envios500` **no te la muestra**.
-> No se perdió: está en `ENVIO`. Simplemente nunca perteneció a la vista. Es el mejor argumento a favor
-> de poner WCO siempre — que es lo que recomienda Date según el slide 15.
+> [!note] Detalles de integridad que el ejercicio no menciona (razonamiento propio)
+> `ENVIO` tiene `id_proveedor` e `id_articulo` como **FK** y como PK compuesta: si `'P2'` o `'A2'` no
+> existen, o `('P1','A1')` ya existía, el `INSERT` falla por integridad **antes de cualquier
+> consideración sobre la vista** (el aclarado del slide 12). El slide 17 asume que `('P1','A1')` **sí**
+> existe.
+> El caso "sin WCO" del segundo `INSERT` es el más contraintuitivo: la fila se inserta **a través de la
+> vista** y `SELECT * FROM Envios500` **no la muestra**; está en `ENVIO`, pero nunca perteneció a la
+> vista. Es el mejor argumento para poner WCO siempre, como recomienda Date (slide 15).
 
 ## Slide 17 · Ejercicio 2 — `CASCADED` vs. `LOCAL`
 
@@ -722,8 +610,7 @@ CREATE VIEW Envios500-999 AS
 > *- `CASCADED` WCO?*
 > *- `LOCAL` WCO?"*
 
-El `UPDATE`, **transcripto literalmente del slide** (ver el `[!bug]` de abajo — así como está no
-compila):
+El `UPDATE`, **transcripto literalmente del slide** (así como está no compila; ver el `[!bug]`):
 
 ```sql
 UPDATE Envios500-999 SET cantidad= 300 where
@@ -731,56 +618,39 @@ UPDATE Envios500-999 SET cantidad= 300 where
 ```
 
 > [!bug] Cuatro errores en el slide 17
-> 1. **`FROM ENVIO500`** — le falta la `S`. La vista se llama **`Envios500`**. Tal como está escrito,
->    referencia una relación inexistente.
+> 1. **`FROM ENVIO500`**: le falta la `S`. La vista se llama **`Envios500`**; tal como está, referencia
+> una relación inexistente.
 > 2. **`Envios500-999` como nombre de vista.** El guion es el **operador de resta** en SQL: un
->    identificador sin comillar no puede contenerlo. Para que funcione habría que escribirlo
->    `` `Envios500-999` `` (MySQL, backticks) o `"Envios500-999"` (estándar/PostgreSQL), o renombrarla
->    `Envios500_999`. **Verificar en clase** — probablemente sea sólo notación informal del slide, pero
->    en el TP4 hay que escribirlo bien.
-> 3. **El paréntesis de cierre quedó *adentro* del literal.** El slide escribe
->    `id_articulo = ‘A1 )’;` — o sea: espacio, paréntesis y recién ahí la comilla de cierre. Comparado
->    con lo que evidentemente se quiso escribir (`id_articulo = 'A1');`), el literal pasó de `'A1'` a
->    `'A1 )'` y el `where (…` **nunca se cierra**. Tal cual está, la sentencia es un error de sintaxis,
->    y aunque se cerrara el paréntesis a mano compararía `id_articulo` contra la cadena `A1 )`, que no
->    existe en `ENVIO`. **La versión que hay que usar en el TP4 es**
->    `... where (id_proveedor = 'P1' and id_articulo = 'A1');`.
-> 4. El texto del slide alterna `ENVIOS500` / `Envios500` / `ENVIO500` para la misma vista, y arrastra
->    un `ENVIOS500-999_con` con guion bajo pegado al "con" (probablemente un subrayado del original).
+> identificador sin comillar no puede contenerlo. Habría que escribir `` `Envios500-999` `` (MySQL,
+> backticks), `"Envios500-999"` (estándar/PostgreSQL) o renombrarla `Envios500_999`. Probablemente sea
+> notación informal del slide, pero en el TP4 hay que escribirlo bien.
+> 3. **El paréntesis de cierre quedó *adentro* del literal.** El slide escribe `id_articulo = ‘A1 )’;`:
+> el literal pasó de `'A1'` a `'A1 )'` y el `where (…` **nunca se cierra**. Es un error de sintaxis, y
+> aun cerrando el paréntesis a mano compararía contra la cadena `A1 )`, que no existe en `ENVIO`.
+> **La versión que hay que usar en el TP4 es** `... where (id_proveedor = 'P1' and id_articulo = 'A1');`.
+> 4. El texto alterna `ENVIOS500` / `Envios500` / `ENVIO500` para la misma vista, y arrastra un
+> `ENVIOS500-999_con` con guion bajo pegado al "con" (probablemente un subrayado del original).
 
-> [!question] El deck tampoco da esta respuesta
-> Lo que sigue es **razonamiento propio, no está en el deck** — **verificar en clase.**
-
-Hay **dos condiciones** en juego sobre la cadena `ENVIO → Envios500 → Envios500-999`:
-
-| Vista | Su condición propia |
-| --- | --- |
-| `Envios500` | `cantidad >= 500` |
-| `Envios500-999` | `cantidad < 1000` |
-
-El `UPDATE` pone `cantidad = 300`. Entonces:
+El deck tampoco da esta respuesta; lo que sigue es **razonamiento propio, no está en el deck**. Sobre
+la cadena `ENVIO → Envios500 → Envios500-999` hay dos condiciones, `cantidad >= 500` (propia de
+`Envios500`) y `cantidad < 1000` (propia de `Envios500-999`), y el `UPDATE` pone `cantidad = 300`:
 
 | Definición de `Envios500-999` | Qué se chequea | Resultado |
 | --- | --- | --- |
 | **`WITH CASCADED CHECK OPTION`** | `cantidad < 1000` **y** `cantidad >= 500` *(la de la vista subyacente)* | `300 < 1000` ✓ pero `300 >= 500` ✗ → **la operación se RECHAZA** |
-| **`WITH LOCAL CHECK OPTION`** | **sólo** `cantidad < 1000` | `300 < 1000` ✓ → **la operación PROCEDE** … y la tupla **migra**: desaparece de `Envios500-999` **y** de `Envios500`, porque ya no cumple `>= 500` |
+| **`WITH LOCAL CHECK OPTION`** | **solo** `cantidad < 1000` | `300 < 1000` ✓ → **la operación PROCEDE** … y la tupla **migra**: desaparece de `Envios500-999` **y** de `Envios500`, porque ya no cumple `>= 500` |
 
-> [!important] Esta es la crítica de Date a `LOCAL`, hecha ejemplo
-> Con `LOCAL`, el WCO **no cumple su promesa**: la tupla migra igual. Se puso una opción de chequeo y
-> la tupla se fue lo mismo. Por eso `CASCADED` es el default del estándar y por eso Date dice que
-> `LOCAL` no debería usarse (slide 15).
->
-> **Regla mnemotécnica:** `CASCADED` chequea **toda la cadena hacia abajo**; `LOCAL` chequea **un solo
-> eslabón**. Si la vista se apoya en otras vistas con filtros, `LOCAL` es un agujero.
+> [!important] La crítica de Date a `LOCAL`, hecha ejemplo
+> Con `LOCAL` el WCO **no cumple su promesa**: la tupla migra igual. Por eso `CASCADED` es el default
+> del estándar y Date dice que `LOCAL` no debería usarse (slide 15). Regla mnemotécnica: `CASCADED`
+> chequea **toda la cadena hacia abajo**; `LOCAL`, **un solo eslabón**.
 
-> [!warning] Matiz del estándar que el slide simplifica
+> [!warning] Matiz del estándar que el slide simplifica (razonamiento propio)
 > El slide define `LOCAL` como *"sólo se chequean contra las condiciones definidas en la misma vista"*.
-> **Razonamiento propio:** en el estándar SQL, `LOCAL` chequea la condición de la vista **más** las
-> condiciones de las vistas subyacentes **que a su vez estén definidas `WITH CHECK OPTION`** — y en este
-> ejercicio `Envios500` se definió **sin** WCO, con lo que el resultado coincide con la lectura
-> simplificada del slide. Pero **no siempre coincide**. Si `Envios500` tuviera su propio WCO, el
-> resultado de la fila `LOCAL` cambiaría. **Verificar en clase cuál de las dos definiciones se toma como
-> válida para el parcial**, porque cambia respuestas.
+> En el estándar SQL, `LOCAL` chequea la condición de la vista **más** las de las vistas subyacentes
+> **que a su vez estén definidas `WITH CHECK OPTION`**. Acá `Envios500` se definió **sin** WCO, así que
+> el resultado coincide con la lectura del slide; si `Envios500` tuviera su propio WCO, la fila `LOCAL`
+> cambiaría. Verificar cuál de las dos definiciones vale para el parcial.
 
 ---
 
@@ -807,40 +677,27 @@ El `UPDATE` pone `cantidad = 300`. Entonces:
 
 ## Dudas abiertas
 
-- [ ] **¿`PROV_COMP_TANDIL` o `PR_COMP_TANDIL`?** El slide 5 crea la primera, los slides 6 y 7 usan la
-      segunda. Tal como está, el segundo `CREATE VIEW` del slide 6 no compila.
-- [ ] **¿Cuál `PROV_COMP` vale?** Slide 5: `SELECT id_proveedor, nombre, ciudad` (preserva la clave ✓).
-      Slide 13: `SELECT nombre, ciudad` (✗). Y `PROV_TANDIL` también tiene dos definiciones
-      (slides 13 y 14). Si en el parcial nombran una vista, hay que preguntar cuál.
-- [ ] **Respuestas del ejercicio del slide 16** — el deck lo deja planteado. Mi tabla está arriba,
-      **sin confirmar**.
-- [ ] **Respuestas del ejercicio del slide 17** (`CASCADED` vs. `LOCAL`) — ídem.
-- [ ] **¿La definición de `LOCAL` del slide 15 es la del estándar?** El estándar chequea también las
-      vistas subyacentes *que tengan WCO*; el slide dice *"sólo… la misma vista"*. Con el ejemplo del
-      slide 17 da igual, pero no en general. **Cuál se toma para el parcial.**
-- [ ] **`Envios500-999` con guion** — ¿es sólo notación del slide o hay que comillarlo? En MySQL sería
-      `` `Envios500-999` ``.
-- [ ] **El `UPDATE` del slide 17 no compila**: el paréntesis de cierre quedó adentro del literal
-      (`id_articulo = 'A1 )';`) y el `where (` nunca se cierra. Asumo que la intención es
-      `id_articulo = 'A1'` y que el paréntesis va afuera — **confirmar en clase** antes de usarlo como
-      enunciado del TP4.
-- [ ] **¿Se puede hacer `INSERT` a través de `PROV_TANDIL`?** Es ✓ actualizable pero no proyecta `rubro`
-      ni `ciudad`, que son `NOT NULL` sin `DEFAULT`. Mi lectura del slide 12 dice que el `INSERT` falla
-      y el `UPDATE`/`DELETE` no. **Confirmar.**
-- [ ] **`DROP VIEW … RESTRICT` en MySQL** — la doc estándar dice una cosa y MySQL las ignora. Confirmar
-      contra la versión que use la cátedra, porque afecta el TP4.
-- [ ] **¿Qué es el "procedimiento específico"** del slide 10 para actualizar vistas no actualizables?
-      ¿Triggers `INSTEAD OF`? MySQL no los tiene. ¿Es contenido de la [[Clase 07 - Vistas-Parte 2]] o de la
-      clase de triggers, más adelante en la cursada?
-- [ ] **¿Cómo se determina la clave de una vista de ensamble?** El slide 11 dice *"la de **alguna** de
-      las tablas"*, sin decir cuál ni qué pasa si son varias. En `PROV_ENVIOS_TANDIL` (slide 6), ¿la
-      clave es la de `PROVEEDOR` o la de `ENVIO`?
-- [ ] **¿Qué "interpretaciones particulares" hace MySQL** de la propiedad key-preserved? El slide 11
-      avisa que los SGBD difieren pero no dice cómo.
-- [ ] **Conseguir Sumathi & Esakkirajan (2007)** — la cátedra cita el diagrama de tres niveles de ahí y
-      la fuente **no está en el vault**.
-- [ ] **¿Las vistas materializadas entran en el parcial?** Aparecen dos veces (slides 3 y 8) pero MySQL
-      no las soporta, así que no se pueden practicar. ¿Se desarrollan en la [[Clase 07 - Vistas-Parte 2]]?
+- [ ] ¿`PROV_COMP_TANDIL` (slide 5) o `PR_COMP_TANDIL` (slides 6 y 7)?
+- [ ] ¿Cuál `PROV_COMP` vale? Slide 5: con clave (✓). Slide 13: sin clave (✗). `PROV_TANDIL` también
+  tiene dos definiciones (slides 13 y 14).
+- [ ] Respuestas de los ejercicios del slide 16 y del slide 17: las tablas de arriba son propias, sin
+  confirmar.
+- [ ] ¿La definición de `LOCAL` del slide 15 es la del estándar (que chequea también las vistas
+  subyacentes con WCO)? Cuál se toma para el parcial.
+- [ ] `Envios500-999` con guion: ¿notación del slide o hay que comillarlo (`` `Envios500-999` `` en MySQL)?
+- [ ] El `UPDATE` del slide 17: confirmar que la intención es `id_articulo = 'A1'` con el paréntesis
+  afuera antes de usarlo en el TP4.
+- [ ] ¿Se puede hacer `INSERT` a través de `PROV_TANDIL`, que no proyecta `rubro` ni `ciudad`
+  (`NOT NULL` sin `DEFAULT`)?
+- [ ] `DROP VIEW … RESTRICT` en MySQL: confirmar contra la versión de la cátedra; afecta el TP4.
+- [ ] ¿Qué es el "procedimiento específico" del slide 10? ¿Triggers `INSTEAD OF` (MySQL no los tiene)?
+  ¿Es contenido de la [[Clase 07 - Vistas-Parte 2]] o de la clase de triggers?
+- [ ] ¿Cómo se determina la clave de una vista de ensamble? El slide 11 dice *"la de **alguna** de las
+  tablas"*. En `PROV_ENVIOS_TANDIL` (slide 6), ¿es la de `PROVEEDOR` o la de `ENVIO`?
+- [ ] ¿Qué "interpretaciones particulares" hace MySQL de la propiedad key-preserved (slide 11)?
+- [ ] Conseguir Sumathi & Esakkirajan (2007): la cátedra cita su diagrama y no está en el vault.
+- [ ] ¿Las vistas materializadas entran en el parcial? Aparecen en los slides 3 y 8 y MySQL no las
+  soporta. ¿Se desarrollan en la [[Clase 07 - Vistas-Parte 2]]?
 
 ## Enlaces
 
