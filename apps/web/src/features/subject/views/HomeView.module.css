@@ -269,9 +269,11 @@
 .actRead {
   border-color: color-mix(in srgb, var(--ucol) 50%, var(--border));
   background: color-mix(in srgb, var(--ucol) 8%, var(--surface));
-  color: var(--ucol);
+  /* El rótulo «Leer» es TEXTO: tinta de la unidad, no la mancha (con --ucol
+     crudo, U6 medía 3,42:1 a 1440 px en pergamino; auditoría 2026-09-19). */
+  color: var(--uink, var(--ucol));
 }
-.actRead:hover { background: color-mix(in srgb, var(--ucol) 15%, var(--surface)); border-color: var(--ucol); color: var(--ucol); }
+.actRead:hover { background: color-mix(in srgb, var(--ucol) 15%, var(--surface)); border-color: var(--ucol); color: var(--uink, var(--ucol)); }
 
 .actLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
