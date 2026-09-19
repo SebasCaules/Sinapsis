@@ -131,7 +131,7 @@
 /* Chip mono de la división: solo en las pestañas que son una página del wiki. */
 .tabChip {
   flex: none;
-  font: 600 9.5px var(--font-mono);
+  font: 600 10.5px var(--font-mono);
   color: var(--uink, var(--ucol));
   border: 1px solid var(--ucol);
   border-radius: 4px;
@@ -212,6 +212,10 @@
   color: var(--text-3);
   cursor: pointer;
   transition: background var(--t), color var(--t);
+}
+/* Con el pulgar, tan alto como la pestaña (30 px). */
+@media (pointer: coarse) {
+  .addTab { width: 30px; height: 30px; margin-top: 10px; }
 }
 .addTab svg { display: block; }
 .addTab:hover { background: var(--hover-wash); color: var(--text); }

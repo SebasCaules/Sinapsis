@@ -139,5 +139,5 @@ test("⌘⇧] pasa a la pestaña siguiente", async ({ page }) => {
 
   await expect(tabs(page).nth(0)).toHaveAttribute("aria-selected", "true");
   await expect(page).toHaveURL(new RegExp(`${home}$`));
-  await expect(page.getByRole("heading", { name: "Progreso", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Progreso", level: 2 })).toBeVisible();
 });

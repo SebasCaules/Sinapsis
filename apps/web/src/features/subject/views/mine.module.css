@@ -182,7 +182,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font: 500 10px var(--font-mono);
+  font: 500 10.5px var(--font-mono);
   letter-spacing: 0.05em;
   color: var(--good-text);
 }
@@ -245,7 +245,7 @@
 
 .noteChip {
   flex: none;
-  font: 600 9.5px var(--font-mono);
+  font: 600 10.5px var(--font-mono);
   color: var(--uink, var(--ucol));
   border: 1px solid var(--ucol);
   border-radius: 4px;
@@ -383,7 +383,7 @@
 }
 
 .scratchState {
-  font: 500 9.5px var(--font-mono);
+  font: 500 10.5px var(--font-mono);
   color: var(--good-text);
   opacity: 0;
   transition: opacity var(--t);

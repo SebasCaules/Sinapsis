@@ -100,7 +100,7 @@
              mismo valor que --border-3 y se mide también sobre --bg y --elevated:
                  pergamino  #8a7c5f → 3.21 (--bg) · 3.77 (--surface) · 3.92 (--elevated)
                  laurel     #7e8161 → 3.21 · 3.73 · 3.83
-                 claustro   #847557 → 4.15 · 3.88 · 3.10
+                 claustro   #8b7d61 → 4.65 · 4.35 · 3.48 (3.02 bajo el grano; ver el bloque de Claustro)
    ============================================================ */
 
 /* ============================================================
@@ -224,18 +224,30 @@
 [data-theme="claustro"], [data-theme="dark"] {
   --bg:#15120c; --bg-2:#100e08;
   --surface:#1e1910; --surface-2:#251f14; --surface-3:#2d2618; --elevated:#332b1b;
-  --text:#ece2cd; --text-2:#bcae93; --text-3:#a1957b;
+  --text:#ece2cd; --text-2:#bcae93; --text-3:#ada38c;
+  /* EL GRANO CUENTA (auditoría 2026-09-19). En Claustro la capa `.grain` de AppRoot va
+     ENCIMA del texto (screen al 22 %, ruido medio 93/255, p84 116/255) y aclara más el
+     fondo que la tinta: lo que el CSS mide en 4,73:1 se ve en 4,09 (media) y 3,93 (p84).
+     Por eso --text-3, --accent-ink, --umeta-ink, --good-ink, --border-3 y --track se
+     eligen para pasar su piso BAJO el grano en el peor píxel razonable (p84), no en el
+     CSS crudo:
+         --text-3     #a1957b → #ada38c  5,58 CSS · 4,54 bajo grano (sobre --elevated)
+         --accent-ink #d68a72 → #d9927c  5,57 · 4,50
+         --umeta-ink  #a1977f → #aba28d  5,54 · 4,51
+         --good-ink   #76b267 → #77b369  5,61 · 4,54
+         --border-3   #847557 → #8b7d61  3,48 · 3,02  (piso 3:1, WCAG 1.4.11)
+     Medido con la textura real dibujada en un canvas (no con una estimación). */
   /* Bordes subidos (N0-67): con #322a1a el borde era invisible sobre --elevated (1.01:1) y
      tenue sobre --surface (1.23): menús, diálogos, tablas y chips perdían su delimitación.
      Ahora --border 1.71 sobre --surface / 1.37 sobre --elevated; --border-2 2.34 / 1.87. */
   --border:#4a4028; --border-2:#5f5439;
-  --border-3:#847557; /* única señal (N0-67): 4.15 sobre --bg · 3.88 sobre --surface · 3.10 sobre --elevated */
-  --track:#847557;   /* pista de progreso = --border-3 (antes #786a4b: 2.64 sobre la hoja --elevated) */
+  --border-3:#8b7d61; /* única señal (N0-67): 4.65 sobre --bg · 4.35 sobre --surface · 3.48 sobre --elevated (3.02 bajo el grano) */
+  --track:#8b7d61;   /* pista de progreso = --border-3 (antes #786a4b: 2.64 sobre la hoja --elevated) */
   --scroll-thumb:rgba(200,180,140,.30); --scroll-thumb-hover:rgba(200,180,140,.55);
   /* en el tema oscuro los colores de unidad ya contrastan: la tinta es casi el
      mismo color (el 8 % de --text solo levanta el azul y el rosa) */
   --ink-mix:72%;     /* antes 92 %: el color casi crudo no llegaba a 4.5:1 sobre la hoja (--elevated): --u2 4.11, --u5 4.10, --u3 4.37; con 72 % todos ≥ 5.1 */
-  --accent-ink:#d68a72; /* 5.15 sobre --elevated (antes #c77963: 4.22) */ --ueval-ink:#d1a653; --umeta-ink:#a1977f; --warn-ink:#ddab53; --good-ink:#76b267;
+  --accent-ink:#d9927c; /* 5.57 sobre --elevated, 4.50 bajo el grano (antes #d68a72: 5.15 / 4.39) */ --ueval-ink:#d1a653; --umeta-ink:#aba28d; --warn-ink:#ddab53; --good-ink:#77b369;
   --primary:#c79a4e; --primary-2:#d8ac5e; --primary-soft:#2c2313; --primary-ring:rgba(199,154,78,.32);
   --accent:#c4705a; --accent-soft:#2e1c15;
   --link:#d2a85c; --link-soft:#2c2313;

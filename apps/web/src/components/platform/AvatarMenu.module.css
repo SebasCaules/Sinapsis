@@ -14,6 +14,10 @@
   box-shadow: var(--relief), var(--shadow-ctrl);
   transition: box-shadow var(--t), filter var(--t);
 }
+/* Con el pulgar, 34 px (la cabecera mide 40). */
+@media (pointer: coarse) {
+  .avatar { width: 34px; height: 34px; }
+}
 .avatar:hover { filter: brightness(1.08); }
 .avatar:focus-visible {
   outline: 2px solid var(--primary);
@@ -21,7 +25,7 @@
   box-shadow: var(--relief), var(--shadow-ctrl), 0 0 0 5px var(--primary-ring);
 }
 .initials {
-  font: 600 9.5px/1 var(--font-mono);
+  font: 600 10.5px/1 var(--font-mono);
   color: var(--on-primary);
   letter-spacing: .02em;
 }
@@ -78,7 +82,7 @@
    este navegador. */
 
 .eyebrow {
-  font: 600 9px var(--font-ui);
+  font: 600 10.5px var(--font-ui);
   letter-spacing: .12em;
   color: var(--text-3);
 }

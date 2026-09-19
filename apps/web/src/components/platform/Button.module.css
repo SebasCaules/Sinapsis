@@ -86,6 +86,11 @@
   box-shadow: var(--relief);
   transition: background var(--t), color var(--t), border-color var(--t);
 }
+/* Con el pulgar (pantalla táctil), 34 px: entra en la cabecera de 40 sin
+   cambiar la geometría del ratón. */
+@media (pointer: coarse) {
+  .icon { width: 34px; height: 34px; }
+}
 .icon:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
 .icon:focus-visible {
   outline: 2px solid var(--primary);

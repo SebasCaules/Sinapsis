@@ -85,6 +85,10 @@ export function HomeView() {
 
   return (
     <div className={css.view}>
+      {/* El encabezado de la página, para quien navega por encabezados: igual
+          que el <title>. En pantalla ya lo dicen la cabecera y el hero del
+          índice, así que no se dibuja (auditoría 2026-09-19). */}
+      <h1 className={css.srOnly}>Inicio · {model.config.name}</h1>
       {/* El orden de la pantalla es el del estudio: primero lo que se consulta
           siempre (evaluación y formularios), después el plan de la modalidad
           elegida, y recién entonces el programa con sus accesos. */}
@@ -147,9 +151,9 @@ function ProgressSection({ model, slug, study }: { model: SubjectModel; slug: st
   return (
     <section className={css.progress} aria-labelledby="home-progress">
       <div className={css.progressHead}>
-        <h1 className={css.h1} id="home-progress">
+        <h2 className={css.progressTitle} id="home-progress">
           Progreso
-        </h1>
+        </h2>
         <span className={css.progressNum}>
           {showPct ? <b className={css.progressPct}>{pct}%</b> : null}
           <span className={css.progressCount}>

@@ -63,6 +63,10 @@
   background: var(--surface);
   border-right: 1px solid var(--border);
 }
+/* En teléfono el rail vive en el cajón (Rail.module.css): el armazón tampoco lo dibuja. */
+@media (max-width: 720px) {
+  .railGhost { display: none; }
+}
 
 .sealRow {
   height: 40px;

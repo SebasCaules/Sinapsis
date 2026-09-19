@@ -46,6 +46,14 @@
   max-width: 260px;
 }
 a.link:hover { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
+/* El mismo anillo que el resto del shell: sin esta regla el enlace caía al
+   `outline: auto` del navegador (auditoría 2026-09-19). */
+a.link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-radius: 4px;
+  color: var(--text-2);
+}
 
 .current {
   color: var(--text-2);
