@@ -26,160 +26,122 @@ estado: procesado
 
 # Clase 11 — Seguridad, transacciones ACID y concurrencia (más un tercer bloque de índices)
 
+## Resumen general
+
+Última teórica de la mitad relacional, del 07/09, con el TP 8 Seguridad del 08/09. El deck trae tres bloques en 38 slides y anuncia dos. **Seguridad** *(slides 2–13)*: amenazas, niveles, autenticación vs. autorización y la sintaxis MySQL de cuentas y privilegios: `CREATE USER 'u'@'host'`, `GRANT … ON base.tabla TO … [WITH GRANT OPTION]`, `CREATE ROLE`, `REVOKE`, `FLUSH PRIVILEGES`. **Transacciones y concurrencia** *(slides 14–30)*: ACID, estados, las anomalías *(lost update, dirty read, non-repeatable read, phantom)*, tres mecanismos de control *(locking, optimista, timestamps)*, los niveles de aislamiento y dos ejemplos en SQL Server y PostgreSQL. **Índices** *(slides 31–38)*, sin anuncio: ordenados vs. asociativos, con y sin agrupación, multinivel, `CREATE INDEX` y B-tree vs. hash según el manual de MySQL.
+
+Es el primer deck de la unidad escrito en MySQL por defecto y el que menos alcanza para su TP, que pide grafos de permisos, privilegios por columna y `REVOKE … CASCADE` "desde la teoría", ausentes de los slides; hace falta GMUW 10.1.4–10.1.6.
+
+Trampas: una cuenta MySQL es `'usuario'@'host'` —no "usuario y contraseña", slide 8— y en Docker hace falta `'%'`. `FLUSH PRIVILEGES` tras un `GRANT` es innecesario; conceder un rol no lo activa sin `SET DEFAULT ROLE`. `REVOKE` no cascadea en MySQL. El slide 30 llama "control de versiones" a un `SELECT … FOR UPDATE`, que es un bloqueo. InnoDB arranca en `REPEATABLE READ` y, contra la tabla del estándar, en la práctica no muestra phantoms. `DROP INDEX` exige `ON tabla`, y `USING HASH` sobre InnoDB se ignora: crea un B-tree.
+
+Para el parcial: la tabla ACID *(la C no la garantiza el motor)*, la de anomalías por nivel de aislamiento, la matriz S/X, fila vs. conjunto en non-repeatable vs. phantom, B-tree *(igualdad y rango, prefijo de `LIKE`)* vs. hash *(solo igualdad, clave completa)* y el cuadro de bolsillo.
+
+## Ficha del deck
+
 > [!info] Fuente
 > `raw/Unidad-01/Teorica/BD2_Clase 11 - Seguridad-Transacciones.pdf` · **38 slides** · **7 imágenes
 > embebidas**, ninguna con contenido técnico salvo el **diagrama de estados del slide 20** *(las otras
-> seis son adornos: el triángulo de advertencia del 3, la casa encadenada del 4, los tres usuarios
-> del 10, el usuario con tres monitores del 14, el cilindro roto del 15 y la mano señalando del 31)*.
-> El slide 1 es la **portada**; el recorrido de abajo arranca en el 2 y llega al 38. **No hay slide
-> de agenda, no hay slide de bibliografía y no hay slide de cierre con links** *(el deck termina en
-> seco con un `CREATE INDEX`)*.
-> Dictado en la **teórica del lunes 07/09**. El `11` del nombre del archivo **es el número de clase**:
-> la cátedra numera sus decks y ésa es la única numeración de clases que existe.
-> Tema oficial según [[_cronograma]] *(fila 2026-09-07)*: ***"Seguridad en Bases de Datos.
-> Transacciones ACID · Implementación de matriz de roles y permisos"***.
-> Clase anterior: [[Clase 10 - Restricciones integridad-Parte 2]] *(del 31/08)*. Clase siguiente:
-> [[Clase 12 - Introduccion a NoSQL]] *(del 14/09 — el salto a la segunda mitad)*.
-> Se practica con el **TP 8 Seguridad** del martes 08/09 → [[Práctica 2026-09-08]].
+> seis son adornos, en los slides 3, 4, 10, 14, 15 y 31)*. El slide 1 es la **portada**; **no hay slide
+> de agenda, ni de bibliografía, ni de cierre**: el deck termina en seco con un `CREATE INDEX`.
+> Dictado en la **teórica del lunes 07/09**; el `11` del nombre del archivo es el número de clase que
+> asigna la cátedra. Tema oficial según [[_cronograma]] *(fila 2026-09-07)*: ***"Seguridad en Bases de
+> Datos. Transacciones ACID · Implementación de matriz de roles y permisos"***.
+> Clase anterior: [[Clase 10 - Restricciones integridad-Parte 2]] *(31/08)*. Clase siguiente:
+> [[Clase 12 - Introduccion a NoSQL]] *(14/09: abre la segunda mitad y la `Unidad-02`, con las Clases
+> 12 a 14 y el TP9)*. Se practica con el **TP 8 Seguridad** del martes 08/09 → [[Práctica 2026-09-08]].
 > Bibliografía: [[_index-bibliografia]] › Clase 11.
 >
-> **Es la última teórica de la primera mitad relacional.** Con ésta, la `Unidad-01` cierra con las
-> **Clases 01 a 11** y los **TP1 a TP8**.
+> **Es la última teórica de la primera mitad relacional.** La `Unidad-01` cierra con las **Clases 01 a
+> 11** y los **TP1 a TP8**; el deck 11 y el TP8 están archivados en `raw/Unidad-01/`.
 
-> [!success] 🎯 Motor: **el primer deck de la U1 escrito en MySQL por defecto**
-> Once decks después, la cursada tiene por primera vez un deck cuyo motor de referencia es el que
-> corre en la práctica. La evidencia, verificada slide por slide:
+> [!success] (clave) Motor: **el primer deck de la U1 escrito en MySQL por defecto**
+> Evidencia, verificada slide por slide:
 >
 > | Evidencia | Dónde |
 > | --- | --- |
 > | El título literal *"Mecanismos de Seguridad **(MySQL)**"* | slide **7** |
 > | *"Un usuario **MySQL** se define en términos de un nombre de usuario y una contraseña"* · *"El superusuario se denomina **ROOT**"* | slide **8** |
-> | `CREATE USER 'nombre_usuario'@'host' IDENTIFIED BY …` — la sintaxis `'usuario'@'host'` es de MySQL | slides **9, 10, 11, 12, 13** |
-> | `'%' es un comodín que permite conexiones desde cualquier IP` — el *host* como parte de la identidad es MySQL | slide **9** |
+> | `CREATE USER 'nombre_usuario'@'host' IDENTIFIED BY …` — la identidad `'usuario'@'host'` y el comodín `'%'` son de MySQL | slides **9, 10, 11, 12, 13** |
 > | `CREATE ROLE` · `GRANT 'app_developer' TO 'dev1'@'localhost'` · `SHOW GRANTS … USING` — roles de **MySQL 8.0+**, copiados del manual | slide **11** |
 > | **`FLUSH PRIVILEGES;`** — comando que sólo existe en MySQL | slides **12, 13** |
-> | Slides **36–37**: traducción casi literal de la **§ 10.3.9** del manual, *Comparison of B-Tree and Hash Indexes* — la lectura que la cátedra asignó en el TP5 —, con el operador **`<=>`** que sólo existe en MySQL | slides **36, 37** |
+> | Traducción casi literal de la **§ 10.3.9** del manual, *Comparison of B-Tree and Hash Indexes* —la lectura asignada en el TP5—, con el operador **`<=>`** que sólo existe en MySQL | slides **36, 37** |
 > | El título literal *"Ejemplo en **MySQL**"* con `CREATE INDEX MYINDEX ON USERS (DNI) USING HASH;` | slide **38** |
 >
 > **Recuento: 10 slides con MySQL explícito · 1 con SQL Server · 1 con PostgreSQL · 26 estándar o sin
-> motor.** Y los dos slides con motor ajeno **están rotulados por el propio deck** —*"Ejemplo de bloqueo
-> en **SQL Server**"* (29) y *"Ejemplo de control de versiones en **PostgreSQL**"* (30)—: es la
-> **primera vez** en la U1 que un deck dice de qué motor es el código ajeno en lugar de presentarlo
-> como si fuera el de la cursada. Detalle en el callout siguiente.
-
-> [!warning] 🔶 …pero el inventario del vault suma igual un archivo más: **once de trece**
-> Con el criterio que [[_index-clases]] y [[PostgreSQL]] § *Inventario* vienen aplicando —*"trae
-> sintaxis de otro motor"*—, este deck **entra en la lista**: el slide **29** es T-SQL
-> (`BEGIN TRANSACTION`, `WITH (UPDLOCK)`, `COMMIT TRANSACTION`) y el **30** está rotulado PostgreSQL.
-> Los archivos de `raw/Unidad-01/Teorica/` con motor ajeno pasan de **diez de doce** a **once de
-> trece**; limpios siguen sólo el `02` y el `06` *(con atribución histórica)*.
+> motor.** Los dos slides con motor ajeno **están rotulados por el propio deck** —*"Ejemplo de bloqueo
+> en **SQL Server**"* (29: T-SQL, `BEGIN TRANSACTION`, `WITH (UPDLOCK)`, `COMMIT TRANSACTION`) y
+> *"Ejemplo de control de versiones en **PostgreSQL**"* (30, que **corre sin cambios en MySQL**)—: es la
+> primera vez en la U1 que un deck dice de qué motor es el código ajeno. Lo que cambia es la naturaleza,
+> no el conteo: en los decks 08, 09 y 10 el motor ajeno **era el contenido** *(ocho slides de PL/pgSQL
+> en el 10)*; aquí son dos ejemplos de cinco líneas. Con el criterio de
+> [[_index-clases]] y [[PostgreSQL]] § *Inventario* —*"trae sintaxis de otro motor"*— el deck entra
+> igual en la lista: los archivos de `raw/Unidad-01/Teorica/` con motor ajeno son **once de trece**;
+> limpios siguen sólo el `02` y el `06` *(con atribución histórica)*. Hay un tercer lugar donde el
+> código no corre en MySQL y **no lo dice**: `drop index <nombre-índice>` del slide **35**, que en MySQL
+> exige `ON <tabla>`.
 >
-> **Lo que cambia es la naturaleza, no el conteo.** En los decks 08, 09 y 10 el motor ajeno **era el
-> contenido** *(ocho slides de PL/pgSQL en el 10)*. Aquí son **dos ejemplos de cinco líneas**, ambos
-> rotulados, y uno de ellos —el del slide 30— **corre sin cambios en MySQL** *(ver § *Slides 29–30*)*.
-> Hay un tercer lugar donde el deck no corre en MySQL y **no lo dice**: la sintaxis `drop index
-> <nombre-índice>` del slide **35**, que en MySQL exige `ON <tabla>` *(ver § *Slide 35*)*.
->
-> 🔴 **Y hay una ausencia más grave que cualquier sintaxis ajena: el deck no muestra ni una sola
-> transacción en MySQL.** Sus únicos `BEGIN … COMMIT` son el de SQL Server y el de PostgreSQL. Ni
-> `START TRANSACTION`, ni `ROLLBACK`, ni `autocommit`, ni `SET TRANSACTION ISOLATION LEVEL`, ni el
-> dato de que **InnoDB arranca en `REPEATABLE READ`** — todo eso queda para un § 7 de [[MySQL]],
-> todavía por escribir *(cuentas, transacciones, aislamiento)*.
+> (crítico) **El deck no muestra ni una sola transacción en MySQL.** Sus únicos `BEGIN … COMMIT` son
+> los de SQL Server y PostgreSQL. Ni `START TRANSACTION`, ni `ROLLBACK`, ni `autocommit`, ni
+> `SET TRANSACTION ISOLATION LEVEL`, ni el dato de que **InnoDB arranca en `REPEATABLE READ`**: todo
+> eso queda pendiente para [[MySQL]] *(cuentas, transacciones, aislamiento)*.
 
-> [!bug] 🔴 La previsión de unidades **falló por quinta vez** *(y por sexta, con el TP8)* — y la hipótesis alternativa **acertó por tercera**
-> [[_index-clases]] § *Unidades* preveía *"`Unidad-04` · Seguridad, matriz de roles y permisos,
-> transacciones ACID · TP8 · 07/09"*, y [[_cronograma]] § *Unidades* lo repetía. **El humano archivó
-> el deck 11 y el TP8 en `Unidad-01`.** Son la sexta y la séptima prueba —el deck 11 y el TP8, que
-> cayó junto con él— de que la unidad **sale del path y no de la expectativa** *(brief de ingesta
-> del 15/09)*; [[_index-clases]] llevaba cinco pruebas, con un acierto y cuatro fallos.
+> [!warning] (crítico) El nombre dice *"Seguridad-Transacciones"*; el deck trae **tres** bloques, y el tercero no está anunciado
+> Los **slides 31 a 38** —el **21 %** del deck— son de **índices**: definición, ordenados vs.
+> asociativos, primarios vs. secundarios, multinivel, `CREATE INDEX`, B-tree vs. hash y `USING HASH`.
+> Ni el nombre del archivo, ni la portada, ni el tema del [[_cronograma]] los mencionan, y los
+> encabezados de los slides **32, 33, 34 y 35** dicen *"Transacciones en Base de Datos"* *(ver §
+> *Erratas*)*.
 >
-> Lo que sí pasó su *"prueba de fuego"* es la hipótesis que [[_index-clases]] dejó escrita el 02/09:
-> *"la prueba de fuego es el **07/09** (seguridad y ACID: todavía relacional) y, sobre todo, el
-> **14/09** (NoSQL y MongoDB), que es donde el corte tendría que caer"*. **Las dos mitades de la
-> prueba se cumplieron el mismo día de archivado**: el material del 07/09 y del 08/09 cayó en la U1,
-> y el del 14/09 y 15/09 —Clases 12 a 14 y TP9— **abrió por fin la `Unidad-02`**. La hipótesis
-> *"U1 = todo lo relacional"* tiene ahora tres aciertos consecutivos *(31/08, 01/09 y 07–08/09)* y
-> el corte relacional → NoSQL cae exactamente donde ella lo ponía. Sigue siendo una previsión; lo
-> único que es hecho es dónde están los archivos hoy.
+> (clave) **Ese bloque no es relleno: es la teoría que faltaba de la [[Clase 08 - Explicando el plan]]**:
+> los slides 32–37 cierran los tres huecos ✗ de [[1.08.02 - Índices|Índices]] § *Qué cubrió la clase*
+> —*"Qué es un B-tree"*, *"Tipos de índice (hash, GiST, GIN, bitmap…)"*, *"Clustered vs.
+> non-clustered"*—: ver § *Slides 32–33* y la propagación pendiente en § *Dudas abiertas*.
 
-> [!warning] 🔴 El nombre dice *"Seguridad-Transacciones"*; el deck trae **tres** bloques, y el tercero no está anunciado en ningún lado
-> Los **slides 31 a 38** —ocho de treinta y ocho, el **21 %** del deck— son de **índices**: definición,
-> ordenados vs. asociativos, primarios vs. secundarios, multinivel, `CREATE INDEX`, B-tree vs. hash y
-> `USING HASH`. **Ni el nombre del archivo, ni la portada, ni el tema del [[_cronograma]] los
-> mencionan.** Y los encabezados de los slides **32, 33, 34 y 35 dicen literalmente *"Transacciones
-> en Base de Datos"*** aunque su contenido sea índices: es el encabezado del bloque anterior, copiado
-> y no corregido *(ver § *Erratas*)*.
->
-> 🎯 **Ese bloque no es relleno: es la teoría que faltaba de la [[Clase 08 - Explicando el plan]].**
-> La página [[1.08.02 - Índices|Índices]] § *Qué cubrió la clase* tiene una tabla de huecos que dice,
-> textual: *"**Qué es un B-tree** | ❌"*, *"**Tipos de índice (hash, GiST, GIN, bitmap…)** | ❌"*,
-> *"**Clustered vs. non-clustered** | ❌"*. **Los slides 32–37 cierran los tres**: B-tree como índice
-> ordenado *(32)*, hash como índice asociativo *(32, 37)*, e índice *"con agrupación"* vs. *"sin
-> agrupación"* —que es exactamente *clustered* vs. *non-clustered* en la traducción de Silberschatz—
-> *(33)*. Hay que propagar a esa página: ver § *Dudas abiertas*.
-
-> [!missing] 🔴 Lo que el tema oficial y el TP8 prometen y **el deck no trae**
+> [!missing] (crítico) Lo que el tema oficial y el TP8 prometen y **el deck no trae**
 > | Prometido por | Qué | ¿Está en el deck? |
 > | --- | --- | :---: |
-> | [[_cronograma]] *(tema del 07/09)* | *"Implementación de **matriz de roles y permisos**"* | ❌ **ninguna matriz** — la palabra no aparece en los 38 slides |
-> | TP8 ej. **1.a** | *"Realice el **grafo de permisos**"* | ❌ **cero** menciones a grafos o diagramas de autorización *(es GMUW **10.1.5** *Grant Diagrams*, impresa 431)* |
-> | TP8 ej. **1** y **2.g/i** | `GRANT UPDATE(tiempo,diccion) ON parrafo` — **privilegios por columna** | ❌ el slide 10 sólo da `ON [base].[tabla]` |
-> | TP8 ej. **1.b** y **3.b** | `REVOKE … CASCADE` — revocación en cascada | ❌ **ni `CASCADE` ni `RESTRICT`** *(y MySQL tampoco los tiene: el TP lo dice)* |
-> | TP8 ej. **2.d/f** | *"todos los usuarios del sistema"* — `PUBLIC` | ❌ no aparece |
-> | TP8 ej. **2.j** | *"Eliminar el rol … ¿qué sucede con los usuarios?"* | 🟡 el slide 11 tiene `DROP ROLE` pero **no dice qué pasa** con quienes lo tenían |
-> | [[1.06.01 - Vistas|Vistas]] *(previsión del 10/08)* | *"vistas como control de acceso → seguridad (07/09)"* | ❌ **el deck no nombra las vistas ni una vez** — la previsión de [[1.06.01 - Vistas|Vistas]] § *Enlaces* falló |
-> | Slide **7** del propio deck | *"Conexiones seguras · Tipos de conexiones y soporte para **SSL**"* | ❌ **anunciado en la agenda del bloque y nunca desarrollado** |
+> | [[_cronograma]] *(tema del 07/09)* | *"Implementación de **matriz de roles y permisos**"* | ✗ **ninguna matriz** — la palabra no aparece en los 38 slides |
+> | TP8 ej. **1.a** | *"Realice el **grafo de permisos**"* | ✗ **cero** menciones a grafos o diagramas de autorización *(es GMUW **10.1.5** *Grant Diagrams*, impresa 431)* |
+> | TP8 ej. **1** y **2.g/i** | `GRANT UPDATE(tiempo,diccion) ON parrafo` — **privilegios por columna** | ✗ el slide 10 sólo da `ON [base].[tabla]` |
+> | TP8 ej. **1.b** y **3.b** | `REVOKE … CASCADE` — revocación en cascada | ✗ **ni `CASCADE` ni `RESTRICT`** *(y MySQL tampoco los tiene: el TP lo dice)* |
+> | TP8 ej. **2.d/f** | *"todos los usuarios del sistema"* — `PUBLIC` | ✗ no aparece |
+> | TP8 ej. **2.j** | *"Eliminar el rol … ¿qué sucede con los usuarios?"* | (atención) el slide 11 tiene `DROP ROLE` pero **no dice qué pasa** con quienes lo tenían |
+> | [[1.06.01 - Vistas\|Vistas]] *(previsión del 10/08)* | *"vistas como control de acceso → seguridad (07/09)"* | ✗ **el deck no nombra las vistas ni una vez** |
+> | Slide **7** del propio deck | *"Conexiones seguras · Tipos de conexiones y soporte para **SSL**"* | ✗ **anunciado en la agenda del bloque y nunca desarrollado** |
 >
 > **El TP8 ejercita, sobre todo, lo que no está en el deck**: los tres ejercicios son de propagación y
-> revocación de privilegios entre usuarios —el modelo de *grant diagram* de GMUW 10.1—, y el deck
-> se queda en la sintaxis de un `GRANT` a un usuario. Para el TP hace falta **GMUW 10.1.4–10.1.6**
-> *(impresas 430–436)*, no el deck.
+> revocación de privilegios entre usuarios —el *grant diagram* de GMUW 10.1—, y el deck se queda en
+> la sintaxis de un `GRANT` a un usuario. Para el TP hace falta **GMUW 10.1.4–10.1.6** *(impresas
+> 430–436)*, no el deck.
 
 > [!note] De dónde salen los slides — observación, no bibliografía
-> El deck **no declara fuentes**, pero el texto delata dos libros y un manual, y conviene saberlo
-> porque **ninguno de los dos libros está en el vault**:
+> El deck **no declara fuentes**, pero el texto delata dos libros y un manual, y **ninguno de los dos
+> libros está en el vault**:
 >
-> - **Silberschatz, Korth y Sudarshan**, *Fundamentos de Bases de Datos* *(traducción española)*:
->   los niveles de seguridad del slide 4, los cinco estados de transacción del 18, las ventajas de la
->   concurrencia del 22 y **todo el bloque de índices 31–35** —*"índices ordenados / asociativos"*,
->   *"con agrupación / sin agrupación"*, el ejemplo bancario de `cuenta`, `sucursal` y
->   `nombre-sucursal`— son el vocabulario de la traducción de ese libro. **El vault sólo tiene su
->   capítulo 1** *(ficha: `Silberschatz - Fundamentos de Bases de Datos Cap 1 — ficha.md`)*, y ese
->   capítulo **no dice "aislamiento" ni "ACID"** *(ficha, fila *"ACID como acrónimo"*: 0 apariciones)*.
+> - **Silberschatz, Korth y Sudarshan**, *Fundamentos de Bases de Datos* *(traducción española)*: los
+> niveles de seguridad del slide 4, los cinco estados del 18, las ventajas de la concurrencia del 22
+> y **todo el bloque de índices 31–35** *("índices ordenados / asociativos", "con agrupación / sin
+> agrupación", el ejemplo bancario de `cuenta`, `sucursal` y `nombre-sucursal`)*. El vault sólo tiene
+> su **capítulo 1** *(ficha: `Silberschatz - Fundamentos de Bases de Datos Cap 1 — ficha.md`)*, que
+> **no dice "aislamiento" ni "ACID"** *(ficha, fila "ACID como acrónimo": 0 apariciones)*.
 > - **Elmasri y Navathe**, *Fundamentos de sistemas de bases de datos*: los tres tipos de amenaza del
->   slide 3 *(integridad · disponibilidad · confidencialidad)*, la lista de seis fallos del 15, las
->   cinco operaciones del 19 y **el diagrama de estados del 20** *(con "Fallo" y "Terminar")* son de
->   ese libro. **No está en el vault.** Se cita `—` en el mapeo y se propone como fuente externa.
+> slide 3, la lista de seis fallos del 15, las cinco operaciones del 19 y **el diagrama de estados del
+> 20** *(con "Fallo" y "Terminar")*. **No está en el vault**: se cita `—` en el mapeo y se propone
+> como fuente externa.
 > - **MySQL Reference Manual**: los slides 11 *(§ *Using Roles*)* y 36–37 *(§ 10.3.9)* son copias del
->   manual, en el primer caso con los mismos nombres del ejemplo oficial *(`dev1`, `app_developer`)*.
+> manual, en el primer caso con los mismos nombres del ejemplo oficial *(`dev1`, `app_developer`)*.
 >
 > Lo que sí está en el vault y **cubre casi todo el deck** es **GMUW** *(6.6, 10.1, 17.1, 18.3–18.9,
 > 8.3, 14.1–14.3)* y **Date** *(caps. 15, 16 y 17)*. El mapeo fino va en [[_index-bibliografia]] ›
 > Clase 11.
 
----
+## Estructura del deck
 
-## Resumen
-
-El deck cierra la mitad relacional con los dos temas que el objetivo declarado de la materia
-—*"tomar buenas decisiones a la hora de elegir una base de datos"*— necesita para poder comparar
-motores en la segunda mitad: **quién puede tocar qué** *(seguridad)* y **qué garantiza el motor
-cuando muchos tocan lo mismo a la vez** *(transacciones y concurrencia)*. Cuando la
-[[Clase 12 - Introduccion a NoSQL]] hable de BASE, CAP y *eventual consistency*, lo que se está
-negociando es exactamente el ACID de los slides 16–17 y los niveles de aislamiento del 28.
-
-Se arma en **tres bloques**, de los cuales el deck anuncia dos:
-
-1. **Seguridad** *(slides 2–13)*. Un marco conceptual corto —amenazas, niveles, autenticación vs.
-   autorización, cifrado— y después **la sintaxis MySQL** de cuentas, privilegios y roles:
-   `CREATE USER`, `GRANT`, `CREATE ROLE`, `REVOKE`, `FLUSH PRIVILEGES`.
-2. **Transacciones y concurrencia** *(slides 14–30)*. Definición, fallos, **ACID** en dos slides,
-   estados y diagrama de transición, operaciones primitivas, por qué concurrencia, las **cuatro
-   anomalías** *(race condition, dirty read, non-repeatable read, phantom)*, los **tres mecanismos de
-   control** *(locking, optimista, timestamps)*, los **cuatro niveles de aislamiento** y dos ejemplos
-   en motores ajenos.
-3. **Índices** *(slides 31–38)*, sin anuncio: definición, ordenados vs. asociativos, primarios vs.
-   secundarios, multinivel, DDL, **B-tree vs. hash** según el manual de MySQL, y `USING HASH`.
+Los dos temas que el deck sí anuncia son los que la segunda mitad necesita para comparar motores:
+**quién puede tocar qué** *(seguridad)* y **qué garantiza el motor cuando muchos tocan lo mismo a la
+vez** *(transacciones y concurrencia)*. Cuando la [[Clase 12 - Introduccion a NoSQL]] hable de BASE,
+CAP y *eventual consistency*, lo que se negocia es el ACID de los slides 16–17 y los niveles de
+aislamiento del 28.
 
 | Bloque | Qué establece | Slides |
 | --- | --- | --- |
@@ -194,19 +156,19 @@ Se arma en **tres bloques**, de los cuales el deck anuncia dos:
 | **Ejemplos** | `WITH (UPDLOCK)` en SQL Server · `FOR UPDATE` en PostgreSQL | 29–30 |
 | **Índices** | Definición, tipos, subtipos, multinivel, `CREATE INDEX`, B-tree vs. hash, `USING HASH` | 31–38 |
 
-> [!important] 🎯 Cuatro cosas que conviene tener claras antes del recorrido
-> 1. **El deck enseña la sintaxis de un `GRANT`, no el modelo de autorización.** Falta todo lo que el
->    TP8 pregunta: qué pasa cuando un usuario que recibió `WITH GRANT OPTION` concede a un tercero y
->    después se lo revocan al primero. Eso es **GMUW 10.1.5–10.1.6** y **Date 17.2**.
+> [!important] (clave) Cuatro cosas que conviene tener claras antes del recorrido
+> 1. **El deck enseña la sintaxis de un `GRANT`, no el modelo de autorización** que el TP8 pregunta
+> *(qué pasa cuando quien recibió `WITH GRANT OPTION` concede a un tercero y después se lo revocan)*:
+> eso es **GMUW 10.1.5–10.1.6** y **Date 17.2**.
 > 2. **ACID se define en dos slides y no vuelve a usarse.** Los slides 23–28 hablan de anomalías y
->    aislamiento **sin decir que están desarrollando la "I" de ACID**. El puente lo pone esta página.
+> aislamiento **sin decir que están desarrollando la "I" de ACID**. El puente lo pone esta página.
 > 3. **Los tres mecanismos de control (25–27) y los cuatro niveles (28) son dos ejes distintos** que el
->    deck presenta uno detrás del otro sin relacionarlos: el nivel de aislamiento es *qué* garantiza el
->    motor; el mecanismo es *cómo* lo implementa. En MySQL/InnoDB conviven **locking** *(para las
->    lecturas con `FOR UPDATE` y las escrituras)* y **multiversión** *(para las lecturas comunes)*.
-> 4. **El slide 30 está mal rotulado**: dice *"control de versiones"* pero su `SELECT … FOR UPDATE` es
->    un **bloqueo pesimista**, lo contrario de lo que el slide 26 define como control de versiones
->    *(«las transacciones no utilizan bloqueos»)*. Ver § *Contradicciones internas*.
+> deck no relaciona: el nivel es *qué* garantiza el motor; el mecanismo, *cómo* lo implementa. En
+> MySQL/InnoDB conviven **locking** *(escrituras y `FOR UPDATE`)* y **multiversión** *(lecturas
+> comunes)*.
+> 4. **El slide 30 está mal rotulado**: su `SELECT … FOR UPDATE` es un **bloqueo pesimista**, lo
+> contrario del *"control de versiones"* que el slide 26 define *(«no utilizan bloqueos»)*. Ver
+> § *Contradicciones internas*.
 
 ---
 
@@ -216,50 +178,40 @@ Se arma en **tres bloques**, de los cuales el deck anuncia dos:
 > *"Bases de Datos II"*
 > *"**SEGURIDAD Y TRANSACCIONES**"*
 
-Plantilla distinta de la de los decks 09 y 10: fondo gris texturizado, título en caja blanca con
-barra naranja y un rectángulo azul a la derecha. **No hay logo del ITBA en la portada** *(los decks
-anteriores lo traían)*. Todo el texto del deck es texto vivo; la única imagen con contenido es el
-diagrama del slide 20.
-
-La portada dice *"Bases de Datos II"* en plural, igual que la del deck 09; el que decía *"Base de
-Datos II"* en singular era el deck 10. Detalle de plantilla sin consecuencias: no es una errata de
-este deck.
+Plantilla distinta de la de los decks 09 y 10, **sin logo del ITBA en la portada**. Todo el texto del
+deck es texto vivo; la única imagen con contenido es el diagrama del slide 20.
 
 ## Slide 2 · Introducción — qué es la seguridad de una base de datos
 
 > [!quote] Textual
 > - *"La seguridad de las bases de datos se refiere a la protección frente a **accesos
->   malintencionados**"*
+> malintencionados**"*
 > - *"Es posible controlar el acceso a la base de datos brindando la autorización adecuada"*
 > - *"Los datos guardados en la base de datos deben estar protegidos contra:"*
->   - *"accesos no autorizados"*
->   - *"destrucción o alteración malintencionadas"*
->   - *"introducción accidental de inconsistencias"*
-
-Las tres viñetas finales van al mismo nivel que las tres primeras en el slide —**no están sangradas**—
-aunque son la lista que abre la tercera. Se conserva la lectura obvia.
+> - *"accesos no autorizados"*
+> - *"destrucción o alteración malintencionadas"*
+> - *"introducción accidental de inconsistencias"*
 
 > [!note] La tercera amenaza **no es de seguridad**, y el deck la pone igual
 > *"Introducción **accidental** de inconsistencias"* no es un acceso malintencionado: es el problema
-> que resuelven las **restricciones de integridad** del deck 09 y las **transacciones** de la segunda
-> mitad de este mismo deck. El slide junta en una lista lo que la materia venía separando en tres
-> mecanismos —autorización, integridad y ACID—, y **ésa es la lectura útil**: la seguridad en sentido
-> amplio es la suma de los tres. Es la misma tripartición de Silberschatz cap. 1 § 1.2 *(ficha:
-> inconvenientes 6 y 7, "anomalías en el acceso concurrente" y "problemas de seguridad")*, que la
+> que resuelven las **restricciones de integridad** del deck 09 y las **transacciones** de este mismo
+> deck. La lectura útil es que la seguridad en sentido amplio es la suma de autorización, integridad y
+> ACID: la misma tripartición de Silberschatz cap. 1 § 1.2 *(ficha: inconvenientes 6 y 7, "anomalías
+> en el acceso concurrente" y "problemas de seguridad")*, que la
 > [[Clase 01 - Introducción_BasesDeDatos]] ya transcribió.
 
 ## Slide 3 · Tipos de amenazas
 
 > [!quote] Textual
 > - ***Pérdida de integridad.** La integridad se pierde si se realizan cambios no autorizados en los
->   datos mediante acciones intencionadas o accidentales*
+> datos mediante acciones intencionadas o accidentales*
 > - ***Pérdida de disponibilidad.** Se refiere a que los objetos estén disponibles para un usuario
->   humano o para un programa que tenga los derechos correspondientes*
+> humano o para un programa que tenga los derechos correspondientes*
 > - ***Pérdida de confidencialidad.** La confidencialidad de la base de datos tiene relación con la
->   protección de los datos frente al acceso no autorizado*
+> protección de los datos frente al acceso no autorizado*
 
 Es la tríada **CIA** *(confidentiality · integrity · availability)* de la seguridad informática, en
-orden distinto y sin nombrarla. El slide lleva un triángulo rojo de advertencia como adorno.
+otro orden y sin nombrarla.
 
 | Amenaza | Lo que se pierde | El mecanismo de la cursada que la ataca |
 | --- | --- | --- |
@@ -267,94 +219,79 @@ orden distinto y sin nombrarla. El slide lleva un triángulo rojo de advertencia
 | Pérdida de **disponibilidad** | que el dato esté cuando se lo pide | **nada en este deck** — es el terreno de réplicas y de CAP, [[Clase 12 - Introduccion a NoSQL]] |
 | Pérdida de **confidencialidad** | que sólo lo vea quien debe | `GRANT SELECT` selectivo *(10, 13)* + cifrado *(6)* |
 
-> [!note] La *"disponibilidad"* queda huérfana en este deck y la recoge el siguiente
-> De las tres amenazas, la única sin un mecanismo en los 38 slides es la disponibilidad. Es
-> deliberado o no, pero encaja: la **A de CAP** *(Seven Databases 2ª ed. **A2** *The CAP Theorem*,
-> impresas 315–318; Corbellini **§ 3.1**)* es exactamente "disponibilidad", y es el eje que la segunda
-> mitad de la cursada va a poner contra la consistencia.
-
-**Redacción del slide:** la definición de *pérdida de disponibilidad* está escrita al revés —define la
-disponibilidad, no su pérdida— y la de *confidencialidad* es circular *("tiene relación con la
-protección … frente al acceso no autorizado")*. Se transcriben como están.
+La disponibilidad es la única amenaza sin mecanismo en los 38 slides; es la **A de CAP** *(Seven
+Databases 2ª ed. **A2** *The CAP Theorem*, impresas 315–318; Corbellini **§ 3.1**)*, el eje que la
+segunda mitad va a poner contra la consistencia. **Redacción:** la definición de *pérdida de
+disponibilidad* está escrita al revés —define la disponibilidad, no su pérdida— y la de
+*confidencialidad* es circular. Se transcriben como están.
 
 ## Slide 4 · Niveles de seguridad
 
 > [!quote] Textual
 > - ***Sistema de bases de datos.** Autorización al acceso a una parte limitada de la base de datos*
 > - ***Sistema operativo.** La debilidad de la seguridad del sistema operativo puede servir como
->   medio para el acceso no autorizado*
+> medio para el acceso no autorizado*
 > - ***Red.** La seguridad en el nivel del software de la red es tan importante en Internet y en las
->   redes privadas de las empresas*
+> redes privadas de las empresas*
 > - ***Físico.** Los sitios que contienen los sistemas informáticos deben estar protegidos de intrusos*
 > - ***Humano.** Los usuarios deben ser autorizados cuidadosamente para reducir la posibilidad de
->   intrusión*
+> intrusión*
 
-Cinco niveles, del más interno al más externo, con la casa encadenada como adorno. **El deck sólo
-va a desarrollar el primero** —el nivel *sistema de bases de datos*—, que es el único donde el DBMS
-tiene algo que decir. Los otros cuatro son el contexto que hace que un `GRANT` bien puesto sirva de
-algo: de nada vale restringir `SELECT` si el archivo de datos se lee desde el sistema operativo.
+Cinco niveles, del más interno al más externo. **El deck sólo desarrolla el primero** —el nivel
+*sistema de bases de datos*—, el único donde el DBMS tiene algo que decir; los otros cuatro son el
+contexto que hace que un `GRANT` sirva de algo.
 
 > [!tip] Es el argumento de por qué existe el `'host'` en `'usuario'@'host'`
-> El nivel **Red** de este slide es lo que justifica que MySQL haga del *host* **parte de la identidad
-> del usuario** *(slide 9)*: `'juan'@'localhost'` y `'juan'@'%'` son **dos cuentas distintas**, con
-> permisos distintos. El deck no conecta los dos slides; conviene hacerlo al estudiar.
-
-**Errata:** *"es **tan** importante en Internet y en las redes privadas"* — la frase quedó sin el
-segundo término de la comparación *(tan importante **como**…)*. Se conserva `[sic]`.
+> El nivel **Red** es lo que justifica que MySQL haga del *host* **parte de la identidad del usuario**
+> *(slide 9)*: `'juan'@'localhost'` y `'juan'@'%'` son **dos cuentas distintas**, con permisos
+> distintos. El deck no conecta los dos slides.
 
 ## Slide 5 · Autenticación y autorización
 
 > [!quote] Textual
 > - *"La **autenticación** es el proceso por el cual se identifica un usuario como válida para
->   posteriormente acceder a ciertos recursos definidos"* **[sic: "válida"]**
->   - *"Relacionado con la **gestión de usuarios y control de acceso** al DBMS"* *(en rojo solo el fragmento en negrita)*
+> posteriormente acceder a ciertos recursos definidos"* **[sic: "válida"]**
+> - *"Relacionado con la **gestión de usuarios y control de acceso** al DBMS"* *(en rojo solo el fragmento en negrita)*
 > - *"La **autorización** es el proceso sobre el cual se establecen qué tipos de recursos están
->   permitidos o denegados para cierto usuario o grupo de usuarios concreto"*
->   - *"Relacionado con **permisos** (lectura, escritura) para cada usuario autentificado"* *(en rojo solo el fragmento en negrita)*
+> permitidos o denegados para cierto usuario o grupo de usuarios concreto"*
+> - *"Relacionado con **permisos** (lectura, escritura) para cada usuario autentificado"* *(en rojo solo el fragmento en negrita)*
 
-**La distinción es la que estructura los slides 8–13**: autenticación = `CREATE USER … IDENTIFIED BY`
-*(quién eres)*; autorización = `GRANT` / `REVOKE` / roles *(qué puedes hacer)*.
+**La distinción es la que estructura los slides 8–13**:
 
 | | Pregunta que responde | Sentencia MySQL | Slide |
 | --- | --- | --- | :---: |
 | **Autenticación** | ¿eres quien dices ser? | `CREATE USER 'u'@'host' IDENTIFIED BY '…'` | 9, 11 |
 | **Autorización** | ¿puedes hacer esto? | `GRANT … ON … TO …` · `REVOKE` · `CREATE ROLE` | 10–13 |
 
-> [!note] Dos cosas del vocabulario que el slide deja pasar
-> - *"usuario o **grupo de usuarios**"* es el concepto que en el slide 11 va a llamarse **rol**. Es
->   la única anticipación del tema en el marco conceptual.
-> - *"autentificado"* y *"autenticación"* conviven en el mismo slide. Las dos formas existen en
->   español; el slide usa una para el sustantivo y la otra para el participio.
->
-> En GMUW la pareja se trata en **10.1.3** *The Privilege-Checking Process* *(impresa 428)*, donde el
-> "usuario autorizado" que ejecuta cada sentencia es el concepto central: la autorización se chequea
-> **por sentencia**, contra los privilegios del *authorization ID* actual.
+*"Usuario o **grupo de usuarios**"* es el concepto que el slide 11 va a llamar **rol**: la única
+anticipación del tema en el marco conceptual. En GMUW la pareja se trata en **10.1.3** *The
+Privilege-Checking Process* *(impresa 428)*: la autorización se chequea **por sentencia**, contra los
+privilegios del *authorization ID* actual.
 
 ## Slide 6 · Cifrado de datos — conceptos
 
 > [!quote] Textual
 > - *"El cifrado de datos se utiliza para proteger datos confidenciales como los números de las
->   tarjetas de crédito y contraseñas"*
+> tarjetas de crédito y contraseñas"*
 > - *"El cifrado se puede utilizar también para proporcionar protección adicional a partes
->   confidenciales de la base de datos"*
+> confidenciales de la base de datos"*
 > - *"Los datos se codifican utilizando algún algoritmo de codificación o cifrado"*
 > - *"Un usuario no autorizado que acceda a datos codificados tendrá dificultades para descifrarlos,
->   pero a los usuarios autorizados se les proporcionarán claves para descifrar los datos"*
+> pero a los usuarios autorizados se les proporcionarán claves para descifrar los datos"*
 
-Es el único slide sobre cifrado y **no trae ni un algoritmo, ni una función, ni una sentencia**. Vale
-como concepto: el cifrado es la **última línea** —lo que protege cuando fallaron los niveles del
-slide 4 y alguien ya tiene el archivo—, y es complementario a la autorización, no un sustituto.
+Único slide sobre cifrado, **sin un algoritmo, una función ni una sentencia**. Vale como concepto: el
+cifrado es la **última línea**, lo que protege cuando fallaron los niveles del slide 4, y es
+complementario a la autorización, no un sustituto.
 
 > [!tip] Lo que MySQL trae para esto y el deck no nombra *(a verificar en el manual 9.7)*
 > - **Contraseñas**: MySQL nunca guarda la contraseña de `IDENTIFIED BY` en claro; la *hashea* con el
->   plugin de autenticación de la cuenta *(`caching_sha2_password` por defecto desde 8.0)*. El slide 6
->   pone "contraseñas" como ejemplo de dato a cifrar y el 9 las crea, sin conectar los dos.
-> - **Datos en reposo**: InnoDB tiene cifrado de *tablespace* *(`ENCRYPTION='Y'` en `CREATE TABLE`)*,
->   y hay funciones `AES_ENCRYPT()` / `AES_DECRYPT()` para cifrar columnas desde SQL.
+> plugin de autenticación de la cuenta *(`caching_sha2_password` por defecto desde 8.0)*. El slide 6
+> pone "contraseñas" como ejemplo de dato a cifrar y el 9 las crea, sin conectar los dos.
+> - **Datos en reposo**: cifrado de *tablespace* en InnoDB *(`ENCRYPTION='Y'` en `CREATE TABLE`)* y
+> funciones `AES_ENCRYPT()` / `AES_DECRYPT()` para cifrar columnas desde SQL.
 > - **Datos en tránsito**: el **SSL** que el slide 7 anuncia y nunca desarrolla.
 >
-> Nada de esto está en el deck; se anota para no confundir "el deck lo enseña" con "el motor lo
-> tiene". En bibliografía: **Date 17.5** *Data Encryption* *(impresa 519)*.
+> Nada de esto está en el deck. En bibliografía: **Date 17.5** *Data Encryption* *(impresa 519)*.
 
 ---
 
@@ -363,70 +300,63 @@ slide 4 y alguien ya tiene el archivo—, y es complementario a la autorización
 > [!quote] Textual — es el slide que fija el motor del deck
 > ***Mecanismos de Seguridad (MySQL)***
 > - *"Administración de cuentas de usuarios"*
->   - *"Creación, modificación y borrado de cuentas de usuario"*
+> - *"Creación, modificación y borrado de cuentas de usuario"*
 > - *"Gestión de permisos"*
->   - *"Otorgamiento, Modificación y Revocación de privilegios"*
+> - *"Otorgamiento, Modificación y Revocación de privilegios"*
 > - *"Conexiones seguras"*
->   - *"Tipos de conexiones y soporte para SSL"*
+> - *"Tipos de conexiones y soporte para SSL"*
 
-Es la agenda de los slides 8–13, y **sirve para medir lo que el bloque cumple**:
+Es la agenda de los slides 8–13, y sirve para medir lo que el bloque cumple:
 
 | Prometido | Cumplido | Dónde |
 | --- | :---: | --- |
-| Creación de cuentas | ✅ | `CREATE USER` *(9, 11)* |
-| **Modificación** de cuentas | ❌ | ni `ALTER USER`, ni `RENAME USER`, ni cambio de contraseña |
-| **Borrado** de cuentas | ❌ | ni `DROP USER` *(hay `DROP ROLE`, que es otra cosa)* |
-| Otorgamiento de privilegios | ✅ | `GRANT` *(10, 11, 13)* |
-| **Modificación** de privilegios | 🟡 | sólo por la vía `GRANT` + `REVOKE` |
-| Revocación de privilegios | ✅ | `REVOKE` *(12, 13)* |
-| **Conexiones seguras / SSL** | ❌ | **cero slides** |
+| Creación de cuentas | ✓ | `CREATE USER` *(9, 11)* |
+| **Modificación** de cuentas | ✗ | ni `ALTER USER`, ni `RENAME USER`, ni cambio de contraseña |
+| **Borrado** de cuentas | ✗ | ni `DROP USER` *(hay `DROP ROLE`, que es otra cosa)* |
+| Otorgamiento de privilegios | ✓ | `GRANT` *(10, 11, 13)* |
+| **Modificación** de privilegios | (atención) | sólo por la vía `GRANT` + `REVOKE` |
+| Revocación de privilegios | ✓ | `REVOKE` *(12, 13)* |
+| **Conexiones seguras / SSL** | ✗ | **cero slides** |
 
-De los siete puntos anunciados, **tres no aparecen**, y uno de los tres es un ítem entero de la
-agenda. Para el TP8 lo que importa es que el `DROP USER` que falta es lo que se necesitaría para
-razonar el ej. **2.j** al revés *(qué pasa con un rol cuando se elimina el usuario)*.
+De los siete puntos anunciados, **tres no aparecen**. El `DROP USER` que falta es lo que se necesitaría
+para razonar el ej. **2.j** del TP8 al revés *(qué pasa con un rol cuando se elimina el usuario)*.
 
 ## Slide 8 · Administración de usuarios — `ROOT`
 
 > [!quote] Textual
 > - *"Un usuario MySQL se define en términos de un nombre de usuario y una contraseña/password"*
 > - *"Por defecto, el motor de base de datos crea un usuario con permisos para todas las tablas de la
->   base de datos"*
->   - *"El superusuario se denomina ROOT"*
->   - *"Se recomienda limitar el uso de ROOT a la gestión del DBMS y no usarlo en aplicaciones de
->     producción"*
+> base de datos"*
+> - *"El superusuario se denomina ROOT"*
+> - *"Se recomienda limitar el uso de ROOT a la gestión del DBMS y no usarlo en aplicaciones de
+> producción"*
 
 > [!warning] La primera viñeta **contradice el slide siguiente**, y el siguiente tiene razón
-> *"Un usuario MySQL se define en términos de un nombre de usuario y una contraseña"* — **no**: en
-> MySQL una cuenta se define por **nombre de usuario y host**, `'usuario'@'host'`, y es el propio
-> slide 9 el que lo explica *("Seguido al nombre de usuario, se debe especificar la IP desde donde
-> podrá realizar conexiones")*. La contraseña es un atributo de la cuenta, no parte de su identidad:
-> `'juan'@'localhost'` y `'juan'@'%'` son dos cuentas aunque tengan la misma contraseña. Registrado
-> en § *Contradicciones internas*.
+> En MySQL una cuenta se define por **nombre de usuario y host**, `'usuario'@'host'`, como explica el
+> propio slide 9 *("Seguido al nombre de usuario, se debe especificar la IP desde donde podrá
+> realizar conexiones")*. La contraseña es un atributo de la cuenta, no parte de su identidad:
+> `'juan'@'localhost'` y `'juan'@'%'` son dos cuentas aunque compartan contraseña. Registrado en
+> § *Contradicciones internas*.
 
-> [!tip] Lo que la recomendación sobre `ROOT` significa en la práctica de la cursada
-> El setup de la práctica conecta a los TPs con **`myuser`** *(`mysql -u myuser -p`, la cuenta que el
-> `docker run` crea con `ALL` sobre `mydb`)*, no con `root`: [[MySQL]] § *Setup*. `root` aparece en el
-> mismo `docker run` *(`MYSQL_ROOT_PASSWORD=root`)* y es la sesión de administrador del TP8.
-> El slide dice que eso está bien *para gestionar el DBMS* y mal *para una aplicación*. El TP8 es la
-> primera práctica donde hay que **crear otros usuarios** y probar qué ve cada uno — o sea, la
-> primera vez que hay más de un actor. Detalle en [[Práctica 2026-09-08]].
-
-Y un dato que el deck no da: `root` en MySQL **no es un rol ni un privilegio**, es una cuenta común
-—`'root'@'localhost'`— que viene con `ALL PRIVILEGES ON *.* WITH GRANT OPTION`. Se le puede quitar
-todo, y se le puede dar lo mismo a cualquier otra cuenta.
+La práctica conecta a los TPs con **`myuser`** *(`mysql -u myuser -p`, la cuenta que el `docker run`
+crea con `ALL` sobre `mydb`)*, no con `root`: [[MySQL]] § *Setup*. `root` aparece en el mismo `docker
+run` *(`MYSQL_ROOT_PASSWORD=root`)* y es la sesión de administrador del TP8, la primera práctica
+donde hay que **crear otros usuarios** y probar qué ve cada uno *([[Práctica 2026-09-08]])*. Y un dato
+que el deck no da: `root` **no es un rol ni un privilegio**, es una cuenta común —`'root'@'localhost'`—
+que viene con `ALL PRIVILEGES ON *.* WITH GRANT OPTION`.
 
 ## Slide 9 · `CREATE USER` y el *host*
 
 > [!quote] Textual
 > - ***CREATE USER** 'nombre_usuario'@'host' **IDENTIFIED BY** ‘tu_contrasena';* **[sic: abre con
->   comilla tipográfica `‘` y cierra con recta `'`]**
+> comilla tipográfica `‘` y cierra con recta `'`]**
 > - *"Seguido al nombre de usuario, se debe especificar la IP desde donde podrá realizar conexiones
->   a la base de datos el usuario creado. Puede ser:"*
->   - *"'localhost' o '127.0.0.1', desde la misma PC en la que se encuentre instalado MySQL, es decir
->     el host local"*
->   - *"'192.168.1.100', sólo permite conexiones desde dicha IP (utilizada para identificar a un PC
->     en un LAN)"*
->   - *"'%' es un comodín que permite conexiones desde cualquier IP"*
+> a la base de datos el usuario creado. Puede ser:"*
+> - *"'localhost' o '127.0.0.1', desde la misma PC en la que se encuentre instalado MySQL, es decir
+> el host local"*
+> - *"'192.168.1.100', sólo permite conexiones desde dicha IP (utilizada para identificar a un PC
+> en un LAN)"*
+> - *"'%' es un comodín que permite conexiones desde cualquier IP"*
 
 **Transcripción limpia, ejecutable en MySQL:**
 
@@ -441,21 +371,21 @@ CREATE USER 'nombre_usuario'@'host' IDENTIFIED BY 'tu_contrasena';
 | `'192.168.1.100'` | sólo desde esa IP | |
 | `'%'` | desde cualquier host | es lo que hace falta para entrar al **contenedor Docker** desde el host |
 
-> [!important] 🔴 Para la cursada, el *host* que importa es `'%'`, y el deck no lo dice
-> El MySQL de los TPs corre en **Docker** *([[MySQL]] § *Setup*)*. Desde el punto de vista del
-> servidor, un cliente que se conecta desde la máquina anfitriona **no es `localhost`**: llega por la
-> red del contenedor con una IP interna. Un usuario creado como `'u'@'localhost'` según el ejemplo del
-> slide **no va a poder conectarse desde fuera del contenedor**. Para probar el TP8 con varios
-> usuarios, hay que crearlos con `'%'` —o entrar con `docker exec` al contenedor y conectarse desde
-> adentro—. Es lo primero que hay que tener en cuenta al armar el ejercicio 2.
+> [!important] (crítico) Para la cursada, el *host* que importa es `'%'`, y el deck no lo dice
+> El MySQL de los TPs corre en **Docker** *([[MySQL]] § *Setup*)*. Un cliente que se conecta desde la
+> máquina anfitriona **no es `localhost`** para el servidor: llega por la red del contenedor con una IP
+> interna. Un usuario creado como `'u'@'localhost'` según el slide **no va a poder conectarse desde
+> fuera del contenedor**. Para probar el TP8 con varios usuarios, hay que crearlos con `'%'` —o entrar
+> con `docker exec` al contenedor y conectarse desde adentro—. Es lo primero a tener en cuenta en el
+> ejercicio 2.
 
 > [!note] `'localhost'` ≠ `'127.0.0.1'`, aunque el slide los junte con una "o"
-> En MySQL, `localhost` se resuelve al **socket Unix** y `127.0.0.1` a **TCP sobre loopback**, y el
-> servidor busca la cuenta que **coincide con el host desde el que llega la conexión**. Si sólo existe
-> `'u'@'localhost'` y el cliente se conecta con `-h 127.0.0.1`, la autenticación **falla**. Es un
-> detalle del manual, no del deck, y muerde en Docker justamente porque ahí se entra por TCP.
+> `localhost` se resuelve al **socket Unix** y `127.0.0.1` a **TCP sobre loopback**; el servidor busca
+> la cuenta que **coincide con el host desde el que llega la conexión**. Si sólo existe
+> `'u'@'localhost'` y el cliente se conecta con `-h 127.0.0.1`, la autenticación **falla**. Muerde en
+> Docker justamente porque ahí se entra por TCP.
 
-**Sin `IDENTIFIED BY`** la cuenta se crea **sin contraseña** — el deck no lo dice y es un agujero
+**Sin `IDENTIFIED BY`** la cuenta se crea **sin contraseña**: el deck no lo dice y es un agujero
 clásico. Y **no hay `ALTER USER`** en el deck para cambiar una contraseña después.
 
 ## Slide 10 · `GRANT` y los tipos de permisos
@@ -483,20 +413,19 @@ GRANT permiso ON base.tabla TO 'usuarioX'@'host' [WITH GRANT OPTION];
 
 > [!warning] Tres imprecisiones en el mismo slide
 > 1. **`WITH GRANT OPTION` no es un "tipo de permiso"**: es una **cláusula** del `GRANT` que da al
->    receptor el derecho de **volver a conceder** los privilegios que recibió. El slide la lista como
->    octavo permiso. Y la glosa *"permite que usuarioX maneje privilegios de otros usuarios"* es
->    engañosa: `usuarioX` **no maneja los privilegios de otros**, puede **conceder los suyos** a
->    otros *(y revocar lo que él mismo concedió)*.
+> receptor el derecho de **volver a conceder** los privilegios que recibió. Y la glosa *"maneje
+> privilegios de otros usuarios"* es engañosa: `usuarioX` puede **conceder los suyos** a otros *(y
+> revocar lo que él mismo concedió)*, no manejar los ajenos.
 > 2. **La lista está incompleta, y lo que falta es lo que el TP7 necesitaba.** MySQL tiene, entre
->    otros, `ALTER`, `INDEX`, `REFERENCES`, `CREATE VIEW`, `SHOW VIEW`, `TRIGGER`, `EXECUTE`,
->    `CREATE ROUTINE`, `ALTER ROUTINE`, `EVENT`, `USAGE`. Con los siete del slide **no se puede crear
->    un trigger ni ejecutar un stored procedure** — o sea, no alcanzan para nada de lo que hizo la
->    [[Práctica 2026-09-01]].
+> otros, `ALTER`, `INDEX`, `REFERENCES`, `CREATE VIEW`, `SHOW VIEW`, `TRIGGER`, `EXECUTE`,
+> `CREATE ROUTINE`, `ALTER ROUTINE`, `EVENT`, `USAGE`. Con los siete del slide **no se puede crear
+> un trigger ni ejecutar un stored procedure**: no alcanzan para nada de lo que hizo la
+> [[Práctica 2026-09-01]].
 > 3. **El nivel de granularidad es uno solo —`base.tabla`— y hay cuatro.** `ON *.*` *(global)*,
->    `ON base.*` *(base)*, `ON base.tabla` *(tabla)* y **`GRANT SELECT (col1, col2) ON base.tabla`**
->    *(columna)*. El slide 13 va a usar `midb.*` sin haber explicado la forma; **la de columna no
->    aparece en ningún slide y el TP8 la usa en el ej. 1** *(`GRANT UPDATE(tiempo,diccion) ON parrafo`)*
->    y la pide en el **2.g** *("actualizar datos en el campo horas_aportadas")*.
+> `ON base.*` *(base)*, `ON base.tabla` *(tabla)* y **`GRANT SELECT (col1, col2) ON base.tabla`**
+> *(columna)*. El slide 13 usa `midb.*` sin haber explicado la forma; **la de columna no aparece en
+> ningún slide y el TP8 la usa en el ej. 1** *(`GRANT UPDATE(tiempo,diccion) ON parrafo`)* y la pide
+> en el **2.g** *("actualizar datos en el campo horas_aportadas")*.
 
 ### Los mismos permisos, contra el estándar y contra GMUW
 
@@ -515,9 +444,6 @@ GRANT permiso ON base.tabla TO 'usuarioX'@'host' [WITH GRANT OPTION];
 > `REVOKE … CASCADE` y por qué `RESTRICT` puede fallar. **Los tres ejercicios del TP8 son ese grafo.**
 > Es la lectura mínima de la semana, antes que el deck.
 
-**Erratas de tipeo:** *"[nombre de bases de datos]. [nombre de tabla]"* con espacio después del
-punto; comillas de apertura tipográficas `‘` contra cierre recto `'` en `‘[usuarioX]’@'host’`.
-
 ## Slide 11 · Roles
 
 > [!quote] Textual, completo — seis sentencias sueltas, sin una línea de prosa
@@ -528,58 +454,53 @@ punto; comillas de apertura tipográficas `‘` contra cierre recto `'` en `‘[
 > - *SHOW GRANTS FOR 'dev1'@'localhost' USING 'app_developer';*
 > - *GRANT SELECT ON T1 to ‘app_developer’;* **[sic: `to` en minúscula, comillas mezcladas]**
 
-Es el único slide del deck sobre roles, no define qué es un rol y **las seis sentencias, leídas de
-arriba abajo, no forman una secuencia ejecutable**: la tercera **borra** el rol que la segunda creó,
-y la cuarta se lo concede a `dev1` **cuando ya no existe**. Son seis comandos de referencia, no un
-guion.
+Único slide sobre roles: no define qué es un rol y **las seis sentencias, leídas de arriba abajo, no
+forman una secuencia ejecutable** —la tercera **borra** el rol que la segunda creó, y la cuarta se lo
+concede a `dev1` cuando ya no existe—. Son comandos de referencia, no un guion.
 
 ### Lo mismo, en el orden en que sí corre
 
 ```sql
 CREATE ROLE 'app_developer';
-GRANT SELECT ON midb.T1 TO 'app_developer';           -- el rol acumula privilegios
+GRANT SELECT ON midb.T1 TO 'app_developer';  -- el rol acumula privilegios
 CREATE USER 'dev1'@'localhost' IDENTIFIED BY 'dev1pass';
-GRANT 'app_developer' TO 'dev1'@'localhost';          -- el usuario recibe el rol
+GRANT 'app_developer' TO 'dev1'@'localhost';  -- el usuario recibe el rol
 SET DEFAULT ROLE 'app_developer' TO 'dev1'@'localhost';  -- ← lo que el deck NO dice
 SHOW GRANTS FOR 'dev1'@'localhost' USING 'app_developer';
 -- …y al final, si hace falta:
 DROP ROLE 'app_developer';
 ```
 
-> [!important] 🔴 Lo que falta es lo que hace que los roles **no funcionen** la primera vez
+> [!important] (crítico) Lo que falta es lo que hace que los roles **no funcionen** la primera vez
 > En MySQL, **conceder un rol no lo activa**. Un usuario con `GRANT 'app_developer' TO 'dev1'` sigue
-> **sin los privilegios del rol** hasta que el rol esté **activo en su sesión**, y para eso hay una de
-> tres cosas: `SET DEFAULT ROLE … TO usuario` *(lo fija para futuras sesiones)*, `SET ROLE …` *(en
-> la sesión actual)*, o la variable de sistema `activate_all_roles_on_login = ON`. **El deck no
-> menciona ninguna.** Quien arme el ej. **2.h** del TP8 siguiendo el slide va a ver que `U4` no
-> puede hacer nada, y va a pensar que el `GRANT` falló. Verificable en el manual 9.7, cap. 8, § *Using
-> Roles* — que es, además, **de donde salen las seis sentencias**: `dev1`, `dev1pass` y
-> `app_developer` son los nombres del ejemplo oficial.
+> **sin los privilegios del rol** hasta que el rol esté **activo en su sesión**, por una de tres vías:
+> `SET DEFAULT ROLE … TO usuario` *(para futuras sesiones)*, `SET ROLE …` *(en la sesión actual)* o
+> la variable de sistema `activate_all_roles_on_login = ON`. **El deck no menciona ninguna.** Quien
+> arme el ej. **2.h** del TP8 siguiendo el slide va a ver que `U4` no puede hacer nada y va a pensar
+> que el `GRANT` falló. Verificable en el manual 9.7, cap. 8, § *Using Roles*, de donde salen las seis
+> sentencias: `dev1`, `dev1pass` y `app_developer` son los nombres del ejemplo oficial.
 
 > [!note] Otras tres cosas que el slide deja sin decir
-> - **Roles existen desde MySQL 8.0.** El deck no dice versión; la cursada corre 9.7, así que no hay
->   problema, pero el TP8 ej. 2.j *("Eliminar el rol ins_prov ¿qué sucede con los usuarios U3 y U4?")*
->   se responde con el manual: al hacer `DROP ROLE`, **el rol se retira de todas las cuentas que lo
->   tenían**, y esas cuentas pierden sus privilegios *(en las sesiones nuevas; las abiertas lo
->   conservan hasta que terminan)*.
+> - **Roles existen desde MySQL 8.0.** La cursada corre 9.7, así que no hay problema. El TP8 ej. 2.j
+> *("Eliminar el rol ins_prov ¿qué sucede con los usuarios U3 y U4?")* se responde con el manual: al
+> hacer `DROP ROLE`, **el rol se retira de todas las cuentas que lo tenían**, y esas cuentas pierden
+> sus privilegios *(en las sesiones nuevas; las abiertas lo conservan hasta que terminan)*.
 > - **`SHOW GRANTS … USING rol`** muestra los privilegios que el usuario tendría **si ese rol
->   estuviera activo** — es la herramienta para responder el TP8 sin adivinar.
-> - **`GRANT SELECT ON T1`** sin base: sólo corre si hay una base seleccionada con `USE`. En el
->   ejemplo del manual la tabla está calificada.
+> estuviera activo**: la herramienta para responder el TP8 sin adivinar.
+> - **`GRANT SELECT ON T1`** sin base sólo corre si hay una base seleccionada con `USE`.
 >
-> Y sobre el concepto: un rol es **un conjunto nombrado de privilegios**, que se concede a usuarios
-> como si fuera un privilegio más. Es el *"grupo de usuarios"* del slide 5, y es lo que el
-> [[_cronograma]] llama *"matriz de roles y permisos"* — la matriz sería la tabla `rol × privilegio`,
-> que **el deck nunca dibuja**. **Date 17.2** *Discretionary Access Control* *(impresa 506)* es la
-> versión conceptual.
+> Sobre el concepto: un rol es **un conjunto nombrado de privilegios**, que se concede a usuarios como
+> si fuera un privilegio más. Es el *"grupo de usuarios"* del slide 5 y lo que el [[_cronograma]]
+> llama *"matriz de roles y permisos"*: la matriz sería la tabla `rol × privilegio`, que **el deck
+> nunca dibuja**. **Date 17.2** *Discretionary Access Control* *(impresa 506)* es la versión conceptual.
 
 ## Slide 12 · `REVOKE` y `FLUSH PRIVILEGES`
 
 > [!quote] Textual
 > - ***REVOKE** [permisos] **ON** [nombre de base de datos] [nombre de tabla] **FROM** ‘[nombre de
->   usuario]’ @‘host’;* **[sic: falta el `.` entre base y tabla; comillas tipográficas]**
->   *"Una vez que se haya finalizado con la configuración de privilegios (GRANT o REVOKE) se deben
->   refrescar todos los con el comando:"* **[sic: falta una palabra — "todos los *privilegios*"]**
+> usuario]’ @‘host’;* **[sic: falta el `.` entre base y tabla; comillas tipográficas]**
+> *"Una vez que se haya finalizado con la configuración de privilegios (GRANT o REVOKE) se deben
+> refrescar todos los con el comando:"* **[sic: falta una palabra — "todos los *privilegios*"]**
 > - ***FLUSH PRIVILEGES;***
 
 **Transcripción limpia:**
@@ -588,29 +509,25 @@ DROP ROLE 'app_developer';
 REVOKE permisos ON base.tabla FROM 'usuario'@'host';
 ```
 
-> [!warning] 🔴 `FLUSH PRIVILEGES` después de un `GRANT` o `REVOKE` **es innecesario**, y el manual lo dice
-> El slide afirma que *"se deben refrescar"* los privilegios después de cada `GRANT` o `REVOKE`.
-> **No**: las sentencias de cuentas *(`CREATE USER`, `GRANT`, `REVOKE`, `SET PASSWORD`…)* **actualizan
-> las tablas de privilegios en memoria de inmediato**. `FLUSH PRIVILEGES` hace falta **sólo** cuando
+> [!warning] (crítico) `FLUSH PRIVILEGES` después de un `GRANT` o `REVOKE` **es innecesario**, y el manual lo dice
+> Las sentencias de cuentas *(`CREATE USER`, `GRANT`, `REVOKE`, `SET PASSWORD`…)* **actualizan las
+> tablas de privilegios en memoria de inmediato**. `FLUSH PRIVILEGES` hace falta **sólo** cuando
 > alguien modificó las tablas del sistema `mysql.user`, `mysql.db`, etc. **a mano con `INSERT` /
-> `UPDATE` / `DELETE`**. Es una instrucción heredada de tutoriales viejos que no rompe nada —por eso
-> sobrevive— pero enseña una causalidad falsa. Verificable en el manual 9.7, cap. 8, § *When Privilege
-> Changes Take Effect*. Registrado en § *Contradicciones internas* como contradicción con el manual,
-> no con otro slide.
+> `UPDATE` / `DELETE`**. Es una instrucción heredada de tutoriales viejos que no rompe nada pero
+> enseña una causalidad falsa. Verificable en el manual 9.7, cap. 8, § *When Privilege Changes Take
+> Effect*. Registrado en § *Contradicciones internas* como contradicción con el manual.
 
-> [!important] 🔴 Lo que el slide no trae es lo que hace difícil el TP8: **`REVOKE` no cascadea en MySQL**
+> [!important] (crítico) Lo que el slide no trae es lo que hace difícil el TP8: **`REVOKE` no cascadea en MySQL**
 > El TP8 lo dice con todas las letras *(ej. 1.b)*: *"Resuelva el ejercicio desde la teoría, ya que
 > **MySQL no provee la opción CASCADE**"*. En el estándar y en GMUW **10.1.6**, `REVOKE … CASCADE`
 > quita el privilegio **y todo lo que se concedió a partir de él**; `RESTRICT` **rechaza** la
 > revocación si eso dejaría privilegios huérfanos. **MySQL no tiene ninguna de las dos**: revocar a
 > `adm` **no toca** lo que `adm` ya concedió a `doc`. Ésa es la brecha que el TP8 pide razonar en
 > papel, y es la **tercera vez** —en el tercer TP consecutivo— que la cátedra reconoce por escrito un
-> desfasaje con MySQL *(las dos anteriores: TP6 3.c y TP7 1.c y 2.b — [[Práctica 2026-09-01]], que
-> cuenta por TP)*. El patrón *"teoría en el estándar,
-> código en MySQL, y la brecha se nombra"* ya no es una anécdota.
+> desfasaje con MySQL *(las dos anteriores: TP6 3.c y TP7 1.c y 2.b, [[Práctica 2026-09-01]])*.
 >
-> Tampoco está **`REVOKE ALL PRIVILEGES, GRANT OPTION FROM usuario`** —la forma de quitar *todo*, que
-> es distinta del `REVOKE ALL ON midb.*` del slide 13—, ni cómo revocar **sólo** la `GRANT OPTION`
+> Tampoco está **`REVOKE ALL PRIVILEGES, GRANT OPTION FROM usuario`** —la forma de quitar *todo*,
+> distinta del `REVOKE ALL ON midb.*` del slide 13—, ni cómo revocar **sólo** la `GRANT OPTION`
 > conservando el privilegio *(`REVOKE GRANT OPTION ON … FROM …`)*.
 
 ## Slide 13 · Ejemplos de privilegios
@@ -625,8 +542,8 @@ REVOKE permisos ON base.tabla FROM 'usuario'@'host';
 > *(En las cuatro, el nombre de usuario va entre comillas tipográficas `‘ ’`, y el host abre con
 > recta `'` y cierra con tipográfica `’` **[sic]**.)*
 
-Es el mejor slide del bloque: **tres granularidades distintas en tres líneas**, y cada una con un
-*host* distinto.
+El mejor slide del bloque: **tres granularidades distintas en tres líneas**, cada una con un *host*
+distinto.
 
 | Sentencia | Granularidad | Host | Lo que enseña |
 | --- | --- | --- | --- |
@@ -638,21 +555,18 @@ Es el mejor slide del bloque: **tres granularidades distintas en tres líneas**,
 > [!tip] El `auditor` del tercer ejemplo es el caso de uso que enlaza con el TP7
 > El ej. 1 del TP7 creó una tabla de auditoría `HIS_ENTREGA` con triggers *([[Práctica 2026-09-01]]
 > § *Ejercicio 1*)*. Este slide muestra **la otra mitad del patrón**: la tabla de log se llena por
-> trigger y **se lee con un usuario que sólo tiene `SELECT` sobre ella**, desde una máquina fija. Es
-> la primera vez que las dos clases se tocan.
+> trigger y **se lee con un usuario que sólo tiene `SELECT` sobre ella**, desde una máquina fija.
 
 > [!note] Dos matices que el ejemplo esconde
-> - `GRANT ALL ON midb.*` **no incluye la `GRANT OPTION`** —hay que pedirla explícitamente— y
->   tampoco los privilegios **globales** *(crear usuarios, `FILE`, `SUPER`…)*: *"todo sobre `midb`"*
->   no es *"todo"*.
+> - `GRANT ALL ON midb.*` **no incluye la `GRANT OPTION`** —hay que pedirla explícitamente— ni los
+> privilegios **globales** *(crear usuarios, `FILE`, `SUPER`…)*: *"todo sobre `midb`"* no es *"todo"*.
 > - El `REVOKE ALL ON midb.*` **no revoca lo que se concedió con otra granularidad**: si `admin`
->   tuviera además un `GRANT SELECT ON midb.log`, ese sobreviviría. Los privilegios en MySQL se
->   guardan **por nivel** *(global, base, tabla, columna)* y se revocan por nivel. Es un detalle del
->   manual que el TP8 ej. 2.e/f puede necesitar.
+> tuviera además un `GRANT SELECT ON midb.log`, ese sobreviviría. Los privilegios se guardan y se
+> revocan **por nivel** *(global, base, tabla, columna)*. El TP8 ej. 2.e/f puede necesitarlo.
 
-Con este slide se cierra el bloque de seguridad. **Balance: 12 slides, de los cuales 5 son marco
-conceptual y 7 son sintaxis MySQL de un solo escenario —un usuario, una tabla—. El modelo de
-propagación y revocación de privilegios entre usuarios, que es lo que el TP8 evalúa, no está.**
+**Balance del bloque de seguridad: 12 slides, 5 de marco conceptual y 7 de sintaxis MySQL de un solo
+escenario —un usuario, una tabla—. El modelo de propagación y revocación de privilegios entre
+usuarios, que es lo que el TP8 evalúa, no está.**
 
 ---
 
@@ -660,30 +574,25 @@ propagación y revocación de privilegios entre usuarios, que es lo que el TP8 e
 
 > [!quote] Textual
 > - *"Una transacción es un mecanismo para definir las **unidades lógicas del procesamiento** de una
->   base de datos"*
+> base de datos"*
 > - *"Una transacción se inicia por la ejecución de un programa escrito en un lenguaje en un lenguaje
->   de programación"* **[sic: "en un lenguaje" repetido]**
+> de programación"* **[sic: "en un lenguaje" repetido]**
 > - *"Una transacción está delimitada por instrucciones de la forma *inicio transacción* y *fin
->   transacción*"*
+> transacción*"*
 
-Adorno: un usuario frente a tres monitores conectados a un cilindro *"BASE DE DATOS"* — la imagen de
-**varios clientes contra un mismo servidor**, que es la situación que hace falta la concurrencia de
-los slides 21–28.
-
-**La definición útil es la primera**: una transacción es la **unidad lógica de trabajo** — el
-conjunto de operaciones que, para el negocio, **o pasa entero o no pasa**. El ejemplo canónico de
-toda la bibliografía es la transferencia bancaria *(debitar una cuenta + acreditar otra)*, que el
-deck **no da** en ningún slide; Silberschatz cap. 1 § 1.7 *(ficha, impresa 10)* lo usa para definir
-atomicidad, consistencia y durabilidad, y GMUW **6.6.3** *Transactions* *(impresa 299)* lo formaliza.
+El adorno —varios clientes contra un mismo servidor— es la situación que motiva la concurrencia de los
+slides 21–28. **La definición útil es la primera**: una transacción es la **unidad lógica de trabajo**, el conjunto
+de operaciones que **o pasa entero o no pasa**. El ejemplo canónico de toda la bibliografía es la
+transferencia bancaria, que el deck **no da** en ningún slide; Silberschatz cap. 1 § 1.7 *(ficha,
+impresa 10)* lo usa para definir atomicidad, consistencia y durabilidad, y GMUW **6.6.3**
+*Transactions* *(impresa 299)* lo formaliza.
 
 > [!note] *"inicio transacción y fin transacción"* — el deck nunca dice cómo se escriben en MySQL
-> En MySQL: **`START TRANSACTION;`** *(o `BEGIN;`)* … **`COMMIT;`** / **`ROLLBACK;`**. Y hay un
-> detalle que cambia todo: MySQL arranca con **`autocommit = 1`**, así que **cada sentencia suelta es
-> una transacción** que se confirma sola; el `START TRANSACTION` es lo que suspende eso hasta el
-> `COMMIT`. Además, **el DDL hace *commit* implícito** *(ya documentado en [[MySQL]] § *Lo que es
-> propio de MySQL*: un `CREATE TABLE` dentro de una transacción la confirma)*, y **todo esto requiere
-> InnoDB** — una tabla MyISAM no participa de transacciones. Nada de esto está en el deck; el único
-> `BEGIN … COMMIT` que muestra es de otros motores *(slides 29–30)*.
+> En MySQL: **`START TRANSACTION;`** *(o `BEGIN;`)* … **`COMMIT;`** / **`ROLLBACK;`**. MySQL arranca
+> con **`autocommit = 1`**, así que **cada sentencia suelta es una transacción** que se confirma sola;
+> `START TRANSACTION` suspende eso hasta el `COMMIT`. Además, **el DDL hace *commit* implícito**
+> *([[MySQL]] § *Lo que es propio de MySQL*)* y **todo esto requiere InnoDB**: una tabla MyISAM no
+> participa de transacciones. El único `BEGIN … COMMIT` del deck es de otros motores *(slides 29–30)*.
 
 ## Slide 15 · Fallos
 
@@ -695,12 +604,11 @@ atomicidad, consistencia y durabilidad, y GMUW **6.6.3** *Transactions* *(impres
 > - *"Fallo del disco rígido"*
 > - *"Problemas físicos y catástrofes"*
 
-Es la lista de tipos de fallo de Elmasri y Navathe, tal cual, sin explicar por qué se lista. **El
-sentido es el que sigue**: el slide 14 dijo que una transacción es "todo o nada", y este slide
-enumera **todas las formas en que puede quedar "a medias"** — y por lo tanto todo lo que el motor
-tiene que poder deshacer o rehacer. Es la motivación del *log* y de la recuperación, temas que el
-deck **no toca** *(GMUW cap. **17** *Coping With System Failures*, y en particular **17.1.1**
-*Failure Modes*, impresa 844, que da la misma taxonomía)*.
+Es la lista de tipos de fallo de Elmasri y Navathe, sin explicar por qué se lista. El sentido: el
+slide 14 dijo "todo o nada", y este enumera **todas las formas en que una transacción puede quedar a
+medias**, es decir, todo lo que el motor tiene que poder deshacer o rehacer. Es la motivación del
+*log* y de la recuperación, temas que el deck **no toca** *(GMUW cap. **17** *Coping With System
+Failures*, en particular **17.1.1** *Failure Modes*, impresa 844, con la misma taxonomía)*.
 
 | Fallo del slide | De quién es la culpa | Qué lo cubre |
 | --- | --- | --- |
@@ -709,39 +617,35 @@ deck **no toca** *(GMUW cap. **17** *Coping With System Failures*, y en particul
 | Errores locales / excepciones | la lógica de negocio *(saldo insuficiente)* | `ROLLBACK` explícito |
 | **Control de la concurrencia** | otra transacción | el *scheduler* aborta una para resolver un conflicto o un **deadlock** — **aislamiento** *(17, 25–28)* |
 | Fallo del disco | medio físico | *backup* + log — GMUW **17.5** *Protecting Against Media Failures* |
-| Catástrofes | el mundo | réplicas remotas — de nuevo, terreno de la segunda mitad |
+| Catástrofes | el mundo | réplicas remotas — terreno de la segunda mitad |
 
 > [!tip] El cuarto ítem es el más raro de la lista, y el más importante para este deck
-> *"Control de la concurrencia"* como **causa de fallo** suena contradictorio: es el mecanismo que
-> protege. Pero es exacto: cuando dos transacciones se traban entre sí *(deadlock)* o una viola la
-> serializabilidad, **el motor mata una de las dos** —en InnoDB, la que hizo menos trabajo— y la
-> aplicación recibe un error. Es la única causa de fallo de la lista **provocada por el propio DBMS**,
-> y el deck **no menciona los deadlocks** en ningún slide *(GMUW **19.2** *Deadlocks*, impresa 966;
-> Date **16.5**)*.
+> *"Control de la concurrencia"* como **causa de fallo** es exacto: cuando dos transacciones se traban
+> entre sí *(deadlock)* o una viola la serializabilidad, **el motor mata una de las dos** —en InnoDB,
+> la que hizo menos trabajo— y la aplicación recibe un error. Es la única causa de fallo **provocada
+> por el propio DBMS**, y el deck **no menciona los deadlocks** en ningún slide *(GMUW **19.2**
+> *Deadlocks*, impresa 966; Date **16.5**)*.
 
 ## Slides 16–17 · ACID
 
 > [!quote] Slide 16 — *"ACID (AC--)"*, textual
 > **Atomicidad**
 > - *"Requiere que cada transacción sea "todo o nada": si una parte de la transacción falla, todas
->   las operaciones de la transacción fallan, y por lo tanto la base de datos no sufre cambios"*
+> las operaciones de la transacción fallan, y por lo tanto la base de datos no sufre cambios"*
 >
 > **Consistencia**
 > - *"Asegura que cualquier transacción llevará a la base de datos de un estado válido a otro estado
->   válido. Cualquier dato que se escriba en la base de datos tiene que ser válido de acuerdo a
->   todas las reglas definidas"*
+> válido. Cualquier dato que se escriba en la base de datos tiene que ser válido de acuerdo a
+> todas las reglas definidas"*
 
 > [!quote] Slide 17 — *"ACID (--ID)"*, textual
 > **Aislamiento**
 > - *"Asegura que la ejecución concurrente de las transacciones resulte en un estado del sistema que
->   se obtendría si estas transacciones fueran ejecutadas una detrás de otra"*
+> se obtendría si estas transacciones fueran ejecutadas una detrás de otra"*
 >
 > **Durabilidad**
 > - *"Significa que una vez que se confirmó una transacción quedará persistida, incluso ante eventos
->   como pérdida de alimentación eléctrica, errores y caídas del sistema"*
-
-Los títulos *"AC--"* y *"--ID"* son el acrónimo con las letras del otro slide tachadas por guiones:
-una forma limpia de partir cuatro definiciones en dos pantallas.
+> como pérdida de alimentación eléctrica, errores y caídas del sistema"*
 
 ### Las cuatro, en una tabla con lo que cada una implica
 
@@ -752,30 +656,24 @@ una forma limpia de partir cuatro definiciones en dos pantallas.
 | **I**solation | como si fueran una detrás de otra | el control de concurrencia | las anomalías de 23–24 | **21–30**, todo el resto del bloque |
 | **D**urabilidad | confirmado = persistido, aun sin luz | el motor, con el log de *redo* y `fsync` | una caída **antes** del `COMMIT` no la rompe: no había nada que durar | — |
 
-> [!important] 🎯 Tres puntos que el deck no dice y el parcial puede pedir
-> 1. **La consistencia es la única de las cuatro que no la garantiza el motor.** *"Válido de acuerdo
->    a todas las reglas definidas"* — las reglas las define alguien: son las **restricciones de
->    integridad** de la [[Clase 09 - Restricciones integridad-Parte 1]] y los **triggers** del deck
->    10. El motor garantiza que si cada transacción *por separado* respeta las reglas, la ejecución
->    concurrente también las respeta *(eso es aislamiento)*. Silberschatz cap. 1 § 1.7 lo reparte
->    igual *(ficha: "el programador define transacciones consistentes; el gestor de transacciones
->    asegura atomicidad y durabilidad")*.
-> 2. **La definición de aislamiento del slide 17 es la de serializabilidad**: *"el estado que se
->    obtendría si … fueran ejecutadas una detrás de otra"*. Es decir, **el deck define la I como el
->    nivel `SERIALIZABLE` del slide 28** — y los otros tres niveles son, literalmente, **grados de
->    violación de la I**. GMUW **6.6.1** *Serializability* *(impresa 296)* abre el tema exactamente
->    así. El deck no conecta los dos slides.
+> [!important] (clave) Tres puntos que el deck no dice y el parcial puede pedir
+> 1. **La consistencia es la única de las cuatro que no la garantiza el motor.** Las *"reglas
+> definidas"* son las **restricciones de integridad** de la
+> [[Clase 09 - Restricciones integridad-Parte 1]] y los **triggers** del deck 10. El motor garantiza
+> que si cada transacción *por separado* respeta las reglas, la ejecución concurrente también
+> *(eso es aislamiento)*. Silberschatz cap. 1 § 1.7 lo reparte igual *(ficha: "el programador define
+> transacciones consistentes; el gestor de transacciones asegura atomicidad y durabilidad")*.
+> 2. **La definición de aislamiento del slide 17 es la de serializabilidad**: el deck define la I como
+> el nivel `SERIALIZABLE` del slide 28, y los otros tres niveles son **grados de violación de la I**.
+> GMUW **6.6.1** *Serializability* *(impresa 296)* abre el tema exactamente así.
 > 3. **ACID es lo que la segunda mitad va a negociar.** Corbellini **§ 3.2** *ACID and BASE
->    properties* *(pp. 5–7)* es la continuación directa: BASE *(Basically Available, Soft state,
->    Eventually consistent)* es "qué se cede de ACID para ganar disponibilidad y partición". Y Date
->    **16.10** se titula, sin más, ***Dropping ACID*** *(impresa 485)*. Este par de slides es el
->    último momento en que la cursada da ACID por sentado.
-
-> [!note] Silberschatz cap. 1 —el único de ese libro en el vault— **no define la I**
-> La ficha lo verificó: § 1.7 define atomicidad, consistencia y durabilidad sobre la transferencia
-> de fondos, y *"nunca dice «aislamiento» en sentido transaccional"*; **0 apariciones de `ACID`**.
-> Para la I hay que ir a **GMUW 6.6** o a **Date 16**, no al capítulo que la cátedra dio como
-> introducción.
+> properties* *(pp. 5–7)*: BASE *(Basically Available, Soft state, Eventually consistent)* es "qué se
+> cede de ACID para ganar disponibilidad y partición". Date **16.10** se titula ***Dropping ACID***
+> *(impresa 485)*.
+>
+> Silberschatz cap. 1 —el único de ese libro en el vault— **no define la I**: § 1.7 define A, C y D
+> sobre la transferencia de fondos y *"nunca dice «aislamiento» en sentido transaccional"*. Para la I
+> hay que ir a **GMUW 6.6** o a **Date 16**.
 
 ## Slide 18 · Estados de una transacción
 
@@ -784,14 +682,13 @@ una forma limpia de partir cuatro definiciones en dos pantallas.
 > - ***Parcialmente confirmada**, después de ejecutarse la última instrucción*
 > - ***Fallida**, tras descubrir que no puede continuar la ejecución normal*
 > - ***Abortada**, después de haber retrocedido la transacción y restablecido la base de datos a su
->   estado anterior al comienzo de la transacción*
+> estado anterior al comienzo de la transacción*
 > - ***Confirmada**, tras completarse con éxito*
 
-**Cinco estados, en el vocabulario de la traducción de Silberschatz.** El que suele confundir es
-*"parcialmente confirmada"*: es el instante en que la última instrucción **ya se ejecutó** pero el
-motor **todavía no garantizó la durabilidad** — los cambios están en memoria y el log no está en
-disco. Desde ahí se puede ir a *confirmada* *(el log llegó a disco)* o a *fallida* *(se cayó el
-sistema antes)*.
+Cinco estados, en el vocabulario de la traducción de Silberschatz. El que confunde es *"parcialmente
+confirmada"*: la última instrucción **ya se ejecutó** pero el motor **todavía no garantizó la
+durabilidad** —los cambios están en memoria y el log no está en disco—. Desde ahí se va a
+*confirmada* *(el log llegó a disco)* o a *fallida* *(se cayó el sistema antes)*.
 
 | Estado | Cuándo se entra | De dónde se viene | A dónde se va |
 | --- | --- | --- | --- |
@@ -801,39 +698,32 @@ sistema antes)*.
 | **Abortada** | `ROLLBACK` terminado, BD restaurada | fallida | *(fin; puede reiniciarse)* |
 | **Confirmada** | `COMMIT` durable | parcialmente confirmada | *(fin)* |
 
-> [!warning] 🔴 Esta lista **no coincide con el diagrama del slide 20**
-> El slide 20 tiene los nodos **"Activa"**, **"Parcialmente confirmada"**, **"Confirmada"**,
-> **"Fallo"** y **"Terminar"**. **"Abortada" no está en el diagrama**, y **"Terminar" no está en la
-> lista**. Son dos fuentes distintas *(la lista es de Silberschatz; el diagrama, de Elmasri y
-> Navathe)* pegadas sin reconciliar. Detalle en § *Slide 20* y en § *Contradicciones internas*.
+(crítico) Esta lista **no coincide con el diagrama del slide 20**: *"Abortada"* no está en el diagrama
+y *"Terminar"* no está en la lista. Detalle en § *Slide 20*.
 
 ## Slide 19 · Operaciones
 
 > [!quote] Textual
 > - ***INICIO DE TRANSACION.** Marca el inicio de la ejecución de una transacción* **[sic: sin la
->   segunda C, dos veces en el slide]**
+> segunda C, dos veces en el slide]**
 > - ***LEER o ESCRIBIR.** Especifican operaciones de lectura o escritura en los elementos de la base
->   de datos que se ejecutan como parte de una transacción*
+> de datos que se ejecutan como parte de una transacción*
 > - ***FIN DE LA TRANSACION.** Especifica que las operaciones LEER y ESCRIBIR de la transacción han
->   terminado y marca el final de la ejecución de la transacción. En este punto se comprueba si los
->   cambios introducidos pueden confirmarse* **[sic]**
+> terminado y marca el final de la ejecución de la transacción. En este punto se comprueba si los
+> cambios introducidos pueden confirmarse* **[sic]**
 > - ***CONFIRMAR (Commit).** Señala una finalización satisfactoria de la transacción, por lo que los
->   cambios (actualizaciones) ejecutados se pueden enviar con seguridad a la base de datos*
+> cambios (actualizaciones) ejecutados se pueden enviar con seguridad a la base de datos*
 > - ***ABORTAR (Rollback).** Señala que la transacción no ha terminado satisfactoriamente, por lo que
->   deben deshacerse los cambios*
+> deben deshacerse los cambios*
 
-Son las **cinco primitivas** con las que el slide 20 va a etiquetar las aristas del diagrama. La
-distinción fina que vale la pena es que **`FIN DE LA TRANSACCIÓN` no es `COMMIT`**: el fin marca que
-el programa terminó de emitir operaciones; *"en este punto se comprueba si los cambios pueden
-confirmarse"* — y recién después viene el *commit* o el *rollback*. Es lo que separa *"activa"* de
-*"parcialmente confirmada"* en el slide 18.
-
-> [!note] En GMUW las primitivas son otras, y más finas
-> GMUW **17.1.4** *The Primitive Operations of Transactions* *(impresa 848)* distingue **`INPUT`**
-> *(disco → buffer)*, **`READ`** y **`WRITE`** *(buffer ↔ variable local)* y **`OUTPUT`** *(buffer →
-> disco)*. El "LEER o ESCRIBIR" del deck son `READ`/`WRITE`; lo que el deck **omite** es que escribir
-> **no** significa que llegó al disco — y ésa es exactamente la razón de que exista el estado
-> "parcialmente confirmada".
+Son las **cinco primitivas** con las que el slide 20 etiqueta las aristas del diagrama. La distinción
+fina: **`FIN DE LA TRANSACCIÓN` no es `COMMIT`**; el fin marca que el programa terminó de emitir
+operaciones, y recién después viene el *commit* o el *rollback*. Es lo que separa *"activa"* de
+*"parcialmente confirmada"* en el slide 18. En GMUW **17.1.4** *The Primitive Operations of
+Transactions* *(impresa 848)* las primitivas son más finas —**`INPUT`** *(disco → buffer)*, **`READ`**
+y **`WRITE`** *(buffer ↔ variable local)* y **`OUTPUT`** *(buffer → disco)*—, y lo que el deck omite
+es que escribir **no** significa que llegó al disco: ésa es la razón del estado "parcialmente
+confirmada".
 
 ### Las cinco operaciones, en MySQL
 
@@ -850,123 +740,109 @@ confirmarse"* — y recién después viene el *commit* o el *rollback*. Es lo qu
 > [!quote] El único diagrama con contenido del deck — imagen escaneada, en blanco y negro
 > *"Transacciones en Base de Datos · Diagrama de Transición de Estados"*
 
-Transcripción del diagrama *(la capa de texto lo perdió por completo — sólo se ve en el PNG)*:
+Transcripción del diagrama *(la capa de texto lo perdió por completo; sólo se ve en el PNG)*:
 
 ```
-                     Leer, Escribir
-                        ┌──┐
-                        ↓  │
-Inicio de            ┌──────┐  Fin de la        ┌──────────────────────┐  Confirmar  ┌────────────┐
+  Leer, Escribir
+  ┌──┐
+  ↓  │
+Inicio de  ┌──────┐  Fin de la  ┌──────────────────────┐  Confirmar  ┌────────────┐
 transacción ───────→ │Activa│ ───────────────→ │Parcialmente confirmada│ ─────────→ │ Confirmada │
-                     └──────┘  transacción      └──────────────────────┘             └────────────┘
-                        │                                  │                               │
-                        │ Abortar                          │ Abortar                       │
-                        │                                  ↓                               ↓
-                        │                            ┌───────┐                       ┌──────────┐
-                        └──────────────────────────→ │ Fallo │ ─────────────────────→│ Terminar │
-                                                     └───────┘                       └──────────┘
+  └──────┘  transacción  └──────────────────────┘  └────────────┘
+  │  │  │
+  │ Abortar  │ Abortar  │
+  │  ↓  ↓
+  │  ┌───────┐  ┌──────────┐
+  └──────────────────────────→ │ Fallo │ ─────────────────────→│ Terminar │
+  └───────┘  └──────────┘
 ```
 
-Cinco nodos y ocho aristas *(siete transiciones entre nodos más la flecha de entrada "Inicio de
-transacción"; las dos que llegan a Terminar van sin etiqueta)*. Las etiquetas de las aristas son
-**exactamente las cinco operaciones del slide 19** *(Inicio, Leer/Escribir, Fin, Confirmar, Abortar)*,
-y "Leer, Escribir" es un **bucle** sobre *Activa*: la transacción se queda activa mientras opera.
+Cinco nodos y ocho aristas *(siete transiciones más la flecha de entrada; las dos que llegan a
+Terminar van sin etiqueta)*. Las etiquetas son **exactamente las cinco operaciones del slide 19**, y
+"Leer, Escribir" es un **bucle** sobre *Activa*.
 
-> [!bug] 🔴 El diagrama y la lista del slide 18 son de dos libros distintos, y no cierran entre sí
+> [!bug] (crítico) El diagrama y la lista del slide 18 son de dos libros distintos, y no cierran entre sí
 > | Slide 18 *(lista)* | Slide 20 *(diagrama)* | ¿Coinciden? |
 > | --- | --- | :---: |
-> | Activa | Activa | ✅ |
-> | Parcialmente confirmada | Parcialmente confirmada | ✅ |
-> | Confirmada | Confirmada | ✅ |
-> | **Fallida** | **Fallo** | 🟡 mismo estado, otro nombre |
-> | **Abortada** | — | ❌ **no está en el diagrama** |
-> | — | **Terminar** | ❌ **no está en la lista** |
+> | Activa | Activa | ✓ |
+> | Parcialmente confirmada | Parcialmente confirmada | ✓ |
+> | Confirmada | Confirmada | ✓ |
+> | **Fallida** | **Fallo** | (atención) mismo estado, otro nombre |
+> | **Abortada** | — | ✗ **no está en el diagrama** |
+> | — | **Terminar** | ✗ **no está en la lista** |
 >
-> El diagrama es la figura de Elmasri y Navathe *(estados *active · partially committed · committed ·
-> failed · terminated*)*; la lista es la de Silberschatz *(*active · partially committed · failed ·
-> aborted · committed*)*. En Elmasri, *"terminated"* es el estado final común de confirmadas y
-> fallidas; en Silberschatz, *"aborted"* es el estado al que llega una fallida **después** del
-> rollback. Los dos modelos son consistentes cada uno por su lado; **el deck mezcla la lista de uno
-> con el dibujo del otro** y, leído literalmente, tiene un estado que no se dibuja y un nodo que no se
-> define. Para el parcial: **aprender uno completo**, y saber que *"Abortada"* de la lista ≈ el tramo
-> *Fallo → Terminar* del diagrama.
+> El diagrama es la figura de Elmasri y Navathe *(active · partially committed · committed · failed ·
+> terminated)*; la lista es la de Silberschatz *(active · partially committed · failed · aborted ·
+> committed)*. En Elmasri, *"terminated"* es el estado final común de confirmadas y fallidas; en
+> Silberschatz, *"aborted"* es el estado al que llega una fallida **después** del rollback. Para el
+> parcial: **aprender uno completo**, y saber que *"Abortada"* ≈ el tramo *Fallo → Terminar*.
+>
+> Lo que el diagrama sí muestra mejor que la lista: que se puede **abortar desde dos lugares**, desde
+> *Activa* y desde *Parcialmente confirmada* *(ya se ejecutó todo, pero el motor no logró hacerlo
+> durable)*. Esa segunda arista es la razón de ser del estado intermedio.
 
-> [!tip] Lo que el diagrama sí muestra mejor que la lista
-> Que se puede **abortar desde dos lugares**: desde *Activa* *(error a mitad de camino)* **y desde
-> *Parcialmente confirmada*** *(ya se ejecutó todo, pero el motor no logró hacerlo durable — por
-> ejemplo, se cayó antes de escribir el log)*. Esa segunda arista es la razón de ser del estado
-> intermedio, y es lo que la lista del slide 18 no deja ver.
+## Slides 21–22 · Concurrencia — el problema y sus ventajas
 
-## Slide 21 · Concurrencia de transacciones
-
-> [!quote] Textual
+> [!quote] Slide 21, textual
 > - ***Enfoque de ejecución secuencial** de transacciones es más sencillo de implementar, pero menos
->   eficiente. Para comenzar una transacción es necesario finalizar la anterior*
+> eficiente. Para comenzar una transacción es necesario finalizar la anterior*
 > - ***Enfoque de ejecución concurrente** permite varias transacciones que actualizan
->   concurrentemente los datos y puede provocar complicaciones en la consistencia de los mismos*
+> concurrentemente los datos y puede provocar complicaciones en la consistencia de los mismos*
 >
 > *El **esquema de control de concurrencia** de un DBMS controla la interacción entre las
 > transacciones concurrentes para evitar que se destruya la consistencia de la base de datos*
 > *(esta última frase va sin viñeta, como conclusión)*
 
-Es el planteo del problema en tres líneas: **secuencial** es trivialmente correcto y lento;
-**concurrente** es rápido y peligroso; el **control de concurrencia** es lo que permite tener lo
-segundo con la corrección de lo primero. La definición de aislamiento del slide 17 es exactamente
-el criterio de corrección: *"como si fueran una detrás de otra"*.
+> [!quote] Slide 22, textual
+> - ***Productividad y utilización de recursos mejorados***
+> - *"El número de transacciones que puede ejecutar en un tiempo dado aumenta cuando varias
+> transacciones se ejecutan en paralelo. Por ej., las operaciones de E/S, como uso de CPU y
+> discos pueden trabajar en paralelo en una computadora"*
+> - ***Tiempo de espera reducido***
+> - *"Frente a transacciones cortas y largas, la ejecución concurrente reduce los retardos
+> impredecibles en la ejecución de las transacciones"*
+> - *"Se reduce también el tiempo medio de respuesta"*
+
+El planteo: **secuencial** es trivialmente correcto y lento; **concurrente** es rápido y peligroso; el
+**control de concurrencia** permite tener lo segundo con la corrección de lo primero, y el criterio de
+corrección es la definición de aislamiento del slide 17. Las dos ventajas son las de un SO
+multiprogramado: **throughput** *(mientras una transacción espera al disco, otra usa la CPU)* y
+**latencia** *(una corta no espera a una larga)*.
 
 > [!note] El vocabulario preciso, que el deck no usa
 > - Una ejecución secuencial es un ***schedule* serial**; una concurrente que da el mismo resultado
->   que alguna serial es un ***schedule* serializable**. GMUW **18.1** *Serial and Serializable
->   Schedules* *(impresa 884)* y Date **16.6** *Serializability* *(476)*.
-> - El "esquema de control de concurrencia" es el ***scheduler*** de GMUW **18.3.2** — el módulo del
->   motor que decide, operación por operación, si dejarla pasar, demorarla o abortar la transacción.
->   Silberschatz cap. 1 lo llama *"gestor de control de concurrencia"* *(ficha § 1.7)*.
-
-## Slide 22 · Ventajas de la concurrencia
-
-> [!quote] Textual
-> - ***Productividad y utilización de recursos mejorados***
->   - *"El número de transacciones que puede ejecutar en un tiempo dado aumenta cuando varias
->     transacciones se ejecutan en paralelo. Por ej., las operaciones de E/S, como uso de CPU y
->     discos pueden trabajar en paralelo en una computadora"*
-> - ***Tiempo de espera reducido***
->   - *"Frente a transacciones cortas y largas, la ejecución concurrente reduce los retardos
->     impredecibles en la ejecución de las transacciones"*
->   - *"Se reduce también el tiempo medio de respuesta"*
-
-Dos argumentos, ambos de sistemas operativos: **throughput** *(mientras una transacción espera al
-disco, otra usa la CPU)* y **latencia** *(una transacción corta no tiene que esperar a que termine
-una larga que llegó antes)*. Son las mismas dos razones por las que un SO multiprograma.
-
-**Errata:** *"las operaciones de E/S, **como** uso de CPU y discos"* — la E/S no es "uso de CPU"; la
-frase original opone E/S a CPU *("E/S **y** uso de CPU pueden trabajar en paralelo")*. Se conserva.
+> que alguna serial es un ***schedule* serializable**. GMUW **18.1** *Serial and Serializable
+> Schedules* *(impresa 884)* y Date **16.6** *Serializability* *(476)*.
+> - El "esquema de control de concurrencia" es el ***scheduler*** de GMUW **18.3.2**: el módulo que
+> decide, operación por operación, si dejarla pasar, demorarla o abortar la transacción.
+> Silberschatz cap. 1 lo llama *"gestor de control de concurrencia"* *(ficha § 1.7)*.
 
 ## Slides 23–24 · Problemas de concurrencia — las cuatro anomalías
 
 > [!quote] Slide 23, textual
 > *"Debido a la ejecución simultánea de transacciones, pueden surgir problemas como:"*
 > - ***Race conditions**: Situación donde el resultado de las transacciones depende del orden de
->   ejecución. Por ejemplo, dos transacciones intentando actualizar el mismo saldo de cuenta
->   simultáneamente.*
+> ejecución. Por ejemplo, dos transacciones intentando actualizar el mismo saldo de cuenta
+> simultáneamente.*
 > - ***Dirty Read:** Ocurre cuando una transacción lee datos modificados por otra transacción que aún
->   no ha sido confirmada. Si la segunda transacción se deshace, los datos leídos son inválidos. Por
->   ejemplo, un cliente ve un saldo de cuenta que se actualizó pero luego se revertió, dejando al
->   cliente con información incorrecta.*
+> no ha sido confirmada. Si la segunda transacción se deshace, los datos leídos son inválidos. Por
+> ejemplo, un cliente ve un saldo de cuenta que se actualizó pero luego se revertió, dejando al
+> cliente con información incorrecta.*
 
 > [!quote] Slide 24, textual
 > - ***Non-repeatable Read:** Se produce cuando una transacción lee un dato y luego otra transacción
->   modifica ese dato antes de que la primera transacción se complete. Esto significa que si la
->   primera transacción lee el mismo dato de nuevo, obtendrá un valor diferente. Por ejemplo, una
->   transacción que lee un precio de producto, y otra transacción cambia el precio antes de que la
->   primera confirme su operación.*
+> modifica ese dato antes de que la primera transacción se complete. Esto significa que si la
+> primera transacción lee el mismo dato de nuevo, obtendrá un valor diferente. Por ejemplo, una
+> transacción que lee un precio de producto, y otra transacción cambia el precio antes de que la
+> primera confirme su operación.*
 > - ***Phantom Read:** Sucede cuando una transacción lee un conjunto de datos y otra transacción
->   inserta o elimina datos en ese conjunto antes de que la primera transacción termine. Esto resulta
->   en un conjunto de datos que cambia durante la transacción. Por ejemplo, una transacción que
->   cuenta el número de registros que cumplen ciertos criterios, mientras que otra transacción
->   inserta nuevos registros que también cumplen esos criterios.*
+> inserta o elimina datos en ese conjunto antes de que la primera transacción termine. Esto resulta
+> en un conjunto de datos que cambia durante la transacción. Por ejemplo, una transacción que
+> cuenta el número de registros que cumplen ciertos criterios, mientras que otra transacción
+> inserta nuevos registros que también cumplen esos criterios.*
 
-Los dos slides son **el catálogo de lo que puede salir mal**, y son la mitad que hace inteligible el
-slide 28: cada nivel de aislamiento se define por **cuáles de estas anomalías tolera**.
+Es el catálogo de lo que puede salir mal, y lo que hace inteligible el slide 28: cada nivel de
+aislamiento se define por **cuáles de estas anomalías tolera**.
 
 ### Las cuatro, con la traza mínima que las produce
 
@@ -981,95 +857,86 @@ slide 28: cada nivel de aislamiento se define por **cuáles de estas anomalías 
 > El estándar SQL-92 —y GMUW **6.6.5**, **6.6.6**, y Date **16.2** *Three Concurrency Problems*—
 > hablan de **lost update**, **dirty read** *(uncommitted dependency)* y **non-repeatable read**
 > *(inconsistent analysis)*, más el **phantom**. *"Race condition"* es vocabulario de sistemas
-> operativos y programación concurrente; describe la **causa** *(el resultado depende del orden)*, no
-> una anomalía en particular. El ejemplo que da el slide —*"dos transacciones intentando actualizar
-> el mismo saldo"*— es exactamente el **lost update**. Vale saber los dos nombres: el del deck para
-> el parcial, el del estándar para la bibliografía.
+> operativos: describe la **causa** *(el resultado depende del orden)*, no una anomalía. El ejemplo
+> del slide —*"dos transacciones intentando actualizar el mismo saldo"*— es exactamente el **lost
+> update**. Vale saber los dos nombres: el del deck para el parcial, el del estándar para la
+> bibliografía.
 
 > [!note] La diferencia entre *non-repeatable* y *phantom* es **fila vs. conjunto**, y el deck la da bien
-> - *Non-repeatable*: **una fila que ya leí cambió** *(`UPDATE` ajeno)*.
-> - *Phantom*: **el conjunto de filas que cumplen mi condición cambió** *(`INSERT`/`DELETE` ajeno)*.
->
-> La distinción importa porque se resuelven con mecanismos distintos: para la primera alcanza con
-> bloquear **las filas leídas**; para la segunda hay que bloquear **el rango** —filas que todavía no
-> existen—, que es lo que hace InnoDB con sus *gap locks* y lo que GMUW **18.6.3** *Phantoms and
-> Handling Insertions Correctly* *(impresa 926)* explica. Por eso `REPEATABLE READ` del estándar evita
-> la primera y no la segunda *(slide 28)*.
+> *Non-repeatable*: **una fila que ya leí cambió** *(`UPDATE` ajeno)*. *Phantom*: **el conjunto de
+> filas que cumplen mi condición cambió** *(`INSERT`/`DELETE` ajeno)*. Se resuelven con mecanismos
+> distintos: para la primera alcanza con bloquear **las filas leídas**; para la segunda hay que
+> bloquear **el rango** —filas que todavía no existen—, que es lo que hace InnoDB con sus *gap locks*
+> y lo que GMUW **18.6.3** *Phantoms and Handling Insertions Correctly* *(impresa 926)* explica. Por
+> eso `REPEATABLE READ` del estándar evita la primera y no la segunda *(slide 28)*.
 
 ## Slide 25 · Locking — shared y exclusive
 
 > [!quote] Textual
 > *"Consiste en controlar el acceso a los datos mediante bloqueos:"*
 > - ***Shared Lock:** Permite que múltiples transacciones lean un dato, pero ninguna pueda
->   modificarlo hasta que se libere el bloqueo. Ej: varias transacciones pueden leer el saldo de una
->   cuenta simultáneamente, pero no pueden modificarlo hasta que se libere el bloqueo.*
+> modificarlo hasta que se libere el bloqueo. Ej: varias transacciones pueden leer el saldo de una
+> cuenta simultáneamente, pero no pueden modificarlo hasta que se libere el bloqueo.*
 > - ***Exclusive Lock:** Permite que una sola transacción lea y modifique el dato. Nadie más puede
->   leer ni modificar el dato hasta que se libere el bloqueo. Ej: una transacción que actualiza el
->   saldo de una cuenta bloquea el dato para que otros usuarios no puedan leer ni modificarlo.*
+> leer ni modificar el dato hasta que se libere el bloqueo. Ej: una transacción que actualiza el
+> saldo de una cuenta bloquea el dato para que otros usuarios no puedan leer ni modificarlo.*
 
-El primero de **tres mecanismos** *(25 locking · 26 optimista · 27 timestamps)*, y el único que la
+Primero de **tres mecanismos** *(25 locking · 26 optimista · 27 timestamps)*, y el único que la
 cursada va a ver en acción. Con dos modos, la regla cabe en una **matriz de compatibilidad**:
 
 | Quiere ↓ · Hay → | **S** *(shared)* | **X** *(exclusive)* |
 | --- | :---: | :---: |
-| **S** | ✅ compatible | ❌ espera |
-| **X** | ❌ espera | ❌ espera |
+| **S** | ✓ compatible | ✗ espera |
+| **X** | ✗ espera | ✗ espera |
 
 Es GMUW **18.4.1** *Shared and Exclusive Locks* y **18.4.2** *Compatibility Matrices* *(impresas
 905–907)*; Date **16.3** *Locking* *(470)*.
 
-> [!warning] 🔴 *"Nadie más puede leer"* es cierto en el modelo de dos bloqueos, y **falso en InnoDB y en PostgreSQL**
-> El slide describe el *locking* clásico: un `X` bloquea también las lecturas. **Los dos motores que
-> el deck usa como ejemplo —y el de la cursada— no funcionan así.** InnoDB y PostgreSQL usan
-> **multiversión (MVCC)**: un `SELECT` común **no pide bloqueo** y lee la **versión confirmada** más
-> reciente *(o la del inicio de su transacción, según el nivel)*, así que **una fila con `X` sigue
-> siendo legible** — se lee su valor viejo. Sólo un `SELECT … FOR UPDATE` / `FOR SHARE` *(slide 30)*
-> pide bloqueo y espera. La consecuencia práctica es enorme: **en MySQL, los lectores no bloquean a
-> los escritores ni los escritores a los lectores**. El deck da el modelo de libro, y ese modelo es el
-> de GMUW 18.4, que en **18.8.5** *Multiversion Timestamps* *(939)* explica precisamente la
+> [!warning] (crítico) *"Nadie más puede leer"* es cierto en el modelo de dos bloqueos, y **falso en InnoDB y en PostgreSQL**
+> Los dos motores que el deck usa como ejemplo —y el de la cursada— usan **multiversión (MVCC)**: un
+> `SELECT` común **no pide bloqueo** y lee la **versión confirmada** más reciente *(o la del inicio de
+> su transacción, según el nivel)*, así que **una fila con `X` sigue siendo legible** con su valor
+> viejo. Sólo un `SELECT … FOR UPDATE` / `FOR SHARE` *(slide 30)* pide bloqueo y espera. **En MySQL,
+> los lectores no bloquean a los escritores ni los escritores a los lectores.** El deck da el modelo
+> de libro, el de GMUW 18.4, que en **18.8.5** *Multiversion Timestamps* *(939)* explica la
 > alternativa que InnoDB usa.
 
 > [!note] Lo que hace falta además de los dos modos, y el deck no trae
 > - **Two-Phase Locking (2PL)**: que una transacción **no pida más bloqueos después de soltar uno**.
->   Sin esa regla, tener bloqueos no garantiza serializabilidad. GMUW **18.3.3** *(900)*.
-> - **Deadlock**: T1 tiene X sobre A y pide B; T2 tiene X sobre B y pide A. Alguien tiene que morir.
->   GMUW **19.2**; Date **16.5**. InnoDB lo detecta y aborta la transacción más chica con el error
->   **1213**.
+> Sin esa regla, tener bloqueos no garantiza serializabilidad. GMUW **18.3.3** *(900)*.
+> - **Deadlock**: T1 tiene X sobre A y pide B; T2 tiene X sobre B y pide A. GMUW **19.2**; Date
+> **16.5**. InnoDB lo detecta y aborta la transacción más chica con el error **1213**.
 > - **Granularidad**: fila, página, tabla. InnoDB bloquea **filas** *(y rangos)*; una tabla MyISAM se
->   bloquea entera. GMUW **18.6** *Hierarchies of Database Elements*; Date **16.9** *Intent Locking*.
-> - **Update lock**: el modo intermedio que el slide 29 va a usar sin definir *(`UPDLOCK`)*. GMUW
->   **18.4.4** *Update Locks* *(909)*.
+> bloquea entera. GMUW **18.6** *Hierarchies of Database Elements*; Date **16.9** *Intent Locking*.
+> - **Update lock**: el modo intermedio que el slide 29 usa sin definir *(`UPDLOCK`)*. GMUW
+> **18.4.4** *Update Locks* *(909)*.
 
 ## Slide 26 · Control de versiones (Optimistic Concurrency Control)
 
 > [!quote] Textual
 > - *"En el **control de versiones** las transacciones no utilizan bloqueos. En lugar de eso, se
->   permite que las transacciones realicen cambios y, antes de confirmarlas, se verifica si los datos
->   han cambiado durante la transacción."*
+> permite que las transacciones realicen cambios y, antes de confirmarlas, se verifica si los datos
+> han cambiado durante la transacción."*
 > - ***Ejemplo:** Una transacción que actualiza un registro debe comparar el valor del registro antes
->   de la actualización con el valor actual en la base de datos. Si ha cambiado, se produce un
->   conflicto y la transacción debe manejar el error.*
+> de la actualización con el valor actual en la base de datos. Si ha cambiado, se produce un
+> conflicto y la transacción debe manejar el error.*
 
-Es el segundo mecanismo: **no bloquear, y validar al final**. Apuesta a que los conflictos son
-raros *(por eso "optimista")*: si lo son, se ahorra todo el costo de los bloqueos; si no lo son, se
-pagan *rollbacks* y reintentos. GMUW **18.9** *Concurrency Control by Validation* *(impresa 942)*, y
-**18.9.3** *Comparison of Three Concurrency-Control Mechanisms* *(946)* es la tabla que compara los
-tres slides 25–27.
+Segundo mecanismo: **no bloquear, y validar al final**. Apuesta a que los conflictos son raros *(por
+eso "optimista")*: si lo son, se ahorra el costo de los bloqueos; si no, se pagan *rollbacks* y
+reintentos. GMUW **18.9** *Concurrency Control by Validation* *(impresa 942)*; **18.9.3** *Comparison
+of Three Concurrency-Control Mechanisms* *(946)* es la tabla que compara los tres slides 25–27.
 
-> [!warning] 🔶 El nombre *"control de versiones"* es desafortunado, y el deck lo usa dos veces con dos sentidos
-> 1. En la bibliografía, lo que el slide describe se llama **control optimista** o **por
->    validación** — el paréntesis del título lo dice bien. *"Control de versiones"* no es un término
->    de la literatura de transacciones: choca con **MVCC** *(multiversion concurrency control — otra
->    cosa: mantener **varias versiones** de cada fila, que es lo que hacen InnoDB y PostgreSQL)* y con
->    *version control* en el sentido de git.
+> [!warning] (nota) El nombre *"control de versiones"* es desafortunado, y el deck lo usa dos veces con dos sentidos
+> 1. En la bibliografía, lo que el slide describe se llama **control optimista** o **por validación**.
+> *"Control de versiones"* no es un término de la literatura de transacciones: choca con **MVCC**
+> *(multiversion concurrency control: mantener **varias versiones** de cada fila, lo que hacen InnoDB
+> y PostgreSQL)* y con *version control* en el sentido de git.
 > 2. El slide **30** se titula *"Ejemplo de **control de versiones** en PostgreSQL"* y muestra un
->    `SELECT … FOR UPDATE`, que es un **bloqueo**. **Es exactamente lo que este slide dice que el
->    control de versiones no hace** *("no utilizan bloqueos")*. Ver § *Slides 29–30* y §
->    *Contradicciones internas*.
+> `SELECT … FOR UPDATE`, que es un **bloqueo**: exactamente lo que este slide dice que el control de
+> versiones no hace. Ver § *Slides 29–30* y § *Contradicciones internas*.
 
 > [!tip] Cómo se implementa el ejemplo del slide en SQL común — el patrón de la **columna de versión**
-> El deck dice *"comparar el valor antes de la actualización con el valor actual"*. En la práctica no
-> se compara el valor: se agrega una columna `version INT` y se hace
+> En la práctica no se compara el valor: se agrega una columna `version INT` y se hace
 >
 > ```sql
 > -- T leyó la fila con version = 7
@@ -1085,27 +952,24 @@ tres slides 25–27.
 
 > [!quote] Textual
 > - *"En el **timestamp ordering**, cada transacción recibe un sello de tiempo y los datos se ordenan
->   según estos tiempos. Las transacciones se ejecutan en el orden de sus sellos de tiempo para
->   evitar conflictos."*
+> según estos tiempos. Las transacciones se ejecutan en el orden de sus sellos de tiempo para
+> evitar conflictos."*
 > - ***Ejemplo**: Si dos transacciones modifican el mismo registro, la transacción con el sello de
->   tiempo más bajo tiene prioridad.*
+> tiempo más bajo tiene prioridad.*
 
 Tercer mecanismo: **decidir el orden serial de antemano** —el del sello de tiempo de inicio— y
 abortar cualquier transacción cuya operación sea incompatible con ese orden. Tampoco usa bloqueos,
-pero a diferencia del optimista **valida operación por operación**, no al final.
+pero **valida operación por operación**, no al final.
 
 > [!note] Lo que el slide simplifica, y GMUW desarrolla
-> - *"Los datos se ordenan según estos tiempos"* — lo que se ordena no son los datos: cada elemento
->   guarda **el sello de la última transacción que lo leyó y de la última que lo escribió**
->   *(`RT(X)`, `WT(X)`)*, y con eso el *scheduler* detecta operaciones *"físicamente irrealizables"*
->   *(leer un valor escrito por alguien que "en el orden serial" viene después)*. GMUW **18.8.1–18.8.4**
->   *(impresas 934–937)*.
-> - *"La transacción con el sello más bajo tiene prioridad"* — sí, pero la consecuencia es que **la
->   más nueva se aborta y reinicia con un sello nuevo**, no que espera.
-> - **18.8.5** *Multiversion Timestamps* *(939)* es el puente hacia MVCC — el mecanismo real de
->   InnoDB, que **no está en ninguno de los tres slides** del deck.
-> - **18.8.6** *Timestamps Versus Locking* *(941)*: cuándo conviene cada uno — bloqueos cuando hay
->   muchos conflictos, timestamps/validación cuando hay pocos y muchas lecturas.
+> - Lo que se ordena no son los datos: cada elemento guarda **el sello de la última transacción que lo
+> leyó y de la última que lo escribió** *(`RT(X)`, `WT(X)`)*, y con eso el *scheduler* detecta
+> operaciones *"físicamente irrealizables"*. GMUW **18.8.1–18.8.4** *(impresas 934–937)*.
+> - *"La transacción con el sello más bajo tiene prioridad"*: la consecuencia es que **la más nueva se
+> aborta y reinicia con un sello nuevo**, no que espera.
+> - **18.8.5** *Multiversion Timestamps* *(939)* es el puente hacia MVCC, el mecanismo real de InnoDB,
+> que **no está en ninguno de los tres slides**. **18.8.6** *Timestamps Versus Locking* *(941)*:
+> bloqueos cuando hay muchos conflictos, timestamps/validación cuando hay pocos y muchas lecturas.
 
 ## Slide 28 · Niveles de aislamiento
 
@@ -1113,47 +977,47 @@ pero a diferencia del optimista **valida operación por operación**, no al fina
 > *"Los **niveles de aislamiento** determinan el grado en el que una transacción debe estar aislada
 > de las demás:"*
 > - ***Read Uncommitted:** Permite lecturas de datos no confirmados (dirty reads). Proporciona el
->   mayor rendimiento pero la menor consistencia.*
+> mayor rendimiento pero la menor consistencia.*
 > - ***Read Committed:** Permite leer solo datos confirmados. Minimiza los dirty reads pero no evita
->   las lecturas no repetibles.*
+> las lecturas no repetibles.*
 > - ***Repeatable Read:** Garantiza que si una transacción lee un dato, ese dato no cambiará durante
->   la transacción. Evita lecturas no repetibles pero no previene las lecturas fantasma.*
+> la transacción. Evita lecturas no repetibles pero no previene las lecturas fantasma.*
 > - ***Serializable:** Proporciona el mayor nivel de aislamiento, tratando las transacciones como si
->   fueran serializadas. Esto asegura la consistencia más alta pero puede impactar en el rendimiento.*
+> fueran serializadas. Esto asegura la consistencia más alta pero puede impactar en el rendimiento.*
 
-**Es el slide que une los 23–24 con el 17**: cada nivel es una **lista de anomalías toleradas**, y
-el último es la definición de aislamiento del slide 17.
+Es el slide que une los 23–24 con el 17: cada nivel es una **lista de anomalías toleradas**, y el
+último es la definición de aislamiento del slide 17.
 
 ### La tabla del estándar SQL-92, que el slide describe en prosa
 
 | Nivel | Dirty read | Non-repeatable read | Phantom | Rendimiento |
 | --- | :---: | :---: | :---: | --- |
-| `READ UNCOMMITTED` | ✅ posible | ✅ posible | ✅ posible | máximo |
-| `READ COMMITTED` | ❌ | ✅ posible | ✅ posible | |
-| `REPEATABLE READ` | ❌ | ❌ | ✅ posible | |
-| `SERIALIZABLE` | ❌ | ❌ | ❌ | mínimo |
+| `READ UNCOMMITTED` | ✓ posible | ✓ posible | ✓ posible | máximo |
+| `READ COMMITTED` | ✗ | ✓ posible | ✓ posible | |
+| `REPEATABLE READ` | ✗ | ✗ | ✓ posible | |
+| `SERIALIZABLE` | ✗ | ✗ | ✗ | mínimo |
 
 GMUW **6.6.5** *Dirty Reads* *(302)* y **6.6.6** *Other Isolation Levels* *(304)* dan exactamente
-esta tabla; Date **16.8** *Isolation Levels* *(480)* y, para los cuatro niveles tal como los define SQL, **16.11** *SQL Facilities* *(490–491)*.
+esta tabla; Date **16.8** *Isolation Levels* *(480)* y, para los cuatro niveles tal como los define
+SQL, **16.11** *SQL Facilities* *(490–491)*.
 
 > [!warning] Dos imprecisiones de redacción, una de ellas conceptual
-> - *"**Minimiza** los dirty reads"* — `READ COMMITTED` **los elimina**, no los minimiza: por
->   definición sólo se leen datos confirmados. Probablemente un eco del *"minimiza"* que sí cabe en
->   otros contextos.
-> - *"Garantiza que si una transacción lee un dato, ese dato **no cambiará** durante la transacción"*
->   — el dato **puede cambiar** en la base *(otra transacción puede confirmar un `UPDATE`)*; lo que se
->   garantiza es que **mi transacción lo va a seguir viendo igual**. La diferencia es exactamente la
->   diferencia entre bloquear la fila *(el otro espera)* y darme una **versión** *(el otro escribe y
->   yo no me entero)*, que es lo que hace InnoDB.
+> - *"**Minimiza** los dirty reads"*: `READ COMMITTED` **los elimina**, por definición sólo se leen
+> datos confirmados.
+> - *"Garantiza que si una transacción lee un dato, ese dato **no cambiará** durante la transacción"*:
+> el dato **puede cambiar** en la base *(otra transacción puede confirmar un `UPDATE`)*; lo que se
+> garantiza es que **mi transacción lo va a seguir viendo igual**. Es la diferencia entre bloquear la
+> fila *(el otro espera)* y darme una **versión** *(el otro escribe y yo no me entero)*, que es lo que
+> hace InnoDB.
 
-> [!important] 🔴 Lo que el deck no dice de MySQL, y es lo que más importa para la práctica
+> [!important] (crítico) Lo que el deck no dice de MySQL, y es lo que más importa para la práctica
 > | Dato | Valor en MySQL/InnoDB | ¿En el deck? |
 > | --- | --- | :---: |
-> | **Nivel por defecto** | **`REPEATABLE READ`** — no `READ COMMITTED` como en PostgreSQL, Oracle y SQL Server | ❌ |
-> | Cómo se cambia | `SET [GLOBAL \| SESSION] TRANSACTION ISOLATION LEVEL …;` o `SET TRANSACTION ISOLATION LEVEL …` para la próxima transacción | ❌ |
-> | Cómo se consulta | `SELECT @@transaction_isolation;` | ❌ |
-> | **Phantoms en `REPEATABLE READ`** | para los `SELECT` comunes, InnoDB **sí los evita** *(lee una instantánea tomada en la primera lectura)*; para los `SELECT … FOR UPDATE` / `UPDATE` / `DELETE`, los evita con **gap locks** | ❌ — el slide dice, siguiendo el estándar, que **no** los previene |
-> | `SERIALIZABLE` en InnoDB | convierte cada `SELECT` común en `SELECT … FOR SHARE`: bloquea de verdad | ❌ |
+> | **Nivel por defecto** | **`REPEATABLE READ`** — no `READ COMMITTED` como en PostgreSQL, Oracle y SQL Server | ✗ |
+> | Cómo se cambia | `SET [GLOBAL \| SESSION] TRANSACTION ISOLATION LEVEL …;` o `SET TRANSACTION ISOLATION LEVEL …` para la próxima transacción | ✗ |
+> | Cómo se consulta | `SELECT @@transaction_isolation;` | ✗ |
+> | **Phantoms en `REPEATABLE READ`** | para los `SELECT` comunes, InnoDB **sí los evita** *(lee una instantánea tomada en la primera lectura)*; para los `SELECT … FOR UPDATE` / `UPDATE` / `DELETE`, los evita con **gap locks** | ✗ — el slide dice, siguiendo el estándar, que **no** los previene |
+> | `SERIALIZABLE` en InnoDB | convierte cada `SELECT` común en `SELECT … FOR SHARE`: bloquea de verdad | ✗ |
 >
 > El tercer renglón es la trampa: **la tabla del estándar dice que `REPEATABLE READ` admite phantoms,
 > y MySQL, en su nivel por defecto, en la práctica no los muestra.** Si el parcial pregunta "según la
@@ -1189,7 +1053,7 @@ esta tabla; Date **16.8** *Isolation Levels* *(480)* y, para los cuatro niveles 
 > *(El comentario `-- Bloqueo de actualización` está partido en dos renglones por el ancho del slide;
 > el segundo renglón, `actualización`, quedaría **fuera del comentario** si se copiara tal cual.)*
 
-**Son los dos únicos slides del deck con motor ajeno, y son el mismo ejemplo dos veces**: abrir una
+**Los dos únicos slides del deck con motor ajeno son el mismo ejemplo dos veces**: abrir una
 transacción, **bloquear las filas que se van a modificar** al leerlas, modificarlas, confirmar. El
 patrón se llama *"leer para actualizar"* y es la forma de evitar el *lost update* del slide 23 con
 **bloqueos pesimistas**.
@@ -1200,37 +1064,34 @@ patrón se llama *"leer para actualizar"* y es la forma de evitar el *lost updat
 | Leer bloqueando | `SELECT … WITH (UPDLOCK)` | `SELECT … FOR UPDATE` | **`SELECT … FOR UPDATE`** — idéntico a PG |
 | Modificar | `UPDATE …` | `UPDATE …` | `UPDATE …` |
 | Cerrar | `COMMIT TRANSACTION;` | `COMMIT;` | `COMMIT;` |
-| ¿Corre en MySQL tal cual? | ❌ `WITH (UPDLOCK)` y `… TRANSACTION` son T-SQL | ✅ **sin cambiar una letra** | — |
+| ¿Corre en MySQL tal cual? | ✗ `WITH (UPDLOCK)` y `… TRANSACTION` son T-SQL | ✓ **sin cambiar una letra** | — |
 
-> [!success] 🎯 Por primera vez en la U1, el código "de otro motor" **corre en MySQL sin traducción**
-> El slide 30 es PostgreSQL según su rótulo, y es MySQL válido carácter por carácter: `BEGIN`,
+> [!success] (clave) Por primera vez en la U1, el código "de otro motor" **corre en MySQL sin traducción**
+> El slide 30 es PostgreSQL según su rótulo y MySQL válido carácter por carácter: `BEGIN`,
 > `FOR UPDATE`, `COMMIT`. Es la única pieza de código ajeno de toda la unidad que no hace falta
-> reescribir. La ironía es que el deck no lo dice, y que el único ejemplo de transacción que la
-> cursada tiene en MySQL **lo tiene por accidente**.
+> reescribir, y el único ejemplo de transacción que la cursada tiene en MySQL **lo tiene por
+> accidente**.
 
-> [!bug] 🔴 El rótulo del slide 30 está mal: `FOR UPDATE` es un **bloqueo**, no *"control de versiones"*
-> El slide 26 definió el control de versiones por **no usar bloqueos** y validar al confirmar. El
-> slide 30 rotula como *"control de versiones"* un `SELECT … FOR UPDATE`, que **adquiere un bloqueo
-> exclusivo sobre las filas** y hace esperar a cualquier otro `FOR UPDATE` o `UPDATE` sobre ellas.
-> Es **el mismo mecanismo que el slide 29** —pesimista, por bloqueo— con otra sintaxis. Lo que
-> ilustraría el slide 26 es el patrón de columna de versión *(ver § *Slide 26*)*. Registrado en
-> § *Contradicciones internas*.
+> [!bug] (crítico) El rótulo del slide 30 está mal: `FOR UPDATE` es un **bloqueo**, no *"control de versiones"*
+> `SELECT … FOR UPDATE` **adquiere un bloqueo exclusivo sobre las filas** y hace esperar a cualquier
+> otro `FOR UPDATE` o `UPDATE` sobre ellas: **el mismo mecanismo que el slide 29** —pesimista, por
+> bloqueo— con otra sintaxis. Lo que ilustraría el slide 26 es el patrón de columna de versión.
+> Registrado en § *Contradicciones internas*.
 
 > [!note] Tres detalles de los ejemplos que el deck deja pasar
 > - **Los dos bloquean la tabla entera**: `SELECT * FROM productos` sin `WHERE` toma un bloqueo por
->   **cada fila** de `productos`, para después modificar una sola *(`WHERE id = 1`)*. En un sistema
->   real, el `SELECT` llevaría el mismo `WHERE` que el `UPDATE`.
-> - **`UPDLOCK` no es un `X`**: es el **update lock** de GMUW **18.4.4** *(909)* — compatible con
->   lecturas compartidas, incompatible con otro `UPDLOCK`, y se **promueve** a exclusivo al escribir.
->   Existe para evitar el *deadlock* clásico de dos transacciones que leen con `S` y quieren promover
->   a `X` a la vez. El `FOR UPDATE` de PostgreSQL y MySQL es directamente exclusivo.
+> **cada fila**, para después modificar una sola *(`WHERE id = 1`)*. En un sistema real, el `SELECT`
+> llevaría el mismo `WHERE` que el `UPDATE`.
+> - **`UPDLOCK` no es un `X`**: es el **update lock** de GMUW **18.4.4** *(909)*, compatible con
+> lecturas compartidas, incompatible con otro `UPDLOCK`, y se **promueve** a exclusivo al escribir.
+> Existe para evitar el *deadlock* de dos transacciones que leen con `S` y quieren promover a `X` a
+> la vez. El `FOR UPDATE` de PostgreSQL y MySQL es directamente exclusivo.
 > - **El `UPDATE` solo, sin el `SELECT`, ya es atómico** en los tres motores: `stock = stock - 1` se
->   evalúa bajo bloqueo de fila. El `SELECT … FOR UPDATE` hace falta cuando la aplicación **necesita
->   leer el valor antes de decidir** *(p. ej. verificar que `stock > 0`)*.
+> evalúa bajo bloqueo de fila. El `SELECT … FOR UPDATE` hace falta cuando la aplicación **necesita
+> leer el valor antes de decidir** *(p. ej. verificar que `stock > 0`)*.
 
-Con estos dos slides termina el bloque de transacciones. **Balance: 17 slides, todos conceptuales
-salvo dos ejemplos en motores ajenos; cero sintaxis MySQL; cero `ROLLBACK` en código; cero
-deadlocks; cero recuperación.**
+**Balance del bloque de transacciones: 17 slides, todos conceptuales salvo dos ejemplos en motores
+ajenos; cero sintaxis MySQL; cero `ROLLBACK` en código; cero deadlocks; cero recuperación.**
 
 ---
 
@@ -1238,42 +1099,36 @@ deadlocks; cero recuperación.**
 
 > [!quote] Textual
 > - *"Estructuras complementarias en DBMS que se asocian con los atributos de las tablas y agilizan
->   la operaciones de búsqueda"* **[sic: "la operaciones"]**
+> la operaciones de búsqueda"* **[sic: "la operaciones"]**
 > - *"Juegan el mismo papel que los índices de los libros o los catálogos de fichas de las
->   bibliotecas"*
+> bibliotecas"*
 > - *"Por ejemplo, para recuperar un registro de cuenta dado su número de cuenta, el sistema de bases
->   de datos buscaría en un índice para encontrar el bloque de disco en que se encuentra el registro
->   correspondiente, y entonces extraería ese bloque de disco para obtener el registro cuenta"*
+> de datos buscaría en un índice para encontrar el bloque de disco en que se encuentra el registro
+> correspondiente, y entonces extraería ese bloque de disco para obtener el registro cuenta"*
 
-Adorno: una mano con el índice levantado. Y a partir de aquí, **ocho slides que no tienen nada que ver
-con seguridad ni con transacciones**. El tema ya se dio: [[Clase 08 - Explicando el plan]] mostró
-índices *en uso* —qué le hacen a un plan de ejecución— y [[1.08.02 - Índices|Índices]] documentó
-que ese deck **no explicaba qué son por dentro**. Estos slides son esa teoría, cinco semanas después
-y en el deck equivocado.
+A partir de aquí, **ocho slides que no tienen nada que ver con seguridad ni con transacciones**. El
+tema ya se dio: [[Clase 08 - Explicando el plan]] mostró índices *en uso* —qué le hacen a un plan de
+ejecución— y [[1.08.02 - Índices|Índices]] documentó que ese deck **no explicaba qué son por dentro**.
+Estos slides son esa teoría, cinco semanas después y en el deck equivocado. Por qué están aquí
+—material que sobró de la Clase 08, repaso pre-parcial del manual § 10.3.9 que el TP5 pidió leer, o
+deck reciclado— no se puede saber desde el deck: los encabezados *"Transacciones en Base de Datos"*
+de los slides 32–35 sugieren copia y pega *(§ *Dudas abiertas*)*.
 
-> [!question] ¿Por qué está esto aquí?
-> Tres hipótesis, ninguna verificable desde el deck: (a) es material que **sobró** de la Clase 08 y
-> se pegó al final del último deck relacional para no perderlo; (b) es un **repaso pre-parcial** de
-> lo que el TP5 pidió leer *(el manual § 10.3.9)*; (c) es simplemente un deck reciclado de otra
-> cursada, donde el orden era otro. Los encabezados *"Transacciones en Base de Datos"* de los slides
-> 32–35 sugieren copia y pega. **Preguntar al humano** si en la clase se explicó el porqué → § *Dudas
-> abiertas*.
-
-El ejemplo del *"registro de cuenta dado su número de cuenta"* es el banco de Silberschatz —el mismo
-que va a usar el slide 35 con `sucursal`—. En GMUW, la motivación es **8.3.1** *Motivation for
-Indexes* *(impresa 350)*.
+El ejemplo del *"registro de cuenta dado su número de cuenta"* es el banco de Silberschatz, el mismo
+del slide 35 con `sucursal`. En GMUW, la motivación es **8.3.1** *Motivation for Indexes* *(impresa
+350)*.
 
 ## Slide 32 · Tipos de índices — ordenados y asociativos
 
 > [!quote] Textual *(encabezado: "Transacciones en Base de Datos · Tipos de Índices" **[sic]**)*
 > - ***Índices ordenados.** Estos índices están basados en una disposición ordenada de los valores.
->   Ej: B-trees.*
+> Ej: B-trees.*
 > - ***Índices asociativos.** Estos índices están basados en una distribución uniforme de los valores
->   a través de una serie de cajones (buckets). El valor asignado a cada cajón está determinado por
->   una función, llamada función de asociación (hash function). Ej: Hashes.*
+> a través de una serie de cajones (buckets). El valor asignado a cada cajón está determinado por
+> una función, llamada función de asociación (hash function). Ej: Hashes.*
 
-Es la **bifurcación fundamental** de las estructuras de índice, y el resto del bloque la sigue: los
-slides 33–35 desarrollan los **ordenados**, y los 36–38 comparan los dos.
+Es la **bifurcación fundamental** de las estructuras de índice: los slides 33–35 desarrollan los
+**ordenados**, y los 36–38 comparan los dos.
 
 | | Ordenado *(B-tree)* | Asociativo *(hash)* |
 | --- | --- | --- |
@@ -1283,66 +1138,60 @@ slides 33–35 desarrollan los **ordenados**, y los 36–38 comparan los dos.
 | En InnoDB | **el único tipo** para tablas de usuario | sólo en el motor `MEMORY` *(y como *adaptive hash index* interno, automático)* |
 | Bibliografía | GMUW **14.2** *B-Trees* *(633)* | GMUW **14.3** *Hash Tables* *(648)* |
 
-> [!success] 🎯 Este slide cierra el hueco *"¿Qué es un B-tree? ❌"* de [[1.08.02 - Índices|Índices]]
+> [!success] (clave) Este slide cierra el hueco *"¿Qué es un B-tree? ✗"* de [[1.08.02 - Índices|Índices]]
 > Con una definición de una línea —*"disposición ordenada de los valores"*—, pero es la primera vez
 > que un deck de la cátedra **define** el B-tree en lugar de mostrarlo en la salida de un `EXPLAIN`.
-> La propiedad que importa es exactamente esa: **está ordenado**, y de ahí sale todo lo que la Clase
-> 08 mostró sin explicar *(por qué sirve para rangos, por qué `LIKE 'abc%'` lo usa y `LIKE '%abc'` no,
-> por qué un índice compuesto se usa por prefijo izquierdo)*. *Seven Databases* 2ª ed. cap. 2 § *Fast
-> Lookups with Indexing* *(impresas 18–20)*, la lectura asignada en el TP5, dice lo mismo con un
-> dibujo.
+> La propiedad que importa es que **está ordenado**, y de ahí sale todo lo que la Clase 08 mostró sin
+> explicar *(por qué sirve para rangos, por qué `LIKE 'abc%'` lo usa y `LIKE '%abc'` no, por qué un
+> índice compuesto se usa por prefijo izquierdo)*. *Seven Databases* 2ª ed. cap. 2 § *Fast Lookups
+> with Indexing* *(impresas 18–20)*, la lectura asignada en el TP5, dice lo mismo con un dibujo.
 
-**Vocabulario:** *"asociativo"* es la traducción de *hash* en Silberschatz; el propio slide da los
-dos nombres. *"Cajón"* = *bucket*.
+**Vocabulario:** *"asociativo"* es la traducción de *hash* en Silberschatz; *"cajón"* = *bucket*.
 
 ## Slide 33 · Índices ordenados — subtipos: con y sin agrupación
 
 > [!quote] Textual *(encabezado "Transacciones en Base de Datos" **[sic]**)*
 > - ***Índice primario o índices con agrupación.** La clave de búsqueda especifica el orden secuencial
->   del archivo (archivos ordenados secuencialmente). La clave de búsqueda de un índice primario es
->   normalmente la clave primaria (pero no necesariamente)*
+> del archivo (archivos ordenados secuencialmente). La clave de búsqueda de un índice primario es
+> normalmente la clave primaria (pero no necesariamente)*
 > - ***Índices secundarios o índices sin agrupación.** Las claves de búsqueda especifican un orden
->   diferente del orden secuencial del archivo. Un archivo puede tener varios índices secundarios
->   además de su método de acceso principal*
+> diferente del orden secuencial del archivo. Un archivo puede tener varios índices secundarios
+> además de su método de acceso principal*
 
-> [!success] 🎯 Y éste cierra el hueco *"Clustered vs. non-clustered ❌"* de [[1.08.02 - Índices|Índices]]
-> *"Con agrupación"* es ***clustered***; *"sin agrupación"* es ***non-clustered***. La traducción
-> de Silberschatz esconde el término en inglés, pero es el mismo concepto: un índice es *clustered*
-> cuando **los datos están físicamente ordenados por su clave**, y por definición **sólo puede haber
-> uno** por tabla *(el archivo tiene un solo orden)*. La sección **B** de [[1.08.02 - Índices|Índices]]
-> —*"El índice clustered de InnoDB"*— ya lo explicaba desde el manual; ahora tiene slide de la cátedra.
+> [!success] (clave) Y éste cierra el hueco *"Clustered vs. non-clustered ✗"* de [[1.08.02 - Índices|Índices]]
+> *"Con agrupación"* es ***clustered***; *"sin agrupación"* es ***non-clustered***. Un índice es
+> *clustered* cuando **los datos están físicamente ordenados por su clave**, y por definición **sólo
+> puede haber uno** por tabla. La sección **B** de [[1.08.02 - Índices|Índices]] —*"El índice
+> clustered de InnoDB"*— ya lo explicaba desde el manual; ahora tiene slide de la cátedra.
 
 > [!important] Lo que este slide significa **en InnoDB**, y el deck no dice
 > - **La `PRIMARY KEY` *es* el índice con agrupación**: la tabla InnoDB está guardada como un B-tree
->   ordenado por PK, y las hojas **son las filas**. No hay "archivo" separado del "índice primario".
+> ordenado por PK, y las hojas **son las filas**. No hay "archivo" separado del "índice primario".
 > - **Todo índice secundario guarda la PK en sus hojas**, no un puntero físico: buscar por índice
->   secundario es **dos búsquedas** *(secundario → PK, PK → fila)*. Por eso una PK gorda encarece
->   todos los índices de la tabla.
+> secundario es **dos búsquedas** *(secundario → PK, PK → fila)*. Por eso una PK gorda encarece
+> todos los índices de la tabla.
 > - La salvedad del slide —*"normalmente la clave primaria (pero no necesariamente)"*— en InnoDB
->   **no aplica**: el clustered es la PK; si no hay PK, el primer `UNIQUE NOT NULL`; si tampoco, uno
->   oculto de 6 bytes. No se puede elegir otra columna.
+> **no aplica**: el clustered es la PK; si no hay PK, el primer `UNIQUE NOT NULL`; si tampoco, uno
+> oculto de 6 bytes.
 >
 > Bibliografía: GMUW **14.1.5** *Secondary Indexes* *(impresa 624)* explica por qué un índice
 > secundario **tiene que ser denso** y el primario puede ser disperso.
-
-**Errata:** *"Índice primario **o** índices con agrupación"* — singular y plural mezclados. Se
-conserva.
 
 ## Slide 34 · Índices multinivel
 
 > [!quote] Textual *(encabezado "Transacciones en Base de Datos" **[sic]**)*
 > - *"Solución para índices muy grandes"*
 > - *"El índice se trata como si fuese un archivo secuencial y se construye otro índice sobre el
->   índice con agrupación"*
+> índice con agrupación"*
 > - *"Para localizar un registro se usa en primer lugar una búsqueda binaria sobre el índice más
->   externo para buscar el registro con el mayor valor de la clave de búsqueda que sea menor o igual
->   al valor deseado"*
+> externo para buscar el registro con el mayor valor de la clave de búsqueda que sea menor o igual
+> al valor deseado"*
 > - *"Los índices multinivel están estrechamente relacionados con la estructura de árbol, tales como
->   los árboles binarios usados para la indexación en memoria"*
+> los árboles binarios usados para la indexación en memoria"*
 
-Es la idea que lleva del "índice ordenado" al **B-tree**: si el índice no entra en memoria, se
-indexa el índice. Dos niveles, tres, los que hagan falta — y un B-tree es exactamente un índice
-multinivel **que se mantiene balanceado solo** al insertar y borrar.
+Es la idea que lleva del "índice ordenado" al **B-tree**: si el índice no entra en memoria, se indexa
+el índice, y un B-tree es un índice multinivel **que se mantiene balanceado solo** al insertar y
+borrar.
 
 | Nivel | Qué contiene | Dónde vive |
 | --- | --- | --- |
@@ -1351,13 +1200,13 @@ multinivel **que se mantiene balanceado solo** al insertar y borrar.
 | Interno *(hojas)* | una entrada por registro *(denso)* o por bloque de datos *(disperso)* | disco |
 
 > [!note] Dos precisiones que el slide simplifica
-> - *"Búsqueda binaria sobre el índice más externo"* — en un B-tree real el nivel externo es **un
->   bloque** con cientos de entradas, y dentro del bloque sí se busca binariamente; pero de un nivel al
->   siguiente se **sigue un puntero**, no se hace búsqueda binaria sobre el archivo.
-> - *"Árboles binarios"* — un B-tree **no es binario**: cada nodo tiene cientos de hijos *(tantos como
->   entradas caben en un bloque de disco)*, y por eso un índice de millones de filas tiene **3 o 4
->   niveles**, no 20. La frase del slide viene de Silberschatz y contrapone los índices en disco con
->   los árboles binarios en memoria; leída sola, confunde.
+> - *"Búsqueda binaria sobre el índice más externo"*: en un B-tree real el nivel externo es **un
+> bloque** con cientos de entradas; dentro del bloque se busca binariamente, pero de un nivel al
+> siguiente se **sigue un puntero**.
+> - *"Árboles binarios"*: un B-tree **no es binario**; cada nodo tiene cientos de hijos *(tantos como
+> entradas caben en un bloque de disco)*, y por eso un índice de millones de filas tiene **3 o 4
+> niveles**, no 20. La frase viene de Silberschatz y contrapone los índices en disco con los árboles
+> binarios en memoria; leída sola, confunde.
 >
 > GMUW **14.1.4** *Multiple Levels of Index* *(impresa 623)* es este slide; **14.2.7** *Efficiency of
 > B-Trees* *(645)* es la cuenta de por qué alcanzan tres niveles.
@@ -1377,97 +1226,86 @@ multinivel **que se mantiene balanceado solo** al insertar y borrar.
 > ```
 > *"índice llamado índice-s de la tabla sucursal con la clave de búsqueda nombre-sucursal"*
 
-Es el DDL que [[1.08.02 - Índices|Índices]] § *Dudas abiertas* marcaba como **🔴 pendiente**:
-*"Sintaxis exacta de `CREATE INDEX` / `DROP INDEX` en MySQL … sigue sin verificar"*. **El deck la
-trae, pero en la versión del libro, y la mitad no corre en MySQL.**
+Es el DDL que [[1.08.02 - Índices|Índices]] § *Dudas abiertas* marcaba como **(crítico) pendiente**
+*("Sintaxis exacta de `CREATE INDEX` / `DROP INDEX` en MySQL … sigue sin verificar")*. **El deck la
+trae en la versión del libro, y la mitad no corre en MySQL.**
 
 | Del slide | En MySQL | ¿Corre? |
 | --- | --- | :---: |
-| `create index <nombre> on <tabla> (<atributos>)` | `CREATE INDEX nombre ON tabla (col1, col2, …);` | ✅ idéntico |
-| **`drop index <nombre>`** | **`DROP INDEX nombre ON tabla;`** — el `ON tabla` es **obligatorio** | ❌ **error de sintaxis** sin `ON` |
-| `create index índice-s on sucursal (nombre-sucursal)` | los identificadores con **guion** *(`índice-s`, `nombre-sucursal`)* **no son válidos sin backticks**: `-` no es un carácter de identificador | ❌ sin `` ` `` |
-| — | `ALTER TABLE tabla ADD INDEX nombre (cols);` / `ALTER TABLE tabla DROP INDEX nombre;` — la forma alternativa, que es la que [[MySQL]] ya documentaba para el borrado | ✅ |
-| — | `CREATE UNIQUE INDEX …` · `CREATE INDEX … USING BTREE \| HASH` *(slide 38)* · `SHOW INDEX FROM tabla` | ✅ |
+| `create index <nombre> on <tabla> (<atributos>)` | `CREATE INDEX nombre ON tabla (col1, col2, …);` | ✓ idéntico |
+| **`drop index <nombre>`** | **`DROP INDEX nombre ON tabla;`** — el `ON tabla` es **obligatorio** | ✗ **error de sintaxis** sin `ON` |
+| `create index índice-s on sucursal (nombre-sucursal)` | los identificadores con **guion** *(`índice-s`, `nombre-sucursal`)* **no son válidos sin backticks**: `-` no es un carácter de identificador | ✗ sin `` ` `` |
+| — | `ALTER TABLE tabla ADD INDEX nombre (cols);` / `ALTER TABLE tabla DROP INDEX nombre;` — la forma alternativa, que es la que [[MySQL]] ya documentaba para el borrado | ✓ |
+| — | `CREATE UNIQUE INDEX …` · `CREATE INDEX … USING BTREE \| HASH` *(slide 38)* · `SHOW INDEX FROM tabla` | ✓ |
 
 **El ejemplo, en MySQL:**
 
 ```sql
-CREATE INDEX `índice-s` ON sucursal (`nombre-sucursal`);   -- con backticks por los guiones
+CREATE INDEX `índice-s` ON sucursal (`nombre-sucursal`);  -- con backticks por los guiones
 -- o, con nombres razonables:
 CREATE INDEX idx_sucursal_nombre ON sucursal (nombre_sucursal);
-DROP INDEX idx_sucursal_nombre ON sucursal;                -- ON tabla obligatorio
+DROP INDEX idx_sucursal_nombre ON sucursal;  -- ON tabla obligatorio
 ```
 
-> [!warning] 🔶 Tercer lugar del deck donde el código no corre en MySQL, y el único **sin rótulo**
-> Los slides 29 y 30 avisan de qué motor son. Éste no avisa de nada y da la forma `drop index
-> nombre` **del estándar y de PostgreSQL**, que MySQL rechaza. Es una discrepancia chica, pero es la
-> que muerde en el TP5 *(que pide crear y borrar índices en cinco ejercicios)* y la que
-> [[1.08.02 - Índices|Índices]] tenía marcada como pendiente. **Con este slide y esta tabla, esa
-> pendiente se puede cerrar** → § *Dudas abiertas*.
->
-> GMUW **8.3.2** *Declaring Indexes* *(impresa 351)* da la misma sintaxis genérica — con la
-> advertencia explícita de que **no es parte del estándar SQL** y cada motor la escribe a su modo.
+> [!warning] (nota) Tercer lugar del deck donde el código no corre en MySQL, y el único **sin rótulo**
+> Los slides 29 y 30 avisan de qué motor son. Éste da la forma `drop index nombre` **del estándar y de
+> PostgreSQL**, que MySQL rechaza. Es una discrepancia chica, pero es la que muerde en el TP5 *(que
+> pide crear y borrar índices en cinco ejercicios)*. GMUW **8.3.2** *Declaring Indexes* *(impresa 351)*
+> da la misma sintaxis genérica, con la advertencia de que **no es parte del estándar SQL** y cada
+> motor la escribe a su modo.
 
 ## Slides 36–37 · B-tree vs. Hash — la § 10.3.9 del manual, traducida a medias
 
 > [!quote] Slide 36, textual — **mitad en español, mitad en inglés**
 > - *"Se puede utilizar un índice de árbol B para comparaciones de columnas en expresiones que
->   utilizan los operadores =, >, >=, <, <= o BETWEEN."*
+> utilizan los operadores =, >, >=, <, <= o BETWEEN."*
 > - *"El índice también se puede utilizar para comparaciones LIKE si el argumento de LIKE es una
->   cadena constante que no comienza con un carácter comodín."*
+> cadena constante que no comienza con un carácter comodín."*
 > - *"For example, the following statements use indexes:"*
->   `SELECT * FROM tbl_name WHERE key_col LIKE 'Patrick%';`
->   `SELECT * FROM tbl_name WHERE key_col LIKE 'Pat%_ck%';`
+> `SELECT * FROM tbl_name WHERE key_col LIKE 'Patrick%';`
+> `SELECT * FROM tbl_name WHERE key_col LIKE 'Pat%_ck%';`
 > - *"The following  statements do not use indexes:"* **[sic: doble espacio]**
->   `SELECT * FROM tbl_name WHERE key_col LIKE '%Patrick%';`
->   `SELECT * FROM tbl_name WHERE key_col LIKE other_col;`
+> `SELECT * FROM tbl_name WHERE key_col LIKE '%Patrick%';`
+> `SELECT * FROM tbl_name WHERE key_col LIKE other_col;`
 >
 > *(En verde van el primer `LIKE` y los dos patrones que usan índice —`'Patrick%'` y `'Pat%_ck%'`—;
 > el segundo `LIKE` va en gris. Los dos `LIKE` y patrones que no usan índice van en rojo.)*
 
 > [!quote] Slide 37, textual
 > - *"Las **Hashes** se utilizan únicamente para comparaciones de igualdad que utilizan los
->   operadores = o <=> (pero son muy rápidos). No se utilizan para operadores de comparación como <
->   que encuentran un rango de valores."*
+> operadores = o <=> (pero son muy rápidos). No se utilizan para operadores de comparación como <
+> que encuentran un rango de valores."*
 > - *"El optimizador no puede utilizar un índice hash para acelerar las operaciones ORDER BY."*
 > - *"Solo se pueden utilizar **claves completas** para buscar una fila."*
 
-> [!success] 🎯 Estos dos slides **son la lectura que la cátedra asignó en el TP5**, puesta en el deck
+> [!success] (clave) Estos dos slides **son la lectura que la cátedra asignó en el TP5**, puesta en el deck
 > [[MySQL]] § *Bibliografía* registra que el TP5 mandó leer el **MySQL 9.7 Reference Manual
 > § 10.3.9** *Comparison of B-Tree and Hash Indexes*. Los slides 36–37 son **esa sección, párrafo por
 > párrafo**: las dos viñetas traducidas, los cuatro ejemplos `SELECT … LIKE` copiados en inglés con
-> `tbl_name` y `key_col` —los nombres del manual—, y las tres propiedades de los hash. La prueba
-> definitiva es el operador **`<=>`** del slide 37: es el **igual seguro ante `NULL`** de MySQL, que
-> **no existe en ningún otro motor ni en el estándar**. Es la primera vez que un deck de la U1 cita
-> *(sin decirlo)* el manual del motor de la cursada.
+> `tbl_name` y `key_col` —los nombres del manual— y las tres propiedades de los hash. La prueba
+> definitiva es el operador **`<=>`** del slide 37: el **igual seguro ante `NULL`** de MySQL, que **no
+> existe en ningún otro motor ni en el estándar**.
 
 ### Lo que los dos slides dicen, en una tabla
 
 | Predicado | B-tree | Hash | Por qué |
 | --- | :---: | :---: | --- |
-| `col = v` · `col <=> v` | ✅ | ✅ | igualdad: los dos |
-| `col > v`, `<`, `>=`, `<=`, `BETWEEN` | ✅ | ❌ | rango: el hash no tiene orden |
-| `col LIKE 'Patrick%'` | ✅ | ❌ | prefijo constante = rango `['Patrick', 'Patricl')` |
-| `col LIKE 'Pat%_ck%'` | ✅ | ❌ | **sólo se usa el prefijo `Pat`**; el resto filtra después |
-| `col LIKE '%Patrick%'` | ❌ | ❌ | empieza con comodín: no hay prefijo → *full scan* |
-| `col LIKE other_col` | ❌ | ❌ | el patrón no es constante: no se conoce al planificar |
-| `ORDER BY col` | ✅ | ❌ | el B-tree ya está ordenado; el hash no |
-| `(a, b)` indexado, `WHERE a = 1` | ✅ prefijo izquierdo | ❌ **clave completa** | el hash de `(a)` no tiene relación con el de `(a, b)` |
+| `col = v` · `col <=> v` | ✓ | ✓ | igualdad: los dos |
+| `col > v`, `<`, `>=`, `<=`, `BETWEEN` | ✓ | ✗ | rango: el hash no tiene orden |
+| `col LIKE 'Patrick%'` | ✓ | ✗ | prefijo constante = rango `['Patrick', 'Patricl')` |
+| `col LIKE 'Pat%_ck%'` | ✓ | ✗ | **sólo se usa el prefijo `Pat`**; el resto filtra después |
+| `col LIKE '%Patrick%'` | ✗ | ✗ | empieza con comodín: no hay prefijo → *full scan* |
+| `col LIKE other_col` | ✗ | ✗ | el patrón no es constante: no se conoce al planificar |
+| `ORDER BY col` | ✓ | ✗ | el B-tree ya está ordenado; el hash no |
+| `(a, b)` indexado, `WHERE a = 1` | ✓ prefijo izquierdo | ✗ **clave completa** | el hash de `(a)` no tiene relación con el de `(a, b)` |
 
 > [!tip] Esto es lo que la [[Clase 08 - Explicando el plan]] mostró en `EXPLAIN` sin explicar
 > [[1.08.02 - Índices|Índices]] § *6* documentó que *"`LIKE '%'` sobre columna indexada no usa el
-> índice"* a partir de un plan con `Filter` y un costo mayor *(187.65 → 208.98)*, y el deck 08 lo
-> decía en sus slides 16 y 20. **Este slide es la regla general de la que aquello era un caso**: el
-> índice se usa cuando el `LIKE` da un **prefijo constante**, porque un prefijo es un **rango** sobre
-> un índice ordenado. `LIKE '%'` no da prefijo. Conviene enlazar las dos páginas.
-
-> [!note] El detalle del segundo ejemplo, que el manual tampoco explica
-> `LIKE 'Pat%_ck%'` **usa el índice**, pero sólo para el tramo `Pat`: el optimizador convierte el
-> prefijo en un rango y aplica el resto del patrón *(`%_ck%`)* como filtro sobre las filas que el rango
-> devuelve. Cuanto más corto el prefijo, menos ayuda el índice.
-
-**Errata de traducción:** *"Las Hashes"* — género forzado *(el manual dice *"Hash indexes"*)*. Y el
-slide 36 deja **dos viñetas sin traducir**, señal inequívoca de la fuente.
+> índice"* a partir de un plan con `Filter` y un costo mayor *(187.65 → 208.98)*, y el deck 08 lo decía
+> en sus slides 16 y 20. **Este slide es la regla general de la que aquello era un caso**: el índice se
+> usa cuando el `LIKE` da un **prefijo constante**, porque un prefijo es un **rango** sobre un índice
+> ordenado. Y `LIKE 'Pat%_ck%'` usa el índice sólo para el tramo `Pat`: el resto del patrón se aplica
+> como filtro sobre las filas que el rango devuelve.
 
 ## Slide 38 · Ejemplo en MySQL — `USING HASH`
 
@@ -1484,24 +1322,23 @@ CREATE INDEX MYINDEX ON USERS (DNI) USING HASH;
 Sintácticamente es MySQL correcto *(`index_type` es `USING {BTREE | HASH}` y va después de la lista
 de columnas)*. Pero:
 
-> [!bug] 🔴 Sobre una tabla InnoDB, este `USING HASH` **se ignora en silencio** y el índice que se crea es un **B-tree**
+> [!bug] (crítico) Sobre una tabla InnoDB, este `USING HASH` **se ignora en silencio** y el índice que se crea es un **B-tree**
 > **InnoDB no soporta índices hash** para tablas de usuario: su único tipo es `BTREE`. El manual lo
 > documenta en la tabla de tipos permitidos por motor *(§ *CREATE INDEX Statement*, capítulo de
 > sentencias SQL del manual 9.7)*: `InnoDB → BTREE`; `MEMORY → HASH, BTREE`; `NDB → HASH, BTREE`. Y
-> agrega, textual en el sentido, que *si se especifica un tipo que el motor no admite pero hay otro que
-> puede usar sin afectar los resultados, el motor usa ése*. O sea: la sentencia del slide **no falla**,
-> y **`SHOW INDEX FROM USERS`** devuelve `Index_type = BTREE`. **Para tener un hash de verdad, la tabla
-> tiene que ser `ENGINE = MEMORY`** — o confiar en el *adaptive hash index* interno de InnoDB, que es
-> automático y no se declara.
+> agrega que *si se especifica un tipo que el motor no admite pero hay otro que puede usar sin afectar
+> los resultados, el motor usa ése*. O sea: la sentencia del slide **no falla**, y **`SHOW INDEX FROM
+> USERS`** devuelve `Index_type = BTREE`. **Para tener un hash de verdad, la tabla tiene que ser
+> `ENGINE = MEMORY`**, o confiar en el *adaptive hash index* interno de InnoDB, que es automático y no
+> se declara.
 >
-> El ejemplo enseña la sintaxis correcta y produce un resultado distinto del que promete: es **la
-> misma clase de incompatibilidad silenciosa** que el `||` del slide 12 del deck 10 *(no falla,
-> devuelve otra cosa)*. Es lo primero que hay que probar al llegar a este slide: crear la tabla, correr
-> la sentencia, mirar `SHOW INDEX`.
+> Es **la misma clase de incompatibilidad silenciosa** que el `||` del slide 12 del deck 10 *(no
+> falla, devuelve otra cosa)*. Lo primero que hay que probar al llegar a este slide: crear la tabla,
+> correr la sentencia, mirar `SHOW INDEX`.
 
-Y un detalle de diseño que el ejemplo esconde: un índice sobre `DNI` **debería ser `UNIQUE`** —un
-DNI identifica a una persona—, y un `UNIQUE` en InnoDB **es un índice B-tree** de todos modos. El
-`USING HASH` sobre `DNI` tendría sentido en una tabla `MEMORY` de sesiones, no en `USERS`.
+Un detalle de diseño que el ejemplo esconde: un índice sobre `DNI` **debería ser `UNIQUE`**, y un
+`UNIQUE` en InnoDB **es un índice B-tree** de todos modos. El `USING HASH` sobre `DNI` tendría sentido
+en una tabla `MEMORY` de sesiones, no en `USERS`.
 
 ---
 
@@ -1565,32 +1402,31 @@ Se transcriben `[sic]` en toda la página; ninguna se corrige en las citas.
 | 11 | `DROP ROLE` **antes** de `GRANT rol TO usuario` | leído en orden, concede un rol borrado |
 | 12 | `ON [nombre de base de datos] [nombre de tabla]` — sin el `.` | `ON base.tabla` |
 | 12 | *"se deben refrescar todos los con el comando"* | falta *"privilegios"* |
-| 12 | 🔴 *"se deben refrescar … FLUSH PRIVILEGES"* tras `GRANT`/`REVOKE` | **innecesario**: sólo tras editar las tablas `mysql.*` directamente |
+| 12 | (crítico) *"se deben refrescar … FLUSH PRIVILEGES"* tras `GRANT`/`REVOKE` | **innecesario**: sólo tras editar las tablas `mysql.*` directamente |
 | 13 | `‘juan’@'%’`, `‘admin’@'%’`, `‘auditor’@'…’` — usuario entre `‘ ’` tipográficas; host abre con `'` recta y cierra con `’` | comillas rectas |
 | 14 | *"escrito en un lenguaje **en un lenguaje** de programación"* | duplicado |
 | 19 | *"INICIO DE **TRANSACION**"* · *"FIN DE LA **TRANSACION**"* | *TRANSACCIÓN* |
-| 18 vs. 20 | 🔴 lista con **Abortada** y sin *Terminar*; diagrama con **Terminar** y sin *Abortada* | dos fuentes sin reconciliar *(ver § Contradicciones)* |
+| 18 vs. 20 | (crítico) lista con **Abortada** y sin *Terminar*; diagrama con **Terminar** y sin *Abortada* | dos fuentes sin reconciliar *(ver § Contradicciones)* |
 | 22 | *"las operaciones de E/S, **como** uso de CPU y discos"* | *"E/S **y** uso de CPU"* |
 | 23 | *"Race conditions"* como nombre de anomalía | **lost update** *(el ejemplo lo es)*; *race condition* es la causa genérica |
 | 28 | *"**Minimiza** los dirty reads"* | los **elimina** |
 | 28 | *"ese dato **no cambiará** durante la transacción"* | *"mi transacción **lo seguirá viendo igual**"* — el dato puede cambiar |
-| 30 | 🔴 *"Ejemplo de **control de versiones**"* sobre un `SELECT … FOR UPDATE` | es un **bloqueo pesimista**, lo contrario del slide 26 |
+| 30 | (crítico) *"Ejemplo de **control de versiones**"* sobre un `SELECT … FOR UPDATE` | es un **bloqueo pesimista**, lo contrario del slide 26 |
 | 30 | `-- Bloqueo de` / `actualización` partido en dos renglones | copiado tal cual, la segunda línea queda fuera del comentario |
 | 31 | *"agilizan **la** operaciones"* | *las* |
-| 32–35 | 🔴 encabezado *"**Transacciones** en Base de Datos"* en cuatro slides de **índices** | copia y pega del bloque anterior |
+| 32–35 | (crítico) encabezado *"**Transacciones** en Base de Datos"* en cuatro slides de **índices** | copia y pega del bloque anterior |
 | 33 | *"Índice primario **o** índices con agrupación"* | singular/plural mezclados |
 | 34 | *"tales como los **árboles binarios**"* | un B-tree no es binario *(frase heredada de Silberschatz)* |
-| 35 | 🔶 `drop index <nombre-índice>` sin `ON tabla` | en MySQL: `DROP INDEX n ON t;` |
+| 35 | (nota) `drop index <nombre-índice>` sin `ON tabla` | en MySQL: `DROP INDEX n ON t;` |
 | 35 | `índice-s`, `nombre-sucursal` con guion y tilde, sin comillas | identificadores inválidos en MySQL sin backticks |
 | 36 | dos viñetas **en inglés** *("For example, the following statements…")* | traducción incompleta del manual § 10.3.9 |
 | 36 | *"The following  statements"* — doble espacio | — |
 | 37 | *"**Las** Hashes"* | *los índices hash* |
-| 38 | 🔴 `USING HASH` sobre una tabla InnoDB | **se ignora**: crea un B-tree |
+| 38 | (crítico) `USING HASH` sobre una tabla InnoDB | **se ignora**: crea un B-tree |
 
 **Total: 34 erratas en 38 slides.** A diferencia del deck 10 *(25 erratas, 11 de las cuales impedían
-compilar)*, aquí **casi ninguna rompe código** —el deck tiene poco código— pero **cuatro son
-conceptuales** *(FLUSH PRIVILEGES, "control de versiones", estados sin reconciliar, USING HASH)* y son
-las que un parcial podría castigar.
+compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *(FLUSH PRIVILEGES,
+"control de versiones", estados sin reconciliar, USING HASH)* y son las que un parcial podría castigar.
 
 ---
 
@@ -1612,54 +1448,45 @@ las que un parcial podría castigar.
 
 ## Dudas abiertas
 
-- [ ] 🔴 **¿Qué se toma de seguridad en el parcial del 13/10: la sintaxis MySQL del deck o el modelo
-      de grafos de GMUW 10.1 que ejercita el TP8?** El deck da `GRANT`/`REVOKE` a un usuario; el TP8
-      pide grafos de permisos, privilegios por columna y `REVOKE … CASCADE` *"desde la teoría, ya que
-      MySQL no provee la opción"*. Son dos capas distintas y **sólo una está en el deck**. Es la
-      tercera vez *(TP6, TP7 y TP8)* que la cátedra nombra por escrito una brecha con MySQL; el patrón *"teoría en el
-      estándar, código en MySQL"* sugiere que se toman las dos. **Confirmar antes del parcial.**
-- [ ] 🔴 **¿Por qué los slides 31–38 son de índices, y se dieron en clase?** No los anuncia ni el
-      nombre del archivo, ni la portada, ni el cronograma; cuatro de ellos tienen encabezado
-      *"Transacciones"*. ¿Repaso pre-parcial? ¿Material que sobró de la Clase 08? ¿Se saltearon?
-      **Preguntar al humano** — afecta qué se estudia de índices para el 13/10.
-- [ ] 🔴 **Propagar los slides 31–38 a [[1.08.02 - Índices|Índices]].** Esa página tiene tres huecos
-      marcados ❌ *("Qué es un B-tree", "Tipos de índice", "Clustered vs. non-clustered")* y una duda
-      🔴 *("Sintaxis exacta de `CREATE INDEX` / `DROP INDEX` en MySQL … sigue sin verificar")*. **Los
-      cuatro se cierran con este deck** *(slides 32, 32–37, 33 y 35 respectivamente, con la salvedad
-      del `ON tabla` en el `DROP`)*. Y hay que agregar `USING HASH` con la advertencia de que InnoDB lo
-      ignora. La página del concepto se llama `1.08.02` porque el concepto **nació en la Clase 08**;
-      este deck lo **reencuadra**, así que va en `clases: [8, 11]`, no en una página nueva.
-- [ ] 🔴 **Verificar en el contenedor de la cursada, antes del TP8**: (a) que `USING HASH` sobre
-      InnoDB devuelve `Index_type = BTREE` en `SHOW INDEX`; (b) que un usuario `'u'@'localhost'`
-      **no** puede conectarse desde el host anfitrión al MySQL en Docker, y que `'u'@'%'` sí; (c) que
-      `GRANT rol TO usuario` sin `SET DEFAULT ROLE` deja al usuario sin los privilegios del rol; (d)
-      `SELECT @@transaction_isolation;` devuelve `REPEATABLE-READ`. Las cuatro son afirmaciones de
-      esta página **hechas desde el manual, no comprobadas en el entorno real**.
-- [ ] 🔴 **¿`REPEATABLE READ` de InnoDB evita los phantoms o no, para lo que pregunta la cátedra?**
-      El slide 28 dice que no *(estándar)*; InnoDB en la práctica no los muestra para lecturas
-      consistentes. Si el parcial pide *"nivel mínimo que evita phantoms"*, la respuesta del slide es
-      `SERIALIZABLE` y la de MySQL es `REPEATABLE READ`. Preguntar cuál se espera.
-- [ ] **¿La *"matriz de roles y permisos"* del cronograma es algo que se dio oralmente?** El deck no
-      tiene ninguna matriz. Si en clase se dibujó una tabla `rol × permiso`, vale reconstruirla desde
-      las notas del humano; si no, el tema del cronograma promete algo que el material no trae.
-- [ ] **¿Se explicó el `SET DEFAULT ROLE` en clase?** Es la omisión del slide 11 que hace que el
-      ej. 2.h del TP8 "no funcione" si se sigue el deck. Si el docente lo mencionó oralmente, no hay
-      problema; si no, es una trampa del enunciado.
+- [ ] (crítico) **¿Qué se toma de seguridad en el parcial del 13/10: la sintaxis MySQL del deck o el
+  modelo de grafos de GMUW 10.1 que ejercita el TP8?** Son dos capas distintas y sólo una está en el
+  deck; el patrón *"teoría en el estándar, código en MySQL"* de TP6, TP7 y TP8 sugiere que se toman
+  las dos. **Confirmar antes del parcial.**
+- [ ] (crítico) **¿Por qué los slides 31–38 son de índices, y se dieron en clase?** ¿Repaso
+  pre-parcial? ¿Material que sobró de la Clase 08? ¿Se saltearon? **Preguntar al humano**: afecta qué
+  se estudia de índices para el 13/10.
+- [ ] (crítico) **Propagar los slides 31–38 a [[1.08.02 - Índices|Índices]].** Sus tres huecos ✗
+  *("Qué es un B-tree", "Tipos de índice", "Clustered vs. non-clustered")* y su duda (crítico) sobre la
+  sintaxis de `CREATE INDEX` / `DROP INDEX` **se cierran con este deck** *(slides 32, 32–37, 33 y 35,
+  con la salvedad del `ON tabla` en el `DROP`)*, más `USING HASH` con la advertencia de que InnoDB lo
+  ignora. El concepto nació en la Clase 08 y este deck lo **reencuadra**: va en `clases: [8, 11]`, no
+  en una página nueva.
+- [ ] (crítico) **Verificar en el contenedor de la cursada, antes del TP8**: (a) que `USING HASH`
+  sobre InnoDB devuelve `Index_type = BTREE` en `SHOW INDEX`; (b) que un usuario `'u'@'localhost'`
+  **no** puede conectarse desde el host anfitrión al MySQL en Docker, y que `'u'@'%'` sí; (c) que
+  `GRANT rol TO usuario` sin `SET DEFAULT ROLE` deja al usuario sin los privilegios del rol; (d) que
+  `SELECT @@transaction_isolation;` devuelve `REPEATABLE-READ`. Las cuatro son afirmaciones de esta
+  página **hechas desde el manual, no comprobadas en el entorno real**.
+- [ ] (crítico) **¿`REPEATABLE READ` de InnoDB evita los phantoms o no, para lo que pregunta la
+  cátedra?** Si el parcial pide *"nivel mínimo que evita phantoms"*, la respuesta del slide es
+  `SERIALIZABLE` y la de MySQL es `REPEATABLE READ`. Preguntar cuál se espera.
+- [ ] **¿La *"matriz de roles y permisos"* del cronograma se dio oralmente?** El deck no tiene ninguna
+  matriz. Si en clase se dibujó una tabla `rol × permiso`, vale reconstruirla desde las
+  notas del humano.
+- [ ] **¿Se explicó el `SET DEFAULT ROLE` en clase?** Sin él, el ej. 2.h del TP8 "no funciona" si se
+  sigue el deck.
 - [ ] **¿Vale el `FOR UPDATE` del slide 30 como "la sintaxis MySQL de transacciones" para el
-      parcial?** Corre en MySQL sin cambios, pero el deck lo rotula PostgreSQL y **no muestra ninguna
-      transacción en MySQL**. Si el parcial pide escribir una transacción, ¿se espera `START
-      TRANSACTION` o vale `BEGIN`? *(las dos funcionan)*.
+  parcial?** Si el parcial pide escribir una transacción, ¿se espera `START TRANSACTION` o vale
+  `BEGIN`? *(las dos funcionan)*.
 - [ ] **¿Deadlocks, 2PL y recuperación entran?** Ninguno está en el deck; los tres están en GMUW
-      *(18.3.3, 19.2, cap. 17)* y en Date *(16.5, cap. 15)*. El slide 15 nombra *"control de la
-      concurrencia"* como causa de fallo, que presupone deadlocks. Preguntar.
-- [ ] **Este deck tampoco declara bibliografía** *(como el 10; el 09 sí lo hacía)*. Sus fuentes
-      evidentes son Silberschatz y Elmasri completos, **que no están en el vault**, y el manual de
-      MySQL. ¿La cátedra asume GMUW y Date para estos temas, o hay que conseguir Elmasri? Afecta al
-      mapeo de [[_index-bibliografia]] › Clase 11.
+  *(18.3.3, 19.2, cap. 17)* y en Date *(16.5, cap. 15)*. El slide 15 nombra *"control de la
+  concurrencia"* como causa de fallo, que presupone deadlocks.
+- [ ] **Este deck tampoco declara bibliografía** *(como el 10; el 09 sí lo hacía)*. ¿La cátedra asume
+  GMUW y Date para estos temas, o hay que conseguir Elmasri? Afecta al mapeo de
+  [[_index-bibliografia]] › Clase 11.
 - [ ] **La previsión de [[1.06.01 - Vistas|Vistas]] § *Enlaces*** —*"seguridad (07/09, vistas como
-      control de acceso) → todavía sin material"*— **falló**: el deck no nombra las vistas. Hay que
-      corregir esa línea *(callout `[!failure]`, como se hizo con `INSTEAD OF` el 02/09)* y dejar la
-      duda: ¿`GRANT SELECT ON vista` se da por sabido, o no entra?
+  control de acceso) → todavía sin material"*— **falló**: el deck no nombra las vistas. Corregir esa
+  línea y dejar la duda: ¿`GRANT SELECT ON vista` se da por sabido, o no entra?
 
 ## Enlaces
 

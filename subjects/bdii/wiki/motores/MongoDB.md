@@ -34,52 +34,37 @@ estado: procesado
 
 # MongoDB — el motor documental de la segunda mitad
 
-> [!important] Este es el primer motor NoSQL de la cursada, y el primero sin desfasaje de motor
-> El [[_cronograma]] abre la segunda mitad con *"Introducción a MongoDB"* el lunes 14/09 y el
-> **TP 9 - MongoDB Parte I** del martes 15/09; el enunciado del TP levanta el servidor con
-> `docker pull mongo` y trabaja en **`mongosh`**. Los tres decks de ese lunes —[[Clase 12 - Introduccion a NoSQL|Clase 12]],
-> [[Clase 13 - NoSQL-EmbebidosVSNormalizado|Clase 13]] y [[Clase 14 - MongoDB Features|Clase 14]]—
-> están escritos en MongoDB. **Por primera vez el deck, el TP y el motor coinciden**: no hay que
-> traducir de PostgreSQL a [[MySQL]] como en toda la Unidad-01.
->
-> **El problema cambió de naturaleza: ahora es de versión y de shell.** Los tres decks y el TP
-> usan la API del shell **`mongo` legado** *(`insert`, `count`, `update({multi: true})`, `remove`,
-> `ensureIndex`, `.pretty()`, `mapReduce`, salida `{result: […], ok: 1}`)*, y lo que se ejecuta en
-> el TP es **`mongosh`**, que acepta casi todo eso con `DeprecationWarning` y rechaza un par de
-> cosas. Esta página existe para eso: para poder leer el slide y saber qué tipear. La contracara
-> conceptual —qué es un documento, cuándo embeber, el pipeline— vive en los conceptos `2.*`
-> enlazados al final.
+## Resumen general
 
-## Resumen
+MongoDB es el motor documental de la segunda mitad de la cursada: lo enseñan las Clases 12, 13
+y 14 (lunes 14/09) y lo trabaja el TP9 (Parte I el 15/09, Parte II el 22/09), en `mongosh`. Es el
+primer motor de la materia sin desfasaje entre lo que enseña el deck y lo que pide la práctica —a
+diferencia de toda la Unidad-01, donde once de trece archivos estaban escritos en PostgreSQL,
+Oracle o T-SQL— y el mejor cubierto por la bibliografía obligatoria (*Seven Databases in Seven
+Weeks* cap. 4 y Corbellini § 6). Importa para el parcial del 13/10, porque abre la unidad NoSQL, y
+para el TPO, porque MongoDB suele ser candidato de comparación de motores.
 
-| | |
-| --- | --- |
-| **Rol** | Motor documental de la segunda mitad — Clases 12, 13 y 14 *(lunes 14/09)* y TP9 *(Parte I 15/09; Parte II 22/09, sin material todavía)* |
-| **Versión** | **No la fija la cátedra.** El slide 2 de la Clase 14 declara *"Stable release: 6.0.5 / 2023-03-13"*; el TP9 hace `docker pull mongo` **sin tag**, que el 16/09/2026 resuelve a **8.3.11** *(verificado en Docker Hub, ver § Versión)* |
-| **Instalación** | Contenedor **Docker** *(`docker run --name Mymongo -p 27017:27017 -d mongo`)* o **MongoDB Community Edition** local |
-| **Cliente** | **`mongosh`** *(CLI, JavaScript)*; GUIs: **DataGrip** *(primera opción del TP)*, **MongoDB Compass** *(oficial)*, **Studio 3T Free** *(ex Robo 3T)*; la teórica suma NoSQLBooster |
-| **Dataset** | Ninguno aparte: los 12 `insertOne` de `players` están como comandos en el PDF del TP9 y la tabla de bandas del ejercicio 1 está **solo como imagen** → [[Práctica 2026-09-15]] |
-| **Puerto / base** | `27017` · base `lab` *(TP9)*; el deck 14 usa `test` |
-| **Autenticación** | **Ninguna**: el `docker run` del TP no pasa `-e MONGO_INITDB_ROOT_USERNAME`, así que cualquier conexión al `27017` es administradora |
-| **Autoridad** | [[_cronograma]] — *gana el cronograma sobre el programa oficial* |
+El problema de esta página no es de motor sino de versión y de shell: los tres decks y el TP
+transcriben la API del shell legado `mongo` (`insert`, `count`, `update({multi:true})`, `remove`,
+`ensureIndex`, `.pretty()`, `mapReduce`), mientras que lo que se ejecuta hoy es `mongosh`, que
+acepta casi todo eso con `DeprecationWarning` y rechaza un puñado de casos. El deck 14 declara la
+versión estable 6.0.5, pero `docker pull mongo` sin tag trae la rama 8.x. Para el parcial y el TP
+conviene recordar: `.pretty()` ya no hace nada; `count()` sin filtro puede ser aproximado
+(`countDocuments()` es la forma exacta); `ensureIndex` no está en la referencia actual
+(`createIndex` es su reemplazo mecánico); el binario `mongo` fue retirado en la versión 6.0; y la
+atomicidad es siempre por documento, aunque existan transacciones multi-documento desde 4.0/4.2.
+Anotar `db.version()` al empezar cualquier ejercicio es el hábito que evita la mayoría de las
+sorpresas.
 
 ---
 
-## Por qué MongoDB — y por qué esta vez no hay discusión
+## Por qué MongoDB no tiene desfasaje de motor
 
-El programa oficial y el cronograma **coinciden** en este motor, a diferencia del caso
-MySQL/PostgreSQL de la primera mitad: los dos dicen MongoDB. Lo que sigue es la evidencia, junta,
-de que el material y la práctica también coinciden:
-
-| Evidencia | Qué implica | Dónde |
-| --- | --- | --- |
-| Fila `2026-09-14` del cronograma: *"Introducción a MongoDB · MongoDB: Enfoque embebido vs Normalizado · Ejemplos con MongoDB"* | MongoDB es el tema de las tres teóricas del 14/09 | [[_cronograma]] |
-| Fila `2026-09-15`: *"TP 9 - MongoDB Parte I"* · fila `2026-09-22`: *"TP 9 - MongoDB Parte II"* | dos prácticas seguidas sobre el motor | [[_cronograma]] |
-| TP9 p. 1: `docker pull mongo` · `docker run --name Mymongo -p 27017:27017 -d mongo` · *"ejecuten el comando **mongosh**"* | el servidor es MongoDB y el cliente es `mongosh` | [[Práctica 2026-09-15]] § Setup |
-| Clase 12, slides 29–52: MongoDB con `insert`, `find`, `$group`, `$lookup`, `createView` | MongoDB, en API legada | [[Clase 12 - Introduccion a NoSQL]] |
-| Clase 13, 28 slides: **cero SQL**; todo el código es MongoDB | MongoDB | [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] § Motor |
-| Clase 14, slide 2: *"Stable release: 6.0.5"*; slide 10: `mongosh --host localhost --port 27017` | MongoDB, y el deck sabe que el shell es `mongosh` | [[Clase 14 - MongoDB Features]] |
-| Programa oficial: MongoDB entre los motores NoSQL | coincide | [[_cronograma]] § diferencias |
+Programa oficial y cronograma coinciden en este motor, a diferencia del caso MySQL/PostgreSQL de
+la primera mitad. La fila `2026-09-14` del [[_cronograma]] da las tres teóricas de MongoDB, la
+`2026-09-15` el **TP9 Parte I** y la `2026-09-22` la **Parte II**; el enunciado del TP hace
+`docker pull mongo` y trabaja en `mongosh` → [[Práctica 2026-09-15]]. La Clase 12 desarrolla
+MongoDB en sus slides 29–52 (`insert`, `find`, `$group`, `$lookup`, `createView`, en API legada).
 
 > [!note] Estos tres decks **no entran** en el inventario de [[PostgreSQL]]
 > Ese inventario registra los decks relacionales escritos contra un motor distinto del de la
@@ -122,31 +107,28 @@ según `pdfinfo`)*. Pero el TP no la instala:
 > [!important] `docker pull mongo` sin tag = `latest`, y `latest` **cambia con el tiempo**
 > Verificado el **16/09/2026** en la página de la imagen oficial `mongo` de Docker Hub: la fila de
 > tags dice `8.3.11`, `8.3`, `8`, `latest` → `8.3.11-noble`, y las otras ramas mantenidas son
-> **8.0.32** y **7.0.43**. O sea: quien hizo el `pull` el 15/09 tiene MongoDB **8.3**, dos ramas
-> mayores por encima del 6.0.5 del deck. *(Es una lectura de la web, no una ejecución de `docker`
-> desde esta página: la versión efectiva de cada máquina hay que leerla con `db.version()`.)*
+> **8.0.32** y **7.0.43**. Quien hizo el `pull` el 15/09 tiene MongoDB **8.3**, dos ramas mayores
+> por encima del 6.0.5 del deck. *(Lectura de la web, no una ejecución de `docker` desde esta
+> página: la versión efectiva de cada máquina hay que leerla con `db.version()`.)*
 >
-> Dos consecuencias:
->
-> 1. **Reproducibilidad.** Dos alumnos que hagan el `pull` en fechas distintas pueden tener
->    versiones distintas, y la forma de la salida de `explain()` *(paso 34 del TP9)* cambia entre
->    ramas mayores. La [[Práctica 2026-08-04]] pinneaba `mysql:9.7.2`; aquí conviene fijar al menos
->    la rama: `docker pull mongo:8`. *(Propuesta propia; la cátedra no lo pide.)*
-> 2. **Compatibilidad hacia atrás.** Todo lo deprecado que enseñan los decks *(`insert`, `count`,
->    `update`, `remove`, `ensureIndex`, `mapReduce`)* sigue existiendo en 8.x según la
->    documentación, pero con advertencia. Lo que **no** existe es el binario `mongo` *(ver § 7 de
->    la tabla de diferencias)*.
+> Dos consecuencias: **(1) reproducibilidad** — dos alumnos que hagan el `pull` en fechas distintas
+> pueden tener versiones distintas, y la forma de la salida de `explain()` *(paso 34 del TP9)*
+> cambia entre ramas mayores; conviene fijar al menos la rama, `docker pull mongo:8` *(propuesta
+> propia, la cátedra no lo pide)*. **(2) compatibilidad hacia atrás** — todo lo deprecado que
+> enseñan los decks *(`insert`, `count`, `update`, `remove`, `ensureIndex`, `mapReduce`)* sigue
+> existiendo en 8.x con advertencia; lo que **no** existe es el binario `mongo` *(ver § 7 de la
+> tabla de diferencias)*.
 
 > [!note] La documentación actual de `mongosh` declara soporte para servidores **7.0 o superiores**
 > La página de instalación de `mongosh` dice hoy *"You can use the MongoDB Shell to connect to
 > MongoDB version 7.0 or greater"* *(verificado el 16/09/2026)*. El **6.0.5 del deck queda por
 > debajo del mínimo soportado por el shell actual**: no es que falle, es que ya no está en la
-> matriz de soporte. Un motivo más para no intentar reproducir la versión del deck.
+> matriz de soporte.
 
 ```javascript
 // Lo primero que se anota en la entrega del TP9, antes de cualquier comando
-db.version()          // versión del servidor mongod
-version()             // versión de mongosh (función del shell, no de db)
+db.version()  // versión del servidor mongod
+version()  // versión de mongosh (función del shell, no de db)
 ```
 
 ---
@@ -163,21 +145,12 @@ La cátedra da dos caminos para el servidor: contenedor **Docker** *(primera opc
 
 ### Levantar el motor con Docker
 
-> [!quote] TP9, p. 1, textual
-> *"Antes de comenzar si desean usar dockers/contenedores, sigan los siguientes pasos:*
-> - *Instalar Docker Desktop for Windows o for Mac o Docker Engine en Linux*
-> - *Para descargar la versión oficial de MongoDB: `docker pull mongo`*
-> - *Levantar el contenedor: `docker run --name Mymongo -p 27017:27017 -d mongo`*
-> - *Para levantar un Shell bash dentro del contenedor: `docker exec -it Mymongo bash`*
-> - *Para apagar el contenedor con: `docker stop Mymongo`*
-> - *Para iniciarla nuevamente: `docker start Mymongo`*
-> - *Para listar todos los containers existentes: `docker ps -a`*
-> - *Para copiar archivos del host al contenedor: `docker cp <filename> Mymongo:/<filename>`"*
+Los ocho pasos del enunciado, tal como hay que tipearlos:
 
 ```bash
 docker pull mongo
 docker run --name Mymongo -p 27017:27017 -d mongo
-docker exec -it Mymongo bash          # y adentro: mongosh
+docker exec -it Mymongo bash  # y adentro: mongosh
 docker stop Mymongo
 docker start Mymongo
 docker ps -a
@@ -191,43 +164,31 @@ docker cp <filename> Mymongo:/<filename>
 > docker exec -it Mymongo mongosh
 > ```
 >
-> Esto no contradice el recuadro que la Clase 14 copia de la documentación —*"The MongoDB Shell
-> (mongosh) is not installed with MongoDB Server"*—: ese aviso vale para la **instalación nativa**
-> *(Community Edition)*, donde el shell se baja aparte; la imagen Docker lo incluye. Y el
-> `docker cp` de la lista sirve para lo que este TP todavía no pide: copiar un `.json`/`.tsv` al
-> contenedor para importarlo con `mongoimport`, que también viene en la imagen.
+> No contradice el recuadro que la Clase 14 copia de la documentación —*"The MongoDB Shell (mongosh)
+> is not installed with MongoDB Server"*—: ese aviso vale para la **instalación nativa**, donde el
+> shell se baja aparte; la imagen Docker lo incluye. El `docker cp` de la lista sirve para lo que
+> este TP todavía no pide: copiar un `.json`/`.tsv` al contenedor e importarlo con `mongoimport`.
 
 ### Instalación local
 
-> [!quote] TP9, p. 1, textual
-> *"Otra opción es instalar mongoDB, en su versión community, en la PC que vayan a utilizar para
-> este práctico: **Instalar MongoDB Community Edition - Manual de base de datos - MongoDB Docs**"*
-
-El texto en azul es un **hipervínculo cuyo destino no se ve en el PDF**. Por el título, es la
-página de instalación del manual oficial *(`https://www.mongodb.com/docs/manual/installation/`
-— URL supuesta, no la del PDF)*. En la instalación nativa **hay que instalar `mongosh` aparte**
-*(recuadro del slide 10 de la Clase 14)* y el servicio se enciende como muestra ese mismo slide:
+El TP ofrece también instalar **MongoDB Community Edition** local, con un hipervínculo *("Instalar
+MongoDB Community Edition - Manual de base de datos - MongoDB Docs")* cuyo destino no se ve en el
+PDF — por el título, sería `https://www.mongodb.com/docs/manual/installation/` *(URL supuesta, no
+la del PDF)*. En la instalación nativa **hay que instalar `mongosh` aparte** *(recuadro del
+slide 10 de la Clase 14)* y el servicio se enciende como muestra ese mismo slide:
 
 ```bash
 # Clase 14, slide 10 — Linux con service
 $ sudo service mongod start
 $ sudo service mongod stop
-$ mongosh --host localhost --port 27017      # es equivalente a
-$ mongosh                                     # esta otra instrucción
+$ mongosh --host localhost --port 27017  # es equivalente a
+$ mongosh  # esta otra instrucción
 ```
 
-### Conectarse
+### Conectarse y parámetros
 
-> [!quote] TP9, p. 1, textual
-> *"Una opción es utilizar el cliente de línea de comandos, para ello dentro de la terminal,
-> ejecuten el comando **mongosh** para acceder a la Shell de MongoDB.*
->
-> *Otra opción es utilizar **DataGrip**, configurando el data source correspondiente. Si quieren
-> utilizar una GUI diferente a DataGrip, pueden optar por alguna de estas:*
-> - *MongoDB Compass (oficial): `https://www.mongodb.com/products/tools/compass`*
-> - *Robo 3T is now Studio 3T Free (open-source) : `https://robomongo.org/download`"*
-
-### Parámetros de conexión, en una tabla
+El TP ofrece `mongosh` como cliente de línea de comandos y **DataGrip** como primera opción de
+GUI, con MongoDB Compass y Studio 3T Free como alternativas *(tabla de clientes, más abajo)*.
 
 | Parámetro | Valor |
 | --- | --- |
@@ -246,28 +207,26 @@ Clientes que propone el material, con lo que cada fuente dice de ellos:
 | --- | --- | --- | --- |
 | **`mongosh`** | CLI, JavaScript | TP9 p. 1 · Clase 14 slide 10 | **Todo el TP está escrito para él.** Es el shell actual; el `mongo` legado no viene en la imagen |
 | **DataGrip** | GUI (JetBrains) | TP9 *(primera opción)* · Clase 14 slide 18 | El mismo cliente que la cursada usa para MySQL desde la [[Práctica 2026-08-04]]: *"configurando el data source correspondiente"* |
-| **MongoDB Compass** | GUI oficial | TP9 · Clase 14 slide 17 | `https://www.mongodb.com/products/tools/compass`. Gratuito; la pestaña *Schema* infiere la estructura de una colección sin esquema; trae un `mongosh` embebido. La consigna complementaria del 14/09 dice *"Usando MongoDB (Compass)"* |
-| **Studio 3T Free** *(ex Robo 3T, ex Robomongo)* | GUI | TP9 · Clase 14 slides 16 y 42 | `https://robomongo.org/download`. El enunciado registra el cambio de nombre: *"Robo 3T is now Studio 3T Free"*; el deck 14 muestra capturas de Robomongo 0.9.0-RC9 y de Robo 3T 1.2 |
+| **MongoDB Compass** | GUI oficial | TP9 · Clase 14 slide 17 | `https://www.mongodb.com/products/tools/compass`. Gratuito, con `mongosh` embebido; la consigna complementaria del 14/09 dice *"Usando MongoDB (Compass)"* |
+| **Studio 3T Free** *(ex Robo 3T)* | GUI | TP9 · Clase 14 slides 16 y 42 | `https://robomongo.org/download`. Cambio de nombre: *"Robo 3T is now Studio 3T Free"*; capturas de Robomongo 0.9.0-RC9 y Robo 3T 1.2 en el deck 14 |
 | NoSQLBooster | GUI | solo Clase 14 slide 19 | El TP no lo lista |
 
 ### Comandos de referencia del contenedor
 
 ```bash
-docker ps -a                     # lista contenedores, incluidos los detenidos
+docker ps -a  # lista contenedores, incluidos los detenidos
 docker stop Mymongo
 docker start Mymongo
 docker exec -it Mymongo mongosh  # shell directo (atajo)
-docker exec -it Mymongo bash     # como dice el TP; adentro: mongosh, mongoimport, mongodump…
+docker exec -it Mymongo bash  # como dice el TP; adentro: mongosh, mongoimport, mongodump…
 ```
 
 > [!note] Misma mecánica que MySQL, con tres diferencias
 > Comparado con el `docker run` de la [[Práctica 2026-08-04]] *(`mysql:9.7.2`, con `-e` de
-> credenciales)*: **(1)** no se fija tag; **(2)** no hay variables de entorno, así que no hay
-> usuario ni contraseña; **(3)** no hay `-v`, así que los datos quedan en el volumen anónimo que la
-> imagen crea en `/data/db`: sobreviven a `stop`/`start`, pero `docker rm` los deja huérfanos y
-> `docker rm -v` los borra. Las tres son decisiones del enunciado, no defectos del motor:
-> `-e MONGO_INITDB_ROOT_USERNAME` / `MONGO_INITDB_ROOT_PASSWORD` y `-v mongo_data:/data/db` existen
-> en la imagen oficial *(ampliación propia, no está en el material)*.
+> credenciales)*: no se fija tag, no hay usuario ni contraseña, y no hay `-v` *(volumen anónimo,
+> ver tabla de parámetros)*. Las tres son decisiones del enunciado, no defectos del motor:
+> `-e MONGO_INITDB_ROOT_USERNAME`/`PASSWORD` y `-v mongo_data:/data/db` existen en la imagen
+> oficial *(ampliación propia)*.
 
 ---
 
@@ -277,51 +236,50 @@ Serie real según [[_cronograma]] y `raw/tp/_index.md`:
 
 | TP | Tema | Práctica donde se da | Teóricas que lo sustentan | ¿Toca MongoDB? |
 | --- | --- | --- | --- | --- |
-| **TP9 Parte I** | MongoDB Parte I | **[[Práctica 2026-09-15]]** | Clases **12**, **13** y **14** *(lunes 14/09)* | ✅ **entero**, en `mongosh`. 34 pasos guiados *(CRUD, selectores, `$regex`, `$set`/`$inc`/`$push`, upsert, proyección, `sort`/`limit`/`skip`, subdocumentos, índices, `explain`)* + 11 ejercicios sobre una colección `bandas` que hay que modelar y cargar a mano. Los ejercicios **10 y 11** piden `createView` y `$group`, que los 34 pasos no enseñan |
-| **TP9 Parte II** | MongoDB Parte II | martes 22/09 *(sin teórica el lunes 21/09, Día del Estudiante)* | pendiente | ✅ presumiblemente; **el enunciado no está en `raw/`** y esta página no predice su contenido |
-| Consigna *ecommerce* *(sin número de TP)* | agregaciones sobre `clientes` / `productos` / `ordenes` | material complementario del 14/09 | Clase 14 | ✅ cinco preguntas de `aggregate`; la solución oficial usa `$lookup` y `$unwind`, que el deck 14 no enseña *(`$lookup` está en las Clases 12 —slide 49— y 13 —slides 22–24—; `$unwind` solo se nombra en la lista del slide 21 de la Clase 13)* → [[Clase 14 - MongoDB Features]] § Material complementario |
-| **TP10**–**TP13** | Cassandra · Neo4j · Redis · DynamoDB | segunda mitad | pendiente | ❌ otros motores |
+| **TP9 Parte I** | MongoDB Parte I | **[[Práctica 2026-09-15]]** | Clases **12**, **13** y **14** *(lunes 14/09)* | ✓ **entero**, en `mongosh`. 34 pasos guiados *(CRUD, selectores, `$regex`, `$set`/`$inc`/`$push`, upsert, proyección, `sort`/`limit`/`skip`, subdocumentos, índices, `explain`)* + 11 ejercicios sobre `bandas`. Los ejercicios **10 y 11** piden `createView` y `$group`, que los 34 pasos no enseñan |
+| **TP9 Parte II** | MongoDB Parte II | martes 22/09 *(sin teórica el lunes 21/09, Día del Estudiante)* | pendiente | ✓ presumiblemente; **el enunciado no está en `raw/`** y esta página no predice su contenido |
+| Consigna *ecommerce* *(sin número de TP)* | agregaciones sobre `clientes` / `productos` / `ordenes` | material complementario del 14/09 | Clase 14 | ✓ cinco preguntas de `aggregate`; la solución oficial usa `$lookup` y `$unwind`, que el deck 14 no enseña *(`$lookup` está en las Clases 12 —slide 49— y 13 —slides 22–24—; `$unwind` solo se nombra en la lista del slide 21 de la Clase 13)* → [[Clase 14 - MongoDB Features]] § Material complementario |
+| **TP10**–**TP13** | Cassandra · Neo4j · Redis · DynamoDB | segunda mitad | pendiente | ✗ otros motores |
 
 > [!warning] El TP9 no trae dataset: los datos se tipean
 > Los 12 documentos de `players` están como comandos `insertOne` en las pp. 2–3 del PDF, y la
-> tabla de bandas del ejercicio 1 está **solo como imagen** en la p. 7. Es la quinta vez que un TP
-> manda tipear el esquema o los datos a mano *(TP4, TP5, TP6 y TP7 según el conteo de **esquemas**
-> tipeados de `raw/tp/_index.md` —en el TP5 los datos sí venían, en CSV—, y ahora el TP9)* y la
-> tercera que da algo solo como imagen *(TP4 y TP6 los esquemas, TP9 los datos)*. La transcripción
-> celda por celda y los `insertMany` ejecutables están en [[Práctica 2026-09-15]] § Ejercicio 1.
+> tabla de bandas del ejercicio 1 está **solo como imagen** en la p. 7 — quinta vez que un TP manda
+> tipear el esquema o los datos a mano *(TP4, TP5, TP6 y TP7 según `raw/tp/_index.md`)* y tercera
+> que da algo solo como imagen. La transcripción celda por celda y los `insertMany` ejecutables
+> están en [[Práctica 2026-09-15]] § Ejercicio 1.
 
 ### El dataset de la teórica
 
 La Clase 14 trabaja con colecciones que **no vienen en el vault**: `towns` *(Portland, New York,
 Punxsutawney — del libro)*, `phones` *(100.000 documentos generados con un script del libro)*,
 `internos` *(importada con `mongoimport … --type tsv < internos.tsv`, 289 documentos)*,
-`egresados`, `testing`, `hospitales` y `elecciones-2019`. Ninguno de esos archivos está en
-`raw/`; los ejemplos se leen, no se reproducen. Lo que sí se puede reproducir es el experimento de
-índices del slide 29 con cualquier colección grande *(ver [[2.14.02 - Índices en MongoDB|Índices en MongoDB]])*.
+`egresados`, `testing`, `hospitales` y `elecciones-2019`. Ninguno está en `raw/`; los ejemplos se
+leen, no se reproducen, salvo el experimento de índices del slide 29, replicable con cualquier
+colección grande → [[2.14.02 - Índices en MongoDB|Índices en MongoDB]].
 
 ---
 
 ## Diferencias: lo que muestra el slide vs. lo que hay que tipear
 
 > [!important] Esta es la tabla que hay que tener al lado cuando se hace el TP
-> Todo lo que sigue está verificado contra la página de compatibilidad de `mongosh`
+> Verificado contra la página de compatibilidad de `mongosh`
 > *(`https://www.mongodb.com/docs/mongodb-shell/reference/compatibility/`, § *Deprecated
 > Methods*, consultada el 16/09/2026)* y contra las páginas de referencia del manual que se citan
-> en cada fila. **Deprecado ≠ eliminado**: los métodos de las filas ⚠️ corren en `mongosh` y
-> emiten `DeprecationWarning`; los de las filas ❌ fallan.
+> en cada fila. **Deprecado ≠ eliminado**: los métodos de las filas (atención) corren en `mongosh` y
+> emiten `DeprecationWarning`; los de las filas ✗ fallan.
 
 ### 1 · CRUD — los *helpers* genéricos se partieron en `…One` / `…Many`
 
 | Como está en el material | Dónde | Estado | Como se escribe hoy |
 | --- | --- | :---: | --- |
-| `db.users.insert({user_id: "abc123", age: 55, status: "A"})` · `db.myCollection.insert({"name" : "tutorial"})` · `db.mycol.insert({…})` · `db.usuarios.insert({…})` · `db.towns.insert( <JSON> )` | Clase 12 slides 32, 37, 38 · Clase 14 slides 12, 20, 23 | ⚠️ deprecado | `insertOne({…})` |
-| `db.post.insert([ {…}, {…} ])` · `db.orders.insert([ … ])` · `db.inventory.insert([ … ])` | Clase 12 slide 39 · Clase 13 slide 22 | ⚠️ deprecado | `insertMany([ … ])` |
-| `db.users.update( { age: { $gt: 25 } }, { $set: { status: "C" } }, { multi: true })` | Clase 12 slide 32 | ⚠️ deprecado | `updateMany( { age: { $gt: 25 } }, { $set: { status: "C" } } )` — la cardinalidad va en el nombre, no en `{multi: true}` |
-| `db.towns.update( { name : "Portland" }, { $set : { "state" : "OR" } } )` → `WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })` | Clase 14 slide 25 | ⚠️ deprecado; la salida `WriteResult` es del shell legado | `updateOne(…)` → `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0 }` |
-| *"especificar un tercer parámetro en true"* *(upsert, prosa)* | TP9 paso 19 | ⚠️ describe la firma legada `update(q, u, true)` | `updateOne(q, u, {upsert: true})` — como el paso 20 del mismo TP ya lo escribe |
-| `db.users.remove( { status: "D" } )` | Clase 12 slide 32 | ⚠️ deprecado | `deleteMany( { status: "D" } )` / `deleteOne(…)` |
-| `db.users.count()` · `db.users.find().count()` · `db.internos.count()` · `db.countries.count()` · `db.players.find({hobbies:'Swimming'}).count()` | Clase 12 slide 32 · Clase 14 slides 14, 27, 29, 34 · TP9 paso 27 | ⚠️ deprecado *(sin filtro puede devolver un valor aproximado, por metadatos)* | `countDocuments(filtro)` *(exacto)* · `estimatedDocumentCount()` *(rápido, sin filtro)*. El slide 14 de la Clase 14 muestra la corrección: `count()` en gris, `countDocuments()` debajo |
-| `db.system.js.save({…})` + `db.loadServerScripts()` | Clase 14 slide 38 | ⚠️ `save()` deprecado | `db.system.js.insertOne({…})`; el mecanismo entero está en retirada *(ver [[2.14.01 - mongosh y herramientas de línea de comando\|mongosh y herramientas]])* |
+| `db.users.insert({user_id: "abc123", age: 55, status: "A"})` · `db.myCollection.insert({"name" : "tutorial"})` · `db.mycol.insert({…})` · `db.usuarios.insert({…})` · `db.towns.insert( <JSON> )` | Clase 12 slides 32, 37, 38 · Clase 14 slides 12, 20, 23 | (atención) deprecado | `insertOne({…})` |
+| `db.post.insert([ {…}, {…} ])` · `db.orders.insert([ … ])` · `db.inventory.insert([ … ])` | Clase 12 slide 39 · Clase 13 slide 22 | (atención) deprecado | `insertMany([ … ])` |
+| `db.users.update( { age: { $gt: 25 } }, { $set: { status: "C" } }, { multi: true })` | Clase 12 slide 32 | (atención) deprecado | `updateMany( { age: { $gt: 25 } }, { $set: { status: "C" } } )` — la cardinalidad va en el nombre, no en `{multi: true}` |
+| `db.towns.update( { name : "Portland" }, { $set : { "state" : "OR" } } )` → `WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })` | Clase 14 slide 25 | (atención) deprecado; la salida `WriteResult` es del shell legado | `updateOne(…)` → `{ acknowledged: true, matchedCount: 1, modifiedCount: 1, upsertedCount: 0 }` |
+| *"especificar un tercer parámetro en true"* *(upsert, prosa)* | TP9 paso 19 | (atención) describe la firma legada `update(q, u, true)` | `updateOne(q, u, {upsert: true})` — como el paso 20 del mismo TP ya lo escribe |
+| `db.users.remove( { status: "D" } )` | Clase 12 slide 32 | (atención) deprecado | `deleteMany( { status: "D" } )` / `deleteOne(…)` |
+| `db.users.count()` · `db.users.find().count()` · `db.internos.count()` · `db.countries.count()` · `db.players.find({hobbies:'Swimming'}).count()` | Clase 12 slide 32 · Clase 14 slides 14, 27, 29, 34 · TP9 paso 27 | (atención) deprecado *(sin filtro puede devolver un valor aproximado, por metadatos)* | `countDocuments(filtro)` *(exacto)* · `estimatedDocumentCount()` *(rápido, sin filtro)*. El slide 14 de la Clase 14 muestra la corrección: `count()` en gris, `countDocuments()` debajo |
+| `db.system.js.save({…})` + `db.loadServerScripts()` | Clase 14 slide 38 | (atención) `save()` deprecado | `db.system.js.insertOne({…})`; el mecanismo entero está en retirada *(ver [[2.14.01 - mongosh y herramientas de línea de comando\|mongosh y herramientas]])* |
 
 Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14 slide 9, TP9)*,
 `deleteOne` *(Clase 14 slide 27)*, `updateOne` / `updateMany` / `deleteMany` / `countDocuments`
@@ -331,79 +289,76 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `db.mycol.find().pretty()` · `db.cliente.find({…}, {…}).pretty()` | Clase 12 slides 40, 41, 44 · Clase 13 slide 26 | ✅ existe, **sin efecto** | `find()` ya imprime indentado en `mongosh`; `.pretty()` es un *no-op* |
-| `aggregate([…])` que devuelve `{ "result" : [ … ], "ok" : 1 }` | Clase 12 slide 47 | ❌ formato **anterior a 2.6** *(2014)* | desde 2.6 `aggregate` devuelve un **cursor** y el shell imprime los documentos sueltos, uno por línea |
-| `"likes" : "100"` en las salidas *(el insert puso el número `100`)* | Clase 12 slides 40, 42, 43, 44 | ❌ salida escrita a mano | el shell imprime `likes: 100`; con el string, el `$gt: 50` del slide 41 no matchearía |
-| `DBQuery.shellBatchSize = x` | Clase 14 slide 11 *(help del shell `mongo`)* | ⚠️ deprecado | `config.set("displayBatchSize", x)` *(verificado en la página de compatibilidad)* |
-| `it` para seguir iterando el cursor | Clase 14 slide 11 | ✅ | igual |
-| `show tables` | Clase 14 slide 13 | ✅ alias | `show collections` |
-| `printjson(doc)` dentro de `forEach` | Clase 13 slide 27 · Clase 14 slide 28 | ✅ | igual |
-| `find({…}).explain()` · `.explain("executionStats")` | Clase 13 slide 28 · Clase 14 slide 29 · TP9 paso 34 | ✅ | igual; la **forma** de la salida cambia entre ramas mayores *(ver [[1.08.01 - Plan de ejecución\|Plan de ejecución]] § MongoDB)* |
+| `db.mycol.find().pretty()` · `db.cliente.find({…}, {…}).pretty()` | Clase 12 slides 40, 41, 44 · Clase 13 slide 26 | ✓ existe, **sin efecto** | `find()` ya imprime indentado en `mongosh`; `.pretty()` es un *no-op* |
+| `aggregate([…])` que devuelve `{ "result" : [ … ], "ok" : 1 }` | Clase 12 slide 47 | ✗ formato **anterior a 2.6** *(2014)* | desde 2.6 `aggregate` devuelve un **cursor** y el shell imprime los documentos sueltos, uno por línea |
+| `"likes" : "100"` en las salidas *(el insert puso el número `100`)* | Clase 12 slides 40, 42, 43, 44 | ✗ salida escrita a mano | el shell imprime `likes: 100`; con el string, el `$gt: 50` del slide 41 no matchearía |
+| `DBQuery.shellBatchSize = x` | Clase 14 slide 11 *(help del shell `mongo`)* | (atención) deprecado | `config.set("displayBatchSize", x)` *(verificado en la página de compatibilidad)* |
+| `it` para seguir iterando el cursor | Clase 14 slide 11 | ✓ | igual |
+| `show tables` | Clase 14 slide 13 | ✓ alias | `show collections` |
+| `printjson(doc)` dentro de `forEach` | Clase 13 slide 27 · Clase 14 slide 28 | ✓ | igual |
+| `find({…}).explain()` · `.explain("executionStats")` | Clase 13 slide 28 · Clase 14 slide 29 · TP9 paso 34 | ✓ | igual; la **forma** de la salida cambia entre ramas mayores *(ver [[1.08.01 - Plan de ejecución\|Plan de ejecución]] § MongoDB)* |
 
 ### 3 · Índices
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `db.phones.ensureIndex( { display : 1 }, { unique : true } )` · `db.players.ensureIndex({name:1})` · `ensureIndex({name:1},{unique:true})` · `ensureIndex({name:1, weight:1})` | Clase 14 slide 29 · TP9 pasos 30, 32, 33 | ⚠️ **fuera de la lista de métodos del manual** *(la referencia `js-collection` lista `createIndex`, `createIndexes`, `dropIndex`, `dropIndexes`, `getIndexes`, `hideIndex`, `unhideIndex`, `reIndex`; `ensureIndex` no aparece — verificado 16/09/2026)*. Alias deprecado desde 3.0 | `createIndex(claves, opciones)`, mismos argumentos. **Si en la consola falla con `is not a function`, la corrección es mecánica** |
-| `db.phones.ensureIndex({ "components.area": 1 }, { background : 1 })` | Clase 14 slide 29 | ⚠️ `background` **ignorado desde 4.2** | `createIndex({ "components.area": 1 })` — todos los índices se construyen sin bloquear |
-| `db.players.dropIndex({name:1})` | TP9 paso 31 | ✅ | igual; también por nombre `'name_1'` |
-| `db[collection].getIndexes()` | Clase 14 slide 28 | ✅ | igual |
+| `db.phones.ensureIndex( { display : 1 }, { unique : true } )` · `db.players.ensureIndex({name:1})` · `ensureIndex({name:1},{unique:true})` · `ensureIndex({name:1, weight:1})` | Clase 14 slide 29 · TP9 pasos 30, 32, 33 | (atención) **fuera de la lista de métodos del manual** *(la referencia `js-collection` lista `createIndex`, `createIndexes`, `dropIndex`, `dropIndexes`, `getIndexes`, `hideIndex`, `unhideIndex`, `reIndex`; `ensureIndex` no aparece — verificado 16/09/2026)*. Alias deprecado desde 3.0 | `createIndex(claves, opciones)`, mismos argumentos. **Si en la consola falla con `is not a function`, la corrección es mecánica** |
+| `db.phones.ensureIndex({ "components.area": 1 }, { background : 1 })` | Clase 14 slide 29 | (atención) `background` **ignorado desde 4.2** | `createIndex({ "components.area": 1 })` — todos los índices se construyen sin bloquear |
+| `db.players.dropIndex({name:1})` | TP9 paso 31 | ✓ | igual; también por nombre `'name_1'` |
+| `db[collection].getIndexes()` | Clase 14 slide 28 | ✓ | igual |
 
 ### 4 · Agregación y MapReduce
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}])` | Clase 12 slide 47 | ✅ *(solo la salida está vieja)* | igual |
-| `db.posts.aggregate([{ $lookup: { from: "comments", localField: "title", foreignField: "postTitle", as: "comments" } }])` | Clase 12 slide 49 *(posts/comments)*. La Clase 13 slide 23 trae el mismo operador con otro ejemplo: `db.orders.aggregate([{ $lookup: { from: "inventory", localField: "item", foreignField: "sku", as: "inventory_docs" } }])` | ✅ *(desde 3.2)* | igual. **No está en *Seven Databases* cap. 4** *(cero ocurrencias, verificado en la Clase 13)* |
-| `db.runCommand({ mapReduce: 'phones', map: map, reduce: reduce, out: 'phones.report' })` · `db.orders.mapReduce(…)` | Clase 14 slide 36 · handout `Ejemplo_MapReduce_MongoDB.pdf` | ⚠️ **deprecado desde 5.0** *(manual: "Starting in MongoDB 5.0, map-reduce is deprecated … you should use an aggregation pipeline" — verificado 16/09/2026)* | `aggregate([{ $group: … }, { $out: … }])`; para lo que no cabe en operadores, `$accumulator` y `$function`. La traducción del handout está en [[Clase 14 - MongoDB Features]] § (c) y en [[2.14.03 - MapReduce\|MapReduce]] |
-| `db.createView("managementFeedback", "survey", [ { $project: { "management": "$feedback.management", department: 1 } } ])` · `db.createCollection("<viewName>", { "viewOn": …, "pipeline": … })` | Clase 12 slides 50–51 | ✅ *(desde 3.4)* | igual; las vistas son **de solo lectura** *(manual: "Views act as read-only collections, and are computed on demand during read operations")* y su pipeline **no puede llevar `$out` ni `$merge`** |
+| `db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}])` | Clase 12 slide 47 | ✓ *(solo la salida está vieja)* | igual |
+| `db.posts.aggregate([{ $lookup: { from: "comments", localField: "title", foreignField: "postTitle", as: "comments" } }])` | Clase 12 slide 49 *(posts/comments)*. La Clase 13 slide 23 trae el mismo operador con otro ejemplo: `db.orders.aggregate([{ $lookup: { from: "inventory", localField: "item", foreignField: "sku", as: "inventory_docs" } }])` | ✓ *(desde 3.2)* | igual. **No está en *Seven Databases* cap. 4** *(cero ocurrencias, verificado en la Clase 13)* |
+| `db.runCommand({ mapReduce: 'phones', map: map, reduce: reduce, out: 'phones.report' })` · `db.orders.mapReduce(…)` | Clase 14 slide 36 · handout `Ejemplo_MapReduce_MongoDB.pdf` | (atención) **deprecado desde 5.0** *(manual: "Starting in MongoDB 5.0, map-reduce is deprecated … you should use an aggregation pipeline" — verificado 16/09/2026)* | `aggregate([{ $group: … }, { $out: … }])`; para lo que no cabe en operadores, `$accumulator` y `$function`. La traducción del handout está en [[Clase 14 - MongoDB Features]] § (c) y en [[2.14.03 - MapReduce\|MapReduce]] |
+| `db.createView("managementFeedback", "survey", [ { $project: { "management": "$feedback.management", department: 1 } } ])` · `db.createCollection("<viewName>", { "viewOn": …, "pipeline": … })` | Clase 12 slides 50–51 | ✓ *(desde 3.4)* | igual; las vistas son **de solo lectura** *(manual: "Views act as read-only collections, and are computed on demand during read operations")* y su pipeline **no puede llevar `$out` ni `$merge`** |
 
 ### 5 · Replica set — el shell cambia, `rs.*` no
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `$ mongod --replSet book --dbpath ./mongo1 --port 27011` *(×3)* | Clase 14 slide 41 | ✅ | igual |
-| `$ mongo localhost:27011` | Clase 14 slide 41 | ❌ **binario `mongo` retirado en 6.0** *(verificado, ver callout al final del § 7)* | `mongosh localhost:27011` · `mongosh --port 27011` |
-| `rs.initiate({ _id: 'book', members: [ {_id: 1, host: 'localhost:27011'}, … ] })` · `rs.status().ok` | Clase 14 slide 41 | ✅ | igual |
-| `rs.secondaryOk` | *(no está en el material; era el paso habitual para leer de un secundario)* | ⚠️ ya no hace falta | `Mongo.setReadPref()` *(página de compatibilidad)* |
+| `$ mongod --replSet book --dbpath ./mongo1 --port 27011` *(×3)* | Clase 14 slide 41 | ✓ | igual |
+| `$ mongo localhost:27011` | Clase 14 slide 41 | ✗ **binario `mongo` retirado en 6.0** *(verificado, ver callout al final del § 7)* | `mongosh localhost:27011` · `mongosh --port 27011` |
+| `rs.initiate({ _id: 'book', members: [ {_id: 1, host: 'localhost:27011'}, … ] })` · `rs.status().ok` | Clase 14 slide 41 | ✓ | igual |
+| `rs.secondaryOk` | *(no está en el material; era el paso habitual para leer de un secundario)* | (atención) ya no hace falta | `Mongo.setReadPref()` *(página de compatibilidad)* |
 
 ### 6 · `ObjectId` — lo inválido y lo que cambió
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `_id: ObjectId(7df78ad8902c)` *(12 hex, sin comillas)* | Clase 12 slides 38, 40, 42, 43, 44, 46 *(y `…902d`, `…902e`)* | ❌ **no corre en ninguna versión**: `SyntaxError` | `ObjectId("507f1f77bcf86cd799439011")` *(string de **24** hex)* — o, más simple, **omitir `_id`** y dejar que el driver lo genere, como hace el TP9 en todos sus inserts. El error viene copiado de tutorialspoint |
-| `db.egresados.findOne()._id.toString()` → `ObjectId("5d712e759bec0f1238869a1a")` | Clase 14 slide 8 | ❌ **cambió**: es el comportamiento del shell legado | en `mongosh`, `toString()` devuelve el **hexadecimal a secas** *(manual, página `ObjectId`: `ObjectId("507f191e810c19729de860ea").toString()` → `507f191e810c19729de860ea` — verificado 16/09/2026)*. `valueOf()` y `getTimestamp()` siguen como en el slide |
-| `ObjectId` de 12 bytes: 4 de timestamp + 5 aleatorios por proceso + 3 de contador | Clase 14 slide 8 *(prosa de la página)* | ✅ | igual *(manual, página `ObjectId`)* |
+| `_id: ObjectId(7df78ad8902c)` *(12 hex, sin comillas)* | Clase 12 slides 38, 40, 42, 43, 44, 46 *(y `…902d`, `…902e`)* | ✗ **no corre en ninguna versión**: `SyntaxError` | `ObjectId("507f1f77bcf86cd799439011")` *(string de **24** hex)* — o, más simple, **omitir `_id`** y dejar que el driver lo genere, como hace el TP9 en todos sus inserts. El error viene copiado de tutorialspoint |
+| `db.egresados.findOne()._id.toString()` → `ObjectId("5d712e759bec0f1238869a1a")` | Clase 14 slide 8 | ✗ **cambió**: es el comportamiento del shell legado | en `mongosh`, `toString()` devuelve el **hexadecimal a secas** *(manual, página `ObjectId`: `ObjectId("507f191e810c19729de860ea").toString()` → `507f191e810c19729de860ea` — verificado 16/09/2026)*. `valueOf()` y `getTimestamp()` siguen como en el slide |
+| `ObjectId` de 12 bytes: 4 de timestamp + 5 aleatorios por proceso + 3 de contador | Clase 14 slide 8 *(prosa de la página)* | ✓ | igual *(manual, página `ObjectId`)* |
 
 ### 7 · El shell y el servicio
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `$ mongosh --host localhost --port 27017` · `$ mongosh` | Clase 14 slide 10 · TP9 p. 1 | ✅ | igual |
-| `> help` con *"quit the **mongo** shell"*, `help mr` | Clase 14 slide 11 | ❌ es la ayuda del shell legado | en `mongosh`, `help` lista `use`, `show`, `exit`; los *helpers* son `db.help()`, `rs.help()`, `sh.help()` |
-| `$ sudo service mongod start` / `stop` | Clase 14 slide 10 | ✅ en instalación nativa Linux | en Docker: `docker start Mymongo` / `docker stop Mymongo` |
-| *"The MongoDB Shell (mongosh) is not installed with MongoDB Server"* | Clase 14 slide 10 *(captura de la documentación)* | ✅ para la instalación nativa | la imagen Docker **sí** trae `mongosh` |
-| `use DATABASE_NAME` · `db` · `show dbs` · `db.dropDatabase()` · `db.createCollection("myCollection")` · `db.myCollection.drop()` | Clase 12 slides 35–37 · Clase 14 slides 12–13 | ✅ | igual. `use` dentro de un archivo `.js` **no es JavaScript válido**: en un script es `db = db.getSiblingDB('lab')` → [[Práctica 2026-09-15]] § Todo el TP en un script |
+| `$ mongosh --host localhost --port 27017` · `$ mongosh` | Clase 14 slide 10 · TP9 p. 1 | ✓ | igual |
+| `> help` con *"quit the **mongo** shell"*, `help mr` | Clase 14 slide 11 | ✗ es la ayuda del shell legado | en `mongosh`, `help` lista `use`, `show`, `exit`; los *helpers* son `db.help()`, `rs.help()`, `sh.help()` |
+| `$ sudo service mongod start` / `stop` | Clase 14 slide 10 | ✓ en instalación nativa Linux | en Docker: `docker start Mymongo` / `docker stop Mymongo` |
+| *"The MongoDB Shell (mongosh) is not installed with MongoDB Server"* | Clase 14 slide 10 *(captura de la documentación)* | ✓ para la instalación nativa | la imagen Docker **sí** trae `mongosh` |
+| `use DATABASE_NAME` · `db` · `show dbs` · `db.dropDatabase()` · `db.createCollection("myCollection")` · `db.myCollection.drop()` | Clase 12 slides 35–37 · Clase 14 slides 12–13 | ✓ | igual. `use` dentro de un archivo `.js` **no es JavaScript válido**: en un script es `db = db.getSiblingDB('lab')` → [[Práctica 2026-09-15]] § Todo el TP en un script |
 
 > [!note] Cuándo se retiró el shell `mongo` — verificado contra las notas de compatibilidad
 > Las páginas de las Clases 12 y 14 y el concepto [[2.14.01 - mongosh y herramientas de línea de comando|mongosh]]
 > afirman que `mongosh` reemplazó a `mongo` en 5.0 y que el binario `mongo` **dejó de distribuirse
-> en 6.0**. Las dos cosas se verificaron el 18/09/2026 en el manual: *Compatibility Changes in
-> MongoDB 5.0* § *Shell Changes* dice *"The mongo shell has been deprecated in MongoDB v5.0. The
-> replacement shell is mongosh"*, y *Compatibility Changes in MongoDB 6.0* § *Legacy mongo Shell
-> Removed* dice *"The mongo shell is removed from MongoDB 6.0. The replacement is mongosh"*
+> en 6.0**. Verificado el 18/09/2026 en el manual: *Compatibility Changes in MongoDB 5.0*
+> § *Shell Changes* dice *"The mongo shell has been deprecated in MongoDB v5.0. The replacement
+> shell is mongosh"*, y *Compatibility Changes in MongoDB 6.0* § *Legacy mongo Shell Removed* dice
+> *"The mongo shell is removed from MongoDB 6.0. The replacement is mongosh"*
 > *(`docs/v6.0/release-notes/6.0-compatibility/`)*. La página de compatibilidad de `mongosh`
-> consultada el 16/09 confirma además la tabla de métodos deprecados. Lo que también es un hecho
-> observable: el deck se declara de 6.0.5 y enseña con `mongosh` en el slide 10; el TP solo nombra
-> `mongosh`; la imagen Docker actual trae `mongosh`.
+> consultada el 16/09 confirma además la tabla de métodos deprecados.
 
 ---
 
 ## Lo que el material dice y ya no es cierto
 
 Tres afirmaciones de la [[Clase 12 - Introduccion a NoSQL|Clase 12]] envejecieron, y las tres
-pueden aparecer en el parcial. Esta página las registra; la decisión de con qué versión responder
-está en § *Dudas abiertas*.
+pueden aparecer en el parcial:
 
 | Afirmación del material | Dónde | Qué pasó después | Fuente verificada |
 | --- | --- | --- | --- |
@@ -423,8 +378,8 @@ está en § *Dudas abiertas*.
 ## Replica set y sharding — los comandos exactos del deck 14
 
 Es el único bloque del material con comandos de administración. El TP9 Parte I **no lo usa**
-*(corre contra un solo `mongod`)*; queda aquí porque es lo que hay que saber tipear si la Parte II
-o el parcial lo piden. La teoría está en [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal — sharding y replicación]].
+*(corre contra un solo `mongod`)*; queda aquí por si la Parte II o el parcial lo piden. La teoría
+está en [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal — sharding y replicación]].
 
 ### Replica set de tres nodos *(Clase 14, slide 41 — del libro, impresas 124–125)*
 
@@ -449,7 +404,7 @@ Versión ejecutable hoy *(un solo cambio: `mongo` → `mongosh`)*:
 
 ```bash
 mkdir ./mongo1 ./mongo2 ./mongo3
-mongod --replSet book --dbpath ./mongo1 --port 27011   # una terminal por nodo
+mongod --replSet book --dbpath ./mongo1 --port 27011  # una terminal por nodo
 mongod --replSet book --dbpath ./mongo2 --port 27012
 mongod --replSet book --dbpath ./mongo3 --port 27013
 mongosh localhost:27011
@@ -460,7 +415,7 @@ rs.initiate({ _id: 'book', members: [
   {_id: 1, host: 'localhost:27011'},
   {_id: 2, host: 'localhost:27012'},
   {_id: 3, host: 'localhost:27013'} ] })
-rs.status().ok        // 1 si el set funciona; rs.status() completo muestra PRIMARY / SECONDARY
+rs.status().ok  // 1 si el set funciona; rs.status() completo muestra PRIMARY / SECONDARY
 ```
 
 | Paso | Qué hace |
@@ -468,14 +423,14 @@ rs.status().ok        // 1 si el set funciona; rs.status() completo muestra PRIM
 | tres `--dbpath` distintos | tres `mongod` no pueden compartir directorio de datos |
 | `--replSet book` en los tres | el nombre del set; debe coincidir con el `_id` de `rs.initiate` |
 | `rs.initiate` desde cualquier nodo | configura el set; los tres negocian quién es **PRIMARY** *(la captura del slide 42 muestra que salió `27012`, no el primero de la lista)* |
-| **tres** y no dos | la elección necesita **mayoría estricta**: el libro desarrolla los casos de 5 nodos *(partición 3–2)* y 4 *(partición 2–2: los dos lados sin mayoría)*; que con 2 nodos una caída deje al sobreviviente sin mayoría y degradado a secundario es aplicación propia de la misma regla *(y el propio libro, impresa 126, dice lo contrario en su experimento: "the last remaining node is implicitly the master")*. Número impar o un árbitro *(`arbiterOnly: true`)* → *Seven Databases* impresas 126–127, § *The Problem with Even Nodes* y recuadro *Voting and Arbiters*; la contradicción está registrada en [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] § Dudas abiertas |
+| **tres** y no dos | la elección necesita **mayoría estricta**: el libro desarrolla los casos de 5 nodos *(partición 3–2)* y 4 *(partición 2–2, sin mayoría en ningún lado)*. Número impar o un árbitro *(`arbiterOnly: true`)* → *Seven Databases* impresas 126–127, § *The Problem with Even Nodes* y recuadro *Voting and Arbiters*; hay una contradicción del libro sobre el caso de 2 nodos, registrada en [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] § Dudas abiertas |
 
 > [!note] En Docker, el replica set del slide es otra cosa
 > El `docker run` del TP levanta **un** `mongod` sin `--replSet`. Reproducir el slide 41 en Docker
-> exige tres contenedores en una misma red *(o tres procesos en uno)* y hosts que se resuelvan
-> entre sí; no está en el material y esta página no lo desarrolla. Las **transacciones
-> multi-documento** requieren un replica set, así que con el contenedor del TP tal cual **no se
-> pueden probar** *(ampliación propia)*.
+> exige tres contenedores en una misma red y hosts que se resuelvan entre sí; no está en el
+> material y esta página no lo desarrolla. Las **transacciones multi-documento** requieren un
+> replica set, así que con el contenedor del TP tal cual **no se pueden probar** *(ampliación
+> propia)*.
 
 ### Sharding — un slide, sin comandos
 
@@ -508,27 +463,26 @@ El deck no escribe ni un comando de sharding; delega en *Seven Databases* § *Sh
 
 > [!success] Es el motor mejor cubierto por la bibliografía obligatoria
 > A diferencia de MySQL *(que no tiene libro en el vault)* y de Cassandra *(que no está en ninguna
-> edición de *Seven Databases*)*, MongoDB tiene un capítulo entero del libro de la cátedra, una
-> sección del paper, y los decks citan páginas del libro sin nombrarlo. Todo lo que sigue está
-> verificado contra las fichas de `raw/Material_Catedra/bibliografia/`.
+> edición de *Seven Databases*)*, MongoDB tiene un capítulo entero del libro de la cátedra y una
+> sección del paper. Verificado contra las fichas de `raw/Material_Catedra/bibliografia/`.
 
 ### *Seven Databases in Seven Weeks*, 2ª ed. — cap. 4 MongoDB *(impresas 93–133; PDF 106–146, offset +13)*
 
 | Sección | Impresas | Qué cubre de la cursada |
 | --- | --- | --- |
 | Hu(mongo)us | 93–94 | presentación del motor |
-| **Day 1: CRUD and Nesting** | **94–110** | todo el recorrido guiado del TP9: § *Command-Line Fun* 95–98 · § *Digging Deep* 100–104 *(incl. `elemMatch` 101–103, `Boolean Ops` 103–104)* · § *Updating* 104–106 · § *References* 106–107 *(`{ $ref, $id }`; "Mongo isn't built to perform joins")* · § *Deleting* 107–108 · § *Reading with Code* 108–109 |
-| **Day 2: Indexing, Aggregating, Mapreduce** | **110–123** | § *Indexing: When Fast Isn't Fast Enough* 110–114 *(el experimento del slide 29; `explain("executionStats")` en 111–112; recuadro *Mongo's Many Useful CLI Tools* en 114 = tabla del slide 30)* · § *Aggregated Queries* 115–117 *(pipeline, `$group`; el link del slide 25 de la Clase 13 es la nota 3 de la 115)* · § *Server-Side Commands* 117–119 *(`system.js`, slide 38)* · § *Mapreduce (and Finalize)* 119–123 *(el slide 35 es la 120 literal; el `runCommand` del 36 está en la 121; el diagrama del 37 en la 122)* |
-| **Day 3: Replica Sets, Sharding, GeoSpatial, and GridFS** | **124–132** | § *Replica Sets* 124–127 *(slide 41; tira cómica de la 124; § *The Problem with Even Nodes* 126–127; recuadro *Voting and Arbiters* 127)* · § *Sharding* 127–130 *(recuadro *mongos vs. mongoconfig* 129)* · § *GeoSpatial Queries* 130–131 *(no se dicta)* · § *GridFS* 131–132 |
-| Wrap-Up | 132–133 | *Mongo's Strengths* / *Weaknesses* 133 *("Mongo encourages denormalization of schemas")* — para el "cuándo elegirlo" del TPO |
+| **Day 1: CRUD and Nesting** | **94–110** | recorrido guiado del TP9: § *Command-Line Fun* 95–98 · § *Digging Deep* 100–104 *(`elemMatch`, `Boolean Ops`)* · § *Updating* 104–106 · § *References* 106–107 *("Mongo isn't built to perform joins")* · § *Deleting* 107–108 · § *Reading with Code* 108–109 |
+| **Day 2: Indexing, Aggregating, Mapreduce** | **110–123** | § *Indexing* 110–114 *(experimento del slide 29; `explain("executionStats")` 111–112)* · § *Aggregated Queries* 115–117 *(pipeline, `$group`)* · § *Server-Side Commands* 117–119 *(`system.js`, slide 38)* · § *Mapreduce (and Finalize)* 119–123 *(slides 35–37)* |
+| **Day 3: Replica Sets, Sharding, GeoSpatial, and GridFS** | **124–132** | § *Replica Sets* 124–127 *(slide 41; § *The Problem with Even Nodes* 126–127)* · § *Sharding* 127–130 · § *GeoSpatial Queries* 130–131 *(no se dicta)* · § *GridFS* 131–132 |
+| Wrap-Up | 132–133 | *Mongo's Strengths* / *Weaknesses* 133 — para el "cuándo elegirlo" del TPO |
 
 > [!warning] El libro está escrito contra **MongoDB 3.6** y con el shell `mongo`
 > Ficha, Apéndice A1 *(impresa 311)*: las versiones tabuladas son las de 2018, MongoDB **3.6**. El
 > libro usa `insert()`, `ensureIndex`, `mongo localhost:27011` y el dominio `docs.mongodb.com`
 > —exactamente lo que los decks heredan—. **No trae `$lookup`** *(cero ocurrencias en el cap. 4)*,
 > ni `createView`, ni transacciones multi-documento *(A1 tabla 6, impresa 314: `Transactions: No`)*,
-> ni `mongosh`. Los `4.N` *(`4.1`…`4.5`)* con que a veces se citan sus bloques son una convención
-> de la ficha, no numeración del libro: se cita **por título de sección y página impresa**.
+> ni `mongosh`. Los `4.N` con que a veces se citan sus bloques son una convención de la ficha, no
+> numeración del libro: se cita **por título de sección y página impresa**.
 
 ### Corbellini et al. (2017) — § 6 *Document-oriented databases* *(pp. 14–16)*
 
@@ -584,103 +538,75 @@ Páginas del manual que **esta página** usó para verificar, y que el material 
 > usarlas en el parcial.**
 
 1. **`db.version()` y `version()`** — la primera devuelve la versión del servidor; la segunda, la
-   del shell. Como la cátedra no fija versión, es lo primero que se anota en la entrega.
+  del shell. Sin versión fijada por la cátedra, es lo primero que se anota en la entrega.
 
 2. **Sin `$set`, `updateOne` reemplaza el documento entero.** El slide 25 de la Clase 14 lo marca
-   en rojo y el paso 17 del TP9 lo dice en prosa *("el documento completo no será reemplazado")*.
-   `updateOne({name: "Portland"}, {state: "OR"})` deja a Portland con **un solo campo** más `_id`.
+  en rojo y el paso 17 del TP9 lo dice en prosa. `updateOne({name: "Portland"}, {state: "OR"})`
+  deja a Portland con **un solo campo** más `_id`.
 
-3. **`use lab` no crea nada.** La base aparece en `show dbs` recién con el primer documento
-   insertado; lo dice el paso 2 del TP9. Y `db.dropDatabase()` borra **la base actual**, sin
-   nombrarla ni pedir confirmación: mirar `db` antes.
+3. **`use lab` no crea nada** hasta el primer documento insertado *(paso 2 del TP9)*.
+  `db.dropDatabase()` borra la base actual sin nombrarla ni pedir confirmación: mirar `db` antes.
 
 4. **`_id` es el único *constraint* declarativo, y el índice único el segundo.** No hay `NOT NULL`,
-   ni `CHECK`, ni claves foráneas; `createIndex({name: 1}, {unique: true})` es lo más cercano a
-   `UNIQUE`. Existe la validación de esquema con `$jsonSchema` *(desde 3.6, según la Clase 14
-   § Lo que el deck no trae)*, que ningún deck ni TP toca. Contraste con
-   [[1.09.01 - Restricciones de integridad|Restricciones de integridad]].
+  `CHECK` ni claves foráneas; `createIndex({name: 1}, {unique: true})` es lo más cercano a
+  `UNIQUE`. Existe `$jsonSchema` *(desde 3.6)*, que ningún deck ni TP toca. Contraste con
+  [[1.09.01 - Restricciones de integridad|Restricciones de integridad]].
 
 5. **`$lookup` y `$unwind` hacen falta para la consigna complementaria y no están en el deck 14.**
-   La solución oficial del *ecommerce* los usa en los cuatro pipelines que escribe. `$lookup` está
-   en la Clase 12 *(slide 49)* y en la 13 *(slide 23)*; `$unwind` solo aparece en la lista del
-   slide 21 de la Clase 13, sin desarrollo → [[2.12.08 - Aggregation pipeline|Aggregation pipeline]].
+  `$lookup` está en la Clase 12 *(slide 49)* y en la 13 *(slide 23)*; `$unwind` solo se nombra en
+  el slide 21 de la Clase 13, sin desarrollo → [[2.12.08 - Aggregation pipeline|Aggregation pipeline]].
 
 6. **Las vistas son de solo lectura y no admiten `$out`/`$merge` en su pipeline** *(manual,
-   `db.createView`)*. El ejercicio 10 del TP9 pide una vista sin haberla enseñado; el "cómo" está
-   en la Clase 12 *(slides 50–52)* y en [[1.06.01 - Vistas|Vistas]] § Vistas en MongoDB.
+  `db.createView`)*. El ejercicio 10 del TP9 pide una vista sin haberla enseñado; el "cómo" está
+  en la Clase 12 *(slides 50–52)* y en [[1.06.01 - Vistas|Vistas]] § Vistas en MongoDB.
 
 7. **`new Date(año, mes, día)` toma el mes desde 0.** Los 12 inserts del TP9 escriben el mes
-   1-based, así que todos los `dob` quedan un mes corridos en el motor. No afecta ningún paso;
-   para datos propios, `new Date('1987-02-14')` → [[Práctica 2026-09-15]] § Paso 7.
+  1-based, así que los `dob` quedan un mes corridos en el motor → [[Práctica 2026-09-15]] § Paso 7.
 
 8. **Transacciones multi-documento: existen desde 4.0, pero exigen un replica set.** Con el
-   `mongod` único del `docker run` del TP **no se pueden ejecutar**: `session.startTransaction()`
-   falla fuera de un replica set. La sintaxis *(`const session = db.getMongo().startSession();
-   session.startTransaction(); … session.commitTransaction()`)* es razonamiento propio a partir del
-   manual, no está en el material.
+  `mongod` único del TP **no se pueden ejecutar**: `session.startTransaction()` falla fuera de un
+  replica set *(razonamiento propio a partir del manual, no está en el material)*.
 
 ### Cómo averiguar lo que el deck no enseña
 
 ```javascript
-db.version()                       // versión del servidor
-db.getCollectionNames()            // colecciones (y vistas) de la base actual — TP9 pasos 3 y 5
-db.getCollectionInfos()            // distingue type: 'collection' de type: 'view'
-db.players.getIndexes()            // índices de una colección — Clase 14 slide 28
-db.players.stats()                 // tamaño, cantidad de documentos, índices
-db.players.find({...}).explain("executionStats")   // plan y ejecución real — Clase 13 slide 28
-db.players.findOne                 // sin paréntesis: imprime el código del método — TP9 NOTA, Clase 14 slide 20
+db.version()  // versión del servidor
+db.getCollectionNames()  // colecciones (y vistas) de la base actual — TP9 pasos 3 y 5
+db.getCollectionInfos()  // distingue type: 'collection' de type: 'view'
+db.players.getIndexes()  // índices de una colección — Clase 14 slide 28
+db.players.stats()  // tamaño, cantidad de documentos, índices
+db.players.find({...}).explain("executionStats")  // plan y ejecución real — Clase 13 slide 28
+db.players.findOne  // sin paréntesis: imprime el código del método — TP9 NOTA, Clase 14 slide 20
 ```
 
 ---
 
 ## Dudas abiertas
 
-- [ ] 🔴 **¿Qué versión de MongoDB toma la cátedra como referencia?** El deck declara 6.0.5; el
-      `pull` sin tag trajo 8.3.11 el 16/09/2026 *(y traerá otra cosa en un mes)*; la documentación
-      actual de `mongosh` soporta servidores 7.0+. Determina la forma de la salida de `explain()`
-      *(TP9 paso 34)* y qué deprecaciones avisan o fallan. **Anotar `db.version()` en la entrega y
-      preguntar el 22/09.**
-- [ ] 🔴 **¿Se acepta la sintaxis legada en la entrega?** `ensureIndex` está en el TP *(pasos 30,
-      32, 33)* y en el deck 14; `find().count()` en el TP *(paso 27)*; `insert`/`update`/`remove`
-      en los tres decks. Todo corre con `DeprecationWarning` según el manual, **pero no se
-      verificó en el motor desde esta página** — `ensureIndex` en particular está fuera de la lista
-      de métodos del manual, y si `mongosh` 2.x lo eliminó como alias, los pasos 30–33 fallan con
-      `is not a function`. Es lo primero que hay que probar.
-- [ ] 🔴 **¿Cómo quiere la cátedra que se responda "¿MongoDB soporta transacciones ACID?"?** El
-      slide 11 de la Clase 12 dice que no; *Seven Databases* A1 *(2018)* dice `Transactions: No`;
-      el manual actual dice multi-documento desde 4.0/4.2. Afecta la justificación de motor del TPO
-      y una pregunta probable del parcial del 13/10.
-- [ ] 🔴 **¿`mapReduce` entra al parcial, o solo el aggregation pipeline?** Tres slides del deck 14
-      y un handout, sobre un comando deprecado desde 5.0. Si entra, hay que saber escribir
-      `map`/`reduce`/`finalize`; si no, alcanza con traducirlo a `$group` + `$out`.
-- [ ] **¿En qué esquina de CAP se pone a MongoDB en el parcial?** Slide 18 de la Clase 12: CP;
-      Corbellini Table 2: AP **y** CP *(configurable)*; *Seven Databases* impresa 127: *"Because
-      it's a CP system"*. → [[2.12.04 - Teorema CAP|Teorema CAP]].
-- [ ] **¿Qué trae la Parte II del TP9 (22/09)?** ¿Agregaciones y vistas *(lo que la Parte I pide sin
-      enseñar)*, `$lookup`/`$unwind` *(lo que la consigna complementaria usa)*, o `mapReduce`,
-      replica sets y sharding *(lo que el deck 14 cubre y la Parte I no toca)*? ¿Reutiliza
-      `players` y `bandas`? Si sí, **no hacer `dropDatabase()`** al terminar la Parte I.
-- [ ] **¿Se toman replica sets y sharding con comandos o solo como concepto?** El deck no tiene un
-      solo comando de sharding y el de replica sets es una copia del libro; el handout sugiere que
-      el nivel esperado es la tabla comparativa.
-- [ ] **`toString()` de `ObjectId`**: el manual actual dice que devuelve el hexadecimal *(verificado
-      16/09)*; el slide 8 de la Clase 14 muestra `ObjectId("…")`. Falta comprobarlo en el `mongosh`
-      de la imagen y anotar cuál es.
-- [x] **¿Desde qué versión se retiró el binario `mongo`?** Las páginas de clase dicen 6.0 y es
-      correcto: *Compatibility Changes in MongoDB 6.0* § *Legacy mongo Shell Removed* lo confirma
-      *(verificado 18/09/2026; ver el callout del § 7)*. No cambia nada operativo: la imagen actual
-      solo trae `mongosh`.
-- [ ] **¿La imagen `mongo` corre en UTC?** Define cómo se guardan los `new Date(…)` del TP9.
-- [ ] **¿Se archiva una ficha para *Practical MongoDB Aggregations*?** Es el único libro nombrado
-      por un deck de la semana y no está en `raw/Material_Catedra/bibliografia/`. Decisión del
-      humano.
-- [ ] **¿La consigna *ecommerce* se resuelve con el *aggregation pipeline builder* de Compass o vale
-      `mongosh`?** El enunciado dice *"Usando MongoDB (Compass)"*; el TP9 nombra primero DataGrip.
-- [ ] **¿Se dicta algo de GridFS, geoespacial o `$jsonSchema`?** Están en el libro *(Day 3)* o en
-      el manual, y en ningún deck; el dataset `hospitales` del slide 33 de la Clase 14 es GeoJSON.
-- [ ] **¿Qué versiones de `mongosh` y de las Database Tools trae la imagen 8.3?** `mongoimport`
-      *(slide 14 de la Clase 14)* se distribuye aparte del servidor desde 4.4; en la imagen Docker
-      viene incluido, **a verificar** con `mongoimport --version` dentro del contenedor.
+- [ ] (crítico) ¿Qué versión de MongoDB toma la cátedra como referencia? *(deck: 6.0.5; `pull` sin
+  tag: 8.3.11 el 16/09/2026; determina la forma de `explain()`, TP9 paso 34)*
+- [ ] (crítico) ¿Se acepta la sintaxis legada en la entrega? *(`ensureIndex` pasos 30, 32, 33;
+  `find().count()` paso 27; `insert`/`update`/`remove` en los tres decks)*
+- [ ] (crítico) ¿Cómo quiere la cátedra que se responda "¿MongoDB soporta transacciones ACID?" —
+  no *(slide 11 de la Clase 12, *Seven Databases* A1)* o sí desde 4.0/4.2 *(manual actual)*?
+- [ ] (crítico) ¿`mapReduce` entra al parcial, o solo el aggregation pipeline?
+- [ ] ¿En qué esquina de CAP se pone a MongoDB en el parcial? *(Slide 18 de la Clase 12: CP;
+  Corbellini Table 2: AP y CP; *Seven Databases* impresa 127: CP)* → [[2.12.04 - Teorema CAP|Teorema CAP]]
+- [ ] ¿Qué trae la Parte II del TP9 (22/09)? ¿Reutiliza `players` y `bandas`? Si sí, **no hacer
+  `dropDatabase()`** al terminar la Parte I.
+- [ ] ¿Se toman replica sets y sharding con comandos o solo como concepto?
+- [ ] ¿`toString()` de `ObjectId` devuelve el hexadecimal a secas en la imagen de la cátedra?
+  *(verificado en el manual, falta comprobarlo en el `mongosh` real)*
+- [x] ¿Desde qué versión se retiró el binario `mongo`? **6.0**, confirmado en el manual
+  *(verificado 18/09/2026)*.
+- [ ] ¿La imagen `mongo` corre en UTC? Define cómo se guardan los `new Date(…)` del TP9.
+- [ ] ¿Se archiva una ficha para *Practical MongoDB Aggregations*? Decisión del humano.
+- [ ] ¿La consigna *ecommerce* se resuelve con el *aggregation pipeline builder* de Compass o vale
+  `mongosh`?
+- [ ] ¿Se dicta algo de GridFS, geoespacial o `$jsonSchema`? *(el dataset `hospitales` del slide 33
+  de la Clase 14 es GeoJSON)*
+- [ ] ¿Qué versiones de `mongosh` y de las Database Tools trae la imagen 8.3? *(a verificar con
+  `mongoimport --version` dentro del contenedor)*
 
 ## Enlaces
 
