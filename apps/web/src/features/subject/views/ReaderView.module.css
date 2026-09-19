@@ -120,6 +120,12 @@
   gap: 14px;
   padding-top: 4px;
   max-height: calc(100vh - 90px);
+  /* La columna NO se desplaza entera (pedido del usuario): cuando el índice de
+     la página es más alto que la ventana, cede altura hasta su mínimo y se
+     desplaza por dentro (`.tocCard`), así el bloque de apuntes queda siempre a
+     la vista. `auto` es solo la red: si aun con el índice en su mínimo los
+     apuntes no entran (20 renglones en una ventana baja), la columna vuelve a
+     desplazarse antes que recortarlos. */
   overflow-y: auto;
   /* Hueco para el botón flotante de la materia: tapaba «FUENTES» al final de la
      columna, sin manera de sacarlo (visto a 1280 y a 1440). */
@@ -148,7 +154,28 @@
 
 .cardEmpty { margin: 0; font: 400 12px var(--font-ui); color: var(--text-3); }
 
-.toc { display: flex; flex-direction: column; gap: 1px; }
+/* «EN ESTA PÁGINA» es la única tarjeta que cede: encoge hasta un mínimo de
+   cinco renglones (~25 px cada uno más la cabecera) y lo que no entra se
+   desplaza en la lista, no en la columna. La medida resultante es la misma en
+   toda página con índice largo: la columna menos el bloque de apuntes. */
+.tocCard {
+  flex: 0 1 auto;
+  min-height: 176px;
+}
+/* El bloque de apuntes no encoge: es lo que el índice le hace lugar. */
+.notesCard { flex: none; }
+
+.toc {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* Al llegar al final de la lista, la rueda no sigue con la hoja: el lector
+     está mirando el índice, no leyendo. */
+  overscroll-behavior: contain;
+}
 
 /* Árbol: una rama por sección, con sus subsecciones colgando de un tronco. El
    tronco toma el color de la unidad cuando el encabezado la declara («U2 · …»). */
