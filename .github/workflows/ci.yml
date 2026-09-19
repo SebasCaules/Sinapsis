@@ -75,7 +75,10 @@ jobs:
           echo "Materia: $slug"
 
           git fetch --no-tags origin main
-          changed="$(git diff --name-only origin/main...HEAD)"
+          # Sin `core.quotePath=false`, git entrecomilla las rutas con acentos
+          # (`"subjects/bdii/wiki/clases/Pr\303\241ctica …"`) y el filtro de abajo
+          # las tomaría como externas a la materia.
+          changed="$(git -c core.quotePath=false diff --name-only origin/main...HEAD)"
           if [ -z "$changed" ]; then
             echo "La rama no cambia nada respecto de main." >&2
             exit 1
