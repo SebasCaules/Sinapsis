@@ -20,6 +20,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -145,7 +146,7 @@ export function PageFrame({
       style={{ ["--ucol" as string]: color, ["--sheet-width" as string]: `${sheetWidth}px` }}
     >
       <div className={css.column} ref={columnRef}>
-        <article className={css.sheet} ref={sheet} data-page-frame="">
+        <article className={css.sheet} ref={sheet} data-page-frame="" data-sheet-width="">
           <header className={css.sheetHead}>
             {division ? (
               <Link className={css.divisionChip} to={routes.division(subject, division.key)}>
@@ -276,7 +277,7 @@ export function Sheet({ children }: { children: ReactNode }) {
       }}
     >
       <div className={css.column} ref={columnRef}>
-        <article className={css.sheet} data-page-frame="">
+        <article className={css.sheet} data-page-frame="" data-sheet-width="">
           {children}
           <SheetHandle side="left" width={sheetWidth} onWidth={setSheetWidth} layoutRef={layoutRef} columnRef={columnRef} />
           <SheetHandle side="right" width={sheetWidth} onWidth={setSheetWidth} layoutRef={layoutRef} columnRef={columnRef} />
@@ -319,11 +320,16 @@ function unlockBody(): void {
  * Fin van a los extremos, y Entrar, Espacio o un doble clic devuelven la hoja a
  * los 840 de fábrica. El valor se OYE, además de verse (`aria-valuetext`).
  *
- * Mientras dura el gesto la variable se escribe directamente en el nodo de
- * `.layout` dentro de un `requestAnimationFrame`: un `pointermove` puede llegar
- * cien veces por segundo y re-renderizar la vista —con su markdown y su
- * KaTeX— en cada uno era insostenible. El estado se confirma al soltar, que es
- * también donde se persiste.
+ * Mientras dura el gesto el ancho se escribe DIRECTO en las cajas que lo usan
+ * —la hoja y sus chips, marcadas con `data-sheet-width`— dentro de un
+ * `requestAnimationFrame`: un `pointermove` puede llegar cien veces por segundo
+ * y re-renderizar la vista —con su markdown y su KaTeX— en cada uno era
+ * insostenible. Tampoco sirve escribir la variable en `.layout` durante el
+ * gesto: una propiedad personalizada heredada invalida el estilo de TODO el
+ * subárbol (medido en la Guía 2 de Cripto, 45 000 nodos: 12 ms por frame antes
+ * de mover un solo píxel), mientras que el ancho de dos cajas cuesta menos de
+ * 4. La variable se escribe al soltar, con el estado, que es también donde se
+ * persiste; ahí el efecto de abajo retira los anchos en línea.
  */
 function SheetHandle({
   side,
@@ -352,10 +358,24 @@ function SheetHandle({
     return room > SHEET_MIN ? Math.min(SHEET_MAX, room) : SHEET_MAX;
   }, [columnRef]);
 
-  const paint = useCallback(
-    (value: number) => layoutRef.current?.style.setProperty("--sheet-width", `${value}px`),
+  const boxes = useCallback(
+    () => (layoutRef.current ? Array.from(layoutRef.current.querySelectorAll<HTMLElement>("[data-sheet-width]")) : []),
     [layoutRef],
   );
+  const paint = useCallback(
+    (value: number) => {
+      for (const box of boxes()) box.style.width = `min(${value}px, 100%)`;
+    },
+    [boxes],
+  );
+  const unpaint = useCallback(() => {
+    for (const box of boxes()) box.style.width = "";
+  }, [boxes]);
+
+  /* El ancho confirmado ya está en la variable de `.layout`: los anchos en
+     línea del gesto sobran (y, si se quedaran, taparían un cambio posterior por
+     teclado o por doble clic). */
+  useLayoutEffect(unpaint, [width, unpaint]);
 
   /* Un desmontaje a mitad de gesto (cambio de página con el botón apretado) no
      puede dejar el documento con el cursor de arrastre para siempre. */
@@ -382,8 +402,8 @@ function SheetHandle({
     } catch {
       /* el puntero ya se había soltado solo */
     }
-    paint(state.value);
-    onWidth(state.value);
+    if (state.value === width) unpaint();
+    else onWidth(state.value);
   };
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {

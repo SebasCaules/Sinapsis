@@ -175,6 +175,9 @@ const REHYPE_SIN_PLACAS: PluggableList = [rehypeHeadingIds, rehypeTypography, [r
 
 const NO_ASSETS: readonly PageAsset[] = [];
 
+/** Cuánto tiene que quedarse quieto el ancho de la prosa antes de reajustar las placas. */
+const REFIT_SETTLE_MS = 120;
+
 export const Markdown = memo(function Markdown({
   body,
   subject,
@@ -234,16 +237,29 @@ export const Markdown = memo(function Markdown({
         vivo = false;
       };
     }
+    /* La primera medida ajusta en el acto; las siguientes —el asa de ancho
+       cambia la medida en cada frame del arrastre— esperan a que el ancho se
+       quede quieto. Ajustar en cada frame costaba unos 10 ms más por frame en
+       una página larga (tres layouts forzados sobre 91 placas), y mientras se
+       arrastra, una placa que desborda ya lo avisa con su degradado. */
     let width = -1;
+    let timer = 0;
     const ro = new ResizeObserver((entries) => {
       const next = entries[0]?.contentRect.width ?? el.clientWidth;
       if (Math.abs(next - width) < 1) return;
+      const first = width < 0;
       width = next;
-      fit();
+      if (first) {
+        fit();
+        return;
+      }
+      window.clearTimeout(timer);
+      timer = window.setTimeout(fit, REFIT_SETTLE_MS);
     });
     ro.observe(el);
     return () => {
       vivo = false;
+      window.clearTimeout(timer);
       ro.disconnect();
     };
   }, [body]);
