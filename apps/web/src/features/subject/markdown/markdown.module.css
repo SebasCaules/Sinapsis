@@ -169,6 +169,23 @@
 }
 .prose pre code { background: none; border: 0; padding: 0; font-size: 13px; }
 
+/* Un resaltado es siempre UN escalón de papel respecto de lo que tiene debajo:
+   sobre la hoja va entonado (--surface-2, arriba) y sobre un bloque entonado
+   —figura, placa de ejercicio— va en papel (--elevated). Antes bajaba a
+   --surface-3 y el segundo tono de beige se veía sucio en los tres temas
+   (pedido del usuario). El bloque ``` dentro de esos contenedores hace lo
+   mismo; su `code` interior sigue sin fondo propio. Los avisos y las tablas
+   quedan afuera: su cuerpo ya es papel y ahí el resaltado se ve como en la
+   prosa. Filete en --border-2, que se ve sobre papel en claustro (R7). */
+.prose :is(:global(.figura), :global(.exercise-plate)) :is(code, pre) {
+  background: var(--elevated);
+  border-color: var(--border-2);
+}
+.prose :is(:global(.figura), :global(.exercise-plate)) pre code {
+  background: none;
+  border: 0;
+}
+
 /* ---------- diagramas Mermaid (N0-69) ----------
    El SVG lo compone Mermaid con los tokens del tema; acá solo se lo centra y se
    lo deja achicarse. Un diagrama que no compila cae al bloque de código, que se
@@ -192,14 +209,18 @@
 }
 
 /* ---------- tablas ---------- */
+/* La tabla es un panel de papel con la cabecera entonada, como el aviso plegado:
+   el cuerpo va en el tono de la hoja (las celdas y sus resaltados se ven igual
+   que la prosa) y la definen el marco, la banda de la cabecera y los filetes
+   de fila. Antes era un bloque --surface-2 con cabecera --surface-3, y ese
+   segundo beige se veía sucio en los tres temas (pedido del usuario). El marco
+   va en --border-2: --border no se ve sobre papel en claustro (R7). */
 .tableWrap {
   margin: 18px 0;
   overflow-x: auto;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-2);
   border-radius: var(--r);
-  /* R5: --surface dentro de la hoja se hunde en claustro y desaparece en los
-     claros; --surface-2 es el único escalón que se comporta igual en los tres. */
-  background: var(--surface-2);
+  background: var(--elevated);
 }
 .tableWrap table { width: 100%; border-collapse: collapse; font: 400 13.5px/1.5 var(--font-ui); }
 .tableWrap th {
@@ -208,7 +229,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-3);
-  background: var(--surface-3);
+  background: var(--surface-2);
   padding: 9px 14px;
   border-bottom: 1px solid var(--border-2);
   white-space: nowrap;
@@ -216,6 +237,19 @@
 /* R7: la separación de filas es la única señal; --border no se ve en claustro. */
 .tableWrap td { padding: 9px 14px; border-bottom: 1px solid var(--border-2); color: var(--text-2); }
 .tableWrap tr:last-child td { border-bottom: 0; }
+/* Un resaltado en la cabecera es un identificador (`Enc`), no un rótulo: no se
+   pasa a versalitas ni hereda el tracking, y se mide con la cabecera en vez de
+   quedar a 13,5 px sobre un texto de 10,5. Va en papel, un escalón sobre la
+   banda entonada de la cabecera. */
+.prose .tableWrap th code {
+  font-size: 11.5px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 1px 4px;
+  background: var(--elevated);
+  border-color: var(--border-2);
+}
 
 /* ---------- matemática ---------- */
 .prose :global(.katex) { font-size: calc(1em * var(--math-scale)); color: var(--math-ink); }
@@ -285,17 +319,38 @@
    desplazar con el degradado que avisa—, que es lo que hace que quitar la
    sangría no corte ninguna fórmula. */
 
+/* Dentro de un bloque que ya está en --surface-2 —figura, placa de ejercicio—
+   la placa quedaba del color de su contenedor: solo la definían el borde y el
+   relieve. Sube un escalón de papel, como el resaltado `code` de más arriba (y
+   como él, no dentro de un aviso, cuyo cuerpo ya es la hoja). Se cambia la
+   VARIABLE y no la propiedad para conservar los degradados que avisan del
+   desborde. */
+.prose :is(:global(.figura), :global(.exercise-plate)) :global(.katex-display) {
+  --plate-bg: var(--elevated);
+}
+/* En claustro la placa se hunde en --bg-2 en todos los casos, también dentro de
+   un bloque: esta regla pesa lo mismo que la anterior y viene después. */
 :global([data-theme="claustro"]) .prose :global(.katex-display) { --plate-bg: var(--bg-2); }
 
 .prose :global(.katex-error) { font-family: var(--font-mono); font-size: 13px; }
 
-/* ---------- callouts ---------- */
+/* ---------- callouts ----------
+   Un aviso —plano (`aside`) o plegado (`details`, N0-66)— es un panel de papel
+   con una banda de cabecera teñida con su color: el cuerpo va en el tono de la
+   hoja, así todo lo que lleva adentro (placas, tablas, resaltados) se ve igual
+   que afuera, y el resalte lo ponen la banda, el marco y el filete izquierdo.
+   Antes el aviso plano era una placa maciza en --surface-2 y el plegado nació
+   con la banda; el usuario pidió unificarlos («más amigable a la vista,
+   manteniendo el sense of highlight»). */
 .prose :global(.callout) {
   --callout: var(--u2);
+  --callout-band: color-mix(in srgb, var(--callout) 12%, var(--elevated));
+  --callout-band-hover: color-mix(in srgb, var(--callout) 18%, var(--elevated));
   margin: 20px 0;
-  padding: 12px 16px 13px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  padding: 12px 16px 14px;
+  background: var(--elevated);
+  /* R7: --border no se ve sobre la hoja en claustro; el marco va en --border-2. */
+  border: 1px solid var(--border-2);
   border-left: 3px solid var(--callout);
   border-radius: var(--r);
   box-shadow: var(--relief);
@@ -305,8 +360,20 @@
 }
 .prose :global(.callout p) { margin: 0 0 8px; }
 .prose :global(.callout > :last-child) { margin-bottom: 0; }
-.prose :global(.callout .calloutLabel) {
-  margin: 0 0 6px;
+/* La banda: la versalita del aviso (un `span` en el plano, el `summary` en el
+   plegado) sangra hasta el marco con márgenes negativos iguales al relleno y
+   cierra por abajo con un filete del color del aviso. Los radios son los
+   interiores del marco: 12 px menos el filete (3 px a la izquierda, 1 px en
+   los otros lados). */
+.prose :global(.callout) > :global(.calloutLabel) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -12px -16px 12px;
+  padding: 9px 16px;
+  background: var(--callout-band);
+  border-radius: calc(var(--r) - 3px) calc(var(--r) - 1px) 0 0 / calc(var(--r) - 1px) calc(var(--r) - 1px) 0 0;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--callout) 28%, transparent);
   font: 600 10.5px var(--font-ui);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -326,21 +393,21 @@
 .prose :global(.callout[data-type="warn"]) { --callout: var(--warn); }
 .prose :global(.callout[data-type="discrepancia"]) { --callout: var(--bad); }
 .prose :global(.callout[data-type="cita"]) { --callout: var(--u6); }
-/* R5: misma profundidad que el resto de los bloques de prosa (ver .figura). */
-.prose :global(.callout[data-type="figura"]) { --callout: var(--u0); background: var(--surface-2); }
+.prose :global(.callout[data-type="figura"]) { --callout: var(--u0); }
 
 /* ---------- avisos plegados (N0-66) ----------
-   `> [!tipo]-` sale como <details>: la versalita es el <summary> y el cuerpo
-   sigue en el HTML aunque esté cerrado. El triángulo propio del navegador se
-   reemplaza por uno que sigue el color del aviso. */
+   `> [!tipo]-` sale como <details>: la banda es el <summary> y el cuerpo sigue
+   en el HTML aunque esté cerrado. Cerrado, el pliegue es solo la banda. El
+   triángulo propio del navegador se reemplaza por uno que sigue el color del
+   aviso. */
 .prose :global(details.callout) > :global(summary.calloutLabel) {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
   cursor: pointer;
   list-style: none;
   user-select: none;
+  transition: background var(--t);
+}
+.prose :global(details.callout) > :global(summary.calloutLabel):hover {
+  background: var(--callout-band-hover);
 }
 .prose :global(details.callout) > :global(summary.calloutLabel::-webkit-details-marker) {
   display: none;
@@ -357,17 +424,19 @@
 .prose :global(details.callout[open]) > :global(summary.calloutLabel)::before {
   transform: rotate(90deg);
 }
-/* R9: el aro de foco es siempre --primary + --primary-ring, no el color del aviso. */
+/* Cerrado: la banda es todo el pliegue —absorbe también el relleno inferior—
+   y redondea las cuatro esquinas. */
+.prose :global(details.callout:not([open])) > :global(summary.calloutLabel) {
+  margin-bottom: -14px;
+  border-radius: calc(var(--r) - 3px) calc(var(--r) - 1px) calc(var(--r) - 1px) calc(var(--r) - 3px) / calc(var(--r) - 1px);
+  box-shadow: none;
+}
+/* R9: el aro de foco es siempre --primary + --primary-ring, no el color del
+   aviso. Va por dentro de la banda, que llega hasta el marco. */
 .prose :global(details.callout) > :global(summary.calloutLabel):focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px var(--primary-ring);
-  border-radius: 3px;
-}
-/* Cerrado, el aviso es una línea: el margen del rótulo solo hace falta cuando
-   hay cuerpo debajo. */
-.prose :global(details.callout[open]) > :global(summary.calloutLabel) {
-  margin-bottom: 6px;
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 5px var(--primary-ring);
 }
 
 /* ---------- figuras interactivas (N0-42) ----------
@@ -517,9 +586,8 @@
   text-transform: uppercase;
   color: var(--ueval-ink);
 }
-/* Se cambia la VARIABLE de la placa, no la propiedad: así se conservan los
-   degradados que avisan del desborde de la fórmula. */
-.prose :global(.exercise-plate .katex-display) { --plate-bg: var(--surface-2); }
+/* El fondo de una placa de fórmula dentro del ejercicio lo pone la regla de
+   bloques anidados (sección «matemática»): papel, y --bg-2 en claustro. */
 
 .prose :global(.exercise-plate .solucion) {
   margin-top: 14px;
