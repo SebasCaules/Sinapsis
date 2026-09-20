@@ -636,7 +636,12 @@ function StudyActions({
   inline?: boolean;
 }) {
   return (
-    <div className={foot ? `${css.chips} ${css.chipsFoot}` : inline ? `${css.chips} ${css.chipsInline}` : css.chips}>
+    <div
+      className={foot ? `${css.chips} ${css.chipsFoot}` : inline ? `${css.chips} ${css.chipsInline}` : css.chips}
+      /* Solo la fila sobre la hoja mide `--sheet-width`: el asa de ancho le
+         escribe el ancho en línea durante el arrastre (ver `SheetHandle`). */
+      data-sheet-width={foot || inline ? undefined : ""}
+    >
       <button
         type="button"
         className={css.chipButton}
