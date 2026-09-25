@@ -30,7 +30,7 @@ Una vista es una **relación derivada**: una consulta con nombre, que vive en el
 comporta como una **tabla virtual** sin guardar datos. El deck cubre `CREATE VIEW` (con renombrado de
 columnas, que es todo o nada), `DROP VIEW` con `RESTRICT`/`CASCADE`, y el problema central del tema:
 qué vistas se pueden actualizar y cómo evitar que una actualización haga desaparecer tuplas. Se
-practica en el **TP4 Vistas** sobre **MySQL**, y la actualizabilidad es lo que más cae en el parcial.
+practica en el **TP4 Vistas** sobre **MySQL**; la actualizabilidad es lo que más cae en el parcial.
 
 Lo que hay que saber:
 
@@ -42,9 +42,10 @@ Lo que hay que saber:
   σ-π**. En una cadena `T→V1→…→Vn`, `Vi` es actualizable solo si `Vi-1` lo es.
 - Una vista actualizable puede sufrir **migración de tuplas** (un `UPDATE` saca las filas de la vista).
   `WITH CHECK OPTION` rechaza esas operaciones: `CASCADED` (default) chequea también las vistas
-  subyacentes, `LOCAL` solo la propia, y Date critica `LOCAL`. WCO solo vale en vistas actualizables.
-- Motor: MySQL ignora `RESTRICT`/`CASCADE` en `DROP VIEW`, no tiene vistas materializadas y sí soporta
-  WCO con `CASCADED` por defecto.
+  subyacentes; `LOCAL`, la propia más las subyacentes con WCO propio (estándar y MySQL 9.7.2; el
+  slide 15 dice "solo la propia"). Date critica `LOCAL`. WCO solo vale en vistas
+  actualizables.
+- Motor: MySQL ignora `RESTRICT`/`CASCADE` en `DROP VIEW` y no tiene vistas materializadas.
 - Trampas del deck: comillas tipográficas que no compilan, nombres reutilizados con definiciones
   distintas (`PROV_COMP`, `PROV_TANDIL`, `PROV_COMP_TANDIL`/`PR_COMP_TANDIL`) y un `UPDATE` con
   errores de sintaxis en el slide 17.
@@ -310,6 +311,11 @@ La dirección fácil. Textual:
 > más un mecanismo de refresco (job, trigger, `REPLACE INTO … SELECT`). En esta cursada el
 > mantenimiento incremental es **teoría, no práctica**: todo lo del TP4 va por recálculo. El
 > *"habitualmente no materializada"* del slide 3 es, en MySQL, *siempre* no materializada.
+>
+> (atención) Precisión sobre la sintaxis: MySQL 9.7.2 **acepta** `CREATE MATERIALIZED VIEW` sin
+> error, pero no materializa nada. El resultado se recalcula en cada `SELECT`, `SHOW CREATE VIEW`
+> muestra `MATERIALIZED /*(BY ENGINE=UNKNOWN)*/` y la vista queda con `IS_UPDATABLE = NO`. Lo que
+> falta es la funcionalidad, no la palabra clave → [[Final 1Dic2023]] § *Pregunta 3*.
 
 ## Slides 9–10 · Actualizaciones Vista → Tabla Base
 
@@ -672,7 +678,7 @@ la cadena `ENVIO → Envios500 → Envios500-999` hay dos condiciones, `cantidad
 | En una cadena `T→V1→…→Vn` | `Vi` es actualizable **si `Vi-1` lo es**; un eslabón roto rompe todo |
 | ¿Qué es la migración de tuplas? | Que la fila actualizada **deje de pertenecer** a la vista |
 | ¿Cómo se evita? | `WITH CHECK OPTION` |
-| `CASCADED` vs. `LOCAL` | `CASCADED` (default) chequea la vista **y las subyacentes**; `LOCAL` sólo la propia |
+| `CASCADED` vs. `LOCAL` | `CASCADED` (default) chequea la vista **y las subyacentes**; `LOCAL` sólo la propia *(según el slide 15; en el estándar y en MySQL 9.7.2, `LOCAL` chequea también las subyacentes que tengan WCO propio)* |
 | ¿Sobre qué vistas funciona WCO? | **Sólo sobre vistas automáticamente actualizables** |
 
 ## Dudas abiertas
@@ -680,10 +686,36 @@ la cadena `ENVIO → Envios500 → Envios500-999` hay dos condiciones, `cantidad
 - [ ] ¿`PROV_COMP_TANDIL` (slide 5) o `PR_COMP_TANDIL` (slides 6 y 7)?
 - [ ] ¿Cuál `PROV_COMP` vale? Slide 5: con clave (✓). Slide 13: sin clave (✗). `PROV_TANDIL` también
   tiene dos definiciones (slides 13 y 14).
-- [ ] Respuestas de los ejercicios del slide 16 y del slide 17: las tablas de arriba son propias, sin
-  confirmar.
+- [x] ~~Respuestas de los ejercicios del slide 16 y del slide 17: las tablas de arriba son propias, sin
+  confirmar.~~ ✓ cerrada: las operaciones que distinguen un caso del otro se corrieron en MySQL 9.7.2,
+  con el nombre corregido (`Envios500_999`) y el paréntesis del `UPDATE` afuera, y coinciden con las
+  dos tablas. Slide 16: sin WCO,
+  el `INSERT` de 300 procede y la fila queda en `ENVIO` pero no en la vista; con WCO, ese `INSERT` y
+  el `UPDATE` a 100 fallan con `ERROR 1369 (HY000): CHECK OPTION failed`. Slide 17: con `CASCADED`,
+  el `UPDATE` a 300 falla con el mismo error; con `LOCAL`, procede y la tupla sale de las dos vistas.
+  Las preguntas 1 y 18 de [[Parcial 2Q2025]] § *Sección A*, corregidas por la plataforma de la
+  cátedra, tienen la misma estructura (una vista base sin WCO debajo de una `LOCAL` y una
+  `CASCADED`) y dan el mismo veredicto.
+  - (nota) Corrida en MySQL 9.7.2, sobre las tres tablas de § *El esquema de ejemplo* con los
+    proveedores `P1` y `P2` y los artículos `A1` y `A2` cargados (salidas reales):
+    - Slide 16, sin WCO: los dos `INSERT` proceden; `ENVIO` queda con `(P1,A1,500)` y `(P2,A2,300)`,
+      y `SELECT * FROM Envios500` muestra solo la de 500. El `UPDATE … SET cantidad=100` procede y la
+      vista queda con 0 filas.
+    - Slide 16, con `WITH CHECK OPTION`: el `INSERT` de 500 procede; el de 300 y el `UPDATE` a 100
+      fallan con `ERROR 1369 (HY000): CHECK OPTION failed 'Envios500'`, y `ENVIO` conserva
+      `(P1,A1,500)`.
+    - Slide 17 (`Envios500` sin WCO, `Envios500_999` encima): con `WITH CASCADED CHECK OPTION`, el
+      `UPDATE … SET cantidad=300` falla con `ERROR 1369 … 'Envios500_999'`; con
+      `WITH LOCAL CHECK OPTION` procede (`ROW_COUNT() = 1`) y la fila queda en 300 en `ENVIO`, con 0
+      filas en `Envios500` y en `Envios500_999`.
 - [ ] ¿La definición de `LOCAL` del slide 15 es la del estándar (que chequea también las vistas
   subyacentes con WCO)? Cuál se toma para el parcial.
+  - (nota) Evidencia de exámenes viejos y del motor: MySQL 9.7.2 aplica la lectura del estándar, no
+    la del slide. Con `v1 … WITH CHECK OPTION` debajo de `v2 … WITH LOCAL CHECK OPTION`, un `INSERT`
+    en `v2` que viola la condición de `v1` falla con `ERROR 1369`; si `v1` no tiene WCO, procede. La
+    Pregunta 18 de [[Parcial 2Q2025]] § *Sección A* (`LOCAL` sobre una vista base **sin** WCO:
+    procede) da el mismo resultado con las dos lecturas, así que no muestra cuál espera la cátedra.
+    Es un examen de 2025: sirve de indicio, no dice qué toma el parcial del 13/10/2026.
 - [ ] `Envios500-999` con guion: ¿notación del slide o hay que comillarlo (`` `Envios500-999` `` en MySQL)?
 - [ ] El `UPDATE` del slide 17: confirmar que la intención es `id_articulo = 'A1'` con el paréntesis
   afuera antes de usarlo en el TP4.
@@ -698,6 +730,15 @@ la cadena `ENVIO → Envios500 → Envios500-999` hay dos condiciones, `cantidad
 - [ ] Conseguir Sumathi & Esakkirajan (2007): la cátedra cita su diagrama y no está en el vault.
 - [ ] ¿Las vistas materializadas entran en el parcial? Aparecen en los slides 3 y 8 y MySQL no las
   soporta. ¿Se desarrollan en la [[Clase 07 - Vistas-Parte 2]]?
+  - (nota) Evidencia de exámenes viejos: la Pregunta 11 de [[Parcial 2Q2025]] § *Sección A* las
+    pregunta como teoría general (V/F: que una vista materializada en MySQL no mejora la performance
+    es **Falso**, según la plataforma). [[Final 1Dic2023]] (Pregunta 3) y
+    [[Parcial 23-5-23 - Bases de Datos Avanzadas]] (Pregunta 29) las preguntan sobre PostgreSQL. En
+    MySQL 9.7.2, `CREATE MATERIALIZED VIEW` se acepta sin error pero no materializa: el resultado se
+    recalcula en cada `SELECT` y `SHOW CREATE VIEW` muestra `MATERIALIZED /*(BY ENGINE=UNKNOWN)*/`.
+    La [[Clase 07 - Vistas-Parte 2]] sí las desarrolla (slides 17 y 20–21). Indicio de 2025, no
+    respuesta para el parcial de 2026. Qué significa `ENGINE=UNKNOWN` sigue abierto: ver
+    [[Clase 07 - Vistas-Parte 2]] § *Dudas abiertas*.
 
 ## Enlaces
 
@@ -709,3 +750,5 @@ la cadena `ENVIO → Envios500 → Envios500-999` hay dos condiciones, `cantidad
 - Motor: [[MySQL]] — ver los tres callouts de motor de esta página (`DROP VIEW`, vistas materializadas,
   WCO)
 - Bibliografía: [[_index-bibliografia]] · calendario: [[_cronograma]] · índice: [[_index-clases]]
+- Exámenes viejos: [[Mapa de exámenes]] *(las preguntas de `WITH CHECK OPTION` y de vistas
+  materializadas)*

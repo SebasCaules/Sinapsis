@@ -60,7 +60,8 @@ lectura.
 > cuyo tema oficial es *"Introducción a las Bases de Datos NoSQL y Tipos de Bases NoSQL · Introducción
 > a MongoDB · MongoDB: Enfoque embebido vs Normalizado · Ejemplos con MongoDB"*. El `12` del nombre del
 > archivo es el número de clase. Clase anterior: [[Clase 11 - Seguridad-Transacciones]] *(07/09, la
-> última relacional)*. Se practica con el **TP 9 MongoDB Parte I** del martes 15/09 →
+> última relacional)* · y su segundo deck [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]]
+> *(recovery y WAL)*. Se practica con el **TP 9 MongoDB Parte I** del martes 15/09 →
 > [[Práctica 2026-09-15]]. Bibliografía: [[_index-bibliografia]] › Clase 12.
 >
 > Es el **primer archivo de `raw/Unidad-02/`**: el corte entre unidades cayó exactamente entre la
@@ -1731,36 +1732,84 @@ citar el deck.
 
 - [ ] (crítico) **¿Cómo quiere la cátedra que se responda "¿MongoDB soporta transacciones ACID?"**: con el
   slide 11, con Seven Databases A1 *(2018, `Transactions: No`)* o con la versión actual *(multi-documento
-  desde 4.0)*. Afecta al TPO. **Preguntar en la práctica del 22/09.**
+  desde 4.0)*. Afecta al TPO. **Preguntar al docente (sin respuesta al 25/09).**
+  - (nota) Evidencia de exámenes viejos: ningún examen del vault pregunta por transacciones de MongoDB.
+    Lo más cercano es el solucionario de estudiantes de la Pregunta 31 de [[Parcial 2Q2025|Parcial 2Q2025]] (embebido
+    vs. no embebido), que cuenta la **atomicidad a nivel de documento** como ventaja del modelo
+    embebido; no dice nada de transacciones multidocumento. El TP9 Parte II
+    *([[Práctica 2026-09-22|Práctica 2026-09-22]])* tampoco lo pregunta.
 - [ ] (crítico) **¿En qué esquina de CAP van MongoDB y Redis en el parcial?** Slide 18: CP para los dos;
   Corbellini Table 2: AP y CP / AP. Ver § *Slide 18*.
+  - (nota) Evidencia de exámenes viejos: para **MongoDB**, el parcial 2Q2025 tomó la clasificación del
+    slide 18. La Pregunta 10 (*"MongoDB es AP según el teorema CAP"*, V/F) tiene **Falso** como
+    respuesta correcta en las capturas de la plataforma, y la Pregunta 13 descarta a MongoDB como CA
+    porque *"es CP"* → [[Parcial 2Q2025|Parcial 2Q2025]] § *Sección F*. Para **Redis**, ningún examen corregido lo
+    pregunta. El [[Parcial XC-202X|Parcial XC-202X]] (Ejercicio 5) trae la consigna *"Clasifique a REDIS según el teorema CAP"* sin resolver, y la
+    única respuesta es la guía de estudiantes [[Repaso Final BD 2|Repaso Final BD 2]] (Ejercicio 12), que lo pone en
+    **CA**, la misma esquina que *Seven Databases* A2. Es una tercera lectura, distinta del slide y de
+    Corbellini.
+    Es un examen de 2025: sirve de indicio, no confirma qué toma el parcial del 13/10/2026. El
+    ejercicio 8 del TP9 Parte II pide justamente clasificar MongoDB → [[Práctica 2026-09-22|Práctica 2026-09-22]].
 - [ ] (crítico) **¿Qué versión de MongoDB corre la cursada, y se acepta la sintaxis vieja del deck?** El
   TP9 usa `mongosh` *(≥ 5.0)*, donde `insert()` corre con `DeprecationWarning` y el slide 38 falla por
   el `ObjectId` inválido. ¿Se corrige `insert()` en el parcial?
+  - (nota) El enunciado del TP9 Parte II no fija versión (*"de acuerdo a la opción de instalación que
+    hayan elegido en el TP anterior"*), pero advierte que *"es posible que varios de los métodos
+    especificados en el libro, estén deprecados, presten atención a los mensajes que obtienen al
+    ejecutarlos"*. La cátedra da por hecho un motor actual en el que la sintaxis vieja avisa. Corrido
+    en MongoDB 8.3.11: `insert()` funciona deprecado y `ensureIndex` funciona sin aviso →
+    [[Práctica 2026-09-22|Práctica 2026-09-22]] § *Qué del TP está deprecado*. Evidencia de exámenes viejos: la solución de
+    la Pregunta 6 de [[Parcial 2Q2025|Parcial 2Q2025]] usa `mapReduce()`, que en 8.3.11 corre con `DeprecationWarning`;
+    ningún examen del vault usa `insert()`.
 - [ ] (crítico) **¿"Familia de columnas" se dicta como column store o como wide-column?** El slide 24
   dibuja lo primero; Cassandra llega el 28/09 con lo segundo.
 - [ ] **¿Entra la implementación de la consistencia eventual** *(N/W/R, quórum, read-repair; Corbellini
   § 3.2 y Table 3)*? No está en ningún slide de este deck.
+  - (nota) Evidencia de exámenes viejos: la Pregunta 26 de [[Parcial 2Q2025|Parcial 2Q2025]] pide la fórmula del
+    **QUORUM** (`(rf/2)+1`, opción múltiple), pero **en Cassandra**, no como teoría general de la
+    Clase 12. En 2025 el quórum entró por la unidad de Cassandra (tema no dictado aún en 2026).
 - [ ] **¿Hasta dónde llegan los índices de MongoDB?** Única mención: slide 29. La
   [[Clase 14 - MongoDB Features]] los desarrolla; falta saber si el TP9 Parte II *(22/09)* los ejercita
   y si entran compuestos o de texto. Complemento: Seven Databases cap. 4 § *Indexing: When Fast Isn't
   Fast Enough* *(impresas 110–114)* y [[1.08.02 - Índices|Índices]].
+  - (nota) El TP9 Parte II sí los ejercita: índice por defecto (B-tree), índice automático sobre
+    `_id`, `explain()` comparado con el `EXPLAIN` de MySQL e índice `2d` geoespacial (ejercicios 2, 3
+    y 5 de [[Práctica 2026-09-22|Práctica 2026-09-22]]). No pide índices compuestos ni de texto. Evidencia de exámenes
+    viejos: el índice por defecto de MongoDB (B-tree, sí, sobre `_id`) es la Pregunta 9 de
+    [[Parcial 2Q2025|Parcial 2Q2025]] y la 32 de [[Parcial 23-5-23 - Bases de Datos Avanzadas|Parcial 23-5-23]]. Ninguna pregunta
+    llega a índices compuestos o de texto.
 - [ ] **¿Qué operadores, además de los seis del slide 41, se dan por sabidos?** `$in`, `$exists`,
   `$regex`, `$elemMatch`, `$size` y la **proyección**. Confirmar en [[Práctica 2026-09-15]].
 - [ ] **¿Se toma `$lookup` como "el join de MongoDB", o hacer joins es señal de mal modelado?** El
   slide 49 lo presenta sin juicio; la doctrina de MongoDB *(y la Clase 13)* es que si se necesita
   `$lookup` a menudo, había que embeber.
+  - (nota) Evidencia de exámenes viejos: el solucionario de estudiantes de la Pregunta 31 de
+    [[Parcial 2Q2025|Parcial 2Q2025]] cuenta como ventaja del modelo embebido la *"mejor performance al evitar joins
+    (que MongoDB no soporta nativamente entre colecciones, salvo $lookup)"*. Presenta `$lookup` como
+    la excepción disponible y evitar el join como la ventaja, que es la lectura de la Clase 13. La
+    respuesta es de estudiantes: la pregunta de ensayo se corrigió a mano y no se sabe qué se esperaba.
 - [ ] **¿Por qué el deck no trae bibliografía, versión ni fecha?** Primer deck del vault con cero
   referencias *(la [[Clase 09 - Restricciones integridad-Parte 1]] citaba el manual de PostgreSQL)*.
   Todo lo citado en [[_index-bibliografia]] › Clase 12 es propuesta del vault.
-- [ ] **Persistencia políglota** *(slides 10 y 28; [[Práctica 2026-08-04]])*: la página
-  [[2.12.03 - Persistencia políglota|Persistencia políglota]] sigue sin existir. ¿Se crea como concepto
-  de la U1 *(04/08)* o como `2.12.NN`?
+- [x] **Persistencia políglota** *(slides 10 y 28; [[Práctica 2026-08-04]])*: ¿dónde va la página?
+  (ok) Se creó como concepto de esta clase → [[2.12.03 - Persistencia políglota|Persistencia políglota]].
+- [ ] **¿Por qué el slide 18 no ubica a Neo4j en ninguna columna, si el parcial 2Q2025 lo evalúa como
+  CA?** La Pregunta 13 de [[Parcial 2Q2025|Parcial 2Q2025]] da *"MySQL y Neo4j"* como las bases CA vistas en clase.
+  El slide 18 solo pone MySQL/PostgreSQL en CA, y la bibliografía obligatoria se contradice sobre
+  Neo4j (*Seven Databases* A2: CA; cap. 6 § *Neo4j on CAP*: HA como AP). ¿Hay otra fuente de cátedra
+  que clasifique a Neo4j, o llega recién con su unidad (19/10, después del parcial)?
+  - (nota) Evidencia de exámenes viejos: el Ejercicio 3 del [[Parcial XC-202X|Parcial XC-202X]]
+    (*"Clasifique a Neo4j según el teorema CAP"*) da un criterio de tres casos: **CP**
+    distribuido con particiones, **CA** con una única instancia y **AP** con alta disponibilidad (HA).
+    Explica la respuesta CA de la Pregunta 13 → [[Parcial 2Q2025|Parcial 2Q2025]] § *Pregunta 13*. Es una respuesta
+    de estudiante, no de cátedra: la pregunta sigue en pie. El caso CP no tiene respaldo en la
+    bibliografía del vault.
 
 ## Enlaces
 
 - Clase anterior: [[Clase 11 - Seguridad-Transacciones]] *(07/09 — la última relacional; su ACID es el
-  contraste de los slides 11 y 20)* · clases hermanas del mismo lunes 14/09:
+  contraste de los slides 11 y 20)* · y su segundo deck
+  [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] *(recovery y WAL)* · clases hermanas del mismo lunes 14/09:
   [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] *(el desarrollo de los slides 6, 27, 34 y 48)* ·
   [[Clase 14 - MongoDB Features]] *(`_id`/`ObjectId`, sharding vs. replication, MapReduce, y el
   material complementario)*
@@ -1804,3 +1853,5 @@ citar el deck.
   registra que la última época que trata es "finales de los 90")*
 - Índice de clases: [[_index-clases]] · bibliografía: [[_index-bibliografia]] ·
   calendario: [[_cronograma]] · reglas: [[CLAUDE]]
+- Exámenes viejos: [[Mapa de exámenes|Mapa de exámenes]] *(CAP en [[Parcial 2Q2025|Parcial 2Q2025]] y en los tres finales;
+  persistencia políglota en [[Parcial 2Q2025|Parcial 2Q2025]]; taxonomía NoSQL en [[Final 1Jul2025|Final 1Jul2025]])*

@@ -42,23 +42,19 @@ JSON almacenados como BSON, el campo `_id` y la anatomía del `ObjectId`, el she
 `$or`, `$set` y `$elemMatch`, índices con `explain()`, el *aggregation pipeline* (`$match`, `$group`,
 `$sort`, `$project`), MapReduce, funciones en `system.js`, `pymongo`, replica sets y sharding. Sigue
 el orden del capítulo 4 de *Seven Databases* (2ª ed.) y cita sus páginas sin nombrar el libro. Es
-el motor de la segunda mitad de la cursada y el del TP 9 (Parte I, martes 15/09), y MongoDB entra
-al parcial del 13/10. Cuatro handouts sin número de clase, documentados al final, agregan una
-consigna de agregaciones sobre un *ecommerce* con su solución oficial, la comparativa sharding vs.
-replication y un ejemplo de MapReduce.
+el motor del TP 9 (Parte I, martes 15/09) y entra al parcial del 13/10.
 
 Reglas y trampas que hay que saber:
 
 - El deck mezcla tres épocas: `mongosh` (6.0.5), el shell legado `mongo` (eliminado en 6.0) y API
-  deprecada (`insert`, `update`, `count`, `ensureIndex`, `mapReduce`). El cuadro de bolsillo traduce
-  cada comando a `mongosh` 6.0+.
+  deprecada (`insert`, `update`, `count`, `ensureIndex`, `mapReduce`).
 - Dos claves en el mismo filtro son `AND`; `OR` se pide con `$or`. `$nin` también devuelve los
   documentos donde el campo no existe: un nombre de campo mal escrito no da error, devuelve todo o
   nada.
 - `update` sin `$set` reemplaza el documento entero. `$elemMatch` exige que un mismo elemento del
   arreglo cumpla todas las condiciones.
 - En `$group`, `_id` es la clave de agrupación y `"$campo"` referencia un campo; `$match` antes de
-  `$group` reduce el trabajo y usa índices. `mapReduce` está deprecado desde 5.0 y se traduce a
+  `$group` usa índices. `mapReduce` está deprecado desde 5.0 y se traduce a
   `$group` (+ `$out`).
 - Replicación copia los mismos datos (disponibilidad; un primario elegido por mayoría, de ahí el
   número impar de nodos); sharding reparte datos distintos (escala; shard key, `mongos` y config
@@ -296,7 +292,9 @@ años distintos.**
 > el string de 24 caracteres hexadecimales: al revés de lo esperable en JavaScript, y fuente de
 > errores al comparar ids con strings. En `mongosh` actual, `toString()` devuelve el hexadecimal a
 > secas y `toHexString()` es la forma explícita: otro punto donde la captura *(shell legado)* y el
-> shell del TP difieren. **A verificar en el TP9.**
+> shell del TP difieren. `valueOf()` también cambió: en `mongosh` devuelve el propio `ObjectId`, al
+> revés que en el slide. Verificado en `mongosh` 2.11.1 / MongoDB 8.3.11 →
+> [[2.12.06 - Modelo de documentos — JSON, BSON y ObjectId|Modelo de documentos]] § 6.
 
 > [!quote] Slide 9, textual
 > **"_id" → ObjectId o generado por el usuario**
@@ -810,7 +808,7 @@ búsqueda pasa a **0 ms** porque camina el árbol y lee un solo documento. El li
 
 | Del slide | Qué es | Hoy |
 | --- | --- | --- |
-| `ensureIndex(claves, opciones)` | crea el índice | **deprecado desde 3.0** → `createIndex` *(mismos argumentos)*. `mongosh` lo acepta con aviso. **El TP9 también dice `ensureIndex`** |
+| `ensureIndex(claves, opciones)` | crea el índice | **deprecado desde 3.0** → `createIndex` *(mismos argumentos)*. `mongosh` lo acepta sin aviso (verificado en `mongosh` 2.11.1); devuelve un arreglo `["name_1"]`. **El TP9 también dice `ensureIndex`** |
 | `{ display : 1 }` | índice ascendente sobre un campo; `-1` sería descendente | igual |
 | `{ unique : true }` | rechaza duplicados de `display` | igual |
 | `"components.area"` | índice sobre un **campo anidado**, con notación de punto | igual |
@@ -1063,8 +1061,8 @@ función global.
 > *(`loadServerScripts` la copia al cliente)*; solo corre en el servidor si la usa un `mapReduce` o
 > un `$where`. La documentación desaconseja guardar lógica de aplicación en la base, `db.eval`
 > **se eliminó en 4.2**, y `save` está **deprecado desde 4.2** *(hoy sería `db.system.js.insertOne`
-> o `replaceOne`)*. **A verificar** si `db.loadServerScripts()` sigue disponible en el `mongosh` del
-> TP.
+> o `replaceOne`)*. `db.loadServerScripts()` **no existe** en `mongosh` 2.11.1: lanza
+> `TypeError: db.loadServerScripts is not a function` (verificado en MongoDB 8.3.11).
 
 ## Slide 39 · MongoDB desde Python
 
@@ -1219,6 +1217,9 @@ remontar a un juego en línea de 1997.
 > complementario*, (b). El diagrama del slide 37 ya los había mezclado: `mongod 1` y `mongod 2`
 > son shards, no réplicas.
 
+> [!figura] lab-sharding
+> Sharding interactivo: el reparto por shard key del slide 44, por rango o hashed, y a qué shards va cada consulta (el replica set de los slides 40–43 está en el laboratorio completo).
+
 ## Slide 45 · Cierre
 
 > [!quote] Textual
@@ -1265,17 +1266,20 @@ Con los links del interior, el deck trae cuatro links a la documentación oficia
 | 8 | `_id.toString()` → `ObjectId("…")` | `toString()` devuelve el hex; `toHexString()` explícito | **cambió** |
 | 25 | `update(f, {$set})` → `WriteResult` | `updateOne(f, {$set})` → `{ acknowledged, matchedCount, modifiedCount }` | deprecado |
 | 27 | `deleteOne(f)` | igual | ✓ |
-| 29 | `ensureIndex(k, o)` | `createIndex(k, o)` | deprecado desde 3.0; alias con aviso |
+| 29 | `ensureIndex(k, o)` | `createIndex(k, o)` | deprecado desde 3.0; alias sin aviso (verificado en `mongosh` 2.11.1); devuelve un arreglo `["name_1"]` |
 | 29 | `{ background : 1 }` | *(omitir)* | ignorado desde 4.2 |
 | 33, 34 | `aggregate([...])`, `distinct` | igual | ✓ |
 | 36 | `db.runCommand({ mapReduce })` | `aggregate([{ $group }, { $out }])` | **deprecado desde 5.0** |
-| 38 | `db.system.js.save({…})` + `loadServerScripts()` | `db.system.js.insertOne` + *(verificar)* | `save` deprecado 4.2; `db.eval` eliminado 4.2 |
+| 38 | `db.system.js.save({…})` + `loadServerScripts()` | `db.system.js.insertOne` + *(sin equivalente: `loadServerScripts()` no existe en `mongosh`)* | `save` deprecado 4.2; `db.eval` eliminado 4.2 |
 | 39 | `print c['name']` | `print(c['name'])` | Python 2 |
 | 41 | `rs.initiate({ _id, members })`, `rs.status()` | igual | ✓ |
 
 ---
 
 ## Material complementario del 14/09 (sin número de clase)
+
+Cuatro handouts sin número de clase agregan una consigna de agregaciones sobre un *ecommerce* con su
+solución oficial, la comparativa sharding vs. replication y un ejemplo de MapReduce.
 
 > [!info] Cuatro PDF archivados junto al deck, **sin `BD2_Clase NN` en el nombre**
 > Están en `raw/Unidad-02/Teorica/`, en la misma tanda que los decks 12–14. **No son clases**: no
@@ -1359,6 +1363,9 @@ Control: 12 000 + 6 000 + 9 700 = **27 700** = 18 700 + 9 000 ✓.
 > El PDF de solución *("Ejercicio de MongoDB: Agregaciones en un e-commerce")* numera sus secciones
 > **1 a 6**: la **1** son los datos, así que la pregunta *N* de la consigna es la sección *N+1* de la
 > solución. Abajo se cita por pregunta, con la sección de la solución entre paréntesis.
+
+> [!figura] lab-aggregation
+> Pipelines recorridos etapa por etapa, entre ellos los cinco de la consigna del *ecommerce*: elija la pregunta en el selector de escenarios.
 
 #### Pregunta 1 — total gastado por cliente *(solución § 2)*
 
@@ -1717,13 +1724,32 @@ los errores sino la **edad** de las capturas.
 ## Dudas abiertas
 
 - [ ] (crítico) **¿`mapReduce` entra al parcial, o solo el aggregation pipeline?** Tres slides
-  *(35–37)* y el handout (c), pero deprecado desde 5.0. **Preguntar en la práctica del 22/09.**
+  *(35–37)* y el handout (c), pero deprecado desde 5.0. **Preguntar al docente (sin respuesta al 25/09).**
+  - (nota) Evidencia de exámenes viejos: el parcial 2Q2025 lo evaluó. La Pregunta 6 de
+    [[Parcial 2Q2025|Parcial 2Q2025]] (ensayo, 4 puntos) pide *"calcular el total vendido por `product` usando la
+    estrategia Map-Reduce"*. Es el ejercicio del handout (c), con los mismos cuatro documentos de
+    `orders`. La solución de estudiantes corre en MongoDB 8.3.11 con `DeprecationWarning` y da el
+    resultado esperado. Es un examen de 2025: muestra que la cátedra lo evaluó estando deprecado, pero
+    no confirma el parcial del 13/10/2026. El TP9 Parte II no tiene ningún ejercicio de `mapReduce`
+    ([[Práctica 2026-09-22|Práctica 2026-09-22]]).
 - [ ] (crítico) **`$lookup` y `$unwind` no están en el deck y la solución oficial del ejercicio
   complementario los usa en todos sus pipelines.** ¿Se dictaron oralmente, salen del libro de Paul
   Done *(slide 32)* o de la Parte II del TP9? Afecta qué estudiar para el parcial del 13/10.
+  - (nota) No salen de la Parte II: sus pipelines usan solo `$match`, `$group` y `$sort`
+    (ejercicios 4 y 6 de [[Práctica 2026-09-22|Práctica 2026-09-22]]). Evidencia de exámenes viejos: el único `aggregate`
+    de [[Parcial 2Q2025|Parcial 2Q2025]] (Pregunta 15) es `$match` + `$group`, y `$lookup` solo aparece nombrado en
+    el solucionario de estudiantes de la Pregunta 31. Ningún examen del vault usa `$unwind`.
 - [ ] (crítico) **¿Qué versión de MongoDB corre en el TP?** `docker pull mongo` sin tag trae la última
-  *(8.x en 2026)*; el deck es de 6.0.5. Determina si `ensureIndex`, `count()`, `insert()` y
-  `db.loadServerScripts()` corren con aviso o fallan. **Verificar con `db.version()`.**
+  *(8.x en 2026)*; el deck es de 6.0.5. Determina si `ensureIndex`, `count()` e `insert()`
+  corren con aviso o fallan. **Verificar con `db.version()`.**
+  - (nota) El enunciado del TP9 Parte II tampoco fija versión: remite a *"la opción de instalación
+    que hayan elegido en el TP anterior"* y avisa que varios métodos del libro pueden estar
+    deprecados. Corrido en MongoDB 8.3.11 / `mongosh` 2.11.1 (imagen `mongo:8`): `ensureIndex`
+    funciona **sin aviso** e `insert()` funciona con `DeprecationWarning` →
+    [[Práctica 2026-09-22|Práctica 2026-09-22]] § *Qué del TP está deprecado*. `count()` tiene dos formas: sobre la
+    colección (`db.coll.count()`) funciona con *"DeprecationWarning: Collection.count() is
+    deprecated"*; sobre el cursor (`find().count()`) funciona sin ningún aviso. `mapReduce()` corre con
+    `DeprecationWarning` → [[Parcial 2Q2025|Parcial 2Q2025]] § *Pregunta 6*. `db.loadServerScripts()` no existe (`TypeError`).
 - [ ] **¿Los handouts (a), (b) y (c) se entregaron el 14/09 o son de otro cuatrimestre?** Datan de
   mayo de 2025. ¿Se discutió la solución oficial, con sus respuestas incompletas *(preguntas 4 y 5)*
   y el empate de la 2?
@@ -1731,18 +1757,37 @@ los errores sino la **edad** de las capturas.
   gráfico de Compass, o vale `mongosh`? El TP9 nombra primero DataGrip.
 - [ ] **¿Se toman replica sets y sharding en el parcial, o solo como concepto?** El handout (b)
   sugiere que el nivel esperado es la tabla comparativa, no la configuración.
+  - (nota) Evidencia de exámenes viejos: en [[Parcial 2Q2025|Parcial 2Q2025]] el tema aparece solo como concepto. La
+    Pregunta 21 (opción múltiple) pide la diferencia entre replicación y sharding, con la misma
+    distinción que el handout (b). La Pregunta 10 (CAP) razona sobre primario y secundarios. Ningún
+    examen del vault pide configurar un *replica set* o un clúster con sharding. El TP9 Parte II
+    tampoco lo pide ([[Práctica 2026-09-22|Práctica 2026-09-22]]).
 - [ ] **¿Se dicta algo de transacciones, GridFS o geoespacial en MongoDB?** Están en el libro y no en
   el deck; el dataset de `hospitales` del slide 33 es GeoJSON.
+  - (nota) El **geoespacial sí entró**, en la práctica: el ejercicio 5 del TP9 Parte II pide cargar
+    `mongoCities_fixed.json`, crear un índice `2d` sobre `location` y resolver el Do.1 del día 3 del
+    libro (ciudades cerca de Londres) → [[Práctica 2026-09-22|Práctica 2026-09-22]]. Transacciones y GridFS no aparecen
+    en la Parte II ni en ningún examen del vault.
 - [ ] **¿En qué unidad cae la Parte II del TP9 (22/09) y Cassandra (28/09)?** Se observa cuando
   llegue el material.
-- [ ] **`toString()` de `ObjectId` en `mongosh`**: el slide 8 dice que devuelve `ObjectId("…")`;
-  en `mongosh` debería devolver el hexadecimal. Probar en el TP.
+  - (nota) Resuelto para la Parte II: está en `raw/Unidad-02/Practica/`, así que es **Unidad 2** →
+    [[Práctica 2026-09-22|Práctica 2026-09-22]]. Cassandra sigue sin material de clase en `raw/`
+    (sí hay preguntas de Cassandra en los exámenes viejos, p. ej. la Sección I de [[Parcial 2Q2025|Parcial 2Q2025]]).
+- [x] ~~**`toString()` de `ObjectId` en `mongosh`**: el slide 8 dice que devuelve `ObjectId("…")`;
+  en `mongosh` debería devolver el hexadecimal. Probar en el TP.~~
+  (ok) Verificado en `mongosh` 2.11.1 / MongoDB 8.3.11: `toString()` devuelve el hexadecimal,
+  `valueOf()` el propio `ObjectId` y `toHexString()` el hexadecimal →
+  [[2.12.06 - Modelo de documentos — JSON, BSON y ObjectId|Modelo de documentos]] § 6.
 - [ ] **¿Existe una ficha para *Practical MongoDB Aggregations* (Paul Done)?** Es el único libro que
   el deck nombra *(slide 32)*, es gratuito en línea y no está en
   `raw/Material_Catedra/bibliografia/`. Decisión del humano.
 - [ ] **Este deck no declara bibliografía**, pero cita tres páginas de *Seven Databases* 2ª ed. sin
   nombrarlo. ¿La cátedra asume el capítulo 4 entero como lectura? Afecta el mapeo de
   [[_index-bibliografia]] › Clase 14.
+  - (nota) El TP9 Parte II lo sugiere: declara que *"se basa mayormente en el libro"* y sus
+    ejercicios recorren los tres días del cap. 4 (impresas 95–133: Do.2–Do.5 del *Day 1*, índices y
+    agregación del *Day 2*, índice `2d` y Do.1 del *Day 3*, y el *Wrap-Up*) → [[Práctica 2026-09-22|Práctica 2026-09-22]].
+    Es una práctica, no una declaración de bibliografía de la teórica.
 
 ## Enlaces
 
@@ -1774,3 +1819,5 @@ los errores sino la **edad** de las capturas.
   detalle en [[_index-bibliografia]] › Clase 14
 - Índice de clases: [[_index-clases]] · bibliografía: [[_index-bibliografia]] ·
   calendario: [[_cronograma]] · TPs: `raw/tp/_index.md`
+- Exámenes viejos: [[Mapa de exámenes|Mapa de exámenes]] · MapReduce, índice por defecto, `aggregate`, embebido y
+  replicación vs. sharding en [[Parcial 2Q2025|Parcial 2Q2025]] § *Sección G* y § *Sección H*

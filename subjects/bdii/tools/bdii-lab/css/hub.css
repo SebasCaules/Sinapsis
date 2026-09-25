@@ -1,0 +1,5 @@
+.bdii-lab .lab-hub-grupo { margin-block: 20px 28px; }
+.bdii-lab .lab-hub-grupo > h2 { font-size: 1.1rem; margin: 0 0 12px; color: var(--text); }
+.bdii-lab .lab-hub-nombre { font-size: 1rem; margin: 0 0 6px; }
+.bdii-lab .lab-hub-que { margin: 0 0 8px; color: var(--text-2); }
+.bdii-lab .lab-hub-pagina { margin: 0; font-size: 0.9em; color: var(--text-3); }

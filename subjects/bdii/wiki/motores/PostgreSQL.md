@@ -19,6 +19,11 @@ aliases:
   - refcursor
   - RETURNS TABLE
   - dollar quoting
+  - WAL en PostgreSQL
+  - pg_wal
+  - PITR en PostgreSQL
+  - Replicación streaming
+  - Replicación lógica
 fuentes:
   - "raw/Unidad-01/Teorica/BD2_Clase 01 - Introducción_BasesDeDatos.pdf"
   - "raw/Unidad-01/Teorica/BD2_Clase 03 - Derivación a Esquema Lógico.pdf"
@@ -29,6 +34,7 @@ fuentes:
   - "raw/Unidad-01/Teorica/BD2_Clase 09 - Restricciones integridad-Parte 1.pdf"
   - "raw/Unidad-01/Teorica/BD2_Clase 10 - Restricciones integridad-Parte 2.pdf"
   - "raw/Unidad-01/Teorica/BD2_Clase 11 - Seguridad-Transacciones.pdf"
+  - "raw/Unidad-01/Teorica/BD2_Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL.pdf"
   - "raw/Material_Catedra/programa/Cronograma 2026-2C.pdf"
 estado: procesado
 ---
@@ -41,22 +47,22 @@ Esta página identifica, deck por deck, qué partes del material de teórica de 
 escritas contra PostgreSQL en lugar del motor real de la cursada, MySQL. El programa oficial promete
 *"PostgreSQL avanzado"*, pero el cronograma lo desmiente: PostgreSQL no se instala, no se usa en
 ningún TP y no es el motor del parcial. Aparece en los decks porque buena parte de la teórica fue
-heredada de una versión anterior de la materia — en las Clases 01, 03, 04, 05 (Parte 1), 07, 08, 09 y
-10, con la Clase 11 como excepción parcial (solo un ejemplo rotulado). Importa para no confundir lo
-que hay que tipear con lo que solo se lee: si una sentencia de un slide no corre en un TP, el criterio
-es revisar la tabla de inventario de esta página y buscar la traducción a MySQL en [[MySQL]].
+heredada de una versión anterior de la materia —ocho de los trece decks, con la Clase 11 como
+excepción parcial (solo un ejemplo rotulado)—. Importa para no confundir lo que hay que tipear con lo
+que solo se lee: si una sentencia de un slide no corre en un TP, hay que revisar la tabla de
+inventario y buscar la traducción en [[MySQL]].
 
-Cinco reglas gobiernan la lectura del material: ante cualquier conflicto de tema o motor gana
+Cuatro reglas gobiernan la lectura del material: ante cualquier conflicto de tema o motor gana
 [[_cronograma]], nunca el programa oficial; lo evaluable de los slides de PostgreSQL es la estructura
 conceptual —despachador, proceso por conexión, buffer cache, WAL, plan de ejecución—, no los nombres
-propios, aunque eso sigue siendo duda abierta; el deck 08 (Explain Plan, 22 slides) y ocho slides del
-deck 10 (PL/pgSQL) son los más afectados y no corren tal cual en ningún TP; la Clase 11 es el primer
-deck de la unidad escrito en MySQL por defecto; y el TP5 ya confirmó que se corre sobre MySQL, cerrando
-la duda para la práctica, aunque sigue abierta para el parcial.
+propios, aunque eso sigue siendo duda abierta; el deck 08 (Explain Plan) y ocho slides del deck 10
+(PL/pgSQL) son los más afectados y no corren tal cual en ningún TP; y el TP5 ya confirmó que se corre
+sobre MySQL, cerrando la duda para la práctica, aunque sigue abierta para el parcial.
 
 Para el parcial conviene llevarse la tabla de inventario y saber distinguir, deck por deck, qué es
 PostgreSQL puro, qué es Oracle o T-SQL disfrazado de PostgreSQL, y qué corre igual en MySQL sin
-traducción, como el `BEGIN` / `SELECT … FOR UPDATE` de la Clase 11.
+traducción, como el `BEGIN` / `SELECT … FOR UPDATE` de la Clase 11. La Clase 11(B) es un caso aparte:
+compara WAL y recovery en los dos motores, sin sintaxis heredada que corregir.
 
 ## Qué motor es este, y por qué aparece
 
@@ -186,8 +192,68 @@ buffer cache` ↔ `Disco`. **Ninguno cuelga de la rama del *Share Buffer Cache*.
 > [!warning] Nada de este diagrama se traslada a MySQL sin traducción
 > Lo que **sí** se traslada es la **forma** del problema: todo motor relacional tiene un despachador,
 > un proceso o hilo por conexión, una caché de páginas en memoria, un log de escritura anticipada y un
-> `fsync` al disco. En MySQL/InnoDB los nombres son otros y no están acá por no tenerlos verificados
-> contra ninguna fuente del vault.
+> `fsync` al disco. En MySQL/InnoDB los nombres son otros: **redo log**, **undo log**, **doublewrite
+> buffer** y **binlog**, ya verificados en MySQL 9.7.2 → [[MySQL]] § *8.5*. El
+> `fsync` del WAL de este diagrama es el mismo que retoma, con los cuatro pasos que lo explican, la §
+> siguiente.
+
+---
+
+## WAL y recovery: la Clase 11(B), el deck donde PostgreSQL no es material ajeno
+
+> [!info] Fuente
+> [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] § *04 · PostgreSQL* (slides 8–9),
+> publicado el 07/09 junto con la [[Clase 11 - Seguridad-Transacciones|Clase 11]]. A diferencia de
+> los otros ocho decks de esta página, acá PostgreSQL **no** es sintaxis heredada sin avisar: el
+> deck nombra los dos motores en su título y les dedica una sección propia a cada uno, en pie de
+> igualdad → ver la fila nueva del § *Inventario*.
+
+Cómo garantiza PostgreSQL atomicidad y durabilidad tras un crash, retomando el `fsync` del diagrama
+de arquitectura de más arriba:
+
+- **El log se llama WAL directamente**: archivos de 16MB en `pg_wal/` (antes `pg_xlog/`). Cada
+  registro tiene un LSN. Es **redo físico** de páginas, con algunas optimizaciones lógicas.
+- **Sin *undo log* separado**: gracias a MVCC, las versiones viejas de las tuplas ya están en la
+  propia tabla (marcadas muertas). Para abortar, simplemente no se aplican los cambios — no hace
+  falta "deshacer" escribiendo encima. Al reiniciar tras un crash: redo desde el último checkpoint,
+  sin fase de undo explícita como en ARIES — MVCC hace ese trabajo "gratis".
+- **Tres parámetros**: `wal_level` (`minimal`/`replica`/`logical` — cuánta información se logea),
+  `checkpoint_timeout` (cada cuánto se dispara un checkpoint) y `synchronous_commit` (si el `COMMIT`
+  espera el `fsync` del WAL).
+- **El mismo WAL sirve para tres cosas más**: **replicación streaming** (los registros se envían a
+  réplicas y se re-aplican allá — el mismo mecanismo de redo), **PITR** (*Point-In-Time Recovery*:
+  `pg_basebackup` + archivado continuo de WAL) y **replicación lógica** (*logical decoding*: el WAL
+  decodificado a nivel fila, para replicar hacia otros sistemas). Recovery, replicación y PITR no
+  son mecanismos distintos: son tres formas de reproducir la misma secuencia de cambios físicos.
+
+| | PostgreSQL | MySQL / InnoDB |
+| --- | --- | --- |
+| Log físico principal | WAL (`pg_wal/`) | Redo log (`ib_logfile`) |
+| Deshacer transacciones abortadas | MVCC — sin log de undo separado | Undo log dedicado |
+| Log para replicación / PITR | el mismo WAL | Binlog (log lógico separado) |
+| Protección *partial writes* | `full_page_writes` | Doublewrite buffer |
+| Algoritmo de recovery | *redo-only* (variante, gracias a MVCC) | ARIES completo (analysis–redo–undo) |
+
+La comparación completa, con el *gotcha* de examen *redo log ≠ binlog* y el *two-phase commit*
+interno de InnoDB entre redo log y binlog —que PostgreSQL no necesita, porque tiene un único WAL—,
+está en [[MySQL]] § *8.5 · Recovery*.
+
+> [!warning] (crítico) Sin verificar contra un servidor real
+> **No verificado en un servidor PostgreSQL**: los tres parámetros de arriba —`wal_level`,
+> `checkpoint_timeout`, `synchronous_commit`— y `full_page_writes` quedan verificados solo contra la
+> **documentación oficial de PostgreSQL 18** (verificado por URL, 25/09), no contra un `SHOW` en un
+> servidor real, a diferencia del lado MySQL, donde las variables equivalentes sí se corrieron
+> → [[MySQL]] § *8.5*. Si se arma un contenedor de PostgreSQL para la cursada, repetir la
+> verificación que ya se hizo del lado MySQL.
+
+Bibliografía de esta sección, sin ficha en el vault, verificada por URL el 25/09: PostgreSQL 18
+Documentation, cap. **28** *Reliability and the Write-Ahead Log* § **28.3** *Write-Ahead Logging
+(WAL)* · cap. **19** § **19.5** *Write Ahead Log* (`wal_level`, `checkpoint_timeout`,
+`synchronous_commit`) · cap. **25** § **25.3** *Continuous Archiving and Point-in-Time Recovery
+(PITR)*.
+
+Conceptos: [[1.11.05 - Recovery y write-ahead logging (WAL)|Recovery y write-ahead logging (WAL)]] ·
+[[1.11.06 - ARIES — análisis, redo y undo|ARIES — análisis, redo y undo]].
 
 ---
 
@@ -327,6 +393,7 @@ El deck de explain plan **no cita un solo libro**: cita seis páginas de la docu
 | **11** | `BD2_Clase 11` — Seguridad-Transacciones | **El primer deck de la U1 escrito en MySQL por defecto** *(slide **7**: *"Mecanismos de Seguridad **(MySQL)**"*; slide **38**: *"Ejemplo en **MySQL**"*)*, y **su motor ajeno son dos ejemplos rotulados por el propio deck**, no el contenido. Slide **30**, textual: `-- Ejemplo de control de versiones en PostgreSQL` → `BEGIN; SELECT * FROM productos FOR UPDATE; … UPDATE productos SET stock = stock - 1 WHERE id = 1; COMMIT;`. Slide **29**, textual: `-- Ejemplo de bloqueo en SQL Server` → `BEGIN TRANSACTION; SELECT * FROM productos WITH (UPDLOCK); … COMMIT TRANSACTION;`. Y un tercer lugar **sin rótulo**: el **slide 35** da `drop index <nombre-índice>` sin `ON <tabla>`, la forma del estándar y de PostgreSQL. Detalle en el callout de abajo | **baja**: es la primera fila de la tabla en la que el código PostgreSQL **corre en MySQL sin cambiar una letra** (`BEGIN` es alias de `START TRANSACTION` y `SELECT … FOR UPDATE` existe igual, manual 9.7 § 15.3.1 y § 17.7.2.4). Lo que **no** corre es el slide 29 (T-SQL) y el `drop index` del 35 (en MySQL el `ON tbl_name` es obligatorio, § 15.1.32) | [[Clase 11 - Seguridad-Transacciones]] · [[Práctica 2026-09-08]] · [[MySQL]] |
 | **12** | `esq_peliculas.sql` *(no es un deck)* | El script **es MySQL** (`DROP FOREIGN KEY`), pero conserva rastros de un **dump de PostgreSQL**: tipos escritos `character varying(n)` / `numeric(p,s)` y nombres de FK con la convención automática `<tabla>_<columna>_fkey` | baja: corre igual | [[Práctica 2026-08-04]] · [[MySQL]] |
 | **13** | *Seven Databases* cap. **2.2** *(bibliografía, no es material propio de la cátedra)* | **El desfasaje también llegó a la bibliografía.** El TP5 asigna como teoría de índices el § *Fast Lookups with Indexing* — que es el **capítulo 2, el de PostgreSQL** (pp. **18–21 impresas**): sintaxis `CREATE INDEX … USING hash (…)` y el mensaje `PRIMARY KEY will create implicit index "events_pkey"`. La cátedra lo aclara en el enunciado: *"si bien el libro hace mención a PostgreSQL, **también aplica para MySQL**"* | baja: lo pedido es el **concepto** —una PK crea un índice automáticamente, y es un **B-tree**—, no la sintaxis | [[Práctica 2026-08-18]] · [[_index-bibliografia]] |
+| **14** | `BD2_Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL` — **Recovery** | **Caso distinto de los trece anteriores: acá PostgreSQL no es material ajeno sin avisar.** El deck nombra los dos motores en su propio título y les dedica una sección completa a cada uno, con la misma extensión — WAL en `pg_wal/`, redo físico, sin *undo log* separado por MVCC, `wal_level`/`checkpoint_timeout`/`synchronous_commit`, y el mismo WAL reutilizado para replicación streaming, PITR y replicación lógica (slides 8–9) | **ninguna** — es comparación explícita, no sintaxis heredada; sin verificar contra un servidor real → § *WAL y recovery* | [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL\|Clase 11(B)]] · [[MySQL]] § *8.5* |
 
 Los decks `BD2_Clase 06`, `07`, `08`, `09`, `10` y `11` son las **Clases 06 a 11** —la cátedra las numera
 en el nombre del archivo— y viven en `raw/Unidad-01/Teorica/`: la **Unidad-01 agrupa las Clases 01 a 11**
@@ -442,7 +509,13 @@ relacional**.
 - [ ] ¿Qué relación tienen los tres `.conf` con el `Postmaster`? En el diagrama están apoyados contra
   su caja **sin ninguna flecha**.
 - [ ] ¿Cuál es el equivalente en **MySQL/InnoDB** de cada pieza del diagrama (postmaster, proceso por
-  conexión, share buffer cache, WAL)?
+  conexión, share buffer cache)? La pieza del **WAL** ya tiene equivalente documentado — redo log,
+  undo log, doublewrite buffer y binlog → § *WAL y recovery* y [[MySQL]] § *8.5*.
+- [ ] (crítico) **Verificar en un servidor PostgreSQL real** `wal_level`,
+  `checkpoint_timeout`, `synchronous_commit` y `full_page_writes` (§ *WAL y recovery*), hoy
+  verificados solo contra la documentación oficial de PostgreSQL 18, no contra un `SHOW` en un
+  servidor real. Si se arma un contenedor de PostgreSQL para la cursada, repetir la verificación que
+  ya se hizo del lado MySQL → [[MySQL]] § *8.5*.
 - [ ] **¿Qué versión de PostgreSQL usa el material?** El deck 08 mezcla `Total runtime:` (etiqueta
   vieja) con `Planning time:` / `Execution time:` (nueva), y el deck 03 linkea la **9.5**, que ya no
   tiene soporte.
@@ -473,7 +546,9 @@ relacional**.
   [[Clase 06 - Vistas-Parte 1]] · [[Clase 07 - Vistas-Parte 2]] ·
   [[Clase 08 - Explicando el plan]] · [[Clase 09 - Restricciones integridad-Parte 1]] ·
   [[Clase 10 - Restricciones integridad-Parte 2]] *(PL/pgSQL — y un slide de Oracle)* ·
-  [[Clase 11 - Seguridad-Transacciones]] *(un slide rotulado PostgreSQL, uno SQL Server; el resto MySQL)*
+  [[Clase 11 - Seguridad-Transacciones]] *(un slide rotulado PostgreSQL, uno SQL Server; el resto MySQL)* ·
+  [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] *(WAL y recovery — comparación explícita,
+  no motor ajeno sin avisar)*
 - Prácticas donde muerde el desfasaje: [[Práctica 2026-08-18]] *(TP5)* · [[Práctica 2026-08-25]] *(TP6)* ·
   [[Práctica 2026-09-01]] *(TP7)* · [[Práctica 2026-09-08]] *(TP8 — en la dirección inversa)*
 - Conceptos: [[1.08.01 - Plan de ejecución|Plan de ejecución]] · [[1.08.02 - Índices|Índices]] ·
@@ -483,6 +558,8 @@ relacional**.
   [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y roles]] ·
   [[1.11.03 - Transacciones y ACID|Transacciones y ACID]] ·
   [[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia]] ·
+  [[1.11.05 - Recovery y write-ahead logging (WAL)|Recovery y write-ahead logging (WAL)]] ·
+  [[1.11.06 - ARIES — análisis, redo y undo|ARIES — análisis, redo y undo]] ·
   [[Sintaxis MySQL vs PostgreSQL]]
 - Calendario: [[_cronograma]] § *Diferencias con el programa oficial* · índice de clases:
   [[_index-clases]] · bibliografía: [[_index-bibliografia]]

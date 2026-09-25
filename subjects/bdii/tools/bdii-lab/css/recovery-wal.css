@@ -1,0 +1,79 @@
+/* ============================================================
+   bdii-lab / css/recovery-wal.css — "Recovery: write-ahead logging y ARIES"
+   (id: recovery-wal). Todo selector cuelga de `.bdii-lab` (regla 6 de
+   TOOLS_BRIEF.md). Colores solo por variables CSS de la plataforma.
+   ============================================================ */
+
+.bdii-lab .lab-recovery-wal-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdii-lab .lab-recovery-wal-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.9em;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-3, var(--border-2, var(--border)));
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.bdii-lab .lab-recovery-wal-step:hover {
+  background: var(--surface-2);
+}
+
+.bdii-lab .lab-recovery-wal-step--current {
+  border-color: var(--primary);
+  background: var(--primary-soft, var(--surface-2));
+}
+
+.bdii-lab .lab-recovery-wal-step-marker {
+  flex: 0 0 auto;
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--text-3);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.bdii-lab .lab-recovery-wal-step--current .lab-recovery-wal-step-marker {
+  color: var(--primary);
+}
+
+.bdii-lab .lab-recovery-wal-zones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.bdii-lab .lab-recovery-wal-reto-feedback:empty {
+  display: none;
+}
+
+.bdii-lab .lab-recovery-wal-row-applied td {
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+}
+
+.bdii-lab .lab-recovery-wal-row-skipped td {
+  color: var(--text-3);
+}
+
+/* ---------- responsive: usable a 375px, cómoda a 1120px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-recovery-wal-zones {
+    grid-template-columns: 1fr;
+  }
+
+  .bdii-lab .lab-recovery-wal-step {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,232 @@
+/* ============================================================
+   bdii-lab / css/grant-revoke.css — "GRANT, REVOKE y el grafo de privilegios"
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md); prefijo
+   propio `.lab-grr-…`. Colores solo por variables CSS de la plataforma.
+   ============================================================ */
+
+.bdii-lab .lab-grr-users-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bdii-lab .lab-grr-builder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  align-items: end;
+}
+
+.bdii-lab .lab-grr-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+/* ---------- lista de sentencias ---------- */
+
+.bdii-lab .lab-grr-stmt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bdii-lab .lab-grr-stmt {
+  border: 1px solid var(--border-3, var(--border-2));
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  background: var(--surface);
+}
+
+/* Estado: fondo suave + borde fino teñido (nunca solo color, ver el badge ✓/✗ en
+   el encabezado de la tarjeta) — mismo patrón que .bdii-callout de lab.css, sin
+   franja lateral de acento. */
+.bdii-lab .lab-grr-stmt--ok {
+  border-color: color-mix(in srgb, var(--good) 35%, var(--border-3, var(--border-2)));
+  background: var(--good-soft);
+}
+.bdii-lab .lab-grr-stmt--bad {
+  border-color: color-mix(in srgb, var(--bad) 35%, var(--border-3, var(--border-2)));
+  background: var(--bad-soft);
+}
+
+.bdii-lab .lab-grr-stmt-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.bdii-lab .lab-grr-stmt-idx {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-2);
+  min-width: 1.4em;
+}
+
+.bdii-lab .lab-grr-stmt-remove {
+  margin-left: auto;
+  font-size: 0.85em;
+  padding: 4px 10px;
+}
+
+.bdii-lab .lab-grr-stmt-reason {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 0.94em;
+}
+
+/* Figura del wiki: una línea por sentencia. */
+.bdii-lab .lab-grr-stmt--compact { padding: 6px 10px; }
+.bdii-lab .lab-grr-stmt--compact .lab-grr-stmt-head { margin-bottom: 0; flex-wrap: wrap; }
+.bdii-lab .lab-grr-stmt-inline {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.bdii-lab .lab-grr-stmt--compact .lab-grr-stmt-reason { margin-top: 4px; font-size: 0.88em; }
+
+/* ---------- grafo (svg) ---------- */
+
+.bdii-lab .lab-grr-graphs {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 10px 0;
+}
+
+.bdii-lab .lab-grr-graph-block {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px;
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.bdii-lab .lab-grr-graph-title {
+  margin: 0 0 8px;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-grr-graph-title code {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.bdii-lab .lab-grr-node-rect {
+  fill: var(--surface-2);
+  stroke: var(--border-3, var(--border-2));
+  stroke-width: 1.5;
+}
+
+.bdii-lab .lab-grr-node--owner .lab-grr-node-rect {
+  fill: var(--primary-soft, var(--surface-2));
+  stroke: var(--primary);
+  stroke-width: 2;
+}
+
+.bdii-lab .lab-grr-node--go .lab-grr-node-rect {
+  stroke: var(--good);
+  stroke-width: 2;
+}
+
+.bdii-lab .lab-grr-node--removed .lab-grr-node-rect {
+  fill: var(--bad-soft, var(--surface-2));
+  stroke: var(--bad);
+  stroke-dasharray: 4 3;
+  opacity: 0.75;
+}
+
+.bdii-lab .lab-grr-node-user {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.bdii-lab .lab-grr-node-priv {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--text-2);
+}
+
+.bdii-lab .lab-grr-node--removed .lab-grr-node-priv,
+.bdii-lab .lab-grr-node--removed .lab-grr-node-user {
+  fill: var(--text-3);
+}
+
+.bdii-lab .lab-grr-node-removed-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--bad-text, var(--bad));
+}
+
+.bdii-lab .lab-grr-edge {
+  stroke: var(--text-3);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.bdii-lab .lab-grr-edge--revoked {
+  stroke: var(--bad);
+  stroke-dasharray: 5 4;
+  opacity: 0.7;
+}
+
+.bdii-lab .lab-grr-arrowhead {
+  fill: var(--text-3);
+}
+
+.bdii-lab .lab-grr-empty {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* ---------- tabla: fila revocada ---------- */
+
+.bdii-lab .lab-grr-row-removed td {
+  color: var(--text-3);
+}
+
+/* ---------- retos y diferencias ---------- */
+
+.bdii-lab .lab-grr-retos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bdii-lab .lab-grr-reto-fuente {
+  font-size: 0.85em;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.bdii-lab .lab-grr-diff-list {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+}
+
+.bdii-lab .lab-grr-links {
+  font-size: 0.9em;
+  color: var(--text-2);
+}
+
+/* ---------- responsive: usable a 375px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-grr-users-grid,
+  .bdii-lab .lab-grr-builder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Figura del wiki: lista de sentencias más apretada. */
+.bdii-lab.bdii-lab--figure .lab-grr-stmt-list { gap: 4px; }
+.bdii-lab.bdii-lab--figure .lab-grr-stmt--compact { padding: 3px 8px; }

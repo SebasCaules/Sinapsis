@@ -1,0 +1,432 @@
+/* ============================================================
+   bdii-lab / css/lab.css — estilos de la base compartida (lib.js).
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md): es la
+   clase raíz que `App.bdiiLab.tool()` pone en el contenedor, tanto en la
+   vista (`.bdii-lab--view`) como en la figura del wiki (`.bdii-lab--figure`).
+   Colores solo por variables CSS de la plataforma; ver
+   apps/web/src/styles/tokens.css en el repositorio de Sinapsis. Cada
+   `var(--x, fallback)` cae a otro token cuando `--x` no existiera en una
+   versión vieja del runtime.
+   ============================================================ */
+
+.bdii-lab {
+  font-family: var(--font-ui);
+  color: var(--text);
+  line-height: 1.5;
+  max-width: var(--maxw-wide);
+  /* Identificadores largos sin espacios (Vista1/Vista2/…) cortan antes que desbordar a 375px. */
+  overflow-wrap: break-word;
+  /* Dentro de una página del wiki la prosa va justificada; en la herramienta, no. */
+  text-align: start;
+  hyphens: manual;
+}
+
+.bdii-lab * { box-sizing: border-box; }
+
+/* ---------- encabezado ---------- */
+
+.bdii-lab .bdii-lab-header { margin-bottom: 20px; }
+
+.bdii-lab .bdii-lab-title {
+  font-family: var(--font-display, var(--font-ui, sans-serif));
+  font-size: var(--h1, clamp(22px, 3vw, 30px));
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+
+.bdii-lab .bdii-lab-subtitle {
+  margin: 0 0 10px;
+  color: var(--text-2);
+  max-width: 68ch;
+}
+
+.bdii-lab .bdii-lab-sources {
+  font-size: 0.9em;
+  color: var(--text-3);
+}
+
+.bdii-lab .bdii-lab-sources-label { color: var(--text-3); }
+
+.bdii-lab .bdii-pagelink,
+.bdii-lab .wikilink {
+  color: var(--link, var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.bdii-lab .bdii-pagelink--missing {
+  color: var(--text-3);
+  font-style: italic;
+  text-decoration: none;
+}
+
+/* ---------- encabezado compacto de figura ---------- */
+
+.bdii-lab.bdii-lab--figure .bdii-lab-figheader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.bdii-lab .bdii-lab-figtitle {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.bdii-lab .bdii-toollink {
+  color: var(--link, var(--primary));
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+/* Solo el enlace del encabezado de la figura va en una línea: es corto y fijo. */
+.bdii-lab .bdii-lab-figheader .bdii-toollink { white-space: nowrap; }
+
+/* ---------- cuerpo ---------- */
+
+.bdii-lab .bdii-lab-body { display: flex; flex-direction: column; gap: 16px; }
+
+/* ---------- campos y controles ---------- */
+
+.bdii-lab .bdii-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.bdii-lab .bdii-field-label,
+.bdii-lab .bdii-field > label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.bdii-lab .bdii-select select,
+.bdii-lab .bdii-number input,
+.bdii-lab .bdii-text input {
+  font-family: inherit;
+  font-size: 1em;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-3, var(--border-2));
+  border-radius: var(--r-ctrl);
+  padding: 8px 10px;
+  max-width: 100%;
+}
+
+/* Un <select> con opciones largas (los presets rotulan su origen) no puede
+   ensanchar la columna: su min-content empujaba la grilla fuera de la vista a 375px. */
+.bdii-lab .bdii-select select { width: 100%; min-width: 0; text-overflow: ellipsis; }
+
+.bdii-lab .bdii-text input.bdii-mono,
+.bdii-lab .bdii-mono {
+  font-family: var(--font-mono);
+}
+
+.bdii-lab .bdii-select select:focus-visible,
+.bdii-lab .bdii-number input:focus-visible,
+.bdii-lab .bdii-text input:focus-visible,
+.bdii-lab .bdii-slider input:focus-visible,
+.bdii-lab .bdii-toggle input:focus-visible,
+.bdii-lab .bdii-seg-btn:focus-visible,
+.bdii-lab .bdii-btn:focus-visible,
+.bdii-lab .bdii-stepper:focus-visible,
+.bdii-lab .bdii-toollink:focus-visible,
+.bdii-lab .wikilink:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* segmentado */
+
+.bdii-lab .bdii-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bdii-lab .bdii-seg-btn {
+  font: inherit;
+  font-size: 0.92em;
+  color: var(--text-2);
+  background: var(--surface);
+  border: 1px solid var(--border-3, var(--border-2));
+  border-radius: var(--r-ctrl);
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.bdii-lab .bdii-seg-btn:hover { background: var(--surface-2); }
+
+.bdii-lab .bdii-seg-btn[aria-pressed="true"] {
+  background: var(--primary-soft, var(--surface-2));
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* slider */
+
+.bdii-lab .bdii-slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bdii-lab .bdii-slider-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.bdii-lab .bdii-slider input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+}
+
+/* toggle (casilla estilo interruptor, sin dependencia de color solo) */
+
+.bdii-lab .bdii-toggle { flex-direction: row; align-items: center; gap: 10px; }
+
+.bdii-lab .bdii-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.bdii-lab .bdii-toggle > label { order: -1; }
+
+/* botones */
+
+.bdii-lab .bdii-btn {
+  font: inherit;
+  font-size: 0.95em;
+  border-radius: var(--r-ctrl);
+  padding: 9px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.bdii-lab .bdii-btn--primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}
+
+.bdii-lab .bdii-btn--primary:hover { background: var(--primary-2, var(--primary)); }
+
+.bdii-lab .bdii-btn--ghost {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-3, var(--border-2));
+}
+
+.bdii-lab .bdii-btn--ghost:hover { background: var(--surface-2); }
+
+.bdii-lab .bdii-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- tabla ---------- */
+
+.bdii-lab .bdii-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+.bdii-lab .bdii-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.94em;
+}
+
+.bdii-lab .bdii-table caption {
+  text-align: left;
+  padding: 8px 12px;
+  color: var(--text-2);
+  font-size: 0.88em;
+  border-bottom: 1px solid var(--border);
+}
+
+.bdii-lab .bdii-table th,
+.bdii-lab .bdii-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.bdii-lab .bdii-table thead th {
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.bdii-lab .bdii-table tbody tr:last-child td { border-bottom: none; }
+
+.bdii-lab .bdii-table tbody tr:hover {
+  background: var(--hover-wash);
+}
+
+.bdii-lab .bdii-null {
+  font-style: italic;
+  color: var(--text-3);
+}
+
+/* ---------- código ---------- */
+
+.bdii-lab .bdii-pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.bdii-lab .bdii-code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  color: var(--text);
+  white-space: pre;
+}
+
+/* ---------- avisos (callout) ---------- */
+
+.bdii-lab .bdii-callout {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  padding: 10px 14px;
+}
+
+.bdii-lab .bdii-callout-title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.bdii-lab .bdii-callout-marker { font-variant-numeric: tabular-nums; }
+
+.bdii-lab .bdii-callout-body {
+  margin-top: 6px;
+  color: var(--text-2);
+}
+
+/* El estado se lee en el rótulo (marcador de texto + color) y en el fondo
+   suave; el borde apenas se tiñe, sin franja lateral. */
+.bdii-lab .bdii-callout--ok {
+  border-color: color-mix(in srgb, var(--good) 35%, var(--border));
+  background: var(--good-soft);
+}
+.bdii-lab .bdii-callout--ok .bdii-callout-title { color: var(--good-text); }
+
+.bdii-lab .bdii-callout--bad {
+  border-color: color-mix(in srgb, var(--bad) 35%, var(--border));
+  background: var(--bad-soft);
+}
+.bdii-lab .bdii-callout--bad .bdii-callout-title { color: var(--bad-text); }
+
+.bdii-lab .bdii-callout--warn {
+  border-color: color-mix(in srgb, var(--warn) 35%, var(--border));
+  background: var(--warn-soft);
+}
+.bdii-lab .bdii-callout--warn .bdii-callout-title { color: var(--warn-text); }
+
+/* ---------- insignias ---------- */
+
+.bdii-lab .bdii-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-weight: 600;
+  border: 1px solid var(--border-3, var(--border-2));
+  color: var(--text-2);
+  background: var(--surface);
+}
+
+.bdii-lab .bdii-badge--ok { border-color: var(--good); color: var(--good-text, var(--good)); background: var(--good-soft, var(--surface)); }
+.bdii-lab .bdii-badge--bad { border-color: var(--bad); color: var(--bad-text, var(--bad)); background: var(--bad-soft, var(--surface)); }
+.bdii-lab .bdii-badge--warn { border-color: var(--warn); color: var(--warn-text, var(--warn)); background: var(--warn-soft, var(--surface)); }
+.bdii-lab .bdii-badge--info { border-color: var(--border-3, var(--border-2)); color: var(--text-2); }
+
+/* ---------- stepper ---------- */
+
+.bdii-lab .bdii-stepper { display: flex; flex-direction: column; gap: 10px; }
+
+.bdii-lab .bdii-stepper-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.bdii-lab .bdii-stepper-status {
+  font-size: 0.86em;
+  color: var(--text-3);
+}
+
+.bdii-lab .bdii-stepper-content { min-width: 0; }
+
+/* ---------- panel y grilla ---------- */
+
+.bdii-lab .bdii-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 14px 16px;
+}
+
+.bdii-lab .bdii-panel-title {
+  margin: 0 0 8px;
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.bdii-lab .bdii-panel-body { display: flex; flex-direction: column; gap: 10px; }
+
+.bdii-lab .bdii-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--bdii-grid-cols, 2), minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* ---------- figura del wiki: más densa que la vista ---------- */
+/* La figura vive dentro de una página del wiki: mismos componentes, menos aire. */
+
+.bdii-lab.bdii-lab--figure .bdii-lab-body { gap: 10px; }
+.bdii-lab.bdii-lab--figure .bdii-panel { padding: 10px 12px; }
+.bdii-lab.bdii-lab--figure .bdii-panel-title { margin-bottom: 6px; }
+.bdii-lab.bdii-lab--figure .bdii-panel-body { gap: 8px; }
+.bdii-lab.bdii-lab--figure .bdii-grid { gap: 10px; }
+.bdii-lab.bdii-lab--figure .bdii-table th,
+.bdii-lab.bdii-lab--figure .bdii-table td { padding: 5px 10px; }
+.bdii-lab.bdii-lab--figure .bdii-table caption { padding: 6px 10px; }
+.bdii-lab.bdii-lab--figure .bdii-seg-btn { padding: 4px 9px; font-size: 0.86em; }
+.bdii-lab.bdii-lab--figure .bdii-field { gap: 4px; }
+.bdii-lab.bdii-lab--figure .bdii-select select,
+.bdii-lab.bdii-lab--figure .bdii-number input,
+.bdii-lab.bdii-lab--figure .bdii-text input { padding: 5px 8px; }
+.bdii-lab.bdii-lab--figure .bdii-btn { padding-top: 5px; padding-bottom: 5px; }
+.bdii-lab.bdii-lab--figure .bdii-callout { padding: 8px 12px; }
+.bdii-lab.bdii-lab--figure .bdii-callout-body { margin-top: 4px; }
+.bdii-lab.bdii-lab--figure .bdii-callout-body p { margin: 0 0 4px; }
+.bdii-lab.bdii-lab--figure .bdii-callout-body p:last-child { margin-bottom: 0; }
+.bdii-lab.bdii-lab--figure ul,
+.bdii-lab.bdii-lab--figure ol { margin-top: 0; margin-bottom: 0; }
+.bdii-lab.bdii-lab--figure li { margin: 0; }
+.bdii-lab.bdii-lab--figure li > p { margin: 0; }
+
+/* ---------- responsive: cómoda a 1120px, usable a 375px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .bdii-grid { grid-template-columns: minmax(0, 1fr); }
+  .bdii-lab .bdii-slider-head { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .bdii-lab .bdii-table th, .bdii-lab .bdii-table td { white-space: normal; }
+}
+
+/* ---------- movimiento reducido ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .bdii-lab, .bdii-lab * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

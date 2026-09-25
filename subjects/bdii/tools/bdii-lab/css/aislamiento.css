@@ -1,0 +1,175 @@
+/* ============================================================
+   bdii-lab / css/aislamiento.css — "Transacciones concurrentes y niveles
+   de aislamiento"
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md); prefijo
+   propio `.lab-ais-…`. Colores solo por variables CSS de la plataforma. Sin
+   franjas laterales de acento: el estado se marca con texto, badge y un
+   fondo/borde suave, igual que `.bdii-callout` de lab.css.
+   ============================================================ */
+
+.bdii-lab .lab-ais-builder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  align-items: end;
+}
+
+.bdii-lab .lab-ais-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+/* ---------- lista de pasos ---------- */
+
+.bdii-lab .lab-ais-pasos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdii-lab .lab-ais-paso {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-3, var(--border-2));
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  background: var(--surface);
+}
+
+.bdii-lab .lab-ais-paso .bdii-pre { margin: 0; padding: 6px 10px; }
+
+.bdii-lab .lab-ais-paso-idx {
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  min-width: 1.5em;
+  text-align: right;
+}
+
+.bdii-lab .lab-ais-paso-btns {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.bdii-lab .lab-ais-paso-btns .bdii-btn { padding: 5px 9px; font-size: 0.85em; }
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-ais-paso { grid-template-columns: 1fr; }
+  .bdii-lab .lab-ais-paso-btns { justify-content: flex-end; }
+}
+
+/* ---------- stepper: fotografía de cada paso ---------- */
+
+.bdii-lab .lab-ais-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bdii-lab .lab-ais-frame-titulo {
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.bdii-lab .lab-ais-estados {
+  color: var(--text-2);
+  margin: 0;
+}
+
+.bdii-lab .lab-ais-sin-pendiente,
+.bdii-lab .lab-ais-sin-locks {
+  color: var(--text-3);
+  font-style: italic;
+  margin: 0;
+}
+
+.bdii-lab .lab-ais-rangelocks {
+  color: var(--text-2);
+  margin: 6px 0 0;
+}
+
+/* ---------- diagnóstico ---------- */
+
+.bdii-lab .lab-ais-diagnostico {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bdii-lab .lab-ais-diag-detalle {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+  color: var(--text-2);
+}
+
+/* ---------- tabla resumen: fila del nivel elegido ---------- */
+
+.bdii-lab .lab-ais-row-current td {
+  background: var(--primary-soft, var(--surface-2));
+  font-weight: 600;
+}
+
+/* ---------- retos ---------- */
+
+.bdii-lab .lab-ais-reto-fuente {
+  color: var(--text-3);
+  font-size: 0.9em;
+}
+
+.bdii-lab .lab-ais-simplif {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-ais-simplif li { margin-bottom: 4px; }
+
+.bdii-lab .lab-ais-links { color: var(--text-2); }
+
+/* ---------- figura compacta ---------- */
+
+.bdii-lab .lab-ais-fig-pasos {
+  margin: 0;
+  padding-left: 2.2em;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.92em;
+}
+
+.bdii-lab .lab-ais-fig-pasos li { padding: 1px 6px; border-radius: var(--r-sm); position: relative; }
+
+.bdii-lab .lab-ais-fig-pasos li.is-current {
+  background: var(--primary-soft, var(--surface-2));
+  font-weight: 600;
+}
+
+.bdii-lab .lab-ais-fig-marca {
+  position: absolute;
+  left: -2.6em;
+  color: var(--primary);
+}
+
+.bdii-lab .lab-ais-fig-estado,
+.bdii-lab .lab-ais-fig-diags {
+  margin: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-ais-fig-diags { gap: 4px; }
+.bdii-lab .lab-ais-fig-diag--warn strong { color: var(--warn-text, var(--warn)); }
+.bdii-lab .lab-ais-fig-diag--ok strong { color: var(--good-text, var(--good)); }
+.bdii-lab .lab-ais-fig-diag--info strong { color: var(--text); }
+
+.bdii-lab .lab-ais-fig-pasos .bdii-badge { padding: 0 7px; }
+.bdii-lab .lab-ais-fig-pasos code { padding: 0 2px; border: none; background: none; }
+.bdii-lab.bdii-lab--figure .lab-ais-frame-titulo { margin: 0; }

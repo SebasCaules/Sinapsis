@@ -881,13 +881,15 @@ Los cuatro parámetros, contra el `JOIN` de la U1 *([[1.05.01 - SQL — consulta
 > }
 > ```
 >
-> **Razonamiento, verificable en `mongosh` con los datos del slide 22:** para `$lookup`, **un
+> **Razonamiento, verificado en MongoDB 8.3.11 con los datos del slide 22:** para `$lookup`, **un
 > campo ausente se compara como `null`**, y `null` es igual a `null`. La orden 3 no tiene `item`
 > → su `localField` vale `null` → empareja con `inventory` 5 *(`sku: null`)* **y** con 6 *(sin
 > `sku`)*. Es la semántica opuesta a SQL, donde `NULL = NULL` **no es verdadero** y una fila con
 > `item NULL` saldría del `LEFT JOIN` con el lado derecho vacío. **Los tres documentos raros del
-> slide 22 están puestos para mostrar esto, y el recorte se lo comió.** Candidato a probar en el
-> [[Práctica 2026-09-15|TP9]] → § *Dudas abiertas*.
+> slide 22 están puestos para mostrar esto, y el recorte se lo comió.** (ok) Corrida real
+> (`insertMany` con los datos del slide 22 y el `$lookup` del slide 23): la orden 3 sale con
+> `inventory_docs: [ { _id: 5, sku: null, description: 'Incomplete' }, { _id: 6 } ]`, exactamente
+> el bloque de arriba. Una orden con `item: null` explícito empareja con los mismos dos documentos.
 
 Lo que sí se ve: las órdenes 1 y 2 salen con **un arreglo de un elemento**; `bread` y `cashews` no
 aparecen *(no están del lado izquierdo)*; y `description` sale **entre comillas** porque el shell
@@ -1130,14 +1132,24 @@ bordes.
 - [ ] **N:M sin ejemplo.** ¿Arreglo de ids en **los dos** lados? ¿Colección intermedia como la tabla
   del deck 03? ¿Cuál enseña la cátedra? Es la pregunta más obvia para el parcial. Preguntar en la
   práctica.
+  - (nota) Evidencia de exámenes viejos: la Pregunta 31 de [[Parcial 2Q2025|Parcial 2Q2025]] (ensayo: ventajas y
+    desventajas del embebido) confirma que el tema se evalúa. Su solucionario de estudiantes manda a
+    usar referencias en *"relaciones N-N"*, pero no dice **cómo** referenciar un N:M: ni arreglo en
+    los dos lados ni colección intermedia. La forma sigue sin respuesta.
 - [ ] **Integridad referencial.** Nadie valida `user_id` / `publisher_id`. ¿El TPO maneja huérfanos
   desde la aplicación? ¿Se menciona el *schema validation* *(`$jsonSchema`)* en alguna clase?
-- [ ] **El resultado recortado del slide 24.** Verificar en `mongosh` con los datos del slide 22 que
+- [x] ~~**El resultado recortado del slide 24.** Verificar en `mongosh` con los datos del slide 22 que
   la orden 3 *(sin `item`)* empareja con `inventory` 5 *(`sku: null`)* **y** 6 *(sin `sku`)*; si es
-  así, escribirlo en [[MongoDB]] como la diferencia `null = null` con SQL.
+  así, escribirlo en [[MongoDB]] como la diferencia `null = null` con SQL.~~ (ok) Verificado en
+  MongoDB 8.3.11: un `localField` ausente o `null` empareja con `foreignField: null` y con
+  `foreignField` ausente *(la orden 3 trae `inventory` 5 y 6)* → § *Slide 24*.
 - [ ] **Transacciones multidocumento.** ¿La cátedra llega a `session.startTransaction()` para el
   normalizado, o la respuesta es "embeba lo que necesite atómico"? Cruza con
   [[Clase 11 - Seguridad-Transacciones]].
+  - (nota) Evidencia de exámenes viejos: el solucionario de la Pregunta 31 de [[Parcial 2Q2025|Parcial 2Q2025]] cuenta
+    la *"atomicidad a nivel de documento"* como ventaja del embebido, en la línea de "embeba lo que
+    necesite atómico". Ningún examen del vault pregunta por `session.startTransaction()` ni por
+    transacciones multidocumento.
 - [ ] **`Sort`, `Match`, `Unwind`, `Project` y `Group`.** Confirmar que la
   [[Clase 14 - MongoDB Features]] las desarrolla *(su texto extraído tiene `aggregate` con
   `$match`)*. Si tampoco trae `$unwind`, es un hueco de la cursada, no del deck.
@@ -1147,7 +1159,11 @@ bordes.
 - [ ] **Versión de MongoDB de la cursada.** El deck es de abril de 2024 y usa shell legacy; el TP9
   debería decir qué versión o imagen de Docker se usa. Si es 6.0 o superior, todo corre en `mongosh`
   con avisos de deprecación de `insert()`.
-- [ ] **Regla para 1:1 en relacional.** [[1.03.01 - Derivación de MER a esquema relacional]] no tiene
+  - (nota) Ni la Parte I ni la Parte II del TP9 fijan versión. La Parte II remite a *"la opción de
+    instalación que hayan elegido en el TP anterior"* y avisa que varios métodos del libro pueden estar
+    deprecados. Corrido en MongoDB 8.3.11 / `mongosh` 2.11.1: `insert()` funciona con
+    `DeprecationWarning` → [[Práctica 2026-09-22|Práctica 2026-09-22]] § *Qué del TP está deprecado*.
+- [ ] **Regla para 1:1 en relacional.** [[1.03.01 - Derivación de MER a esquema relacional|Derivación de MER a esquema relacional]] no tiene
   regla para la binaria 1:1. ¿Vale agregar la respuesta estándar *(FK con `UNIQUE` en uno de los dos
   lados, o fusión de tablas)* como razonamiento propio?
 - [ ] **Patrones con nombre.** ¿La cátedra usa el vocabulario de la documentación *(extended
@@ -1181,3 +1197,5 @@ bordes.
 - Motores: [[MongoDB]] *(página pendiente)* · [[MySQL]] *(para el contraste)* · [[PostgreSQL]].
 - Índices: [[_index-clases]] · bibliografía: [[_index-bibliografia]] · calendario: [[_cronograma]]
   · catálogo: [[index]] · reglas: [[CLAUDE]].
+- Exámenes viejos: [[Mapa de exámenes|Mapa de exámenes]] · embebido vs. no embebido en [[Parcial 2Q2025|Parcial 2Q2025]] § *Sección G*
+  (Pregunta 31).

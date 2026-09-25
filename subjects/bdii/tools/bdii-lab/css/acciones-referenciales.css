@@ -1,0 +1,137 @@
+/* ============================================================
+   bdii-lab / css/acciones-referenciales.css — "Integridad referencial:
+   acciones y MATCH". Todo selector cuelga de `.bdii-lab` (regla 6 de
+   TOOLS_BRIEF.md); prefijo propio `.lab-ar-…`. Colores solo por
+   variables CSS de la plataforma.
+   ============================================================ */
+
+.bdii-lab .lab-ar-preset-note {
+  margin: 0 0 10px;
+  color: var(--text-2);
+  font-size: 0.94em;
+}
+
+.bdii-lab .lab-ar-fk-def {
+  margin: 0 0 8px;
+  color: var(--text-2);
+  font-size: 0.92em;
+}
+
+.bdii-lab .lab-ar-fk-def code {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.bdii-lab .lab-ar-match-na {
+  margin: 6px 0 0;
+  color: var(--text-3);
+  font-size: 0.88em;
+  font-style: italic;
+}
+
+.bdii-lab .lab-ar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.bdii-lab .lab-ar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bdii-lab .lab-ar-error {
+  margin: 0;
+  color: var(--bad-text, var(--bad));
+  font-size: 0.9em;
+  min-height: 1.2em;
+}
+
+.bdii-lab .lab-ar-demo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdii-lab .lab-ar-demo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bdii-lab .lab-ar-demo-nota {
+  margin: 0 0 8px;
+  font-size: 0.85em;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-ar-demo-origen {
+  font-size: 0.82em;
+  color: var(--text-3);
+}
+
+.bdii-lab .lab-ar-row-affected td {
+  background: var(--warn-soft, var(--surface-2));
+  font-weight: 600;
+}
+
+.bdii-lab .lab-ar-reto-fuente {
+  font-size: 0.85em;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.bdii-lab .lab-ar-retos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bdii-lab .lab-ar-links {
+  font-size: 0.9em;
+  color: var(--text-2);
+}
+
+/* ---------- responsive: usable a 375px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-ar-demo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---------- figura compacta ---------- */
+
+.bdii-lab .lab-ar-fig-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.bdii-lab.bdii-lab--figure .lab-ar-preset-note,
+.bdii-lab.bdii-lab--figure .lab-ar-fk-def,
+.bdii-lab.bdii-lab--figure .lab-ar-match-na { margin: 0; }
+.bdii-lab .lab-ar-error:empty { display: none; }
+
+.bdii-lab .lab-ar-fig-aviso {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  padding: 6px 12px;
+  color: var(--text-2);
+}
+.bdii-lab .lab-ar-fig-aviso summary { cursor: pointer; font-weight: 600; color: var(--text); }
+.bdii-lab .lab-ar-fig-aviso summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.bdii-lab .lab-ar-fig-aviso p { margin: 6px 0 0; }
+
+.bdii-lab .lab-ar-fig-fks { display: flex; flex-direction: column; }
+.bdii-lab .lab-ar-fig-fk { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.bdii-lab .lab-ar-fig-fk:last-child { border-bottom: none; }
+.bdii-lab .lab-ar-fig-fk-def { margin: 0 0 4px; overflow-wrap: anywhere; }
+.bdii-lab .lab-ar-fig-fk-ctrls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+@media (max-width: 640px) {
+  .bdii-lab .lab-ar-fig-fk-ctrls { grid-template-columns: minmax(0, 1fr); }
+}

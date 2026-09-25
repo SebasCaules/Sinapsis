@@ -1,0 +1,134 @@
+/* ============================================================
+   bdii-lab / css/cap-quorum.css — "Réplicas, particiones y quórums"
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md); prefijo
+   propio `.lab-cq-…`. Colores solo por variables CSS de la plataforma. Sin
+   franjas laterales de acento: el estado se marca con texto, fondo suave y
+   un borde fino teñido, como los callouts de `lab.css`.
+   ============================================================ */
+
+/* ---------- anillo de réplicas ---------- */
+
+.bdii-lab .lab-cq-ring {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1 / 1;
+  margin: 8px auto 12px;
+}
+
+.bdii-lab .lab-cq-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font: inherit;
+  font-size: 0.72em;
+  line-height: 1.15;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border-3, var(--border-2));
+  cursor: pointer;
+  padding: 0;
+}
+
+.bdii-lab .lab-cq-node:hover:not(:disabled) { background: var(--surface-2); }
+
+.bdii-lab .lab-cq-node:disabled { cursor: default; }
+
+.bdii-lab .lab-cq-node-id { font-weight: 700; }
+
+.bdii-lab .lab-cq-node-side {
+  color: var(--text-2);
+  font-size: 0.92em;
+}
+
+.bdii-lab .lab-cq-node-ver {
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  font-size: 0.9em;
+}
+
+.bdii-lab .lab-cq-node--sideA { border-color: var(--primary); }
+.bdii-lab .lab-cq-node--sideB { border-color: var(--accent, var(--primary)); }
+
+.bdii-lab .lab-cq-node--unreachable {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.bdii-lab .lab-cq-node--wrote { background: var(--good-soft); }
+.bdii-lab .lab-cq-node--read { background: var(--primary-soft, var(--surface-2)); }
+.bdii-lab .lab-cq-node--wrote.lab-cq-node--read {
+  background: linear-gradient(135deg, var(--good-soft) 50%, var(--primary-soft, var(--surface-2)) 50%);
+}
+
+.bdii-lab .lab-cq-client {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9em;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-cq-client-label { font-weight: 700; color: var(--text); }
+
+/* ---------- fila atenuada de la tabla de réplicas (fuera de alcance) ---------- */
+
+.bdii-lab .lab-cq-row-muted td { color: var(--text-3); }
+
+/* ---------- acciones (escribir / leer / curar) ---------- */
+
+.bdii-lab .lab-cq-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bdii-lab .lab-cq-actions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- clasificación CAP ---------- */
+
+.bdii-lab .lab-cq-cap-note {
+  margin: 0 0 10px;
+  color: var(--text-2);
+}
+
+/* ---------- retos ---------- */
+
+.bdii-lab .lab-cq-reto-enunciado {
+  margin: 0 0 6px;
+  color: var(--text);
+}
+
+.bdii-lab .lab-cq-reto-fuente {
+  margin: 0 0 10px;
+  color: var(--text-3);
+  font-size: 0.88em;
+}
+
+/* ---------- responsive: usable a 375px, cómoda a 1120px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-cq-ring { max-width: 240px; }
+  .bdii-lab .lab-cq-node { width: 54px; height: 54px; font-size: 0.68em; }
+}
+
+/* ---------- movimiento reducido: nada que animar acá, pero se respeta la regla global ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .bdii-lab .lab-cq-node { transition: none; }
+}
+
+/* ---------- figura compacta ---------- */
+
+.bdii-lab.bdii-lab--figure .lab-cq-ring { max-width: 210px; margin: 4px auto 8px; }
+.bdii-lab.bdii-lab--figure .lab-cq-node { width: 54px; height: 54px; font-size: 0.68em; }
