@@ -277,3 +277,51 @@ Y una cuarta, de dato y no de código: las cinco tareas «Simulacro …» de
 Con la vista publicada pueden pasar a `kind: "tool"` con `target: "parcial"`; el
 recorte por unidades (`?u=1,2`) necesita además que `PlanTask` admita un
 argumento de ruta.
+
+---
+
+## 7. 2026-09-25 — guías completas: 119 → 259 ítems, distintivo «Clave»
+
+Las guías resueltas se completaron en el baseline: la colección `guia` pasó de
+119 a 259 ejercicios (429 en total con Lutzio y evaluaciones). Los 119 que ya
+estaban antes llevan ahora `clave: true` — son los más importantes de la guía
+(resolución oficial de cátedra o selección estilo parcial) — y el baseline
+agregó un distintivo «Clave» junto a cada «Ejercicio N.» y un filtro «Clave»
+(`?clave=1`) en la barra de la colección. Se porta **solo** ese cambio de hoy,
+sin regenerar nada desde el baseline:
+
+| Archivo | Qué se portó |
+|---|---|
+| `data/ejercicios-data.js` | copia byte a byte del baseline: 429 ítems, 119 con `clave: true` (todos en `guia`) |
+| `ejercicios.js` | parche de hoy aplicado a mano sobre el puerto del bundle: `CLAVE_TIT`, distintivo «Clave» en el run-in (con `icon("star", 11)`, ya en el runtime), `" (clave)"` en la etiqueta accesible, botón/filtro «Clave» (`fClave`, `A.setQuery({clave:…})`, `A.parseRoute().query.clave`, `marcarClave`, `limpiarFiltros`). Cero desviaciones `[bundle]` nuevas: la query de `clave` sigue el mismo `A.parseRoute()`/`A.setQuery()` que ya usaban `estado` y `q` en este bundle (no hay una función propia del bundle para la query que hubiera que replicar) |
+| `css/ejercicios.css` | reglas `.ej-clave-b` (botón del filtro, análogo a `.ej-toolbar .ej-cols-seg button.on i`) y `.ej-clave` (distintivo junto a `.ej-n`), agregadas en la forma envuelta (`& .selector { … }` dentro de `.sinapsis-tool { … }`) en el lugar análogo al parche. Todas las custom properties que usa el parche (`--accent`, `--accent-soft`, `--accent-ink`, `--border`, `--r-ctrl`, `--text-2`, `--text-3`, `--t`, `--font-mono`, `--font-ui`, `--surface`, `--primary`) existen en `apps/web/src/styles/tokens.css` de la plataforma y en el vocabulario del bundle: no hizo falta sustituir ninguna |
+| `sinapsis.tools.json` | versión `1.0.0` → `1.1.0`; descripción actualizada de «289 fichas» a «429 fichas» (la cuenta que trae el corpus real, no una constante del código) |
+
+**Supuestos que cambian con 259 ítems de guía — verificados:**
+
+- No hay conteos fijos `119`/`289` ni asserts en `ejercicios.js`, `parcial.js` ni
+  `formularios.js`: todo se deriva de `list.length` / `Object.keys(items).length`
+  en tiempo de ejecución. Queda un comentario descriptivo desactualizado en
+  `ejercicios.js` («214 de los 289 ítems…», línea ~1172) que **ya está así en el
+  baseline actual** (no lo tocó el parche de hoy): se deja igual, por disciplina
+  de puerto verbatim — no es lógica, es una nota de diseño.
+- `parcial.js:85` sigue filtrando `e.coleccion === "examen" || e.oficial`: el
+  campo `oficial` es independiente de `clave` (los 140 ejercicios nuevos de la
+  guía no traen `oficial: true`), así que el banco de ejercicios abiertos del
+  simulador sigue en **136** (57 de `guia` + 79 de `examen`), verificado contra
+  el corpus real — no cambió.
+- El banco de opción múltiple (`window.EXAMEN`, `data/exam-data.js`) no depende
+  de `ejercicios-data.js`: sigue en 43 preguntas (15 declaradas + 28
+  generadas), sin tocar.
+- `formularios.js` no lee `window.EJERCICIOS`: no hay nada que portar ahí.
+
+**Arnés de prueba.** `.claude/workforce-cambios/tools/incisos.test.mjs` prueba
+`App.ejPartirIncisos` contra el baseline (`estudio/ejercicios.js`) y no se
+tocó. Se agregó `.claude/workforce-cambios/tools/incisos.bundle.test.mjs`,
+misma batería de casos, cargando en cambio `tools/proba-exercises/ejercicios.js`
+y `tools/proba-exercises/data/ejercicios-data.js` (con un mock de `App` que
+cubre además lo que el bundle usa detrás de un guard —
+`registerProgressProvider`, `toolFileUrl`, `onTeardown`— dejándolos ausentes a
+propósito para ejercitar esa rama). Corre en verde: 19 casos, corpus completo
+de 429 ejercicios, 203 con incisos partidos, idempotente y sin pérdida de
+texto.

@@ -190,6 +190,7 @@
     }
   ],
   "fab": null,
+  "exercisePlates": true,
   "wiki": {
     "root": "wiki",
     "index": "index.md",
@@ -197,6 +198,8 @@
     "ignore": [],
     "divisionField": "unidad",
     "study": "estudio",
-    "standalone": ["formulario-maestro"]
+    "standalone": [
+      "formulario-maestro"
+    ]
   }
 }
