@@ -179,6 +179,7 @@
 
   // ---------------- estado por ejercicio ----------------
   var LS_ESTADO = "pe.exEstado", LS_ULTIMO = "pe.exUltimo";
+  var CLAVE_TIT = "Ejercicio clave: de los más importantes de la guía (resolución oficial o selección estilo parcial)";
   var EST_LABEL = ["Sin resolver", "Resuelto solo", "Con poca ayuda", "Con mucha ayuda"];
   // Rótulos cortos del filtro, que hace de leyenda del semáforo. «Solo» a secas
   // se leía como «únicamente»; «Sin ayuda» nombra el estado sin ambigüedad.
@@ -1468,11 +1469,15 @@
     // un <strong> no recibe foco y el title no llega a un lector de pantalla:
     // se repite el mismo texto en un rótulo oculto que sí se lee (WCAG 3.3.2).
     var notaNum = renumerado(it)
-      ? "N.º " + numDe(it) + " de la guía; el PDF de resolución lo numera como " + it.numero
+      ? "N.º " + numDe(it) + " de la guía; la resolución oficial de la cátedra lo numera como " + it.numero
       : "";
     var runIn = '<strong class="ej-n"' + (notaNum ? ' title="' + esc(notaNum) + '"' : "") +
       ">" + esc(rotulo) + "</strong>" +
-      (notaNum ? '<span class="sr-only"> (' + esc(notaNum) + ")</span>" : "") + " ";
+      (notaNum ? '<span class="sr-only"> (' + esc(notaNum) + ")</span>" : "") +
+      // Guías completas: los ejercicios que ya estaban antes de completar la
+      // guía (oficiales + selección estilo parcial) son los más importantes.
+      (it.clave ? '<span class="ej-clave" title="' + esc(CLAVE_TIT) + '">' + icon("star", 11) +
+        "Clave</span>" : "") + " ";
     var cuerpoEnun = quitarRotuloEnunciado(it.enunciadoHtml || "").trim();
     // El chip «Respuesta simbólica» desapareció con la línea de metadatos; el
     // aviso, que sí hace falta antes de calcular, queda como nota del enunciado.
@@ -1515,7 +1520,7 @@
     // Título y metadatos ya no se dibujan, pero no se pierden: nombran el
     // artículo para quien lo recorre con lector de pantalla y quedan en
     // data-titulo para quien los necesite (la barra de unidad, por ejemplo).
-    var etiqueta = rotulo + " " + String(it.titulo || "").replace(/\$/g, "") +
+    var etiqueta = rotulo + (it.clave ? " (clave)" : "") + " " + String(it.titulo || "").replace(/\$/g, "") +
       (meta ? " · " + meta : "");
 
     // 'ej-rev' revela la respuesta en el modo práctica: la traen ya puesta los
@@ -1660,6 +1665,7 @@
     var q0 = A.parseRoute().query || {};
     var fEstado0 = /^[0-3]$/.test(q0.estado || "") ? q0.estado : "";
     var fQ0 = q0.q || "";
+    var fClave0 = q0.clave === "1";
 
     var s = statsOf(list);
 
@@ -1727,7 +1733,16 @@
         ' aria-label="Imprimir la colección">' + icon("printer", 15) + "</button>" +
       "</div>";
 
-    var toolbar = '<div class="ej-toolbar">' + segCols + segEst + busca + prog + acciones + "</div>";
+    // «Solo clave»: solo en la guía, que es la colección con distintivo.
+    var hayClave = list.some(function (it) { return it.clave; });
+    var nClave = list.filter(function (it) { return it.clave; }).length;
+    var claveTit = "Solo los " + nClave + " ejercicios clave (los más importantes de la guía)";
+    var segClave = hayClave
+      ? '<button type="button" class="ej-clave-b' + (fClave0 ? " on" : "") + '" id="ejClave" aria-pressed="' +
+        (fClave0 ? "true" : "false") + '" title="' + esc(claveTit) + '" aria-label="' + esc(claveTit) + '">' +
+        icon("star", 13) + "<span>Clave</span><i>" + nClave + "</i></button>"
+      : "";
+    var toolbar = '<div class="ej-toolbar">' + segCols + segClave + segEst + busca + prog + acciones + "</div>";
 
     var cuerpo;
     if (COL_EXAMEN[col]) {
@@ -1806,11 +1821,11 @@
       try { A.wireUnitStrip(main, { unidad: u, current: "ej:" + col }); } catch (e) {}
     }
 
-    bindUnidad(main, u, col, list, fEstado0, fQ0);
+    bindUnidad(main, u, col, list, fEstado0, fQ0, fClave0);
   }
 
   // ---------------- interacción ----------------
-  function bindUnidad(main, u, col, list, fEstado, fQ) {
+  function bindUnidad(main, u, col, list, fEstado, fQ, fClave) {
     var listEl = $("#ejList", main);
     if (!listEl) return;
 
@@ -2057,6 +2072,7 @@
         var it = BY_ID[art.dataset.ej];
         var ok = true;
         if (fEstado !== "" && getEstado(art.dataset.ej) !== +fEstado) ok = false;
+        if (ok && fClave && !(it && it.clave)) ok = false;
         if (ok && nq && it && haystack(it).indexOf(nq) < 0) ok = false;
         art.hidden = !ok;
         if (ok) visibles++;
@@ -2065,7 +2081,7 @@
       $$(".ej-group", listEl).forEach(function (g) {
         g.hidden = !$$(".ej-item", g).some(function (a) { return !a.hidden; });
       });
-      var filtrando = (fEstado !== "" || !!nq);
+      var filtrando = (fEstado !== "" || !!nq || !!fClave);
       if (countEl) {
         // dentro del campo de búsqueda hay lugar para «5/24» y no para la frase
         // entera, que se conserva en el title
@@ -2089,11 +2105,26 @@
     }
 
     function limpiarFiltros() {
-      fEstado = ""; fQ = "";
+      fEstado = ""; fQ = ""; fClave = false;
       if (inputQ) inputQ.value = "";
       marcarEstado("");
-      A.setQuery({ estado: null, q: null });
+      marcarClave();
+      A.setQuery({ estado: null, q: null, clave: null });
       aplicarFiltro();
+    }
+    var claveBtn = $("#ejClave", main);
+    function marcarClave() {
+      if (!claveBtn) return;
+      claveBtn.classList.toggle("on", !!fClave);
+      claveBtn.setAttribute("aria-pressed", fClave ? "true" : "false");
+    }
+    if (claveBtn) {
+      claveBtn.addEventListener("click", function () {
+        fClave = !fClave;
+        marcarClave();
+        A.setQuery({ clave: fClave ? "1" : null });
+        aplicarFiltro();
+      });
     }
     var limpiarBtn = $("#ejLimpiar", main);
     if (limpiarBtn) limpiarBtn.addEventListener("click", limpiarFiltros);

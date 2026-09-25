@@ -1105,3 +1105,24 @@ estimación.
   [17:39–18:03] y énfasis [33:45]), [[video-vad-2d]] (advertencia [09:29]).
 - Sin cambios de contenido matemático. `python3 estudio/build.py` regenerado (209 páginas).
 
+
+## [2026-09-25] ingest | Guías resueltas completas: los 259 ejercicios de TP1–TP9
+
+- Las guías resueltas (`Parcial-Para-Imprimir/_src/frags/reso-tpN-*.html` → PDFs
+  `resoluciones/reso-tpN-*.pdf` y colección «Guía» de la app `estudio/`) pasan de 119 a **259**
+  ejercicios: todos los de cada guía, en el orden de la guía (TP1 7 · TP2 40 · TP3 41 · TP4 36 ·
+  TP5 41 · TP6 25 · TP7 24 · TP8 25 · TP9 20).
+- Los 119 previos (57 oficiales de la cátedra + 62 de la selección estilo parcial) quedan
+  marcados **★ clave**: los más importantes. En el PDF, chip «clave» en el título; en la app,
+  distintivo «Clave» y filtro «Clave» en la barra. Procedencia aparte: *oficial* / *propuesta*.
+- Los 140 nuevos son *(resolución propuesta)*: resueltos con el método del curso, verificados
+  uno por uno con recálculo independiente y contrastados con la sección «Respuestas» de cada
+  guía (TP1 no la tiene).
+- Discrepancias con la guía, documentadas en su ejercicio con un recuadro «Cuándo no»:
+  TP3 ej. 3 (Var[Y] = 1,9715; la guía imprime 1,917), TP4 ej. 15 f) (2Φ(−2,698) ≈ 0,0070; la
+  guía da 0,008), TP4 ej. 35–36 (erratas del enunciado), TP6 ej. 23 b) (fórmula de la guía
+  incorrecta; se verificó por enumeración).
+- G-01: en TP8 las resoluciones oficiales «17» y «21» son los ejercicios 22 y 20 de la guía; ahora
+  se ubican por su número de guía (ids de la app sin cambio).
+- Proceso y estado en `.claude/workforce-guias/EXEC_STATE.md`. Regenerados
+  `estudio/ejercicios-data.js` (429 ejercicios, KaTeX 0 errores) y los 9 PDF de resolución.

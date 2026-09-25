@@ -566,6 +566,38 @@
   & .ej-toolbar .ej-cols-seg button.on i {
     color: var(--primary-2);
   }
+  /* «Solo clave» (guías completas): filtra los ejercicios clave de la guía, los
+     más importantes. Mismo alto que los grupos segmentados; el color de acento
+     es el mismo del distintivo de cada ejercicio. */
+  & .ej-clave-b {
+    display: inline-flex; align-items: center; gap: 4px; flex: none; white-space: nowrap;
+    height: 30px; padding: 0 9px; font-size: 11.5px;
+    border: 1px solid var(--border); border-radius: var(--r-ctrl);
+    background: transparent; color: var(--text-2); cursor: pointer;
+    transition: background var(--t), color var(--t), border-color var(--t);
+  }
+  & .ej-clave-b svg {
+    flex: none; color: var(--accent);
+  }
+  & .ej-clave-b i {
+    font-style: normal; font-family: var(--font-mono); font-size: 10.5px;
+    font-variant-numeric: tabular-nums; color: var(--text-3);
+  }
+  & .ej-clave-b:hover {
+    background: var(--surface); color: var(--text);
+  }
+  & .ej-clave-b.on {
+    background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink);
+  }
+  & .ej-clave-b.on svg {
+    fill: currentColor;
+  }
+  & .ej-clave-b.on i {
+    color: var(--accent-ink);
+  }
+  & .ej-clave-b:focus-visible {
+    outline: 2px solid var(--primary); outline-offset: 2px;
+  }
   /* El filtro por estado hace de leyenda del semáforo: cada botón lleva su icono
      y su color, en el mismo orden que los botones del encabezado. Aquí va solo el
      glifo; el nombre del estado está en title y aria-label. */
@@ -870,6 +902,18 @@
     color: var(--text);
     white-space: nowrap;
     margin-right: .3em;
+  }
+  /* distintivo «Clave» junto a «Ejercicio N.»: los más importantes de la guía */
+  & .ej-clave {
+    display: inline-flex; align-items: center; gap: 3px;
+    margin-right: .45em; padding: 0 .5em 0 .4em; vertical-align: .08em;
+    border: 1px solid var(--accent); border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent-ink);
+    font-family: var(--font-ui, inherit); font-size: .72em; font-weight: 600;
+    line-height: 1.55; letter-spacing: .02em; text-indent: 0; white-space: nowrap;
+  }
+  & .ej-clave svg {
+    flex: none; fill: currentColor;
   }
   /* renumerado: el rótulo explica de dónde sale el número */
   & .ej-n[title] {
