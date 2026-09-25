@@ -27,3 +27,4 @@ rama, que se conserva 30 días, así que esta fila tiene que bastarse sola.
 | 2026-09-06 | cripto | Una imagen del wiki entra en la columna | proposal/cripto-20260906-una-imagen-del-wiki-entra-en-la-columna | aprobada | `975710e` |
 | 2026-09-06 | cripto | El runtime lee la ruta aunque el sitio cuelgue de un base | proposal/cripto-20260906-el-runtime-lee-la-ruta-aunque-el-sitio-cuelgue-de-un-base | aprobada | `c59d319` |
 | 2026-09-06 | cripto | Una herramienta puede vivir en la hoja ajustable del lector | proposal/cripto-20260906-una-herramienta-puede-vivir-en-la-hoja-ajustable-del-lector | aprobada | `e0e6e5b` |
+| 2026-09-25 | derecho | Referencia de herramientas: App.DATA usa el nombre del archivo sin extensión | proposal/derecho-20260925-referencia-de-herramientas-app-data-usa-el-nombre-del | aprobada | `a106382` |
