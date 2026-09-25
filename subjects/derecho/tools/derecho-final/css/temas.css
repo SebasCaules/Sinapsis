@@ -1,0 +1,657 @@
+/* ============================================================
+   temas.css — vista «Temas y tracker de dominio» (temas.js).
+
+   Todo bajo la clase raíz .df-temas (BUNDLE.md §6.5). Solo tokens de la
+   plataforma (--text, --text-2, --bg, --surface, --border, --primary,
+   --accent, --accent-ink, --bad, --warn, --ueval, --u1…--u9) y fuentes
+   (--font-ui, --font-display, --font-read, --font-mono), siempre con un
+   fallback razonable. Sin --sp-*, --fs- ni --radius propios de study-app: las
+   medidas van en valores literales, que no son un color y no están
+   restringidos por §6.5.
+   ============================================================ */
+
+.df-temas {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 8px 0 56px;
+  color: var(--text, #1a1a1a);
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+
+.df-temas h1 {
+  margin: 4px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border, #ddd);
+  font: 700 26px/1.2 var(--font-display, var(--font-ui, system-ui, sans-serif));
+  color: var(--text, #1a1a1a);
+  overflow-wrap: break-word;
+}
+
+/* ---------- botones y enlaces genéricos ---------- */
+
+.df-temas .df-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 8px;
+  background: var(--surface, #f5f5f5);
+  color: var(--text, #1a1a1a);
+  font: 600 13.5px var(--font-ui, system-ui, sans-serif);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.df-temas .df-btn:hover {
+  border-color: var(--primary, #2a5adf);
+}
+
+.df-temas .df-btn-primary {
+  background: var(--primary, #2a5adf);
+  border-color: var(--primary, #2a5adf);
+  color: var(--on-primary, #fff);
+}
+
+.df-temas .df-btn-ghost {
+  background: transparent;
+}
+
+/* .df-btn fija `display: inline-flex`, que por ser regla de autor gana sobre
+   el `display: none` del agente de usuario para `[hidden]` aunque la
+   especificidad empate: sin este reset, un <button class="df-btn" hidden>
+   (los de "Mostrar"/"Ocultar y recitar" del esqueleto) queda visible. */
+.df-temas .df-btn[hidden] {
+  display: none;
+}
+
+.df-temas .df-link {
+  color: var(--primary, #2a5adf);
+  text-decoration: underline;
+}
+
+/* ---------- 1. filtros del tablero (4 controles, DESIGN-like) ---------- */
+
+.df-temas .df-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px 18px;
+  margin: 0 0 22px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border, #ddd);
+  border-bottom: 1px solid var(--border, #ddd);
+}
+
+.df-temas .df-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-campo-texto {
+  flex: 1 1 14rem;
+}
+
+.df-temas .df-select,
+.df-temas .df-input {
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 6px;
+  background: var(--bg, #fff);
+  color: var(--text, #1a1a1a);
+  font: 400 13.5px var(--font-ui, system-ui, sans-serif);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.df-temas .df-buscar {
+  width: 100%;
+}
+
+.df-temas .df-acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border, #ddd);
+}
+
+.df-temas .df-nota {
+  margin: 10px 0 0;
+  font: 400 12px var(--font-ui, system-ui, sans-serif);
+  color: var(--text-2, #666);
+}
+
+/* ---------- 2. colofón de dominio por tier ---------- */
+
+.df-temas .df-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.df-temas .df-resumen-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--surface, #f5f5f5);
+  border: 1px solid var(--border, #ddd);
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-radius: 8px;
+}
+
+.df-temas .df-resumen-tier {
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-resumen-count {
+  font: 500 15px var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--text, #1a1a1a);
+}
+
+/* Canal no cromático del tier: además del color, cambia el trazo del canto
+   (solid/dashed/dotted), así el estado no depende solo del color (§6.8). */
+.df-temas .df-tier-a {
+  border-left-color: var(--accent, #b3261e);
+  border-left-style: solid;
+}
+.df-temas .df-tier-b {
+  border-left-color: var(--warn, #9a6700);
+  border-left-style: dashed;
+}
+.df-temas .df-tier-c {
+  border-left-color: var(--border, #999);
+  border-left-style: dotted;
+}
+
+/* ---------- 3. tabla maestra ---------- */
+
+.df-temas .df-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+}
+
+.df-temas .df-tabla {
+  min-width: 46rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.df-temas .df-tabla thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 10px;
+  background: var(--surface, #f5f5f5);
+  border-bottom: 1px solid var(--border, #ddd);
+  text-align: left;
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+  white-space: nowrap;
+}
+
+.df-temas .df-tabla tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: middle;
+}
+
+.df-temas .df-tabla tbody tr:nth-child(even) {
+  background: var(--surface, #f8f8f8);
+}
+
+.df-temas .df-tabla tbody td:first-child {
+  min-width: 13rem;
+  font-weight: 600;
+}
+
+.df-temas .df-tabla tbody td:first-child a {
+  color: var(--text, #1a1a1a);
+  text-decoration: none;
+}
+
+.df-temas .df-tabla tbody td:first-child a:hover {
+  color: var(--primary, #2a5adf);
+  text-decoration: underline;
+}
+
+.df-temas .df-num {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.df-temas .df-senal {
+  min-width: 12rem;
+  max-width: 22rem;
+  font-size: 12.5px;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-ficha-cell {
+  text-align: center;
+}
+
+.df-temas .df-ficha-cell a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: 6px;
+  color: var(--primary, #2a5adf);
+  text-decoration: none;
+}
+
+.df-temas .df-ficha-cell a:hover {
+  background: var(--surface, #eee);
+  text-decoration: underline;
+}
+
+.df-temas .df-chk-cell {
+  text-align: center;
+}
+
+.df-temas .df-chk-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.df-temas .df-chk-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.df-temas .df-muted {
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-empty {
+  margin: 20px 0;
+  padding: 14px;
+  border: 1px dashed var(--border, #ccc);
+  border-radius: 8px;
+  color: var(--text-2, #666);
+  font-size: 13.5px;
+}
+
+/* ---------- 4. ficha de tema — cabecera y pills ---------- */
+
+.df-temas .df-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border, #ddd);
+}
+
+.df-temas .df-header > * {
+  min-width: 0;
+}
+
+.df-temas .df-header h1 {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.df-temas .df-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.df-temas .df-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid var(--border, #ccc);
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-left-color: var(--border, #ccc);
+  border-radius: 999px;
+  font: 600 12px var(--font-ui, system-ui, sans-serif);
+  color: var(--text, #1a1a1a);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.df-temas .df-pill-senal {
+  background: var(--surface, #f5f5f5);
+  border-left-color: var(--ueval, #7c3aed);
+  font-weight: 400;
+}
+
+/* ---------- 5. hitos del tracker (detalle) ---------- */
+
+.df-temas .df-hitos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.df-temas .df-hito {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 40px;
+  min-width: 0;
+  padding: 6px 12px;
+  border: 1px solid var(--border, #ccc);
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-left-color: var(--border, #ccc);
+  border-radius: 8px;
+  background: var(--surface, #f5f5f5);
+  font: 400 13.5px var(--font-ui, system-ui, sans-serif);
+  cursor: pointer;
+}
+
+.df-temas .df-hito:has(input[type="checkbox"]:checked) {
+  border-left-color: var(--primary, #2a5adf);
+  color: var(--primary, #2a5adf);
+  font-weight: 700;
+}
+
+.df-temas .df-hito input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.df-temas .df-botones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.df-temas .df-sin-ficha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--border, #ccc);
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-left-color: var(--warn, #9a6700);
+  border-radius: 8px;
+  background: var(--surface, #f5f5f5);
+  font-size: 13px;
+  color: var(--text-2, #666);
+}
+
+/* ---------- 6. secciones del detalle ---------- */
+
+.df-temas .df-seccion {
+  margin: 0 0 30px;
+}
+
+.df-temas .df-seccion-titulo {
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border, #ddd);
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-esqueleto-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.df-temas .df-esqueleto {
+  margin: 0;
+  padding: 16px;
+  background: var(--surface, #f5f5f5);
+  border: 1px solid var(--border, #ddd);
+  border-left: 4px solid var(--accent, #b3261e);
+  border-radius: 8px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* "Ocultar y recitar": el desenfoque es un apoyo visual, no el único indicio
+   del estado — el rótulo del botón pasa a "Mostrar", que es lo que de verdad
+   lo comunica (§6.8, nada depende solo del color/efecto). */
+.df-temas .df-esqueleto.df-esqueleto-oculto {
+  filter: blur(0.35rem);
+  user-select: none;
+}
+
+.df-temas .df-timer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.df-temas .df-timer-contador {
+  padding-left: 10px;
+  border-left: 1px solid var(--border, #ddd);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--text-2, #666);
+}
+
+/* Contenido markdown saneado (App.renderMarkdown → fragmento()). */
+.df-temas .df-md {
+  max-width: 42rem;
+  font-family: var(--font-read, var(--font-ui, serif));
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.df-temas .df-md > :first-child {
+  margin-top: 0;
+}
+.df-temas .df-md > :last-child {
+  margin-bottom: 0;
+}
+
+.df-temas .df-md table {
+  font-size: 13px;
+}
+
+.df-temas .df-prosa {
+  font-family: var(--font-read, var(--font-ui, serif));
+}
+
+.df-temas .df-base-detalle {
+  font-size: 13.5px;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-tabla-detalle {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.df-temas .df-tabla-detalle th {
+  padding: 8px 10px;
+  background: var(--surface, #f5f5f5);
+  border-bottom: 1px solid var(--border, #ddd);
+  text-align: left;
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-tabla-detalle td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: top;
+}
+
+.df-temas .df-tabla-detalle td p {
+  margin: 0;
+}
+
+.df-temas .df-tabla-detalle td code,
+.df-temas .df-md code {
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--surface, #eee);
+  color: var(--primary, #2a5adf);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.9em;
+}
+
+/* ---------- 7. páginas madre ---------- */
+
+.df-temas .df-madre-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+  gap: 12px;
+}
+
+.df-temas .df-madre-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  background: var(--surface, #f9f9f9);
+}
+
+.df-temas .df-madre-title {
+  font: 700 14px var(--font-display, var(--font-ui, sans-serif));
+  color: var(--text, #1a1a1a);
+  text-decoration: none;
+}
+
+.df-temas .df-madre-title:hover {
+  text-decoration: underline;
+}
+
+.df-temas .df-madre-item p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-2, #666);
+}
+
+/* ---------- 8. tema no encontrado ---------- */
+
+.df-temas .df-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+/* ---------- 8b. consignas del banco (detalle) ---------- */
+
+.df-temas .df-banco-grupo {
+  margin: 18px 0 8px;
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-temas .df-banco-grupo:first-of-type {
+  margin-top: 0;
+}
+
+.df-temas .df-banco-list {
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.df-temas .df-banco-item {
+  padding: 10px 14px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  background: var(--surface, #f9f9f9);
+}
+
+.df-temas .df-banco-consigna {
+  margin-bottom: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.df-temas .df-banco-practicar {
+  margin-top: 8px;
+}
+
+/* ---------- 9. reflujo a partir de 360px, sin scroll horizontal de página ---------- */
+
+@media (max-width: 640px) {
+  .df-temas .df-filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .df-temas .df-campo {
+    width: 100%;
+  }
+
+  .df-temas .df-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .df-temas .df-hito,
+  .df-temas .df-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .df-temas .df-madre-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

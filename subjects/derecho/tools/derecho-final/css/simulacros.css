@@ -1,0 +1,705 @@
+/* simulacros.css — vista «simulacros» (lista, runner y registro) del bundle
+   derecho-final. Toda regla cuelga de .df-simc; nada toca elementos sueltos
+   fuera de ese ámbito, para no filtrarse a las otras vistas del bundle ni a
+   las de otros bundles. Solo tokens de la plataforma, siempre con un
+   fallback razonable (§6.5 del contrato del bundle). */
+
+.df-simc {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 4px 0 48px;
+  color: var(--text, #1a1a1a);
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+
+.df-simc a {
+  color: inherit;
+}
+
+.df-simc :focus-visible {
+  outline: 2px solid var(--primary, var(--accent, #3b6fd6));
+  outline-offset: 2px;
+}
+
+/* -----------------------------------------------------------------------
+   1. Encabezados
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-header {
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border, #e3e3e3);
+}
+
+.df-simc .df-simc-header h1,
+.df-simc .df-simc-runner-header h1 {
+  margin: 4px 0 8px;
+  font: 700 26px/1.2 var(--font-display, var(--font-ui, sans-serif));
+  color: var(--text, #1a1a1a);
+  overflow-wrap: anywhere;
+}
+
+.df-simc .df-simc-lead {
+  margin: 0;
+  max-width: 42rem;
+  font: 400 14.5px/1.6 var(--font-ui, sans-serif);
+  color: var(--text-2, #555);
+}
+
+.df-simc .df-simc-vacio {
+  margin: 32px 0;
+  font: 400 14px var(--font-ui, sans-serif);
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-muted {
+  color: var(--text-2, #666);
+}
+
+/* -----------------------------------------------------------------------
+   2. Grilla de tarjetas (lista de simulacros)
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.df-simc .df-simc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e3e3e3);
+  border-radius: 10px;
+}
+
+.df-simc .df-simc-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border, #e3e3e3);
+}
+
+.df-simc .df-simc-card-top h2 {
+  flex: 1 1 10rem;
+  margin: 0;
+  font: 700 16px/1.3 var(--font-display, var(--font-ui, sans-serif));
+  color: var(--text, #1a1a1a);
+  overflow-wrap: anywhere;
+}
+
+.df-simc .df-simc-fecha {
+  margin: 0;
+  font: 500 12px var(--font-ui, sans-serif);
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-nota {
+  margin: 0;
+  padding-inline-start: 10px;
+  border-inline-start: 3px solid var(--ueval, var(--accent, #b8860b));
+  font: 600 12.5px/1.4 var(--font-ui, sans-serif);
+  color: var(--text, #1a1a1a);
+}
+
+.df-simc .df-simc-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.df-simc .df-simc-pill {
+  max-width: 100%;
+  padding: 3px 9px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 999px;
+  font: 600 11px var(--font-ui, sans-serif);
+  color: var(--text-2, #555);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* El tier no se comunica solo por color: la pastilla ya lleva la letra en su
+   propio texto ("Nombre del tema · A"); el color solo refuerza. */
+.df-simc .df-simc-pill-A {
+  border-color: var(--bad, #c0392b);
+  color: var(--bad, #c0392b);
+}
+.df-simc .df-simc-pill-B {
+  border-color: var(--warn, #b7791f);
+  color: var(--warn, #b7791f);
+}
+.df-simc .df-simc-pill-C {
+  border-color: var(--border, #999);
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-ultimo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: auto 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border, #eee);
+  font: 500 12.5px var(--font-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.df-simc .df-simc-registro-link {
+  margin: 4px 0 0;
+}
+
+/* -----------------------------------------------------------------------
+   3. Distintivos (tipo, umbral)
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 999px;
+  font: 700 11px var(--font-ui, sans-serif);
+  letter-spacing: 0.02em;
+  color: var(--text-2, #555);
+  white-space: nowrap;
+}
+
+.df-simc .df-simc-badge-ok {
+  border-color: var(--primary, var(--accent, #2f7d4f));
+  color: var(--accent-ink, var(--primary, #2f7d4f));
+}
+
+.df-simc .df-simc-badge-bad {
+  border-color: var(--bad, #c0392b);
+  color: var(--bad, #c0392b);
+}
+
+/* -----------------------------------------------------------------------
+   4. Botones y enlaces
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 16px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #ccc);
+  border-radius: 8px;
+  color: var(--text, #1a1a1a);
+  font: 600 13.5px var(--font-ui, sans-serif);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.df-simc .df-simc-btn:hover {
+  border-color: var(--primary, var(--accent, #3b6fd6));
+}
+
+.df-simc .df-simc-btn-primario {
+  background: var(--primary, var(--accent, #3b6fd6));
+  border-color: var(--primary, var(--accent, #3b6fd6));
+  color: var(--on-primary, #fff);
+}
+
+.df-simc .df-simc-btn-primario:hover {
+  filter: brightness(1.05);
+}
+
+.df-simc .df-simc-btn-fantasma {
+  background: transparent;
+}
+
+.df-simc .df-simc-btn-block {
+  width: 100%;
+}
+
+.df-simc .df-simc-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.df-simc .df-simc-link {
+  color: var(--primary, var(--accent, #3b6fd6));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* -----------------------------------------------------------------------
+   5. Encabezado del runner y tipografía del markdown del kit
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-runner-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border, #e3e3e3);
+}
+
+.df-simc .df-simc-reglas {
+  padding: 10px 14px;
+  background: var(--bg, #fafafa);
+  border-inline-start: 3px solid var(--ueval, var(--accent, #3b6fd6));
+  border-radius: 6px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* Tipografía compartida de todo bloque que renderiza markdown del kit
+   (consignas, correcciones, regla de aprobación). */
+.df-simc .df-simc-md {
+  max-width: 42rem;
+  font: 400 15px/1.65 var(--font-read, var(--font-ui, sans-serif));
+  color: var(--text, #1a1a1a);
+  overflow-wrap: anywhere;
+}
+.df-simc .df-simc-md > :first-child {
+  margin-top: 0;
+}
+.df-simc .df-simc-md > :last-child {
+  margin-bottom: 0;
+}
+.df-simc .df-simc-md table {
+  font-size: 13px;
+}
+
+/* -----------------------------------------------------------------------
+   6. Cronómetro — aria-live="polite" en la cifra (regla dura §6.4)
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-timer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg, #fafafa);
+  border: 1px solid var(--border, #e3e3e3);
+  border-inline-start: 3px solid var(--ueval, var(--accent, #3b6fd6));
+  border-radius: 8px;
+}
+
+.df-simc .df-simc-timer-label {
+  font: 600 11.5px var(--font-ui, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-cifra {
+  font: 700 20px var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--text, #1a1a1a);
+}
+
+/* -----------------------------------------------------------------------
+   7. Alternancia "responder en papel" / "consigna resuelta"
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-toggle,
+.df-simc .df-simc-terminada {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  background: var(--bg, #fafafa);
+  border: 1px solid var(--border, #ccc);
+  border-radius: 8px;
+  color: var(--text, #1a1a1a);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.df-simc .df-simc-toggle:hover,
+.df-simc .df-simc-terminada:hover {
+  border-color: var(--primary, var(--accent, #3b6fd6));
+}
+
+.df-simc .df-simc-toggle {
+  margin: 0 0 20px;
+}
+
+.df-simc .df-simc-terminada {
+  margin-top: 14px;
+}
+
+/* -----------------------------------------------------------------------
+   8. Consignas — paso "responder"
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-consignas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.df-simc .df-simc-consigna {
+  padding: 14px 16px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e3e3e3);
+  border-radius: 10px;
+}
+
+.df-simc .df-simc-consigna-n {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border, #eee);
+  font: 700 11px var(--font-ui, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary, var(--accent, #3b6fd6));
+}
+
+.df-simc .df-simc-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 9rem;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg, #fff);
+  border: 1px solid var(--border, #ccc);
+  border-radius: 8px;
+  color: var(--text, #1a1a1a);
+  font: 400 14px/1.5 var(--font-ui, sans-serif);
+  resize: vertical;
+}
+
+.df-simc .df-simc-terminar {
+  width: 100%;
+  padding-block: 12px;
+}
+
+/* -----------------------------------------------------------------------
+   9. Corrección revelada
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-instruccion {
+  max-width: 42rem;
+  margin-bottom: 18px;
+  font-size: 13.5px;
+  color: var(--text-2, #555);
+}
+
+.df-simc .df-simc-correccion {
+  max-width: 42rem;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e3e3e3);
+  border-inline-start: 3px solid var(--ueval, var(--accent, #3b6fd6));
+  border-radius: 8px;
+}
+
+.df-simc .df-simc-correccion h2 {
+  margin: 0 0 10px;
+  font: 700 16px/1.3 var(--font-display, var(--font-ui, sans-serif));
+}
+
+.df-simc .df-simc-consigna-texto {
+  padding-inline-start: 10px;
+  margin-bottom: 14px;
+  border-inline-start: 1px solid var(--border, #ddd);
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--text-2, #555);
+}
+
+.df-simc .df-simc-respuesta {
+  margin: 14px 0;
+  padding: 10px 12px;
+  background: var(--bg, #fafafa);
+  border: 1px solid var(--border, #e3e3e3);
+  border-radius: 8px;
+}
+
+.df-simc .df-simc-respuesta-titulo {
+  margin-bottom: 6px;
+  font: 700 10.5px var(--font-ui, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-respuesta-texto {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.df-simc .df-simc-puntaje-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, #eee);
+  font: 700 11px var(--font-ui, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-select {
+  min-width: 11rem;
+  padding: 7px 10px;
+  background: var(--bg, #fff);
+  border: 1px solid var(--border, #ccc);
+  border-radius: 6px;
+  color: var(--text, #1a1a1a);
+  font: 500 13px var(--font-ui, sans-serif);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* -----------------------------------------------------------------------
+   10. Resumen del intento
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-resumen {
+  max-width: 42rem;
+  padding: 16px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e3e3e3);
+  border-radius: 10px;
+}
+
+.df-simc .df-simc-resumen h2 {
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border, #eee);
+  font: 700 18px var(--font-display, var(--font-ui, sans-serif));
+}
+
+.df-simc .df-simc-resumen-puntajes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.df-simc .df-simc-resumen-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 4.2rem;
+  padding: 8px 10px;
+  background: var(--bg, #fafafa);
+  border: 1px solid var(--border, #e3e3e3);
+  border-radius: 8px;
+}
+
+.df-simc .df-simc-resumen-item span {
+  font: 700 10.5px var(--font-ui, sans-serif);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+.df-simc .df-simc-resumen-item strong {
+  font: 700 16px var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.df-simc .df-simc-resumen-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border, #eee);
+}
+
+/* -----------------------------------------------------------------------
+   11. Registro
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+/* Tabla ancha en contenedor con scroll propio: nunca desborda la página
+   (regla dura §6.5). */
+.df-simc .df-simc-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 12px;
+}
+
+.df-simc .df-simc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.df-simc .df-simc-table th,
+.df-simc .df-simc-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #e3e3e3);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.df-simc .df-simc-table th {
+  font: 700 10.5px var(--font-ui, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2, #666);
+}
+
+/* Columnas P1-P5 y Umbral: centradas, con guarismos tabulares. */
+.df-simc .df-simc-table td:nth-child(n + 3):nth-child(-n + 7) {
+  text-align: center;
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.df-simc .df-simc-table td:nth-child(8) {
+  text-align: center;
+}
+
+/* "Temas a repasar" puede traer varios enlaces: se permite que la celda
+   quiebre de renglón en vez de forzar scroll horizontal extra. */
+.df-simc .df-simc-table td:nth-child(9) {
+  white-space: normal;
+}
+
+.df-simc .df-simc-nota-registro {
+  max-width: 42rem;
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--text-2, #666);
+}
+
+/* -----------------------------------------------------------------------
+   12. Panel de resumen del registro
+   -------------------------------------------------------------------- */
+
+.df-simc .df-simc-panel-resumen {
+  max-width: 42rem;
+  padding: 16px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e3e3e3);
+  border-radius: 10px;
+}
+
+.df-simc .df-simc-panel-resumen h2 {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border, #eee);
+  font: 700 16px var(--font-display, var(--font-ui, sans-serif));
+}
+
+.df-simc .df-simc-panel-resumen p {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+}
+
+.df-simc .df-simc-panel-resumen p strong {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.df-simc .df-simc-prioridad {
+  font-weight: 700;
+  color: var(--bad, #c0392b);
+}
+
+.df-simc .df-simc-panel-resumen ul {
+  margin: 0 0 14px;
+  padding-inline-start: 1.2em;
+  font-size: 13px;
+}
+
+.df-simc .df-simc-panel-resumen li {
+  padding: 2px 0;
+}
+
+/* -----------------------------------------------------------------------
+   13. Reflujo a pantallas angostas (≥360px, sin scroll horizontal de página)
+   -------------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .df-simc .df-simc-header h1,
+  .df-simc .df-simc-runner-header h1 {
+    font-size: 21px;
+  }
+
+  .df-simc .df-simc-timer-row {
+    width: 100%;
+  }
+
+  .df-simc .df-simc-resumen-acciones .df-simc-btn,
+  .df-simc .df-simc-toolbar .df-simc-btn {
+    flex: 1 1 100%;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   14. Modo de colores forzados — todo bloque con fondo suave conserva un
+   filete real cuando el fondo desaparece.
+   -------------------------------------------------------------------- */
+
+@media (forced-colors: active) {
+  .df-simc .df-simc-reglas,
+  .df-simc .df-simc-timer-row,
+  .df-simc .df-simc-toggle,
+  .df-simc .df-simc-terminada,
+  .df-simc .df-simc-respuesta,
+  .df-simc .df-simc-resumen-item,
+  .df-simc .df-simc-card,
+  .df-simc .df-simc-consigna,
+  .df-simc .df-simc-correccion,
+  .df-simc .df-simc-resumen,
+  .df-simc .df-simc-panel-resumen {
+    border: 1px solid CanvasText;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   15. Accesibilidad
+   -------------------------------------------------------------------- */
+
+/* Texto solo para lectores de pantalla: la pastilla "Nombre del tema · A" ya
+   comunica el tier por color y por letra, pero la letra sola no dice qué es
+   sin la palabra "Tier" delante para quien usa un lector de pantalla. */
+.df-simc .df-simc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Celda "Acciones" del registro: "Copiar fila" + "Eliminar" lado a lado. */
+.df-simc .df-simc-acciones-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
