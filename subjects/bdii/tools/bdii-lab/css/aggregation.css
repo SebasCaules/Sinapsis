@@ -1,0 +1,128 @@
+/* ============================================================
+   bdii-lab / css/aggregation.css — "Aggregation pipeline paso a paso".
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md); prefijo
+   propio `.lab-aggregation-…`. Colores solo por variables CSS de la
+   plataforma (regla 5), con fallback cuando el token no existiera.
+   ============================================================ */
+
+/* ---------- etapas del pipeline ---------- */
+
+.bdii-lab .lab-aggregation-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bdii-lab .lab-aggregation-stagerow {
+  border: 1px solid var(--border-3, var(--border));
+  border-radius: var(--r, 10px);
+  padding: 12px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdii-lab .lab-aggregation-stagerow--selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary) inset;
+}
+
+.bdii-lab .lab-aggregation-stagerow-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bdii-lab .lab-aggregation-stagenum {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.bdii-lab .lab-aggregation-status,
+.bdii-lab .lab-aggregation-typebadge { min-width: 0; }
+
+.bdii-lab .lab-aggregation-stagerow-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.bdii-lab .lab-aggregation-stage-label {
+  margin-top: 2px;
+}
+
+.bdii-lab .lab-aggregation-textarea {
+  width: 100%;
+  min-height: 4.5em;
+  resize: vertical;
+  font-size: 0.95em;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-3, var(--border));
+  border-radius: var(--r-ctrl, 8px);
+  padding: 8px 10px;
+  box-sizing: border-box;
+}
+
+.bdii-lab .lab-aggregation-textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- resultado explicado ---------- */
+
+.bdii-lab .lab-aggregation-resultstatus-text {
+  color: var(--text-2);
+  font-size: 0.9em;
+  margin: 0 0 8px;
+}
+
+.bdii-lab .lab-aggregation-details {
+  border: 1px solid var(--border-3, var(--border));
+  border-radius: var(--r, 10px);
+  padding: 8px 12px;
+  background: var(--surface);
+}
+
+.bdii-lab .lab-aggregation-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-aggregation-retos-title {
+  font-family: var(--font-display, var(--font-ui));
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 4px 0 0;
+  color: var(--text);
+}
+
+/* ---------- figura compacta ---------- */
+
+.bdii-lab.bdii-lab--figure .lab-aggregation-figintro {
+  color: var(--text-2);
+  margin: 0 0 8px;
+}
+
+.bdii-lab.bdii-lab--figure .lab-aggregation-figstep {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bdii-lab.bdii-lab--figure .lab-aggregation-figdesc {
+  color: var(--text-2);
+  margin: 0;
+}
+
+/* ---------- responsive: 375px de ancho usable ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-aggregation-stagerow-actions { margin-left: 0; }
+}
+
+/* ---------- prefers-reduced-motion: nada que animar acá, ya lo resuelve lab.css ---------- */

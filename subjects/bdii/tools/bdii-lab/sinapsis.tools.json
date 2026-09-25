@@ -1,0 +1,99 @@
+{
+  "id": "bdii-lab",
+  "title": "Laboratorio de Base de Datos II",
+  "version": "1.0.0",
+  "description": "Nueve herramientas para entender jugando con datos y parámetros: vistas con CHECK OPTION, acciones referenciales, índices y plan de ejecución, niveles de aislamiento, GRANT/REVOKE, recovery con WAL, CAP y quórums, sharding y replica sets, y aggregation pipeline. Cada una registra también una figura para el wiki.",
+  "runtime": 1,
+  "scripts": [
+    "lib.js",
+    "check-option.js",
+    "acciones-referenciales.js",
+    "indices-plan.js",
+    "aislamiento.js",
+    "grant-revoke.js",
+    "recovery-wal.js",
+    "cap-quorum.js",
+    "sharding.js",
+    "aggregation.js",
+    "hub.js"
+  ],
+  "styles": [
+    "css/lab.css",
+    "css/check-option.css",
+    "css/acciones-referenciales.css",
+    "css/indices-plan.css",
+    "css/aislamiento.css",
+    "css/grant-revoke.css",
+    "css/recovery-wal.css",
+    "css/cap-quorum.css",
+    "css/sharding.css",
+    "css/aggregation.css",
+    "css/hub.css"
+  ],
+  "data": [
+    "data/aggregation.json"
+  ],
+  "views": [
+    {
+      "id": "laboratorio",
+      "label": "Laboratorio de Base de Datos II",
+      "icon": "flask",
+      "layout": "wide"
+    },
+    {
+      "id": "check-option",
+      "label": "Vistas y WITH CHECK OPTION",
+      "icon": "layers",
+      "layout": "wide"
+    },
+    {
+      "id": "acciones-referenciales",
+      "label": "Integridad referencial: acciones y MATCH",
+      "icon": "link",
+      "layout": "wide"
+    },
+    {
+      "id": "indices-plan",
+      "label": "Índices y plan de ejecución",
+      "icon": "chart",
+      "layout": "wide"
+    },
+    {
+      "id": "aislamiento",
+      "label": "Transacciones concurrentes y niveles de aislamiento",
+      "icon": "timer",
+      "layout": "wide"
+    },
+    {
+      "id": "grant-revoke",
+      "label": "GRANT, REVOKE y el grafo de privilegios",
+      "icon": "graph",
+      "layout": "wide"
+    },
+    {
+      "id": "recovery-wal",
+      "label": "Recovery: write-ahead logging y ARIES",
+      "icon": "list",
+      "layout": "wide"
+    },
+    {
+      "id": "cap-quorum",
+      "label": "Réplicas, particiones y quórums",
+      "icon": "circle",
+      "layout": "wide"
+    },
+    {
+      "id": "sharding",
+      "label": "Sharding y replica sets en MongoDB",
+      "icon": "grid",
+      "layout": "wide"
+    },
+    {
+      "id": "aggregation",
+      "label": "Aggregation pipeline paso a paso",
+      "icon": "function",
+      "layout": "wide"
+    }
+  ],
+  "figures": true
+}

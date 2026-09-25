@@ -1,0 +1,132 @@
+/* ============================================================
+   bdii-lab / css/sharding.css — estilos propios de "sharding"
+   (Sharding y replica sets en MongoDB). Todo selector cuelga de
+   `.bdii-lab`; prefijo propio `.lab-sharding-…`. Colores solo por
+   variables CSS (var(--x, fallback)), nunca literales.
+   ============================================================ */
+
+.bdii-lab .lab-sharding-hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+
+/* ---------- histograma de reparto por shard ---------- */
+
+.bdii-lab .lab-sharding-hist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdii-lab .lab-sharding-hist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bdii-lab .lab-sharding-hist-label {
+  width: 64px;
+  flex: 0 0 auto;
+  font-size: 0.85em;
+  color: var(--text-2);
+}
+
+.bdii-lab .lab-sharding-hist-track {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-ctrl);
+  overflow: hidden;
+}
+
+.bdii-lab .lab-sharding-hist-fill {
+  height: 100%;
+  min-width: 2px;
+  background: var(--shard-color, var(--primary));
+}
+
+.bdii-lab .lab-sharding-hist-count {
+  width: 44px;
+  flex: 0 0 auto;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--text);
+}
+
+/* Seis tonos distinguibles por token (nunca color literal); cada barra
+   lleva además el número de shard como texto, así el color nunca es la
+   única señal. */
+.bdii-lab .lab-sharding-c0 { --shard-color: var(--primary); }
+.bdii-lab .lab-sharding-c1 { --shard-color: var(--accent); }
+.bdii-lab .lab-sharding-c2 { --shard-color: var(--good); }
+.bdii-lab .lab-sharding-c3 { --shard-color: var(--warn); }
+.bdii-lab .lab-sharding-c4 { --shard-color: var(--bad); }
+.bdii-lab .lab-sharding-c5 { --shard-color: color-mix(in srgb, var(--primary) 50%, var(--accent)); }
+
+/* ---------- miembros del replica set ---------- */
+
+.bdii-lab .lab-sharding-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bdii-lab .lab-sharding-member {
+  min-width: 150px;
+  flex: 1 1 150px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.92em;
+}
+
+.bdii-lab .lab-sharding-member--primary {
+  border-color: var(--primary);
+  border-width: 2px;
+}
+
+.bdii-lab .lab-sharding-member--isolated {
+  border-style: dashed;
+}
+
+.bdii-lab .lab-sharding-member--down {
+  opacity: 0.6;
+  background: var(--surface-2);
+}
+
+.bdii-lab .lab-sharding-member-role {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---------- registro de eventos ---------- */
+
+.bdii-lab .lab-sharding-log {
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  color: var(--text-2);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+/* ---------- responsive: usable a 375px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-sharding-hist-label { width: 52px; font-size: 0.8em; }
+  .bdii-lab .lab-sharding-member { flex: 1 1 100%; }
+}

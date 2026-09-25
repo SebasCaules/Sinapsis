@@ -21,6 +21,7 @@ aliases:
   - B-tree vs. Hash
 fuentes:
   - "raw/Unidad-01/Teorica/BD2_Clase 11 - Seguridad-Transacciones.pdf"
+  - "raw/Unidad-01/Teorica/ejemplo Seguridad BD.png"
 estado: procesado
 ---
 
@@ -28,7 +29,7 @@ estado: procesado
 
 ## Resumen general
 
-Última teórica de la mitad relacional, del 07/09, con el TP 8 Seguridad del 08/09. El deck trae tres bloques en 38 slides y anuncia dos. **Seguridad** *(slides 2–13)*: amenazas, niveles, autenticación vs. autorización y la sintaxis MySQL de cuentas y privilegios: `CREATE USER 'u'@'host'`, `GRANT … ON base.tabla TO … [WITH GRANT OPTION]`, `CREATE ROLE`, `REVOKE`, `FLUSH PRIVILEGES`. **Transacciones y concurrencia** *(slides 14–30)*: ACID, estados, las anomalías *(lost update, dirty read, non-repeatable read, phantom)*, tres mecanismos de control *(locking, optimista, timestamps)*, los niveles de aislamiento y dos ejemplos en SQL Server y PostgreSQL. **Índices** *(slides 31–38)*, sin anuncio: ordenados vs. asociativos, con y sin agrupación, multinivel, `CREATE INDEX` y B-tree vs. hash según el manual de MySQL.
+Última teórica relacional, del 07/09, con el TP 8 Seguridad del 08/09, en tres bloques. **Seguridad** *(slides 2–13)*: amenazas, niveles, autenticación vs. autorización y la sintaxis MySQL de cuentas y privilegios: `CREATE USER`, `GRANT … [WITH GRANT OPTION]`, `CREATE ROLE`, `REVOKE`, `FLUSH PRIVILEGES`. **Transacciones y concurrencia** *(slides 14–30)*: ACID, estados, las anomalías *(lost update, dirty read, non-repeatable read, phantom)*, tres mecanismos de control *(locking, optimista, timestamps)*, los niveles de aislamiento y dos ejemplos en SQL Server y PostgreSQL; recovery y WAL *(la A y la D)* van en la [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]], deck hermano. **Índices** *(slides 31–38)*, sin anuncio: ordenados vs. asociativos, con y sin agrupación, multinivel, `CREATE INDEX` y B-tree vs. hash según el manual de MySQL.
 
 Es el primer deck de la unidad escrito en MySQL por defecto y el que menos alcanza para su TP, que pide grafos de permisos, privilegios por columna y `REVOKE … CASCADE` "desde la teoría", ausentes de los slides; hace falta GMUW 10.1.4–10.1.6.
 
@@ -46,10 +47,14 @@ Para el parcial: la tabla ACID *(la C no la garantiza el motor)*, la de anomalí
 > Dictado en la **teórica del lunes 07/09**; el `11` del nombre del archivo es el número de clase que
 > asigna la cátedra. Tema oficial según [[_cronograma]] *(fila 2026-09-07)*: ***"Seguridad en Bases de
 > Datos. Transacciones ACID · Implementación de matriz de roles y permisos"***.
+> Segundo deck de esta misma clase *(07/09)*: [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] — recovery, WAL y ARIES.
 > Clase anterior: [[Clase 10 - Restricciones integridad-Parte 2]] *(31/08)*. Clase siguiente:
 > [[Clase 12 - Introduccion a NoSQL]] *(14/09: abre la segunda mitad y la `Unidad-02`, con las Clases
 > 12 a 14 y el TP9)*. Se practica con el **TP 8 Seguridad** del martes 08/09 → [[Práctica 2026-09-08]].
 > Bibliografía: [[_index-bibliografia]] › Clase 11.
+> El § *Material complementario del 07/09* documenta además `ejemplo Seguridad BD.png`, publicado en
+> el campus el **07/09** junto a la actividad *"Ejercicio de seguridad en BD"*: un grafo de permisos
+> con `GRANT`/`REVOKE … CASCADE`, sin número de clase.
 >
 > **Es la última teórica de la primera mitad relacional.** La `Unidad-01` cierra con las **Clases 01 a
 > 11** y los **TP1 a TP8**; el deck 11 y el TP8 están archivados en `raw/Unidad-01/`.
@@ -1025,6 +1030,9 @@ SQL, **16.11** *SQL Facilities* *(490–491)*.
 > del `FOR EACH STATEMENT` del TP7. **Verificar contra el manual 9.7, § *Transaction Isolation
 > Levels* del capítulo de InnoDB, antes de afirmarlo en un examen.**
 
+> [!figura] lab-aislamiento
+> Las anomalías de los slides 23–24 (dirty read, non-repeatable read, phantom read y la *race condition* sobre un mismo saldo como lost update), nivel por nivel de este slide, con dos transacciones.
+
 ## Slides 29–30 · Ejemplos prácticos — en SQL Server y en PostgreSQL
 
 > [!quote] Slide 29, textual — con coloreado de sintaxis, texto vivo
@@ -1446,15 +1454,107 @@ compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *
 
 ---
 
+## Material complementario del 07/09 (sin número de clase)
+
+> [!info] Un PNG archivado junto al deck, sin `BD2_Clase NN` en el nombre
+> `raw/Unidad-01/Teorica/ejemplo Seguridad BD.png`, publicado en el campus el **07/09** —la fecha de
+> esta clase— junto a la actividad *"Ejercicio de seguridad en BD"*. No es una clase y por eso no
+> tiene página propia.
+
+> [!quote] El diagrama, transcrito
+> Tres usuarios como nodos y cinco operaciones, en este orden:
+> 1. `User 0: Grant INSERT ON T1 to User 1 WGO` *(WGO = `WITH GRANT OPTION`)*
+> 2. `User 0: Grant UPDATE, DELETE ON V2 to User 2`
+> 3. `User 1: Grant INSERT on T1 to User 2.`
+> 4. `User 0: Revoke INSERT on T1 from User 1 CASCADE`
+> 5. `Flush privileges;`
+>
+> Y la síntesis del recuadro amarillo, textual: *"To sum up: User 0 es admin, User 1 sin permisos, y
+> User 2 solo queda cn permisos de upd y del en V2."* **[sic: "cn" por "con"]** El diagrama de flechas
+> muestra el estado **final**: la arista `User 0 → User 1` (*Insert T1, WGO*) y la arista
+> `User 1 → User 2` (*Insert T1*) están **tachadas** —revocadas—; la arista `User 0 → User 2`
+> (*Update, Delete V2*) queda **sin tachar**.
+
+Es exactamente el **grafo de permisos** de GMUW cap. 10.1.5–10.1.6 que esta clase menciona sin ejemplo
+propio (§ *Slide 10*, *Slide 12*) y que **[[Práctica 2026-09-08]]** identifica como el formalismo que
+el TP8 exige y el deck no enseña: un nodo por *(usuario, privilegio, con o sin opción de concesión)*
+y una arista por `GRANT`. El paso 4 —`REVOKE … CASCADE`— es la pieza central: como `User 1` recibió
+`INSERT` con `WITH GRANT OPTION` y se lo pasó a `User 2`, revocarlo **en cascada** debería arrastrar
+también el `GRANT` derivado de `User 2`, dejando a `User 2` solo con lo que `User 0` le dio
+directamente (`UPDATE`, `DELETE` en `V2`) — la frase del recuadro amarillo.
+
+> [!figura] lab-grant-revoke
+> Elija el escenario del handout (grafo de GMUW, User0/User1/User2) y compruebe el `REVOKE … CASCADE` del estándar contra lo que hace MySQL.
+
+**Corrida real en MySQL 9.7.2** (usuarios y tablas de prueba, `User 0` = `root`):
+
+```sql
+CREATE TABLE t1 (id INT PRIMARY KEY, dato VARCHAR(50));
+CREATE TABLE v2 (id INT PRIMARY KEY, dato VARCHAR(50));
+CREATE USER 'user1_sec'@'%' IDENTIFIED BY '...';
+CREATE USER 'user2_sec'@'%' IDENTIFIED BY '...';
+
+-- 1) User 0: Grant INSERT ON T1 to User 1 WGO
+GRANT INSERT ON t1 TO 'user1_sec'@'%' WITH GRANT OPTION;
+-- 2) User 0: Grant UPDATE, DELETE ON V2 to User 2
+GRANT UPDATE, DELETE ON v2 TO 'user2_sec'@'%';
+-- 3) User 1: Grant INSERT on T1 to User 2  (conectado como user1_sec, usando su WITH GRANT OPTION)
+GRANT INSERT ON t1 TO 'user2_sec'@'%';
+-- 4) User 0: Revoke INSERT on T1 from User 1 CASCADE
+REVOKE INSERT ON t1 FROM 'user1_sec'@'%' CASCADE;
+```
+
+| Paso | Resultado real |
+| --- | --- |
+| 1–2 (root otorga) | ✓ — `SHOW GRANTS` confirma `INSERT … WITH GRANT OPTION` para `user1_sec` y `UPDATE, DELETE` para `user2_sec` |
+| 3 (`user1_sec` otorga, usando su `WITH GRANT OPTION`) | ✓ — `SHOW GRANTS FOR 'user2_sec'@'%'` pasa a listar también `INSERT ON t1` |
+| 4 (`REVOKE … CASCADE`) | ✗ `ERROR 1064 (42000): You have an error in your SQL syntax … near 'CASCADE'` |
+
+> [!warning] (crítico) El paso 4 del enunciado **no compila en MySQL**, y ya estaba anticipado
+> [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y roles]] y
+> **[[Práctica 2026-09-08]]** § *Cheatsheet* ya registraban que *"MySQL no provee la opción
+> CASCADE"* en `REVOKE`;
+> este handout lo confirma con un caso ejecutable: `REVOKE … CASCADE` es directamente un **error de
+> sintaxis**, no una cláusula que se ignore en silencio. Repitiendo el paso 4 **sin** `CASCADE`
+> —lo único que MySQL admite (slide 12 de esta clase)— el resultado real es:
+>
+> | Verificación tras `REVOKE INSERT ON t1 FROM 'user1_sec'@'%';` (sin `CASCADE`) | Resultado real |
+> | --- | --- |
+> | `SHOW GRANTS FOR 'user1_sec'@'%'` | pierde el `INSERT`; queda `GRANT USAGE ON t1 … WITH GRANT OPTION` — la opción de concesión sobrevive como marca vacía |
+> | `SHOW GRANTS FOR 'user2_sec'@'%'` | **conserva** `INSERT ON t1` |
+>
+> **`User 2` no queda como dice el recuadro amarillo.** El `GRANT INSERT` que `User 2` recibió de
+> `User 1` en el paso 3 se vuelve un **privilegio huérfano**: sigue vigente aunque la concesión de la
+> que dependía —la de `User 1`— ya no exista. Es la brecha exacta que
+> [[Práctica 2026-09-08]] atribuye a que *"el modelo de seguridad de MySQL no tiene owner, no tiene
+> `PUBLIC`, no tiene `CASCADE`"*: sin cascada, la revocación **nunca se propaga**, y el estado final
+> real es *"User 1 sin permisos, User 2 con `INSERT` en T1 **y** `UPDATE`/`DELETE` en V2"* — más
+> permisos de los que el handout da por ciertos.
+
+> [!info] Enlaces de esta sección
+> [[Práctica 2026-09-08]] (TP8) resuelve el mismo tipo de grafo con tres ejercicios y llega a la
+> misma conclusión sobre `CASCADE`; [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y
+> roles]] documenta `WITH GRANT OPTION` y la ausencia de `CASCADE` como propiedades del motor.
+
 ## Dudas abiertas
 
 - [ ] (crítico) **¿Qué se toma de seguridad en el parcial del 13/10: la sintaxis MySQL del deck o el
   modelo de grafos de GMUW 10.1 que ejercita el TP8?** Son dos capas distintas y sólo una está en el
   deck; el patrón *"teoría en el estándar, código en MySQL"* de TP6, TP7 y TP8 sugiere que se toman
   las dos. **Confirmar antes del parcial.**
+  - (nota) Evidencia de exámenes viejos: la Pregunta 32 de [[Parcial 2Q2025]] § *Sección E* pide
+    una cadena de `GRANT`/`REVOKE … CASCADE` resuelta **en SQL estándar**, con el grafo de permisos
+    (el solucionario da el estado final de U0 a U3; la captura muestra puntaje completo). El handout
+    del 07/09 (§ *Material complementario del 07/09*) también resuelve con la semántica del estándar
+    un `REVOKE … CASCADE` que en MySQL 9.7.2 es `ERROR 1064`. Los dos apuntan al modelo de grafos;
+    el examen es de 2025 y no confirma el parcial del 13/10/2026.
 - [ ] (crítico) **¿Por qué los slides 31–38 son de índices, y se dieron en clase?** ¿Repaso
   pre-parcial? ¿Material que sobró de la Clase 08? ¿Se saltearon? **Preguntar al humano**: afecta qué
   se estudia de índices para el 13/10.
+  - (nota) Evidencia de exámenes viejos: B-tree vs. hash se pregunta en [[Final 1Jul2025]]
+    (Pregunta 1: qué índice usar para el `userID` del login en MySQL; respuesta de la fuente: hash),
+    que es un final, no un parcial. En el [[Parcial 2Q2025]] los índices aparecen solo en la lectura
+    de un plan (Pregunta 12: PK o `UNIQUE`). No explica por qué el deck los trae.
 - [ ] (crítico) **Propagar los slides 31–38 a [[1.08.02 - Índices|Índices]].** Sus tres huecos ✗
   *("Qué es un B-tree", "Tipos de índice", "Clustered vs. non-clustered")* y su duda (crítico) sobre la
   sintaxis de `CREATE INDEX` / `DROP INDEX` **se cierran con este deck** *(slides 32, 32–37, 33 y 35,
@@ -1467,9 +1567,24 @@ compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *
   `GRANT rol TO usuario` sin `SET DEFAULT ROLE` deja al usuario sin los privilegios del rol; (d) que
   `SELECT @@transaction_isolation;` devuelve `REPEATABLE-READ`. Las cuatro son afirmaciones de esta
   página **hechas desde el manual, no comprobadas en el entorno real**.
+  - (nota) (a) ✓ verificado en MySQL 9.7.2: `CREATE INDEX … USING HASH` sobre una tabla InnoDB se
+    acepta sin error y `SHOW INDEX` devuelve `Index_type = BTREE`; con `ENGINE=MEMORY` sí queda
+    `HASH` → [[Final 1Jul2025]] § *Pregunta 1*.
+  - (nota) (c) ✓ verificado en MySQL 9.7.2 *(`activate_all_roles_on_login = 0`, el valor por
+    defecto)*: tras `GRANT 'rol' TO 'u'@'%'` sin `SET DEFAULT ROLE`, el usuario conectado obtiene
+    `CURRENT_ROLE()` = `NONE` y un `SELECT` sobre la tabla concedida al rol da `ERROR 1142 … SELECT
+    command denied`; después de `SET ROLE 'rol'` el mismo `SELECT` pasa.
+  - (nota) (d) ✓ verificado en MySQL 9.7.2: `SELECT @@transaction_isolation;` → `REPEATABLE-READ`
+    → [[MySQL]] § *8.5*.
+  - (abierto) Solo (b) sigue sin verificar: exige conectarse desde el host anfitrión, fuera del
+    contenedor.
 - [ ] (crítico) **¿`REPEATABLE READ` de InnoDB evita los phantoms o no, para lo que pregunta la
   cátedra?** Si el parcial pide *"nivel mínimo que evita phantoms"*, la respuesta del slide es
   `SERIALIZABLE` y la de MySQL es `REPEATABLE READ`. Preguntar cuál se espera.
+  - (nota) Evidencia de exámenes viejos: ningún examen del vault pregunta el caso de InnoDB. La guía
+    de estudiantes [[Repaso Final BD 2]] (Ejercicio 18) responde con la tabla clásica del estándar
+    (`REPEATABLE READ` permite phantoms; solo `SERIALIZABLE` los evita), sin nombrar un motor. Es
+    material de estudiantes, no de la cátedra.
 - [ ] **¿La *"matriz de roles y permisos"* del cronograma se dio oralmente?** El deck no tiene ninguna
   matriz. Si en clase se dibujó una tabla `rol × permiso`, vale reconstruirla desde las
   notas del humano.
@@ -1481,15 +1596,24 @@ compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *
 - [ ] **¿Deadlocks, 2PL y recuperación entran?** Ninguno está en el deck; los tres están en GMUW
   *(18.3.3, 19.2, cap. 17)* y en Date *(16.5, cap. 15)*. El slide 15 nombra *"control de la
   concurrencia"* como causa de fallo, que presupone deadlocks.
+  - (nota) La recuperación tiene deck propio, del mismo 07/09:
+    [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] (write-ahead logging, ARIES y su
+    implementación en PostgreSQL y MySQL/InnoDB). Deadlocks y 2PL siguen sin deck. Evidencia de
+    exámenes viejos: la Pregunta 3 de [[Final 1Dic2025]] (V/F de concurrencia) toma shared y
+    exclusive lock y timestamp ordering, pero no deadlocks ni 2PL.
 - [ ] **Este deck tampoco declara bibliografía** *(como el 10; el 09 sí lo hacía)*. ¿La cátedra asume
   GMUW y Date para estos temas, o hay que conseguir Elmasri? Afecta al mapeo de
   [[_index-bibliografia]] › Clase 11.
 - [ ] **La previsión de [[1.06.01 - Vistas|Vistas]] § *Enlaces*** —*"seguridad (07/09, vistas como
   control de acceso) → todavía sin material"*— **falló**: el deck no nombra las vistas. Corregir esa
   línea y dejar la duda: ¿`GRANT SELECT ON vista` se da por sabido, o no entra?
+  - (nota) Evidencia de exámenes viejos: la Pregunta 32 de [[Parcial 2Q2025]] § *Sección E* otorga
+    `SELECT` sobre dos **vistas** (`CS` y `CSV`) dentro de la misma cadena de `GRANT`, sin
+    explicarlo: en 2025 se daba por sabido. Indicio, no confirmación para 2026.
 
 ## Enlaces
 
+- Segundo deck de esta misma clase *(07/09)*: [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] — recovery, WAL y ARIES
 - Clase anterior: [[Clase 10 - Restricciones integridad-Parte 2]] *(31/08)* · clase siguiente:
   [[Clase 12 - Introduccion a NoSQL]] *(14/09 — arranca la segunda mitad y la `Unidad-02`)*
 - Práctica de esa semana (martes 08/09): **[[Práctica 2026-09-08]]** — TP 8 Seguridad
@@ -1499,8 +1623,9 @@ compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *
 - Conceptos que **nacen** en esta clase *(nombres previstos; los fija la etapa de conceptos)*:
   [[1.11.01 - Seguridad en bases de datos|Seguridad en bases de datos]] ·
   [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y roles]] ·
-  [[1.11.03 - Transacciones y ACID|Transacciones y ACID]] *(hoy el vault linkea
-  `[[Transacciones ACID]]` desde trece lugares: conviene que sea alias)* ·
+  [[1.11.03 - Transacciones y ACID|Transacciones y ACID]] *(hoy el vault linkea esta página sin
+  alias, al nombre desnudo "Transacciones ACID", desde trece lugares: conviene revisarlos y ponerles
+  alias)* ·
   [[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia y niveles de aislamiento]]
 - Conceptos que esta clase **reencuadra**: [[1.08.02 - Índices|Índices]] *(slides 31–38: B-tree vs.
   hash, clustered, multinivel, DDL — cierra tres huecos y una duda de esa página)* ·
@@ -1513,6 +1638,8 @@ compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *
   `REPEATABLE READ`, `FOR UPDATE`, `USING HASH`)* · [[PostgreSQL]] § *Inventario* *(fila del deck 11:
   slide 30, y el `drop index` sin `ON` del 35)* · [[MongoDB]] *(lo que sigue: qué pasa con ACID cuando
   no hay transacciones — Seven Databases 2ª ed. A1, tabla 6, *Transactions · Triggers · Security*)*
+- Material complementario del 07/09: § arriba — grafo de permisos con `REVOKE … CASCADE`, corrido en
+  MySQL (confirma el error de sintaxis y el privilegio huérfano que deja)
 - Bibliografía verificada contra las fichas: GMUW **6.6** *(Transactions in SQL, 296–306)* ·
   **10.1** *(Security and User Authorization, 425–436)* · **17.1** *(Failure Modes y primitivas,
   843–850)* · **18.3–18.9** *(locks, timestamps, validación, 897–947)* · **19.2** *(Deadlocks, 966)* ·
@@ -1523,3 +1650,5 @@ compilar)*, aquí casi ninguna rompe código, pero **cuatro son conceptuales** *
   *(314)*, **A2** *(315–318)* — Corbellini **§ 3.1–3.2** *(CAP, ACID y BASE, pp. 4–7)*
 - Índice de clases: [[_index-clases]] · bibliografía: [[_index-bibliografia]] ·
   calendario: [[_cronograma]] · reglas del vault: [[CLAUDE]]
+- Exámenes viejos: [[Mapa de exámenes]] *(grafo de `GRANT`/`REVOKE` en SQL estándar, concurrencia y
+  aislamiento, hash vs. B-tree)*

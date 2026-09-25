@@ -26,6 +26,8 @@ aliases:
   - Disparadores
 fuentes:
   - "raw/Unidad-01/Teorica/BD2_Clase 09 - Restricciones integridad-Parte 1.pdf"
+  - "raw/Unidad-01/Teorica/Ejercicios de RI/Ejercicio 1 - RIR.png"
+  - "raw/Unidad-01/Teorica/Ejercicios de RI/Ejercicio 2 - RIR.png"
 estado: procesado
 ---
 
@@ -35,28 +37,27 @@ estado: procesado
 
 Una **restricción de integridad (RI)** es una condición que los datos deben cumplir para que la
 instancia de la base sea *legal*: el DBA la declara y el SGBD la fuerza, rechazando la operación o
-reparándola. El deck (39 slides, teórica del lunes 24/08) recorre tres capas: qué es una RI y cómo
-se clasifica *(slides 2–5)*; las RI que ya se usaban sin nombrarlas —`NOT NULL`, `UNIQUE`,
-`PRIMARY KEY` y sobre todo la **integridad referencial**, con cinco acciones y tres tipos de
-matching *(slides 6–14)*—; y la jerarquía declarativa **atributo → tupla → tabla → base de datos**,
-con `CREATE DOMAIN`, `CHECK` de registro, `CHECK` de tabla y `CREATE ASSERTION` *(slides 15–24)*.
-El tercio final *(slides 16, 25–38)* es **triggers**, que el cronograma ubica una semana después: el
+reparándola. El deck (39 slides, teórica del 24/08) recorre tres capas: clasificación de RI
+*(slides 2–5)*; las RI ya usadas sin nombrarlas —`NOT NULL`, `UNIQUE`, `PRIMARY KEY`— y la
+**integridad referencial**, con cinco acciones y tres tipos de matching *(slides 6–14)*; y la
+jerarquía declarativa **atributo → tupla → tabla → base de datos**, con `CREATE DOMAIN`, `CHECK` de
+registro, `CHECK` de tabla y `CREATE ASSERTION` *(slides 15–24)*. El tercio final *(slides 16, 25–38)* es **triggers**, que el cronograma ubica una semana después: el
 TP6 del 25/08, *Restricciones declarativas*, no los usa.
 
-Lo que se cobra en el TP6 y en el parcial. Las acciones referenciales se disparan sobre la tabla
-**referenciada**, nunca sobre la referenciante; `RESTRICT` se evalúa antes de las reparaciones y
+Las acciones referenciales se disparan sobre la tabla **referenciada**, nunca sobre la
+referenciante; `RESTRICT` se evalúa antes de las reparaciones y
 `NO ACTION` al final, y ante dos reglas en conflicto manda la restrictiva. El matching solo importa
 con una FK **compuesta y nullable**: `SIMPLE` acepta con un solo nulo, `PARTIAL` exige que los no
-nulos coincidan y `FULL` prohíbe la mezcla. El ámbito de una restricción se decide **contando tablas
-y filas**: una tabla y una fila es tupla; una tabla y varias filas es tabla; varias tablas es
-assertion. Un `CHECK` se cumple con VERDADERO **o DESCONOCIDO**, así que `NULL` pasa; el `WHEN` de un
-trigger dispara solo con VERDADERO. Y un trigger **no es una RI** ni valida los datos ya cargados: se
-usa solo cuando lo declarativo no alcanza.
+nulos coincidan y `FULL` prohíbe la mezcla. El ámbito se decide **contando tablas y filas**: una
+tabla-una fila es tupla; una tabla-varias filas es tabla; varias tablas es assertion. Un `CHECK`
+se cumple con VERDADERO **o DESCONOCIDO** —`NULL` pasa—; el `WHEN` de un trigger dispara solo con
+VERDADERO. Un trigger **no es una RI** ni valida lo ya cargado: se usa cuando lo declarativo no
+alcanza.
 
-El deck está escrito contra **PostgreSQL** y la cursada corre sobre **MySQL**, donde no existen
-`CREATE DOMAIN`, `MATCH`, `SET DEFAULT`, `FOR EACH STATEMENT`, `INSTEAD OF` ni `WHEN`. Y el corte
-que define el ejercicio 3.c del TP6 no es de MySQL: **de ámbito tabla para arriba se va a trigger en
-cualquier motor**, porque ninguno acepta una subconsulta en un `CHECK` ni implementa `ASSERTION`.
+El deck es de **PostgreSQL**; en **MySQL** no existen `CREATE DOMAIN`, `MATCH`, `SET DEFAULT`,
+`FOR EACH STATEMENT`, `INSTEAD OF` ni `WHEN`. El corte del TP6 3.c vale en cualquier motor: **de
+ámbito tabla para arriba se va a trigger**, porque ninguno acepta subconsulta en `CHECK` ni
+implementa `ASSERTION`.
 
 ## Fuente, alcance y motor
 
@@ -67,6 +68,9 @@ cualquier motor**, porque ninguno acepta una subconsulta en un `CHECK` ni implem
 > Clase anterior: [[Clase 08 - Explicando el plan]] *(del 10/08 — el lunes 17/08 fue feriado)*.
 > Se practica con el **TP6 Restricciones declarativas** del martes 25/08 → [[Práctica 2026-08-25]].
 > Bibliografía: [[_index-bibliografia]] › Clase 09. Qué archivo es de qué clase: [[_index-clases]].
+> El § *Material complementario del 25/08* documenta además los **dos PNG sin número de clase**
+> archivados junto al deck: dos ejercicios de restricciones (`Ejercicio 1 - RIR.png`,
+> `Ejercicio 2 - RIR.png`). No son clases y por eso no tienen página propia.
 
 > [!warning] (crítico) Un tercio del deck son triggers, y la *Parte 2* es **otra clase**
 > **13 de los 39 slides** (el 16 y los 25 a 38) son **triggers**: sintaxis, granularidad,
@@ -439,6 +443,9 @@ Razonamiento propio (el slide plantea el ejercicio y no lo resuelve). Los dos em
 > no lo implementa.
 > 3. **`SET NULL` sobre `UPDATE`**: el empleado **pierde el área**, no la sigue. `CASCADE` mantiene
 > el vínculo, `SET NULL` lo rompe; tiene sentido en `ON DELETE`, no en `ON UPDATE`.
+
+> [!figura] lab-acciones-referenciales
+> Pruebe las operaciones del slide con cada acción referencial y compare el resultado con esta tabla.
 
 ---
 
@@ -1302,6 +1309,206 @@ castellano.
 
 ---
 
+## Material complementario del 25/08 (sin número de clase)
+
+> [!info] Dos PNG archivados junto al deck, **sin `BD2_Clase NN` en el nombre**
+> `raw/Unidad-01/Teorica/Ejercicios de RI/Ejercicio 1 - RIR.png` y `Ejercicio 2 - RIR.png`, en una
+> carpeta *Ejercicios de RI* publicada en el campus el **25/08**, la fecha de esta clase. No son
+> clases: no llevan número de la cátedra ni portada. Se documentan aquí, junto al deck de la fecha
+> con la que se publicaron.
+>
+> (atención) Pese al nombre de la carpeta —*RI*, y el propio deck usa la sigla **RIR**—, **ninguno de
+> los dos ejercicios traza acciones referenciales** (`CASCADE` / `SET NULL` / …): los dos piden un
+> `CHECK`, uno de fila y otro de tabla — el tema de los **slides 15–22 de esta misma clase**, no el de
+> los slides 7–14. El ejercicio clásico de trazar `RESTRICT`/`CASCADE`/`SET NULL` sobre FKs ya está
+> resuelto, con dos esquemas completos, en **[[Práctica 2026-08-25]]** (TP6, ejercicios 1 y 2).
+
+### (a) `Ejercicio 1 - RIR.png` — CUENTA: restricción de fila según el tipo
+
+> [!quote] Enunciado, textual
+> *"Una aplicación bancaria registra cuentas:"*
+> ```
+> CUENTA(
+>   numero,
+>   tipo,
+>   saldo,
+>   limiteDescubierto
+> )
+> ```
+> *"Los tipos posibles son:"* `CAJA_AHORRO` · `CUENTA_CORRIENTE`
+>
+> *"Reglas:"*
+> - *"Toda cuenta debe tener saldo."*
+> - *"Una caja de ahorro no puede tener saldo negativo."*
+> - *"Una cuenta corriente puede tener saldo negativo hasta el límite de descubierto especificado."*
+> - *"`limiteDescubierto` nunca puede ser negativo."*
+
+Las cuatro reglas miran **una sola fila**, nunca comparan contra otra tupla ni agregan sobre la
+tabla: caen en el **nivel 2** de la jerarquía de esta clase (`CHECK` de registro, slide 20). **No hay
+ninguna FK en el enunciado** — es, de los dos, el que más se aleja de lo que el nombre de la carpeta
+sugiere.
+
+**Resolución del vault**, corrida en MySQL 9.7.2 (*(propuesta propia, tipos de
+dato incluidos: el enunciado no los da, igual que el ejemplo del slide 11)*):
+
+```sql
+CREATE TABLE cuenta (
+  numero INT PRIMARY KEY,
+  tipo ENUM('CAJA_AHORRO','CUENTA_CORRIENTE') NOT NULL,
+  saldo DECIMAL(12,2) NOT NULL,
+  limiteDescubierto DECIMAL(12,2),
+  CONSTRAINT chk_limite_no_negativo
+    CHECK (limiteDescubierto IS NULL OR limiteDescubierto >= 0),
+  CONSTRAINT chk_saldo_segun_tipo
+    CHECK (
+      (tipo = 'CAJA_AHORRO' AND saldo >= 0)
+      OR (tipo = 'CUENTA_CORRIENTE' AND saldo >= -limiteDescubierto)
+    )
+);
+```
+
+`saldo NOT NULL` resuelve *"toda cuenta debe tener saldo"*; las otras tres reglas quedan en los dos
+`CHECK`. Siete inserciones de prueba, con el resultado **real** del motor:
+
+| # | Insert | Resultado real |
+| ---: | --- | --- |
+| 1 | Caja de ahorro, saldo 500 | ✓ acepta |
+| 2 | Caja de ahorro, saldo −50 | ✗ `Check constraint 'chk_saldo_segun_tipo' is violated` |
+| 3 | Cuenta corriente, saldo −200, límite 300 | ✓ acepta |
+| 4 | Cuenta corriente, saldo −400, límite 300 | ✗ rechaza — excede el límite |
+| 5 | Cuenta corriente, límite −10 | ✗ `Check constraint 'chk_limite_no_negativo' is violated` |
+| 6 | Cuenta corriente, saldo −100, límite `NULL` | ✓ acepta |
+| 7 | Caja de ahorro, saldo 0 | ✓ acepta |
+
+Estado final de la tabla (las cuatro que pasaron):
+
+```
+numero  tipo              saldo    limiteDescubierto
+1       CAJA_AHORRO       500.00   NULL
+3       CUENTA_CORRIENTE  -200.00  300.00
+6       CUENTA_CORRIENTE  -100.00  NULL
+7       CAJA_AHORRO       0.00     NULL
+```
+
+> [!warning] El caso 6 es el que hay que saber explicar
+> Una cuenta corriente con saldo negativo y **sin** `limiteDescubierto` **es aceptada**: con
+> `limiteDescubierto IS NULL`, `saldo >= -limiteDescubierto` evalúa `DESCONOCIDO`, y un `CHECK` pasa
+> con VERDADERO **o** DESCONOCIDO — la misma regla de nulos de esta clase (slide 17: *"la condición
+> debe evaluar como VERDADERA o DESCONOCIDA"*). El enunciado dice *"hasta el límite… especificado"*, y
+> sin límite especificado la restricción, tal como está escrita, no frena nada. Si la intención es
+> exigir el límite antes de permitir saldo negativo, hace falta agregar
+> `AND limiteDescubierto IS NOT NULL` a la rama de cuenta corriente — *(propuesta propia; el
+> enunciado no lo aclara)*.
+
+### (b) `Ejercicio 2 - RIR.png` — PROYECTO/ASIGNACION: restricción de tabla (cardinalidad)
+
+> [!quote] Enunciado, textual
+> *"Se dispone de:"*
+> ```
+> PROYECTO(
+>   idProyecto,
+>   nombre
+> )
+>
+> ASIGNACION(
+>   idEmpleado,
+>   idProyecto,
+>   fechaDesde,
+>   fechaHasta
+> )
+> ```
+> *"Una asignación se considera activa cuando:"* `fechaHasta IS NULL`
+>
+> *"La organización establece: Un empleado no puede participar simultáneamente en más de tres
+> proyectos activos."*
+>
+> *"Preguntas: 1. ¿Puede resolverse con `NOT NULL`? 2. ¿Puede resolverse con `UNIQUE`? 3. ¿Puede
+> resolverse mediante un `CHECK` convencional de MySQL?"*
+
+A diferencia de (a), aquí **sí** hay una FK — `ASIGNACION.idProyecto → PROYECTO.idProyecto` —, pero lo
+que se pregunta no es sobre ella: es *"no más de 3 activas por empleado"*, el mismo patrón que *"no
+más de 30 empleados por área"* del slide 22 de esta clase. Mira **varias filas de una sola tabla**
+(`ASIGNACION`): **nivel 3**, `CHECK` de tabla con subconsulta.
+
+**Respuesta a las tres preguntas del enunciado:**
+
+| Pregunta | Respuesta | Por qué |
+| --- | --- | --- |
+| 1. ¿`NOT NULL`? | No | es una RI de **atributo**: fuerza que un valor esté presente, no cuenta filas |
+| 2. ¿`UNIQUE`? | No | `UNIQUE(idEmpleado, idProyecto)` evita **repetir** una combinación, no limita **cuántas** distintas tiene un empleado a la vez |
+| 3. ¿`CHECK` convencional de MySQL? | No | necesita `SELECT … GROUP BY … HAVING COUNT(*) > 3` — una subconsulta —, y MySQL (como PostgreSQL, slide 22) no la admite dentro de un `CHECK` |
+
+Cae en el corte exacto del slide 22 de esta clase: *"de ámbito tabla para arriba se va a trigger en
+cualquier motor"*. **Resolución del vault**: un trigger sobre `INSERT` y otro sobre `UPDATE` —
+reabrir una asignación cerrada también puede violar la regla, y un solo trigger `BEFORE INSERT` no lo
+vería:
+
+```sql
+CREATE TABLE proyecto (idProyecto INT PRIMARY KEY, nombre VARCHAR(100) NOT NULL);
+CREATE TABLE asignacion (
+  idEmpleado INT NOT NULL, idProyecto INT NOT NULL,
+  fechaDesde DATE NOT NULL, fechaHasta DATE NULL,
+  PRIMARY KEY (idEmpleado, idProyecto, fechaDesde),
+  CONSTRAINT fk_asignacion_proyecto FOREIGN KEY (idProyecto) REFERENCES proyecto(idProyecto)
+);
+
+DELIMITER $$
+CREATE TRIGGER trg_max3_activos_ins BEFORE INSERT ON asignacion
+FOR EACH ROW
+BEGIN
+  DECLARE activos INT;
+  IF NEW.fechaHasta IS NULL THEN
+    SELECT COUNT(*) INTO activos FROM asignacion
+      WHERE idEmpleado = NEW.idEmpleado AND fechaHasta IS NULL;
+    IF activos >= 3 THEN
+      SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un empleado no puede participar simultaneamente en mas de tres proyectos activos';
+    END IF;
+  END IF;
+END$$
+
+-- segundo trigger, misma lógica, cubre el caso "reabrir" (fechaHasta pasa de NOT NULL a NULL):
+-- BEFORE INSERT no lo ve, porque la fila ya existía antes del UPDATE.
+CREATE TRIGGER trg_max3_activos_upd BEFORE UPDATE ON asignacion
+FOR EACH ROW
+BEGIN
+  DECLARE activos INT;
+  IF NEW.fechaHasta IS NULL AND OLD.fechaHasta IS NOT NULL THEN
+    SELECT COUNT(*) INTO activos FROM asignacion
+      WHERE idEmpleado = NEW.idEmpleado AND fechaHasta IS NULL;
+    IF activos >= 3 THEN
+      SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Un empleado no puede participar simultaneamente en mas de tres proyectos activos';
+    END IF;
+  END IF;
+END$$
+DELIMITER ;
+```
+
+Corrido en MySQL 9.7.2 (los dos triggers activos), con resultado real:
+
+| Caso | Operación | Resultado real |
+| --- | --- | --- |
+| 1 | Empleado 1: tres altas activas (proyectos 1, 2, 3) | ✓ acepta las tres |
+| 2 | Empleado 1: cuarta alta activa (proyecto 4) | ✗ `Un empleado no puede participar simultaneamente en mas de tres proyectos activos` |
+| 3 | Cerrar la asignación al proyecto 1 (`UPDATE … SET fechaHasta = …`) y reintentar la cuarta | ✓ acepta — ya hay solo dos activas |
+| 4 | Empleado 2: una cerrada + tres activas | ✓ acepta — la cerrada no cuenta |
+| 5 | Reabrir (`fechaHasta = NULL`) la asignación cerrada del empleado 1, que ya tiene tres activas | ✗ mismo error, disparado por el trigger de `UPDATE` |
+| 6 | `DELETE FROM proyecto WHERE idProyecto = 2` (referenciada, sin `ON DELETE` explícito) | ✗ `Cannot delete or update a parent row: a foreign key constraint fails` |
+
+> [!tip] Por qué la pregunta 2 (`UNIQUE`) es la trampa
+> `UNIQUE(idEmpleado, idProyecto)` parece una respuesta razonable porque también "limita" algo, pero
+> limita la **combinación**, no la **cantidad**: con `UNIQUE`, un empleado sigue pudiendo tener
+> cuatro, cinco o cien asignaciones activas, mientras cada una sea a un proyecto distinto. Es el
+> mismo error de categoría que confundir "de tupla" con "de tabla" en la tabla del slide 15.
+
+> [!note] El caso 6 confirma la acción por defecto de la FK
+> Sin `ON DELETE` explícito, InnoDB rechaza el borrado de la fila referenciada: el default es
+> `NO ACTION` (que en InnoDB se comporta como `RESTRICT`), tal como registra
+> [[1.09.02 - Integridad referencial y acciones referenciales|Integridad referencial y acciones
+> referenciales]] § *Cuadro de bolsillo*. Es la única acción referencial que este ejercicio ejercita
+> — el resto de su restricción no es de FK, es de cardinalidad.
+
 ## Dudas abiertas
 
 - [x] **¿Qué es la *Parte 2*?** Cerrada el 02/09: es la
@@ -1318,6 +1525,14 @@ castellano.
   según la teoría**"*, ej. 1.c; *"aunque MySQL no lo soporta, **responda según la teoría**"*, ej.
   2.b → [[Práctica 2026-09-01]]). Además, la Clase 10 omite `CREATE DOMAIN` en sus slides 14–19 e
   implementa el nivel de atributo con un `CHECK` de columna, que sí corre en MySQL. **Confirmarlo.**
+  - (nota) Evidencia de exámenes viejos: el [[Parcial 2Q2025]] pide las dos capas. La Pregunta 24
+    (§ *Sección D*) pide implementar una restricción de tabla *"teniendo en cuenta SQL estándar
+    primero y luego MySQL"*, y la respuesta de la plataforma es `CHECK` en el estándar y `TRIGGER` en
+    MySQL. La 19 (§ *Sección B*) pide razonar `MATCH` simple, parcial y full sobre una FK compuesta
+    con un `NULL`, cláusula que MySQL no tiene. La 17 y la 30 usan el mismo esquema con
+    `[restrict, cascade]`: la 30 pide la traza de `restrict` y la 17 es la trampa de unicidad de la
+    PK (*"No procede por restricción de unicidad"*).
+    Es un examen de 2025: refuerza la hipótesis, no confirma el parcial del 13/10/2026.
 - [ ] (crítico) **`:new` / `:old` (slide 30) vs. `new.` / `old.` (slide 36)**: el deck se contradice y
   la forma correcta para PostgreSQL y MySQL es la del 36. ¿Cuál se corrige? El slide 17 de la Clase
   10 vuelve a meter Oracle —`months_between(sysdate, fecha_nacimiento)`— en un deck de PostgreSQL:
@@ -1331,7 +1546,17 @@ castellano.
 - [ ] **¿Qué se espera cuando `SET NULL` choca contra una FK `NOT NULL`?** ¿Se rechaza la operación,
   o la definición de la FK ya era ilegal?
 - [ ] **`MATCH PARTIAL`**: ni PostgreSQL ni MySQL lo implementan. ¿Es solo teoría?
+  - (nota) Evidencia de exámenes viejos: la Pregunta 19 de [[Parcial 2Q2025]] § *Sección B* ofrece
+    *"Procede con MATCH simple / parcial / full"* como opciones separadas; la correcta es la de
+    `SIMPLE` (con un componente `NULL`, la FK no se verifica). Se evalúa como teoría del estándar, de
+    lápiz y papel; en MySQL 9.7.2 el mismo `INSERT` procede, porque el motor se comporta como
+    `SIMPLE`. Indicio de 2025, no respuesta para el parcial de 2026.
 - [ ] **¿La `S` final de "RIRS" quiere decir algo?** El TP6 usa `RIR`.
+- [ ] **¿Qué abarca "RIR" en los nombres de la carpeta *Ejercicios de RI*?** `Ejercicio 1 - RIR.png` y
+  `Ejercicio 2 - RIR.png` son ejercicios de `CHECK` de fila y de tabla, no de acciones referenciales
+  (§ *Material complementario del 25/08*). ¿La cátedra usa la sigla en un sentido más amplio que el
+  de este deck, o esa carpeta del campus tiene un tercer archivo, con acciones referenciales, que no
+  está en el vault? Preguntarle al humano.
 - [ ] **Participación total vs. parcial**: el slide 5 la nombra como RI, pero sigue sin definirse la
   notación (desde [[Clase 02 - Modelo Entidad-Relacion]]).
 - [ ] **Sumathi & Esakkirajan (slide 39) sigue sin estar en el vault**; ya la citan dos decks
@@ -1355,5 +1580,8 @@ castellano.
   [[1.05.01 - SQL — consultas|SQL — consultas]] § 11 *(lógica trivaluada)* ·
   [[1.06.01 - Vistas|Vistas]] *(`WITH CHECK OPTION`, `INSTEAD OF`, materializadas)*
 - Motores: [[MySQL]] § *5 · Restricciones e integridad* · [[PostgreSQL]] § *Inventario*
+- Material complementario del 25/08: § arriba — dos ejercicios de `CHECK` (fila y tabla), corridos en
+  MySQL. El ejercicio clásico de acciones referenciales con FKs está en **[[Práctica 2026-08-25]]**
 - Índice de clases: [[_index-clases]] · bibliografía: [[_index-bibliografia]] ·
   calendario: [[_cronograma]]
+- Exámenes viejos: [[Mapa de exámenes]] *(acciones referenciales, `MATCH` y `CHECK` vs. `TRIGGER`)*

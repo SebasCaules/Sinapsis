@@ -1,0 +1,203 @@
+/* ============================================================
+   bdii-lab / css/check-option.css — "Vistas y WITH CHECK OPTION"
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md); prefijo
+   propio `.lab-cko-…`. Colores solo por variables CSS de la plataforma.
+   Sin franjas laterales de acento: el estado se marca con texto, ícono e
+   insignia (ver `lab.css`), nunca solo con un borde de color.
+   ============================================================ */
+
+.bdii-lab .lab-cko-hint {
+  font-size: 0.85em;
+  color: var(--text-3);
+  margin: 4px 0 0;
+}
+
+/* ---------- tabla base editable ---------- */
+
+.bdii-lab .lab-cko-rows .bdii-table-wrap { margin-bottom: 8px; }
+
+.bdii-lab .lab-cko-cell-input {
+  width: 100%;
+  min-width: 6ch;
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-3, var(--border-2));
+  border-radius: var(--r-sm);
+  padding: 4px 6px;
+}
+
+.bdii-lab .lab-cko-row-remove {
+  font-size: 0.82em;
+  padding: 4px 8px;
+}
+
+/* fila rechazada en la matriz de combinaciones: fondo suave, nunca solo color
+   (el texto "✗ rechaza" de la celda ya lo dice). */
+.bdii-lab .lab-cko-row-reject {
+  background: var(--bad-soft, transparent);
+}
+
+/* ---------- tabla base + cadena de vistas, dos columnas ---------- */
+/* Reemplaza a `lab.grid(2, …)` para este par de paneles: igual que `.bdii-grid`
+   pero con `minmax(0, 1fr)` en las DOS columnas (no solo en la que colapsa a
+   una), así el contenido interno (inputs, segmentados) se puede comprimir por
+   debajo de su ancho de contenido en vez de desbordar el panel a 375px. */
+.bdii-lab .lab-cko-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-cko-two-col { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- cadena de vistas ---------- */
+
+.bdii-lab .lab-cko-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bdii-lab .lab-cko-where {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  background: var(--surface-2);
+}
+
+.bdii-lab .lab-cko-where-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+
+.bdii-lab .lab-cko-terms {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  container-type: inline-size;
+  container-name: lab-cko-terms;
+}
+
+.bdii-lab .lab-cko-term {
+  display: grid;
+  grid-template-columns: minmax(9ch, 1.2fr) minmax(9ch, 1fr) minmax(9ch, 1.4fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+/* Panel angosto (la columna "Cadena de vistas" a 1280 px mide ~400 px): Columna y
+   Operador en una fila, Valor en la siguiente y "Quitar término" en la suya, para
+   que los select no queden recortados ("mon…", "LIK"). */
+@container lab-cko-terms (max-width: 520px) {
+  .bdii-lab .lab-cko-term { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .bdii-lab .lab-cko-term > :nth-child(3) { grid-column: 1 / -1; }
+  .bdii-lab .lab-cko-term > :nth-child(4) { grid-column: 1 / -1; justify-self: start; }
+}
+
+@container lab-cko-terms (max-width: 300px) {
+  .bdii-lab .lab-cko-term { grid-template-columns: minmax(0, 1fr); }
+}
+
+.bdii-lab .lab-cko-and {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-3);
+  text-align: center;
+}
+
+/* ---------- operación ---------- */
+
+.bdii-lab .lab-cko-op-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px 14px;
+  align-items: end;
+  margin-bottom: 10px;
+}
+
+.bdii-lab .lab-cko-values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+/* ---------- resultado ---------- */
+
+.bdii-lab .lab-cko-matrix-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bdii-lab .lab-cko-result,
+.bdii-lab .lab-cko-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---------- retos ---------- */
+
+.bdii-lab .lab-cko-retos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bdii-lab .lab-cko-diff-list {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+}
+
+/* ---------- responsive: usable a 375px ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-cko-term { grid-template-columns: minmax(0, 1fr); }
+  .bdii-lab .lab-cko-op-grid { grid-template-columns: minmax(0, 1fr); }
+  .bdii-lab .lab-cko-values { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- figura compacta: una fila por vista ---------- */
+
+.bdii-lab .lab-cko-fig-view {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.bdii-lab .lab-cko-fig-view:last-child { border-bottom: none; }
+
+.bdii-lab .lab-cko-fig-def {
+  margin: 0;
+  flex: 1 1 260px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-2);
+}
+
+.bdii-lab.bdii-lab--figure .lab-cko-chain { gap: 0; }
+
+/* El rótulo del segmentado repite el nombre de la vista que ya se lee a la
+   izquierda: queda para el lector de pantalla y se oculta a la vista. */
+.bdii-lab .lab-cko-fig-view .bdii-field-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.bdii-lab .lab-cko-errline { overflow-wrap: anywhere; font-size: 0.9em; }

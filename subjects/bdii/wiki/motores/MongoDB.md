@@ -26,6 +26,12 @@ fuentes:
   - "raw/Unidad-02/Teorica/Diferencia_Sharding_Replication_MongoDB.pdf"
   - "raw/Unidad-02/Teorica/Ejemplo_MapReduce_MongoDB.pdf"
   - "raw/Unidad-02/Practica/ITBA TP 9 - MongoDB Parte I.pdf"
+  - "raw/Unidad-02/Practica/ITBA TP 9 - MongoDB Parte II.pdf"
+  - "raw/Unidad-02/Practica/egresados.csv"
+  - "raw/Unidad-02/Practica/mongoCities_fixed.json"
+  - "raw/Examenes_Viejos/Drive bd2 (4to año 2Q)/Parciales viejos/Parcial_BDII_2Q2025_reconstruido(1).pdf"
+  - "raw/Examenes_Viejos/Drive bd2 (4to año 2Q)/Parciales viejos/Parcial_BDII_2Q2025_reconstruido.pdf"
+  - "raw/Examenes_Viejos/Drive 72.41 - BDII - Examenes Viejos/BDII - Parcial 2Q2025.docx"
   - "raw/Material_Catedra/bibliografia/obligatoria/Perkins, Redmond y Wilson - Seven Databases in Seven Weeks (2ed, 2018).pdf"
   - "raw/Material_Catedra/bibliografia/papers/Corbellini et al (2017) - Persisting big-data, The NoSQL landscape.pdf"
   - "raw/Material_Catedra/programa/Cronograma 2026-2C.pdf"
@@ -50,11 +56,12 @@ transcriben la API del shell legado `mongo` (`insert`, `count`, `update({multi:t
 acepta casi todo eso con `DeprecationWarning` y rechaza un puñado de casos. El deck 14 declara la
 versión estable 6.0.5, pero `docker pull mongo` sin tag trae la rama 8.x. Para el parcial y el TP
 conviene recordar: `.pretty()` ya no hace nada; `count()` sin filtro puede ser aproximado
-(`countDocuments()` es la forma exacta); `ensureIndex` no está en la referencia actual
-(`createIndex` es su reemplazo mecánico); el binario `mongo` fue retirado en la versión 6.0; y la
-atomicidad es siempre por documento, aunque existan transacciones multi-documento desde 4.0/4.2.
-Anotar `db.version()` al empezar cualquier ejercicio es el hábito que evita la mayoría de las
-sorpresas.
+(`countDocuments()` es la forma exacta); `ensureIndex` ya no está en la referencia oficial pero
+sigue corriendo sin advertencia; el binario `mongo` fue retirado en la versión 6.0; y la atomicidad es siempre por documento, aunque
+existan transacciones multi-documento desde 4.0/4.2. Anotar `db.version()` al empezar cualquier
+ejercicio es el hábito que evita la mayoría de las sorpresas. El [[Parcial 2Q2025|parcial del
+2Q2025]] evaluó `mapReduce` deprecado y tomó **CP** como esquina CAP de MongoDB —la del deck, no la
+de Corbellini—: indicio para 2026, no confirmación.
 
 ---
 
@@ -118,6 +125,17 @@ según `pdfinfo`)*. Pero el TP no la instala:
 > enseñan los decks *(`insert`, `count`, `update`, `remove`, `ensureIndex`, `mapReduce`)* sigue
 > existiendo en 8.x con advertencia; lo que **no** existe es el binario `mongo` *(ver § 7 de la
 > tabla de diferencias)*.
+
+> [!note] Confirmado de nuevo el 25/09/2026, en una corrida distinta
+> [[Práctica 2026-09-22|TP9 Parte II]] corrió contra otro contenedor descartable y anotó `db.version()`
+> al empezar, como recomienda esta página: **8.3.11**, con `mongosh` **2.11.1**. Coincide con la rama
+> reportada el 16/09 en Docker Hub. La [[Práctica 2026-09-15|Parte I]] del 15/09 **no** aporta una
+> tercera lectura: quedó resuelta en papel, sin correr contra ningún motor *(la propia página lo dice
+> en su tabla de estado y en sus dudas abiertas)*. Hay entonces dos evidencias, no tres: una lectura de
+> la documentación de Docker Hub (16/09) y una corrida real contra el motor (25/09), ambas en la rama
+> **8.x**, ninguna en el 6.0.5 que declara el deck. Sigue sin confirmarse qué versión exacta bajó el
+> `docker pull mongo` de cada alumno en su propia fecha — eso solo lo dice el `db.version()` de cada
+> máquina.
 
 > [!note] La documentación actual de `mongosh` declara soporte para servidores **7.0 o superiores**
 > La página de instalación de `mongosh` dice hoy *"You can use the MongoDB Shell to connect to
@@ -228,6 +246,47 @@ docker exec -it Mymongo bash  # como dice el TP; adentro: mongosh, mongoimport, 
 > `-e MONGO_INITDB_ROOT_USERNAME`/`PASSWORD` y `-v mongo_data:/data/db` existen en la imagen
 > oficial *(ampliación propia)*.
 
+### Carga masiva con `mongoimport`
+
+> [!info] Fuente
+> [[Práctica 2026-09-22|TP9 Parte II]], ejercicios 4 y 5: la primera vez que el material de la
+> cursada usa `mongoimport` para traer datos externos, en vez de tipear `insertOne`/`insertMany` a
+> mano como en el resto del TP9. `mongoimport` viene incluido en la imagen `mongo` junto con
+> `mongosh` *(Database Tools de MongoDB)*.
+
+```bash
+# copiar el archivo al contenedor primero (mismo patrón que docker cp del § anterior)
+docker cp <archivo> Mymongo:/<archivo>
+
+# CSV con encabezado: --type csv --headerline
+docker exec Mymongo mongoimport --db academica --collection egresados \
+  --type csv --headerline --file /egresados.csv
+
+# NDJSON (un documento JSON por línea, no un arreglo): sin flag de tipo adicional
+docker exec Mymongo mongoimport --db lab --collection cities \
+  --file /mongoCities_fixed.json
+```
+
+| Parámetro | Qué hace |
+| --- | --- |
+| `--db` / `--collection` | destino de la carga; los crea si no existen |
+| `--type csv --headerline` | interpreta el archivo como CSV y usa la primera fila como nombres de campo |
+| sin `--type` | `mongoimport` detecta JSON por defecto; espera **un documento por línea** *(NDJSON)*, no un arreglo `[ … ]` |
+
+**Salida real de las dos cargas** *(verificado 25/09/2026, servidor descartable)*:
+
+| Archivo | Filas/líneas | Documentos importados | Fallidos |
+| --- | ---: | ---: | :---: |
+| `egresados.csv` *(6 columnas: `legajo, nivel, titulo, colacion, promedio, promedio_lineal`)* | 8223 | **8223** | 0 |
+| `mongoCities_fixed.json` *(NDJSON)* | 99838 | **99838** | 0 |
+
+> [!tip] `mongoimport` tipa automáticamente los valores numéricos de un CSV
+> Sin declarar ningún esquema, `mongoimport --type csv --headerline` sobre `egresados.csv` tipó
+> cada valor por separado: `legajo` es `int` en los 8223 documentos; `colacion`, `int` en 8222 y cadena
+> vacía en uno; `promedio` y `promedio_lineal`, `double` en 3079 y cadena vacía `""` en 5144; `titulo`
+> y `nivel` son string. El tipo es por valor, no por columna: una celda vacía queda como `""`. Es lo más cercano que tiene Mongo a la inferencia de tipos que un `LOAD DATA INFILE` de
+> MySQL exigiría declarar antes, vía `CREATE TABLE` → contraste con [[MySQL]].
+
 ---
 
 ## Qué TPs corren sobre MongoDB
@@ -237,7 +296,7 @@ Serie real según [[_cronograma]] y `raw/tp/_index.md`:
 | TP | Tema | Práctica donde se da | Teóricas que lo sustentan | ¿Toca MongoDB? |
 | --- | --- | --- | --- | --- |
 | **TP9 Parte I** | MongoDB Parte I | **[[Práctica 2026-09-15]]** | Clases **12**, **13** y **14** *(lunes 14/09)* | ✓ **entero**, en `mongosh`. 34 pasos guiados *(CRUD, selectores, `$regex`, `$set`/`$inc`/`$push`, upsert, proyección, `sort`/`limit`/`skip`, subdocumentos, índices, `explain`)* + 11 ejercicios sobre `bandas`. Los ejercicios **10 y 11** piden `createView` y `$group`, que los 34 pasos no enseñan |
-| **TP9 Parte II** | MongoDB Parte II | martes 22/09 *(sin teórica el lunes 21/09, Día del Estudiante)* | pendiente | ✓ presumiblemente; **el enunciado no está en `raw/`** y esta página no predice su contenido |
+| **TP9 Parte II** | MongoDB Parte II | **[[Práctica 2026-09-22]]** *(martes 22/09, sin teórica el lunes 21/09, Día del Estudiante)* | Clases **12**, **13** y **14** *(las mismas de la Parte I, no hay deck nuevo)* | ✓ **entero**, en `mongosh` contra un servidor real. Ocho ejercicios: `towns` y los Do.2–Do.5 del *Day 1*, tipo de índice default y automático, `explain()` vs. `EXPLAIN` de MySQL, `mongoimport` de `egresados.csv` y `mongoCities_fixed.json` con `aggregate()`, índice `2d` y consulta geoespacial, dos SQL traducidos a `aggregate` sobre `bandas`, fortalezas/debilidades y clasificación CAP |
 | Consigna *ecommerce* *(sin número de TP)* | agregaciones sobre `clientes` / `productos` / `ordenes` | material complementario del 14/09 | Clase 14 | ✓ cinco preguntas de `aggregate`; la solución oficial usa `$lookup` y `$unwind`, que el deck 14 no enseña *(`$lookup` está en las Clases 12 —slide 49— y 13 —slides 22–24—; `$unwind` solo se nombra en la lista del slide 21 de la Clase 13)* → [[Clase 14 - MongoDB Features]] § Material complementario |
 | **TP10**–**TP13** | Cassandra · Neo4j · Redis · DynamoDB | segunda mitad | pendiente | ✗ otros motores |
 
@@ -253,7 +312,8 @@ Serie real según [[_cronograma]] y `raw/tp/_index.md`:
 La Clase 14 trabaja con colecciones que **no vienen en el vault**: `towns` *(Portland, New York,
 Punxsutawney — del libro)*, `phones` *(100.000 documentos generados con un script del libro)*,
 `internos` *(importada con `mongoimport … --type tsv < internos.tsv`, 289 documentos)*,
-`egresados`, `testing`, `hospitales` y `elecciones-2019`. Ninguno está en `raw/`; los ejemplos se
+`egresados`, `testing`, `hospitales` y `elecciones-2019`. Ninguno está en `raw/`, salvo `egresados`:
+`egresados.csv` está en `raw/Unidad-02/Practica/` desde el TP9 Parte II. Los demás ejemplos se
 leen, no se reproducen, salvo el experimento de índices del slide 29, replicable con cualquier
 colección grande → [[2.14.02 - Índices en MongoDB|Índices en MongoDB]].
 
@@ -279,7 +339,7 @@ colección grande → [[2.14.02 - Índices en MongoDB|Índices en MongoDB]].
 | *"especificar un tercer parámetro en true"* *(upsert, prosa)* | TP9 paso 19 | (atención) describe la firma legada `update(q, u, true)` | `updateOne(q, u, {upsert: true})` — como el paso 20 del mismo TP ya lo escribe |
 | `db.users.remove( { status: "D" } )` | Clase 12 slide 32 | (atención) deprecado | `deleteMany( { status: "D" } )` / `deleteOne(…)` |
 | `db.users.count()` · `db.users.find().count()` · `db.internos.count()` · `db.countries.count()` · `db.players.find({hobbies:'Swimming'}).count()` | Clase 12 slide 32 · Clase 14 slides 14, 27, 29, 34 · TP9 paso 27 | (atención) deprecado *(sin filtro puede devolver un valor aproximado, por metadatos)* | `countDocuments(filtro)` *(exacto)* · `estimatedDocumentCount()` *(rápido, sin filtro)*. El slide 14 de la Clase 14 muestra la corrección: `count()` en gris, `countDocuments()` debajo |
-| `db.system.js.save({…})` + `db.loadServerScripts()` | Clase 14 slide 38 | (atención) `save()` deprecado | `db.system.js.insertOne({…})`; el mecanismo entero está en retirada *(ver [[2.14.01 - mongosh y herramientas de línea de comando\|mongosh y herramientas]])* |
+| `db.system.js.save({…})` + `db.loadServerScripts()` | Clase 14 slide 38 | (atención) `save()` deprecado; ✗ `db.loadServerScripts()` **no existe** en `mongosh` 2.11.1 (`TypeError: db.loadServerScripts is not a function`) | `db.system.js.insertOne({…})`; la carga al shell no tiene reemplazo *(ver [[2.14.01 - mongosh y herramientas de línea de comando\|mongosh y herramientas]])* |
 
 Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14 slide 9, TP9)*,
 `deleteOne` *(Clase 14 slide 27)*, `updateOne` / `updateMany` / `deleteMany` / `countDocuments`
@@ -297,24 +357,71 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 | `show tables` | Clase 14 slide 13 | ✓ alias | `show collections` |
 | `printjson(doc)` dentro de `forEach` | Clase 13 slide 27 · Clase 14 slide 28 | ✓ | igual |
 | `find({…}).explain()` · `.explain("executionStats")` | Clase 13 slide 28 · Clase 14 slide 29 · TP9 paso 34 | ✓ | igual; la **forma** de la salida cambia entre ramas mayores *(ver [[1.08.01 - Plan de ejecución\|Plan de ejecución]] § MongoDB)* |
+| *(no está en ningún deck: el `stage` de `explain()` cambia entre versiones)* | — | ✓ nuevo en esta rama | **`EXPRESS_IXSCAN`**: en MongoDB 8.3.11, una búsqueda por igualdad sobre un índice único *(`name = 'Portland'` con índice en `name`)* devuelve este *stage* directamente, sin el `FETCH`/`IXSCAN` que la [[Práctica 2026-09-15\|Parte I]] había anticipado a mano. Es una vía de ejecución más nueva para *point queries* simples; no cambia la lectura del plan *(sigue siendo "usó el índice"), solo el nombre exacto* → [[Práctica 2026-09-22]] § Ejercicio 3, [[1.08.01 - Plan de ejecución\|Plan de ejecución]] § MongoDB |
+
+> [!note] `explain()` vs. `EXPLAIN` de MySQL — comparados de verdad en el TP9 Parte II
+> [[Práctica 2026-09-22]] § Ejercicio 3 corrió la misma consulta (igualdad con índice, y filtro sin
+> índice) en los dos motores. Coinciden en avisar índice vs. *table scan* y en nombrar el índice
+> elegido; difieren en el formato — Mongo siempre da un documento BSON anidado, nunca tabular — y en
+> que Mongo separa `totalKeysExamined` de `totalDocsExamined`, mientras MySQL da una sola cifra
+> (`rows`). Un detalle que corresponde documentar del lado de [[MySQL]], no de esta página: **MySQL
+> 9.7.2 cambió el formato por defecto de `EXPLAIN` a un árbol de texto con sangría** (ya no la tabla de
+> columnas `id`/`select_type`/`type`… que el resto del vault viene usando desde el TP1); la tabla
+> clásica sigue disponible con `EXPLAIN FORMAT=TRADITIONAL`, que fue la que se usó para poder comparar
+> columna por columna en esta práctica. *(No verificado en qué versión exacta de la serie 9.x cambió el
+> default.)*
 
 ### 3 · Índices
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
-| `db.phones.ensureIndex( { display : 1 }, { unique : true } )` · `db.players.ensureIndex({name:1})` · `ensureIndex({name:1},{unique:true})` · `ensureIndex({name:1, weight:1})` | Clase 14 slide 29 · TP9 pasos 30, 32, 33 | (atención) **fuera de la lista de métodos del manual** *(la referencia `js-collection` lista `createIndex`, `createIndexes`, `dropIndex`, `dropIndexes`, `getIndexes`, `hideIndex`, `unhideIndex`, `reIndex`; `ensureIndex` no aparece — verificado 16/09/2026)*. Alias deprecado desde 3.0 | `createIndex(claves, opciones)`, mismos argumentos. **Si en la consola falla con `is not a function`, la corrección es mecánica** |
+| `db.phones.ensureIndex( { display : 1 }, { unique : true } )` · `db.players.ensureIndex({name:1})` · `ensureIndex({name:1},{unique:true})` · `ensureIndex({name:1, weight:1})` | Clase 14 slide 29 · TP9 pasos 30, 32, 33 | (atención) **fuera de la lista de métodos del manual** *(la referencia `js-collection` lista `createIndex`, `createIndexes`, `dropIndex`, `dropIndexes`, `getIndexes`, `hideIndex`, `unhideIndex`, `reIndex`; `ensureIndex` no aparece — verificado 16/09/2026)*. Alias deprecado desde 3.0, pero **corre sin ninguna advertencia impresa** — verificado 25/09/2026 contra MongoDB 8.3.11 / mongosh 2.11.1: `db.towns.ensureIndex({name:1})` crea el índice y devuelve `['name_1']`, con `deprecated: false` en la introspección del propio método → [[Práctica 2026-09-22]] § *Qué del TP está deprecado* | `createIndex(claves, opciones)`, mismos argumentos. **Si en la consola falla con `is not a function`, la corrección es mecánica** |
 | `db.phones.ensureIndex({ "components.area": 1 }, { background : 1 })` | Clase 14 slide 29 | (atención) `background` **ignorado desde 4.2** | `createIndex({ "components.area": 1 })` — todos los índices se construyen sin bloquear |
+| `ensureIndex({…}, { unique: true, dropDups: true })` | libro p. 111 *(no está en los decks de la cursada)* | ✗ `dropDups` es un **no-op** — verificado 25/09/2026: insertar un duplicado y crear el índice único falla igual, con `E11000`, con o sin la opción | no hay reemplazo mecánico: los duplicados se limpian a mano antes de `createIndex({…}, {unique: true})` → [[Práctica 2026-09-22]] § *Qué del TP está deprecado* |
 | `db.players.dropIndex({name:1})` | TP9 paso 31 | ✓ | igual; también por nombre `'name_1'` |
 | `db[collection].getIndexes()` | Clase 14 slide 28 | ✓ | igual |
+
+> [!note] Índice por defecto y único índice automático: **B-tree sobre `_id`**, confirmado dos veces más
+> [[Práctica 2026-09-22|TP9 Parte II]] § Ejercicio 2 corrió `db.towns.getIndexes()` sobre una colección
+> recién creada, antes de pedir ningún índice: `[ { v: 2, key: { _id: 1 }, name: '_id_' } ]` — un único
+> índice, automático, sobre `_id`. La misma pregunta apareció, casi textual, en [[Parcial 2Q2025]]
+> (Sección G, pregunta 9: *"¿Cuál es el tipo de índice default que maneja MongoDB? ¿Hay índices
+> creados por default…?"*), con la misma respuesta — **B-Tree, sí, sobre `_id`**— y la misma corrida
+> de verificación (`getIndexes()`) del lado del vault.
+> El tipo `2d`/geoespacial que nombra la p. 110 del libro no es "default": hay que crearlo
+> explícitamente, como en el ejercicio 5 de la Parte II.
+
+> [!note] Índice `2d` y consulta geoespacial — la única vez que el material lo pide
+> [[Práctica 2026-09-22|TP9 Parte II]] § Ejercicio 5 crea `db.cities.createIndex({ location: "2d" })`
+> sobre las 99.838 ciudades de `mongoCities_fixed.json` y resuelve *"ciudades a 50 millas de
+> Londres"* con `$geoWithin`/`$centerSphere` *(el operador vigente para radios con índice `2d`;
+> `$geoNear` exige ser la primera etapa de un `aggregate`, y acá alcanza con un `find`)*: **297**
+> ciudades, verificado contra vecinos geográficos reales de Londres. El hallazgo que hay que tener
+> presente si se reusa ese dataset: **no tiene un orden fijo de `[lon, lat]` vs. `[lat, lon]` entre
+> países** — Londres, Portland (US), Buenos Aires y Sídney están en `[lon, lat]`, pero Andorra la
+> Vella, París, Tokio y Moscú están en `[lat, lon]`, el orden que sí usa el ejemplo del libro
+> *(Portland, p. 130)*. Una consulta geoespacial escrita para el Reino Unido no falla; la misma
+> consulta centrada en una ciudad europea continental sí correría el riesgo de invertir el orden sin
+> avisar → detalle completo en [[Práctica 2026-09-22]] § Ejercicio 5.
 
 ### 4 · Agregación y MapReduce
 
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
 | `db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}])` | Clase 12 slide 47 | ✓ *(solo la salida está vieja)* | igual |
-| `db.posts.aggregate([{ $lookup: { from: "comments", localField: "title", foreignField: "postTitle", as: "comments" } }])` | Clase 12 slide 49 *(posts/comments)*. La Clase 13 slide 23 trae el mismo operador con otro ejemplo: `db.orders.aggregate([{ $lookup: { from: "inventory", localField: "item", foreignField: "sku", as: "inventory_docs" } }])` | ✓ *(desde 3.2)* | igual. **No está en *Seven Databases* cap. 4** *(cero ocurrencias, verificado en la Clase 13)* |
+| `db.posts.aggregate([{ $lookup: { from: "comments", localField: "title", foreignField: "postTitle", as: "comments" } }])` | Clase 12 slide 49 *(posts/comments)*. La Clase 13 slide 23 trae el mismo operador con otro ejemplo: `db.orders.aggregate([{ $lookup: { from: "inventory", localField: "item", foreignField: "sku", as: "inventory_docs" } }])` | ✓ *(desde 3.2)* | igual. **No está en *Seven Databases* cap. 4** *(cero ocurrencias, verificado en la Clase 13)*. (atención) Un campo ausente se compara como `null` y `null` empareja con `null`: una orden sin `item` empareja con `sku: null` y con `sku` ausente, al revés que el `NULL = NULL` de SQL → [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] § *Slides 21–25* (slides 22–24; verificado en MongoDB 8.3.11) |
 | `db.runCommand({ mapReduce: 'phones', map: map, reduce: reduce, out: 'phones.report' })` · `db.orders.mapReduce(…)` | Clase 14 slide 36 · handout `Ejemplo_MapReduce_MongoDB.pdf` | (atención) **deprecado desde 5.0** *(manual: "Starting in MongoDB 5.0, map-reduce is deprecated … you should use an aggregation pipeline" — verificado 16/09/2026)* | `aggregate([{ $group: … }, { $out: … }])`; para lo que no cabe en operadores, `$accumulator` y `$function`. La traducción del handout está en [[Clase 14 - MongoDB Features]] § (c) y en [[2.14.03 - MapReduce\|MapReduce]] |
 | `db.createView("managementFeedback", "survey", [ { $project: { "management": "$feedback.management", department: 1 } } ])` · `db.createCollection("<viewName>", { "viewOn": …, "pipeline": … })` | Clase 12 slides 50–51 | ✓ *(desde 3.4)* | igual; las vistas son **de solo lectura** *(manual: "Views act as read-only collections, and are computed on demand during read operations")* y su pipeline **no puede llevar `$out` ni `$merge`** |
+| `$group` con `WHERE` previo → `$match` + `$group` + `$sort`, en ese orden | *(no está en ningún deck; patrón del libro pp. 116–117)* | ✓ | `db.egresados.aggregate([{ $group: { _id: "$titulo", cantidad: { $sum: 1 } } }, { $sort: { cantidad: -1 } } ])` — verificado sobre `egresados.csv` (8223 documentos, 19 carreras; *Ingeniero Industrial* con 3847, la mayor). Con `WHERE` previo, el `$match` va **antes** del `$group`: verificado con `bandas` filtrando `fecha_inscripcion` → [[Práctica 2026-09-22]] § Ejercicios 4 y 6 |
+
+> [!important] `mapReduce` se evaluó en el parcial 2Q2025, aunque esté deprecado desde 5.0
+> [[Parcial 2Q2025]] (Sección G, pregunta 6) pide calcular un total por producto "usando la estrategia
+> Map-Reduce" sobre una colección de cuatro documentos. Corrida real contra MongoDB 8.3.11:
+> `db.orders.mapReduce(…)` **funciona y da el resultado correcto**, pero imprime
+> `DeprecationWarning: Collection.mapReduce() is deprecated. Use an aggregation instead.` — coincide
+> exactamente con lo que dice esta tabla. Es evidencia a favor, de 2025: si `mapReduce` entra al
+> parcial 2026 sigue abierto → § *Dudas abiertas*. Si entra, hay que saber escribirlo aunque la forma
+> vigente sea el `$group` de más arriba.
 
 ### 5 · Replica set — el shell cambia, `rs.*` no
 
@@ -330,7 +437,7 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
 | `_id: ObjectId(7df78ad8902c)` *(12 hex, sin comillas)* | Clase 12 slides 38, 40, 42, 43, 44, 46 *(y `…902d`, `…902e`)* | ✗ **no corre en ninguna versión**: `SyntaxError` | `ObjectId("507f1f77bcf86cd799439011")` *(string de **24** hex)* — o, más simple, **omitir `_id`** y dejar que el driver lo genere, como hace el TP9 en todos sus inserts. El error viene copiado de tutorialspoint |
-| `db.egresados.findOne()._id.toString()` → `ObjectId("5d712e759bec0f1238869a1a")` | Clase 14 slide 8 | ✗ **cambió**: es el comportamiento del shell legado | en `mongosh`, `toString()` devuelve el **hexadecimal a secas** *(manual, página `ObjectId`: `ObjectId("507f191e810c19729de860ea").toString()` → `507f191e810c19729de860ea` — verificado 16/09/2026)*. `valueOf()` y `getTimestamp()` siguen como en el slide |
+| `db.egresados.findOne()._id.toString()` → `ObjectId("5d712e759bec0f1238869a1a")` | Clase 14 slide 8 | ✗ **cambió**: es el comportamiento del shell legado | en `mongosh`, `toString()` devuelve el **hexadecimal a secas** *(manual, página `ObjectId`: `ObjectId("507f191e810c19729de860ea").toString()` → `507f191e810c19729de860ea` — verificado 16/09/2026)*. `getTimestamp()` sigue igual; `valueOf()` **cambió**: devuelve el propio `ObjectId` (`typeof` → `object`), no el hexadecimal; para el hexadecimal, `toString()` o `toHexString()` — verificado 25/09/2026 en mongosh 2.11.1 → [[2.12.06 - Modelo de documentos — JSON, BSON y ObjectId\|Modelo de documentos]] § 6 |
 | `ObjectId` de 12 bytes: 4 de timestamp + 5 aleatorios por proceso + 3 de contador | Clase 14 slide 8 *(prosa de la página)* | ✓ | igual *(manual, página `ObjectId`)* |
 
 ### 7 · El shell y el servicio
@@ -473,7 +580,7 @@ El deck no escribe ni un comando de sharding; delega en *Seven Databases* § *Sh
 | Hu(mongo)us | 93–94 | presentación del motor |
 | **Day 1: CRUD and Nesting** | **94–110** | recorrido guiado del TP9: § *Command-Line Fun* 95–98 · § *Digging Deep* 100–104 *(`elemMatch`, `Boolean Ops`)* · § *Updating* 104–106 · § *References* 106–107 *("Mongo isn't built to perform joins")* · § *Deleting* 107–108 · § *Reading with Code* 108–109 |
 | **Day 2: Indexing, Aggregating, Mapreduce** | **110–123** | § *Indexing* 110–114 *(experimento del slide 29; `explain("executionStats")` 111–112)* · § *Aggregated Queries* 115–117 *(pipeline, `$group`)* · § *Server-Side Commands* 117–119 *(`system.js`, slide 38)* · § *Mapreduce (and Finalize)* 119–123 *(slides 35–37)* |
-| **Day 3: Replica Sets, Sharding, GeoSpatial, and GridFS** | **124–132** | § *Replica Sets* 124–127 *(slide 41; § *The Problem with Even Nodes* 126–127)* · § *Sharding* 127–130 · § *GeoSpatial Queries* 130–131 *(no se dicta)* · § *GridFS* 131–132 |
+| **Day 3: Replica Sets, Sharding, GeoSpatial, and GridFS** | **124–132** | § *Replica Sets* 124–127 *(slide 41; § *The Problem with Even Nodes* 126–127)* · § *Sharding* 127–130 · § *GeoSpatial Queries* 130–131 *(se practica: TP9 Parte II ej. 5 → [[Práctica 2026-09-22]])* · § *GridFS* 131–132 |
 | Wrap-Up | 132–133 | *Mongo's Strengths* / *Weaknesses* 133 — para el "cuándo elegirlo" del TPO |
 
 > [!warning] El libro está escrito contra **MongoDB 3.6** y con el shell `mongo`
@@ -584,22 +691,50 @@ db.players.findOne  // sin paréntesis: imprime el código del método — TP9 N
 ## Dudas abiertas
 
 - [ ] (crítico) ¿Qué versión de MongoDB toma la cátedra como referencia? *(deck: 6.0.5; `pull` sin
-  tag: 8.3.11 el 16/09/2026; determina la forma de `explain()`, TP9 paso 34)*
-- [ ] (crítico) ¿Se acepta la sintaxis legada en la entrega? *(`ensureIndex` pasos 30, 32, 33;
-  `find().count()` paso 27; `insert`/`update`/`remove` en los tres decks)*
+  tag: 8.3.11 el 16/09/2026; determina la forma de `explain()`, TP9 paso 34)*. **Dato nuevo, no
+  resuelve la pregunta:** [[Práctica 2026-09-22]] corrió contra el motor el 25/09/2026 y dio
+  **8.3.11 / mongosh 2.11.1** — segunda evidencia en la rama 8.x, después de la lectura de Docker Hub
+  del 16/09 y ninguna en 6.0.5. *(La [[Práctica 2026-09-15|Parte I]] del 15/09 quedó resuelta en
+  papel, sin correr contra el motor: no cuenta como verificación.)* Sigue sin confirmarse qué versión
+  toma la cátedra como referencia oficial.
+- [x] (crítico) ¿`ensureIndex`/`find().count()` siguen funcionando en el `mongosh` de hoy? **Sí, los
+  dos**, verificado 25/09/2026 contra MongoDB 8.3.11 / mongosh 2.11.1:
+  `db.towns.ensureIndex({name:1})` crea el índice sin ninguna advertencia impresa
+  (`deprecated: false` en la introspección del propio método); `dropDups` es un no-op verificado
+  insertando un duplicado real → [[Práctica 2026-09-22]] § *Qué del TP está deprecado*. **Sigue
+  abierto** si la cátedra **acepta** esta sintaxis legada en una entrega, más allá de que funcione en
+  el motor.
 - [ ] (crítico) ¿Cómo quiere la cátedra que se responda "¿MongoDB soporta transacciones ACID?" —
   no *(slide 11 de la Clase 12, *Seven Databases* A1)* o sí desde 4.0/4.2 *(manual actual)*?
 - [ ] (crítico) ¿`mapReduce` entra al parcial, o solo el aggregation pipeline?
+  - (nota) Evidencia de exámenes viejos: la pregunta 6 (Sección G) de [[Parcial 2Q2025]] lo pidió
+    "usando la estrategia Map-Reduce", como el handout (c); en MongoDB 8.3.11 corre con
+    `DeprecationWarning` → § *Agregación y MapReduce* más arriba. Es un examen de 2025: sirve de
+    indicio, no confirma el parcial del 13/10/2026.
 - [ ] ¿En qué esquina de CAP se pone a MongoDB en el parcial? *(Slide 18 de la Clase 12: CP;
-  Corbellini Table 2: AP y CP; *Seven Databases* impresa 127: CP)* → [[2.12.04 - Teorema CAP|Teorema CAP]]
-- [ ] ¿Qué trae la Parte II del TP9 (22/09)? ¿Reutiliza `players` y `bandas`? Si sí, **no hacer
-  `dropDatabase()`** al terminar la Parte I.
+  Corbellini Table 2: AP y CP; *Seven Databases* impresa 127: CP)* → [[2.12.04 - Teorema CAP|Teorema CAP]].
+  - (nota) Evidencia de exámenes viejos: el parcial 2Q2025 tomó la clasificación del slide 18. La
+    pregunta 10 de [[Parcial 2Q2025]] (*"MongoDB es AP según el teorema CAP"*, V/F) tiene **Falso**
+    como respuesta correcta en las capturas de la plataforma. Es un examen de 2025: sirve de indicio,
+    no confirma qué toma el parcial del 13/10/2026.
+- [x] ~~¿Qué trae la Parte II del TP9 (22/09)? ¿Reutiliza `players` y `bandas`?~~ (ok) Trae `towns`,
+  índices, `explain()`, `mongoimport`, índice `2d`, SQL → `aggregate` sobre `bandas` y CAP. Reutiliza
+  `bandas` (ejercicio 6: *"suponiendo la o las colecciones y vistas creadas en el TP anterior"*), no
+  `players` → [[Práctica 2026-09-22]]. (nota) El vault recreó `bandas` con el mismo `insertMany` de la
+  Parte I porque la [[Práctica 2026-09-15|Parte I]] no se corrió contra el motor.
 - [ ] ¿Se toman replica sets y sharding con comandos o solo como concepto?
-- [ ] ¿`toString()` de `ObjectId` devuelve el hexadecimal a secas en la imagen de la cátedra?
-  *(verificado en el manual, falta comprobarlo en el `mongosh` real)*
+- [x] ~~¿`toString()` de `ObjectId` devuelve el hexadecimal a secas en la imagen de la cátedra?~~
+  (ok) Sí: `ObjectId("5d712e759bec0f1238869a1a").toString()` → `5d712e759bec0f1238869a1a`, verificado
+  25/09/2026 en mongosh 2.11.1 → [[2.12.06 - Modelo de documentos — JSON, BSON y ObjectId|Modelo de documentos]] § 6.
 - [x] ¿Desde qué versión se retiró el binario `mongo`? **6.0**, confirmado en el manual
   *(verificado 18/09/2026)*.
-- [ ] ¿La imagen `mongo` corre en UTC? Define cómo se guardan los `new Date(…)` del TP9.
+- [x] ~~¿La imagen `mongo` corre en UTC? Define cómo se guardan los `new Date(…)` del TP9.~~ (ok) Sí:
+  en la imagen `mongo:8` (MongoDB 8.3.11), `date` y la zona de `mongosh` dan UTC, y
+  `new Date(1987,2,14,0,0)` se guarda como `1987-03-14T00:00:00.000Z` — verificado 25/09/2026.
+- [ ] ¿Cuál es el criterio real detrás de la mezcla de convenciones de coordenadas
+  (`[lat, lon]` vs. `[lon, lat]`) en `mongoCities_fixed.json`? Verificado con seis países concretos
+  (Andorra, París, Tokio y Moscú en `[lat, lon]`; Londres, Portland, Buenos Aires y Sídney en
+  `[lon, lat]`), sin identificar la regla exacta → [[Práctica 2026-09-22]] § Ejercicio 5.
 - [ ] ¿Se archiva una ficha para *Practical MongoDB Aggregations*? Decisión del humano.
 - [ ] ¿La consigna *ecommerce* se resuelve con el *aggregation pipeline builder* de Compass o vale
   `mongosh`?
@@ -615,8 +750,11 @@ db.players.findOne  // sin paréntesis: imprime el código del método — TP9 N
   [[PostgreSQL]] *(estos decks **no** entran en su inventario)* · próximos motores:
   [[Cassandra]] *(28/09)* · [[Neo4j]] · [[Redis]] · [[DynamoDB]]
 - Setup y TPs: [[Práctica 2026-09-15]] *(TP9 Parte I — setup, 34 pasos, 11 ejercicios)* ·
-  [[Práctica 2026-08-04]] *(Docker, la misma mecánica con `mysql:9.7.2`)* · [[Docker]] ·
-  índice de enunciados en `raw/tp/_index.md`
+  [[Práctica 2026-09-22]] *(TP9 Parte II — índices, `explain()` vs. MySQL, `mongoimport`, índice `2d`,
+  `aggregate` sobre `egresados`, CAP)* · [[Práctica 2026-08-04]] *(Docker, la misma mecánica con
+  `mysql:9.7.2`)* · [[Docker]] · índice de enunciados en `raw/tp/_index.md`
+- Exámenes que evalúan este motor: [[Parcial 2Q2025]] *(Sección G — MongoDB: índice por defecto,
+  `aggregate`, MapReduce, CAP; el modelo más cercano al parcial del 13/10)*
 - Clases del motor *(lunes 14/09)*: [[Clase 12 - Introduccion a NoSQL]] *(por qué NoSQL, CAP, BASE,
   géneros; MongoDB desde el slide 29, API legada)* · [[Clase 13 - NoSQL-EmbebidosVSNormalizado]]
   *(embebido vs. referencias, `$lookup`, `explain`)* · [[Clase 14 - MongoDB Features]] *(`mongosh`,

@@ -21,6 +21,11 @@
       "key": "2",
       "name": "NoSQL y MongoDB",
       "kind": "numbered"
+    },
+    {
+      "key": "eval",
+      "name": "Evaluaciones — exámenes viejos resueltos",
+      "kind": "extra"
     }
   ],
   "pageTypes": [
@@ -44,6 +49,14 @@
       "label": "Concepto",
       "plural": "Conceptos",
       "folder": "conceptos",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "examen",
+      "label": "Examen",
+      "plural": "Exámenes",
+      "folder": "examenes",
       "countsAsContent": true,
       "collapsedByDefault": false
     },
@@ -89,6 +102,19 @@
           "icon": "square",
           "kind": "page",
           "target": "postgresql"
+        }
+      ]
+    },
+    {
+      "id": "laboratorio",
+      "label": "Laboratorio",
+      "items": [
+        {
+          "id": "lab",
+          "label": "Laboratorio interactivo",
+          "icon": "flask",
+          "kind": "tool",
+          "target": "laboratorio"
         }
       ]
     },

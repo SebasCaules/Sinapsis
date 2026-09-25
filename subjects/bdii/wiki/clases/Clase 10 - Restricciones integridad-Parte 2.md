@@ -21,6 +21,9 @@ aliases:
   - ASSERTIONS
 fuentes:
   - "raw/Unidad-01/Teorica/BD2_Clase 10 - Restricciones integridad-Parte 2.pdf"
+  - "raw/Unidad-01/Teorica/Ejercicio_Stored_Procedure_BDII.pdf"
+  - "raw/Unidad-01/Teorica/ejercicio de SP.sql"
+  - "raw/Unidad-01/Teorica/ejercicio de teoria de PosgreSQL hecho en MySQL.sql"
 estado: procesado
 ---
 
@@ -61,6 +64,11 @@ que puedan violar la restricción, `DELETE` incluido; y los tres ejes de diseño
 > asigna la cátedra. Clase anterior: [[Clase 09 - Restricciones integridad-Parte 1]] *(24/08)*.
 > Se practica con el **TP 7 Restricciones avanzadas** del martes 01/09 → [[Práctica 2026-09-01]].
 > Bibliografía: [[_index-bibliografia]] › Clase 10.
+> El § *Material complementario* documenta además un **ejercicio de stored procedures sin número de
+> clase** (`Ejercicio_Stored_Procedure_BDII.pdf`, `ejercicio de SP.sql`) y la **traducción a MySQL de
+> un ejemplo de teoría de este mismo deck** (`ejercicio de teoria de PosgreSQL hecho en MySQL.sql`).
+> No son clases y por eso no tienen página propia; la fecha de publicación del primero no se pudo
+> leer del campus, y la asignación a esta clase es **por tema** (SQL procedural).
 
 > [!warning] (crítico) El nombre del archivo dice *"Restricciones integridad-Parte 2"*; **la portada dice otra cosa**
 > El slide 1, textual: *"Base de Datos II · **SQL PROCEDURAL** · Triggers, Stored Procedures"*.
@@ -1248,6 +1256,126 @@ se van a copiar fragmentos de estos slides.
 
 ---
 
+## Material complementario (sin número de clase)
+
+> [!info] Un ejercicio y una traducción, archivados junto al deck, sin `BD2_Clase NN` en el nombre
+> Tres archivos en `raw/Unidad-01/Teorica/`: `Ejercicio_Stored_Procedure_BDII.pdf` (el enunciado),
+> `ejercicio de SP.sql` (su script) y `ejercicio de teoria de PosgreSQL hecho en MySQL.sql` (la
+> traducción a MySQL de un ejemplo de esta misma teórica). Ninguno trae número de la cátedra ni
+> fecha de publicación legible: la asignación a la **Clase 10** es **por tema** — los tres son SQL
+> procedural en MySQL, lo que enseñan los slides 6–13 — y no por fecha del campus, que no se pudo
+> determinar.
+
+### (a) `Ejercicio_Stored_Procedure_BDII.pdf` + `ejercicio de SP.sql` — `RegistrarEntrega`
+
+> [!quote] Contexto del enunciado, textual
+> *"Una universidad quiere registrar las entregas de trabajos prácticos de sus estudiantes."*
+> `Alumno(legajo, nombre, apellido, carrera)` · `Materia(codigo, nombre)` ·
+> `TrabajoPractico(id_tp, codigo_materia FK, descripcion, fecha_entrega)` ·
+> `Entrega(id_entrega, id_tp FK, legajo_alumno FK, fecha, archivo_url, nota)`
+
+El PDF (generado con Workbench, un solo `stored procedure`) pide un `PROCEDURE` que registre una
+entrega: si llega **a tiempo** (`fecha <= fecha_entrega` del TP), la inserta; si no, aborta con
+`SIGNAL`. Una *"ampliación opcional"* pide, en cambio de abortar, **registrar igual** la entrega
+marcándola `entrega_fuera_de_termino = TRUE`.
+
+> [!bug] El PDF tiene un bug que el `.sql` corrige sin decirlo
+> El `PROCEDURE` del PDF declara **cuatro** parámetros (`p_id_tp, p_legajo, p_fecha,
+> p_archivo_url`) y su `INSERT` no menciona `id_entrega`, que es la PK de `Entrega` y **no tiene**
+> `AUTO_INCREMENT`: tal como está escrito, el `INSERT` fallaría por falta de valor en una columna
+> `NOT NULL` sin default. El `.sql` lo corrige agregando un quinto parámetro, `p_id_en`, y
+> nombrando `id_entrega` en el `INSERT` — la versión que se corrió abajo.
+
+**Corrida real en MySQL 9.7.2** (`ejercicio de SP.sql`, con el schema `SP` renombrado a una base de
+prueba):
+
+```sql
+CREATE PROCEDURE RegistrarEntrega(
+  IN p_id_en INT, IN p_id_tp INT, IN p_legajo INT, IN p_fecha DATE, IN p_archivo_url VARCHAR(255)
+)
+BEGIN
+  DECLARE v_fecha_entrega DATE;
+  SELECT fecha_entrega INTO v_fecha_entrega FROM TrabajoPractico WHERE id_tp = p_id_tp;
+  IF p_fecha <= v_fecha_entrega THEN
+    INSERT INTO Entrega(id_entrega, id_tp, legajo_alumno, fecha, archivo_url)
+      VALUES (p_id_en, p_id_tp, p_legajo, p_fecha, p_archivo_url);
+  ELSE
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'La entrega fue realizada fuera de término. No se registró.';
+  END IF;
+END;
+```
+
+| Llamada | `fecha_entrega` del TP2 | `p_fecha` | Resultado real |
+| --- | :---: | :---: | --- |
+| `CALL RegistrarEntrega(12, 2, 1001, '2025-05-30', …)` | 2025-06-01 | 2025-05-30 (a tiempo) | ✓ inserta |
+| `CALL RegistrarEntrega(15, 2, 1002, '2025-06-02', …)` | 2025-06-01 | 2025-06-02 (tarde) | ✗ `ERROR 1644 (45000): La entrega fue realizada fuera de término. No se registró.` |
+
+> [!warning] Las dos primeras filas de `INSERT INTO Entrega VALUES (…)` del propio `.sql` también
+> fallan, y por una razón distinta al bug del PDF
+> `INSERT INTO Entrega VALUES (1, 1, 1001, '2025-05-14', 'url1.pdf', 9.5);` da los valores por
+> **posición de columna** (`id_entrega, legajo_alumno, id_tp, fecha, archivo_url, nota`), pero los
+> escribe en el **orden del enunciado** (`id_entrega, id_tp, legajo_alumno, …`): con eso,
+> `legajo_alumno = 1` e `id_tp = 1001`, ninguno de los cuales existe. MySQL lo rechaza:
+> `ERROR 1452: Cannot add or update a child row: a foreign key constraint fails … FOREIGN KEY
+> (legajo_alumno) REFERENCES Alumno (legajo)`. Las dos filas de ejemplo del enunciado **nunca llegan
+> a cargarse**; lo que sí corre, y es lo que importa, son las dos `CALL` de la tabla de arriba, que
+> pasan sus valores por posición **de parámetro**, no de columna de tabla, y no arrastran el error.
+
+La *"ampliación opcional"* (`RegistrarEntrega2`) se corrió igual: `CALL
+RegistrarEntrega2(40, 2, 1002, '2025-06-07', …)` — fuera de término — **inserta** con
+`entrega_fuera_de_termino = 1` y `nota = NULL`, en vez de abortar. Confirma el patrón "acción
+reparadora en vez de rechazo" que [[1.09.02 - Integridad referencial y acciones referenciales|la
+Clase 09]] ya daba para FKs: aquí, hecho a mano con un `IF`/`ELSE` en el cuerpo del procedimiento.
+
+> [!tip] Qué aporta a la duda del TP7 3.d (`PROCEDURE` o `FUNCTION`)
+> `RegistrarEntrega` es un `PROCEDURE` porque se declara con `CREATE PROCEDURE` y se invoca con
+> `CALL`: no devuelve un valor, sino que inserta la fila o rechaza la operación. El `SIGNAL` de su rama
+> de error **no** es lo que lo distingue de una función: en MySQL 9.7.2 una `FUNCTION` también puede
+> ejecutar `SIGNAL` (`CREATE FUNCTION fsig(x INT) … IF x < 0 THEN SIGNAL SQLSTATE '45000' …` se crea
+> sin error, y `SELECT fsig(-1)` termina con `ERROR 1644 (45000)`). La duda del 3.d sigue abierta en
+> § *Dudas abiertas*.
+
+### (b) `ejercicio de teoria de PosgreSQL hecho en MySQL.sql` — es la traducción de `voluntarioscadax` (slide 13)
+
+Comparado contra los ejemplos PL/pgSQL de esta misma página, el procedimiento y la tabla que declara
+(`voluntario(nro_voluntario, apellido, nombre)`, parámetro `x`, patrón *"una de cada x"* con
+`i % x = 0`) coinciden exactamente con la función `voluntarioscadax` del **slide 13** — no con
+`hay_paises` del slide 11 ni con `VoluntariosPorApellido` del slide 12, que usan otra tabla y otra
+lógica.
+
+**Correspondencia línea a línea** contra el PL/pgSQL del slide 13 (transcripto en § *Slide 13* de
+esta página) y contra la traducción a MySQL que esta misma página ya proponía en esa sección:
+
+| PL/pgSQL — slide 13 | `ejercicio de teoria de PosgreSQL hecho en MySQL.sql` | Traducción que ya proponía esta página |
+| --- | --- | --- |
+| `CREATE FUNCTION voluntarioscadax(x integer) RETURNS TABLE(…)` | `CREATE PROCEDURE voluntarioscadax(IN x INT)` | `CREATE PROCEDURE voluntarioscadax(IN x INT)` — mismo cambio: función con tabla → procedimiento |
+| `var_r record;` | `v_nro INT; v_apellido VARCHAR(255); v_nombre VARCHAR(255);` (una variable por columna) | `v_nro DECIMAL(10,0); v_ape VARCHAR(60); v_nom VARCHAR(60);` — mismo recurso, otros nombres/tipos |
+| *(implícito: `FOR` recorre el resultado)* | `DECLARE cur CURSOR FOR SELECT nro_voluntario, apellido, nombre FROM voluntario;` + `DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;` | idéntico en estructura (cursor `cur` + handler `done`) |
+| `i := 0;` antes del `FOR` | `DECLARE i INT DEFAULT 0;` | `DECLARE i INT DEFAULT 0;` |
+| `FOR var_r IN (SELECT …) LOOP` | `OPEN cur; read_loop: LOOP FETCH cur INTO v_nro, v_apellido, v_nombre; IF done THEN LEAVE read_loop; END IF;` | `OPEN cur; bucle: LOOP FETCH cur INTO v_nro, v_ape, v_nom; IF done = 1 THEN LEAVE bucle; END IF;` — mismas piezas, etiqueta de loop distinta |
+| `IF (i % x = 0) THEN … RETURN NEXT; END IF;` | `IF (i % x = 0) THEN INSERT INTO tmp_resultado VALUES (…); SET i = 0; END IF;` | `IF (i % x = 0) THEN INSERT INTO tmp_cadax VALUES (…); SET i = 0; END IF;` — mismo reemplazo de `RETURN NEXT` por `INSERT` en tabla temporal, nombre de tabla distinto |
+| `i := i + 1;` | `SET i = i + 1;` | `SET i = i + 1;` |
+| `END LOOP; END;` | `CLOSE cur;` + `SELECT * FROM tmp_resultado;` | `CLOSE cur;` + `SELECT * FROM tmp_cadax;  -- éste es el "return"` |
+
+Las dos traducciones a MySQL —la de este archivo y la que propone esta página en § *Slide 13*—
+llegan a la misma estructura (cursor + handler `NOT FOUND` +
+tabla temporal), lo que confirma que es **la** forma canónica de portar un `FOR`-sobre-resultado con
+`RETURN NEXT`, no una elección arbitraria entre varias.
+
+**Corrida real en MySQL 9.7.2**, con nueve voluntarios de prueba y `x = 3`:
+
+```
+nro_voluntario  apellido  nombre
+1               Perez     Ana
+4               Ruiz      Pedro
+7               Ibañez    Noa
+```
+
+Confirma **"una de cada tres"**, empezando por la primera fila (`i` arranca en 0, y `0 % 3 = 0`) —lo
+mismo que esta página ya señalaba como ambiguo en el slide 13 (el reset de `i` dentro del `IF`)—: aquí
+queda **verificado que el resultado es el descrito**, tres filas de nueve, espaciadas de a tres.
+
 ## Dudas abiertas
 
 - [ ] (crítico) **¿El trigger del TP7 ej. 2 corre en MySQL, o lo frena el error 1442?** El enunciado pone un
@@ -1257,6 +1385,11 @@ se van a copiar fragmentos de estos slides.
   `record`, `refcursor`, cursor parametrizado, `FOR`-sobre-resultado y `RETURNS TABLE` **no tienen
   sustituto** en MySQL. El patrón del TP7 sugiere **teoría en el estándar, código en MySQL**.
   Confirmarlo antes del parcial del 13/10.
+  - (nota) Evidencia de exámenes viejos: ninguno de los once exámenes del vault pide escribir código
+    procedural SQL (funciones, stored procedures, cursores o triggers). Lo más cercano es la
+    Pregunta 24 de [[Parcial 2Q2025]] § *Sección D*, que solo pide nombrar `TRIGGER` como la forma
+    de implementar en MySQL una restricción de tabla. Que no aparezca en exámenes de otros años no
+    descarta el tema en 2026.
 - [ ] (crítico) **¿Los cursores entran al parcial?** Tema nuevo, con vocabulario cerrado y tres slides propios.
   De dónde estudiarlos ya no es la duda: GMUW **9.3.6** *Cursors* (383–386) es la definición del
   slide 9 en el estándar, y GMUW **9.4.4–9.4.6** ponen el cursor adentro de un procedimiento
@@ -1264,6 +1397,8 @@ se van a copiar fragmentos de estos slides.
   cursor parametrizado, `OPEN … FOR EXECUTE`— no está en ningún libro del vault: sale del manual de
   PostgreSQL **§ 41.7** o del de MySQL **§ 15.6.6**. Ver [[_index-bibliografia]] › Clase 10 y
   [[1.10.03 - Cursores|Cursores]].
+  - (nota) Evidencia de exámenes viejos: ningún examen del vault pregunta cursores (ver la nota de la
+    duda anterior).
 - [ ] (crítico) **¿Por qué el archivo se llama *"Restricciones integridad-Parte 2"* si su portada dice
   *"SQL PROCEDURAL"*?** ¿Nombre heredado, o **falta un deck de restricciones** que la cátedra todavía
   no subió? El deck 09 tenía 39 slides y éste 20. Preguntarle al humano si hay más material.
@@ -1275,12 +1410,26 @@ se van a copiar fragmentos de estos slides.
   bibliografía o de preguntar.
 - [ ] **¿Qué pide el TP7 ej. 3.d, `PROCEDURE` o `FUNCTION`?** El cálculo devuelve **dos valores**, lo que
   empuja a `PROCEDURE` con parámetros `OUT` o a dos funciones separadas.
+  - (nota) El ejercicio del material complementario (`Ejercicio_Stored_Procedure_BDII.pdf`) llama
+    *stored procedure* a un `CREATE PROCEDURE` con `SIGNAL` en la rama de error
+    (§ *Material complementario (a)*). Indica cómo usa el término ese material; no dice qué se espera
+    en el 3.d.
 - [ ] **¿MySQL 9.7 admite `CREATE OR REPLACE PROCEDURE` / `FUNCTION`?** En 8.x no existe y hay que
   hacer `DROP … IF EXISTS` antes. Verificar contra el manual 9.7 § 15.1.17.
 - [ ] **¿`DECLARE v TEXT DEFAULT '…';` es válido como variable local en MySQL 9.7**, o hay que usar
   `VARCHAR(n)`? El `DEFAULT` sí existe; lo dudoso es `TEXT`. Manual 9.7 § 15.6.
 - [ ] **La lógica del *"cada x"* del slide 13**: ¿el reset `i := 0` dentro del `IF` es intencional, o
   el ejemplo tiene un bug que nadie notó?
+  - (nota) La traducción a MySQL del material complementario conserva el reset (`SET i = 0` dentro
+    del `IF`) y, corrida con nueve voluntarios y `x = 3`, devuelve las filas 1, 4 y 7 (§ *Material
+    complementario (b)*). Sin el reset el resultado es el mismo: `i` vuelve a ser múltiplo de `x` en
+    las mismas filas. El reset es redundante, no un bug; sigue sin saberse si es intencional.
+- [ ] **¿De quién es la corrección de `RegistrarEntrega`?** El PDF declara cuatro parámetros y su
+  `INSERT` omite `id_entrega` (PK sin `AUTO_INCREMENT`); `ejercicio de SP.sql` agrega un quinto
+  parámetro, `p_id_en`, sin explicarlo. Además, las dos filas de carga inicial de `Entrega` de ese
+  `.sql` siguen el orden de columnas del enunciado y no el de la tabla, y fallan por FK
+  (`ERROR 1452`) → § *Material complementario (a)*. ¿El `.sql` es una corrección del humano o llegó
+  así de la cátedra? Preguntarle al humano.
 - [ ] **¿`CREATE DOMAIN` desapareció del temario?** El deck 09 le dedica tres slides *(17–19)*; el
   deck 10 implementa el nivel 1 con un `CHECK` de columna y no lo menciona. Se cruza con la duda
   (crítico) del parcial de la [[Clase 09 - Restricciones integridad-Parte 1]].
@@ -1293,8 +1442,9 @@ se van a copiar fragmentos de estos slides.
 
 ## Enlaces
 
-- Clase anterior: [[Clase 09 - Restricciones integridad-Parte 1]] · clase siguiente: *(la del 07/09,
-  todavía sin material)*
+- Clase anterior: [[Clase 09 - Restricciones integridad-Parte 1]] · clase siguiente:
+  [[Clase 11 - Seguridad-Transacciones|Clase 11]] *(07/09)* · segundo deck del mismo día:
+  [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]]
 - Práctica de esa semana (martes 01/09): **[[Práctica 2026-09-01]]** — TP 7 Restricciones avanzadas
 - Conceptos que **nacen** en esta clase: [[1.10.01 - SQL procedural|SQL procedural]] ·
   [[1.10.02 - Stored procedures y funciones|Stored procedures y funciones]] ·
@@ -1308,5 +1458,9 @@ se van a copiar fragmentos de estos slides.
   [[1.03.02 - DDL — creación y alteración de tablas|DDL]] *(`ALTER TABLE … ADD CONSTRAINT`)*
 - Motores: [[MySQL]] § *6 · SQL procedural* *(la traducción completa)* · [[PostgreSQL]] §
   *Inventario* *(fila del deck 10)*
+- Material complementario: § arriba — `RegistrarEntrega` (stored procedure con `SIGNAL`) y la
+  traducción MySQL de `voluntarioscadax` (slide 13), las dos corridas en MySQL
 - Índice de clases: [[_index-clases]] · bibliografía: [[_index-bibliografia]] ·
   calendario: [[_cronograma]]
+- Exámenes viejos: [[Mapa de exámenes]] *(ninguno pide código procedural; el más cercano pide
+  `TRIGGER` como implementación MySQL de una restricción de tabla)*

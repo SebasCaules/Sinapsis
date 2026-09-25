@@ -1382,24 +1382,42 @@ significa que casi todo salió de caché, o sea que la próxima corrida en frío
   TP5 no lo reproduce (§ *Bloque B* de [[Práctica 2026-08-18]] es el equivalente en MySQL).
 - [ ] **¿Entra `cpu_operator_cost` (0.0025) en el parcial?** Sin esa constante no cierran ni el
   `Aggregate` ni los `Seq Scan` con `Filter`.
+  - (nota) Evidencia de exámenes viejos: ninguna pregunta de plan de los exámenes del vault pide
+    constantes de costo. Ver la nota de la duda sobre el motor del parcial, más abajo.
 - [ ] **¿Cuánto hay que saber de `GEQO`?** El **slide 10** pone el título y el link, y nada más.
+  - (nota) Evidencia de exámenes viejos: ningún examen del vault lo pregunta.
 - [ ] **¿La versión de PostgreSQL?** El deck mezcla `Total runtime:` con `Planning time:` /
   `Execution time:`.
 - [ ] **El parcial ~~y el TP5~~, ¿es sobre MySQL o sobre PostgreSQL?** ✓ El TP5 es **MySQL** (su
   enunciado: *"Antes de comenzar, es necesario levantar **MySQL** en la PC que vayan a utilizar para
   este práctico"* → [[Práctica 2026-08-18]]), así que **sí, hay que rehacer todos los ejemplos** de este
   deck. (crítico) **La mitad parcial sigue abierta:** el enunciado del TP5 no dice nada del parcial.
+  - (nota) Evidencia de exámenes viejos: el [[Parcial 2Q2025]] § *Sección C* pregunta el plan **en
+    MySQL**. La Pregunta 2 es un V/F sobre `EXPLAIN ANALYZE` en MySQL (ejecuta la sentencia: la
+    afirmación de que no la ejecuta es Falsa); la 12 muestra un plan con `Nested loop inner join`,
+    `Table scan` y `Single-row index lookup` y pide deducir que `codigo` es PK o `UNIQUE` en
+    `materia` (las tablas del TP5). Ninguna pregunta de plan del vault pide constantes de costo,
+    `BUFFERS` ni GEQO; la única sobre PostgreSQL es un V/F de `EXPLAIN ANALYZE` en otra materia
+    ([[Parcial 23-5-23 - Bases de Datos Avanzadas]], Pregunta 17). Es un examen de 2025: indicio, no
+    confirmación del parcial del 13/10/2026.
 - [ ] **En MySQL, ¿desde qué versión está `EXPLAIN ANALYZE`?** 8.0.18 está escrito de memoria y sin
   verificar; confirmar contra la doc oficial antes de usarlo en el TP.
+- [ ] **¿Desde qué versión de MySQL el `EXPLAIN` sale por defecto en formato árbol?** En MySQL 9.7.2,
+  `@@explain_format` vale `TREE` con origen `COMPILED` (es el default de fábrica, no una
+  configuración del contenedor): un `EXPLAIN` sin `FORMAT=` devuelve el árbol `->` y no la tabla
+  `id | select_type | … | Extra`. Para la tabla clásica hay que pedir `EXPLAIN FORMAT=TRADITIONAL`,
+  como se corrió en [[Práctica 2026-09-22]] § *Ejercicio 3*. No se verificó en qué versión cambió.
 - [ ] **¿Cuál es el equivalente MySQL de `EXPLAIN (ANALYZE, BUFFERS)`?** No hay uno directo.
 - [ ] **En MySQL el DDL hace `COMMIT` implícito**, así que `BEGIN; EXPLAIN ANALYZE CREATE TABLE AS …;
   ROLLBACK;` del slide 1 **no funciona**. ¿Cómo se hace el equivalente?
 
 ## Enlaces
 
-- Clase anterior: [[Clase 07 - Vistas-Parte 2]] · clase siguiente: *(todavía sin material)*
+- Clase anterior: [[Clase 07 - Vistas-Parte 2]] · clase siguiente: [[Clase 09 - Restricciones integridad-Parte 1|Clase 09]] *(24/08; el 17/08 fue feriado)*
 - Del mismo lunes 10/08: [[Clase 06 - Vistas-Parte 1]] · [[Clase 07 - Vistas-Parte 2]]
 - Se practica en: [[Práctica 2026-08-18]] (**TP5 Explain Plan**, martes 18/08)
+- Exámenes viejos: [[Mapa de exámenes]] *(`EXPLAIN` vs. `EXPLAIN ANALYZE` y lectura de un plan de
+  MySQL)*
 - Motores: [[PostgreSQL]] · [[MySQL]]
 - Conceptos: [[1.08.01 - Plan de ejecución|Plan de ejecución]] · [[1.08.02 - Índices|Índices]] · [[Índice compuesto]] · [[Estadísticas del optimizador]] ·
   [[Selectividad]] · [[Costo de una consulta]] · [[1.11.03 - Transacciones y ACID|Transacciones ACID]]

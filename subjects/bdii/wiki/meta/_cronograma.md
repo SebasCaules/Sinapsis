@@ -27,7 +27,8 @@ nunca del orden de filas ni de la fecha; las prácticas se identifican por fecha
 path, nunca se deduce del tema; y ninguna edición de *Seven Databases* cubre Cassandra (fuente:
 Corbellini § 5 más documentación oficial). Para el parcial: fechas de evaluación, reparto real
 MySQL/Cassandra frente al programa, y el criterio para ubicar un archivo — clase por el deck, tema y
-fecha por el cronograma, unidad por el path.
+fecha por el cronograma, unidad por el path. El formato probable del parcial sale de los exámenes
+viejos, reunidos en [[Mapa de exámenes|Mapa de exámenes]].
 
 ## Qué es esta página
 
@@ -72,12 +73,12 @@ significa *todavía no se verificó*, no *no hay*.
 | 2026-08-25 | Martes, 16:00–19:00, Práctica | Presencial | TP 6 - Restricciones declarativas | [[Práctica 2026-08-25]] |
 | 2026-08-31 | Lunes, 19:00–22:00, Teórica | Virtual | Triggers y SQL Procedural | **Clase 10** |
 | 2026-09-01 | Martes, 16:00–19:00, Práctica | Presencial | TP 7 - Restricciones avanzadas | [[Práctica 2026-09-01]] |
-| 2026-09-07 | Lunes, 19:00–22:00, Teórica | Virtual | Seguridad en Bases de Datos. Transacciones ACID · Implementación de matriz de roles y permisos | **Clase 11** *(el deck suma ocho slides de índices que el tema no anuncia)* |
+| 2026-09-07 | Lunes, 19:00–22:00, Teórica | Virtual | Seguridad en Bases de Datos. Transacciones ACID · Implementación de matriz de roles y permisos | **Clase 11** [[Clase 11 - Seguridad-Transacciones\|Seguridad y transacciones]] *(el deck suma ocho slides de índices que el tema no anuncia)* · **Clase 11(B)** [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL\|Recovery y WAL]] *(segundo deck de la Clase 11: durabilidad y atomicidad)* |
 | 2026-09-08 | Martes, 16:00–19:00, Práctica | Presencial | TP 8 - Seguridad | [[Práctica 2026-09-08]] |
 | 2026-09-14 | Lunes, 19:00–22:00, Teórica | Virtual | Introducción a las Bases de Datos NoSQL y Tipos de Bases NoSQL · Introducción a MongoDB · MongoDB: Enfoque embebido vs Normalizado · Ejemplos con MongoDB | **Clases 12–14** *(las tres el mismo lunes; más cuatro handouts sin número)* |
 | 2026-09-15 | Martes, 16:00–19:00, Práctica | Presencial | TP 9 - MongoDB Parte I | [[Práctica 2026-09-15]] |
 | 2026-09-21 | Lunes, 19:00–22:00, Teórica | Virtual | **Día del Estudiante** | — |
-| 2026-09-22 | Martes, 16:00–19:00, Práctica | Presencial | TP 9 - MongoDB Parte II | pendiente |
+| 2026-09-22 | Martes, 16:00–19:00, Práctica | Presencial | TP 9 - MongoDB Parte II | [[Práctica 2026-09-22\|Práctica 2026-09-22]] |
 | 2026-09-28 | Lunes, 19:00–22:00, Teórica | Virtual | Introducción a Cassandra | pendiente |
 | 2026-09-29 | Martes, 16:00–19:00, Práctica | Presencial | TP 10 - Cassandra Parte I | pendiente |
 | 2026-10-05 | Lunes, 19:00–22:00, Teórica | Virtual | Conceptos teóricos de Cassandra | pendiente |
@@ -107,7 +108,7 @@ significa *todavía no se verificó*, no *no hay*.
 
 | Qué | Cuándo |
 | --- | --- |
-| **Parcial** | martes **13/10**, presencial |
+| **Parcial** | martes **13/10**, presencial — formato probable y temas que más se repiten en [[Mapa de exámenes\|Mapa de exámenes]] |
 | **Recuperatorio** | martes **03/11**, presencial |
 | **Enunciado del TPO** | lunes **09/11** |
 | **Entrega del TPO** | domingo **15/11**, al final del día, virtual |
@@ -117,6 +118,15 @@ significa *todavía no se verificó*, no *no hay*.
 
 Las tres teóricas de feriado más el Día del Estudiante hacen **4 lunes perdidos**; la práctica del
 martes nunca cae en feriado.
+
+> [!tip] Cómo llegar al parcial del 13/10
+> Los exámenes viejos muestran el formato probable: el [[Parcial 2Q2025|Parcial 2Q2025]], el más
+> cercano a esta cursada, tuvo 33 preguntas en plataforma: 22 cerradas y autocalificadas (opción
+> múltiple, verdadero/falso, coincidencia) y 11 de ensayo corregidas a mano, es decir, un tercio del
+> examen de desarrollo. No fue un práctico domiciliario como los de 2020-2021. Antes
+> del 13/10 se dicta todo lo relacional, NoSQL/MongoDB y las dos teóricas de Cassandra; Neo4j, Redis y
+> DynamoDB llegan después, aunque en los exámenes viejos también aparecen. Detalle y priorización en
+> [[Mapa de exámenes|Mapa de exámenes]].
 
 ## Unidades
 
@@ -130,8 +140,8 @@ clases según **dónde quedó archivado el material**, no según los temas.
 
 | Unidad | Clases | Tema |
 | --- | --- | --- |
-| `Unidad-01` | ✓ **01 a 11** | Intro a BD, DER, esquema lógico, DDL/alteración de tablas, consultas SQL · vistas · índices/explain plan · **restricciones de integridad** · **SQL procedural** (triggers, stored procedures, cursores) · **seguridad (usuarios, `GRANT`/`REVOKE`, roles), ACID, concurrencia y niveles de aislamiento, e índices** *(Clase 11, 07/09)* · persistencia políglota, Docker, MySQL · **TP1–TP8** *(falta el del TP3 SQLs avanzados)* y sus seis prácticas (04, 11, 18, 25/08, 01, 08/09). Todo lo relacional: 13 archivos de teórica |
-| `Unidad-02` | ✓ **12 a 14** | **NoSQL**: por qué surge, propiedades, CAP, BASE, taxonomía · **MongoDB**: documentos, CRUD, `aggregate`, `$lookup`, vistas, embebido vs. normalizado (1:1/1:N/N:M) · `mongosh`, índices, aggregation pipeline, MapReduce, replica sets, sharding *(14/09)* · **4 handouts sin número** (ecommerce, sharding vs. replication, MapReduce — en Clase 14) · **TP9 Parte I** y práctica del 15/09. Abierta el **15/09** |
+| `Unidad-01` | ✓ **01 a 11** | Intro a BD, DER, esquema lógico, DDL/alteración de tablas, consultas SQL · vistas · índices/explain plan · **restricciones de integridad** · **SQL procedural** (triggers, stored procedures, cursores) · **seguridad (usuarios, `GRANT`/`REVOKE`, roles), ACID, concurrencia y niveles de aislamiento, e índices** *(Clase 11, 07/09)* · **recovery: WAL y ARIES** *(Clase 11(B), 07/09 — segundo deck de la Clase 11, no una clase nueva)* · **6 archivos de material complementario sin número**: los dos PNG de *Ejercicios de RI* (Clase 09), el enunciado de stored procedure y dos `.sql` (Clase 10) y `ejemplo Seguridad BD.png` (Clase 11) · persistencia políglota, Docker, MySQL · **TP1–TP8** completos, TP3 SQLs simples y SQLs avanzados incluidos, y sus seis prácticas (04, 11, 18, 25/08, 01, 08/09). Todo lo relacional: 14 decks de teórica *(la Clase 05 en tres partes y la 11 en dos)* |
+| `Unidad-02` | ✓ **12 a 14** | **NoSQL**: por qué surge, propiedades, CAP, BASE, taxonomía · **MongoDB**: documentos, CRUD, `aggregate`, `$lookup`, vistas, embebido vs. normalizado (1:1/1:N/N:M) · `mongosh`, índices, aggregation pipeline, MapReduce, replica sets, sharding *(14/09)* · **4 handouts sin número** (ecommerce, sharding vs. replication, MapReduce — en Clase 14) · **TP9 Parte I** y práctica del 15/09 · **TP9 Parte II** (índices y `explain()`, `$group`, índice `2d`, CAP; con `egresados.csv` y `mongoCities_fixed.json`) y práctica del 22/09. Abierta el **15/09** |
 | `Unidad-03` | ✗ *(no usado)* | triggers y SQL procedural — cayeron en `Unidad-01` (Clase 09/TP6, Clase 10/TP7) |
 | `Unidad-04` | ✗ *(no usado)* | seguridad, roles y permisos, ACID — cayó en `Unidad-01` |
 | `Unidad-05` | ✗ *(no usado)* | NoSQL, MongoDB — cayó en `Unidad-02` |

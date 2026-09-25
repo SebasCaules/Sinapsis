@@ -1,0 +1,138 @@
+/* ============================================================
+   bdii-lab / css/indices-plan.css — "Índices y plan de ejecución"
+   Todo selector cuelga de `.bdii-lab` (regla 6 de TOOLS_BRIEF.md); prefijo
+   propio `.lab-indices-plan-…`. Colores solo por variables CSS de la
+   plataforma, con fallback cuando el token pudiera faltar.
+   ============================================================ */
+
+.bdii-lab .lab-indices-plan-resultado { display: flex; flex-direction: column; gap: 14px; }
+
+.bdii-lab .lab-indices-plan-dim { opacity: 0.45; }
+
+/* ---------- árbol B+ ---------- */
+
+.bdii-lab .lab-indices-plan-treewrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 8px;
+}
+
+.bdii-lab .lab-indices-plan-tree {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 360px;
+}
+
+.bdii-lab .lab-indices-plan-edge,
+.bdii-lab .lab-indices-plan-chain {
+  stroke: var(--border-3, var(--border));
+  stroke-width: 1.5;
+}
+.bdii-lab .lab-indices-plan-chain { stroke-dasharray: 4 3; }
+
+.bdii-lab .lab-indices-plan-nodebox {
+  fill: var(--surface);
+  stroke: var(--border-3, var(--border));
+  stroke-width: 1.5;
+}
+.bdii-lab .lab-indices-plan-node.is-path .lab-indices-plan-nodebox { stroke: var(--primary); stroke-width: 2.5; }
+.bdii-lab .lab-indices-plan-node.is-split .lab-indices-plan-nodebox { stroke: var(--warn); stroke-width: 2.5; }
+.bdii-lab .lab-indices-plan-node.is-range .lab-indices-plan-nodebox { fill: var(--good-soft, var(--surface-2)); }
+
+.bdii-lab .lab-indices-plan-cell { fill: transparent; }
+.bdii-lab .lab-indices-plan-cell.is-found { fill: var(--good-soft, var(--surface-2)); }
+.bdii-lab .lab-indices-plan-celldiv { stroke: var(--border); stroke-width: 1; }
+
+.bdii-lab .lab-indices-plan-keytext {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* ---------- gráfico costo vs. selectividad ---------- */
+
+.bdii-lab .lab-indices-plan-chartwrap { overflow-x: auto; }
+
+.bdii-lab .lab-indices-plan-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 280px;
+}
+
+.bdii-lab .lab-indices-plan-axis { stroke: var(--text-3); stroke-width: 1; }
+.bdii-lab .lab-indices-plan-gridline { stroke: var(--border); stroke-width: 1; opacity: 0.6; }
+.bdii-lab .lab-indices-plan-axistext {
+  fill: var(--text-3);
+  font-size: 15px;
+  font-family: var(--font-ui);
+}
+
+.bdii-lab .lab-indices-plan-line { fill: none; stroke-width: 2.5; }
+.bdii-lab .lab-indices-plan-line--idx { stroke: var(--primary); }
+.bdii-lab .lab-indices-plan-line--full { stroke: var(--text-3); stroke-dasharray: 5 3; }
+
+.bdii-lab .lab-indices-plan-crossline { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.bdii-lab .lab-indices-plan-crossdot { fill: var(--warn); }
+
+.bdii-lab .lab-indices-plan-chartleg {
+  font-size: 0.85em;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bdii-lab .lab-indices-plan-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+.bdii-lab .lab-indices-plan-swatch--idx { background: var(--primary); }
+.bdii-lab .lab-indices-plan-swatch--full { background: var(--text-3); }
+
+/* ---------- retos ---------- */
+
+.bdii-lab .lab-indices-plan-reto {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bdii-lab .lab-indices-plan-reto:first-child {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* ---------- responsive: usable a 375px, el diagrama scrollea si hace falta ---------- */
+
+@media (max-width: 640px) {
+  .bdii-lab .lab-indices-plan-tree {
+    min-width: 480px;
+  }
+  /* El gráfico ya tiene un viewBox de 400 unidades con rótulos de 15: cabe en la
+     columna de 375 px (~310 px útiles) con el texto en ~11-12 px, sin scroll. */
+  .bdii-lab .lab-indices-plan-chart {
+    min-width: 280px;
+  }
+}
+
+.bdii-lab .lab-indices-plan-inlinecode {
+  font-size: 0.92em;
+  padding: 0 0.25em;
+  border-radius: 4px;
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+/* ---------- figura compacta ---------- */
+
+.bdii-lab .lab-indices-plan-figcol { display: flex; flex-direction: column; gap: 8px; min-width: 0; }

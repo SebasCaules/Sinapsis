@@ -24,14 +24,13 @@ estado: procesado
 
 ## Resumen general
 
-Esta es la parte 1 de 3 de la Clase 05, dictada en forma asincrónica, dedicada al `SELECT`
+Esta es la parte 1 de 3 de la Clase 05, dedicada al `SELECT`
 recorrido cláusula por cláusula: proyección (`SELECT`, `DISTINCT`), filtrado (`WHERE`, comparadores,
 `BETWEEN`, `LIKE`, `IS NULL`, `AND`/`OR`/`NOT`), orden (`ORDER BY`, `LIMIT`/`OFFSET`) y, al cierre,
 funciones de agregación con `GROUP BY` y `HAVING`. Todos los ejemplos corren sobre el esquema
-Voluntarios (en realidad el esquema HR de Oracle renombrado). El deck mezcla tres motores —Oracle en
-el DDL, PostgreSQL en `LIMIT`/`OFFSET` y en los mensajes de error— mientras que la cursada corre sobre
-MySQL; la traducción cláusula por cláusula está al final, en «PostgreSQL/Oracle → MySQL». Es base
-directa del TP 3, que trabaja sobre `esq_peliculas.sql`.
+Voluntarios. El deck mezcla tres motores —Oracle en el DDL, PostgreSQL en `LIMIT`/`OFFSET` y en los
+mensajes de error— mientras que la cursada corre sobre MySQL. Es base directa del TP 3, que trabaja
+sobre `esq_peliculas.sql`.
 
 Reglas y trampas que hay que llevarse:
 

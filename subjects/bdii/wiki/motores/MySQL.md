@@ -48,6 +48,11 @@ fuentes:
   - "raw/Unidad-01/Practica/ITBA TP 7 Restricciones Avanzadas.pdf"
   - "raw/Unidad-01/Teorica/BD2_Clase 11 - Seguridad-Transacciones.pdf"
   - "raw/Unidad-01/Practica/ITBA TP 8 Seguridad.pdf"
+  - "raw/Unidad-01/Teorica/BD2_Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL.pdf"
+  - "raw/Unidad-01/Practica/ITBA TP 3 SQL avanzados.pdf"
+  - "raw/Unidad-01/Teorica/Ejercicios de RI/Ejercicio 1 - RIR.png"
+  - "raw/Unidad-01/Teorica/Ejercicios de RI/Ejercicio 2 - RIR.png"
+  - "raw/Unidad-01/Teorica/ejemplo Seguridad BD.png"
   - "raw/Material_Catedra/programa/Cronograma 2026-2C.pdf"
 estado: procesado
 ---
@@ -67,11 +72,12 @@ Reglas y trampas centrales: el DDL y las sentencias de cuentas (`CREATE USER`, `
 hacen *commit* implícito, sin *rollback* posible; MySQL no tiene `ASSERTION`, `DOMAIN`, `CHECK` con
 subconsulta, `FOR EACH STATEMENT` ni los tipos `%rowtype`/`%type`/`record` de PL/pgSQL, y hay que
 resolver con triggers, `ENUM`, columnas repetidas o cursores explícitos; el modelo de seguridad no
-tiene *owner*, `PUBLIC` ni `REVOKE … CASCADE`, y `WITH GRANT OPTION` es una marca por cuenta y
-nivel, no por privilegio —una misma sentencia del TP8 tiene respuesta distinta según se conteste
-desde la teoría o desde el motor—; InnoDB arranca en `REPEATABLE READ` y es multiversión, así que
-un `SELECT` común no bloquea; `||` es el operador `OR` en MySQL, no concatenación (se usa
-`CONCAT()`); y `DELIMITER` es un comando del cliente, imprescindible para triggers y procedimientos.
+tiene *owner*, `PUBLIC` ni `REVOKE … CASCADE`; InnoDB arranca en `REPEATABLE READ` y es
+multiversión, así que un `SELECT` común no bloquea; `||` es el operador `OR`, no concatenación; y su
+*crash recovery* separa *redo log*, *undo log*, *doublewrite buffer* y *binlog* —*gotcha* de examen:
+*redo log ≠ binlog* (§ 8.5). Varias de estas reglas y varios mensajes de error (`1369`, `1451`,
+`1062`, `1471`, `3819`) ya se confirmaron con corridas reales contra `mysql:9.7.2` →
+[[Parcial 2Q2025]].
 
 Para el parcial conviene tener a mano la tabla de equivalencias DDL/DML (§§ 1–2), el corte de las
 restricciones declarativas entre tupla y tabla (§ 5) y las tres diferencias de modelo en seguridad
@@ -265,16 +271,17 @@ Serie real según [[_cronograma]], transcripta de `raw/tp/_index.md`:
 
 | TP | Tema | Práctica donde se da | Teórica que lo sustenta | ¿Toca MySQL? |
 | --- | --- | --- | --- | --- |
-| **TP1** | Modelos / Diagramas ER extendido | [[Práctica 2026-08-04]] | pendiente | ✗ es papel: DER, sin motor |
-| **TP2** | Creación de esquemas: tablas y tipos de datos | [[Práctica 2026-08-04]] | pendiente | ✓ DDL en MySQL |
-| **TP3** | SQLs simples · SQLs avanzados | [[Práctica 2026-08-04]] · [[Práctica 2026-08-11]] | pendiente | ✓ sobre `esq_peliculas.sql`. **El enunciado de "SQLs avanzados" no está archivado** — `pendiente`, no `—` |
+| **TP1** | Modelos / Diagramas ER extendido | [[Práctica 2026-08-04]] | Clases **02, 03 y 05** *(en conjunto para TP1–TP3 simples; el reparto uno a uno no está verificado)* | ✗ es papel: DER, sin motor |
+| **TP2** | Creación de esquemas: tablas y tipos de datos | [[Práctica 2026-08-04]] | Clases **02, 03 y 05** | ✓ DDL en MySQL |
+| **TP3** | SQLs simples · SQLs avanzados | [[Práctica 2026-08-04]] · [[Práctica 2026-08-11]] | Clases **02, 03 y 05** *(simples)* · Clase **05** *(ej. 1)* y Clase **04** *(ej. 2)* *(avanzados)* | ✓ sobre `esq_peliculas.sql`. SQLs avanzados, corrido en MySQL 9.7.2 → [[Práctica 2026-08-11]] § *TP3 SQLs avanzados* |
 | **TP4** | Vistas | **[[Práctica 2026-08-11]]** | Clases **06** y **07** | ✓ `CREATE VIEW` en MySQL. 5 ejercicios; los **3, 4 y 5** sobre `esq_peliculas.sql`, el **1 y el 2** sobre un esquema propio que **hay que crear a mano** |
 | **TP5** | Explain Plan | **[[Práctica 2026-08-18]]** | Clase **08** | ✓ **confirmado por el enunciado** — ver el callout de abajo. **No usa `esq_peliculas.sql`**: crea sus propias tablas `materia` e `inscripto` |
 | **TP6** | Restricciones declarativas | **[[Práctica 2026-08-25]]** | Clase **09** | (atención) **solo el ejercicio 3.c.** Los ejercicios 1 y 2 son de **matching**, que InnoDB ignora, y el 3.b pide `CREATE ASSERTION`, que no existe. Sus tres esquemas están solo como imagen → § *5* |
 | **TP7** | Restricciones avanzadas | **[[Práctica 2026-09-01]]** | Clase **10** | (atención) **casi todo, menos dos puntos.** Los ejercicios **1.c** y **2.b** piden razonar `FOR EACH STATEMENT`, que MySQL no tiene: son de lápiz y papel, como los de *matching* del TP6. Usa `esq_peliculas.sql` *(ej. 1 y 3)* y el esquema A del TP6 ej. 3 *(ej. 4)*. El trigger del **ej. 2** puede chocar con el **error 1442** → § *Dudas abiertas* |
 | **TP8** | Seguridad | **[[Práctica 2026-09-08]]** | Clase **11** *(sólo los slides 8–13)* | (atención) **corre casi entero, con la teoría por delante.** De sus **18 ítems**: tres son de lápiz y papel por decisión del enunciado —1.b (`REVOKE … CASCADE`) y 2.d / 2.f (`PUBLIC`)—, uno no puede ejecutarse como está —2.h nombra el rol `ins_prov`, que 2.g no creó—, uno usa `CASCADE` sin aviso (3.b.2), y 1.a da un resultado distinto en MySQL que en la teoría (la sentencia 6 pasa). Tres esquemas propios, dos como imagen, y once cuentas a crear a mano → § *7* |
 | **TP9** | MongoDB — Parte I | **[[Práctica 2026-09-15]]** | Clases **12, 13 y 14** | ✗ **MongoDB** — cambio de motor y de unidad *(`raw/Unidad-02/`)* → [[MongoDB]] |
-| **TP9 Parte II**–**TP13** | MongoDB · Cassandra · Neo4j · Redis · DynamoDB | segunda mitad | pendiente | ✗ segunda mitad NoSQL |
+| **TP9 Parte II** | MongoDB | **[[Práctica 2026-09-22]]** | Clases **12, 13 y 14** | ✗ **MongoDB** → [[MongoDB]] |
+| **TP10**–**TP13** | Cassandra · Neo4j · Redis · DynamoDB | segunda mitad | pendiente | ✗ segunda mitad NoSQL |
 
 > [!success] (clave) El TP5 corre sobre **MySQL**, y lo dice su propio enunciado
 > Primera línea del PDF: *"Antes de comenzar, es necesario **levantar MySQL** en la PC que vayan a
@@ -393,9 +400,11 @@ el deck de la [[Clase 04 - AlteraciónActualizaciónTablas|Clase 04]].
 | `STDDEV(col)` | Oracle / PostgreSQL | existe, **pero MySQL devuelve el desvío poblacional** y PostgreSQL el muestral → **números distintos** | **verificar** | [[Clase 05 - Consultas de Datos–Parte 1]] § *PostgreSQL/Oracle → MySQL* |
 | `LIKE` sensible a mayúsculas | PostgreSQL: sí | MySQL: **depende de la *collation***; con la default `..._ci` es **insensible** | **verificar la collation del TP** | [[Clase 05 - Consultas de Datos–Parte 1]] slide 14 |
 | Alias plegado a minúsculas en la salida | PostgreSQL (*case folding*) | MySQL **respeta** las mayúsculas del alias | alta | [[Clase 05 - Consultas de Datos–Parte 1]] |
-| Regla del `GROUP BY` del slide 31 | PostgreSQL: siempre | MySQL: **igual desde 5.7**, por `ONLY_FULL_GROUP_BY` activo por defecto | alta | [[Clase 05 - Consultas de Datos–Parte 1]] slide 31 |
+| Regla del `GROUP BY` del slide 31 | PostgreSQL: siempre | MySQL: **igual desde 5.7**, por `ONLY_FULL_GROUP_BY` activo por defecto | **confirmado** — corrida real del TP3 ejercicio g agrupando por `nro_entrega` (la PK, fuera del `SELECT`) para no violarla | [[Clase 05 - Consultas de Datos–Parte 1]] slide 31 · [[Práctica 2026-08-11]] § *TP3 SQLs avanzados*, ejercicio g |
 | `ERROR: aggregates not allowed in WHERE clause` | PostgreSQL | `ERROR 1111 (HY000): Invalid use of group function` | alta | [[Clase 05 - Consultas de Datos–Parte 1]] slide 35 |
 | Identificador con caracteres raros — el slide 17 lo escribe **pelado**: `CREATE VIEW Envios500-999 AS` | ninguno: **así, sin comillas, no es un identificador válido en ningún motor** *(razonamiento propio)* | `` `Envios500-999` `` — **MySQL usa backticks**; en el estándar/PostgreSQL sería `"Envios500-999"` | seguro | [[Clase 06 - Vistas-Parte 1]] slide 17 |
+| `UPDATE … SET … FROM …` | estándar / PostgreSQL | **no existe** *(MySQL no tiene `FROM` en el `UPDATE`)* → `UPDATE tabla JOIN otra ON … SET tabla.col = otra.col;`, el `JOIN` va **antes** del `SET` | **confirmado** — corrida real, TP3 ejercicio 2.c: `UPDATE DistribuidorNac dn JOIN internacional i ON dn.id_distrib_mayorista = i.id_distribuidor SET dn.codigo_pais = i.codigo_pais;` | [[Práctica 2026-08-11]] § *TP3 SQLs avanzados*, ejercicio 2.c |
+| `to_date('2020-02-02', 'yyyy-MM-dd')` | Oracle | **no existe** → `STR_TO_DATE('2020-02-02', '%Y-%m-%d')`, o directamente el literal `'2020-02-02'` si la columna es `DATE` (MySQL castea el string sin funciones) | alta — la sintaxis Oracle aparece en un enunciado de examen ([[Parcial 2Q2025]] Preguntas 1 y 18) que el vault resolvió con el literal directo, sin necesitar `STR_TO_DATE` | [[Parcial 2Q2025]] Sección A |
 
 ### 3 · Vistas
 
@@ -403,7 +412,7 @@ el deck de la [[Clase 04 - AlteraciónActualizaciónTablas|Clase 04]].
 | --- | --- | --- | --- |
 | `CREATE VIEW … AS consulta` | **igual** | seguro | [[Clase 06 - Vistas-Parte 1]] |
 | `DROP VIEW v RESTRICT;` / `CASCADE;` | MySQL **acepta las palabras y las ignora**: el `DROP` procede y las vistas dependientes quedan inválidas *(fallan recién al consultarlas)* | seguro | [[Clase 06 - Vistas-Parte 1]] slide 7 |
-| **`CREATE MATERIALIZED VIEW … WITH [NO] DATA`** | **no existe.** *"MySQL no admite las vistas materializadas"* — **lo dice el propio slide 20** | seguro, dicho por el deck | [[Clase 07 - Vistas-Parte 2]] slides 20–21 |
+| **`CREATE MATERIALIZED VIEW … WITH [NO] DATA`** | **no existe.** *"MySQL no admite las vistas materializadas"* — **lo dice el propio slide 20**. (atención) Precisión sobre la sintaxis, corrida en MySQL 9.7.2: `CREATE MATERIALIZED VIEW v AS SELECT …` **sin** cláusula final **se acepta**, pero crea una vista común que no materializa *(`TABLE_TYPE = VIEW`, `IS_UPDATABLE = NO`, el `SELECT` refleja al instante los `INSERT` sobre la tabla base; `SHOW CREATE VIEW` muestra `MATERIALIZED /*(BY ENGINE=UNKNOWN)*/`)*. Con `WITH DATA` o `WITH NO DATA` → `ERROR 1064`; con `WITH LOCAL CHECK OPTION` → `ERROR 1368 … CHECK OPTION on non-updatable view` | **confirmado** — corrida real en 9.7.2 | [[Clase 07 - Vistas-Parte 2]] slides 20–21 · [[Final 1Dic2023]] § *Pregunta 3* |
 | `REFRESH MATERIALIZED VIEW v;` *(**no está en el deck**: `REFRESH` no aparece en ninguno de los 22 slides. Es la contraparte PostgreSQL del "se debe actualizar manualmente la vista materializada" que dice la tabla del slide 20)* | **no existe** (no hay qué refrescar) | **razonamiento propio** | — |
 | Trigger **`INSTEAD OF`** sobre una vista, con `:new.columna` | **no existe**: MySQL solo admite `BEFORE`/`AFTER` y **solo sobre tablas**. El sustituto es un *stored procedure* o escribir contra las tablas base | **verificar** — razonamiento propio | [[Clase 07 - Vistas-Parte 2]] slides 11–12 |
 | `WITH [LOCAL\|CASCADED] CHECK OPTION` | existe en MySQL | seguro | [[Clase 06 - Vistas-Parte 1]] slides 4 y 15 *(ejemplos: 16–17)* · [[Clase 07 - Vistas-Parte 2]] slide 2 |
@@ -500,9 +509,9 @@ sentencias declarativas que enseña, MySQL tiene una y media**.
 | `ON DELETE` / `ON UPDATE CASCADE` | **igual** | seguro | Clase 09 slides 9–10 |
 | `ON DELETE` / `ON UPDATE SET NULL` | **igual**, y **exige que la columna admita nulos** | seguro | Clase 09 slide 9 |
 | **`SET DEFAULT`** | ✗ **InnoDB rechaza la definición de la tabla**: la parsea y la declara inválida | **alta** — verificar contra el manual 9.7 | Clase 09 slide 8 |
-| **`NO ACTION` vs. `RESTRICT`** | (atención) **InnoDB los trata igual.** No hay chequeo diferido, así que la distinción del slide 9 *("RESTRICT se chequea antes")* **no es observable** | **alta** | Clase 09 slides 9–10, 38 |
-| Acción por defecto | `NO ACTION` — que en InnoDB **es** `RESTRICT` | alta | Clase 09 slide 9 |
-| **`MATCH FULL \| PARTIAL \| SIMPLE`** | (atención) **se parsea y se ignora**: InnoDB siempre se comporta como **`MATCH SIMPLE`** | **alta** — (crítico) **verificar contra el manual 9.7** | Clase 09 slides 12–14 |
+| **`NO ACTION` vs. `RESTRICT`** | (atención) **InnoDB los trata igual.** No hay chequeo diferido, así que la distinción del slide 9 *("RESTRICT se chequea antes")* **no es observable** | **alta** — **confirmado con dos corridas reales** (25/09): un `DELETE` sobre la fila padre sin `ON DELETE` explícito lo rechaza con `ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails` en [[Parcial 2Q2025]] Pregunta 30, y de nuevo en el Ejercicio 2 RIR de [[Clase 09 - Restricciones integridad-Parte 1]] § *Material complementario del 25/08* (b), caso 6 | Clase 09 slides 9–10, 38 · [[Parcial 2Q2025]] Sección B |
+| Acción por defecto | `NO ACTION` — que en InnoDB **es** `RESTRICT` | alta — confirmado (ver fila anterior) | Clase 09 slide 9 |
+| **`MATCH FULL \| PARTIAL \| SIMPLE`** | (atención) **se parsea y se ignora**: InnoDB siempre se comporta como **`MATCH SIMPLE`** | **confirmado con corrida real** (25/09): un `INSERT` con un componente `NULL` de una FK compuesta procede sin error aunque el otro componente no exista en la tabla referenciada — [[Parcial 2Q2025]] Pregunta 19, `INSERT INTO Materia (…) VALUES ('M4', 3, null, 'nom4');` sobre `idCarr=3` inexistente, sin `ERROR`. Coincide con [[1.09.02 - Integridad referencial y acciones referenciales\|Integridad referencial]] § *Tipos de matching* | Clase 09 slides 12–14 · [[Parcial 2Q2025]] Sección B |
 | Chequeo diferido (`SET CONSTRAINTS … DEFERRED`) | ✗ **no existe**: todo es inmediato | seguro | Clase 09 slide 38, paso 3 |
 | `ALTER TABLE t ADD CONSTRAINT n FOREIGN KEY …` | **igual** | seguro | Clase 09 slide 8 · TP6 ej. 1.a |
 | Eliminar una FK | `ALTER TABLE t DROP **FOREIGN KEY** n;` — **no** `DROP CONSTRAINT` | seguro | `esq_peliculas.sql` |
@@ -530,6 +539,25 @@ sentencias declarativas que enseña, MySQL tiene una y media**.
 | `LIKE 'S\_%' ESCAPE '\'` | **igual — y el `ESCAPE` es opcional**: en MySQL la barra invertida ya es el carácter de escape por defecto dentro de las cadenas | alta | Clase 09 slide 18 · TP6 3.B.7 |
 | `EXTRACT(YEAR FROM fecha)` | existe; la forma idiomática es **`YEAR(fecha)`** | seguro | TP6 3.A.3 |
 | Nombrar restricciones (`ADD CONSTRAINT nombre`) | **igual**, y sigue siendo *"Recomendable!"* | seguro | Clase 09 slide 6 |
+
+> [!warning] (crítico) Un `CHECK` con un operando `NULL` no rechaza: **acepta**
+> Confirmado con corrida real (25/09) sobre el Ejercicio 1 RIR de
+> [[Clase 09 - Restricciones integridad-Parte 1]] § *Material complementario del 25/08* (a): una
+> cuenta corriente con `saldo` negativo y `limiteDescubierto = NULL` **pasa** el
+> `CHECK (saldo >= -limiteDescubierto)`. La condición evalúa `DESCONOCIDO` (cualquier comparación
+> contra `NULL` lo hace), y un `CHECK` deja pasar tanto `VERDADERO` como `DESCONOCIDO` — nunca solo
+> rechaza `FALSO`. Es la misma lógica trivaluada de [[1.05.01 - SQL — consultas|SQL — consultas]] §
+> 11, aplicada a un `CHECK` en vez de a un `WHERE`. Si la intención es exigir el valor antes de
+> permitir la excepción, hay que agregarlo a mano: `AND limiteDescubierto IS NOT NULL`.
+>
+> El mensaje de error real de un `CHECK` violado, para cuando sí rechaza (`ALTER TABLE … ADD
+> CONSTRAINT` sobre datos ya cargados que no lo cumplen, [[Parcial 2Q2025]] Pregunta 25):
+> ```
+> ERROR 3819 (HY000): Check constraint 'chk_sueldo_comision' is violated.
+> ```
+> Confirma que MySQL **valida los datos existentes al crear el `CHECK`** — a diferencia de un
+> trigger, que solo actúa sobre operaciones futuras —, consistente con la fila de arriba
+> *"se hace cumplir desde 8.0.16"*.
 
 #### 5.3 · Triggers
 
@@ -732,8 +760,10 @@ OPTION` por privilegio, `REVOKE … CASCADE`, `PUBLIC`— contra lo que MySQL ha
 > Columna 2: la teoría, tal como la usa el TP8 y la formaliza **GMUW 10.1** *(impresas 425–436)*.
 > Columna 3: MySQL 9.7. *De dónde sale* distingue **deck** *(slide N de la Clase 11)*, **TP8**
 > *(ejercicio)* y **manual 9.7** *(sección citada por número y título)*; lo que no se pudo abrir
-> dice `sin verificar`. Ninguna de las tres fuentes es el contenedor: **nada de esta sección se
-> ejecutó todavía en `mysql:9.7.2`** → § *Dudas abiertas*.
+> dice `sin verificar`. La mayor parte de esta sección seguía sin corrida real al 16/09 → § *Dudas
+> abiertas*. **Confirmado con corrida real en MySQL 9.7.2:** la fila *Revocar* de
+> abajo, `REVOKE … CASCADE` como error de sintaxis (`ERROR 1064`) y el privilegio huérfano que deja
+> — ver ahí la corrida. El resto de la tabla sigue sin ejecutar.
 
 #### 7.1 · La tabla: teoría *(GMUW 10.1 / TP8)* vs. MySQL
 
@@ -746,9 +776,9 @@ OPTION` por privilegio, `REVOKE … CASCADE`, `PUBLIC`— contra lo que MySQL ha
 | **Granularidades** | tabla, o **columna** en `SELECT`/`INSERT`/`UPDATE`/`REFERENCES` | **cinco niveles**: `ON *.*` *(global)* · `ON base.*` · `ON base.tabla` · **`GRANT UPDATE (col1, col2) ON base.tabla`** *(columna)* · `ON PROCEDURE base.rutina`. El deck da una sola *(`[base].[tabla]`)*. **La de columna, que el TP8 usa en el ej. 1 y pide en 2.g/2.i, no está en ningún slide** | (atención) operativo: la sintaxis hay que sacarla del manual | deck slides 10, 13 · TP8 ej. 1, 2.g, 2.i · manual **§ 15.7.1.6** *(gramática `priv_type [(column_list)]`)* |
 | **`WITH GRANT OPTION`** | se adjunta **a cada privilegio**: se puede tener `SELECT*` y `DELETE` sin `*` sobre la misma tabla | (crítico) **Es un privilegio aparte, `GRANT OPTION`, y es una marca por (cuenta, nivel)**: si se tiene sobre la tabla, sirve para re-otorgar cualquier privilegio que se tenga sobre ella. Es el elemento `'Grant'` del `SET` `Table_priv` de `mysql.tables_priv` *(y `Grant_priv` en `mysql.user`/`mysql.db`)* | (crítico) **sí**: la **sentencia 6 del ej. 1 falla en la teoría y pasa en MySQL**; en 2.c U2 puede re-otorgar también el `SELECT` de 2.b; en 3.b.2 B conserva la marca tras perder `INSERT` | TP8 ej. 1.a, 2.c, 3.b.2 · manual **§ 8.2.2 *Privileges Provided by MySQL*** · **§ 8.2.3 *Grant Tables*** *(`Table_priv` = `SET('Select','Insert','Update','Delete','Create','Drop','Grant','References','Index','Alter','Create View','Show view','Trigger')`)*. Sin resolver si aplica a nivel global, ver *Dudas* |
 | **`ALL`** | `ALL PRIVILEGES` = todos los que el otorgante puede conceder *(GMUW 10.1.4)* | ✓ `ALL [PRIVILEGES]`, **pero no incluye `GRANT OPTION`** —hay que pedirla aparte con `WITH GRANT OPTION`— ni los privilegios de un nivel superior: *"todo sobre `midb`"* no es *"todo"* | (atención) en 2.a hay que escribir `WITH GRANT OPTION` explícito | deck slides 10, 13 · [[Clase 11 - Seguridad-Transacciones]] § *Slide 13* · manual **§ 15.7.1.6** *("the `GRANT OPTION` privilege enables you to assign only those privileges which you yourself possess")* |
-| **Revocar** | `REVOKE priv ON tabla FROM usuario {CASCADE \| RESTRICT}`: `CASCADE` quita también lo concedido a partir de él, `RESTRICT` rechaza si dejaría huérfanos *(GMUW 10.1.6)* | (crítico) **`REVOKE permisos ON base.tabla FROM 'u'@'h';` — sin `CASCADE` ni `RESTRICT`**: la gramática del manual no los tiene. **La revocación nunca se propaga**: quitarle algo a `adm` no le quita nada a `doc`. Escribir `CASCADE` es error de sintaxis | (crítico) **sí**: 1.b y 3.b.2 se contestan **en papel**, y el enunciado del 1.b lo dice | TP8 ej. 1.b *("ya que MySQL no provee la opción CASCADE")*, 3.b.2 · deck slide 12 · manual **§ 15.7.1.8 *REVOKE Statement*** |
+| **Revocar** | `REVOKE priv ON tabla FROM usuario {CASCADE \| RESTRICT}`: `CASCADE` quita también lo concedido a partir de él, `RESTRICT` rechaza si dejaría huérfanos *(GMUW cap. 10.1.6)* | (crítico) **`REVOKE permisos ON base.tabla FROM 'u'@'h';` — sin `CASCADE` ni `RESTRICT`**: la gramática del manual no los tiene. **La revocación nunca se propaga**: quitarle algo a `adm` no le quita nada a `doc`. Escribir `CASCADE` **confirmado con corrida real** (25/09, sobre el grafo de `ejemplo Seguridad BD.png` de [[Clase 11 - Seguridad-Transacciones]] § *Material complementario del 07/09*): `REVOKE INSERT ON t1 FROM 'user1_sec'@'%' CASCADE;` da `ERROR 1064 (42000): You have an error in your SQL syntax … near 'CASCADE'` — **no se ignora en silencio, es un error de sintaxis que no compila**. Repitiendo el `REVOKE` sin `CASCADE`, el privilegio que `user1_sec` le había otorgado a `user2_sec` (vía su `WITH GRANT OPTION`) **sobrevive**: queda **huérfano**, vigente aunque la concesión de la que dependía ya no exista | (crítico) **sí**: 1.b y 3.b.2 se contestan **en papel**, y el enunciado del 1.b lo dice | TP8 ej. 1.b *("ya que MySQL no provee la opción CASCADE")*, 3.b.2 · deck slide 12 · manual **§ 15.7.1.8 *REVOKE Statement*** · [[Clase 11 - Seguridad-Transacciones]] § *Material complementario del 07/09* |
 | **Revocar todo** | `REVOKE ALL PRIVILEGES ON tabla FROM usuario` | dos formas equivalentes que **el deck no trae**: **`REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'u'@'h';`** o `REVOKE ALL ON *.* FROM 'u'@'h';` — las dos borran *"all global, database, table, column, and routine privileges"*. El `REVOKE ALL ON midb.*` del slide 13 **sólo revoca el nivel base**: un `GRANT SELECT ON midb.log` sobreviviría | (atención) puede tocar 2.e / 2.f | deck slide 13 · manual **§ 15.7.1.8** *(cita textual)* |
-| **Revocar una columna a quien tiene la tabla entera** | el estándar descompone: quedan las otras columnas | (nota) MySQL **no descompone** el privilegio de tabla: `REVOKE UPDATE(tiempo) …` a quien tiene `UPDATE` de tabla **falla**, presumiblemente con **`ERROR 1147 (42000)`** *(`ER_NONEXISTING_TABLE_GRANT`, sin verificar en el contenedor)* | (crítico) **sí**: el punto más fino del 1.b | TP8 ej. 1.b · [[Práctica 2026-09-08]] § *Qué no corre*, fila 6 · *MySQL Error Reference 9.7* |
+| **Revocar una columna a quien tiene la tabla entera** | el estándar descompone: quedan las otras columnas | (nota) MySQL **no descompone** el privilegio de tabla: `REVOKE UPDATE(tiempo) …` a quien tiene `UPDATE` de tabla **falla** con **`ERROR 1147 (42000)`** *(`ER_NONEXISTING_TABLE_GRANT`; confirmado con corrida real en 9.7.2: `There is no such grant defined for user … on table 'parrafo'`)* | (crítico) **sí**: el punto más fino del 1.b | TP8 ej. 1.b · [[Práctica 2026-09-08]] § *Qué no corre*, fila 6 · *MySQL Error Reference 9.7* |
 | **`PUBLIC`** | pseudo-usuario que representa a **todos**, presentes y futuros *(GMUW 10.1, impresa 425)* | ✗ **No existe**: cero apariciones en § 15.7.1.6. Sustituto: un rol nombrado en la variable de sistema **`mandatory_roles`** —se comporta como *"granted to all users"* sin concederlo a cada cuenta—, que se fija con `SET PERSIST mandatory_roles = '…';` o en `my.cnf`, y **exige el privilegio `ROLE_ADMIN`**. O bien un `GRANT` por cuenta | (crítico) **sí**: 2.d y 2.f se contestan en la teoría; el sustituto es un extra | TP8 ej. 2.d, 2.f · manual **§ 8.2.10 *Using Roles*** › *Defining Mandatory Roles* · **§ 8.2.2** *(`ROLE_ADMIN`)* |
 | **Roles** | SQL:1999: `CREATE ROLE`, `GRANT priv TO rol`, `GRANT rol TO usuario` *(Date 17.6)* | ✓ **desde MySQL 8.0**: `CREATE ROLE 'r';` · `GRANT SELECT ON base.t TO 'r';` · `GRANT 'r' TO 'u'@'h';` · `SHOW GRANTS FOR 'u'@'h' USING 'r';` · `DROP ROLE 'r';` — las seis sentencias del slide 11 son el **ejemplo oficial del manual** *(`dev1`, `dev1pass`, `app_developer`)*, **pero en un orden que no corre**: la tercera borra el rol que la segunda creó | — | deck slide 11 · manual **§ 8.2.10 *Using Roles*** |
 | **Activación del rol** | un rol concedido **está activo** | (crítico) **No**: conceder un rol *"no automatically causes the role to become active within account sessions"*. Hay tres maneras: **`SET DEFAULT ROLE 'r' TO 'u'@'h';`** *(para cada conexión futura)*, **`SET ROLE 'r';`** *(en la sesión actual)*, o la variable **`activate_all_roles_on_login = ON`** *(desactivada por defecto)*. **El deck no menciona ninguna**: quien siga el slide 11 para el ej. 2.h va a ver que `U4` no puede hacer nada. Se comprueba con **`SELECT CURRENT_ROLE();`** | (crítico) **sí**: 2.h–2.j no funcionan sin este paso | deck slide 11 · TP8 ej. 2.h · manual **§ 8.2.10** › *Activating Roles* |
@@ -827,7 +857,8 @@ SELECT User, Host, Db, Table_name, Column_name, Column_priv FROM mysql.columns_p
 > LEVEL`, ni que **InnoDB arranca en `REPEATABLE READ`**, ni que las lecturas comunes no bloquean.
 > Es la ausencia que [[Clase 11 - Seguridad-Transacciones]] dejó anotada como *"queda para un § 7 de
 > [[MySQL]], todavía por escribir"* — es este § 8. Todo lo que sigue está verificado contra el manual
-> 9.7, salvo donde dice lo contrario; **nada se ejecutó todavía en el contenedor**.
+> 9.7, salvo donde dice lo contrario. **Una parte de esta sección está corrida en MySQL 9.7.2**: `@@transaction_isolation` (§ *8.2*) y las variables de redo/undo/doublewrite/binlog de la
+> nueva § *8.5* — ver ahí el detalle. El resto (§§ *8.1*, *8.3*, *8.4*) sigue sin ejecutarse.
 
 #### 8.1 · Abrir, confirmar, deshacer
 
@@ -849,7 +880,7 @@ SELECT User, Host, Db, Table_name, Column_name, Column_priv FROM mysql.columns_p
 | Los cuatro niveles del estándar, en prosa | los **mismos cuatro** nombres: `READ UNCOMMITTED` · `READ COMMITTED` · `REPEATABLE READ` · `SERIALIZABLE` | manual **§ 15.3.7 *SET TRANSACTION Statement*** |
 | *(no dice el nivel por defecto)* | (crítico) **`REPEATABLE READ`** es el default de InnoDB. **No `READ COMMITTED`** como en PostgreSQL, Oracle y SQL Server *(razonamiento propio sobre esos tres motores)* | manual **§ 15.3.7** y **§ 17.7.2.1 *Transaction Isolation Levels*** |
 | *(no dice cómo se cambia)* | **`SET TRANSACTION ISOLATION LEVEL nivel;`** → sólo la **próxima** transacción · **`SET SESSION TRANSACTION ISOLATION LEVEL …`** → toda la sesión · **`SET GLOBAL …`** → sesiones nuevas | manual **§ 15.3.7** |
-| *(no dice cómo se consulta)* | **`SELECT @@SESSION.transaction_isolation;`** · `SELECT @@GLOBAL.transaction_isolation;` — devuelve `REPEATABLE-READ` con guion | manual **§ 15.3.7** *(formato con guion: sin verificar en el contenedor)* |
+| *(no dice cómo se consulta)* | **`SELECT @@SESSION.transaction_isolation;`** · `SELECT @@GLOBAL.transaction_isolation;` — devuelve `REPEATABLE-READ` con guion | manual **§ 15.3.7** — **confirmado en el contenedor**, corrida real (25/09) en MySQL 9.7.2: `SELECT @@transaction_isolation;` → `REPEATABLE-READ`, ver § *8.5* |
 | *"Exclusive Lock: Nadie más puede leer ni modificar el dato"* *(slide 25)* | (crítico) **Falso en InnoDB para los `SELECT` comunes.** InnoDB es **multiversión**: guarda versiones previas de las filas para construir lecturas consistentes. Un `SELECT` sin `FOR UPDATE` **no pide bloqueo**: **los lectores no bloquean a los escritores ni al revés**. El modelo del slide es el de GMUW 18.4, no el del motor de la cursada | manual **§ 17.3 *InnoDB Multi-Versioning*** · [[Clase 11 - Seguridad-Transacciones]] § *Slide 25* |
 | *"Repeatable Read … no previene las lecturas fantasma"* | (nota) **En la práctica, para las lecturas consistentes, InnoDB no las muestra**: lee la instantánea de la primera lectura de la transacción. Si el parcial pregunta *"según la teoría"*, vale el slide; si pregunta *"en MySQL"*, la respuesta es la contraria — el mismo patrón del `FOR EACH STATEMENT` del TP7. Para **lecturas con bloqueo, `UPDATE` y `DELETE`**, la misma sección agrega *gap locks* / *next-key locks* que bloquean inserciones de otras sesiones en el rango escaneado | manual **§ 17.7.2.1**. Sin verificar quedan § 17.7.1 *InnoDB Locking* y § 17.7.4 *Phantom Rows* |
 | *"Serializable: … tratando las transacciones como si fueran serializadas"* | en InnoDB **convierte cada `SELECT` común en `SELECT … FOR SHARE`** si `autocommit` está desactivado: es el único nivel donde **leer bloquea** | manual **§ 17.7.2.1** |
@@ -895,7 +926,65 @@ del § *4*** de esta página. La teoría va a [[1.08.02 - Índices|Índices]]; a
 | **`drop index <nombre-índice>`** *(slide 35)* | **`DROP INDEX nombre ON tabla;`** — el `ON tabla` es **obligatorio** | ✗ sin `ON` es error de sintaxis — **el más visible de los tres lugares del deck que no corren en MySQL y no lo avisan** *(los otros dos: el orden del `DROP ROLE` del slide 11 y los guiones de la fila siguiente)* | [[Clase 11 - Seguridad-Transacciones]] § *Slide 35* · manual § *DROP INDEX Statement*: **título y número sin verificar** *(no se abrió)* |
 | `create index índice-s on sucursal (nombre-sucursal)` | los identificadores con **guion** exigen backticks: `` CREATE INDEX `índice-s` ON sucursal (`nombre-sucursal`); `` | ✗ sin `` ` `` | razonamiento propio *(`-` no es carácter de identificador)* |
 | — | la forma alternativa: `ALTER TABLE tabla ADD INDEX nombre (cols);` / `ALTER TABLE tabla DROP INDEX nombre;` *(es la que § *1 · DDL* ya daba para el borrado)* | ✓ | § *1* de esta página · manual: **sin verificar** |
-| `CREATE INDEX MYINDEX ON USERS (DNI) USING HASH;` *(slide 38, "Ejemplo en MySQL")* | (crítico) **Sintaxis correcta, resultado distinto del prometido.** La *Table 15.1 Index Types Per Storage Engine* del manual dice `InnoDB → BTREE` *(sólo)*, `MyISAM → BTREE`, `MEMORY/HEAP → HASH, BTREE`, `NDB → HASH, BTREE`; si el tipo pedido no es válido para el motor, se usa el disponible sin fallar. O sea: **sobre una tabla InnoDB la sentencia no falla y crea un B-tree**; `SHOW INDEX FROM USERS` debería devolver `Index_type = BTREE` *(sin verificar en el contenedor)*. Para un hash de verdad, la tabla tiene que ser `ENGINE = MEMORY` | (atención) corre, pero **ignora el `USING HASH` en silencio** — la misma clase de incompatibilidad que el `\|\|` del deck 10 | manual **§ 15.1.18** |
+| `CREATE INDEX MYINDEX ON USERS (DNI) USING HASH;` *(slide 38, "Ejemplo en MySQL")* | (crítico) **Sintaxis correcta, resultado distinto del prometido.** La *Table 15.1 Index Types Per Storage Engine* del manual dice `InnoDB → BTREE` *(sólo)*, `MyISAM → BTREE`, `MEMORY/HEAP → HASH, BTREE`, `NDB → HASH, BTREE`; si el tipo pedido no es válido para el motor, se usa el disponible sin fallar. O sea: **sobre una tabla InnoDB la sentencia no falla y crea un B-tree**; `SHOW INDEX FROM USERS` devuelve `Index_type = BTREE` *(confirmado con corrida real en 9.7.2; el único aviso es una nota, `Note 3502: This storage engine does not support the HASH index algorithm, storage engine default was used instead.`, que se lee con `SHOW WARNINGS`)*. Para un hash de verdad, la tabla tiene que ser `ENGINE = MEMORY` | (atención) corre, pero **ignora el `USING HASH` en silencio** — la misma clase de incompatibilidad que el `\|\|` del deck 10 | manual **§ 15.1.18** |
+
+#### 8.5 · Recovery — redo log, undo log, doublewrite buffer y binlog
+
+> [!info] Fuente
+> [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] § *05 · MySQL / InnoDB* (slides 10–11),
+> con las variables **verificadas en `mysql:9.7.2`** (corrida real, 25/09). Completa el § *8*: aquélla
+> cubre transacciones y aislamiento; esta subsección cubre **cómo InnoDB sobrevive a un crash**, la
+> **D** y la **A** de ACID por el lado del motor.
+
+A diferencia de PostgreSQL —un único WAL que hace de todo, ver [[PostgreSQL]] § *WAL y recovery*—,
+InnoDB separa el problema en **cuatro mecanismos**, cada uno con su rol:
+
+| Log / buffer | Qué es | Para qué sirve |
+| --- | --- | --- |
+| **Redo log** | `ib_logfile` / `#innodb_redo`; buffer circular de tamaño **fijo** | el WAL propiamente dicho: cambios **físicos** a páginas. Crash recovery, fase **Redo** de ARIES |
+| **Undo log** | tablespaces de undo | valores anteriores de las filas. Sirve **dos** consumidores: `ROLLBACK` **y** los *snapshots* de MVCC para lecturas consistentes (el mismo mecanismo que documenta § *8.2*) |
+| **Doublewrite buffer** | área contigua previa a la escritura final | protege contra *partial page writes*: escribe la página primero en un área auxiliar, después en su lugar definitivo |
+| **Binary log (binlog)** | log **lógico**, separado — *statement* o *row-based* | **no** es el mecanismo de crash recovery. Es para replicación y PITR |
+
+> [!bug] (crítico) El gotcha clásico de examen: **redo log ≠ binlog**
+> El redo log es el WAL físico, usado en crash recovery; el binlog es un log lógico separado, usado
+> para replicación y PITR. Mantener ambos consistentes exige un **two-phase commit interno**: el
+> `COMMIT` del redo log queda en estado *prepared*, se escribe el binlog, y recién entonces el redo
+> log pasa a *committed* — así los dos logs siempre coinciden en qué transacciones "pasaron".
+> PostgreSQL no necesita este paso: tiene un único WAL que ya sirve para las tres cosas (recovery,
+> replicación, PITR) → [[PostgreSQL]] § *WAL y recovery*.
+
+Recovery en InnoDB es **ARIES completo** — al reiniciar tras un crash, InnoDB hace **checkpoint
+difuso** (*fuzzy checkpointing*) de forma continua, y sigue las tres fases: **Analysis** (ubica el
+último checkpoint), **Redo** (con el redo log, rehace todo lo logueado desde ahí — incluso de
+transacciones que después abortaron) y **Undo** (de las transacciones no comprometidas, con el undo
+log). Contrasta con PostgreSQL, que al no tener undo log separado —MVCC hace ese trabajo— solo
+necesita la fase de redo: ver la comparativa completa en [[PostgreSQL]] § *WAL y recovery*.
+
+> [!success] (clave) Verificado en MySQL 9.7.2 — corrida real, 25/09
+> Los cuatro mecanismos están activos por defecto:
+>
+> | Variable | Valor verificado | Qué confirma |
+> | --- | --- | --- |
+> | `SELECT @@version;` | `9.7.2` | versión del contenedor |
+> | `SHOW VARIABLES LIKE 'innodb_doublewrite';` | `ON` | el *doublewrite buffer* está activo |
+> | `SHOW VARIABLES LIKE 'innodb_flush_log_at_trx_commit';` | `1` | el redo log se fuerza a disco (`fsync`) en **cada** `COMMIT` — el ajuste más estricto |
+> | `SHOW VARIABLES LIKE 'innodb_redo_log_capacity';` | `104857600` *(100 MB)* | tamaño del buffer circular del redo log — **reemplaza** a la vieja `innodb_log_file_size`, que en 9.7 **ya no existe como variable** *(consulta vacía)* |
+> | `SHOW VARIABLES LIKE 'sync_binlog';` | `1` | el binlog también se fuerza a disco en cada *commit* — la otra mitad del *two-phase commit* interno |
+> | `SHOW VARIABLES LIKE 'log_bin';` | `ON` | el binlog está activo en este contenedor, aunque no haya réplicas configuradas |
+> | `SELECT @@transaction_isolation;` | `REPEATABLE-READ` | reconfirma el dato de § *8.2* |
+> | `SHOW VARIABLES LIKE '%undo%';` | `innodb_max_undo_log_size = 1073741824` *(1 GB)* · `innodb_undo_directory = ./` · `innodb_undo_log_encrypt = OFF` · `innodb_undo_log_truncate = ON` | el undo log existe como tablespace, con purga automática; `innodb_undo_tablespaces` **ya no aparece** como variable configurable en 9.7 *(consulta vacía)* |
+>
+> No verificado en un servidor **PostgreSQL**: los parámetros equivalentes del
+> lado PostgreSQL (`wal_level`, `checkpoint_timeout`, `synchronous_commit`) quedan verificados solo
+> contra la documentación oficial, no contra un servidor real → [[PostgreSQL]] § *Dudas abiertas*.
+
+Bibliografía de esta subsección, sin ficha en el vault, verificada por URL el 25/09: MySQL 9.7
+Reference Manual § **17.4** *InnoDB Architecture* · § **17.6.4** *Doublewrite Buffer* · § **17.6.5**
+*Redo Log* · § **17.6.6** *Undo Logs* · § **7.4.4** *The Binary Log*.
+
+Conceptos: [[1.11.05 - Recovery y write-ahead logging (WAL)|Recovery y write-ahead logging (WAL)]] ·
+[[1.11.06 - ARIES — análisis, redo y undo|ARIES — análisis, redo y undo]].
 
 ---
 
@@ -934,9 +1023,14 @@ Las dos URLs y los dos títulos de ancla salen de las anotaciones del PDF del TP
 > | **17.7.2.1** | *Transaction Isolation Levels* | `REPEATABLE READ` por defecto, instantánea, `SERIALIZABLE` → `FOR SHARE` |
 > | **17.7.2.4** | *Locking Reads* | `FOR UPDATE`, `FOR SHARE`, `NOWAIT`, `SKIP LOCKED` |
 > | **15.1.18** | *CREATE INDEX Statement* | *Table 15.1 Index Types Per Storage Engine*: InnoDB sólo `BTREE` |
-> | — | *MySQL Error Reference 9.7* › *Server Error Message Reference* | errores **1410**, **1141**, **1147**, **1213**, **1175** *(el **3523** quedó fuera de la parte visible: `sin verificar`)* |
+> | — | *MySQL Error Reference 9.7* › *Server Error Message Reference* | errores **1410**, **1141**, **1147**, **1213**, **1175** *(el **3523** quedó fuera de la parte visible; confirmado con corrida real → § *Dudas abiertas*)*; **confirmados con corrida real** (25/09, ver §§ *5* y *7.1* y [[Parcial 2Q2025]]): **1064** *(error de sintaxis, `REVOKE … CASCADE`)*, **1369** *(`CHECK OPTION failed`)*, **1451** *(FK: borrar/actualizar fila padre)*, **1062** *(entrada duplicada de PK/UNIQUE)*, **1471** *(`INSERT` sobre vista no insertable)*, **3819** *(`CHECK constraint … is violated`)* |
 >
 > | **15.7.7.24** | *SHOW GRANTS Statement* | *(abierta el **18/09**)* la marca `Grant` aparece como sufijo `WITH GRANT OPTION` de cada línea |
+> | **17.4** | *InnoDB Architecture* | *(abierta el **25/09**, § *8.5*)* redo log, undo log, doublewrite buffer, binlog — el mapa de los cuatro mecanismos |
+> | **17.6.4** | *Doublewrite Buffer* | *(abierta el **25/09**)* protección contra *partial page writes* |
+> | **17.6.5** | *Redo Log* | *(abierta el **25/09**)* `ib_logfile`, `innodb_redo_log_capacity` |
+> | **17.6.6** | *Undo Logs* | *(abierta el **25/09**)* `ROLLBACK` y *snapshots* MVCC desde el mismo log |
+> | **7.4.4** | *The Binary Log* | *(abierta el **25/09**)* binlog como log lógico, separado del redo log |
 >
 > **Sigue sin abrir**: § *DROP INDEX Statement*, § *SAVEPOINT*, § 17.7.1 *InnoDB Locking* *(tipos de
 > lock)*, § 17.7.4 *Phantom Rows*, y las cinco secciones del § *5.4* *(`CHECK`, `FOREIGN KEY`,
@@ -1012,6 +1106,15 @@ subconsulta en el `WHERE` que referencia una tabla del `FROM`, referencia solo a
 `ALGORITHM = TEMPTABLE`, y múltiples referencias a la misma columna base (esto último solo rompe el
 `INSERT`).
 
+> [!tip] El mensaje real cuando MySQL rechaza el `INSERT`
+> Confirmado con corrida real (25/09, [[Parcial 2Q2025]] Pregunta 27) sobre una vista con `GROUP BY`
+> y funciones de agregación:
+> ```
+> ERROR 1471 (HY000): The target table <vista> of the INSERT is not insertable-into
+> ```
+> Es un código puntual que no está documentado en [[1.06.01 - Vistas|Vistas]], que cubre la regla
+> general de actualizabilidad pero no este mensaje de error específico.
+
 ### Cómo averiguar lo que el deck no enseña
 
 ```sql
@@ -1052,12 +1155,20 @@ SHOW TABLE STATUS;  -- filas estimadas, tamaño
 - [ ] (crítico) **¿El parcial evalúa seguridad con la semántica del estándar o con la de MySQL?** La
   sentencia 6 del TP8 ej. 1.a falla en la teoría y pasa en MySQL; `REVOKE … CASCADE`, `PUBLIC` y el
   *owner* no existen en el motor → pregunta 5 de [[Práctica 2026-09-08]] § *Preguntas al docente*.
-- [ ] (crítico) **Verificar en el contenedor `mysql:9.7.2`, antes del parcial**: (a) `GRANT` a cuenta
-  inexistente → `ERROR 1410`; (b) `REVOKE UPDATE(tiempo)` a quien tiene `UPDATE` de tabla →
-  ¿`ERROR 1147`?; (c) rol concedido sin `SET DEFAULT ROLE` deja `CURRENT_ROLE() = NONE`; (d)
-  `'u'@'localhost'` no conecta desde el host al contenedor, `'u'@'%'` sí; (e) `SELECT
-  @@transaction_isolation;` → `REPEATABLE-READ`; (f) `CREATE INDEX … USING HASH` sobre InnoDB →
-  `SHOW INDEX` dice `BTREE`; (g) el error **3523** (rol desconocido, ej. 2.h).
+- [ ] (crítico) **Verificar en `mysql:9.7.2`, antes del parcial** — queda abierta solo la (d):
+  (a) ✓ ~~`GRANT` a cuenta inexistente~~ → `ERROR 1410 (42000): You are not allowed to create a user
+  with GRANT`; (b) ✓ ~~`REVOKE UPDATE(tiempo)` a quien tiene `UPDATE` de tabla~~ → `ERROR 1147
+  (42000): There is no such grant defined for user … on table 'parrafo'`; (c) ✓ ~~rol concedido sin
+  `SET DEFAULT ROLE`~~ → `SELECT CURRENT_ROLE();` devuelve `NONE`; (d) `'u'@'localhost'` no conecta
+  desde el host al contenedor, `'u'@'%'` sí — **sin verificar**; (e) ✓ ~~`SELECT
+  @@transaction_isolation;`~~ → `REPEATABLE-READ` → § *8.5*; (f) ✓ ~~`CREATE INDEX … USING HASH`
+  sobre InnoDB~~ → `INDEX_TYPE = BTREE`, con `Note 3502: This storage engine does not support the
+  HASH index algorithm, storage engine default was used instead.`; (g) ✓ ~~rol desconocido
+  (ej. 2.h)~~ → `ERROR 3523 (HY000): Unknown authorization ID` con el nombre entre backticks
+  (`` `ins_prov`@`%` ``).
+- [x] ~~¿Qué son el redo log, el undo log, el doublewrite buffer y el binlog en MySQL, y cómo se
+  relacionan con crash recovery?~~ **Resuelto**, con valores verificados en MySQL 9.7.2
+  → § *8.5* y [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]].
 - [ ] **¿`GRANT OPTION` se otorga también a nivel global?** `mysql.user` tiene `Grant_priv` y
   `GRANT ALL ON *.* … WITH GRANT OPTION` es la forma habitual de crear un administrador, pero la
   Table 8.2 no lo nombra explícitamente entre los niveles de `GRANT OPTION`. Probarlo es más barato
@@ -1107,15 +1218,21 @@ SHOW TABLE STATUS;  -- filas estimadas, tamaño
   [[Clase 08 - Explicando el plan]] · [[Clase 09 - Restricciones integridad-Parte 1]] ·
   [[Clase 10 - Restricciones integridad-Parte 2]] *(SQL procedural — el § 6 sale de acá)* ·
   **[[Clase 11 - Seguridad-Transacciones]]** *(el primer deck en MySQL por defecto — los §§ 7 y 8
-  salen de ahí; cierra la U1)*
+  salen de ahí; cierra la U1)* ·
+  [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL|Clase 11(B)]] *(recovery — el § 8.5 sale de ahí)*
 - Lo que sigue, en otro motor: [[Clase 12 - Introduccion a NoSQL]] · [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] ·
   [[Clase 14 - MongoDB Features]] *(14/09, `raw/Unidad-02/` — no entran en el inventario de motor
   ajeno: son [[MongoDB]])*
+- Exámenes con corridas reales que confirman esta página: [[Parcial 2Q2025]] *(vistas con `CHECK
+  OPTION`, acciones referenciales, `MATCH simple`, `EXPLAIN`/`EXPLAIN ANALYZE`, `CHECK` de tabla,
+  actualizabilidad de vistas — §§ 2, 5, 8)*
 - Conceptos: [[DDL vs DML]] · [[1.06.01 - Vistas|Vistas]] · [[1.08.02 - Índices|Índices]] · [[1.08.01 - Plan de ejecución|Plan de ejecución]] ·
   [[Restricciones de integridad]] · [[1.11.03 - Transacciones y ACID|Transacciones ACID]] · [[Sintaxis MySQL vs PostgreSQL]] ·
   [[1.09.04 - Triggers|Triggers]] ·
   **de la Clase 11**: [[1.11.01 - Seguridad en bases de datos|Seguridad en bases de datos]] ·
   [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y roles]] *(§ 7)* ·
-  [[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia y niveles de aislamiento]] *(§ 8)*
+  [[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia y niveles de aislamiento]] *(§ 8)* ·
+  **de la Clase 11(B)**: [[1.11.05 - Recovery y write-ahead logging (WAL)|Recovery y write-ahead
+  logging (WAL)]] · [[1.11.06 - ARIES — análisis, redo y undo|ARIES — análisis, redo y undo]] *(§ 8.5)*
 - Calendario: [[_cronograma]] · índice de clases: [[_index-clases]] · bibliografía:
   [[_index-bibliografia]]

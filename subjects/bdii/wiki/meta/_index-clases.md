@@ -1,6 +1,6 @@
 ---
 tipo: referencia
-resumen: "Registro de qué archivo de raw/ pertenece a qué clase: las 14 teóricas con deck, fecha y síntesis, las prácticas por fecha, el reparto observado de unidades y punteros a dudas y contradicciones. Regla: la clase la numera la cátedra en el nombre del deck; la unidad se observa, no se predice."
+resumen: "Registro de qué archivo de raw/ es de qué clase: las 14 teóricas con sus decks, el material sin número, las prácticas por fecha, los exámenes viejos, el reparto de unidades y punteros a dudas. La clase la numera la cátedra en el nombre del deck; la unidad se observa, no se predice."
 formato: indice
 ---
 
@@ -8,31 +8,29 @@ formato: indice
 
 ## Resumen general
 
-Esta página es el registro central de la cursada: qué archivo de `raw/` corresponde a qué clase, y
-es el único lugar del vault donde esa correspondencia queda escrita. Reúne tres piezas
-independientes: la **clase** (numerada por la cátedra en el nombre del deck, `BD2_Clase NN`), la
-**unidad** (la carpeta de `raw/` donde se archivó el material, que agrupa varias clases) y la
-**práctica** (identificada por fecha, no por número). Importa para toda la cursada porque documenta
-el desfasaje de motor que atraviesa la primera mitad: la materia corre sobre **MySQL**, pero once de
-los trece decks teóricos de la `Unidad-01` traen sintaxis de PostgreSQL, Oracle o T-SQL, y la
-traducción sintaxis por sintaxis vive en [[MySQL]] y [[PostgreSQL]]. También documenta la
-`Unidad-02` (MongoDB), donde el desfasaje es de shell (`mongo` legado vs. `mongosh`) y de versión
-(`mapReduce` deprecado desde 5.0).
+Esta página es el único registro de qué archivo de `raw/` corresponde a qué clase. Separa
+tres piezas: la **clase**, que numera la cátedra en el nombre del deck (`BD2_Clase NN`); la
+**unidad**, que es la carpeta donde el humano archivó el material; y la **práctica**, identificada
+por fecha. También registra el material sin número de clase y qué archivo de `raw/Examenes_Viejos/`
+usa cada página de exámenes *(cruzadas con el cronograma en
+[[Mapa de exámenes|Mapa de exámenes]])*.
 
-Reglas clave para no perderse: (1) el número de clase sale siempre del nombre del deck, nunca del
-cronograma ni de la fecha; (2) una clase puede repartirse en varias partes (Clase 05, tres archivos)
-sin dejar de ser una sola clase, salvo que la cátedra le cambie el número (la "Parte 2" de la
-Clase 09 resultó ser la Clase 10, con número propio); (3) varias clases pueden compartir fecha
-(01–05, todas el 03/08) o ser asincrónicas (la 05); (4) el reparto unidad → clases se observa
-después de que el material llega, nunca se predice con anticipación; (5) los cuatro handouts sin
-número del 14/09 no son clases y se documentan como material complementario de esa fecha.
+Importa porque documenta el desfasaje de motor de la primera mitad: la cursada corre sobre
+**MySQL**, pero once de los trece primeros decks de la `Unidad-01` traen PostgreSQL, Oracle o
+T-SQL; la traducción vive en [[MySQL|MySQL]] y [[PostgreSQL|PostgreSQL]]. En la `Unidad-02`
+(MongoDB) el desfasaje es de shell y de versión.
 
-Para el parcial conviene tener presente: qué deck usa qué motor ajeno (tabla de la sección de
-desfasaje PostgreSQL/MySQL), el método reiterado de la cátedra de dar la teoría en el estándar SQL
-y advertir en el enunciado cuando MySQL no la soporta (TP6 a TP8), y las contradicciones internas
-documentadas por clase — en particular las de la Clase 09 (`:new`/`:old` de Oracle filtrado en
-PL/pgSQL) y la Clase 11 (estados de transacción según Silberschatz vs. Elmasri-Navathe, aislamiento
-real de InnoDB frente al modelo del slide).
+Reglas clave: (1) el número de clase sale del nombre del deck, nunca del cronograma ni de la fecha;
+(2) una clase puede tener varios archivos —la 05 en tres partes, la 11 en dos decks el 07/09— sin
+dejar de ser una, salvo que la cátedra cambie el número (la "Parte 2" de la 09 fue la Clase 10);
+(3) varias clases pueden compartir fecha (01–05, el 03/08) o ser asincrónicas (la 05); (4) el reparto de unidades se observa,
+no se predice; (5) el material sin número —cuatro handouts del 14/09 y seis archivos de la
+`Unidad-01`— no son clases: se documentan en la clase que acompañan.
+
+Para el parcial: qué deck usa qué motor ajeno, el método de la cátedra de dar la teoría en el
+estándar y avisar cuando MySQL no la soporta (TP6 a TP8), y las contradicciones internas de cada
+deck, sobre todo las de la Clase 09 (`:new`/`:old`) y la Clase 11 (estados de transacción,
+aislamiento real de InnoDB).
 
 ## Modelo de la cursada
 
@@ -43,7 +41,8 @@ Mapa de la cursada. Las **fuentes** viven en `raw/` (las cura el humano); las **
 > - **Clase** — la numera **la cátedra**, en el nombre del deck: `BD2_Clase NN` → **Clase NN**. No se
 > inventa ni la deduce el cronograma.
 > - **Unidad** — es la **carpeta de `raw/` donde se archivó**, y **agrupa varias clases**: hoy
-> `raw/Unidad-01/` tiene las **Clases 01 a 11** *(13 archivos de teórica: la 05 va en tres partes)*
+> `raw/Unidad-01/` tiene las **Clases 01 a 11** *(14 decks de teórica: la 05 va en tres partes y
+> la 11 en dos decks; más 6 archivos sin número de clase)*
 > y `raw/Unidad-02/` las **Clases 12 a 14** *(3 decks, más 4 handouts sin número de clase)*.
 > Se decide al archivar; se registra después de verla.
 > - **Práctica** — **no se numera**: se identifica por **fecha**. La cátedra numera solo las
@@ -63,6 +62,7 @@ raw/
 │  ├── Teorica/  ← lunes 19–22, virtual  (decks BD2_Clase NN)
 │  └── Practica/  ← martes 16–19, presencial (deck del día + TPs)
 ├── Material_Catedra/{programa,bibliografia}/
+├── Examenes_Viejos/  ← exámenes de otras cursadas, en tres carpetas de Drive (ver § Exámenes viejos)
 └── tp/  ← solo el índice; los enunciados van con su unidad
 ```
 
@@ -80,8 +80,9 @@ clase corresponde cada uno o se pierde el dato. Para arrancar una nota hay plant
 ## Clases con material
 
 **Catorce** clases, **todas sintetizadas**: las **01 a 11** archivadas en `raw/Unidad-01/Teorica/`
-*(13 archivos: la 05 va en tres partes)* y las **12 a 14** en `raw/Unidad-02/Teorica/` *(3 decks, más
-los 4 handouts sin número de clase de la tabla siguiente)*.
+*(14 decks: la 05 va en tres partes y la 11 en dos —`Clase 11` y `Clase 11(B)`—, más los 6 archivos
+sin número de clase de la tabla siguiente)* y las **12 a 14** en `raw/Unidad-02/Teorica/` *(3 decks,
+más los 4 handouts sin número de clase)*.
 
 | # | Unidad | Deck | Slides | Fecha | Tema | Síntesis |
 | --- | --- | --- | ---: | --- | --- | --- |
@@ -96,16 +97,25 @@ los 4 handouts sin número de clase de la tabla siguiente)*.
 | **09** | U1 | `BD2_Clase 09 - Restricciones integridad-Parte 1.pdf` | 39 | 24/08 | Restricciones de integridad — RIRS, acciones referenciales, matching, `CHECK`/`DOMAIN`/`ASSERTION` y **triggers** | ✓ [[Clase 09 - Restricciones integridad-Parte 1]] |
 | **10** | U1 | `BD2_Clase 10 - Restricciones integridad-Parte 2.pdf` | 20 | 31/08 | **SQL procedural** — stored procedures, funciones, **cursores** · los cuatro niveles de restricción (atributo, fila, tabla, `ASSERTION`) | ✓ [[Clase 10 - Restricciones integridad-Parte 2]] |
 | **11** | U1 | `BD2_Clase 11 - Seguridad-Transacciones.pdf` | 38 | 07/09 | **Seguridad** — amenazas, autenticación/autorización, cifrado; usuarios `'u'@'h'`, `GRANT`/`REVOKE`, roles · **transacciones ACID**, estados, concurrencia, locking/OCC/timestamps, niveles de aislamiento · **índices** *(slides 31–38, un tercer bloque que ni el nombre ni el cronograma anuncian)* | ✓ [[Clase 11 - Seguridad-Transacciones]] |
+| **11** *(B)* | U1 | `BD2_Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL.pdf` | 14 | 07/09 | **Recovery** — el *buffer pool* volátil y la A y la D de ACID, la regla de oro del *write-ahead logging*, anatomía de un *log record* (`LSN`), **ARIES** (*analysis · redo · undo*), el WAL de PostgreSQL *(sin undo log: lo reemplaza MVCC)* frente a InnoDB *(redo log, undo log, doublewrite buffer, binlog)* y la trampa **redo log ≠ binlog** | ✓ [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL\|Clase 11(B)]] *(segundo deck de la Clase 11: `clase: 11`)* |
 | **12** | **U2** | `BD2_Clase 12 - Introduccion a NoSQL.pdf` | 52 | 14/09 | **Introducción a NoSQL** — por qué surge, propiedades, teorema CAP, BASE, taxonomía (clave-valor, documental, columnar, grafos) · **introducción a MongoDB**: arquitectura, CRUD en el shell, operadores, `aggregate`, `$lookup`, vistas | ✓ [[Clase 12 - Introduccion a NoSQL]] |
 | **13** | U2 | `BD2_Clase 13 - NoSQL-EmbebidosVSNormalizado(1).pdf` | 28 | 14/09 | **MongoDB: diseño del modelo de datos** — documentos embebidos vs. referencias, relaciones 1:1, 1:N y N:M, `$lookup`, `find` con proyección, `explain` | ✓ [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] *(el `(1)` es artefacto de descarga: se cae del nombre de la página, no del `deck:`)* |
 | **14** | U2 | `BD2_Clase 14 - MongoDB Features.pdf` | 45 | 14/09 | **MongoDB Features** — `ObjectId`, `mongosh` y herramientas de línea de comando, `mongoimport`, CRUD, índices, aggregation pipeline, **MapReduce**, `system.js`, pymongo, **replica sets** y **sharding** | ✓ [[Clase 14 - MongoDB Features]] *(incluye § *Material complementario del 14/09*: los 4 handouts)* |
 
-> [!note] 14/09 — **tres clases en un solo lunes**, y la 11 sola el 07/09
+> [!note] 14/09 — **tres clases en un solo lunes**, y el 07/09 **una clase con dos decks**
 > El cronograma tiene **una fila** para el 14/09 y la cátedra numeró **tres decks** para esa fila:
 > `BD2_Clase 12`, `13` y `14`. El deck 12 cubre los dos primeros tramos del tema oficial *(intro
 > NoSQL y tipos · intro a MongoDB)*, el 13 el tercero *(embebido vs. normalizado)* y el 14 el cuarto
 > *(ejemplos con MongoDB)*: **una fila del cronograma no es una clase**, mismo patrón del 03/08 y del
-> 10/08. El 07/09, en cambio, fue una sola: la **Clase 11**.
+> 10/08.
+>
+> El 07/09 es el caso inverso: **una sola clase, la 11, con dos decks**. `BD2_Clase 11 -
+> Seguridad-Transacciones.pdf` *(38 slides)* y `BD2_Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL.pdf`
+> *(14 slides)*, publicados en el campus el mismo día. El número del segundo lo da **el nombre del
+> deck en el campus** —el archivo bajó como `Recovery_WAL_PostgreSQL_MySQL.pptx.pdf`, sin número—, y
+> su tema (atomicidad y durabilidad) es el bloque *"Transacciones ACID"* de la misma fila del
+> [[_cronograma|cronograma]]. Son **dos páginas con `clase: 11`**, como las tres partes de la Clase 05, no dos
+> clases.
 >
 > La Clase 11 repite lo del deck 10: el nombre —*"Seguridad-Transacciones"*— y el tema del
 > cronograma **no anuncian los ocho slides de índices** (31–38, el 21 % del deck), cuatro de los
@@ -114,6 +124,36 @@ los 4 handouts sin número de clase de la tabla siguiente)*.
 > incorpora.
 
 ### Material sin número de clase
+
+Diez archivos de teórica **no son decks de clase**: seis de `raw/Unidad-01/Teorica/` y cuatro de
+`raw/Unidad-02/Teorica/`. Ninguno trae `BD2_Clase NN` en el nombre ni recibe página propia: cada uno
+se documenta en la sección *Material complementario* de la clase que acompaña, y esta tabla es el
+único lugar donde queda escrito a qué clase se asignó.
+
+#### `Unidad-01`
+
+| Archivo (`raw/Unidad-01/Teorica/`) | Tamaño | Qué es | Clase | Dónde está documentado |
+| --- | --- | --- | --- | --- |
+| `Ejercicios de RI/Ejercicio 1 - RIR.png` | imagen | Enunciado: `CUENTA(numero, tipo, saldo, limiteDescubierto)` con cuatro reglas según el tipo *(caja de ahorro sin saldo negativo, cuenta corriente hasta el límite de descubierto)*. Es un `CHECK` **de registro** *(nivel 2)*, sin ninguna FK | **09** *(publicado en el campus el 25/08, carpeta* Ejercicios de RI*)* | [[Clase 09 - Restricciones integridad-Parte 1\|Clase 09]] § *Material complementario del 25/08* **(a)** |
+| `Ejercicios de RI/Ejercicio 2 - RIR.png` | imagen | Enunciado: `PROYECTO` / `ASIGNACION`, *"no más de tres proyectos activos"* por empleado, y si alcanza con `NOT NULL`, `UNIQUE` o un `CHECK` de MySQL. Es un `CHECK` **de tabla** *(nivel 3)* | **09** *(ídem)* | ídem **(b)** |
+| `Ejercicio_Stored_Procedure_BDII.pdf` | 3 págs. | Enunciado: `PROCEDURE RegistrarEntrega` que inserta la entrega de un TP si llega a término y aborta con `SIGNAL` si no, más una ampliación opcional *(registrarla marcada fuera de término)*. El `INSERT` del PDF omite `id_entrega` y no insertaría | **10** *(por tema)* | [[Clase 10 - Restricciones integridad-Parte 2\|Clase 10]] § *Material complementario* **(a)** |
+| `ejercicio de SP.sql` | 179 líneas | Script del mismo ejercicio *(esquema, carga y procedimiento, en un schema `SP`)*: agrega un quinto parámetro `p_id_en` que el PDF no tiene, y sus dos filas de carga de `Entrega` fallan por FK *(`ERROR 1452`)* en MySQL 9.7.2 | **10** *(por tema)* | ídem **(a)** |
+| `ejercicio de teoria de PosgreSQL hecho en MySQL.sql` | 60 líneas | Traducción a MySQL de la función `voluntarioscadax` *(PL/pgSQL, slide 13 de la Clase 10: una de cada `x` filas)* | **10** *(por tema)* | ídem **(b)** |
+| `ejemplo Seguridad BD.png` | imagen | Grafo de permisos: `GRANT … WITH GRANT OPTION`, un `GRANT` encadenado y `REVOKE … CASCADE`, con el estado final tachado *(GMUW cap. 10.1.5–10.1.6)* | **11** *(publicado el 07/09 junto a la actividad* Ejercicio de seguridad en BD*)* | [[Clase 11 - Seguridad-Transacciones\|Clase 11]] § *Material complementario del 07/09* |
+
+> [!warning] La asignación de los tres archivos de *stored procedures* a la Clase 10 es **por tema**
+> Para los PNG de RI *(25/08)* y el de seguridad *(07/09)* la clase sale de la fecha en que el campus
+> los publicó. Para `Ejercicio_Stored_Procedure_BDII.pdf`, `ejercicio de SP.sql` y `ejercicio de
+> teoria de PosgreSQL hecho en MySQL.sql` esa fecha no se pudo leer: se asignan a la **Clase 10**
+> porque los tres son SQL procedural en MySQL, lo que enseñan sus slides 6–13. Si el humano confirma
+> otra fecha, la fila cambia.
+
+> [!note] Los PNG de *Ejercicios de RI* no son de acciones referenciales
+> Pese al nombre de la carpeta, los dos piden un `CHECK` *(slides 15–22 de la Clase 09)*, no trazar
+> `CASCADE`/`SET NULL` *(slides 7–14)*. Si esa carpeta del campus tiene un tercer archivo, no está en
+> el vault → [[Clase 09 - Restricciones integridad-Parte 1|Clase 09]] § *Dudas abiertas*.
+
+#### `Unidad-02`
 
 Cuatro archivos de `raw/Unidad-02/Teorica/` **no son decks de clase**: no traen `BD2_Clase NN` en
 el nombre, son texto puro *(cero imágenes)* y están generados en **mayo de 2025** *(tres con PyFPDF
@@ -150,7 +190,8 @@ complementario del 14/09*. **No son clases** y no reciben número.
 > La Clase 09 anunciaba una "Parte 2" propia; llegó con número nuevo — es la **Clase 10**. La regla de
 > `CLAUDE.md` *"un deck partido en varios archivos es una sola clase"* sigue siendo correcta, pero lo
 > que la hace verdadera en `BD2_Clase 05 Parte 1/2/3` es que **el número es el mismo**, no que diga
-> *"Parte"*: la premisa siempre es el `NN`, nunca el sufijo.
+> *"Parte"*: la premisa siempre es el `NN`, nunca el sufijo. Lo mismo vale para el `(B)` de
+> `BD2_Clase 11(B)`: el número es `11`, así que es la Clase 11.
 
 > [!note] La Clase 05 es **una clase repartida en tres archivos**, no tres clases
 > `Parte 1/2/3` son partes del mismo deck `BD2_Clase 05`: son **88 slides**, más que las Clases 01–04
@@ -160,7 +201,10 @@ complementario del 14/09*. **No son clases** y no reciben número.
 
 > [!warning] El desfasaje **PostgreSQL / MySQL** no es un caso aislado del deck 04
 > Once de los trece decks de teórica traen marcas de otro motor, **uno no trae ninguna** —la Clase
-> 02— y **uno trae sólo una atribución histórica** —la Clase 06—. Una fila por archivo: el *"no hay"*
+> 02— y **uno trae sólo una atribución histórica** —la Clase 06—. El segundo deck de la Clase 11,
+> `BD2_Clase 11(B)`, queda fuera de ese recuento: nombra PostgreSQL y MySQL en su propio título y les
+> dedica una sección a cada uno, así que no presenta ningún motor ajeno como genérico; su fila va igual
+> en la tabla. Una fila por archivo: el *"no hay"*
 > también es dato. **Los decks 12–14 no entran en esta tabla**: son MongoDB, el motor correcto de la
 > segunda mitad; su desfasaje es de *shell* y de versión, no de motor *(ver la nota al pie)*.
 >
@@ -179,6 +223,7 @@ complementario del 14/09*. **No son clases** y no reciben número.
 > | `BD2_Clase 09` | **PostgreSQL** | Slide 12: *"MATCH SIMPLE (Opción por defecto para SQL estandar **y PostgreSQL**)"*. Slide 27, título: ***"TRIGGERS – SINTAXIS PostgreSQL"***. Slide 36 es **PL/pgSQL**: `CREATE FUNCTION cant_total_empleados ( ) RETURNS trigger AS $body$` con `TG_OP`. Slide 39, primera fuente de la bibliografía: *"Capitulo 36 del Manual de POstgreSQL . www.postgresql.org"* |
 > | `BD2_Clase 10` | **PostgreSQL + Oracle** | (clave) **El más denso del vault**, y el único donde el motor ajeno **es el contenido**, no un ejemplo suelto: **ocho slides —del 6 al 13— se titulan *"Procedimientos/Funciones en Postgres"***. Slide 6, cuerpo: *"Para **Postgres** todos son funciones, sólo que hay funciones que devuelven void ( Procedimientos )"*, con `RETURNS tipo AS $$ … $$ LANGUAGE plpgsql ;`. Slide 8: `ALIAS FOR $1`, `CONSTANT`, `voluntario%rowtype`, `voluntario.nombre%type`. Slides 9–11: *"Todo el acceso a cursores en **PL/pgSQL** … del tipo de datos especial **refcursor**"*, y la variable `FOUND`. Slides 12–13: `RETURNS TABLE(…)`, `RETURN QUERY`, `RETURN NEXT`, `record`. Slide 20: `postgresqltutorial.com` y `postgresql.com` *(sic — el sitio es `.org`)*. (nota) **ORACLE** en el slide 17: `having avg( **months_between ( sysdate**, fecha_nacimiento ) )` — ninguna de las dos existe en PostgreSQL ni en MySQL —, y en el slide 9 `curs3 CURSOR (key int) **IS** SELECT …`, donde el `IS` es PL/SQL y **contradice la gramática que el mismo slide da cuatro líneas más arriba** (`… CURSOR [ ( argumentos ) ] **FOR** select_query ;`) |
 > | `BD2_Clase 11` | **MySQL por defecto** *(+ SQL Server y PostgreSQL, **rotulados**)* | (clave) **Primer deck de la U1 escrito en el motor de la cursada.** Slide 7, título *"Mecanismos de Seguridad (MySQL)"*; slide 8, *"Un usuario MySQL se define…"* y *"El superusuario se denomina ROOT"*; slides 9, 11 y 13, cuentas `'usuario'@'host'` con el comodín `'%'`; slide 11, los roles de MySQL 8.0+ copiados del manual § *Using Roles* (`dev1`/`dev1pass`/`app_developer`); slides 12–13, `FLUSH PRIVILEGES;` *(solo MySQL)*; slides 36–37, la § 10.3.9 del *MySQL Reference Manual* *(Comparison of B-Tree and Hash Indexes)* traducida a medias con el operador `<=>`, que solo existe en MySQL; slide 38, *"Ejemplo en MySQL: `CREATE INDEX MYINDEX ON USERS (DNI) USING HASH;`"*. **El motor ajeno son dos ejemplos que el propio deck rotula**: slide 29, *"-- Ejemplo de bloqueo en SQL Server"* (`BEGIN TRANSACTION; SELECT * FROM productos WITH (UPDLOCK); … COMMIT TRANSACTION;`) y slide 30, *"-- Ejemplo de control de versiones en PostgreSQL"* (`BEGIN; SELECT * FROM productos FOR UPDATE; … COMMIT;`) — este último **corre en MySQL sin cambios**. Sin rótulo y **no corre en MySQL**: slide 35, `drop index <nombre-índice>` sin `ON tabla`, e identificadores con guion *(`índice-s`, `nombre-sucursal`)* sin backticks |
+> | `BD2_Clase 11(B)` | **PostgreSQL + MySQL, rotulados en el título** | Slide 1: *"Write-Ahead Logging (WAL) y su implementación en PostgreSQL y MySQL"*. Sección 04 *(slides 8–9)*, *"El WAL de PostgreSQL"*: `pg_wal/` *(antes `pg_xlog/`)*, `wal_level`, `checkpoint_timeout`, `synchronous_commit`, *"sin undo log separado"* gracias a MVCC. Sección 05 *(slides 10–11)*, MySQL/InnoDB: `ib_logfile` / `#innodb_redo`, *undo log*, *doublewrite buffer* y *binlog*. Comparativa lado a lado en el slide 12. **Ningún motor ajeno presentado como genérico**: la única asimetría es de orden *(PostgreSQL va primero)* → [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL\|Clase 11(B)]] § *El desfasaje de motor* |
 >
 > **Recuento verificado slide por slide.** Deck 10 *(20 renders)*: 10 PostgreSQL · 2 Oracle *(9 y
 > 17)* · 8 estándar o sin motor · **0 MySQL** —cero backticks, cero `DELIMITER`, cero `SIGNAL`—; sus
@@ -246,25 +291,29 @@ complementario del 14/09*. **No son clases** y no reciben número.
 
 Indexadas **por fecha**, no por número: la cátedra no las numera. Las del 04/08 al 08/09 están en
 `raw/Unidad-01/Practica/`; la del **15/09** es la **primera de la `Unidad-02`**, en
-`raw/Unidad-02/Practica/`.
+`raw/Unidad-02/Practica/`, y la del **22/09** es la segunda.
 
 | Fecha | Material | TPs | Síntesis |
 | --- | --- | --- | --- |
 | **martes 04/08** | `BDD II - Clase I.pdf` · `esq_peliculas.sql` · `Resoluciones/` (`TP1.md`, `image.png` — propios del humano) | TP1 Modelos · TP2 Creates · TP3 SQLs simples | ✓ [[Práctica 2026-08-04]] |
-| **martes 11/08** | `ITBA TP 4 Vistas.pdf` | TP3 SQLs avanzados *(sin archivo todavía)* · TP4 Vistas | ✓ [[Práctica 2026-08-11]] |
+| **martes 11/08** | `ITBA TP 3 SQL avanzados.pdf` *(3 págs., reusa `esq_peliculas.sql`)* · `ITBA TP 4 Vistas.pdf` | TP3 SQLs avanzados *(archivado y resuelto: ejercicio 1 a–h y 2 a–c, corridos en MySQL 9.7.2 → § *TP3 SQLs avanzados*)* · TP4 Vistas | ✓ [[Práctica 2026-08-11]] |
 | **martes 18/08** | `ITBA TP 5 Explain Plan.pdf` · `materia.csv` · `inscripto.csv` | TP5 Explain Plan | ✓ [[Práctica 2026-08-18]] |
 | **martes 25/08** | `ITBA TP 6 Restricciones Declarativas.pdf` *(5 págs., sin dataset)* | TP6 Restricciones declarativas | ✓ [[Práctica 2026-08-25]] |
 | **martes 01/09** | `ITBA TP 7 Restricciones Avanzadas.pdf` *(2 págs., sin dataset nuevo — **reusa `esq_peliculas.sql`**)* | TP7 Restricciones avanzadas | ✓ [[Práctica 2026-09-01]] |
 | **martes 08/09** | `ITBA TP 8 Seguridad.pdf` *(3 págs., **sin dataset** — **tres esquemas propios**, dos como imagen y uno como línea de texto; no reusa `esq_peliculas.sql`)* | TP8 Seguridad | ✓ [[Práctica 2026-09-08]] |
 | **martes 15/09** | `ITBA TP 9 - MongoDB Parte I.pdf` *(7 págs., **`raw/Unidad-02/Practica/`** — los datos van **dentro del PDF**: 12 `insert` como comandos en pp. 2–3 y la tabla de bandas del ej. 1 **solo como imagen** en p. 7)* | TP9 MongoDB Parte I | ✓ [[Práctica 2026-09-15]] |
+| **martes 22/09** | `ITBA TP 9 - MongoDB Parte II.pdf` *(2 págs., 8 ejercicios; seis citan páginas de* Seven Databases *cap. 4 y el 6 y el 8 no)* · `egresados.csv` · `mongoCities_fixed.json` *(los tres en **`raw/Unidad-02/Practica/`**)* | TP9 MongoDB Parte II *(resuelto y corrido en MongoDB 8.3.11)* | ✓ [[Práctica 2026-09-22\|Práctica 2026-09-22]] |
 
 Los enunciados de los TPs están en la carpeta de la unidad, junto al deck del día; `raw/tp/` guarda
-solo el índice. La semana del 18/08 **no tiene teórica**: el lunes 17/08 es feriado.
+solo el índice. La semana del 18/08 **no tiene teórica**: el lunes 17/08 es feriado. Tampoco la del
+22/09: el lunes 21/09 es el Día del Estudiante, así que el TP9 Parte II se apoya en las Clases 12
+a 14.
 
 **Ninguna de las prácticas del 11/08, 18/08, 25/08 ni 01/09 trae deck de slides**: la cátedra entregó
 solo el enunciado —y, el 18/08, además los dos CSV—. El único deck de práctica del vault sigue siendo
 `BDD II - Clase I.pdf`, del 04/08. Tampoco las del **08/09** ni el **15/09** traen deck: el TP8 son
-tres páginas de enunciado y el TP9, siete páginas con los datos adentro.
+tres páginas de enunciado y el TP9, siete páginas con los datos adentro. La del **22/09** tampoco:
+dos páginas de enunciado y dos datasets.
 
 > [!note] El TP6 es el primero que **no necesita motor**
 > Los TP4 y TP5 se resolvían tipeando. El **TP6 no trae ningún `.sql` ni CSV**, sus tres esquemas
@@ -294,6 +343,14 @@ tres páginas de enunciado y el TP9, siete páginas con los datos adentro.
 > *(TP4, TP6, TP8, TP9)* — conteo de `raw/tp/_index.md`. Los ejercicios 10–11 piden `createView` y
 > `aggregate`, que ninguno de los 34 pasos guiados enseña. Detalle en [[Práctica 2026-09-15]].
 
+> [!note] El TP9 Parte II trae los datos en archivo y remite al libro
+> Es el primer TP de la `Unidad-02` con datasets propios *(`egresados.csv`, para agregar con
+> `$group`, y `mongoCities_fixed.json`, para el índice `2d` y una consulta geoespacial). A diferencia
+> de la Parte I, no trae comandos listos: seis de sus ocho ejercicios citan páginas de *Seven
+> Databases* 2ª ed. cap. 4; el 6 *(traducir dos SQL sobre `bandas`)* y el 8 *(clasificar MongoDB según
+> CAP)* no remiten al libro. Trabaja sobre la colección `bandas` de la Parte I *(ejercicio 6)* y compara `explain()` con
+> el `EXPLAIN` de MySQL *(ejercicio 3)*. Detalle en [[Práctica 2026-09-22|Práctica 2026-09-22]].
+
 > [!missing] Falta `Clase I.md`, nota propia del humano de la primera semana
 > Estaba en la vieja `Clases/…/Clase-01/Teorica/` y no aparece en `raw/Unidad-01/`. Sus definiciones
 > de **programación políglota** y **persistencia políglota** quedaron citadas dentro de
@@ -302,15 +359,17 @@ tres páginas de enunciado y el TP9, siete páginas con los datos adentro.
 
 ## Unidades
 
-Dos unidades tienen material y se observan: **`Unidad-01` = Clases 01 a 11 + TP1 a TP8** *(13
-archivos de teórica)* y **`Unidad-02` = Clases 12 a 14 + los 4 handouts + TP9 Parte I**, abierta el
-**15/09**. `raw/Unidad-03` … `raw/Unidad-10` **todavía no existen**: la carpeta de unidad (con su
-`Teorica/` y `Practica/`) la crea el humano cuando archiva el primer material.
+Dos unidades tienen material y se observan: **`Unidad-01` = Clases 01 a 11 + TP1 a TP8** *(14
+decks de teórica —la 11 en dos— y 6 archivos sin número de clase)* y **`Unidad-02` = Clases 12 a 14 +
+los 4 handouts + TP9 Parte I y Parte II**, abierta el **15/09**. `raw/Unidad-03` … `raw/Unidad-10`
+**todavía no existen**: la carpeta de unidad (con su `Teorica/` y `Practica/`) la crea el humano
+cuando archiva el primer material. `raw/Examenes_Viejos/` **no es una unidad**: sus páginas llevan
+`unidad: eval` *(§ Exámenes viejos)*.
 
 | Unidad | Temas previstos | Cuándo |
 | --- | --- | --- |
-| `Unidad-01` | ✓ **observado**: Clases **01 a 11** *(todo lo relacional: intro, DER, DDL, SQL, vistas, índices/explain, restricciones, SQL procedural, **seguridad, transacciones ACID e índices**)* · TP1 a **TP8** | 03/08 → 08/09 |
-| `Unidad-02` | ✓ **observado**: Clases **12 a 14** *(NoSQL, CAP/BASE, MongoDB: embebido vs. normalizado, features)* · 4 handouts sin número · **TP9 Parte I** | 14/09 → 15/09 *(y previsión: TP9 Parte II el 22/09)* |
+| `Unidad-01` | ✓ **observado**: Clases **01 a 11** *(todo lo relacional: intro, DER, DDL, SQL, vistas, índices/explain, restricciones, SQL procedural, **seguridad, transacciones ACID e índices**, y **recovery/WAL** en el segundo deck de la 11)* · 6 archivos sin número *(ejercicios de RI, de stored procedures y de seguridad)* · TP1 a **TP8**, con el **TP3 SQLs avanzados** ya archivado | 03/08 → 08/09 |
+| `Unidad-02` | ✓ **observado**: Clases **12 a 14** *(NoSQL, CAP/BASE, MongoDB: embebido vs. normalizado, features)* · 4 handouts sin número · **TP9 Parte I** y **TP9 Parte II** *(con `egresados.csv` y `mongoCities_fixed.json`)* | 14/09 → 22/09 |
 | `Unidad-03` a `Unidad-05` | Sin nada previsto: los temas que se les había asignado *(restricciones/TP6, triggers-SQL procedural/TP7, seguridad-ACID/TP8, NoSQL-MongoDB/TP9)* cayeron todos en `Unidad-01` o `Unidad-02` — ver tabla de predicciones abajo | — |
 | `Unidad-06` | *(previsión)* Cassandra · TP10 (I y II) · (clave) **parcial el 13/10** | 28/09 · 05/10 |
 | `Unidad-07` | *(previsión)* Neo4j · TP11 | 19/10 |
@@ -318,7 +377,7 @@ archivos de teórica)* y **`Unidad-02` = Clases 12 a 14 + los 4 handouts + TP9 P
 | `Unidad-09` | *(previsión)* Amazon DynamoDB · TP13 · (clave) **recuperatorio el 03/11** | 02/11 |
 | `Unidad-10` | *(previsión)* TPO: enunciado 09/11 · entrega 15/11 · defensas 16, 17 y 24/11 | 09/11 → 24/11 |
 
-> [!warning] Reparto `unidad → clases`: siete predicciones puestas a prueba, y solo una acertó
+> [!warning] Reparto `unidad → clases`: ocho predicciones puestas a prueba, y solo dos acertaron
 > La previsión inicial asignaba una unidad por tema del cronograma (`Unidad-02` para el 10/08,
 > `Unidad-03` para restricciones/triggers, `Unidad-04` para seguridad, `Unidad-05` para NoSQL). El
 > material real fue cayendo distinto:
@@ -332,6 +391,7 @@ archivos de teórica)* y **`Unidad-02` = Clases 12 a 14 + los 4 handouts + TP9 P
 > | 5 | práctica del 01/09 → `Unidad-03` | TP7 | `Unidad-01` | ✗ falló |
 > | 6 | teórica y práctica del 07–08/09 → `Unidad-04` *(seguridad, ACID, TP8)* | Clase 11 · TP8 | `Unidad-01` | ✗ falló |
 > | 7 | teórica y práctica del 14–15/09 → `Unidad-05` *(NoSQL, MongoDB, TP9)* | Clases 12, 13 y 14 · 4 handouts · TP9 Parte I | `Unidad-02` | ✗ falló |
+> | 8 | práctica del 22/09 → `Unidad-02` *(TP9 Parte II, junto a la Parte I)* | TP9 Parte II + `egresados.csv` + `mongoCities_fixed.json` | `Unidad-02` | ✓ acertó |
 >
 > Las seis fallidas tienen la misma forma: se asignaba una unidad **por tema del cronograma** y la
 > cátedra archiva con otro criterio. La hipótesis que sí se sostuvo, confirmada con el corte del
@@ -350,25 +410,31 @@ tener dos copias que se desincronicen. `index.md` remite a esta lista.
 
 | Dónde viven | Qué juntan |
 | --- | --- |
-| [[Clase 06 - Vistas-Parte 1]] § *Dudas abiertas* | Nombres de vista que no cierran entre slides, `PROV_COMP` con dos definiciones, la definición de `LOCAL` del slide 15 vs. la del estándar, `DROP VIEW … RESTRICT` en MySQL |
-| [[Clase 07 - Vistas-Parte 2]] § *Dudas abiertas* | Actualizabilidad con `JOIN` en MySQL, `CREATE OR REPLACE VIEW`, vistas materializadas, qué criterio decide qué materializar |
-| [[Clase 08 - Explicando el plan]] § *Dudas abiertas* | Los costos que no cierran de los slides 16 y 17, `EXPLAIN (ANALYZE, BUFFERS)` en MySQL, el `BEGIN…ROLLBACK` del slide 1, `GEQO` |
-| [[Práctica 2026-08-11]] § *Preguntas para el docente* | TP4: qué chequea `LOCAL` en cadena (el 4.c pide las 9 combinaciones y el vault resuelve una) y el **choque de criterios** join vs. clave preservada |
-| [[Práctica 2026-08-18]] § *Preguntas para el docente* | TP5: ~~(crítico) la **sintaxis MySQL de `CREATE INDEX`**~~ ✓ **cerrada** *(Clase 11, slides 35 y 38; ya está en [[1.08.02 - Índices\|Índices]] y en [[MySQL]] § 4)*; el *Form Editor* de Workbench, el índice clustered de InnoDB, si el **parcial** se rinde sobre MySQL |
-| [[Clase 09 - Restricciones integridad-Parte 1]] § *Dudas abiertas* | ~~cuándo llega la **Parte 2**~~ ✓ **cerrada** *(es la **Clase 10**, no la misma 09)*. Siguen: si el parcial toma sintaxis del estándar o de MySQL, `:new`/`:old` vs. `new.`/`old.`, `RESTRICT` vs. `NO ACTION` en un motor que los trata igual, el `BETWEEN` del slide 19, la columna tapada del slide 11 |
-| [[Práctica 2026-08-25]] § *Preguntas para el docente* | TP6: (crítico) **A.4 y A.5 se contradicen** *(juntas hacen imposible publicar un artículo argentino)*, si se clasifica por ámbito o por sentencia, el escape del `_` en `LIKE`, cuántos ejemplos pide el 2.b |
-| [[Clase 10 - Restricciones integridad-Parte 2]] § *Dudas abiertas* | (crítico) si el **error 1442** frena el trigger del TP7 ej. 2, si **PL/pgSQL entra al parcial** cuando el TP se resuelve en MySQL, si los **cursores** entran y con qué bibliografía *(no tienen capítulo en GMUW ni en Date)*, por qué el archivo se llama *"Restricciones"* si la portada dice *"SQL procedural"*, y que **`INSTEAD OF` sigue sin resolverse**. Más: `CREATE OR REPLACE` en MySQL 9.7, `TEXT` como variable local, si `CREATE DOMAIN` salió del temario |
-| [[Práctica 2026-09-01]] § *Dudas abiertas* | TP7: (crítico) el mismo **error 1442**, (crítico) si el **3.d** pide `PROCEDURE` o `FUNCTION` *(el enunciado dice "stored procedure", el título dice "funciones", y el cálculo devuelve **dos** valores)*, (crítico) si el **ej. 2** espera la respuesta única o el análisis de la dependencia del orden. Más: unidad de tiempo del ej. 3, un `HIS_ENTREGA` o dos, si el TP se entrega y en qué formato |
-| [[Clase 11 - Seguridad-Transacciones]] § *Dudas abiertas* | (crítico) **qué se toma de seguridad en el parcial**: la sintaxis MySQL del deck o el grafo de permisos / `REVOKE CASCADE` de GMUW 10.1 que el TP8 ejercita *"desde la teoría"*; (crítico) por qué los slides 31–38 son de índices y si se dieron en clase; si `REPEATABLE READ` evita *phantoms* "para la cátedra" *(el slide dice que no; InnoDB en la práctica sí)*; dónde está la *"matriz de roles y permisos"* del cronograma *(el deck no tiene ninguna)*; si se explicó `SET DEFAULT ROLE`; si el `FOR UPDATE` del slide 30 vale como sintaxis MySQL, y `START TRANSACTION` o `BEGIN`; si entran deadlocks, 2PL y recuperación; bibliografía sin declarar; cuatro afirmaciones del manual a verificar en el contenedor *(`USING HASH` → BTREE, `'u'@'localhost'` vs. `'%'` en Docker, rol sin activar, `@@transaction_isolation`)* |
-| [[Práctica 2026-09-08]] § *Preguntas para el docente* y § *Dudas abiertas* | TP8: (crítico) si el **1.a** espera la respuesta de la teoría *(la sentencia 6 falla)* o la de MySQL *(pasa)*; (crítico) **2.h**: si `ins_prov` es errata de `ins_vol` o un rol distinto; **1.b**: si `REVOKE UPDATE(tiempo)` a quien tiene `UPDATE` de toda la tabla se descompone; **2.d**: si aceptan `mandatory_roles` como sustituto de `PUBLIC`; **3**: si `A.usuario` se reproduce en MySQL o se contesta en papel; (crítico) si el **parcial evalúa seguridad con la semántica del estándar o con la de MySQL**; si el TP se entrega y en qué formato; números de error y `GRANT OPTION` por nivel pendientes de verificar en `mysql:9.7.2` |
-| [[Clase 12 - Introduccion a NoSQL]] § *Dudas abiertas* | (crítico) cómo responder *"¿MongoDB soporta transacciones ACID?"*: con el deck *(slide 11: no)*, con Seven Databases 2018 *(Transactions: No)* o con la versión actual *(multi-documento desde 4.0)*; (crítico) **en qué esquina de CAP van MongoDB y Redis**: el slide 18 dice CP para ambos, Corbellini Table 2 AP y CP/AP, Seven Databases A2 pone a Redis en CA; qué versión corre la cursada y si se acepta la sintaxis legacy del deck *(`insert`, `count`, `update{multi}`, `remove`, `ObjectId` sin comillas — en `mongosh` el slide 38 falla dos veces)*; si *"familia de columnas"* se dicta como *column store* o como *wide-column*; si entra consistencia eventual *(N/W/R, quórum)*; qué operadores además de los seis del slide 41 se dan por sabidos; si `$lookup` es "el join de MongoDB" o señal de mal modelado; por qué el deck no trae bibliografía, versión ni fecha |
-| [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] § *Dudas abiertas* | **N:M sin ejemplo en el deck**: arreglo de ids en ambos lados o colección intermedia *(el único N:M de la cursada está en el handout de ecommerce)*; integridad referencial: nadie valida `user_id`/`publisher_id`; verificar en `mongosh` la semántica **null = ausente** de `$lookup` con los datos del slide 22; si la cátedra llega a transacciones multidocumento; `$unwind` **no está en el deck 14** *(lo usa el handout)*; el esquema `cliente` del slide 26 no es de ningún ejemplo anterior; versión de MongoDB de la cursada; regla para la binaria 1:1 que [[1.03.01 - Derivación de MER a esquema relacional\|1.03.01]] no tiene; patrones con nombre de la documentación; `DBRef` vs. referencia manual |
-| [[Clase 14 - MongoDB Features]] § *Dudas abiertas* | (crítico) **si `mapReduce` entra al parcial** *(deprecado desde 5.0)*; (crítico) `$lookup` y `$unwind` no están en el deck y la solución del handout los usa en los cinco pipelines; (crítico) **qué versión de MongoDB corre el TP** *(`docker pull mongo` sin tag resolvía a **8.3.11** el 16/09; el deck es de 6.0.5)*; si los cuatro handouts de mayo de 2025 se entregaron el 14/09; la consigna dice *"Usando MongoDB (Compass)"*: ¿pipeline builder o vale `mongosh`?; replica sets y sharding con comandos o solo como concepto; transacciones, GridFS y geoespacial *(en el libro, no en el deck)*; en qué unidad caen la Parte II del TP9 y Cassandra; ficha para *Practical MongoDB Aggregations*; si la cátedra asume el cap. 4 de Seven Databases entero como lectura |
-| [[Práctica 2026-09-15]] § *Preguntas para el docente* y § *Dudas abiertas* | TP9: (crítico) si `ensureIndex()` existe todavía en el `mongosh` de la imagen `mongo` actual; (crítico) qué versión baja `docker pull mongo`; si la imagen corre en UTC *(los 13 `dob` van con mes 1-based en `new Date(y,m,d)`)*; paso 34: con `name_1` y `name_1_weight_1` coexistiendo, cuál elige el planificador; (crítico) **ej. 1: si EFECTO ALFONS son dos bandas o una** *(cambia el ej. 9: 3 vs. 2, y el promedio del 10)*, una colección o dos, `discos: []` o campo ausente; ej. 10 antes o después del 4, y dónde va el `$sort`; ej. 11: por bandas o por integrantes; qué contiene la Parte II del 22/09; si se entrega y en qué formato |
+| [[Clase 06 - Vistas-Parte 1]] § *Dudas abiertas* | Nombres de vista que no cierran entre slides, `PROV_COMP` con dos definiciones, la definición de `LOCAL` del slide 15 vs. la del estándar *(MySQL 9.7.2 aplica la del estándar; qué espera la cátedra sigue abierto)*, `DROP VIEW … RESTRICT` en MySQL, si las vistas materializadas entran *(la Pregunta 11 de [[Parcial 2Q2025\|Parcial 2Q2025]] las toma como teoría general: indicio de 2025)*. ✓ **Cerrada**: las respuestas de los ejercicios de los slides 16 y 17, corridas en MySQL 9.7.2 |
+| [[Clase 07 - Vistas-Parte 2]] § *Dudas abiertas* | Actualizabilidad con `JOIN` en MySQL *(ningún examen viejo la evalúa sin agregación)*, `CREATE OR REPLACE VIEW`, vistas materializadas *(MySQL 9.7.2 acepta `CREATE MATERIALIZED VIEW` pero recalcula en cada consulta; nueva: qué significa `ENGINE=UNKNOWN` en `SHOW CREATE VIEW`)*, el `MATERIALIZED … WITH LOCAL CHECK OPTION` del slide 21 *(`ERROR 1368` en MySQL 9.7.2)*, qué criterio decide qué materializar |
+| [[Clase 08 - Explicando el plan]] § *Dudas abiertas* | Los costos que no cierran de los slides 16 y 17, `EXPLAIN (ANALYZE, BUFFERS)` en MySQL, el `BEGIN…ROLLBACK` del slide 1, `GEQO` *(ningún examen viejo lo pregunta)*; nueva: desde qué versión MySQL da el `EXPLAIN` en árbol por defecto *(9.7.2 ya lo hace)*. El [[Parcial 2Q2025\|Parcial 2Q2025]] § *Sección C* pregunta el plan **en MySQL** y sin constantes de costo |
+| [[Práctica 2026-08-11]] § *Preguntas para el docente* | TP4: qué chequea `LOCAL` en cadena *(el 4.c pide las 9 combinaciones y el vault resuelve una; MySQL 9.7.2 sigue el estándar, la Pregunta 18 del [[Parcial 2Q2025\|Parcial 2Q2025]] no distingue las dos lecturas)*, el **choque de criterios** join vs. clave preservada *(ningún examen viejo lo cierra)*, si el 4.d va con `GROUP BY`; nueva del **TP3 SQLs avanzados**: si *"últimos 5 años"* (1.f) es una ventana relativa a la fecha de corrida o fija al período del dataset |
+| [[Práctica 2026-08-18]] § *Preguntas para el docente* | TP5: ✓ **cerrada** la sintaxis de índices *(Clase 11, slides 35 y 38: `CREATE INDEX nombre ON tabla (col)`; en MySQL el `DROP INDEX` lleva `ON tabla` → [[1.08.02 - Índices\|Índices]])*. Siguen: el *Form Editor* de Workbench, el índice clustered de InnoDB, si el **parcial** se rinde sobre MySQL *(en el [[Parcial 2Q2025\|Parcial 2Q2025]] las preguntas de SQL nombran MySQL y las de restricciones de tabla y privilegios van por el estándar: indicio de 2025)*, si se pide leer la estrategia de join por nombre |
+| [[Clase 09 - Restricciones integridad-Parte 1]] § *Dudas abiertas* | ~~cuándo llega la **Parte 2**~~ ✓ **cerrada** *(es la **Clase 10**, no la misma 09)*. Siguen: si el parcial toma sintaxis del estándar o de MySQL *(el [[Parcial 2Q2025\|Parcial 2Q2025]] pidió las dos capas: Preguntas 19 y 24; indicio de 2025)*, `:new`/`:old` vs. `new.`/`old.`, `RESTRICT` vs. `NO ACTION` en un motor que los trata igual, `SET NULL` contra una FK `NOT NULL`, si `MATCH PARTIAL` es solo teoría, el `BETWEEN` del slide 19, la columna tapada del slide 11; nueva: qué abarca *"RIR"* en la carpeta *Ejercicios de RI*, cuyos dos PNG son de `CHECK` y no de acciones referenciales |
+| [[Práctica 2026-08-25]] § *Preguntas para el docente* | TP6: (crítico) **A.4 y A.5 se contradicen** *(juntas hacen imposible publicar un artículo argentino)*, si se clasifica por ámbito o por sentencia *(la Pregunta 25 del [[Parcial 2Q2025\|Parcial 2Q2025]] no lo decide)*, el escape del `_` en `LIKE`, cuántos ejemplos pide el 2.b, `MATCH PARTIAL` solo como teoría del estándar |
+| [[Clase 10 - Restricciones integridad-Parte 2]] § *Dudas abiertas* | (crítico) si el **error 1442** frena el trigger del TP7 ej. 2, si **PL/pgSQL entra al parcial** cuando el TP se resuelve en MySQL, si los **cursores** entran al parcial *(la bibliografía ya está resuelta: GMUW cap. 9.3.6 y 9.4.4–9.4.6; ningún examen viejo pide código procedural ni cursores)*, por qué el archivo se llama *"Restricciones"* si la portada dice *"SQL procedural"*, y que **`INSTEAD OF` sigue sin resolverse**. Más: `CREATE OR REPLACE` en MySQL 9.7, `TEXT` como variable local, si `CREATE DOMAIN` salió del temario, el reset del *"cada x"* del slide 13 *(redundante: la traducción del material complementario da las mismas filas con y sin él)*; nueva: de quién es la corrección de `RegistrarEntrega` en `ejercicio de SP.sql` |
+| [[Práctica 2026-09-01]] § *Dudas abiertas* | TP7: (crítico) el mismo **error 1442**, (crítico) si el **3.d** pide `PROCEDURE` o `FUNCTION` *(el enunciado dice "stored procedure", el título dice "funciones", y el cálculo devuelve **dos** valores; el material complementario de la Clase 10 llama* stored procedure *a un `CREATE PROCEDURE`, sin decidir el 3.d)*, (crítico) si el **ej. 2** espera la respuesta única o el análisis de la dependencia del orden. Más: unidad de tiempo del ej. 3, un `HIS_ENTREGA` o dos, si el TP se entrega y en qué formato |
+| [[Clase 11 - Seguridad-Transacciones]] § *Dudas abiertas* | (crítico) **qué se toma de seguridad en el parcial** *(la Pregunta 32 del [[Parcial 2Q2025\|Parcial 2Q2025]] pidió `GRANT`/`REVOKE … CASCADE` en SQL estándar con el grafo de permisos, igual que el handout del 07/09: indicio de 2025)*; (crítico) por qué los slides 31–38 son de índices y si se dieron en clase; si `REPEATABLE READ` evita *phantoms* "para la cátedra"; la *"matriz de roles y permisos"* del cronograma; `SET DEFAULT ROLE`; el `FOR UPDATE` del slide 30 y `START TRANSACTION` o `BEGIN`; si entran deadlocks y 2PL *(la **recuperación** ya tiene deck: [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL\|Clase 11(B)]])*; bibliografía sin declarar; verificaciones en el contenedor, en MySQL 9.7.2: ✓ `USING HASH` → `BTREE` sobre InnoDB, ✓ el rol concedido sin `SET DEFAULT ROLE` queda inactivo *(`CURRENT_ROLE()` = `NONE`, `ERROR 1142`)* y ✓ `@@transaction_isolation` → `REPEATABLE-READ` *([[MySQL\|MySQL]] § *8.5*)*; sigue sin verificar `'u'@'localhost'` vs. `'%'` desde el host anfitrión |
+| [[Clase 11(B)_Recovery_WAL_PostgreSQL_MySQL\|Clase 11(B)]] § *Dudas abiertas* | (crítico) si **ARIES** entra por nombre *(Date cap. 15.4 lo nombra; ningún examen viejo lo pregunta)*; (crítico) lo de PostgreSQL *(`wal_level`, `checkpoint_timeout`, `synchronous_commit`, `full_page_writes`)* verificado solo contra la documentación de PostgreSQL 18, sin servidor real; cuánto detalle se pide del *two-phase commit* interno entre *redo log* y *binlog*; `full_page_writes` vs. *doublewrite buffer*. ✓ **Cerradas**: la recuperación tiene deck propio *(duda heredada de la Clase 11)* y `innodb_log_file_size` ya no existe en MySQL 9.7.2 *(`unknown variable`; solo `innodb_redo_log_capacity`)*; deadlocks y 2PL siguen sin deck |
+| [[1.11.05 - Recovery y write-ahead logging (WAL)\|Recovery y WAL]] · [[1.11.06 - ARIES — análisis, redo y undo\|ARIES]] § *Dudas abiertas* | Repiten las de la Clase 11(B) *(PostgreSQL sin servidor real, *two-phase commit* interno, `full_page_writes` vs. *doublewrite buffer*, ARIES por nombre)* y suman dos de 1.11.06: si el ejemplo trabajado con un log numérico *(§ 7)* es el nivel que pide la cátedra, y si `recLSN` y `CLR` *(§ 7.6)* se mencionaron en clase o son ampliación del vault |
+| [[Práctica 2026-09-08]] § *Preguntas para el docente* y § *Dudas abiertas* | TP8: (crítico) si el **1.a** espera la respuesta de la teoría *(la sentencia 6 falla)* o la de MySQL *(pasa)*; (crítico) **2.h**: si `ins_prov` es errata de `ins_vol` o un rol distinto; **1.b**: si `REVOKE UPDATE(tiempo)` a quien tiene `UPDATE` de toda la tabla se descompone; **2.d**: si aceptan `mandatory_roles` como sustituto de `PUBLIC`; **3**: si `A.usuario` se reproduce en MySQL o se contesta en papel; (crítico) si el **parcial evalúa seguridad con la semántica del estándar o con la de MySQL** *(la Pregunta 32 del [[Parcial 2Q2025\|Parcial 2Q2025]]: estándar; indicio de 2025)*; si el TP se entrega y en qué formato; números de error: ✓ `1064`, `1410`, `3523` y `1147` verificados en MySQL 9.7.2; `GRANT OPTION` por (cuenta, tabla) consistente con una corrida en MySQL 9.7.2, sin verificar la frase del manual |
+| [[Clase 12 - Introduccion a NoSQL]] § *Dudas abiertas* | (crítico) cómo responder *"¿MongoDB soporta transacciones ACID?"* *(ningún examen viejo lo pregunta)*; (crítico) **en qué esquina de CAP van MongoDB y Redis**: para **MongoDB**, el [[Parcial 2Q2025\|Parcial 2Q2025]] tomó **CP**, la del slide 18 *(Pregunta 10; indicio de 2025)*; **Redis** no tiene pregunta corregida *(la guía [[Repaso Final BD 2\|Repaso Final BD 2]] lo pone en CA)*; qué versión corre la cursada y si se acepta la sintaxis legacy *(en MongoDB 8.3.11, `insert()` avisa la deprecación y `ensureIndex` no)*; *column store* o *wide-column*; si entra la consistencia eventual *(el quórum apareció en 2025, pero en la pregunta de Cassandra)*; hasta dónde llegan los índices *(el TP9 Parte II ejercita el índice por defecto, `_id`, `explain()` y `2d`)*; qué operadores se dan por sabidos; si `$lookup` es "el join de MongoDB" o señal de mal modelado; por qué el deck no trae bibliografía, versión ni fecha; nueva: por qué el slide 18 no ubica a Neo4j si el Parcial 2Q2025 lo evalúa como CA |
+| [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] § *Dudas abiertas* | **N:M sin ejemplo en el deck** *(la Pregunta 31 del [[Parcial 2Q2025\|Parcial 2Q2025]] confirma que embebido vs. referencias se evalúa, pero no dice cómo referenciar un N:M)*; integridad referencial: nadie valida `user_id`/`publisher_id`; ✓ **cerrada** la semántica **null = ausente** de `$lookup`: con los datos del slide 22, en MongoDB 8.3.11, la orden sin `item` empareja con `sku: null` y con `sku` ausente; si la cátedra llega a transacciones multidocumento *(ningún examen viejo)*; `$unwind` **no está en el deck 14**; el esquema `cliente` del slide 26; versión de MongoDB de la cursada *(ninguna de las dos partes del TP9 la fija)*; regla para la binaria 1:1 que [[1.03.01 - Derivación de MER a esquema relacional\|1.03.01]] no tiene; patrones con nombre de la documentación; `DBRef` vs. referencia manual |
+| [[Clase 14 - MongoDB Features]] § *Dudas abiertas* | (crítico) **si `mapReduce` entra al parcial** *(la Pregunta 6 del [[Parcial 2Q2025\|Parcial 2Q2025]] lo pidió con el ejercicio del handout (c), que en MongoDB 8.3.11 corre con `DeprecationWarning`: indicio de 2025)*; (crítico) `$lookup` y `$unwind` fuera del deck *(el TP9 Parte II no los usa; ningún examen viejo usa `$unwind`)*; (crítico) **qué versión de MongoDB corre el TP** *(referencia: 8.3.11 / `mongosh` 2.11.1 con la imagen `mongo:8`; el deck es de 6.0.5)*; si los cuatro handouts de mayo de 2025 se entregaron el 14/09; Compass o `mongosh` para la consigna; replica sets y sharding *(en 2025, solo como concepto)*; transacciones y GridFS *(el geoespacial sí entró: índice `2d` del TP9 Parte II)*; ficha para *Practical MongoDB Aggregations*; si la cátedra asume el cap. 4 de Seven Databases entero *(el TP9 Parte II lo recorre)*. Resuelto en parte: la Parte II del TP9 cayó en `Unidad-02`; Cassandra sigue sin material de clase |
+| [[Práctica 2026-09-15]] § *Preguntas para el docente* y § *Dudas abiertas* | TP9: ✓ **cerradas**: `ensureIndex()` funciona sin aviso en MongoDB 8.3.11 / `mongosh` 2.11.1, qué trae la Parte II, y que la Parte II reutiliza `bandas` *(no `players`)*, y que la imagen `mongo:8` corre en UTC *(`new Date(1987,2,14,0,0)` → `1987-03-14T00:00:00.000Z`)*. Siguen: (crítico) qué versión baja `docker pull mongo` *(8.3.11 es un dato de referencia, no la respuesta)*; si `ensureIndex` se **acepta** en la entrega; paso 34: cuál índice elige el planificador; (crítico) **ej. 1: si EFECTO ALFONS son dos bandas o una** *(cambia el ej. 9: 3 vs. 2, y el promedio del 10)*, una colección o dos, `discos: []` o campo ausente; ej. 10 antes o después del 4, y dónde va el `$sort`; si se entrega y en qué formato |
+| [[Práctica 2026-09-22\|Práctica 2026-09-22]] § *Preguntas para el docente* y § *Dudas abiertas* | TP9 Parte II: si el **ej. 8** espera **CP** o AP para MongoDB *(Clase 12 vs. Corbellini; el Parcial 2Q2025 tomó CP)*; si `titulo` es la columna que pide el 4.b *(`egresados.csv` no trae `carrera`)*; `ensureIndex` o `createIndex` en la entrega; en qué base va `mongoCities_fixed.json`; (crítico) el criterio de `mongoCities_fixed.json` para ordenar `location` *(`[lat, lon]` en unos países y `[lon, lat]` en otros)*; desde qué versión de MySQL 9.x el `EXPLAIN` sale en árbol; si `ensureIndex` sobrevive a la próxima versión mayor de `mongosh` |
 | [[Clase 02 - Modelo Entidad-Relacion]] · [[Clase 03 - Derivación a Esquema Lógico]] · [[Clase 05 - Consultas de Datos–Parte 1]] *(y partes 2 y 3)* | DER y repaso relacional: notación del parcial, derivación de 1:1 y ternarias, `NULL`, `UNION`/`INTERSECT`/`EXCEPT` |
 | [[Clase 01 - Introducción_BasesDeDatos]] · [[Clase 04 - AlteraciónActualizaciónTablas]] | Dudas sueltas de las dos clases más cortas |
-| [[MySQL]] · [[PostgreSQL]] | Lo que quedó en `verificar` de la traducción entre motores |
-| [[MongoDB]] | Versión real de la imagen `mongo` sin tag, `ensureIndex`/`count` en `mongosh`, `mapReduce` en 8.x, replica set y sharding sobre el `mongod` suelto del TP9, autenticación *(el contenedor arranca sin `--auth` y ninguna clase dio usuarios ni roles de MongoDB)* |
+| [[MySQL\|MySQL]] · [[PostgreSQL\|PostgreSQL]] | Lo que quedó en `verificar` de la traducción entre motores. En [[MySQL\|MySQL]]: ✓ `@@transaction_isolation` → `REPEATABLE-READ` y ✓ *redo log*, *undo log*, *doublewrite buffer* y *binlog* *(§ 8.5)*; siguen, entre otras, `'u'@'localhost'` vs. `'u'@'%'` desde el host *(la única que queda de las verificaciones de seguridad de § 7)*, el error 1442, `CREATE OR REPLACE PROCEDURE`, `GRANT OPTION` global y `BEGIN` vs. `START TRANSACTION`. En [[PostgreSQL\|PostgreSQL]]: (crítico) no hay servidor PostgreSQL para verificar `wal_level` y los demás parámetros del WAL; el equivalente InnoDB de cada pieza del diagrama de la Clase 01 *(la del WAL ya está documentada)* |
+| [[MongoDB\|MongoDB]] | Qué versión toma la cátedra *(8.3.11 / `mongosh` 2.11.1, segunda evidencia en la rama 8.x)*; si se acepta en la entrega la sintaxis legada *(✓ `ensureIndex` y `find().count()` funcionan en `mongosh`)*; transacciones ACID; replica sets y sharding con comandos o como concepto; el orden de coordenadas de `mongoCities_fixed.json`; si en la entrega `bandas` se reutiliza o se recrea *(el ej. 6 del TP9 Parte II la supone creada; [[Práctica 2026-09-22\|Práctica 2026-09-22]] la recrea con el mismo `insertMany`)*; Compass o `mongosh` para la consigna *ecommerce*; GridFS y `$jsonSchema`; versiones de las Database Tools. Siguen abiertas, con el [[Parcial 2Q2025\|Parcial 2Q2025]] como indicio de 2025 y no como cierre: si `mapReduce` entra *(Pregunta 6)* y en qué esquina de CAP va MongoDB *(Pregunta 10: CP)*. ✓ Cerradas: el binario `mongo` se retiró en 6.0, `toString()` de `ObjectId` devuelve el hexadecimal y la imagen `mongo:8` corre en UTC |
+| [[Mapa de exámenes\|Mapa de exámenes]] § *Dudas abiertas* | El formato del parcial 2026 *(plataforma, como el 2Q2025, o impreso y de desarrollo, como el [[Parcial XC-202X\|XC-202X]] y el [[Parcial 2Q-2023\|2Q-2023]])*; cómo clasifica la cátedra a Neo4j en CAP *(el slide 18 no lo ubica y los exámenes viejos lo preguntan)*; la disputa CAP de Redis *(CP el deck, AP Corbellini, CA Seven Databases)*; si las preguntas de Cassandra del parcial 2026 serán de definición, como en 2025, o de razonamiento aplicado. ✓ **Hecha** la propagación de la evidencia del Parcial 2Q2025 a [[Clase 06 - Vistas-Parte 1]], [[Práctica 2026-08-11]] y [[Clase 09 - Restricciones integridad-Parte 1]]: las tres tienen su nota *(nota) Evidencia de exámenes viejos* |
+| [[1.03.02 - DDL — creación y alteración de tablas\|DDL]] · [[1.05.01 - SQL — consultas\|SQL — consultas]] · [[1.06.01 - Vistas\|Vistas]] · [[1.08.01 - Plan de ejecución\|Plan de ejecución]] · [[1.11.01 - Seguridad en bases de datos\|Seguridad]] · [[1.11.02 - Usuarios, privilegios y roles\|Usuarios y roles]] · [[1.11.03 - Transacciones y ACID\|ACID]] · [[1.11.04 - Control de concurrencia y niveles de aislamiento\|Aislamiento]] § *Dudas abiertas* | **Motor del parcial:** abierta en Plan de ejecución, DDL, SQL — consultas y la [[Práctica 2026-08-18]]: el TP5 confirma MySQL para la práctica; la Pregunta 2 del [[Parcial 2Q2025\|Parcial 2Q2025]] nombra MySQL y el [[Parcial 2Q-2023\|Parcial 2Q-2023]] presupone PostgreSQL, indicios de otros años. **Vistas:** ✓ MySQL 9.7.2 aplica la lectura de `LOCAL` del estándar y ✓ acepta `CREATE MATERIALIZED VIEW` sin materializar; siguen (crítico) la actualizabilidad con `JOIN`, qué lectura de `LOCAL` corrige la cátedra y si entran las vistas materializadas *(las mismas de las Clases 06 y 07)*. **Plan:** las de la Clase 08 *(versión de `EXPLAIN ANALYZE`, `EXPLAIN (ANALYZE, BUFFERS)`, `cpu_operator_cost`, GEQO, estrategias de join, costos de los slides 16–17)* más `explain()` de MongoDB. **DDL** y **SQL — consultas:** las de los decks 04 y 05 *(tipeos, `(OJO)!!!`, `DROP CONSTRAINT`, `TRUNCATE`, `FALSE`/`UNKNOWN`, collation, `ANY`/`ALL`, operadores de conjunto)*. **1.11.01–1.11.04:** las de la Clase 11 *(qué capa de seguridad evalúa el parcial, `'u'@'localhost'` vs. `'%'`, phantoms en `REPEATABLE READ`, deadlocks y 2PL, transacciones en el parcial)* |
+| [[2.12.01 - NoSQL — origen, propiedades y taxonomía\|Taxonomía NoSQL]] · [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[2.12.04 - Teorema CAP\|Teorema CAP]] · [[2.12.05 - BASE y consistencia eventual\|BASE]] · [[2.12.08 - Aggregation pipeline\|Aggregation pipeline]] · [[2.13.01 - Documentos embebidos vs. referencias\|Embebidos]] · [[2.13.02 - Relaciones 1:1, 1:N y N:M en MongoDB\|Relaciones]] · [[2.14.02 - Índices en MongoDB\|Índices en MongoDB]] · [[2.14.03 - MapReduce\|MapReduce]] § *Dudas abiertas* | **CAP de MongoDB:** (crítico) abierta en Escalabilidad horizontal y en Teorema CAP *(indicio de 2025: CP, Pregunta 10 del Parcial 2Q2025)*, como en la Clase 12; Redis y Neo4j en CAP. Replica sets y sharding con comandos o como concepto; si entran `$lookup` y `$unwind`; si entra `mapReduce` *(como en la Clase 14)*; ✓ `db.loadServerScripts()` no existe en `mongosh` 2.11.1; índices de texto *(los geoespaciales ✓ entraron con el `2d` del TP9 Parte II)*; versión de la imagen `mongo`. Las de Taxonomía, BASE, Embebidos y Relaciones repiten las de las Clases 12 y 13: transacciones ACID, *column store* o *wide-column*, N:M, `DBRef`, `$jsonSchema`, quórum |
 
 > [!bug] Las **contradicciones internas de los decks del 10/08** (Clases 06–08)
 > Son las más gruesas del vault y conviene llevarlas juntas a clase. El detalle de cada una está en
@@ -602,10 +668,58 @@ tener dos copias que se desincronicen. `index.md` remite a esta lista.
 > (*"aunque MySQL no soporta… resuelva según la teoría"*), TP8 1.b y ej. 2 (*"MySQL no provee…
 > resuélvalo desde la teoría"*, ya con desfasaje **de modelo**, no de una cláusula). El TP9, en
 > cambio, es el primero **sin brecha que nombrar**: escrito y corrido en `mongosh`, el desfasaje que
-> queda es solo de versión. **Sigue sin confirmarse qué motor toma el parcial** → [[Práctica
-> 2026-08-18]], [[Práctica 2026-09-01]], [[Práctica 2026-09-08]], [[Práctica 2026-09-15]].
+> queda es solo de versión. **Sigue sin confirmarse qué motor toma el parcial** →
+> [[Práctica 2026-08-18]], [[Práctica 2026-09-01]], [[Práctica 2026-09-08]], [[Práctica 2026-09-15]].
+>
+> El indicio más cercano es el [[Parcial 2Q2025|Parcial 2Q2025]]: sus preguntas de SQL nombran
+> **MySQL** en el enunciado (vistas, `EXPLAIN`, consultas) y las de restricciones de tabla y
+> privilegios piden el **estándar** —la 24, primero el estándar y después MySQL; la 32, solo el
+> estándar—. Es el mismo método de los TP6 a TP8, pero es un examen de 2025.
+
+## Exámenes viejos
+
+`raw/Examenes_Viejos/` guarda exámenes de otras cursadas en tres carpetas de Drive. **No es una
+unidad ni una clase**: cada instancia tiene su página en `wiki/examenes/` *(`tipo: examen`,
+`unidad: eval`)*, nombrada con el rótulo que trae la fuente. Como con los decks, esta tabla es el
+registro de qué archivo usa cada página. Ninguno es material oficial del campus 2026: todos circulan
+como copias de estudiantes. La mayoría son reconstrucciones, resoluciones o capturas hechas por
+estudiantes; los enunciados de `1Q2021`, `2Q2021` y `Recuperatorio 2Q2020` no traen resolución, y
+los dos de 2021 los publicó la cátedra de entonces *(Aizemberg/Rodríguez)*. Cada página dice qué tan
+confiable es su fuente. Los veinte archivos figuran además en las `fuentes:` de
+[[Mapa de exámenes|Mapa de exámenes]], que los cruza con el cronograma 2026.
+
+| Archivo | Qué es | Página que lo usa | Temario |
+| --- | --- | --- | --- |
+| **`Drive 72.41 - BDII - Examenes Viejos/`** | | | |
+| `BDII - Parcial 2Q2025.docx` | 41 capturas del examen real en la plataforma online, con la corrección y el puntaje de cada pregunta | [[Parcial 2Q2025\|Parcial 2Q2025]] | actual |
+| `BDII - Parciales Viejos.pdf` | 13 págs. manuscritas de un estudiante: resuelve dos parciales —el rotulado "XC-202X" (págs. 2–4) y el "2Q-2023" (págs. 5–9)— y una práctica que rotula "subida por la cátedra" (págs. 10–13); la pág. 1 es una portada | [[Parcial XC-202X\|Parcial XC-202X]] · [[Parcial 2Q-2023\|Parcial 2Q-2023]] · [[Práctica subida por la cátedra\|Práctica subida por la cátedra]] *(lo enlazan además [[Parcial 2Q2025\|Parcial 2Q2025]], [[Clase 12 - Introduccion a NoSQL\|Clase 12]] y [[2.12.04 - Teorema CAP\|Teorema CAP]])* | actual |
+| `BDII - Finales Viejos.docx` | Versión corta de dos finales, con una "Respuesta:" por pregunta | [[Final 1Jul2025\|Final 1Jul2025]] · [[Final 1Dic2023\|Final 1Dic2023]] | actual |
+| `BDII - Final 1Dic2025.docx` | Enunciado reconstruido de memoria, sin respuestas | [[Final 1Dic2025\|Final 1Dic2025]] | actual |
+| **`Drive bd2 (4to año 2Q)/`** | | | |
+| `Copia de BDII - Finales Viejos.docx` | Versión larga: los tres finales en un documento, con respuestas más desarrolladas | [[Final 1Jul2025\|Final 1Jul2025]] · [[Final 1Dic2023\|Final 1Dic2023]] · [[Final 1Dic2025\|Final 1Dic2025]] | actual |
+| `Repaso Final BD 2.docx` | Guía de estudiantes: 32 ejercicios *(Redis, DynamoDB, concurrencia, vistas, índices, CAP)*; transcribe también los tres finales | [[Repaso Final BD 2\|Repaso Final BD 2]] | actual |
+| `Parciales viejos/Parcial_BDII_2Q2025_reconstruido(1).pdf` | Reconstrucción de estudiantes de las 33 preguntas, con solucionario al final *(texto)* | [[Parcial 2Q2025\|Parcial 2Q2025]] | actual |
+| `Parciales viejos/Parcial_BDII_2Q2025_reconstruido.pdf` | La misma reconstrucción con imágenes y marcas de quien la completó | [[Parcial 2Q2025\|Parcial 2Q2025]] | actual |
+| `Parciales viejos/parcial.pdf` · `parcial(1).pdf` | El mismo examen de otra materia, *Bases de Datos Avanzadas* (23/05/2023), con solucionario; difieren solo en la codificación de las flechas | [[Parcial 23-5-23 - Bases de Datos Avanzadas\|Parcial 23-5-23]] | anterior |
+| **`Drive ITBA Informatica - 72.41/Parciales/`** | | | |
+| `1Q2020 - RESUELTO (no chequeado).pdf` · `1Q2020 - RESUELTO (no chequeado).docx` | Domiciliario resuelto por un estudiante, que lo rotula "no chequeado" | [[Parcial 1Q2020\|Parcial 1Q2020]] | anterior |
+| `2Q2020 - Resuelto (10 puntos).pdf` · `2Q2020 - Resuelto (10 puntos).docx` · `2Q2020 - Resuelto (10 puntos)(1).docx` | Domiciliario del 13/10/2020 resuelto por un estudiante; las dos variantes del `.docx` difieren en un detalle de transcripción | [[Parcial 2Q2020\|Parcial 2Q2020]] | anterior |
+| `Recuperatorio 2Q2020.pdf` | Solo enunciado *(03/11/2020)*, sin resolución | [[Recuperatorio 2Q2020\|Recuperatorio 2Q2020]] | anterior |
+| `1Q2021.pdf` · `1Q2021.docx` | Enunciado del domiciliario del 18/05/2021, sin respuestas | [[Parcial 1Q2021\|Parcial 1Q2021]] | anterior |
+| `2Q2021.pdf` · `2Q2021 - Datasets.pdf` | Enunciado del domiciliario del 26/10/2021 y el detalle de sus dos datasets | [[Parcial 2Q2021\|Parcial 2Q2021]] | anterior |
+
+**Temario `anterior`** marca los exámenes de 2020–2021 y el de *Bases de Datos Avanzadas*, que
+evalúan motores o un formato que la cursada 2026 no usa *(CouchDB, ElasticSearch, HBase, PostGIS;
+domiciliarios de varias horas)*. Los del temario `actual` —el parcial 2Q2025, los parciales XC-202X y 2Q-2023, tres finales de 2023
+y 2025, una guía de repaso y una práctica de parcial— son los que [[Mapa de exámenes|Mapa de exámenes]] usa para priorizar el estudio
+del parcial del 13/10.
 
 ## Evaluación
 
 Según el programa: cursada = promedio entre parcial y TP Especial (el **TPO** del cronograma), mínimo
 4 en cada uno; final con mínimo 4. Fechas concretas en [[_cronograma]].
+
+Para preparar el **parcial del 13/10** con exámenes de otras cursadas:
+[[Mapa de exámenes|Mapa de exámenes]] cruza los once exámenes viejos con el cronograma 2026 —formato, temas por frecuencia,
+trampas recurrentes y qué estudiar primero—, y § *Exámenes viejos* de esta página dice de qué archivo
+sale cada uno.

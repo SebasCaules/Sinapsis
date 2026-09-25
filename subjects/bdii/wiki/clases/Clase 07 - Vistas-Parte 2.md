@@ -23,13 +23,13 @@ estado: procesado
 
 ## Resumen general
 
-Escribir a través de una vista es la pregunta que recorre todo el deck: cuándo un `INSERT`, `UPDATE`
-o `DELETE` sobre una relación derivada se traduce sin ambigüedad a las tablas base. Tres capas que no
-coinciden: el estándar SQL:1999 (slides 3–4), lo que hace MySQL —el motor de la cursada— (slide 13 y
-capturas del manual en los slides 14–16), y lo que se fuerza con triggers `INSTEAD OF` (slides 11–12).
+El deck recorre una pregunta: cuándo un `INSERT`, `UPDATE` o `DELETE` sobre una vista se traduce
+sin ambigüedad a las tablas base. Tres capas que no coinciden: el estándar SQL:1999 (slides 3–4), lo
+que hace MySQL (slides 13–16, con capturas del manual) y lo que se fuerza con triggers `INSTEAD OF`
+(slides 11–12).
 Cierra con vistas materializadas (slides 17 y 20–21) y ventajas/desventajas (18–19). Se practica con
-el TP4 Vistas y es material de parcial: qué tabla preserva la clave o qué operación falla sobre un
-join es el detalle que se pregunta.
+el TP4 Vistas; en el parcial se pregunta qué tabla preserva la clave o qué operación falla sobre un
+join.
 
 Las cuatro condiciones del estándar: la escritura afecta una sola tabla base (si la vista deriva de
 varias, la que preserva la clave); sin columnas derivadas, funciones de grupo, `DISTINCT`,
@@ -37,10 +37,10 @@ subconsultas en el `SELECT` ni operaciones de conjunto; sin errores por columnas
 sin `DEFAULT` o con RI asociadas; y la fila cumple la condición si hay `WITH CHECK OPTION`. La tabla
 que preserva la clave se decide por el esquema, no por los datos: en tipo-subtipo es el subtipo. La
 actualizabilidad se hereda en cadena (`Vi` actualizable solo si `Vi-1` lo es). El deck se contradice
-sobre los joins en MySQL: el slide 13 los lista como no actualizables, pero el slide 10 inserta y
-actualiza a través de una vista con `join`. `INSTEAD OF` no resuelve la ambigüedad, la delega al
-programador, y MySQL no lo admite. MySQL tampoco tiene vistas materializadas, y el ejemplo de
-PostgreSQL del slide 21 con `WITH LOCAL CHECK OPTION` no es sintaxis válida.
+sobre los joins en MySQL: el slide 13 los da por no actualizables y el slide 10 escribe a través de
+una vista con `join`. `INSTEAD OF` no resuelve la ambigüedad, la delega al programador, y MySQL no
+lo admite. MySQL tampoco tiene vistas materializadas funcionales, y el ejemplo de PostgreSQL del
+slide 21 con `WITH LOCAL CHECK OPTION` no es sintaxis válida.
 
 Para el parcial: vista σ-π-⋈ y una sola tabla tocada; la tabla de decisión del final recorre los
 chequeos en orden, y `WITH CHECK OPTION` se estudia en la Parte 1, porque este deck solo lo nombra.
@@ -673,6 +673,11 @@ WITH DATA;
 > [[_cronograma]] § diferencias con el programa), y aquí el desajuste es máximo: **MySQL no tiene
 > `CREATE MATERIALIZED VIEW` en absoluto**, como dice el propio slide 20. En PostgreSQL el refresco
 > manual se hace con `REFRESH MATERIALIZED VIEW nombre;`, sentencia que el deck **no menciona**.
+>
+> (atención) Precisión sobre la sintaxis: MySQL 9.7.2 **acepta** `CREATE MATERIALIZED VIEW` sin
+> error, pero no materializa nada. El resultado se recalcula en cada `SELECT`, `SHOW CREATE VIEW`
+> muestra `MATERIALIZED /*(BY ENGINE=UNKNOWN)*/` y la vista queda con `IS_UPDATABLE = NO`. Lo que
+> falta es la funcionalidad, no la palabra clave → [[Final 1Dic2023]] § *Pregunta 3*.
 
 ---
 
@@ -754,14 +759,34 @@ El mapeo real tema → capítulo, contra los índices de las fuentes del vault, 
 - [x] ~~**¿`CASCADED` vs. `LOCAL`?**~~ **Resuelto** en el deck 06 → [[Clase 06 - Vistas-Parte 1]]
   slides 15–17: `CASCADED` es el default (del estándar **y** de MySQL). Queda abierto allá si la
   definición de `LOCAL` del slide 15 coincide con la del estándar.
+  - (nota) En el motor ya está verificado: MySQL 9.7.2 sigue la lectura del estándar (con `LOCAL`
+    también chequea las vistas subyacentes que tienen su propio WCO). Lo que sigue abierto es cuál
+    espera la cátedra → [[Clase 06 - Vistas-Parte 1]] § *Dudas abiertas*.
 - [ ] **¿Una vista con `JOIN` es o no actualizable en MySQL?** El slide 13 dice que no; los slides 10
   y 15 muestran escrituras válidas. `vjoin` tiene un componente materializado (`vmat`) que
   `vista_nota_alumnos_aprobados` no tiene: quizás no sean el mismo caso. **Preguntar.**
+  - (nota) Evidencia de exámenes viejos: ninguna pregunta evalúa una vista con `JOIN` **sin**
+    agregación. La Pregunta 27 de [[Parcial 2Q2025]] § *Sección A* (`ConstructorVIP`, con `JOIN`,
+    `GROUP BY` y `HAVING`) es no actualizable, y el solucionario de estudiantes cita el `JOIN` entre
+    las causas, pero lo decisivo es la agregación (en MySQL 9.7.2, `ERROR 1471 … is not
+    insertable-into` en el `INSERT` y `ERROR 1288 … is not updatable` en el `UPDATE`). La Pregunta 30 de [[Parcial 23-5-23 - Bases de Datos Avanzadas]] (V/F:
+    "siempre" se puede escribir en una vista → Falso) es sobre PostgreSQL. No cierra el caso MySQL.
 - [ ] **`E.cantidad_horas` en el slide 7**: ¿tipeo o esquema distinto?
 - [ ] **¿El trigger del slide 12 es "sintaxis SQL estándar"?** Usa `:new` de Oracle PL/SQL.
 - [ ] **¿Cómo se resuelve el TP4 si MySQL no tiene `INSTEAD OF` ni vistas materializadas?**
+  - (nota) Sobre las vistas materializadas: MySQL 9.7.2 acepta `CREATE MATERIALIZED VIEW` sin error,
+    pero el resultado se recalcula en cada consulta, como en una vista común → corrida en
+    [[Final 1Dic2023]] § *Pregunta 3*. No sirve como sustituto real.
 - [ ] **`CREATE MATERIALIZED VIEW … WITH LOCAL CHECK OPTION` (slide 21)**: ¿error del deck o hay
   algún motor donde sea válido?
+  - (nota) En MySQL 9.7.2 no es válido: `CREATE MATERIALIZED VIEW mv AS SELECT * FROM t WHERE val > 5
+    WITH LOCAL CHECK OPTION` da `ERROR 1368 (HY000): CHECK OPTION on non-updatable view`, mientras
+    que la misma definición sin `MATERIALIZED` se crea sin error. No verificado en PostgreSQL.
+- [ ] **¿Qué significa `ENGINE=UNKNOWN` en `SHOW CREATE VIEW` de una vista creada con
+  `CREATE MATERIALIZED VIEW` en MySQL 9.7.2?** ¿Es una función en desarrollo o un marcador
+  permanente? No se encontró documentación oficial de MySQL sobre esa sintaxis; conviene revisar el
+  *changelog* de MySQL 9.x antes de dar por definitiva la ausencia de vistas materializadas →
+  [[Final 1Dic2023]] § *Dudas abiertas*.
 - [ ] **¿Se acepta `CREATE OR REPLACE VIEW` en el TP4?** No aparece en ningún deck; la única vía
   documentada para *"re-crear"* (slide 19) es `DROP VIEW` (deck 06 slide 7) + `CREATE`.
 - [ ] **¿Qué criterio concreto decide qué vistas materializar?** El slide 17 lo declara *"decisión
@@ -781,3 +806,4 @@ El mapeo real tema → capítulo, contra los índices de las fuentes del vault, 
   *(vistas como control de acceso)*
 - Índice de clases: [[_index-clases]] · bibliografía: [[_index-bibliografia]] § 2 · calendario:
   [[_cronograma]]
+- Exámenes viejos: [[Mapa de exámenes]] *(actualizabilidad de vistas y vistas materializadas)*
