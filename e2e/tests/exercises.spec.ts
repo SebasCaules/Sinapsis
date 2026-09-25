@@ -25,9 +25,14 @@ const seed = readSeed();
 const subject = seed.subject;
 const BUNDLE_ID = "proba-exercises";
 
-/** Las tres vistas del manifiesto, con algo que solo dibuja cada una. */
+/**
+ * Las tres vistas del manifiesto, con algo que solo dibuja cada una. El total de
+ * ejercicios no se fija: sale de la materia real y cambia con cada publicación
+ * de proba. Alcanza con que no sea cero: sin datos, la vista dice «0 ejercicios
+ * resueltos».
+ */
 const VISTAS = [
-  { id: "ejercicios", texto: /289 ejercicios resueltos/ },
+  { id: "ejercicios", texto: /[1-9]\d* ejercicios resueltos/ },
   { id: "parcial", texto: /Banco disponible:/ },
   { id: "formularios", texto: /Todo el programa/ },
 ] as const;
