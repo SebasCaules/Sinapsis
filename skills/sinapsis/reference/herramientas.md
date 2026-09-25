@@ -45,7 +45,7 @@ tenga.
 
   "scripts": ["lib-math.js", "tools.js", "figuras/u1.js"],   // se cargan EN ORDEN
   "styles": ["css/tools.css"],      // se inyectan con el bundle y se quitan al salir
-  "data": ["data/datos.json"],      // quedan en App.DATA["data/datos.json"]
+  "data": ["data/datos.json"],      // quedan en App.DATA["datos"] (nombre sin carpeta ni extensión)
 
   "views": [                        // cada vista abre en /m/<materia>/t/<id de vista>
     { "id": "explorador", "label": "Explorador de distribuciones",
@@ -115,7 +115,9 @@ controles interactivos, `cleanup(fn)` para listeners y timers, `theme`, `cssVar(
 `App.SUBJECT` (`{ slug, config }`), `App.PAGES`, `App.CONTENT` (las que cuentan como
 contenido), `App.BY_SLUG`, `App.UNITS`, `App.TYPES`, `App.unitShort(key)`,
 `App.unitMeta(key)`, `App.isStudied(slug)`, y los JSON del propio bundle en `App.DATA` y
-`App.STUDY`.
+`App.STUDY`. `App.DATA` guarda cada archivo de `data` por su **nombre sin carpeta y sin
+extensión** (`dataKey()` de `packages/runtime/src/loader.ts`): `data/datos.json` →
+`App.DATA["datos"]`, no `App.DATA["data/datos.json"]`.
 
 **Navegación y avisos**
 
