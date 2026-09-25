@@ -1,0 +1,225 @@
+{
+  "contract": 1,
+  "slug": "derecho",
+  "name": "Derecho para Ingenieros",
+  "code": "61.31",
+  "institution": "ITBA",
+  "color": "--u1",
+  "semester": "2026-1C",
+  "division": {
+    "singular": "Unidad",
+    "abbr": "U",
+    "plural": "Unidades"
+  },
+  "divisions": [
+    {
+      "key": "1",
+      "name": "Introducción al Derecho",
+      "kind": "numbered"
+    },
+    {
+      "key": "2",
+      "name": "Organización del Estado",
+      "kind": "numbered"
+    },
+    {
+      "key": "3",
+      "name": "Derecho Civil",
+      "kind": "numbered"
+    },
+    {
+      "key": "4",
+      "name": "Derecho Comercial",
+      "kind": "numbered"
+    },
+    {
+      "key": "5",
+      "name": "Propiedad Intelectual",
+      "kind": "numbered"
+    },
+    {
+      "key": "6",
+      "name": "Sociedades",
+      "kind": "numbered"
+    },
+    {
+      "key": "7",
+      "name": "Contratos Civiles y Comerciales",
+      "kind": "numbered"
+    },
+    {
+      "key": "8",
+      "name": "Derechos del Consumidor",
+      "kind": "numbered"
+    },
+    {
+      "key": "9",
+      "name": "Derecho Laboral",
+      "kind": "numbered"
+    },
+    {
+      "key": "10",
+      "name": "Complemento: Derecho Procesal",
+      "kind": "extra"
+    },
+    {
+      "key": "11",
+      "name": "Complemento: Delitos Informáticos",
+      "kind": "extra"
+    },
+    {
+      "key": "final",
+      "name": "Final completo",
+      "kind": "extra",
+      "color": "--ueval"
+    },
+    {
+      "key": "parciales",
+      "name": "Parciales y parcialitos",
+      "kind": "extra"
+    },
+    {
+      "key": "reducido",
+      "name": "Final reducido (archivo)",
+      "kind": "extra"
+    }
+  ],
+  "pageTypes": [
+    {
+      "key": "resumen",
+      "label": "Resumen",
+      "plural": "Resúmenes",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "indice",
+      "label": "Guía",
+      "plural": "Guías",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "concepto",
+      "label": "Concepto",
+      "plural": "Conceptos",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "entidad",
+      "label": "Norma o institución",
+      "plural": "Normas e instituciones",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "comparacion",
+      "label": "Comparación",
+      "plural": "Comparaciones",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "examen",
+      "label": "Material de examen",
+      "plural": "Material de examen",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "referencia",
+      "label": "Referencia",
+      "plural": "Referencias",
+      "countsAsContent": false,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "fuente",
+      "label": "Fuente",
+      "plural": "Fuentes",
+      "countsAsContent": false,
+      "collapsedByDefault": true
+    }
+  ],
+  "rail": [
+    {
+      "id": "final",
+      "label": "Final",
+      "color": "--ueval",
+      "items": [
+        {
+          "id": "guia-final",
+          "label": "Guía del final",
+          "icon": "map",
+          "kind": "page",
+          "target": "indice-final-completo",
+          "hint": "Reglas del final, estrategia, tracker de temas y plan por fases"
+        },
+        {
+          "id": "temas",
+          "label": "Temas y tracker",
+          "icon": "grid",
+          "kind": "tool",
+          "target": "temas",
+          "hint": "Los temas del final por tier (A/B/C), con su esqueleto, su seguro anti-cero y tres hitos de dominio"
+        },
+        {
+          "id": "simulador",
+          "label": "Simulador de final",
+          "icon": "timer",
+          "kind": "tool",
+          "target": "simulador",
+          "hint": "Banco de consignas reales y un final de 5 preguntas con cronómetro y umbral 4 de 5"
+        },
+        {
+          "id": "simulacros",
+          "label": "Simulacros",
+          "icon": "pencil",
+          "kind": "tool",
+          "target": "simulacros",
+          "hint": "Los 7 simulacros del kit con la corrección oculta hasta terminar y el registro de resultados"
+        },
+        {
+          "id": "esqueletos",
+          "label": "Esqueletos",
+          "icon": "list",
+          "kind": "page",
+          "target": "esqueletos-todos",
+          "hint": "Todos los esqueletos memorizables juntos: el documento de la víspera"
+        }
+      ]
+    },
+    {
+      "id": "referencia",
+      "label": "Referencia",
+      "color": "--u3",
+      "items": [
+        {
+          "id": "programa",
+          "label": "Programa oficial",
+          "icon": "notebook",
+          "kind": "page",
+          "target": "programa-oficial-61-31",
+          "hint": "Contenidos oficiales por unidad y modalidad de evaluación"
+        }
+      ]
+    }
+  ],
+  "fab": null,
+  "exercisePlates": true,
+  "wiki": {
+    "root": "wiki",
+    "index": "indice.md",
+    "ignore": [
+      "TPE",
+      "_privado"
+    ],
+    "divisionField": "unidad",
+    "study": "estudio",
+    "standalone": [
+      "programa-oficial-61-31",
+      "referencias-libro"
+    ]
+  }
+}

@@ -1,0 +1,707 @@
+/* simulador.css -- vista "simulador" (banco de preguntas + simulador de final).
+   Todo selector cuelga de la clase raiz .df-sim (BUNDLE.md regla 5): sin colores
+   literales, solo los tokens de la plataforma con un fallback razonable en cada uno
+   (var(--token, valor)), para que se lea bien en claro y en oscuro aunque algun
+   token todavia no exista. Responsive desde 360px sin scroll horizontal de pagina;
+   las tablas anchas (numeros de oro) van en .df-table-wrap con overflow-x: auto.
+
+   ACOTAMIENTO: las clases genericas que no empiezan con "df-sim-" (.df-btn,
+   .df-select, .df-input, .df-textarea, .df-table-wrap, .df-badge*, .df-sr-only)
+   tambien las usan otras vistas del bundle (temas.css, simulacros.css). Para que
+   esta hoja no las pise ni la pisen, TODAS esas reglas cuelgan de ".df-sim" como
+   ancestro. Las clases ya namespaced (.df-sim-*) son unicas de esta vista y no
+   necesitan el prefijo extra, aunque el contenedor raiz (raiz = el("div", {class:
+   "df-sim"}) en simulador.js) siempre las envuelve igual. */
+
+.df-sim {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 8px 0 64px;
+  color: var(--text, #1b1f24);
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+
+.df-sim a {
+  color: inherit;
+}
+
+/* ---------- conmutador Banco / Simulador ---------- */
+
+.df-sim-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: 18px;
+  background: var(--surface, #f6f8fa);
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 999px;
+}
+
+.df-sim-tab {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font: 600 12.5px var(--font-ui, system-ui, sans-serif);
+  color: var(--text-2, #57606a);
+  text-decoration: none;
+  cursor: pointer;
+}
+.df-sim-tab:hover {
+  color: var(--text, #1b1f24);
+}
+.df-sim-tab.is-on {
+  background: var(--bg, #ffffff);
+  color: var(--text, #1b1f24);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+.df-sim-tab.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.df-sim-tab:focus-visible {
+  outline: 2px solid var(--primary, #2f6feb);
+  outline-offset: 2px;
+}
+
+/* ---------- cabecera de cada seccion ---------- */
+
+.df-sim-encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border, #d0d7de);
+}
+
+.df-sim-titulo {
+  margin: 0;
+  font: 700 26px/1.2 var(--font-display, var(--font-ui, system-ui, sans-serif));
+  letter-spacing: -0.01em;
+  color: var(--text, #1b1f24);
+}
+
+.df-sim-subtitulo {
+  margin: 0;
+  max-width: 46rem;
+  font: 400 14px/1.55 var(--font-ui, system-ui, sans-serif);
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-contador {
+  align-self: flex-start;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-muted {
+  color: var(--text-2, #57606a);
+}
+
+/* ---------- controles genericos (boton, select, input) ---------- */
+
+.df-sim .df-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+  background: var(--surface, #f6f8fa);
+  color: var(--text, #1b1f24);
+  font: 600 13px var(--font-ui, system-ui, sans-serif);
+  text-decoration: none;
+  cursor: pointer;
+}
+.df-sim .df-btn:hover {
+  border-color: var(--primary, #2f6feb);
+}
+.df-sim .df-btn:focus-visible {
+  outline: 2px solid var(--primary, #2f6feb);
+  outline-offset: 2px;
+}
+.df-sim .df-btn[aria-disabled="true"],
+.df-sim .df-btn[disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.df-sim .df-btn-primary {
+  background: var(--primary, #2f6feb);
+  border-color: var(--primary, #2f6feb);
+  color: var(--on-primary, #fff);
+}
+.df-sim .df-btn-primary:hover {
+  filter: brightness(1.05);
+}
+/* Canal no cromatico del estado "elegido" (WCAG 1.4.1): subrayado, no solo relleno. */
+.df-sim .df-btn-primary[aria-pressed="true"],
+.df-sim .df-btn-primary {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.df-sim .df-btn-ghost {
+  background: transparent;
+}
+
+.df-sim .df-select,
+.df-sim .df-input {
+  min-height: 36px;
+  padding: 5px 10px;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+  background: var(--bg, #ffffff);
+  color: var(--text, #1b1f24);
+  font: 400 13.5px var(--font-ui, system-ui, sans-serif);
+}
+.df-sim .df-select:focus-visible,
+.df-sim .df-input:focus-visible {
+  outline: 2px solid var(--primary, #2f6feb);
+  outline-offset: 1px;
+}
+
+/* ---------- Banco: filtros y modo de agrupacion ---------- */
+
+.df-sim-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  padding: 12px 0;
+  border-block: 1px solid var(--border, #d0d7de);
+}
+
+.df-sim-grupo {
+  display: flex;
+  flex: 1 1 min(22rem, 100%);
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px 16px;
+  min-inline-size: 0;
+}
+
+.df-sim-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 min(10rem, 100%);
+  min-inline-size: 0;
+}
+.df-sim-campo-texto {
+  flex: 1 1 min(15rem, 100%);
+}
+.df-sim-campo > span {
+  font: 700 10.5px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2, #57606a);
+}
+.df-sim-campo select,
+.df-sim-campo input {
+  width: 100%;
+}
+
+.df-sim-modo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 20px;
+}
+
+/* ---------- Banco: listado ---------- */
+
+.df-sim-body {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.df-sim-grupo-consignas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.df-sim-grupo-titulo {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border, #d0d7de);
+  background: var(--bg, #ffffff);
+  font: 700 15px var(--font-display, var(--font-ui, system-ui, sans-serif));
+}
+
+.df-sim-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--border, #d0d7de);
+}
+.df-sim-item:last-child {
+  border-bottom: 0;
+}
+
+.df-sim-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font: 400 12px var(--font-ui, system-ui, sans-serif);
+  color: var(--text-2, #57606a);
+  font-variant-numeric: tabular-nums;
+}
+
+.df-sim-item-consigna,
+.df-sim-pregunta-consigna {
+  max-width: 42rem;
+  font-family: var(--font-read, Georgia, serif);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--text, #1b1f24);
+}
+.df-sim-item-consigna > :first-child,
+.df-sim-pregunta-consigna > :first-child {
+  margin-top: 0;
+}
+.df-sim-item-consigna > :last-child,
+.df-sim-pregunta-consigna > :last-child {
+  margin-bottom: 0;
+}
+
+.df-sim-item-nota {
+  max-width: 42rem;
+  padding-left: 10px;
+  border-left: 1px solid var(--border, #d0d7de);
+  font-size: 13px;
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-item-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.df-sim-vacio {
+  margin: 40px 0;
+  text-align: center;
+  color: var(--text-2, #57606a);
+}
+
+/* ---------- pildora de tier (no depende solo del color, lleva la letra) ---------- */
+
+.df-sim-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border, #d0d7de);
+  font: 700 11px var(--font-mono, ui-monospace, monospace);
+}
+.df-sim-pill-A {
+  border-color: var(--primary, #2f6feb);
+  color: var(--primary, #2f6feb);
+}
+.df-sim-pill-B {
+  border-color: var(--warn, #9a6700);
+  color: var(--warn, #9a6700);
+}
+.df-sim-pill-C {
+  border-color: var(--text-2, #57606a);
+  color: var(--text-2, #57606a);
+}
+.df-sim-pill-x {
+  color: var(--text-2, #57606a);
+}
+
+.df-sim .df-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Simulador: paso 1, configuracion ---------- */
+
+.df-sim-config-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.df-sim-config {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 32rem;
+}
+.df-sim-config h2 {
+  margin: 0;
+  font: 700 17px var(--font-display, var(--font-ui, system-ui, sans-serif));
+}
+.df-sim-config .df-btn-primary {
+  align-self: flex-start;
+  min-height: 44px;
+  padding-inline: 22px;
+  font-size: 13.5px;
+}
+
+/* ---------- Simulador: paso 2, examen ---------- */
+
+.df-sim-examen,
+.df-sim-correccion {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.df-sim-timer-barra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  background: var(--surface, #f6f8fa);
+  border: 1px solid var(--ueval, var(--border, #d0d7de));
+  border-radius: 8px;
+}
+
+.df-sim-timer-label {
+  font: 700 10.5px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-timer-num {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary, #2f6feb);
+}
+
+.df-sim-timer-aviso {
+  flex: 1 1 16rem;
+  min-inline-size: 0;
+  font-size: 12px;
+  color: var(--text-2, #57606a);
+  font-variant-numeric: tabular-nums;
+}
+
+.df-sim-timer-barra .df-btn {
+  margin-left: auto;
+}
+
+.df-sim-pregunta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border, #d0d7de);
+}
+.df-sim-pregunta:last-child {
+  border-bottom: 0;
+}
+
+.df-sim-pregunta-num {
+  margin: 0;
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-aviso {
+  max-width: 42rem;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-pregunta-tema {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.df-sim-amano {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 13px;
+  color: var(--text-2, #57606a);
+  cursor: pointer;
+}
+.df-sim-amano input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary, #2f6feb);
+}
+
+.df-sim .df-textarea {
+  width: 100%;
+  max-width: 42rem;
+  min-height: 11rem;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+  background: var(--bg, #ffffff);
+  color: var(--text, #1b1f24);
+  font: 400 14px/1.55 var(--font-ui, system-ui, sans-serif);
+  resize: vertical;
+}
+.df-sim .df-textarea:focus-visible {
+  outline: 2px solid var(--primary, #2f6feb);
+  outline-offset: 1px;
+}
+
+/* ---------- Simulador: paso 3, correccion ---------- */
+
+.df-sim-nota-mano {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2, #57606a);
+}
+
+.df-sim-respuesta {
+  max-width: 42rem;
+  padding: 10px 14px;
+  background: var(--surface, #f6f8fa);
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+}
+.df-sim-respuesta-label {
+  margin-bottom: 6px;
+  font: 700 10.5px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2, #57606a);
+}
+.df-sim-respuesta-texto {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-read, Georgia, serif);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.df-sim-sin-ficha {
+  color: var(--text-2, #57606a);
+  font-style: italic;
+}
+
+.df-sim-bloque {
+  background: var(--surface, #f6f8fa);
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+}
+.df-sim-bloque summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  cursor: pointer;
+  list-style: none;
+  font: 700 11px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary, #2f6feb);
+}
+.df-sim-bloque summary::-webkit-details-marker {
+  display: none;
+}
+.df-sim-bloque summary::before {
+  content: "+";
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  color: var(--text-2, #57606a);
+}
+.df-sim-bloque[open] summary::before {
+  content: "\2212";
+}
+.df-sim-bloque[open] summary {
+  border-bottom: 1px solid var(--border, #d0d7de);
+}
+.df-sim-bloque summary:focus-visible {
+  outline: 2px solid var(--primary, #2f6feb);
+  outline-offset: -2px;
+}
+.df-sim-bloque > *:not(summary) {
+  margin: 0;
+  padding: 12px 14px;
+}
+.df-sim-esqueleto {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: auto;
+  background: var(--bg, #ffffff);
+  border-radius: 6px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.df-sim-markdown > :first-child {
+  margin-top: 0;
+}
+.df-sim-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.df-sim .df-table-wrap {
+  overflow-x: auto;
+}
+.df-sim .df-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.df-sim .df-table-wrap td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border, #d0d7de);
+  vertical-align: top;
+}
+.df-sim .df-table-wrap td > p {
+  margin: 0;
+  display: inline;
+}
+.df-sim .df-table-wrap td:last-child {
+  color: var(--text-2, #57606a);
+  font-size: 12px;
+}
+
+.df-sim-puntaje-label {
+  margin-top: 4px;
+  font: 700 10.5px var(--font-ui, system-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2, #57606a);
+}
+.df-sim-puntaje {
+  display: flex;
+  gap: 8px;
+}
+.df-sim-puntaje .df-btn {
+  min-width: 44px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 15px;
+}
+
+.df-sim-resumen {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  background: var(--surface, #f6f8fa);
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 10px;
+}
+.df-sim-resumen h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.df-sim-resumen-total {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.df-sim .df-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font: 700 12px var(--font-ui, system-ui, sans-serif);
+  white-space: normal;
+}
+.df-sim .df-badge-ok {
+  background: color-mix(in srgb, var(--primary, #2f6feb) 16%, var(--bg, #ffffff));
+  color: var(--primary, #2f6feb);
+  border: 1px solid var(--primary, #2f6feb);
+}
+.df-sim .df-badge-ok::before {
+  content: "\2713\00a0";
+}
+.df-sim .df-badge-bad {
+  background: color-mix(in srgb, var(--bad, #d1242f) 14%, var(--bg, #ffffff));
+  color: var(--bad, #d1242f);
+  border: 1px solid var(--bad, #d1242f);
+}
+.df-sim .df-badge-bad::before {
+  content: "\2715\00a0";
+}
+
+.df-sim-resumen-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border, #d0d7de);
+  width: 100%;
+}
+
+/* ---------- palabras largas y responsive (>= 360px, sin scroll horizontal) ---------- */
+
+.df-sim {
+  overflow-wrap: anywhere;
+}
+.df-sim .df-table-wrap {
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .df-sim {
+    padding: 6px 0 48px;
+  }
+  .df-sim-titulo {
+    font-size: 22px;
+  }
+  .df-sim-timer-barra {
+    position: static;
+  }
+  .df-sim-timer-barra .df-btn {
+    margin-left: 0;
+  }
+  .df-sim-config .df-btn-primary {
+    padding-inline: 16px;
+  }
+  .df-sim-grupo-titulo {
+    position: static;
+  }
+}

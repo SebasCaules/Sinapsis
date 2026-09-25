@@ -1,0 +1,1049 @@
+{
+  "title": "Plan de estudio · Final completo",
+  "instances": [
+    {
+      "key": "final",
+      "label": "Final completo"
+    }
+  ],
+  "phases": [
+    {
+      "id": "f0",
+      "title": "Diagnóstico",
+      "subtitle": "1 sesión · 88 min",
+      "instance": "final",
+      "description": "Punto de partida: conocer el mapa completo del final antes de estudiar y fijar una línea de base sin haber repasado nada.",
+      "icon": "map",
+      "guide": "- Regla de sacrificio: si falta tiempo se recorta profundidad de B/C, jamás cobertura. Esqueleto y seguro anti-cero de todo tema histórico es innegociable — la regla 4-de-5 castiga el tema mudo, no el tema flojo (final-completo/indice-final-completo § 6).\n- Regla de hierro: prohibido releer una ficha sin recitar antes — la relectura pasiva engaña; el recitado fallido dice qué estudiar (final-completo/indice-final-completo § 5).\n- Criterio de \"estoy listo\": dos simulacros consecutivos con punto asegurado (≥1) en 4 de 5 preguntas, registrados en el registro de simulacros, más los 11 esqueletos tier A recitables en frío, sin mirar, de una sola pasada. Hasta que las dos cosas se cumplan, seguir ciclando sobre lo fallado (final-completo/indice-final-completo § 8; cita textual — la matriz vigente cuenta 12 temas tier A en kit.temas).",
+      "milestones": [
+        {
+          "id": "f0-s1",
+          "title": "Diagnóstico inicial: matriz completa + simulacro S0 · 88 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f0-s1-t1",
+              "label": "Leer completa la matriz de frecuencias antes de estudiar cualquier tema, para ver el mapa entero del final.",
+              "kind": "custom",
+              "target": "matriz-frecuencias"
+            },
+            {
+              "id": "f0-s1-t2",
+              "label": "Rendir el simulacro S0 sin haber estudiado todavía, para fijar una línea de base real.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S0"
+            },
+            {
+              "id": "f0-s1-t3",
+              "label": "Revisar cuánto tiempo insumió cada respuesta del simulacro S0 y calibrar el ritmo de referencia de unos 12 minutos y una carilla por pregunta.",
+              "kind": "custom",
+              "target": "simulacro-0-diagnostico"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f1",
+      "title": "Reactivar los 5 temas reciclados del reducido",
+      "subtitle": "5 sesiones · 175 min",
+      "instance": "final",
+      "description": "Los cinco temas que ya se estudiaron para el final reducido son el punto de partida más barato: contrato, laboral-extinción, concursos, marcas y responsabilidad civil.",
+      "milestones": [
+        {
+          "id": "f1-s1",
+          "title": "Contrato: concepto y elementos — ciclo 3R + audio · 35 min",
+          "divisions": [
+            "7"
+          ],
+          "tasks": [
+            {
+              "id": "f1-s1-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Contrato: concepto y elementos.",
+              "kind": "custom",
+              "target": "ficha-contrato-concepto-y-elementos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f1-s1-t2",
+              "label": "Redactar el desarrollo de Contrato: concepto y elementos en 12 minutos cronometrados, como si fuera una pregunta del final.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:contrato-concepto-y-elementos",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f1-s1-t3",
+              "label": "Revisar lo redactado contra la ficha de Contrato: concepto y elementos y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-contrato-concepto-y-elementos"
+            },
+            {
+              "id": "f1-s1-t4",
+              "label": "Releer el desarrollo modelo del reducido: Contrato: concepto y elementos",
+              "kind": "custom",
+              "target": "tema-1-contratos",
+              "detail": "El audio narrado está solo en el vault de Obsidian"
+            }
+          ]
+        },
+        {
+          "id": "f1-s2",
+          "title": "Extinción del contrato de trabajo — ciclo 3R + audio · 35 min",
+          "divisions": [
+            "9"
+          ],
+          "tasks": [
+            {
+              "id": "f1-s2-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Extinción del contrato de trabajo.",
+              "kind": "custom",
+              "target": "ficha-laboral-extincion",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f1-s2-t2",
+              "label": "Redactar el desarrollo de Extinción del contrato de trabajo en 12 minutos cronometrados, como si fuera una pregunta del final.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:laboral-extincion",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f1-s2-t3",
+              "label": "Revisar lo redactado contra la ficha de Extinción del contrato de trabajo y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-laboral-extincion"
+            },
+            {
+              "id": "f1-s2-t4",
+              "label": "Releer el desarrollo modelo del reducido: Extinción del contrato de trabajo",
+              "kind": "custom",
+              "target": "tema-2-laboral",
+              "detail": "El audio narrado está solo en el vault de Obsidian"
+            }
+          ]
+        },
+        {
+          "id": "f1-s3",
+          "title": "Concursos y quiebras — ciclo 3R + audio · 35 min",
+          "divisions": [
+            "4"
+          ],
+          "tasks": [
+            {
+              "id": "f1-s3-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Concursos y quiebras.",
+              "kind": "custom",
+              "target": "ficha-concursos-y-quiebras",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f1-s3-t2",
+              "label": "Redactar el desarrollo de Concursos y quiebras en 12 minutos cronometrados, como si fuera una pregunta del final.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:concursos-y-quiebras",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f1-s3-t3",
+              "label": "Revisar lo redactado contra la ficha de Concursos y quiebras y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-concursos-y-quiebras"
+            },
+            {
+              "id": "f1-s3-t4",
+              "label": "Releer el desarrollo modelo del reducido: Concursos y quiebras",
+              "kind": "custom",
+              "target": "tema-3-concursos-y-quiebras",
+              "detail": "El audio narrado está solo en el vault de Obsidian"
+            }
+          ]
+        },
+        {
+          "id": "f1-s4",
+          "title": "Marcas — ciclo 3R + audio · 35 min",
+          "divisions": [
+            "5"
+          ],
+          "tasks": [
+            {
+              "id": "f1-s4-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Marcas.",
+              "kind": "custom",
+              "target": "ficha-marcas",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f1-s4-t2",
+              "label": "Redactar el desarrollo de Marcas en 12 minutos cronometrados, como si fuera una pregunta del final.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:marcas",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f1-s4-t3",
+              "label": "Revisar lo redactado contra la ficha de Marcas y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-marcas"
+            },
+            {
+              "id": "f1-s4-t4",
+              "label": "Releer el desarrollo modelo del reducido: Marcas",
+              "kind": "custom",
+              "target": "tema-4-marcas",
+              "detail": "El audio narrado está solo en el vault de Obsidian"
+            }
+          ]
+        },
+        {
+          "id": "f1-s5",
+          "title": "Responsabilidad civil — ciclo 3R + audio · 35 min",
+          "divisions": [
+            "3"
+          ],
+          "tasks": [
+            {
+              "id": "f1-s5-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Responsabilidad civil.",
+              "kind": "custom",
+              "target": "ficha-responsabilidad-civil",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f1-s5-t2",
+              "label": "Redactar el desarrollo de Responsabilidad civil en 12 minutos cronometrados, como si fuera una pregunta del final.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:responsabilidad-civil",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f1-s5-t3",
+              "label": "Revisar lo redactado contra la ficha de Responsabilidad civil y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-responsabilidad-civil"
+            },
+            {
+              "id": "f1-s5-t4",
+              "label": "Releer el desarrollo modelo del reducido: Responsabilidad civil",
+              "kind": "custom",
+              "target": "tema-5-responsabilidad-civil",
+              "detail": "El audio narrado está solo en el vault de Obsidian"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f2",
+      "title": "Tier A restante",
+      "subtitle": "5 sesiones · 260 min",
+      "instance": "final",
+      "description": "El resto de los temas tier A que no forman parte de los cinco reciclados, en orden descendente de frecuencia, dos por sesión con ciclo de recitar, redactar y revisar. Cierra con el simulacro S1.",
+      "milestones": [
+        {
+          "id": "f2-s1",
+          "title": "Modalidades de contratación laboral + Sociedades: tipos y responsabilidad (ciclo 3R) · 50 min",
+          "divisions": [
+            "9",
+            "6"
+          ],
+          "tasks": [
+            {
+              "id": "f2-s1-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Modalidades de contratación laboral.",
+              "kind": "custom",
+              "target": "ficha-modalidades-contratacion-laboral",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s1-t2",
+              "label": "Redactar el desarrollo de Modalidades de contratación laboral en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:modalidades-contratacion-laboral",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s1-t3",
+              "label": "Revisar lo redactado contra la ficha de Modalidades de contratación laboral y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-modalidades-contratacion-laboral"
+            },
+            {
+              "id": "f2-s1-t4",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Sociedades: tipos y responsabilidad.",
+              "kind": "custom",
+              "target": "ficha-sociedades-tipos-y-responsabilidad",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s1-t5",
+              "label": "Redactar el desarrollo de Sociedades: tipos y responsabilidad en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:sociedades-tipos-y-responsabilidad",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s1-t6",
+              "label": "Revisar lo redactado contra la ficha de Sociedades: tipos y responsabilidad y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-sociedades-tipos-y-responsabilidad"
+            }
+          ]
+        },
+        {
+          "id": "f2-s2",
+          "title": "Defensa de la Competencia + Defensa del Consumidor (ciclo 3R) · 50 min",
+          "divisions": [
+            "4",
+            "8"
+          ],
+          "tasks": [
+            {
+              "id": "f2-s2-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Defensa de la Competencia.",
+              "kind": "custom",
+              "target": "ficha-defensa-de-la-competencia",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s2-t2",
+              "label": "Redactar el desarrollo de Defensa de la Competencia en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:defensa-de-la-competencia",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s2-t3",
+              "label": "Revisar lo redactado contra la ficha de Defensa de la Competencia y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-defensa-de-la-competencia"
+            },
+            {
+              "id": "f2-s2-t4",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Defensa del Consumidor.",
+              "kind": "custom",
+              "target": "ficha-defensa-del-consumidor",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s2-t5",
+              "label": "Redactar el desarrollo de Defensa del Consumidor en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:defensa-del-consumidor",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s2-t6",
+              "label": "Revisar lo redactado contra la ficha de Defensa del Consumidor y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-defensa-del-consumidor"
+            }
+          ]
+        },
+        {
+          "id": "f2-s3",
+          "title": "Obligaciones: concepto y tipos + Cheque (ciclo 3R) · 50 min",
+          "divisions": [
+            "3",
+            "4"
+          ],
+          "tasks": [
+            {
+              "id": "f2-s3-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Obligaciones: concepto y tipos.",
+              "kind": "custom",
+              "target": "ficha-obligaciones-concepto-tipos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s3-t2",
+              "label": "Redactar el desarrollo de Obligaciones: concepto y tipos en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:obligaciones-concepto-tipos",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s3-t3",
+              "label": "Revisar lo redactado contra la ficha de Obligaciones: concepto y tipos y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-obligaciones-concepto-tipos"
+            },
+            {
+              "id": "f2-s3-t4",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Cheque.",
+              "kind": "custom",
+              "target": "ficha-cheque",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s3-t5",
+              "label": "Redactar el desarrollo de Cheque en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:cheque",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s3-t6",
+              "label": "Revisar lo redactado contra la ficha de Cheque y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-cheque"
+            }
+          ]
+        },
+        {
+          "id": "f2-s4",
+          "title": "Derecho y fuentes del derecho + Documentos y Firma Digital (ciclo 3R) · 50 min",
+          "divisions": [
+            "1",
+            "3"
+          ],
+          "tasks": [
+            {
+              "id": "f2-s4-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Derecho y fuentes del derecho.",
+              "kind": "custom",
+              "target": "ficha-derecho-y-fuentes",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s4-t2",
+              "label": "Redactar el desarrollo de Derecho y fuentes del derecho en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:derecho-y-fuentes",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s4-t3",
+              "label": "Revisar lo redactado contra la ficha de Derecho y fuentes del derecho y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-derecho-y-fuentes"
+            },
+            {
+              "id": "f2-s4-t4",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Documentos y Firma Digital.",
+              "kind": "custom",
+              "target": "ficha-documentos-y-firma-digital",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f2-s4-t5",
+              "label": "Redactar el desarrollo de Documentos y Firma Digital en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:documentos-y-firma-digital",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f2-s4-t6",
+              "label": "Revisar lo redactado contra la ficha de Documentos y Firma Digital y anotar los huecos.",
+              "kind": "custom",
+              "target": "ficha-documentos-y-firma-digital"
+            }
+          ]
+        },
+        {
+          "id": "f2-s5",
+          "title": "Simulacro S1 · 60 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f2-s5-t1",
+              "label": "Rendir el simulacro S1, cronometrado, para cerrar el repaso de tier A.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f3",
+      "title": "Tier B, barrido de esqueletos C y simulacros S2-S3",
+      "subtitle": "9 sesiones · 452 min",
+      "instance": "final",
+      "description": "Tier B empezando por los temas con \"flecha para arriba\" (persona-y-capacidad, seguros, extinción de obligaciones), luego el resto en orden de frecuencia, tres temas por sesión con recitar y redactar (sin ficha B ya cubierta en F1: responsabilidad civil). Después, un barrido de esqueletos por cada tema tier C. Cierra con los simulacros S2 y S3.",
+      "milestones": [
+        {
+          "id": "f3-s1",
+          "title": "Persona y capacidad + Seguros + Extinción de obligaciones (recitar + redactar) · 51 min",
+          "divisions": [
+            "3",
+            "4",
+            "7"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s1-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Persona y capacidad.",
+              "kind": "custom",
+              "target": "ficha-persona-y-capacidad",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s1-t2",
+              "label": "Redactar el desarrollo de Persona y capacidad en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:persona-y-capacidad",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s1-t3",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Seguros.",
+              "kind": "custom",
+              "target": "ficha-seguros",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s1-t4",
+              "label": "Redactar el desarrollo de Seguros en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:seguros",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s1-t5",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Extinción de obligaciones.",
+              "kind": "custom",
+              "target": "ficha-extincion-de-obligaciones",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s1-t6",
+              "label": "Redactar el desarrollo de Extinción de obligaciones en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:extincion-de-obligaciones",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            }
+          ]
+        },
+        {
+          "id": "f3-s2",
+          "title": "Jornada de trabajo + Contrato de compraventa + Contratos con el Estado (recitar + redactar) · 51 min",
+          "divisions": [
+            "9",
+            "7",
+            "2"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s2-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Jornada de trabajo.",
+              "kind": "custom",
+              "target": "ficha-jornada-de-trabajo",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s2-t2",
+              "label": "Redactar el desarrollo de Jornada de trabajo en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:jornada-de-trabajo",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s2-t3",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Contrato de compraventa.",
+              "kind": "custom",
+              "target": "ficha-contrato-de-compraventa",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s2-t4",
+              "label": "Redactar el desarrollo de Contrato de compraventa en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:contrato-de-compraventa",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s2-t5",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Contratos con el Estado.",
+              "kind": "custom",
+              "target": "ficha-contratos-con-el-estado",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s2-t6",
+              "label": "Redactar el desarrollo de Contratos con el Estado en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:contratos-con-el-estado",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            }
+          ]
+        },
+        {
+          "id": "f3-s3",
+          "title": "Derecho y moral + Fondo de Comercio + Leasing, franchising y licencia (recitar + redactar) · 51 min",
+          "divisions": [
+            "1",
+            "4",
+            "7"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s3-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Derecho y moral.",
+              "kind": "custom",
+              "target": "ficha-derecho-y-moral",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s3-t2",
+              "label": "Redactar el desarrollo de Derecho y moral en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:derecho-y-moral",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s3-t3",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Fondo de Comercio.",
+              "kind": "custom",
+              "target": "ficha-fondo-de-comercio",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s3-t4",
+              "label": "Redactar el desarrollo de Fondo de Comercio en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:fondo-de-comercio",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s3-t5",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Leasing, franchising y licencia.",
+              "kind": "custom",
+              "target": "ficha-leasing-franchising-licencia",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s3-t6",
+              "label": "Redactar el desarrollo de Leasing, franchising y licencia en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:leasing-franchising-licencia",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            }
+          ]
+        },
+        {
+          "id": "f3-s4",
+          "title": "Patentes e Invención + Relación y contrato de trabajo + Artículo 14 CN (recitar + redactar) · 51 min",
+          "divisions": [
+            "5",
+            "9",
+            "2"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s4-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Patentes e Invención.",
+              "kind": "custom",
+              "target": "ficha-patentes-e-invencion",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s4-t2",
+              "label": "Redactar el desarrollo de Patentes e Invención en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:patentes-e-invencion",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s4-t3",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Relación y contrato de trabajo.",
+              "kind": "custom",
+              "target": "ficha-relacion-y-contrato-de-trabajo",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s4-t4",
+              "label": "Redactar el desarrollo de Relación y contrato de trabajo en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:relacion-y-contrato-de-trabajo",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s4-t5",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Artículo 14 CN.",
+              "kind": "custom",
+              "target": "ficha-articulo-14-cn",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s4-t6",
+              "label": "Redactar el desarrollo de Artículo 14 CN en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:articulo-14-cn",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            }
+          ]
+        },
+        {
+          "id": "f3-s5",
+          "title": "Artículo 41 CN (ambiente) + Derechos de autor y software + Derechos del trabajador (art. 14 bis CN) (recitar + redactar) · 51 min",
+          "divisions": [
+            "2",
+            "5",
+            "9"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s5-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Artículo 41 CN (ambiente).",
+              "kind": "custom",
+              "target": "ficha-articulo-41-ambiente",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s5-t2",
+              "label": "Redactar el desarrollo de Artículo 41 CN (ambiente) en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:articulo-41-ambiente",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s5-t3",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Derechos de autor y software.",
+              "kind": "custom",
+              "target": "ficha-derechos-de-autor-y-software",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s5-t4",
+              "label": "Redactar el desarrollo de Derechos de autor y software en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:derechos-de-autor-y-software",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            },
+            {
+              "id": "f3-s5-t5",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Derechos del trabajador (art. 14 bis CN).",
+              "kind": "custom",
+              "target": "ficha-derechos-del-trabajador-14bis",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s5-t6",
+              "label": "Redactar el desarrollo de Derechos del trabajador (art. 14 bis CN) en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:derechos-del-trabajador-14bis",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            }
+          ]
+        },
+        {
+          "id": "f3-s6",
+          "title": "Organización del Estado — Poderes (recitar + redactar) · 17 min",
+          "divisions": [
+            "2"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s6-t1",
+              "label": "Recitar en frío, sin mirar la ficha, el esqueleto de Organización del Estado — Poderes.",
+              "kind": "custom",
+              "target": "ficha-organizacion-del-estado-poderes",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s6-t2",
+              "label": "Redactar el desarrollo de Organización del Estado — Poderes en 12 minutos cronometrados.",
+              "kind": "tool",
+              "target": "simulador",
+              "query": "arg=tema:organizacion-del-estado-poderes",
+              "detail": "12 minutos cronometrados, como una pregunta del final"
+            }
+          ]
+        },
+        {
+          "id": "f3-s7",
+          "title": "Barrido de esqueletos tier C · 60 min",
+          "divisions": [
+            "2",
+            "1",
+            "6",
+            "9",
+            "5",
+            "10",
+            "8"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s7-t1",
+              "label": "Recitar en frío el esqueleto de Acto administrativo.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t2",
+              "label": "Recitar en frío el esqueleto de Etica empresarial.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t3",
+              "label": "Recitar en frío el esqueleto de Impuestos provinciales.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t4",
+              "label": "Recitar en frío el esqueleto de Inspeccion general de justicia.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t5",
+              "label": "Recitar en frío el esqueleto de Negociacion colectiva.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t6",
+              "label": "Recitar en frío el esqueleto de Plagio y defraudacion.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t7",
+              "label": "Recitar en frío el esqueleto de Reglamentos internos y sanciones.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t8",
+              "label": "Recitar en frío el esqueleto de Clasificacion del derecho.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t9",
+              "label": "Recitar en frío el esqueleto de Norma juridica jerarquia.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t10",
+              "label": "Recitar en frío el esqueleto de Prueba y derecho procesal.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t11",
+              "label": "Recitar en frío el esqueleto de Principios derecho laboral.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            },
+            {
+              "id": "f3-s7-t12",
+              "label": "Recitar en frío el esqueleto de Lealtad comercial.",
+              "kind": "custom",
+              "target": "esqueletos-todos",
+              "detail": "Recitar primero; abrir la ficha solo para comprobar"
+            }
+          ]
+        },
+        {
+          "id": "f3-s8",
+          "title": "Simulacro S2 · 60 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s8-t1",
+              "label": "Rendir el simulacro S2, cronometrado.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S2"
+            }
+          ]
+        },
+        {
+          "id": "f3-s9",
+          "title": "Simulacro S3 · 60 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f3-s9-t1",
+              "label": "Rendir el simulacro S3, cronometrado.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f4",
+      "title": "Simulacros finales y repaso de fallados",
+      "subtitle": "4 sesiones · 188 min",
+      "instance": "final",
+      "description": "Los tres simulacros que cierran el ciclo — S4 y S5 sintéticos, S6 el final real más reciente — y un repaso dirigido de lo que haya fallado en el registro.",
+      "milestones": [
+        {
+          "id": "f4-s1",
+          "title": "Simulacro S4 · 60 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f4-s1-t1",
+              "label": "Rendir el simulacro S4, cronometrado.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S4"
+            }
+          ]
+        },
+        {
+          "id": "f4-s2",
+          "title": "Simulacro S5 · 60 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f4-s2-t1",
+              "label": "Rendir el simulacro S5, cronometrado.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S5"
+            }
+          ]
+        },
+        {
+          "id": "f4-s3",
+          "title": "Simulacro S6 · 60 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f4-s3-t1",
+              "label": "Rendir el simulacro S6, cronometrado.",
+              "kind": "tool",
+              "target": "simulacros",
+              "query": "arg=S6"
+            }
+          ]
+        },
+        {
+          "id": "f4-s4",
+          "title": "Repaso dirigido de los temas fallados · 8 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "f4-s4-t1",
+              "label": "Repasar los temas marcados con 0 o ½ en el registro de simulacros, releyendo su ficha antes de recitar de nuevo.",
+              "kind": "custom",
+              "target": "registro-simulacros"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vispera",
+      "title": "Víspera",
+      "subtitle": "1 sesión · 53 min",
+      "instance": "final",
+      "description": "Nada nuevo: solo volcado en frío de todos los esqueletos, la carilla única del reducido y los audios.",
+      "icon": "star",
+      "milestones": [
+        {
+          "id": "v-s1",
+          "title": "Víspera — volcado en frío · 53 min",
+          "divisions": [
+            "final"
+          ],
+          "tasks": [
+            {
+              "id": "v-s1-t1",
+              "label": "Recitar de memoria, sin mirar, todos los esqueletos de tier A.",
+              "kind": "cards",
+              "target": "esqueletos"
+            },
+            {
+              "id": "v-s1-t2",
+              "label": "Recitar de memoria, sin mirar, todos los esqueletos de tier B.",
+              "kind": "cards",
+              "target": "esqueletos"
+            },
+            {
+              "id": "v-s1-t3",
+              "label": "Recitar de memoria, sin mirar, todos los esqueletos de tier C.",
+              "kind": "cards",
+              "target": "esqueletos"
+            },
+            {
+              "id": "v-s1-t4",
+              "label": "Repasar la carilla única de esquemas de los cinco temas reciclados.",
+              "kind": "custom",
+              "target": "indice-final-reducido",
+              "detail": "El PDF está solo en el vault de Obsidian"
+            },
+            {
+              "id": "v-s1-t5",
+              "label": "Releer los desarrollos modelo del kit reducido",
+              "kind": "custom",
+              "target": "indice-final-reducido",
+              "detail": "Los audios narrados están solo en el vault de Obsidian"
+            },
+            {
+              "id": "v-s1-t6",
+              "label": "No incorporar contenido nuevo: la víspera es solo repaso de lo ya estudiado.",
+              "kind": "custom"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

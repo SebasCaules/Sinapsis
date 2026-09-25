@@ -1,0 +1,184 @@
+[
+  {
+    "id": "tier-a",
+    "title": "Tier A · los temas que más caen",
+    "description": "Las fichas de los temas más frecuentes del corpus, con sus esqueletos y seguros anti-cero.",
+    "icon": "star",
+    "divisions": [
+      "9",
+      "6",
+      "4",
+      "8",
+      "5",
+      "3",
+      "7",
+      "1"
+    ],
+    "pages": [
+      "ficha-modalidades-contratacion-laboral",
+      "ficha-sociedades-tipos-y-responsabilidad",
+      "ficha-defensa-de-la-competencia",
+      "ficha-concursos-y-quiebras",
+      "ficha-defensa-del-consumidor",
+      "ficha-laboral-extincion",
+      "ficha-marcas",
+      "ficha-obligaciones-concepto-tipos",
+      "ficha-contrato-concepto-y-elementos",
+      "ficha-cheque",
+      "ficha-derecho-y-fuentes",
+      "ficha-documentos-y-firma-digital"
+    ],
+    "decks": [
+      "esqueletos",
+      "seguros-anti-cero",
+      "numeros-de-oro"
+    ],
+    "quizzes": [],
+    "tools": [
+      "temas",
+      {
+        "target": "simulador?arg=tier:A",
+        "label": "Simulador solo tier A",
+        "icon": "timer"
+      }
+    ]
+  },
+  {
+    "id": "tier-b",
+    "title": "Tier B",
+    "description": "Los temas de frecuencia media: ficha, esqueleto y seguro anti-cero de cada uno.",
+    "icon": "layers",
+    "divisions": [
+      "9",
+      "3",
+      "7",
+      "2",
+      "1",
+      "4",
+      "5"
+    ],
+    "pages": [
+      "ficha-jornada-de-trabajo",
+      "ficha-persona-y-capacidad",
+      "ficha-contrato-de-compraventa",
+      "ficha-contratos-con-el-estado",
+      "ficha-derecho-y-moral",
+      "ficha-fondo-de-comercio",
+      "ficha-leasing-franchising-licencia",
+      "ficha-patentes-e-invencion",
+      "ficha-relacion-y-contrato-de-trabajo",
+      "ficha-responsabilidad-civil",
+      "ficha-seguros",
+      "ficha-articulo-14-cn",
+      "ficha-articulo-41-ambiente",
+      "ficha-derechos-de-autor-y-software",
+      "ficha-derechos-del-trabajador-14bis",
+      "ficha-extincion-de-obligaciones",
+      "ficha-organizacion-del-estado-poderes"
+    ],
+    "decks": [
+      "esqueletos",
+      "seguros-anti-cero"
+    ],
+    "quizzes": [],
+    "tools": [
+      "temas"
+    ]
+  },
+  {
+    "id": "tier-c",
+    "title": "Tier C · cobertura mínima",
+    "description": "Los temas raros no tienen ficha: se cubren con su esqueleto y su seguro anti-cero.",
+    "icon": "list",
+    "divisions": [],
+    "pages": [
+      "esqueletos-todos",
+      "matriz-frecuencias"
+    ],
+    "decks": [
+      "esqueletos",
+      "seguros-anti-cero"
+    ],
+    "quizzes": [],
+    "tools": [
+      "temas"
+    ]
+  },
+  {
+    "id": "simulacros",
+    "title": "Simulacros del final",
+    "description": "Los finales reales y sintéticos del kit, con la corrección oculta hasta terminar, y el registro de resultados.",
+    "icon": "pencil",
+    "divisions": [
+      "final"
+    ],
+    "pages": [
+      "simulacro-0-diagnostico",
+      "simulacro-1",
+      "simulacro-2",
+      "simulacro-3",
+      "simulacro-4-sintetico",
+      "simulacro-5-sintetico",
+      "simulacro-6-febrero-2025"
+    ],
+    "decks": [],
+    "quizzes": [],
+    "tools": [
+      "simulacros",
+      "simulador"
+    ]
+  },
+  {
+    "id": "vispera",
+    "title": "Víspera del final",
+    "description": "Nada nuevo: volcado en frío de todos los esqueletos y repaso de los confundibles.",
+    "icon": "clock",
+    "divisions": [
+      "final"
+    ],
+    "pages": [
+      "esqueletos-todos",
+      "confundibles"
+    ],
+    "decks": [
+      "esqueletos",
+      "seguros-anti-cero",
+      "confundibles"
+    ],
+    "quizzes": [],
+    "tools": [
+      "esqueletos"
+    ]
+  },
+  {
+    "id": "unidades-6-a-9",
+    "title": "Quiz de las unidades 6 a 9",
+    "description": "Preguntas de opción múltiple y verdadero o falso de sociedades, contratos, consumidor y laboral.",
+    "icon": "quiz",
+    "divisions": [
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "pages": [
+      "unidad-6-resumen",
+      "unidad-7-resumen",
+      "unidad-8-resumen",
+      "unidad-9-resumen"
+    ],
+    "decks": [
+      "checklist-unidad-6",
+      "checklist-unidad-7",
+      "checklist-unidad-8",
+      "checklist-unidad-9"
+    ],
+    "quizzes": [
+      "quiz-unidad-6",
+      "quiz-unidad-7",
+      "quiz-unidad-8",
+      "quiz-unidad-9"
+    ],
+    "tools": []
+  }
+]

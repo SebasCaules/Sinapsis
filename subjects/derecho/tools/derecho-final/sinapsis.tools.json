@@ -1,0 +1,17 @@
+{
+  "id": "derecho-final",
+  "title": "Herramientas del final completo",
+  "version": "1.0.0",
+  "description": "Tablero de temas con el tracker de dominio, banco de consignas reales con simulador de final cronometrado y los siete simulacros del kit con su registro.",
+  "runtime": 1,
+  "scripts": ["temas.js", "simulador.js", "simulacros.js"],
+  "styles": ["css/temas.css", "css/simulador.css", "css/simulacros.css"],
+  "data": ["data/kit.json"],
+  "views": [
+    { "id": "temas", "label": "Temas y tracker", "icon": "grid", "layout": "wide" },
+    { "id": "simulador", "label": "Simulador de final", "icon": "timer", "layout": "wide" },
+    { "id": "simulacros", "label": "Simulacros", "icon": "pencil", "layout": "wide" }
+  ],
+  "figures": false,
+  "progress": false
+}
