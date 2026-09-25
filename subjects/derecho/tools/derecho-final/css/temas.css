@@ -147,8 +147,6 @@
   padding: 10px 14px;
   background: var(--surface, #f5f5f5);
   border: 1px solid var(--border, #ddd);
-  border-left-width: 4px;
-  border-left-style: solid;
   border-radius: 8px;
 }
 
@@ -165,19 +163,20 @@
   color: var(--text, #1a1a1a);
 }
 
-/* Canal no cromático del tier: además del color, cambia el trazo del canto
+/* El tier tiñe el marco de 1px de la tarjeta, sin franja lateral. El canal no
+   cromático es doble: el rótulo «Tier A/B/C» y el trazo del marco
    (solid/dashed/dotted), así el estado no depende solo del color (§6.8). */
 .df-temas .df-tier-a {
-  border-left-color: var(--accent, #b3261e);
-  border-left-style: solid;
+  border-color: var(--accent, #b3261e);
+  border-style: solid;
 }
 .df-temas .df-tier-b {
-  border-left-color: var(--warn, #9a6700);
-  border-left-style: dashed;
+  border-color: var(--warn, #9a6700);
+  border-style: dashed;
 }
 .df-temas .df-tier-c {
-  border-left-color: var(--border, #999);
-  border-left-style: dotted;
+  border-color: var(--border, #999);
+  border-style: dotted;
 }
 
 /* ---------- 3. tabla maestra ---------- */
@@ -335,9 +334,6 @@
   align-items: center;
   padding: 3px 10px;
   border: 1px solid var(--border, #ccc);
-  border-left-width: 3px;
-  border-left-style: solid;
-  border-left-color: var(--border, #ccc);
   border-radius: 999px;
   font: 600 12px var(--font-ui, system-ui, sans-serif);
   color: var(--text, #1a1a1a);
@@ -349,7 +345,7 @@
 
 .df-temas .df-pill-senal {
   background: var(--surface, #f5f5f5);
-  border-left-color: var(--ueval, #7c3aed);
+  border-color: var(--ueval, #7c3aed);
   font-weight: 400;
 }
 
@@ -371,9 +367,6 @@
   min-width: 0;
   padding: 6px 12px;
   border: 1px solid var(--border, #ccc);
-  border-left-width: 4px;
-  border-left-style: solid;
-  border-left-color: var(--border, #ccc);
   border-radius: 8px;
   background: var(--surface, #f5f5f5);
   font: 400 13.5px var(--font-ui, system-ui, sans-serif);
@@ -381,7 +374,7 @@
 }
 
 .df-temas .df-hito:has(input[type="checkbox"]:checked) {
-  border-left-color: var(--primary, #2a5adf);
+  border-color: var(--primary, #2a5adf);
   color: var(--primary, #2a5adf);
   font-weight: 700;
 }
@@ -406,10 +399,7 @@
   align-items: center;
   gap: 4px;
   padding: 6px 12px;
-  border: 1px solid var(--border, #ccc);
-  border-left-width: 4px;
-  border-left-style: solid;
-  border-left-color: var(--warn, #9a6700);
+  border: 1px solid var(--warn, #9a6700);
   border-radius: 8px;
   background: var(--surface, #f5f5f5);
   font-size: 13px;
@@ -444,7 +434,6 @@
   padding: 16px;
   background: var(--surface, #f5f5f5);
   border: 1px solid var(--border, #ddd);
-  border-left: 4px solid var(--accent, #b3261e);
   border-radius: 8px;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 13px;
