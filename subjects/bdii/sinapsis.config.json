@@ -23,6 +23,11 @@
       "kind": "numbered"
     },
     {
+      "key": "3",
+      "name": "NoSQL columnar — Cassandra",
+      "kind": "numbered"
+    },
+    {
       "key": "eval",
       "name": "Evaluaciones — exámenes viejos resueltos",
       "kind": "extra"
@@ -41,6 +46,14 @@
       "key": "practica",
       "label": "Práctica",
       "plural": "Prácticas",
+      "countsAsContent": true,
+      "collapsedByDefault": false
+    },
+    {
+      "key": "guia",
+      "label": "Guía resuelta",
+      "plural": "Guías resueltas",
+      "folder": "guias",
       "countsAsContent": true,
       "collapsedByDefault": false
     },
@@ -95,6 +108,13 @@
           "icon": "layers",
           "kind": "page",
           "target": "mongodb"
+        },
+        {
+          "id": "cassandra",
+          "label": "Cassandra",
+          "icon": "grid",
+          "kind": "page",
+          "target": "cassandra"
         },
         {
           "id": "postgresql",
@@ -153,6 +173,7 @@
       "index-clases",
       "mysql",
       "mongodb",
+      "cassandra",
       "postgresql"
     ]
   }

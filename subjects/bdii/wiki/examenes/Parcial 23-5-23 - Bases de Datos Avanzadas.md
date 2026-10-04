@@ -113,6 +113,28 @@ especifica duración ni si la modalidad fue presencial o virtual, con o sin mate
 | 31 | Kibana para visualizar ElasticSearch | ElasticSearch (texto plano) | fuera del temario 2026 |
 | 32 | MongoDB — índice por defecto (B-tree sobre `_id`) | [[2.14.02 - Índices en MongoDB\|Índices en MongoDB]] | Clase 14 |
 
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+El [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]] son de la cátedra y la plataforma actuales, con la corrección
+real, y pesan más para practicar. Seis preguntas de este examen vuelven en ellos:
+
+| Pregunta del 23-5-23 | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 1 — CAP, todos los nodos escriben | Parcial P2 (idéntica) | misma clave, AP |
+| 3 — persistencia vs. programación políglota | Parcial P6 (idéntica, con el distractor *"Programación múltiple"*) | el alumno de 1C 2026 cayó en el distractor (1,5/3) |
+| 10 — tabla de posiciones | Recuperatorio P25 (idéntica, con 1.000.000 de transacciones por segundo y otras opciones) | misma clave, **Redis**; el alumno eligió MongoDB (0/4) |
+| 17 — `EXPLAIN ANALYZE` en PostgreSQL | Parcial P1 (en MySQL: *"muestra los tiempos de planificación, pero no ejecuta"*) | mismo tema: `EXPLAIN ANALYZE` ejecuta; clave Falso |
+| 29 — vista materializada | Parcial P32 (sin nombrar motor: *"trae mejoras en la performance"*) | clave Verdadero, el mismo fondo que la clave Falso de aquí |
+| 32 — índice por defecto de MongoDB | Parcial P9 (idéntica, *"como ocurría en MySQL"*) | misma clave, B-Tree, sí, `_id`; 5/5 |
+
+### Con las demás instancias
+
+La 1, la 3 y la 32 son también las Preguntas 3, 5 y 9 del [[Parcial 2Q2025]]; la 24 (versionado) y
+la 29 (vista materializada), las Preguntas 2 y 3 del [[Final 1Dic2023]]; la 10 se contrasta con la 4
+del [[Final 1Jul2025]] (escritura masiva sin *ranking*: Cassandra).
+
 ### Pregunta 1 — Teorema CAP
 
 > Suponga que tiene una base de datos distribuida en varios nodos y todos los nodos aceptan lecturas
@@ -228,6 +250,11 @@ es (atención) incorrecto para Redis en general —el módulo existe y hace lo m
 enseña la bibliografía del vault; la vía que sí está documentada es la manual con `SETBIT`/`GETBIT`.
 La opción marcada (D y H) no cambia.
 
+(nota) Cassandra, que aquí no es opción, también usa filtros de Bloom: uno por SSTable, para descartar
+las que seguro no tienen la clave antes de leerlas (slide 30 de la [[Clase 15 - Introduccion a Cassandra|Clase 15]] y su handout). En
+Cassandra 5.0.9 el trazado de una lectura muestra `Bloom filter allows skipping sstable 1` →
+[[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] § 6 y corrida M6.
+
 ### Pregunta 7 — Lenguaje de consulta de Neo4j (tema no dictado aún)
 
 > ¿Cuál es el lenguaje más utilizado para consultar un grafo en Neo4J?
@@ -298,6 +325,12 @@ DynamoDB es razonable como descarte relativo —soporta ese throughput con aprov
 pero no está optimizado para el patrón de "leer el top-N ordenado por score" sin un índice secundario
 adicional—, aunque no es un error absoluto de DynamoDB: es una comparación de *fit*, no de
 capacidad bruta.
+
+(nota) ★★ Es la Pregunta 25 del [[Recuperatorio 1Q2026]], con 1.000.000 de transacciones por segundo y
+opciones Redis, Neo4j, MongoDB, HBase y Cassandra: la clave es **Redis**, la misma de aquí. Cassandra
+no sirve para el *ranking* global porque ordena solo dentro de una partición (slide 67 de la
+[[Clase 15 - Introduccion a Cassandra|Clase 15]]; en Cassandra 5.0.9, keyspace `examviejos`: `ORDER BY is only supported when the partition key is restricted
+by an EQ or an IN.`) → [[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] § 4.1.
 
 ### Pregunta 11 — ElasticSearch sobre Lucene (fuera del temario 2026)
 
@@ -726,6 +759,9 @@ confirmando que el índice existe y se usa por defecto sobre ese campo.
 
 ## Qué enseña para el parcial 2026
 
+- ★★ **Seis preguntas de este examen volvieron en 1C 2026** (§ *Relación con otras instancias*): la
+  tabla de posiciones, con la misma clave Redis; CAP con todos los nodos escribiendo; persistencia
+  políglota; el índice por defecto de MongoDB; `EXPLAIN ANALYZE`, y la vista materializada.
 - **CAP y persistencia políglota son las dos secciones de este examen directamente reutilizables**:
   las preguntas 1, 4 y 9 (CAP) y 3 y 10 (persistencia políglota) están formuladas casi con el mismo
   vocabulario que usa la cátedra de BDII en la Clase 12, y son un buen banco de repaso rápido antes
@@ -769,4 +805,7 @@ confirmando que el índice existe y se usa por defecto sobre ese campo.
   [[2.12.05 - BASE y consistencia eventual|BASE y consistencia eventual]] ·
   [[2.14.02 - Índices en MongoDB|Índices en MongoDB]] ·
   [[1.06.01 - Vistas|Vistas]] · [[1.08.01 - Plan de ejecución|Plan de ejecución]]
+- [[Parcial 1Q2026]] · [[Recuperatorio 1Q2026]] · [[Parcial 2Q2025]] · [[Final 1Dic2023]] · [[Final 1Jul2025]]
+- [[Clase 15 - Introduccion a Cassandra]] · [[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] ·
+  [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]]
 - [[_cronograma]]

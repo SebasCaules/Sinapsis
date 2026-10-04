@@ -35,6 +35,8 @@ fuentes:
   - "raw/Material_Catedra/bibliografia/obligatoria/Perkins, Redmond y Wilson - Seven Databases in Seven Weeks (2ed, 2018).pdf"
   - "raw/Material_Catedra/bibliografia/papers/Corbellini et al (2017) - Persisting big-data, The NoSQL landscape.pdf"
   - "raw/Material_Catedra/programa/Cronograma 2026-2C.pdf"
+  - "raw/Examenes_Viejos/1C-26/Parcial/BDII Parcial - 1Q2026.pdf"
+  - "raw/Examenes_Viejos/1C-26/Recu/WhatsApp Video 2026-09-29 at 11.06.33.mp4"
 estado: procesado
 ---
 
@@ -61,7 +63,8 @@ sigue corriendo sin advertencia; el binario `mongo` fue retirado en la versión 
 existan transacciones multi-documento desde 4.0/4.2. Anotar `db.version()` al empezar cualquier
 ejercicio es el hábito que evita la mayoría de las sorpresas. El [[Parcial 2Q2025|parcial del
 2Q2025]] evaluó `mapReduce` deprecado y tomó **CP** como esquina CAP de MongoDB —la del deck, no la
-de Corbellini—: indicio para 2026, no confirmación.
+de Corbellini—. El 1C 2026 repitió las dos claves y sumó dos trampas del shell (§ 7 de la tabla
+de diferencias).
 
 ---
 
@@ -136,6 +139,9 @@ según `pdfinfo`)*. Pero el TP no la instala:
 > **8.x**, ninguna en el 6.0.5 que declara el deck. Sigue sin confirmarse qué versión exacta bajó el
 > `docker pull mongo` de cada alumno en su propia fecha — eso solo lo dice el `db.version()` de cada
 > máquina.
+>
+> (nota) Tercera corrida, el 29/09/2026, con las preguntas de MongoDB del [[Parcial 1Q2026|Parcial 1Q2026]] y el
+> [[Recuperatorio 1Q2026|Recuperatorio 1Q2026]]: `db.version()` → `8.3.11` y `version()` → `2.11.1`, los mismos valores.
 
 > [!note] La documentación actual de `mongosh` declara soporte para servidores **7.0 o superiores**
 > La página de instalación de `mongosh` dice hoy *"You can use the MongoDB Shell to connect to
@@ -387,7 +393,8 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 > índice, automático, sobre `_id`. La misma pregunta apareció, casi textual, en [[Parcial 2Q2025]]
 > (Sección G, pregunta 9: *"¿Cuál es el tipo de índice default que maneja MongoDB? ¿Hay índices
 > creados por default…?"*), con la misma respuesta — **B-Tree, sí, sobre `_id`**— y la misma corrida
-> de verificación (`getIndexes()`) del lado del vault.
+> de verificación (`getIndexes()`) del lado del vault. ★★ Y otra vez en el [[Parcial 1Q2026|Parcial 1Q2026]] P9,
+> con las opciones en otro orden (la correcta es la F).
 > El tipo `2d`/geoespacial que nombra la p. 110 del libro no es "default": hay que crearlo
 > explícitamente, como en el ejercicio 5 de la Parte II.
 
@@ -409,7 +416,7 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 | Como está en el material | Dónde | Estado | Hoy |
 | --- | --- | :---: | --- |
 | `db.mycol.aggregate([{$group : {_id : "$by_user", num_tutorial : {$sum : 1}}}])` | Clase 12 slide 47 | ✓ *(solo la salida está vieja)* | igual |
-| `db.posts.aggregate([{ $lookup: { from: "comments", localField: "title", foreignField: "postTitle", as: "comments" } }])` | Clase 12 slide 49 *(posts/comments)*. La Clase 13 slide 23 trae el mismo operador con otro ejemplo: `db.orders.aggregate([{ $lookup: { from: "inventory", localField: "item", foreignField: "sku", as: "inventory_docs" } }])` | ✓ *(desde 3.2)* | igual. **No está en *Seven Databases* cap. 4** *(cero ocurrencias, verificado en la Clase 13)*. (atención) Un campo ausente se compara como `null` y `null` empareja con `null`: una orden sin `item` empareja con `sku: null` y con `sku` ausente, al revés que el `NULL = NULL` de SQL → [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] § *Slides 21–25* (slides 22–24; verificado en MongoDB 8.3.11) |
+| `db.posts.aggregate([{ $lookup: { from: "comments", localField: "title", foreignField: "postTitle", as: "comments" } }])` | Clase 12 slide 49 *(posts/comments)*. La Clase 13 slide 23 trae el mismo operador con otro ejemplo: `db.orders.aggregate([{ $lookup: { from: "inventory", localField: "item", foreignField: "sku", as: "inventory_docs" } }])` | ✓ *(desde 3.2)* | igual. **No está en *Seven Databases* cap. 4** *(cero ocurrencias, verificado en la Clase 13)*. (atención) Un campo ausente se compara como `null` y `null` empareja con `null`: una orden sin `item` empareja con `sku: null` y con `sku` ausente, al revés que el `NULL = NULL` de SQL → [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] § *Slides 21–25* (slides 22–24; verificado en MongoDB 8.3.11). ★★ El [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] P13 pide escribirlo: `JOIN` → `$lookup` + `$unwind` → [[2.12.08 - Aggregation pipeline\|Aggregation pipeline]] § *En los exámenes* |
 | `db.runCommand({ mapReduce: 'phones', map: map, reduce: reduce, out: 'phones.report' })` · `db.orders.mapReduce(…)` | Clase 14 slide 36 · handout `Ejemplo_MapReduce_MongoDB.pdf` | (atención) **deprecado desde 5.0** *(manual: "Starting in MongoDB 5.0, map-reduce is deprecated … you should use an aggregation pipeline" — verificado 16/09/2026)* | `aggregate([{ $group: … }, { $out: … }])`; para lo que no cabe en operadores, `$accumulator` y `$function`. La traducción del handout está en [[Clase 14 - MongoDB Features]] § (c) y en [[2.14.03 - MapReduce\|MapReduce]] |
 | `db.createView("managementFeedback", "survey", [ { $project: { "management": "$feedback.management", department: 1 } } ])` · `db.createCollection("<viewName>", { "viewOn": …, "pipeline": … })` | Clase 12 slides 50–51 | ✓ *(desde 3.4)* | igual; las vistas son **de solo lectura** *(manual: "Views act as read-only collections, and are computed on demand during read operations")* y su pipeline **no puede llevar `$out` ni `$merge`** |
 | `$group` con `WHERE` previo → `$match` + `$group` + `$sort`, en ese orden | *(no está en ningún deck; patrón del libro pp. 116–117)* | ✓ | `db.egresados.aggregate([{ $group: { _id: "$titulo", cantidad: { $sum: 1 } } }, { $sort: { cantidad: -1 } } ])` — verificado sobre `egresados.csv` (8223 documentos, 19 carreras; *Ingeniero Industrial* con 3847, la mayor). Con `WHERE` previo, el `$match` va **antes** del `$group`: verificado con `bandas` filtrando `fecha_inscripcion` → [[Práctica 2026-09-22]] § Ejercicios 4 y 6 |
@@ -422,6 +429,11 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 > exactamente con lo que dice esta tabla. Es evidencia a favor, de 2025: si `mapReduce` entra al
 > parcial 2026 sigue abierto → § *Dudas abiertas*. Si entra, hay que saber escribirlo aunque la forma
 > vigente sea el `$group` de más arriba.
+>
+> ★★ En el 1C 2026 volvió como concepto, en cinco V/F: paralelo y pares clave-valor en el
+> [[Parcial 1Q2026|Parcial 1Q2026]] (P8 y P17) y en el [[Recuperatorio 1Q2026|Recuperatorio 1Q2026]] (P15 y P16), y en la P14 del
+> recuperatorio *"MongoDB recomienda Map-Reduce para analytics modernos antes que Aggregation
+> Pipeline"*, con clave **Falso**: la cátedra da por sabida la deprecación → [[2.14.03 - MapReduce|MapReduce]].
 
 ### 5 · Replica set — el shell cambia, `rs.*` no
 
@@ -449,6 +461,17 @@ Lo que **ya está en la API vigente** y no hay que tocar: `insertOne` *(Clase 14
 | `$ sudo service mongod start` / `stop` | Clase 14 slide 10 | ✓ en instalación nativa Linux | en Docker: `docker start Mymongo` / `docker stop Mymongo` |
 | *"The MongoDB Shell (mongosh) is not installed with MongoDB Server"* | Clase 14 slide 10 *(captura de la documentación)* | ✓ para la instalación nativa | la imagen Docker **sí** trae `mongosh` |
 | `use DATABASE_NAME` · `db` · `show dbs` · `db.dropDatabase()` · `db.createCollection("myCollection")` · `db.myCollection.drop()` | Clase 12 slides 35–37 · Clase 14 slides 12–13 | ✓ | igual. `use` dentro de un archivo `.js` **no es JavaScript válido**: en un script es `db = db.getSiblingDB('lab')` → [[Práctica 2026-09-15]] § Todo el TP en un script |
+| `db.createCollection("Proyectos", { idProy : 17, NomProy: "Bases de Datos", … })` | [[Parcial 1Q2026\|Parcial 1Q2026]] P28 *(el enunciado, no un deck)* | ✗ | `IDLUnknownField: BSON field 'create.idProy' is an unknown field.`: el segundo argumento son **opciones** (*capped*, validación, `viewOn`), no un documento. Se lee como "los documentos tienen esta forma" y se cargan con `insertOne`/`insertMany` |
+| `db.proyectos.aggregate([…])` sobre una colección creada como `Proyectos` | [[Parcial 1Q2026\|Parcial 1Q2026]] P28 *(la respuesta del alumno)* | (atención) | los nombres de colección **distinguen mayúsculas**: `db.proyectos` es otra colección, vacía. La consulta devuelve `[]` sin error ni aviso, y no crea nada (`db.getCollectionNames()` → `[ 'Proyectos' ]`) |
+
+> [!warning] ★★ Lo que el 1C 2026 agregó a esta tabla — verificado el 29/09/2026 en MongoDB 8.3.11 / `mongosh` 2.11.1
+> Las dos filas de arriba salen del [[Parcial 1Q2026|Parcial 1Q2026]] P28: el alumno escribió bien la lógica
+> (`$group` con `$sum: 1` y `$sort` descendente) sobre `db.proyectos`, y la plataforma le dio 4/5. La
+> tercera trampa es del [[Recuperatorio 1Q2026|Recuperatorio 1Q2026]] P13: una respuesta con comas faltantes ni llega al
+> servidor, porque `mongosh` la corta antes con `SyntaxError: Unexpected token, expected "," (5:4)`. Los
+> errores de esa respuesta que sí son del servidor (`Unrecognized pipeline stage name: '$foreign'`,
+> `the $sort key specification must be an object`, …) están en
+> [[2.12.08 - Aggregation pipeline|Aggregation pipeline]] § *En los exámenes*.
 
 > [!note] Cuándo se retiró el shell `mongo` — verificado contra las notas de compatibilidad
 > Las páginas de las Clases 12 y 14 y el concepto [[2.14.01 - mongosh y herramientas de línea de comando|mongosh]]
@@ -711,12 +734,16 @@ db.players.findOne  // sin paréntesis: imprime el código del método — TP9 N
     "usando la estrategia Map-Reduce", como el handout (c); en MongoDB 8.3.11 corre con
     `DeprecationWarning` → § *Agregación y MapReduce* más arriba. Es un examen de 2025: sirve de
     indicio, no confirma el parcial del 13/10/2026.
+  - (nota) ★★ El 1C 2026, con la cátedra actual, lo preguntó como concepto (cinco V/F, sin código) y
+    con la deprecación como clave (Recuperatorio 1Q2026 P14) → § *Agregación y MapReduce*.
 - [ ] ¿En qué esquina de CAP se pone a MongoDB en el parcial? *(Slide 18 de la Clase 12: CP;
   Corbellini Table 2: AP y CP; *Seven Databases* impresa 127: CP)* → [[2.12.04 - Teorema CAP|Teorema CAP]].
   - (nota) Evidencia de exámenes viejos: el parcial 2Q2025 tomó la clasificación del slide 18. La
     pregunta 10 de [[Parcial 2Q2025]] (*"MongoDB es AP según el teorema CAP"*, V/F) tiene **Falso**
     como respuesta correcta en las capturas de la plataforma. Es un examen de 2025: sirve de indicio,
     no confirma qué toma el parcial del 13/10/2026.
+  - (nota) ★★ El [[Recuperatorio 1Q2026|Recuperatorio 1Q2026]] P17 repite la afirmación, con la misma clave (**Falso**), y su
+    P26 resta a MongoDB como CA: la cátedra actual sigue el slide 18, **CP**.
 - [x] ~~¿Qué trae la Parte II del TP9 (22/09)? ¿Reutiliza `players` y `bandas`?~~ (ok) Trae `towns`,
   índices, `explain()`, `mongoimport`, índice `2d`, SQL → `aggregate` sobre `bandas` y CAP. Reutiliza
   `bandas` (ejercicio 6: *"suponiendo la o las colecciones y vistas creadas en el TP anterior"*), no
@@ -748,13 +775,15 @@ db.players.findOne  // sin paréntesis: imprime el código del método — TP9 N
 - Motor de la primera mitad: **[[MySQL]]** *(el `ON DUPLICATE KEY UPDATE` del TP7 vs. el upsert del
   paso 20 del TP9; el `EXPLAIN` del TP5 vs. `explain()`)* · motor del material relacional:
   [[PostgreSQL]] *(estos decks **no** entran en su inventario)* · próximos motores:
-  [[Cassandra]] *(28/09)* · [[Neo4j]] · [[Redis]] · [[DynamoDB]]
+  [[Cassandra]] *(Clase 15, 28/09)* · [[Neo4j]] · [[Redis]] · [[DynamoDB]]
 - Setup y TPs: [[Práctica 2026-09-15]] *(TP9 Parte I — setup, 34 pasos, 11 ejercicios)* ·
   [[Práctica 2026-09-22]] *(TP9 Parte II — índices, `explain()` vs. MySQL, `mongoimport`, índice `2d`,
   `aggregate` sobre `egresados`, CAP)* · [[Práctica 2026-08-04]] *(Docker, la misma mecánica con
   `mysql:9.7.2`)* · [[Docker]] · índice de enunciados en `raw/tp/_index.md`
-- Exámenes que evalúan este motor: [[Parcial 2Q2025]] *(Sección G — MongoDB: índice por defecto,
-  `aggregate`, MapReduce, CAP; el modelo más cercano al parcial del 13/10)*
+- Exámenes que evalúan este motor: ★★ [[Parcial 1Q2026|Parcial 1Q2026]] *(índice por defecto P9, embebido P20,
+  `aggregate` P27 y P28, MapReduce P8 y P17)* · ★★ [[Recuperatorio 1Q2026|Recuperatorio 1Q2026]] *(`$lookup` P13, MapReduce
+  P14–P16, CAP P17 y P26)* · [[Parcial 2Q2025]] *(Sección G — MongoDB: índice por defecto,
+  `aggregate`, MapReduce, CAP)*
 - Clases del motor *(lunes 14/09)*: [[Clase 12 - Introduccion a NoSQL]] *(por qué NoSQL, CAP, BASE,
   géneros; MongoDB desde el slide 29, API legada)* · [[Clase 13 - NoSQL-EmbebidosVSNormalizado]]
   *(embebido vs. referencias, `$lookup`, `explain`)* · [[Clase 14 - MongoDB Features]] *(`mongosh`,

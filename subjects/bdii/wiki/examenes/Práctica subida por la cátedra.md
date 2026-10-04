@@ -11,7 +11,7 @@ tema:
   - Privilegios (GRANT/REVOKE, WITH GRANT OPTION, vistas)
   - MongoDB — aggregation pipeline ($group, $sort)
   - Neo4j — Cypher con caminos de longitud variable (no dictado aún en 2026 2C)
-  - Cassandra — CREATE KEYSPACE (no dictado aún en 2026 2C)
+  - Cassandra — CREATE KEYSPACE (dictado el 28/09, Clase 15)
 temario: actual
 fuentes:
   - "raw/Examenes_Viejos/Drive 72.41 - BDII - Examenes Viejos/BDII - Parciales Viejos.pdf"
@@ -61,7 +61,8 @@ a leer la consigna con cuidado: "a lo sumo 3" y "dirigido" admiten más de una l
 > - **Corridas del vault:** las vistas, las consultas, el agregado y la secuencia de privilegios se
 >   corrieron en MySQL 9.7.2 (base propia `practica_catedra`, datos inventados para cada caso); el de
 >   Películas, sobre `raw/Unidad-01/Practica/esq_peliculas.sql` con dos filas agregadas; el
->   `aggregate`, en MongoDB 8.3.11. Neo4j y Cassandra **no se verificaron en un motor**.
+>   `aggregate`, en MongoDB 8.3.11; el `CREATE KEYSPACE`, en Cassandra 5.0.9. Neo4j **no se verificó
+>   en un motor**.
 
 ## Formato
 
@@ -90,7 +91,28 @@ a leer la consigna con cuidado: "a lo sumo 3" y "dirigido" admiten más de una l
 | 6 | `GRANT`/`REVOKE` sobre `REMERA`, `CLIENTE`, `VENTAS`, `VENDEDOR` y una vista | [[1.11.02 - Usuarios, privilegios y roles\|Usuarios, privilegios y roles]] | [[Clase 11 - Seguridad-Transacciones\|Clase 11]] · [[Práctica 2026-09-08\|TP8]] |
 | 7 | `SELECT … GROUP BY … ORDER BY COUNT(*)` traducido a `aggregate` | [[2.12.08 - Aggregation pipeline\|Aggregation pipeline]] | [[Clase 12 - Introduccion a NoSQL\|Clases 12–14]] · [[Práctica 2026-09-15\|TP9]] |
 | 8 | Cypher: amigos a 2 o 3 saltos que no son amigos directos | Neo4j (sin página) | no dictado aún (Neo4j empieza el 19/10) |
-| 9 | CQL: `CREATE KEYSPACE` | Cassandra (sin página) | no dictado aún (Cassandra empieza el 28/09) |
+| 9 | CQL: `CREATE KEYSPACE` | [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces\|Bases de datos tabulares]] · [[Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slide 59) · [[Práctica 2026-09-29\|TP10]] (paso 1) |
+
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+El [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]] traen la corrección real de la plataforma y del docente, y
+pesan más para practicar. Cinco ejercicios de aquí vuelven en ellos:
+
+| Ejercicio de la práctica | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 1 — esquema de Investigadores | Parcial P3 (cadena de `GRANT`/`REVOKE … CASCADE` sobre `INVESTIGADOR` y sus vistas) | mismo esquema, otra consigna: privilegios en lugar de escribir las vistas; 5/5 |
+| 6 — roles y privilegios | Parcial P3 | la misma mecánica de `WITH GRANT OPTION` y revocación en cadena |
+| 7 — `GROUP BY … ORDER BY COUNT(*)` a MongoDB | Parcial P28 (cantidad de proyectos por investigador, ordenada) · Recuperatorio P13 (un `JOIN … ORDER BY` a `$lookup`, `$unwind` y `$sort`) | P28: 4/5 por consultar la colección en minúscula; P13: el mismo `$sort: -1` inválido que la nota manuscrita de aquí |
+| 8 — leer Cypher de amigos de amigos | Recuperatorio P24 | allí se escribe la consulta, para "Ana": 3/4 por no filtrar por el nombre |
+| 9 — `CREATE KEYSPACE` | Parcial P31 (idéntica, 3 puntos) | una respuesta con `replication :` sacó 3/3, aunque el motor la rechaza (§ Ejercicio 9) |
+
+### Con las demás instancias
+
+El mismo cuaderno trae el [[Parcial XC-202X|Parcial XC-202X]] y el [[Parcial 2Q-2023|Parcial 2Q-2023]];
+el Ejercicio 6 repite la mecánica de la Pregunta 32 del [[Parcial 2Q2025|Parcial 2Q2025]] (§ *Qué enseña
+para el parcial 2026*).
 
 ---
 
@@ -813,7 +835,7 @@ de cualquiera de las dos.
 
 ---
 
-### Ejercicio 9 — Cassandra: `CREATE KEYSPACE` *(tema no dictado aún)*
+### Ejercicio 9 — Cassandra: `CREATE KEYSPACE` *(dictado el 28/09, Clase 15)*
 
 > **Ejercicio. Cassandra.** Escriba en CQL la sentencia correcta para crear un *keyspace*.
 
@@ -824,11 +846,24 @@ CREATE KEYSPACE my_space
 WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 3};
 ```
 
-**Resolución del vault:** *(tema no dictado aún: Cassandra se dicta el 28/09 y el 05/10, antes del
-parcial)*. ✓ Correcta; coincide con el ejemplo de la documentación oficial de Apache Cassandra, § *CREATE
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]], slide 59)*. ✓ Correcta; coincide con el ejemplo de la documentación oficial de Apache Cassandra, § *CREATE
 KEYSPACE* (`https://cassandra.apache.org/doc/latest/cassandra/developing/cql/ddl.html`), que usa
-`WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3}`. No verificado en un motor.
-Lo que conviene saber para defenderla:
+`WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3}`, y con el del slide 59 de
+la clase (`CREATE KEYSPACE nombre WITH replication = {'class':'SimpleStrategy', 'replication_factor' :
+3};`). Verificado en Cassandra 5.0.9, en un nodo único, con el nombre `examviejos_my_space` para no
+chocar con otros *keyspaces*:
+
+```
+CREATE KEYSPACE examviejos_my_space
+WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 3};
+Warnings :
+Your replication factor 3 for keyspace examviejos_my_space is higher than the number of nodes 1
+```
+
+Se crea, con un aviso: con un nodo no hay dónde guardar tres réplicas, y una lectura en `QUORUM`
+(dos réplicas con RF 3) fallaría con `Unavailable` → [[3.15.05 - Niveles de consistencia y QUORUM|Niveles de consistencia y QUORUM]]
+§ 4. `DESCRIBE KEYSPACE` la devuelve con el factor como texto (`'replication_factor': '3'`) y
+`durable_writes = true`. Lo que conviene saber para defenderla:
 
 - **`replication`** es la única opción obligatoria: la clase de estrategia y el factor de replicación
   (cuántas copias de cada fila guarda el clúster).
@@ -837,17 +872,25 @@ Lo que conviene saber para defenderla:
   un factor **por centro de datos**:
   `{'class': 'NetworkTopologyStrategy', 'dc1': 3, 'dc2': 2}`.
 - El nombre del *keyspace* admite solo letras, dígitos y guion bajo (hasta 48 caracteres), y no
-  distingue mayúsculas salvo entre comillas dobles: `my-space`, con guion medio, fallaría.
+  distingue mayúsculas salvo entre comillas dobles: `my-space`, con guion medio, fallaría. Verificado:
+  `CREATE KEYSPACE examviejos-my-space …` → `SyntaxException: line 1:26 mismatched input '-'
+  expecting K_WITH`.
+- (atención) El `=` después de `replication` es obligatorio: `WITH replication : {…}` da
+  `SyntaxException: … no viable alternative at input ':'`. ★★ Es la respuesta que sacó 3/3 en la
+  Pregunta 31 del [[Parcial 1Q2026]], esta misma consigna: la plataforma la aprobó, pero no corre.
 - `IF NOT EXISTS` evita el error si ya existe.
 
 Ninguna edición de *Seven Databases* cubre Cassandra; el respaldo bibliográfico del vault es
 [[Corbellini et al (2017) - Persisting big-data — ficha|Corbellini]] § 5, que no llega al detalle de
-CQL.
+CQL; el de la cursada es el slide 59 → [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] § 2.5 y
+[[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 4 (factor de replicación y estrategias).
 
 ---
 
 ## Qué enseña para el parcial 2026
 
+- ★★ **Primero, las instancias de 1C 2026.** Cinco ejercicios de aquí vuelven en el [[Parcial 1Q2026]]
+  y el [[Recuperatorio 1Q2026]] (§ *Relación con otras instancias*); el `CREATE KEYSPACE`, idéntico.
 - **Vistas encadenadas y agregación.** Una vista con `GROUP BY … HAVING COUNT(DISTINCT …)` y otra
   definida sobre ella es el formato de ejercicio más repetido de la primera mitad. Se evalúan tres
   cosas: el `DISTINCT` dentro del `COUNT`, declarar el alias de la vista base y saber que la vista
@@ -869,7 +912,9 @@ CQL.
 - **MongoDB:** el error más probable en la traducción de un `GROUP BY` es olvidar el `$` de la ruta
   de campo en `_id` y escribir `$sort` sin documento.
 - **Neo4j queda después del parcial** (19/10) según el cronograma; **Cassandra**, antes (28/09 y 05/10),
-  así que un `CREATE KEYSPACE` o una pregunta de replicación pueden entrar el 13/10.
+  así que un `CREATE KEYSPACE` o una pregunta de replicación pueden entrar el 13/10. (nota) Cassandra
+  se dictó el 28/09 ([[Clase 15 - Introduccion a Cassandra|Clase 15]]). ★★ En 1C 2026 este `CREATE KEYSPACE` entró tal cual (Parcial
+  1Q2026, Pregunta 31): conviene escribirlo con `=` y explicar el factor de replicación.
 
 ## Dudas abiertas
 
@@ -906,7 +951,9 @@ CQL.
   [[1.05.01 - SQL — consultas|SQL — consultas]] · [[1.06.01 - Vistas|Vistas]] ·
   [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y roles]] ·
   [[2.12.08 - Aggregation pipeline|Aggregation pipeline]]
-- Motores: [[MySQL|MySQL]] · [[MongoDB|MongoDB]] · [[PostgreSQL|PostgreSQL]]
+- Motores: [[MySQL|MySQL]] · [[MongoDB|MongoDB]] · [[PostgreSQL|PostgreSQL]] · [[Cassandra]]
+- 1C 2026: [[Parcial 1Q2026]] · [[Recuperatorio 1Q2026]] · [[Clase 15 - Introduccion a Cassandra]] ·
+  [[Práctica 2026-09-29]] · [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]]
 - Bibliografía: [[Seven Databases in Seven Weeks — ficha|Seven Databases (ficha)]] ·
   [[Corbellini et al (2017) - Persisting big-data — ficha|Corbellini (ficha)]]
 - [[_cronograma|Cronograma]]

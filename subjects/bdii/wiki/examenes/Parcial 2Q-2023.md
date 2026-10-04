@@ -92,6 +92,29 @@ el mismo examen (Ej. 9 y Ej. 10).
 | 9 | Anti-join: `NOT IN` vs. `NOT EXISTS` vs. `<> NULL` | [[1.05.01 - SQL — consultas\|SQL — consultas]] | [[Clase 05 - Consultas de Datos–Parte 2\|Clase 05]] |
 | 10 | `NOT IN` con un `NULL` en la subconsulta | [[1.05.01 - SQL — consultas\|SQL — consultas]] | [[Clase 05 - Consultas de Datos–Parte 2\|Clase 05]] |
 
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+El [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]] son de la cátedra y la plataforma actuales, con la corrección
+real, y pesan más para practicar. Siete ejercicios de aquí vuelven en ellos:
+
+| Ejercicio del 2Q-2023 | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 4A — `ASSERTION max_obras` | Recuperatorio P3 (leer una `ASSERTION` sobre `tarea` y `empleado`) | allí se explica qué controla la aserción y se la reemplaza con triggers; 3/4 |
+| 4B — `ConstructorVIP` | Parcial P22 (con `COUNT`, filtro a obras privadas y umbral de 500.000) | 4/6; el umbral sobre el total va en el `HAVING` |
+| 5 — `WITH CHECK OPTION` vs. sin él | Parcial P4 (un `INSERT` por una vista sin `CHECK OPTION`) | mismo tema, como opción múltiple: sin WCO el `INSERT` procede y la fila queda fuera de la vista |
+| 6 — cadena `GRANT`/`REVOKE … CASCADE` | Parcial P3 (sobre `INVESTIGADOR` y tres vistas) | mismo molde; 5/5 |
+| 7 — `EXPLAIN ANALYZE` | Parcial P1 (el inciso *a*, en MySQL) | misma clave, Falso |
+| 8 — `Carrera`/`Materia`/`Facultad` | Parcial P10, P19 y P21 | las tres operaciones como opción múltiple (allí el `DELETE` es de `idCarr = 2`); el `UPDATE` vuelve a fallar por la PK duplicada |
+| 10 — `NOT IN` con `NULL` | Recuperatorio P4 (idéntica, con los mismos datos) | la tabla se crea en MySQL y cambia el orden de las opciones; la clave es la del `NULL` de `SABOR`, la *a* de aquí (§ Pregunta 10) |
+
+### Con las demás instancias
+
+Cinco ejercicios reaparecen en el [[Parcial 2Q2025|Parcial 2Q2025]] (detalle en § *Qué enseña para
+el parcial 2026*), y el mismo cuaderno trae el [[Parcial XC-202X|Parcial XC-202X]] y la
+[[Práctica subida por la cátedra|Práctica subida por la cátedra]].
+
 ## Datasets y corridas
 
 Todo se corrió en **MySQL 9.7.2** sobre una base propia (`parcial2q2023`) con datos de juguete, salvo
@@ -901,10 +924,19 @@ no lo que el estándar hace. Dos arreglos: filtrar los nulos de la subconsulta, 
 Con `NOT EXISTS` sale también el jugo de marca `NULL`, porque ninguna fila de `SABOR` es igual a `NULL`.
 Mismo principio que la opción B del Ej. 9: [[1.05.01 - SQL — consultas|SQL — consultas]] § 11.4.
 
+(nota) ★★ **La corrección de 1C 2026 confirma la respuesta.** Es la Pregunta 4 del [[Recuperatorio 1Q2026]],
+con los mismos datos y la tabla creada en MySQL: la clave de la plataforma es la opción del `NULL` de
+`SABOR` (allí la B), la misma que marcó el estudiante aquí. Esa página agrega una trampa del motor: la
+consulta escribe `jugo` y `sabor` en minúscula, y en un MySQL sobre Linux, donde los nombres de tabla
+distinguen mayúsculas, falla con `ERROR 1146` antes de llegar al `NULL`.
+
 ---
 
 ## Qué enseña para el parcial 2026
 
+- ★★ **Siete ejercicios de aquí volvieron en 1C 2026** (§ *Relación con otras instancias*); el
+  `NOT IN` con `NULL`, idéntico y con la misma respuesta. El [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]]
+  van primero al practicar.
 - **La cátedra recicla.** Cinco de los diez ejercicios reaparecen en el [[Parcial 2Q2025|Parcial 2Q2025]]
   con cambios cosméticos: 1B → P16, 4B → P27, 6 → P32, 7a → P2, y 8.1/8.2/8.3 → P30/P17/P19. La P24
   pregunta lo mismo que el 4A, pero para una restricción de tabla (`CHECK` → `TRIGGER`), no global. Conviene dominar estos esquemas (`CONSTRUCTOR`/`OBRA`/`EJECUTA`,
@@ -939,7 +971,8 @@ Mismo principio que la opción B del Ej. 9: [[1.05.01 - SQL — consultas|SQL �
 
 ## Enlaces
 
-- [[Mapa de exámenes|Mapa de exámenes]] · [[Parcial 2Q2025|Parcial 2Q2025]] (versión 2025 de cinco de
+- [[Mapa de exámenes|Mapa de exámenes]] · [[Parcial 1Q2026]] y [[Recuperatorio 1Q2026]] (siete de estos ejercicios,
+  en 1C 2026) · [[Parcial 2Q2025|Parcial 2Q2025]] (versión 2025 de cinco de
   estos ejercicios) · [[Parcial XC-202X|Parcial XC-202X]] y
   [[Práctica subida por la cátedra|Práctica subida por la cátedra]] (las otras dos instancias del mismo
   cuaderno)

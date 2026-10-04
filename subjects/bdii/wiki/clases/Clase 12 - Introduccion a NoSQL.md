@@ -40,7 +40,7 @@ clave-valor y documento. Criterio SQL vs. NoSQL: ¿cabe en un servidor y va a se
 
 Trampas: el slide 6 ilustra un join materializado *(desnormalización)*, no ausencia de esquema; el
 schemaless real es el slide 27. El slide 24 dibuja un column store, no una familia de columnas
-*(Cassandra)*. *"Maestro-esclavo"* fue eliminado en MongoDB 4.0: hoy son replica sets. En el shell,
+*([[Cassandra]], [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. *"Maestro-esclavo"* fue eliminado en MongoDB 4.0: hoy son replica sets. En el shell,
 `insert`, `update({multi:true})`, `remove` y `count` están deprecados *(→ `insertOne/Many`,
 `updateMany`, `deleteMany`, `countDocuments`)*; `ObjectId(7df78ad8902c)` no corre en ninguna versión
 y la salida `{result: […], ok: 1}` es anterior a 2.6. No hay `CREATE`: base y colección nacen con el
@@ -615,7 +615,10 @@ Conclusión del bloque teórico *(12–20)*; las tres frases en rojo son la sín
 § 3.2 *(pp. 6–7)* y Table 3 *(p. 6)* dan el modelo **N / W / R** *(réplicas, escrituras confirmadas,
 lecturas consultadas)*: `W + R > N` ⇒ consistencia fuerte; `W + R ≤ N` ⇒ débil; quórum típico
 `N/2 + 1`; y las tres políticas de reparación de Cassandra *(read-repair, write-repair,
-asynchronous-repair)*. Va a hacer falta cuando llegue Cassandra el 28/09.
+asynchronous-repair)*. Va a hacer falta cuando llegue Cassandra el 28/09. (nota) Llegó: la
+[[Clase 15 - Introduccion a Cassandra|Clase 15]] da el QUORUM, el *digest* y la reparación de lectura en los slides 41–47 →
+[[3.15.05 - Niveles de consistencia y QUORUM|Niveles de consistencia y QUORUM]] · [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]]
+§ 8; el motor, en [[Cassandra]].
 
 ---
 
@@ -637,7 +640,7 @@ For* por género que es la mejor guía de elección del vault.
 
 | Categoría *(slide)* | Nombre en Corbellini | Nombre en Seven Databases | Motor de la cursada | Slides de detalle |
 | --- | --- | --- | --- | :---: |
-| Columna | Wide Column / Column Families *(§ 5)* | Columnar | **Cassandra** *(28/09, 05/10)* | 24 |
+| Columna | Wide Column / Column Families *(§ 5)* | Columnar | **[[Cassandra]]** *(28/09 → [[Clase 15 - Introduccion a Cassandra\|Clase 15]]; 05/10)* | 24 |
 | Documento | Document-oriented *(§ 6)* | Document | **MongoDB** *(14/09, 22/09)* | 26–27 |
 | Clave-valor | Key-Value *(§ 4)* | Key-Value | **Redis** *(26/10)* · **DynamoDB** *(02/11)* | 25 |
 | Grafo | Graph-oriented *(§ 7)* | Graph | **Neo4j** *(19/10)* | 22–23 |
@@ -735,9 +738,14 @@ resueltos **sin diseñar**.
 > Es un clásico de las introducciones a NoSQL, pero importa **para Cassandra**, que llega el 28/09 con el
 > modelo de la derecha *(partition key, clustering columns, familias)*. Seven Databases cap. 1
 > § *Columnar* *(impresa 6)* y cap. 3 *(HBase)* describen ese modelo. **Anotado en § *Dudas abiertas*.**
+>
+> (ok) La [[Clase 15 - Introduccion a Cassandra|Clase 15]] (28/09) no hace la distinción: su slide 2 usa *columnares*, *de columnas
+> extendidas* y *orientadas a columnas* como sinónimos, y Cassandra es el modelo de la derecha →
+> [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] § 3 · [[Cassandra]].
 
 **Los dos motores en la bibliografía:** Cassandra *(Corbellini § 5.2, p. 13 — la única fuente del
-vault, y el punto abierto #1 de [[CLAUDE]])* y HBase *(Corbellini § 5.2 y Seven Databases cap. 3)*.
+vault, y el punto abierto #1 de [[CLAUDE]]; desde el 28/09, también el deck de la [[Clase 15 - Introduccion a Cassandra|Clase 15]] y el
+motor en [[Cassandra]])* y HBase *(Corbellini § 5.2 y Seven Databases cap. 3)*.
 
 ## Slide 25 · BD Clave-Valor
 
@@ -1750,6 +1758,9 @@ citar el deck.
     Corbellini.
     Es un examen de 2025: sirve de indicio, no confirma qué toma el parcial del 13/10/2026. El
     ejercicio 8 del TP9 Parte II pide justamente clasificar MongoDB → [[Práctica 2026-09-22|Práctica 2026-09-22]].
+  - (nota) ★★ En 1C 2026 la plataforma repitió la clasificación del slide 18: la Pregunta 17 del
+    [[Recuperatorio 1Q2026]] (*"MongoDB es AP según el teorema CAP"*) tiene clave Falso. Redis sigue sin
+    clasificación CAP en un examen corregido.
 - [ ] (crítico) **¿Qué versión de MongoDB corre la cursada, y se acepta la sintaxis vieja del deck?** El
   TP9 usa `mongosh` *(≥ 5.0)*, donde `insert()` corre con `DeprecationWarning` y el slide 38 falla por
   el `ObjectId` inválido. ¿Se corrige `insert()` en el parcial?
@@ -1761,13 +1772,20 @@ citar el deck.
     [[Práctica 2026-09-22|Práctica 2026-09-22]] § *Qué del TP está deprecado*. Evidencia de exámenes viejos: la solución de
     la Pregunta 6 de [[Parcial 2Q2025|Parcial 2Q2025]] usa `mapReduce()`, que en 8.3.11 corre con `DeprecationWarning`;
     ningún examen del vault usa `insert()`.
-- [ ] (crítico) **¿"Familia de columnas" se dicta como column store o como wide-column?** El slide 24
+- [x] (crítico) **¿"Familia de columnas" se dicta como column store o como wide-column?** El slide 24
   dibuja lo primero; Cassandra llega el 28/09 con lo segundo.
+  - (ok) Resuelto con la [[Clase 15 - Introduccion a Cassandra|Clase 15]] (28/09): el deck la dicta como base **tabular** de filas con
+    columnas propias (wide-column) y usa *columnar* como sinónimo, sin distinguir el column store →
+    [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] § 3.
 - [ ] **¿Entra la implementación de la consistencia eventual** *(N/W/R, quórum, read-repair; Corbellini
   § 3.2 y Table 3)*? No está en ningún slide de este deck.
   - (nota) Evidencia de exámenes viejos: la Pregunta 26 de [[Parcial 2Q2025|Parcial 2Q2025]] pide la fórmula del
     **QUORUM** (`(rf/2)+1`, opción múltiple), pero **en Cassandra**, no como teoría general de la
     Clase 12. En 2025 el quórum entró por la unidad de Cassandra (tema no dictado aún en 2026).
+  - (ok) Entra, por Cassandra: la [[Clase 15 - Introduccion a Cassandra|Clase 15]] (28/09) da el QUORUM, el *digest* y la reparación de
+    lectura (slides 41–47). ★★ El [[Parcial 1Q2026]] (Pregunta 14, 8 puntos) pidió el QUORUM con RF 5,
+    la regla R + W > RF y qué corrige las réplicas viejas → [[3.15.05 - Niveles de consistencia y QUORUM|Niveles de consistencia y
+    QUORUM]].
 - [ ] **¿Hasta dónde llegan los índices de MongoDB?** Única mención: slide 29. La
   [[Clase 14 - MongoDB Features]] los desarrolla; falta saber si el TP9 Parte II *(22/09)* los ejercita
   y si entran compuestos o de texto. Complemento: Seven Databases cap. 4 § *Indexing: When Fast Isn't
@@ -1777,7 +1795,7 @@ citar el deck.
     y 5 de [[Práctica 2026-09-22|Práctica 2026-09-22]]). No pide índices compuestos ni de texto. Evidencia de exámenes
     viejos: el índice por defecto de MongoDB (B-tree, sí, sobre `_id`) es la Pregunta 9 de
     [[Parcial 2Q2025|Parcial 2Q2025]] y la 32 de [[Parcial 23-5-23 - Bases de Datos Avanzadas|Parcial 23-5-23]]. Ninguna pregunta
-    llega a índices compuestos o de texto.
+    llega a índices compuestos o de texto. ★★ En 1C 2026 volvió igual: Pregunta 9 del [[Parcial 1Q2026]].
 - [ ] **¿Qué operadores, además de los seis del slide 41, se dan por sabidos?** `$in`, `$exists`,
   `$regex`, `$elemMatch`, `$size` y la **proyección**. Confirmar en [[Práctica 2026-09-15]].
 - [ ] **¿Se toma `$lookup` como "el join de MongoDB", o hacer joins es señal de mal modelado?** El
@@ -1788,6 +1806,9 @@ citar el deck.
     (que MongoDB no soporta nativamente entre colecciones, salvo $lookup)"*. Presenta `$lookup` como
     la excepción disponible y evitar el join como la ventaja, que es la lectura de la Clase 13. La
     respuesta es de estudiantes: la pregunta de ensayo se corrigió a mano y no se sabe qué se esperaba.
+  - (nota) ★★ En 1C 2026 el examen tomó `$lookup` como el join de MongoDB: la Pregunta 13 del
+    [[Recuperatorio 1Q2026]] pide traducir un `JOIN … ORDER BY` y la respuesta es `$lookup` + `$unwind` +
+    `$sort`.
 - [ ] **¿Por qué el deck no trae bibliografía, versión ni fecha?** Primer deck del vault con cero
   referencias *(la [[Clase 09 - Restricciones integridad-Parte 1]] citaba el manual de PostgreSQL)*.
   Todo lo citado en [[_index-bibliografia]] › Clase 12 es propuesta del vault.
@@ -1804,6 +1825,8 @@ citar el deck.
     Explica la respuesta CA de la Pregunta 13 → [[Parcial 2Q2025|Parcial 2Q2025]] § *Pregunta 13*. Es una respuesta
     de estudiante, no de cátedra: la pregunta sigue en pie. El caso CP no tiene respaldo en la
     bibliografía del vault.
+  - (nota) ★★ La Pregunta 26 del [[Recuperatorio 1Q2026]] es la 13 del 2Q2025 con la misma clave (MySQL y
+    Neo4j): la plataforma sostiene a Neo4j como CA en 1C 2026, todavía sin slide que lo respalde.
 
 ## Enlaces
 
