@@ -11,7 +11,7 @@ tema:
   - Teorema CAP y arquitecturas distribuidas
   - MongoDB — CRUD, aggregation pipeline, MapReduce, índices
   - Persistencia políglota, sharding y replicación
-  - Cassandra (no dictado aún en 2026 2C)
+  - Cassandra (dictado el 28/09, Clase 15)
   - Neo4j (no dictado aún en 2026 2C)
 cuatrimestre: 2025-2C
 temario: actual
@@ -20,7 +20,7 @@ fuentes:
   - "raw/Examenes_Viejos/Drive bd2 (4to año 2Q)/Parciales viejos/Parcial_BDII_2Q2025_reconstruido.pdf"
   - "raw/Examenes_Viejos/Drive 72.41 - BDII - Examenes Viejos/BDII - Parcial 2Q2025.docx"
 estado: procesado
-resumen: "Parcial del 2Q2025, el modelo más cercano al del 13/10/2026: 33 preguntas sobre SQL/MySQL (vistas, RI, EXPLAIN, CHECK, privilegios), CAP y MongoDB, más Cassandra/Neo4j (no dictados aún). Tres fuentes cruzadas y corridas reales en MySQL y MongoDB."
+resumen: "Parcial del 2Q2025, el modelo más cercano al del 13/10/2026: 33 preguntas sobre SQL/MySQL (vistas, RI, EXPLAIN, CHECK, privilegios), CAP y MongoDB, más Cassandra (dictada el 28/09) y Neo4j. Casi todo vuelve en 1C 2026. Tres fuentes cruzadas y corridas reales en MySQL y MongoDB."
 aliases:
   - Parcial 2Q2025
   - 2Q2025
@@ -51,9 +51,10 @@ texto del alumno, así que para esas once la fuente es el solucionario.
 Qué enseña para el 13/10/2026: el peso de `WITH CHECK OPTION` y sus dos variantes, las
 acciones referenciales con `MATCH simple` (MySQL acepta `MATCH FULL/PARTIAL` pero los ignora, así que el
 examen las pide de lápiz y papel), la lectura de un `EXPLAIN` mostrando `Unique Index Scan` vs. `Full
-Scan`, el teorema CAP por motor con la clasificación **del deck**, y que Cassandra y Neo4j entran al
-examen aunque en 2026 2C todavía no se dictaron: según [[_cronograma]], Cassandra empieza el 28/09 y
-Neo4j el 19/10.
+Scan`, el teorema CAP por motor con la clasificación **del deck**, y que entran Cassandra (dictada
+el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]]) y Neo4j (19/10, después del parcial).
+★★ Casi todo vuelve en el [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]], que pesan más
+(§ *Relación con otras instancias*).
 
 > [!info] Fuente
 > - **`Parcial_BDII_2Q2025_reconstruido(1).pdf`** (texto) — examen reconstruido por
@@ -111,14 +112,14 @@ Neo4j el 19/10.
 | 4 | Neo4j HA — propagación de escrituras entre nodos | Neo4j — texto plano *(no dictado aún; se dicta el 19–20/10)* | — |
 | 5 | Persistencia políglota vs. programación políglota | [[2.12.03 - Persistencia políglota\|Persistencia políglota]] | Clase 12 · [[Práctica 2026-08-04]] |
 | 6 | MapReduce en MongoDB | [[2.14.03 - MapReduce\|MapReduce]] | Clase 14 |
-| 7 | Cassandra — Keyspace/Column Family/Cluster vs. equivalentes relacionales | Cassandra — texto plano *(no dictado aún; se dicta el 28/09–06/10)* | — |
-| 8 | Componentes de un nodo Cassandra (SSTable, Memtable, Commit Log) | Cassandra — texto plano *(no dictado aún)* | — |
+| 7 | Cassandra — Keyspace/Column Family/Cluster vs. equivalentes relacionales | [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces\|Bases de datos tabulares]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slide 4) |
+| 8 | Componentes de un nodo Cassandra (SSTable, Memtable, Commit Log) | [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación\|Escritura y lectura en Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slide 30) |
 | 9 | Índice por defecto de MongoDB (`_id`, B-Tree) | [[2.14.02 - Índices en MongoDB\|Índices en MongoDB]] | Clase 14 |
 | 10 | MongoDB en el teorema CAP | [[2.12.04 - Teorema CAP\|Teorema CAP]] | Clase 12 · Clase 14 |
 | 11 | Vista materializada en MySQL — performance | [[1.06.01 - Vistas\|Vistas]] § *Virtual vs. materializada* | Clase 06/07 |
 | 12 | Lectura de un plan `EXPLAIN` (Unique Index Scan vs. Full Scan) | [[1.08.01 - Plan de ejecución\|Plan de ejecución]] · [[1.08.02 - Índices\|Índices]] | Clase 08 |
 | 13 | Bases de datos en configuración CA | [[2.12.04 - Teorema CAP\|Teorema CAP]] | Clase 12 |
-| 14 | Cassandra — SSTable en memoria o en disco | Cassandra — texto plano *(no dictado aún)* | — |
+| 14 | Cassandra — SSTable en memoria o en disco | [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación\|Escritura y lectura en Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slide 30) |
 | 15 | Interpretar un `aggregate` de MongoDB (`$match`+`$group`) | [[2.12.08 - Aggregation pipeline\|Aggregation pipeline]] | Clase 12 · [[Práctica 2026-09-15\|TP9]] |
 | 16 | Consulta MySQL con `COALESCE` sobre jerarquía exclusiva (`OBRA`/`OBRA_PRIVADA`/`OBRA_CIVIL`) | [[1.05.01 - SQL — consultas\|SQL — consultas]] | Clase 05 |
 | 17 | RI — `UPDATE` sobre `Carrera` con dos RIR (`restrict`/`cascade`) | [[1.09.02 - Integridad referencial y acciones referenciales\|Integridad referencial]] | Clase 09 · [[Práctica 2026-08-25\|TP6]] |
@@ -127,19 +128,63 @@ Neo4j el 19/10.
 | 20 | Neo4j — Cypher, restricción de unicidad | Neo4j — texto plano *(no dictado aún)* | — |
 | 21 | Diferencia entre replicación y sharding | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] | Clase 12 |
 | 22 | Neo4j — traducir una consulta Cypher a lenguaje natural | Neo4j — texto plano *(no dictado aún)* | — |
-| 23 | Cassandra — `WHERE` sin la clave de partición | Cassandra — texto plano *(no dictado aún)* | — |
+| 23 | Cassandra — `WHERE` sin la clave de partición | [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING\|Clave primaria en Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slides 67–71) |
 | 24 | Restricción de tabla: SQL estándar vs. MySQL | [[1.09.03 - CHECK, DOMAIN y ASSERTION\|CHECK, DOMAIN y ASSERTION]] | Clase 09/10 |
 | 25 | `CHECK` de tabla — qué hace, de qué tipo es, si aplica a datos ya cargados | [[1.09.03 - CHECK, DOMAIN y ASSERTION\|CHECK, DOMAIN y ASSERTION]] | Clase 09/10 |
-| 26 | Cassandra — fórmula del QUORUM | Cassandra — texto plano *(no dictado aún)* | — |
+| 26 | Cassandra — fórmula del QUORUM | [[3.15.05 - Niveles de consistencia y QUORUM\|Niveles de consistencia y QUORUM]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slides 45–46) |
 | 27 | Vista `ConstructorVIP` con agregación — actualizabilidad | [[1.06.01 - Vistas\|Vistas]] | Clase 06/07 |
-| 28 | Cassandra — arquitectura Master-Slave o peer-to-peer | Cassandra — texto plano *(no dictado aún)* | — |
-| 29 | Cassandra — Primary Key: partition key y clustering columns | Cassandra — texto plano *(no dictado aún)* | — |
+| 28 | Cassandra — arquitectura Master-Slave o peer-to-peer | [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación\|Arquitectura de Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slides 12, 26) |
+| 29 | Cassandra — Primary Key: partition key y clustering columns | [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING\|Clave primaria en Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slides 56, 63–64, 69) |
 | 30 | RI — `DELETE` sobre `Carrera` con RIR `restrict` | [[1.09.02 - Integridad referencial y acciones referenciales\|Integridad referencial]] | Clase 09 · [[Práctica 2026-08-25\|TP6]] |
 | 31 | Modelo embebido vs. no embebido en MongoDB | [[2.13.01 - Documentos embebidos vs. referencias\|Documentos embebidos vs. referencias]] | Clase 13 |
 | 32 | Cadena de `GRANT`/`REVOKE ... CASCADE` en SQL estándar | [[1.11.02 - Usuarios, privilegios y roles\|Usuarios, privilegios y roles]] | Clase 11 · [[Práctica 2026-09-08\|TP8]] |
 | 33 | Motor que delega la coordinación de nodos en una herramienta externa | [[2.12.04 - Teorema CAP\|Teorema CAP]] *(arquitecturas)* + Neo4j *(no dictado aún)* | Clase 12 |
 
 ## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+El [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]] son del cuatrimestre anterior, con la misma cátedra y la misma
+plataforma, y traen la corrección real (clave, puntaje y comentario del docente): pesan más que este
+parcial para practicar. **32 de las 33 preguntas de aquí vuelven en alguno de los dos**, casi todas idénticas
+o con cambios menores y algunas como variante del mismo tema; solo la 16 (`COALESCE` sobre la jerarquía de obras) no volvió.
+
+| Pregunta del 2Q2025 | En 1C 2026 | Qué cambia · qué muestra la corrección de 1C 2026 |
+| --- | --- | --- |
+| 1 — `EURO` por `MovUSDTValorComi` | Recuperatorio P6 (idéntica) · Parcial P30 (otro `INSERT` de la misma cadena) | la clave automática del recuperatorio decía *Procede* y el docente la anuló a mano: **No procede**, la clave de aquí (§ Pregunta 1) |
+| 2 — `EXPLAIN ANALYZE` en MySQL | Parcial P1 (idéntica) | misma clave, Falso |
+| 3 — CAP, todos los nodos escriben | Parcial P2 (idéntica, opciones en otro orden) | misma clave, AP |
+| 4 — Neo4j HA | Recuperatorio P20 (idéntica) | *"los dos nodos"*, 4/4 |
+| 5 — persistencia vs. programación políglota | Parcial P6 (idéntica) | el alumno de 1C 2026 cayó en el mismo distractor, *"Programación múltiple"* (1,5/3) |
+| 6 — MapReduce | Recuperatorio P14, P15 y P16 · Parcial P8 y P17 | vuelve como V/F de teoría, no como código; P14: MongoDB **no** recomienda MapReduce antes que el pipeline (Falso) |
+| 7 — terminología tabular | Recuperatorio P34 (idéntica) | misma clave, la tabla del slide 4 de la [[Clase 15 - Introduccion a Cassandra\|Clase 15]] |
+| 8 — componentes del nodo | Parcial P26 (idéntica, opciones reordenadas) | misma clave: Commit Log, Memtable y SSTable |
+| 9 — índice por defecto de MongoDB | Parcial P9 (idéntica, opciones reordenadas) | misma clave: B-Tree, sí, `_id` |
+| 10 — MongoDB AP | Recuperatorio P17 (idéntica) | misma clave, Falso (CP, slide 18 de la Clase 12) |
+| 11 — vista materializada en MySQL | Parcial P32 (en positivo y sin nombrar motor) | clave Verdadero: el mismo fondo que la clave Falso de aquí (§ Pregunta 11) |
+| 12 — `EXPLAIN` de `materia`/`inscripto` | Parcial P29 (idéntica, opciones reordenadas) | misma clave: PK o `UNIQUE` en `materia`; 4/4 |
+| 13 — bases CA | Recuperatorio P26 (idéntica) | misma clave, MySQL y Neo4j; 3/3 (§ Pregunta 13) |
+| 14 — SSTable en memoria | Recuperatorio P35 (idéntica) | misma clave, Falso |
+| 15 — `aggregate` de `orders` | Parcial P27 | otro filtro (`size` y `status`) y agrupa por `type` |
+| 17 — `UPDATE` sobre `Carrera` | Parcial P19 (idéntica) | misma clave (unicidad de la PK); el alumno de 1C 2026 respondió *"No procede por RIR R1"*, la misma trampa |
+| 18 — `BITCOIN` por `MovUSDTValor` | Recuperatorio P5 (idéntica) · Parcial P5 (misma cadena, `LOCAL` con otro valor) | en el recuperatorio, misma clave: Procede; en el Parcial P5 falla la condición propia (`valor < 1200` con 1700): No procede |
+| 19 — `INSERT` con FK compuesta y `NULL` | Parcial P21 (idéntica) | misma clave, `MATCH` simple |
+| 20 — unicidad en Cypher | Recuperatorio P22 (idéntica) | la forma del libro, `ON … ASSERT`, sacó 3/3 (§ Pregunta 20) |
+| 21 — replicación vs. sharding | Parcial P15 (idéntica, opciones reordenadas) | misma respuesta; el alumno de 1C 2026 eligió *"persigue exactamente lo mismo"* (0/2) |
+| 22 — Cypher a lenguaje natural | Recuperatorio P21 (idéntica) | 3/3 con filtro, conteo, orden y límite (§ Pregunta 22) |
+| 23 — `blogs` y `ALLOW FILTERING` | Parcial P34 (`PRIMARY KEY ((blogId, time1), time2)`) | clave C, D y E, con *"es impredecible la performance"* como opción correcta (§ Pregunta 23) |
+| 24 — restricción de tabla | Recuperatorio P8 (idéntica, con *"Ninguna opción es correcta"* agregada) | misma clave, 1. CHECK 2. TRIGGER; 2/2 (§ Pregunta 24) |
+| 25 — `CHECK` sueldo/comisión | Parcial P12 (`Vendedor`, umbral 5.000.000) | 2/6 para *"restricción de inserción"*; el tipo según el deck, en § Pregunta 25 |
+| 26 — fórmula del QUORUM | Parcial P14 (aplicada a RF 5, 8 puntos) · Recuperatorio P36 (niveles de escritura válidos) | en 1C 2026 se pide aplicada: QUORUM 3 con RF 5 y R + W = 6 > 5 |
+| 27 — `ConstructorVIP` | Parcial P22 (umbral 500.000) | 4/6; lo más probable es que el descuento sea por poner el umbral en el `WHERE` y no en el `HAVING` |
+| 28 — master-slave | Parcial P24 (idéntica) | misma clave, Falso |
+| 29 — *Primary Key* en Cassandra | Parcial P7 (reducida a la función de cada parte, 5 puntos) | el comentario del docente fija la respuesta esperada (§ Pregunta 29) |
+| 30 — `DELETE` sobre `Carrera` | Parcial P10 (idéntica) | misma clave, No procede por R2; el alumno de 1C 2026 respondió *Procede* |
+| 31 — embebido vs. no embebido | Parcial P20 (idéntica) | 1/6 con una sola ventaja: se esperan ventajas, desventajas y criterio |
+| 32 — cadena `GRANT`/`REVOKE … CASCADE` | Parcial P3 (mismo molde, sobre `INVESTIGADOR`) | 5/5 |
+| 33 — coordinación externa | Parcial P16 (idéntica) | misma clave, Neo4j |
+
+### Con las demás instancias
 
 | Pregunta del 2Q2025 | Reaparece en | Diferencia |
 | --- | --- | --- |
@@ -259,6 +304,12 @@ Coincide exactamente con la fuente: MySQL rechaza el `INSERT` con el error de `C
 propagado por la cadena `CASCADED`. Consistente con [[1.06.01 - Vistas|Vistas]] § *`WITH CHECK
 OPTION`*: *"`CASCADED` (el default) chequea también las vistas subyacentes"*.
 
+(nota) ★★ **La corrección de 1C 2026 confirma la clave.** El mismo `INSERT` es la Pregunta 6 del
+[[Recuperatorio 1Q2026]]: allí la clave automática de la plataforma decía *Procede* y el docente la anuló a
+mano (*"Está mal configurada la pregunta. La respuesta correcta es No Procede."*), con 2/2 para el
+alumno que marcó No procede. La cátedra sostiene **No procede** en los dos cuatrimestres; si la
+plataforma vuelve a mostrar la clave invertida, manda el razonamiento de `CASCADED`.
+
 > [!figura] lab-check-option
 > La cadena `MovimientoUSDT` → `MovUSDTValor` → `MovUSDTValorComi` de las preguntas 1 y 18, precargada: cambie los valores del `INSERT` y vea por qué uno se rechaza y el otro procede.
 
@@ -360,6 +411,10 @@ Esta pregunta es evidencia para una duda abierta del vault: [[Clase 06 - Vistas-
 abiertas* pregunta *"¿Las vistas materializadas entran en el parcial? Aparecen en los slides 3 y 8 y
 MySQL no las soporta."* — en 2025 entraron como pregunta de teoría general (V/F), aunque el motor de
 la cursada no las materialice. Es un indicio de 2025, no confirma el parcial del 13/10/2026.
+
+(nota) ★★ En 1C 2026 volvieron: la Pregunta 32 del [[Parcial 1Q2026]] dice lo mismo en positivo y
+sin nombrar motor (*"trae mejoras en la performance"*), con clave **Verdadero**. Dos cuatrimestres
+seguidos la plataforma corrige con la teoría general, no con lo que hace MySQL.
 
 ### Pregunta 27 — vista `ConstructorVIP` con agregación: ¿es actualizable? (Ensayo)
 
@@ -628,8 +683,14 @@ estimado."* Captura: `1/1`, "Falso" marcada y correcta.
 **Resolución del vault:** sin discrepancia. [[1.08.01 - Plan de ejecución|Plan de ejecución]] §
 *`EXPLAIN` vs. `EXPLAIN ANALYZE`* lo documenta en los mismos términos: *"`EXPLAIN ANALYZE` (explica y
 ejecuta): corre la consulta de verdad y agrega los números reales"*, con la advertencia (atención)
-propia de esa página: *"Un `EXPLAIN ANALYZE DELETE …` borra."* No corrida aparte: es exactamente el
-comportamiento que ya está verificado en esa página del vault.
+de esa página, que vale para PostgreSQL: *"En PostgreSQL, el motor del deck, un `EXPLAIN ANALYZE
+DELETE …` borra"*. No corrida aparte: es exactamente el comportamiento que ya está verificado en esa
+página del vault.
+
+(atención) Esa advertencia no se cumple en MySQL 9.7.2: `EXPLAIN ANALYZE DELETE` sobre una sola tabla
+responde `<not executable by iterator executor>`, y en la forma multitabla recorre las filas pero no
+modifica nada. La corrida está en el [[Parcial 1Q2026]] § *Pregunta 1*, que es esta misma pregunta (★★,
+misma clave: Falso). Para el `SELECT`, la regla de la fuente vale sin cambios.
 
 ### Pregunta 12 — lectura de un `EXPLAIN` (Opción Múltiple, varias correctas)
 
@@ -708,6 +769,11 @@ frase: *"como ningún motor admite subconsultas en un `CHECK` ni assertions, de 
 va a triggers."* No hay discrepancia; la pregunta pide exactamente lo que esa página documenta como
 su regla central.
 
+(nota) ★★ Es la Pregunta 8 del [[Recuperatorio 1Q2026]], con la opción *"Ninguna opción es correcta"*
+agregada: **misma clave** (1. CHECK 2. TRIGGER, allí la opción F) y 2/2 para el alumno que la marcó.
+Esa página trae además qué responde MySQL 9.7.2 a un `CHECK` de tabla: `ERROR 1111` con el
+`GROUP BY … HAVING` del deck de la Clase 09 y `ERROR 3815` con una subconsulta sin agregación.
+
 ### Pregunta 25 — `CHECK` de tabla sobre `Empleado` (Ensayo)
 
 > Imagine que tiene una tabla `Empleado` en MySQL y alguien agrega posteriormente a la creación la
@@ -751,6 +817,17 @@ solo actúa sobre operaciones futuras). Consistente con
 (fila, porque relaciona dos columnas de la misma fila, `sueldo` y `comision`, sin cruzar tablas ni
 filas — la pregunta la llama "restricción de tabla" en sentido amplio de "restricción declarada con
 `ALTER TABLE`", pero por el criterio de esa página es de **nivel fila**, no de nivel tabla).
+
+(atención) **El tipo, según el deck, es de fila, no de tabla.** El solucionario dice *"`CHECK` a
+nivel de tabla"*, pero la [[Clase 10 - Restricciones integridad-Parte 2|Clase 10]] trae este mismo
+ejemplo (`chk_sueldo_comision`, umbral 5000) en el slide 15 bajo *"2. A nivel de Fila"*: *"entre
+columnas de una misma fila o tupla"*. La [[Clase 09 - Restricciones integridad-Parte 1|Clase 09]]
+llama a ese nivel *"RI (CHECK) de registro"* (slide 20), y el nivel de tabla (slide 16 de la
+Clase 10) es el de las restricciones entre varias filas. En el ensayo, lo que suma es **`CHECK` de
+fila (de registro o de tupla)**, agregado con `ALTER TABLE`; *"de tabla"* describe dónde se declara,
+no su ámbito. ★★ Es la Pregunta 12 del [[Parcial 1Q2026]] (tabla `Vendedor`, umbral 5.000.000): 2/6,
+sin comentario del docente, para una respuesta que la llamó *"restricción de inserción"* y dijo que
+no aplica a los datos ya cargados.
 
 ---
 
@@ -839,7 +916,8 @@ defecto (escrituras y lecturas al primario); AP si se leen secundarios"* y con e
 la duda abierta de [[Clase 12 - Introduccion a NoSQL]] § *Dudas abiertas* (*"¿En qué esquina de CAP
 van MongoDB y Redis en el parcial?"*): en 2025 la plataforma tomó la clasificación del deck (CP), no
 la de Corbellini. No fija qué toma el parcial del 13/10/2026; la duda sigue abierta allí y en
-[[2.12.04 - Teorema CAP|Teorema CAP]].
+[[2.12.04 - Teorema CAP|Teorema CAP]]. ★★ En 1C 2026 la plataforma repitió la clave: la Pregunta 17
+del [[Recuperatorio 1Q2026]] es idéntica y su clave es Falso.
 
 ### Pregunta 13 — bases de datos en configuración CA (Opción Múltiple, varias correctas)
 
@@ -867,6 +945,12 @@ instancia única, y el Ejercicio 3 del [[Parcial XC-202X|Parcial XC-202X]] trae 
 estudiante de tres casos (instancia única → CA, HA → AP, distribuido con particiones → CP) que explica
 por qué esta pregunta (instancia sin distribuir) y la Pregunta 4 (clúster HA) piden esquinas distintas
 del mismo motor. (atención) El caso CP de ese criterio no aparece en ninguna fuente del vault.
+
+(nota) ★★ Es la Pregunta 26 del [[Recuperatorio 1Q2026]], idéntica, con **la misma clave** (MySQL y Neo4j)
+y 3/3 para el alumno que marcó esas dos: la plataforma sostiene a Neo4j como CA dos cuatrimestres
+seguidos. El respaldo sigue siendo *Seven Databases* A2 (impresa 317), no un slide. Cassandra resta
+por AP, que el slide 11 de la [[Clase 15 - Introduccion a Cassandra|Clase 15]] dice explícitamente →
+[[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 7.
 
 ### Pregunta 33 — coordinación de nodos delegada a una herramienta externa (Opción Múltiple)
 
@@ -897,6 +981,10 @@ cita: [[Corbellini et al (2017) - Persisting big-data — ficha|Corbellini § 5.
 Failover* describe a **MongoDB** con elecciones de réplica internas (*replica set elections*,
 mecanismo propio del *replica set*) — lo que descarta B y D por el mismo argumento que el
 solucionario, con respaldo directo en el vault.
+
+(nota) Para Cassandra el descarte ya tiene respaldo en el deck: se coordina sola, por *gossip* entre
+pares (slide 28 de la [[Clase 15 - Introduccion a Cassandra|Clase 15]]) → [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 5. ★★ Es
+la Pregunta 16 del [[Parcial 1Q2026]], idéntica, con la misma clave (Neo4j).
 
 ### Pregunta 4 — Neo4j HA: propagación de escrituras (Ensayo)
 
@@ -947,6 +1035,14 @@ con el modelo general de
 [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal]] (una
 escritura aceptada en un nodo se propaga al resto del clúster antes de considerarse durable), aunque
 esa página no cubre Neo4j específicamente.
+
+(nota) **El mecanismo, según el libro.** En Neo4j HA los esclavos también aceptan escrituras:
+*"Slave writes will synchronize with the master node"*, y el maestro propaga esos cambios al resto de
+los esclavos (*Seven Databases* 2ª ed. cap. 6, § *High Availability*, impresa 203). La misma página
+advierte que la escritura en un esclavo no llega de inmediato a los demás: es la consistencia
+eventual de la salvedad anterior. Aplicado aquí: Homero se escribe en el nodo 2, se sincroniza con el
+maestro y este lo propaga al nodo 3, donde también está Bart. ★★ Es la Pregunta 20 del
+[[Recuperatorio 1Q2026]], idéntica: la respuesta *"los dos nodos"* sacó 4/4.
 
 ---
 
@@ -1127,15 +1223,23 @@ horizontal]] ya distingue con precisión.
 
 ---
 
-## Sección I — Cassandra *(tema no dictado aún en 2026 2C)*
+## Sección I — Cassandra *(dictado el 28/09, Clase 15)*
 
-Cassandra se dicta el 28/09–06/10/2026 según [[_cronograma]] (hoy, 25/09/2026, todavía no se cursó).
-Ninguna edición de *Seven Databases in Seven Weeks* cubre Cassandra en profundidad de examen (el vault
+Cassandra se dictó el 28/09 en la [[Clase 15 - Introduccion a Cassandra|Clase 15]] (el [[_cronograma]] le da también la teórica del
+05/10); el motor, con el setup del TP10, está en [[Cassandra]]. Cada pregunta enlaza el concepto y el
+slide donde está la respuesta. Ninguna edición de *Seven Databases in Seven Weeks* cubre Cassandra en profundidad de examen (el vault
 ya lo anota en "Puntos abiertos #1" de `CLAUDE.md`); el respaldo bibliográfico disponible es
 [[Corbellini et al (2017) - Persisting big-data — ficha|Corbellini § 5.2, p. 13]] (modelo BigTable con
 mecanismos de Dynamo: *consistent hashing*, *read-repair*, *vector clocks*, *gossip protocol*) más
 documentación oficial de Apache Cassandra para el detalle de CQL que Corbellini no cubre
 (`https://cassandra.apache.org/doc/stable/cassandra/cql/`).
+
+(atención) **Vector clocks, no.** El slide 54 dice que el *timestamp* resuelve los conflictos, y la
+documentación oficial aclara que Cassandra, a diferencia del paper de Dynamo, usa *last write wins*
+(cita en [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] § 8). Verificado en Cassandra 5.0.9 (keyspace
+`examviejos`): dos `INSERT` sobre la misma fila, primero `USING TIMESTAMP 2000` y después
+`USING TIMESTAMP 1000`, dejan el valor del 2000 y `WRITETIME` = 2000; de la escritura más vieja no
+queda versión.
 
 ### Pregunta 7 — Cassandra vs. bases relacionales (Coincidencia)
 
@@ -1146,9 +1250,12 @@ documentación oficial de Apache Cassandra para el detalle de CQL que Corbellini
 cinco ítems marcados "Correcta" con "Parcial: 20 %" cada uno; la imagen no muestra un encabezado con
 el puntaje total, así que `5/5` se infiere de sumar los cinco parciales, no se ve directamente.
 
-**Resolución del vault:** *(tema no dictado aún)*. Consistente con Corbellini § 5.2: un *keyspace* es
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. Consistente con Corbellini § 5.2: un *keyspace* es
 el contenedor de nivel superior de Cassandra (equivalente a una base de datos), una *column family* es
-lo que CQL llama tabla desde la versión que adoptó sintaxis SQL-like.
+lo que CQL llama tabla desde la versión que adoptó sintaxis SQL-like. Es, literal, la tabla
+*Terminología RDBMS vs Tabular* del slide 4: Instancia ↔ Cluster, Base de Dato ↔ KeySpace, Tabla ↔
+Familia de Columnas, Fila ↔ Fila, Columna ↔ Columna → [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] § 1.
+★★ Volvió idéntica como Pregunta 34 del [[Recuperatorio 1Q2026]] (2,5/2,5).
 
 ### Pregunta 8 — componentes de un nodo Cassandra (Opción Múltiple, varias correctas)
 
@@ -1160,10 +1267,16 @@ lo que CQL llama tabla desde la versión que adoptó sintaxis SQL-like.
 **Respuesta de la fuente:** ambas fuentes coinciden en **A, B, C**. Captura: `3/3`, las tres marcadas
 y correctas (`33,33%` cada una).
 
-**Resolución del vault:** *(tema no dictado aún)*. Consistente con Corbellini § 5.1.2 (componentes de los
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. Consistente con Corbellini § 5.1.2 (componentes de los
 *tablet servers* de BigTable, cuyo modelo hereda Cassandra: *memtable* en memoria, *commit log* en
 disco para durabilidad, *SSTable* inmutable resultado del *flush*) y § 5.2 (Cassandra combina el
 modelo de BigTable con los mecanismos de Dynamo). D y E son distractores sin respaldo en ninguna fuente del vault.
+
+El slide 30 (*Elementos de Cassandra*) enumera Commit log, MemTable, SSTable y un cuarto elemento, los
+**filtros de Bloom**, que aquí no es opción; la clave A, B, C no cambia. En Cassandra 5.0.9 los tres
+se ven en el nodo: los segmentos del commit log, la MemTable que `nodetool flush` vacía y los archivos
+de cada SSTable (`Data.db`, `Filter.db`, `Index.db`…) → [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]]
+§ M1. ★★ Volvió idéntica, con las opciones reordenadas, como Pregunta 26 del [[Parcial 1Q2026]] (3/3).
 
 ### Pregunta 14 — SSTable, ¿en memoria? (Verdadero/Falso)
 
@@ -1174,9 +1287,13 @@ modelo de BigTable con los mecanismos de Dynamo). D y E son distractores sin res
 **Respuesta de la fuente:** ambas fuentes coinciden en **Falso**. Captura: `0/1`, alumno marcó
 "Verdadero" (incorrecto).
 
-**Resolución del vault:** *(tema no dictado aún)*. La *Memtable* es la estructura en memoria; la
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. La *Memtable* es la estructura en memoria; la
 *SSTable* ("Sorted String Table") es el archivo **inmutable en disco** al que se vuelca la Memtable al
-llenarse — la relación inversa a la que plantea la pregunta como trampa.
+llenarse — la relación inversa a la que plantea la pregunta como trampa. El slide 30 lo dice así: la
+MemTable *"es una estructura de datos residente en la memoria"*; la SSTable, *"un archivo de disco"*.
+En el motor, `nodetool flush` pasa la MemTable a una SSTable (Memtable cell count 3 → 0, SSTable count
+0 → 1: [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] § M1). ★★ Volvió idéntica como Pregunta 35
+del [[Recuperatorio 1Q2026]] (2/2).
 
 ### Pregunta 23 — `WHERE` sin la clave de partición (Opción Múltiple, varias correctas)
 
@@ -1204,12 +1321,49 @@ y D como "Respuesta correcta" **sin ícono de selección** (no marcadas por el a
 marcada. El alumno marcó **únicamente B**, sin marcar C ni D (33,33 % de 3 ≈ `0,99/3`, consistente con
 una sola opción correcta marcada y ninguna incorrecta).
 
-**Resolución del vault:** *(tema no dictado aún)*. Consistente con el modelo de partición de
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]], slides 67–71)*. Consistente con el modelo de partición de
 Cassandra que documenta Corbellini § 5.2 (partición por *consistent hashing* sobre la *partition
 key*): en una PK compuesta `(blogId, time1, time2)`, `blogId` es la clave de partición y `time1`/
 `time2` son columnas de *clustering*; CQL exige la clave de partición completa en el `WHERE` (o
 `ALLOW FILTERING`, que fuerza un escaneo de todas las particiones) — comportamiento estándar de CQL,
 verificable contra la documentación oficial citada arriba, no contra una fuente del vault.
+
+El ejemplo es el de los slides 70–71 (*Why ALLOW FILTERING?*): la misma tabla, la misma consulta y el
+error que avisa que la consulta *"may have unpredictable performance"*. El 71 explica que la única
+forma de responderla es leer todas las filas y filtrar, y propone un índice sobre `time1` →
+[[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]] § 5.
+
+(atención) **Corrida tal cual, falla por otro motivo.** En Cassandra 5.0.9 (keyspace `examviejos`,
+la tabla del enunciado) `time1` es `int` y el literal 1418306451235 no entra (el máximo es
+2.147.483.647), con o sin `ALLOW FILTERING`:
+
+```
+SELECT * FROM blogs WHERE time1 = 1418306451235;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Unable to make int from '1418306451235'"
+SELECT * FROM blogs WHERE time1 = 1418306451235 ALLOW FILTERING;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Unable to make int from '1418306451235'"
+```
+
+Con un `int` válido aparece el error del slide y, con `ALLOW FILTERING`, la consulta devuelve las
+filas:
+
+```
+SELECT * FROM blogs WHERE time1 = 1418306;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+SELECT blogid, time1, time2 FROM blogs WHERE time1 = 1418306 ALLOW FILTERING;
+ blogid | time1   | time2
+--------+---------+-------
+      1 | 1418306 |     1
+      2 | 1418306 |     5
+```
+
+La clave (B, C y D) responde a la intención del ejemplo, no a la corrida literal: en el parcial se
+marcan las tres; si se pide justificar, suma decir que el literal no entra en un `int` (con
+`time1 bigint` todo pasa como en el slide: [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]] § P3).
+★★ En el [[Parcial 1Q2026]] (Pregunta 34) la clave primaria cambia a `((blogId, time1), time2)` y las
+opciones también: la clave es *"no incluye blogId"*, *"no se puede filtrar por time1 solamente"* y
+*"es impredecible la performance de la consulta"*, que es el texto del error. El alumno omitió esta
+última (1,99/3).
 
 ### Pregunta 26 — fórmula del QUORUM (Opción Múltiple)
 
@@ -1220,13 +1374,18 @@ verificable contra la documentación oficial citada arriba, no contra una fuente
 **Respuesta de la fuente:** ambas fuentes coinciden en **D — `(replication_factor/2)+1`**. Captura:
 `1/1`, "D" marcada y correcta.
 
-**Resolución del vault:** *(tema no dictado aún)*. Es la fórmula estándar de quórum mayoritario de
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. Es la fórmula estándar de quórum mayoritario de
 sistemas distribuidos (mínimo de réplicas que deben confirmar una operación para garantizar
-consistencia mayoritaria); no está desarrollada en ninguna página actual del vault en términos de
-Cassandra específicamente, aunque el modelo general de *N/W/R* y quórum sí aparece desarrollado (no
-específico de Cassandra) en [[2.12.04 - Teorema CAP|Teorema CAP]] § *6 · Lo que CAP no dice*, con la
-misma fórmula de quórum mayoritario `N/2 + 1` que pide esta pregunta, citando Corbellini § 3.2 y
-Table 3.
+consistencia mayoritaria). La cátedra la da en el slide 45 (`Quorum = (sum_of_replication_factors /
+2) + 1`) y en la fila QUORUM de la tabla de escritura del slide 46 (`(replication_factor/2)+1`), con
+división entera → [[3.15.05 - Niveles de consistencia y QUORUM|Niveles de consistencia y QUORUM]] § 4. Verificado en Cassandra
+5.0.9 (keyspaces `examviejos_rf3` y `examviejos_rf5`, nodo único): con `CONSISTENCY QUORUM` el error
+de disponibilidad informa `'required_replicas': 2` con RF 3 y `'required_replicas': 3` con RF 5. El
+modelo general *N/W/R* sigue en [[2.12.04 - Teorema CAP|Teorema CAP]] § *6 · Lo que CAP no dice*
+(Corbellini § 3.2 y Table 3). ★★ En el [[Parcial 1Q2026]] (Pregunta 14, 8 puntos) se pidió aplicada:
+RF 5 → QUORUM 3, consistencia fuerte porque R + W = 3 + 3 = 6 > 5, y qué corrige las réplicas viejas
+(la reparación de lectura); el [[Recuperatorio 1Q2026]] (Pregunta 36) pidió los niveles de escritura válidos
+del slide 46.
 
 ### Pregunta 28 — arquitectura Master-Slave (Verdadero/Falso)
 
@@ -1237,11 +1396,14 @@ Table 3.
 **Respuesta de la fuente:** ambas fuentes coinciden en **Falso**. Captura: `0/1`, alumno marcó
 "Verdadero" (incorrecto).
 
-**Resolución del vault:** *(tema no dictado aún)*. Consistente con
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. Consistente con
 [[Corbellini et al (2017) - Persisting big-data — ficha|Corbellini § 5.2, p. 13]] (arquitectura
 **peer-to-peer**, sin nodo maestro, coordinada por *consistent hashing* + *gossip protocol*) y con
 [[2.12.04 - Teorema CAP|Teorema CAP]] § *4.3*, que ubica a Cassandra como *"el único wide-column en la
-columna AP del paper"* — coherente con una arquitectura sin nodo único de coordinación.
+columna AP del paper"* — coherente con una arquitectura sin nodo único de coordinación. El slide 12
+lo dice sin rodeos: arquitectura *Peer-to-Peer* que *"no sigue patrones maestro-esclavo"*, y
+cualquier nodo puede coordinar una consulta (slides 12 y 26) → [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de
+Cassandra]] § 1. ★★ Volvió idéntica como Pregunta 24 del [[Parcial 1Q2026]] (1/1).
 
 ### Pregunta 29 — Primary Key en Cassandra (Ensayo)
 
@@ -1254,10 +1416,19 @@ las filas dentro de la partición). Da tres ejemplos progresivos: PK simple (sol
 compuesta (partition key + clustering column) y PK con partition key compuesta (`(pais, ciudad),
 fecha`). Captura: `0/6` (corrección manual, sin ver el texto del alumno).
 
-**Resolución del vault:** *(tema no dictado aún)*. Consistente con el modelo de *consistent hashing*
+**Resolución del vault:** *(dictado el 28/09, [[Clase 15 - Introduccion a Cassandra|Clase 15]])*. Consistente con el modelo de *consistent hashing*
 de Corbellini § 5.2: la primera componente (o el primer grupo entre paréntesis) de la PK determina el
 nodo por hash; el resto ordena físicamente los datos dentro de esa partición — CQL estándar,
-verificable contra la documentación oficial de Apache Cassandra citada arriba.
+verificable contra la documentación oficial de Apache Cassandra citada arriba. Es lo que dicen los
+slides 56 (la *partition key* agrupa las filas en la misma partición, físicamente juntas; la
+*clustering key* determina su orden físico), 63–64 y 69 → [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en
+Cassandra]]; el token por hash, en [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 2.
+
+(nota) ★★ **Qué espera la cátedra.** El [[Parcial 1Q2026]] (Pregunta 7, 5 puntos) pidió la función de
+cada parte, y el comentario del docente fija la respuesta: la *partition key* define cómo se
+**distribuyen** las tuplas en el clúster, y la *clustering key*, cómo se **ordenan** dentro de la
+partición. Una respuesta que habló de *"quién participa de la clave"* y *"el orden de la clave"*
+sacó 0/5: hay que nombrar distribución y orden, y aquí, además, dar los ejemplos.
 
 ---
 
@@ -1286,6 +1457,11 @@ UNIQUE;`. Captura: `1/3` (crédito parcial en la corrección manual).
 [[Parcial XC-202X|Parcial XC-202X]] pide la misma restricción y la respuesta manuscrita usa la misma
 forma `CREATE CONSTRAINT … FOR … REQUIRE … IS UNIQUE`, la que documenta hoy Neo4j.
 
+(nota) ★★ En el [[Recuperatorio 1Q2026]] (Pregunta 22, idéntica) el alumno escribió la forma del libro,
+`CREATE CONSTRAINT ON (p:Publication) ASSERT p.name IS UNIQUE;`, y sacó 3/3: la cátedra aceptó la
+sintaxis vieja, que Neo4j 5.0 eliminó (detalle en esa página). Lo seguro sigue siendo escribir
+`FOR … REQUIRE` y mencionar la otra.
+
 ### Pregunta 22 — traducir Cypher a lenguaje natural (Ensayo)
 
 > Redacte en lenguaje natural la pregunta que le solicitan responder para construir la siguiente
@@ -1307,10 +1483,19 @@ alfabéticamente de forma ascendente. Limitar a las 10 primeras."* Captura: `2/3
 grafo `(actor)-[:ACTED_IN]->(movie)` no tiene traducción a una sola cláusula de SQL relacional); no
 hay discrepancia que resolver porque no hay página del vault contra la cual contrastar.
 
+(nota) ★★ Es la Pregunta 21 del [[Recuperatorio 1Q2026]], idéntica: *"Cuantos actores actuaron en cada
+pelicula cuyo titulo comienza por T"*, con el orden y el límite, sacó 3/3. La diferencia con el
+solucionario de aquí (2/3) es pequeña; lo seguro es nombrar las cinco piezas: filtro, agrupamiento por
+título, conteo, orden y límite.
+
 ---
 
 ## Qué enseña para el parcial 2026
 
+- ★★ **Primero, las dos instancias de 1C 2026.** 32 de las 33 preguntas de este parcial vuelven,
+  idénticas o como variantes del mismo tema, en el [[Parcial 1Q2026]] y el [[Recuperatorio 1Q2026]] (§ *Relación con
+  otras instancias*), que además muestran la corrección real de la plataforma y del docente. Este
+  parcial queda segundo en prioridad.
 - **`WITH CHECK OPTION` en cadena es un tema de examen real, no solo de TP**, y aparece dos veces
   (preguntas 1 y 18) con la misma cadena de tres vistas y solo cambia qué vista es el destino del
   `INSERT` y qué condición se viola. Memorizar la regla del estándar —verificada empíricamente en
@@ -1336,7 +1521,10 @@ hay discrepancia que resolver porque no hay página del vault contra la cual con
   fórmula de QUORUM, sintaxis Cypher básica) más que de razonamiento aplicado: si para el 13/10/2026
   esas unidades ya se dictaron (Cassandra 28/09–06/10; Neo4j recién 19/10, **después** del parcial),
   conviene repasarlas con foco en vocabulario y comandos textuales del deck, no en ejercicios
-  complejos.
+  complejos. (nota) Cassandra ya se dictó ([[Clase 15 - Introduccion a Cassandra|Clase 15]]). ★★ En 1C 2026 dejó de ser solo
+  definición: el [[Parcial 1Q2026]] pidió en ensayo la función de cada parte de la clave (P7, 5 puntos) y el
+  QUORUM aplicado a RF 5, con R + W > RF y la reparación de lectura (P14, 8 puntos) →
+  [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]] · [[3.15.05 - Niveles de consistencia y QUORUM|Niveles de consistencia y QUORUM]].
 - **Las preguntas de ensayo se corrigen a mano y con crédito parcial**: ninguna captura muestra el
   texto que escribió el alumno, solo el puntaje — así que la "fuente" real para esas preguntas es
   siempre el solucionario reconstruido, nunca la captura.
@@ -1348,7 +1536,8 @@ hay discrepancia que resolver porque no hay página del vault contra la cual con
   el Ejercicio 3 del [[Parcial XC-202X|Parcial XC-202X]] trae un criterio de estudiante de tres casos
   (instancia única → CA; HA → AP; distribuido con particiones → CP, este último sin respaldo en la
   bibliografía) que explica por qué no hay contradicción entre las preguntas 4 y 13, pero sigue sin haber un slide o fuente de cátedra de 2026 que clasifique a
-  Neo4j explícitamente.
+  Neo4j explícitamente. ★★ La Pregunta 26 del [[Recuperatorio 1Q2026]] repite la clave (MySQL y Neo4j): la
+  plataforma la sostiene en 1C 2026, todavía sin slide que la respalde.
 - (ok) Qué chequea `LOCAL CHECK OPTION` en MySQL 9.7.2 está cerrado en [[1.06.01 - Vistas|Vistas]] §
   *Dudas abiertas* y registrado en [[Clase 06 - Vistas-Parte 1|Clase 06]] y [[Práctica 2026-08-11]]:
   la condición propia más las de las vistas subyacentes con WCO propio. Lo fija la corrida
@@ -1372,4 +1561,9 @@ hay discrepancia que resolver porque no hay página del vault contra la cual con
 [[2.12.08 - Aggregation pipeline|Aggregation pipeline]] ·
 [[Clase 06 - Vistas-Parte 1]] · [[Clase 07 - Vistas-Parte 2]] · [[Clase 08 - Explicando el plan]] ·
 [[Clase 09 - Restricciones integridad-Parte 1]] · [[Clase 11 - Seguridad-Transacciones]] ·
-[[Clase 12 - Introduccion a NoSQL]] · [[Práctica 2026-08-11]] · [[Práctica 2026-08-25]]
+[[Clase 12 - Introduccion a NoSQL]] · [[Práctica 2026-08-11]] · [[Práctica 2026-08-25]] ·
+[[Parcial 1Q2026]] · [[Recuperatorio 1Q2026]] · [[Clase 10 - Restricciones integridad-Parte 2]] ·
+[[Clase 15 - Introduccion a Cassandra]] · [[Cassandra]] ·
+[[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] · [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] ·
+[[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] · [[3.15.05 - Niveles de consistencia y QUORUM|Niveles de consistencia y QUORUM]] ·
+[[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]]

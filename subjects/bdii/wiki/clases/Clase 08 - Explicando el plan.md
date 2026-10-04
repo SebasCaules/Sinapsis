@@ -33,7 +33,8 @@ cursada corre sobre MySQL: el TP5 Explain Plan (martes 18/08) rehace todo ahí, 
 traduce cada comando.
 
 `EXPLAIN` solo estima; `EXPLAIN ANALYZE` ejecuta, así que sobre `INSERT`, `UPDATE`, `DELETE` o
-`CREATE TABLE AS` va entre `BEGIN` y `ROLLBACK`. `EXPLAIN ANALYZE consulta` y `ANALYZE tabla` son cosas
+`CREATE TABLE AS` va entre `BEGIN` y `ROLLBACK` *(en PostgreSQL; MySQL no modifica datos →
+[[1.08.01 - Plan de ejecución|Plan de ejecución]])*. `EXPLAIN ANALYZE consulta` y `ANALYZE tabla` son cosas
 distintas: el segundo recolecta las estadísticas (`pg_class.relpages`, `reltuples`) con las que estima el
 planner; sin él, las `rows=` mienten. El costo es una unidad arbitraria (`seq_page_cost = 1`,
 `cpu_tuple_cost = 0.01`): compara planes de la misma consulta, no predice milisegundos. El plan es un
@@ -1299,7 +1300,9 @@ El método, en el orden en que conviene aplicarlo. Sirve para el TP5 y para el p
 ### Paso 0 — ¿`EXPLAIN` o `EXPLAIN ANALYZE`?
 
 - `SELECT` barato → `EXPLAIN ANALYZE` directo: se quieren los números reales.
-- `INSERT` / `UPDATE` / `DELETE` / `CREATE TABLE AS` / `EXECUTE` → **`BEGIN; … ROLLBACK;`**.
+- `INSERT` / `UPDATE` / `DELETE` / `CREATE TABLE AS` / `EXECUTE` → **`BEGIN; … ROLLBACK;`** *(en
+  PostgreSQL; en MySQL 9.7.2 no hace falta: `EXPLAIN ANALYZE` de un `DELETE` o `UPDATE` no modifica
+  datos, y el de `CREATE TABLE AS` da ERROR 1064 — corrida en [[Parcial 1Q2026]] P1)*.
 - Consulta que puede tardar minutos (como el `count(*)` de 30 M) → empezar con `EXPLAIN` a secas:
   cuesta 2 ms y ya dice si va a hacer un full scan.
 

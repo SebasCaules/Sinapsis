@@ -40,8 +40,9 @@ además desarrolla respuestas completas para la 3 y la 5 (la 1 remite a la del f
 tiene desarrollo y la 4 dice explícitamente "ya lo respondí arriba"). Ninguna de las dos es oficial de
 la cátedra. La pregunta 5 (Cassandra para IoT) es la respuesta más completa y mejor argumentada de los
 tres finales de esta tanda, y sirve de referencia cruzada para resolver la discrepancia de la pregunta
-4 del final 1Jul2025. Tres de las cinco preguntas (DynamoDB, Neo4j, Cassandra) son sobre temas
-todavía no dictados en septiembre de 2026; se responden igual, apoyadas en bibliografía y rotuladas.
+4 del final 1Jul2025. Dos de las cinco preguntas (DynamoDB, Neo4j) son sobre temas todavía no
+dictados; la de Cassandra se dictó el 28/09 ([[Clase 15 - Introduccion a Cassandra|Clase 15]]). Se responden igual, apoyadas en
+bibliografía y rotuladas.
 
 > [!info] Fuente
 > - `BDII - Final 1Dic2025.docx`: el enunciado completo tal como el estudiante lo reconstruyó de
@@ -67,7 +68,7 @@ todavía no dictados en septiembre de 2026; se responden igual, apoyadas en bibl
 | 2 | Insertar y consultar en DynamoDB (partition/sort key) | DynamoDB — texto plano *(no dictado aún, se dicta el 02/11)* | — |
 | 3 | Concurrencia y aislamiento en bases relacionales | [[1.11.04 - Control de concurrencia y niveles de aislamiento\|Control de concurrencia]] | Clase 11 |
 | 4 | Por qué Neo4j no escala para redes sociales masivas | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] | no dictado aún — Neo4j se dicta el 19-20/10 |
-| 5 | Cassandra para sensores IoT de alto volumen | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] | no dictado aún — Cassandra 28/09 y 05/10 |
+| 5 | Cassandra para sensores IoT de alto volumen | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación\|Arquitectura de Cassandra]] · [[3.15.03 - CQL y modelado orientado a consultas\|CQL y modelado]] · [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING\|Clave primaria en Cassandra]] | [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slides 3, 5–6, 11, 16, 32–34) |
 
 ### Pregunta 1 — el náufrago: CAP y consistencia eventual
 
@@ -194,6 +195,12 @@ dato"*); E coincide con § 3.3 *Timestamp ordering* de esa misma página, donde 
 (más antiguo) tiene prioridad. B es correcta por descarte: el esquema secuencial es, por definición,
 el opuesto del concurrente.
 
+(nota) ★★ Tres de estas afirmaciones volvieron en 1C 2026 como V/F sueltos, con las claves de aquí:
+A en el [[Parcial 1Q2026]] (P11) y el [[Recuperatorio 1Q2026]] (P11), redactada como *"que la ejecución
+simultánea de transacciones no comprometa la consistencia"* (Verdadero); C en el recuperatorio (P10,
+Verdadero); y D en el parcial (P13) y el recuperatorio (P9), como *"permiten tanto lectura como
+escritura concurrente"* (Falso).
+
 ### Pregunta 4 — por qué Neo4j no es la base de las grandes redes sociales
 
 > Si Neo4j parece ideal para el modelado de comunidades, ¿por qué aplicaciones como Instagram o
@@ -250,8 +257,65 @@ concluye Cassandra con una justificación completa, lo que refuerza que la respu
 versión corta del final 1Jul2025 da para ese caso análogo (videojuego, 10⁹ escrituras/seg) es la
 inconsistente entre las cuatro respuestas que tocan este patrón en los tres finales de esta tanda.
 
+(nota) **Contrastada con el deck** ([[Clase 15 - Introduccion a Cassandra|Clase 15]], dictada el 28/09). Casi toda la justificación de la
+fuente está en los slides: AP, escala horizontal con hardware de bajo costo y escala lineal (el mismo
+ejemplo de 2 a 4 nodos que duplica las operaciones por segundo) en el slide 11; sin nodo principal y
+cualquier nodo como coordinador, slides 12 y 25–26; *"Buena para registrar eventos"*, slide 5;
+escrituras *"baratas"* y compactación, slides 32–34, así que la compactación ya no depende solo de la
+documentación; modelar por patrón de acceso y elegir la *partition key* para evitar cuellos de
+botella, slide 16 → [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 7 ·
+[[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] §§ 1–3.
+
+(atención) **El promedio semanal choca con el slide 6.** El slide 6 pone entre los casos en que las
+bases tabulares **no** convienen las consultas de agregación (*sum* o *avg*), *"ya que deben hacerse
+del lado del cliente"*; el slide 73, en cambio, enseña `SUM` en CQL. En Cassandra 5.0.9 (keyspace
+`examviejos`, tres lecturas de prueba del sensor `s1`: 4,0 y 5,0 el 22/09, 6,5 el 23/09), con la
+clave que propone la fuente —`sensor_id` más un balde de día en la *partition key* y `ts` como
+*clustering*— el promedio de la semana corre si se nombran los siete días:
+
+```
+CREATE TABLE lecturas (sensor_id text, dia date, ts timestamp, temp double, PRIMARY KEY ((sensor_id, dia), ts));
+SELECT sensor_id, AVG(temp) FROM lecturas WHERE sensor_id = 's1' AND dia IN ('2026-09-22','2026-09-23','2026-09-24','2026-09-25','2026-09-26','2026-09-27','2026-09-28');
+ sensor_id | system.avg(temp)
+-----------+------------------
+        s1 |          5.16667
+Warnings :
+Aggregation query used on multiple partition keys (IN restriction)
+```
+
+Sin nombrar los días, la misma consulta (`WHERE sensor_id = 's1'`) falla con `Cannot execute this
+query as it might involve data filtering …`: la partición es `(sensor_id, dia)` y hay que darla
+completa. Y `temp` tiene que ser `double`: `AVG` conserva el tipo de la columna y sobre un `int`
+trunca ([[Clase 15 - Introduccion a Cassandra|Clase 15]] § *Lo que el deck dice y Cassandra 5.0 no hace*, fila 24). La elección de la fuente
+sigue siendo la correcta; para el puntaje completo conviene escribir esa clave y aclarar que el
+promedio es una consulta por sensor sobre siete particiones, o un cálculo de la aplicación →
+[[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] §§ 4.2 y 5 · [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]] § 7.
+
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+| Pregunta del final | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 3 A — objetivo del control de concurrencia | [[Parcial 1Q2026]] P11 · [[Recuperatorio 1Q2026]] P11 | V/F suelto, Verdadero |
+| 3 C — dirty read | [[Recuperatorio 1Q2026]] P10 | V/F suelto, Verdadero |
+| 3 D — Shared Lock | [[Parcial 1Q2026]] P13 · [[Recuperatorio 1Q2026]] P9 | V/F suelto, Falso |
+| 5 — motor para sensores IoT | [[Recuperatorio 1Q2026]] P25 (tabla de posiciones de un juego, 10⁶ transacciones por segundo) | no es la misma pregunta: allí hay *ranking* y la clave es Redis; aquí, escritura masiva de series de tiempo, Cassandra |
+
+Las preguntas 1, 2 y 4 no volvieron en 1C 2026.
+
+### Con las demás instancias
+
+La 1 es la Pregunta 5 del [[Final 1Jul2025]] y la 1 del [[Final 1Dic2023]]; la 4, la 3 del Final
+1Jul2025; la 5 repite el patrón de la 4 del Final 1Jul2025. Las preguntas 2 a 5 están resueltas por
+estudiantes en el [[Repaso Final BD 2]] (Ejercicios 29 a 32).
+
 ## Qué enseña para el parcial 2026
 
+- ★★ **En 1C 2026** volvió la concurrencia de la pregunta 3 (tres afirmaciones, con las mismas
+  claves), y la elección de motor apareció con una tabla de posiciones cuya clave es Redis
+  ([[Recuperatorio 1Q2026]] P25). El patrón de la pregunta 5 —escritura masiva de series de tiempo— sigue
+  siendo Cassandra.
 - El patrón "motor para escritura distribuida masiva + tolerancia a particiones + disponibilidad +
   escalado horizontal" aparece dos veces en esta tanda de finales (aquí y en la pregunta 4 del final
   1Jul2025) y las dos veces la respuesta mejor justificada es Cassandra — memorizar el criterio
@@ -281,4 +345,7 @@ inconsistente entre las cuatro respuestas que tocan este patrón en los tres fin
 [[2.12.05 - BASE y consistencia eventual|BASE y consistencia eventual]] ·
 [[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia]] ·
 [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal]] ·
-[[Clase 11 - Seguridad-Transacciones]]
+[[Clase 11 - Seguridad-Transacciones]] · [[Parcial 1Q2026]] · [[Recuperatorio 1Q2026]] · [[Repaso Final BD 2]] ·
+[[Clase 15 - Introduccion a Cassandra]] · [[Cassandra]] · [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] ·
+[[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] · [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] ·
+[[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]]

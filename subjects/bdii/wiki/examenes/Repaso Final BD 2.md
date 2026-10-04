@@ -47,7 +47,7 @@ fortalezas/debilidades y su clasificación CAP) quedan directamente sin responde
 DynamoDB y Neo4j se dictan después del parcial del 13/10 (26/10, 02/11 y 19/10). Para el parcial
 sirven los temas ya dictados —**transacciones y concurrencia**, **vistas SQL** (también las
 materializadas), **índices**, la taxonomía NoSQL y el CAP del náufrago— y **Cassandra** (Ejercicios 24
-y 32), que se dicta el 28/09 y el 05/10.
+y 32), que se dictó el 28/09 ([[Clase 15 - Introduccion a Cassandra|Clase 15]]).
 
 > [!info] Fuente
 > Un solo archivo: `raw/Examenes_Viejos/Drive bd2 (4to año 2Q)/Repaso Final BD 2.docx`. Apuntes de
@@ -99,7 +99,7 @@ enunciado y la resolución de cada pregunta.
 | Ejercicio 21 (Final 1Jul2025, preg. 1) | Índices: HASH vs. B+Tree para login | [[1.08.02 - Índices\|Índices]] | Clase 08 / 11 · TP5 |
 | Ejercicio 22 (Final 1Jul2025, preg. 2) | Taxonomía NoSQL: XML sin relación | [[2.12.01 - NoSQL — origen, propiedades y taxonomía\|Taxonomía NoSQL]] | Clase 12 |
 | Ejercicio 23 (Final 1Jul2025, preg. 3) | Neo4j y redes sociales | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] (Neo4j, texto plano) | no dictado aún (19/10) |
-| Ejercicio 24 (Final 1Jul2025, preg. 4) | Elección de motor: videojuego de alta escritura | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[2.12.04 - Teorema CAP\|Teorema CAP]] (Cassandra, Redis, DynamoDB en texto plano) | Cassandra: no dictado aún (28/09) |
+| Ejercicio 24 (Final 1Jul2025, preg. 4) | Elección de motor: videojuego de alta escritura | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[2.12.04 - Teorema CAP\|Teorema CAP]] · [[3.15.03 - CQL y modelado orientado a consultas\|CQL y modelado]] · [[Cassandra]] (Redis y DynamoDB en texto plano) | Cassandra: [[Clase 15 - Introduccion a Cassandra\|Clase 15]] |
 | Ejercicio 25 (Final 1Jul2025, preg. 5) | CAP: el náufrago (V/F) | [[2.12.04 - Teorema CAP\|Teorema CAP]] · [[2.12.05 - BASE y consistencia eventual\|BASE y consistencia eventual]] | Clase 12 |
 | Ejercicio 26 (Final 1Jul2025, preg. 6) | Redis Sentinel (V/F) | Redis (texto plano) | no dictado aún (26/10) |
 | Ejercicio 27 (Final 1Dic2023, preg. 2) | Versionado de datos: HBase | HBase (texto plano) | fuera del temario 2026 |
@@ -107,7 +107,7 @@ enunciado y la resolución de cada pregunta.
 | Ejercicio 29 (Final 1Dic2025, preg. 2) | DynamoDB: tabla Usuarios, put-item y query | DynamoDB | no dictado aún (02/11) |
 | Ejercicio 30 (Final 1Dic2025, preg. 3) | Concurrencia en BD relacionales (V/F) | [[1.11.04 - Control de concurrencia y niveles de aislamiento\|Control de concurrencia]] | Clase 11 |
 | Ejercicio 31 (Final 1Dic2025, preg. 4) | Neo4j en Instagram/Twitter | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] (Neo4j, texto plano) | no dictado aún (19/10) |
-| Ejercicio 32 (Final 1Dic2025, preg. 5) | IoT logístico: elección de motor | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[2.12.04 - Teorema CAP\|Teorema CAP]] (Cassandra, texto plano) | Cassandra: no dictado aún (28/09) |
+| Ejercicio 32 (Final 1Dic2025, preg. 5) | IoT logístico: elección de motor | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[2.12.04 - Teorema CAP\|Teorema CAP]] · [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING\|Clave primaria en Cassandra]] · [[Cassandra]] | Cassandra: [[Clase 15 - Introduccion a Cassandra\|Clase 15]] |
 
 ---
 
@@ -832,6 +832,11 @@ lista de anomalías pero que sí está en el material de la Clase 11 y en el con
 pena repasarlo aparte para el parcial. La cita de la fuente al pie ("Todo eso está en BD2 - Clase 11:
 Seguridad y Transacciones, sección Mecanismos de Control de Concurrencia") es correcta.
 
+(nota) ★★ En 1C 2026 esta tabla se preguntó aplicada: el [[Parcial 1Q2026]] (Pregunta 23, ensayo de 6
+puntos) pidió reconocer un *phantom read* en un *schedule* y el nivel que lo evita (SERIALIZABLE, con
+`SET TRANSACTION ISOLATION LEVEL`), y el [[Recuperatorio 1Q2026]] pidió el *dirty read* y `READ UNCOMMITTED`
+como V/F (Preguntas 10 y 12).
+
 ### Ejercicio 19 — Mecanismos de control de concurrencia
 
 *(Numeración original: sin número, misma sección, subtítulos "Locking", "Control de Versiones" y
@@ -975,6 +980,10 @@ completa. En InnoDB, `USING HASH` se acepta pero crea un B-tree (según el manua
 fuente ya incorpora esta salvedad de MySQL/InnoDB, así que no hace falta corregirla: es la respuesta
 más completa posible con el material dictado (Clase 08 + slides 31–38 de la Clase 11).
 
+(nota) ★★ La Pregunta 7 del [[Recuperatorio 1Q2026]] es esta consigna como opción múltiple: clave **Hash**,
+y 0/2 para quien eligió B-Tree. La cátedra corrige con la respuesta teórica; la salvedad de InnoDB
+suma en un desarrollo, no en una opción múltiple.
+
 ### Ejercicio 22 — Taxonomía NoSQL para archivos XML sin relación entre sí
 
 *(Numeración original: pregunta 2, Final 1Jul2025 — opción múltiple A) Columnar B) Clave-Valor
@@ -1008,9 +1017,11 @@ por el volumen y porque el tipo de consultas está bien definido de antemano, y 
 bien.
 
 **Resolución del vault:** consistente con lo que documenta [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal]] sobre la diferencia entre escalar verticalmente
-(copiar todo el grafo) y horizontalmente (particionar entre nodos). Neo4j y Cassandra son temas **no
-dictados aún** en 2026 2C (Neo4j: 19/10; Cassandra: 28/09), así que esta es una buena introducción
-pero conviene revisarla de nuevo contra el material real de esas clases cuando se dicten.
+(copiar todo el grafo) y horizontalmente (particionar entre nodos). Neo4j es tema **no dictado aún**
+en 2026 2C (19/10): para esa parte, esta es una buena introducción que conviene revisar contra el
+material real de la clase cuando se dicte. Cassandra ya se dictó (28/09,
+[[Clase 15 - Introduccion a Cassandra|Clase 15]]): el slide 11 respalda que escala en forma
+horizontal y lineal agregando nodos → [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 7.
 (atención) Sobre CAP, la fuente dice que Neo4j es CP por defecto y AP solo con HA; *Seven Databases*
 2ª ed. coincide en HA = AP (cap. 6, § *Neo4j on CAP*, impresa 208) pero ubica a Neo4j de una sola
 instancia en CA (apéndice A2, impresa 317). El matiz está desarrollado en [[Final 1Jul2025]] §
@@ -1034,6 +1045,14 @@ Cassandra como motor AP orientado a escritura de alto volumen que da el vault en
 [[2.12.04 - Teorema CAP|Teorema CAP]] y [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal]]. Nota: 1.000 millones de escrituras por segundo es una cifra
 extrema incluso para Cassandra a escala de un solo clúster razonable — vale como ejercicio de
 razonamiento sobre el eje AP/escritura, no como una cifra realista de sizing.
+
+(atención) **Contrastado con el deck** ([[Clase 15 - Introduccion a Cassandra|Clase 15]], dictada el 28/09). Las escrituras masivas y
+*"baratas"* están en los slides 3 y 32–34, pero *"mejores scores"* no es una consulta natural: el
+`ORDER BY` solo ordena dentro de una partición (slide 67; en Cassandra 5.0.9, keyspace `examviejos`:
+`ORDER BY is only
+supported when the partition key is restricted by an EQ or an IN.`). ★★ La Pregunta 25 del
+[[Recuperatorio 1Q2026]] —una tabla de posiciones con `UserID` y `Score`— tiene clave **Redis**. Desarrollo
+completo en [[Final 1Jul2025]] § *Pregunta 4* y [[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] § 4.1.
 
 ### Ejercicio 25 — CAP: el náufrago (verdadero/falso)
 
@@ -1088,7 +1107,8 @@ eventual]]. Es una de las mejores justificaciones de todo el documento.
   Sentinels deben detectar la falla y alcanzar quórum, y luego proponen una réplica como nuevo master.
 
 **Resolución del vault:** correcto y consistente con lo verificado en el Ejercicio 9 (mismo tema,
-*Seven Databases* cap. 8 p. 289).
+*Seven Databases* cap. 8 p. 289). ★★ Las tres afirmaciones volvieron como V/F en el [[Recuperatorio 1Q2026]]
+(Preguntas 30–32), con estas mismas claves.
 
 ---
 
@@ -1107,7 +1127,9 @@ por **Cassandra**. La respuesta se verifica contra *Seven Databases in Seven Wee
 A1 *Database Overview Tables* (impresa 313): la columna *Versioning* marca **Yes** solo para HBase,
 CouchDB y DynamoDB, y **No** para PostgreSQL, MongoDB, Neo4j y Redis. Entre las cinco opciones, la
 única compatible es **C) HBase**: A y B incluyen a MongoDB, que el libro marca "No", y Neo4j también
-es "No". La fuente acierta → misma resolución en [[Final 1Dic2023]] § *Pregunta 2*.
+es "No". La fuente acierta → misma resolución en [[Final 1Dic2023]] § *Pregunta 2*. (nota) Cassandra,
+de la opción A, tampoco versiona: gana el *timestamp* mayor y la escritura vieja no deja versión
+(slide 54 de la [[Clase 15 - Introduccion a Cassandra|Clase 15]]; corrida en [[Final 1Dic2023]] § *Pregunta 2*).
 
 ### Ejercicio 28 — Vistas materializadas de PostgreSQL (verdadero/falso)
 
@@ -1141,7 +1163,8 @@ la vista materializada ("por mantenimiento incremental o regeneración", nunca a
 MATERIALIZED VIEW` pero no materializa**: recalcula en cada `SELECT` (ver [[Final 1Dic2023]] §
 *Pregunta 3*; la Clase 07, slide 20, dice que MySQL no las admite). Esta pregunta, si aparece en 2026,
 se evalúa en términos teóricos de PostgreSQL: en el motor de la cursada la sintaxis corre, pero no hay
-materialización.
+materialización. ★★ Así la corrigió la plataforma en 1C 2026: la Pregunta 32 del [[Parcial 1Q2026]],
+la afirmación A sin nombrar motor, tiene clave Verdadero.
 
 ---
 
@@ -1227,7 +1250,9 @@ versión ("DEL FINAL"), sintácticamente correcta. Ninguna de las dos se verific
   las transacciones en el **orden** de sus timestamps, no en orden inverso.
 
 **Resolución del vault:** correcto en los cinco incisos, coincide con
-[[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia]].
+[[1.11.04 - Control de concurrencia y niveles de aislamiento|Control de concurrencia]]. ★★ A, C y D
+volvieron como V/F sueltos en 1C 2026, con las mismas claves: [[Parcial 1Q2026]] P11 y P13;
+[[Recuperatorio 1Q2026]] P9, P10 y P11.
 
 ### Ejercicio 31 — Por qué Neo4j no lo usan Instagram o Twitter
 
@@ -1269,15 +1294,41 @@ ejecutar, no al revés.
 [[2.12.04 - Teorema CAP|Teorema CAP]]. Cassandra todavía **no se dictó** al 25/09/2026 (se dicta el
 28/09/2026); revisar de nuevo contra el
 material real de esa clase cuando esté disponible en el vault.
+(nota) Revisado contra la [[Clase 15 - Introduccion a Cassandra|Clase 15]] (dictada el 28/09): la justificación coincide con los slides
+3, 5, 11, 12, 16 y 32–34. (atención) El promedio semanal choca con el slide 6, que manda las
+agregaciones al cliente; con una clave `(sensor_id, dia)` el promedio corre si se nombran los siete
+días, y sin ellos pide `ALLOW FILTERING` (corrida en [[Final 1Dic2025]] § *Pregunta 5*) →
+[[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] § 4.2 · [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]] § 7.
 
 ---
 
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+| Ejercicio del repaso | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 18 — anomalías y niveles de aislamiento | [[Parcial 1Q2026]] P23 · [[Recuperatorio 1Q2026]] P10 y P12 | aplicado a un *schedule* (phantom read → SERIALIZABLE) y como V/F |
+| 21 — índice para el login | [[Recuperatorio 1Q2026]] P7 | opción múltiple, clave Hash |
+| 24 — motor para 10⁹ escrituras | [[Recuperatorio 1Q2026]] P25 (tabla de posiciones) | clave **Redis**: el *ranking* cambia la respuesta |
+| 9 y 26 — Redis Sentinel | [[Recuperatorio 1Q2026]] P30, P31 y P32 | las mismas tres afirmaciones como V/F |
+| 28 — vistas materializadas | [[Parcial 1Q2026]] P32 | la afirmación A sin motor, clave Verdadero |
+| 30 — concurrencia V/F | [[Parcial 1Q2026]] P11 y P13 · [[Recuperatorio 1Q2026]] P9, P10 y P11 | A, C y D como V/F sueltos, mismas claves |
+
+### Con las demás instancias
+
+Los Ejercicios 21 a 26 son el [[Final 1Jul2025]]; el 27 y el 28, las Preguntas 2 y 3 del
+[[Final 1Dic2023]]; del 29 al 32, las Preguntas 2 a 5 del [[Final 1Dic2025]].
+
 ## Qué enseña para el parcial 2026
 
+- ★★ **Primero, las instancias de 1C 2026.** Seis ejercicios de aquí volvieron en el [[Parcial 1Q2026]] o
+  el [[Recuperatorio 1Q2026]] (§ *Relación con otras instancias*); el cambio que más importa es el del
+  Ejercicio 24: para una tabla de posiciones, la clave de la cátedra es Redis.
 - De este documento, entran al parcial del **13/10/2026** los temas ya dictados —**transacciones y
   concurrencia** (Bloque 3), **vistas SQL** (Ejercicio 20 y las materializadas del Ejercicio 28),
   **índices** (Ejercicio 21), la taxonomía NoSQL (Ejercicio 22) y el CAP del náufrago (Ejercicio 25),
-  de la Clase 12— y **Cassandra** (Ejercicios 24 y 32), que se dicta el 28/09 y el 05/10, antes del
+  de la Clase 12— y **Cassandra** (Ejercicios 24 y 32), que se dictó el 28/09 ([[Clase 15 - Introduccion a Cassandra|Clase 15]]), antes del
   parcial. Neo4j, Redis y DynamoDB se dictan después: quedan para el recuperatorio y el final — ver
   [[_cronograma]].
 - Patrón que se repite en los finales viejos: las preguntas de "elegir un motor y justificar"
@@ -1320,5 +1371,9 @@ material real de esa clase cuando esté disponible en el vault.
   [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal]] ·
   [[2.12.04 - Teorema CAP|Teorema CAP]] · [[2.12.05 - BASE y consistencia eventual|BASE y consistencia
   eventual]].
+- 1C 2026: [[Parcial 1Q2026]] · [[Recuperatorio 1Q2026]]
+- Cassandra: [[Clase 15 - Introduccion a Cassandra]] · [[Cassandra]] ·
+  [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] · [[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] ·
+  [[3.15.06 - Clave primaria en Cassandra — partition key, clustering key y ALLOW FILTERING|Clave primaria en Cassandra]]
 - [[_cronograma]] — fechas de dictado de Redis (26/10), DynamoDB (02/11), Cassandra (28/09) y Neo4j
   (19/10), todas usadas en esta página para rotular qué está "no dictado aún".

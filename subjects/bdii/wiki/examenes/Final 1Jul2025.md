@@ -41,7 +41,7 @@ Cassandra, la otra Redis— y esa discrepancia se documenta y se resuelve más a
 dispar pregunta por pregunta: sólida en la del náufrago (CAP) y en la de Sentinel, más floja en la de
 Neo4j y abiertamente contradictoria en la del videojuego. Para el parcial del 13/10/2026, las
 preguntas 1 (índice hash en MySQL, verificable en el motor real de esta cursada), 2 (taxonomía NoSQL)
-y 5 (CAP) son de temas ya dictados; la 4 (Cassandra) se dicta antes del parcial (28/09 y 05/10), y la
+y 5 (CAP) son de temas ya dictados; la 4 (Cassandra) se dictó el 28/09 ([[Clase 15 - Introduccion a Cassandra|Clase 15]]), y la
 3 (Neo4j) y la 6 (Redis) llegan después del 13/10.
 
 > [!info] Fuente
@@ -69,7 +69,7 @@ y 5 (CAP) son de temas ya dictados; la 4 (Cassandra) se dicta antes del parcial 
 | 1 | Índice hash vs. B-tree para acceso por igualdad (MySQL) | [[1.08.02 - Índices\|Índices]] | Clase 08 · Clase 11 |
 | 2 | Taxonomía NoSQL — documentos para XML sin esquema compartido | [[2.12.01 - NoSQL — origen, propiedades y taxonomía\|Taxonomía NoSQL]] | Clase 12 |
 | 3 | Por qué Neo4j no escala para redes sociales masivas | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] | no dictado aún — Neo4j se dicta el 19-20/10 |
-| 4 | Cassandra vs. Redis para 10⁹ escrituras/segundo | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] | no dictado aún — Cassandra 28/09 y 05/10, Redis 26/10 |
+| 4 | Cassandra vs. Redis para 10⁹ escrituras/segundo | [[2.12.02 - Escalabilidad horizontal — sharding y replicación\|Escalabilidad horizontal]] · [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación\|Escritura y lectura en Cassandra]] · [[3.15.03 - CQL y modelado orientado a consultas\|CQL y modelado]] | Cassandra: [[Clase 15 - Introduccion a Cassandra\|Clase 15]] (slides 3, 16, 32–34, 67); Redis: no dictado aún (26/10) |
 | 5 | Teorema CAP y consistencia eventual (metáfora del náufrago) | [[2.12.04 - Teorema CAP\|Teorema CAP]] · [[2.12.05 - BASE y consistencia eventual\|BASE y consistencia eventual]] | Clase 12 |
 | 6 | Redis Sentinel — failover y proveedor de configuración | Redis — texto plano *(no dictado aún, se dicta el 26/10)* | — |
 
@@ -128,6 +128,10 @@ disponible es el índice único B-tree por defecto sobre `userID` (que ya resuel
 eficiente, aunque en O(log n) y no O(1)), o mover esa tabla puntual a `MEMORY` si el caso de uso lo
 tolera (datos volátiles). Esto ya está documentado como trampa en
 [[1.08.02 - Índices|Índices]] § *Slides 36-37*.
+
+(nota) ★★ La Pregunta 7 del [[Recuperatorio 1Q2026]] es esta consigna como opción múltiple (B-Tree, GIS,
+*Ninguna de las opciones*, Hash): clave **D — Hash**, y 0/2 para el alumno que eligió B-Tree. La
+cátedra corrige con el criterio teórico (igualdad pura → hash), no con lo que construye InnoDB.
 
 ### Pregunta 2 — taxonomía NoSQL para documentos XML
 
@@ -189,8 +193,10 @@ de una sola instancia en **CA**, porque no distribuye datos y no hay partición 
 "ya no está soportada": el libro (2018) no dice eso —describe Neo4j HA como la opción vigente—; la
 afirmación es más bien sobre el Neo4j actual (Neo4j reemplazó HA por *Causal Clustering* en versiones
 posteriores a las del libro), algo que no se puede verificar contra la bibliografía obligatoria de
-esta cursada. Sobre la alternativa: ni HBase ni Cassandra están dictadas todavía en 2026 2C (Cassandra
-el 28/09 y el 05/10); el criterio de "consulta bien definida + volumen" que da la versión larga sí es
+esta cursada. Sobre la alternativa: HBase no se dicta en 2026 2C; Cassandra se dictó el 28/09
+([[Clase 15 - Introduccion a Cassandra|Clase 15]]), y el slide 11 respalda el argumento de la escala: crece en forma horizontal agregando
+nodos y de manera lineal → [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] § 7. El criterio de "consulta
+bien definida + volumen" que da la versión larga sí es
 consistente con [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad
 horizontal]].
 
@@ -230,6 +236,35 @@ se repite casi textual en la pregunta 5 de [[Final 1Dic2025]], donde la fuente s
 Cassandra y con una justificación mucho más desarrollada; usar esa resolución como referencia cruzada
 refuerza que la respuesta de la versión corta de esta pregunta (Redis) es la que está equivocada, no
 la de la versión larga.
+
+(nota) **Lo que ahora dice el deck** ([[Clase 15 - Introduccion a Cassandra|Clase 15]], dictada el 28/09). La optimización para escritura
+ya no depende solo de la documentación: el slide 3 pone entre lo que las bases tabulares hacen bien
+las *"Cargas de escrituras masivas orientadas al stream"*; el 32 dice que en Cassandra las escrituras
+son *"baratas"* (commit log y MemTable); el 33, que las lecturas son más *"caras"* porque una partición
+puede estar repartida en varias SSTables; y el 34 describe la compactación →
+[[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]] §§ 1–3.
+
+(atención) **"Mejores scores" no es una consulta natural en Cassandra, y el recuperatorio de 1C 2026
+eligió Redis para una tabla de posiciones.** La versión larga cuenta *"mejores scores"* entre las
+consultas que Cassandra modela bien. El deck lo matiza: el `ORDER BY` solo puede usar columnas de la
+*clustering key* (slide 67), es decir, ordena **dentro** de una partición. En Cassandra 5.0.9
+(keyspace `examviejos`), una tabla `posiciones (userid text PRIMARY KEY, score int)` no admite el
+ranking global:
+
+```
+SELECT userid, score FROM posiciones ORDER BY score DESC LIMIT 10;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+```
+
+Para el *top*-N hace falta otra tabla con `score` como *clustering* dentro de una sola partición: esa
+partición recibe todas las escrituras —el cuello de botella que el slide 16 pide evitar— y, como el
+puntaje es parte de la clave, actualizarlo deja la fila vieja → [[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] § 4.1.
+★★ La Pregunta 25 del [[Recuperatorio 1Q2026]] —una tabla de posiciones con `UserID` y `Score`, 1.000.000 de
+transacciones por segundo y Cassandra entre las opciones— tiene clave **Redis** (*sorted sets*). La
+resolución de esta pregunta se sostiene para lo que su enunciado pide (10⁹ **escrituras** por segundo
+de `userID` y `score`, sin ranking): Cassandra. Pero la conclusión de que Redis está equivocada
+vale solo para ese enunciado: si la consigna habla de **tabla de posiciones**, *ranking* o *top*-N, la
+respuesta que corrige la cátedra es Redis.
 
 ### Pregunta 5 — el náufrago: CAP y consistencia eventual
 
@@ -303,8 +338,37 @@ Sentinel líder, sin intervención manual— coincide con el mecanismo documenta
 combina *monitoring*, *notification*, *configuration provider* y **automatic failover** con elección
 de líder por mayoría (`quorum` + `down-after-milliseconds`), sin actor humano en el camino crítico.
 
+(nota) ★★ Las tres afirmaciones volvieron como V/F separados en el [[Recuperatorio 1Q2026]] (Preguntas 30–32),
+con las claves de esta resolución: el administrador no inicia el failover (Falso), Sentinel monitorea
+master y réplicas (Verdadero) y es proveedor de configuración (Verdadero). El alumno de 1C 2026
+perdió 4 de esos 6 puntos por marcar Verdadero la primera y Falso la última.
+
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+| Pregunta del final | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 1 — índice para el login | [[Recuperatorio 1Q2026]] P7 (opción múltiple) | clave Hash; B-Tree, 0/2 |
+| 4 — motor para 10⁹ escrituras por segundo | [[Recuperatorio 1Q2026]] P25 (tabla de posiciones, 10⁶ transacciones por segundo) | clave **Redis**, no Cassandra: el *ranking* cambia la respuesta (§ Pregunta 4) |
+| 6 — Redis Sentinel | [[Recuperatorio 1Q2026]] P30, P31 y P32 | las mismas tres afirmaciones, como V/F: Falso, Verdadero, Verdadero |
+
+Las preguntas 2, 3 y 5 no volvieron en 1C 2026. CAP sí, con otras consignas: todos los nodos
+escriben → AP ([[Parcial 1Q2026]] P2) y bases CA ([[Recuperatorio 1Q2026]] P26).
+
+### Con las demás instancias
+
+La 5 es la Pregunta 1 del [[Final 1Dic2025]] y del [[Final 1Dic2023]]; la 6, la Pregunta 5 del Final
+1Dic2023; la 3, la 4 del Final 1Dic2025. Las seis están resueltas por estudiantes en el
+[[Repaso Final BD 2]] (Ejercicios 21 a 26). La 4 se contrasta con la Pregunta 10 del
+[[Parcial 23-5-23 - Bases de Datos Avanzadas|Parcial 23-5-23]] (tabla de posiciones → Redis).
+
 ## Qué enseña para el parcial 2026
 
+- ★★ **La corrección de 1C 2026 matiza la pregunta 4.** La Pregunta 25 del [[Recuperatorio 1Q2026]] (tabla de
+  posiciones, 10⁶ transacciones por segundo) tiene clave Redis: ante *ranking* o *top*-N, Redis;
+  ante escritura masiva sin *ranking*, Cassandra. Las preguntas 1 y 6 volvieron con las claves de
+  esta página.
 - La pregunta 1 es la única de este final ejecutable en el motor real de la cursada, y expone una
   trampa concreta de MySQL/InnoDB: pedir `USING HASH` en una tabla InnoDB no da error, pero tampoco
   hace lo que se pide — se ignora en silencio y queda un B-tree. Vale la pena memorizar esto para
@@ -343,4 +407,8 @@ de líder por mayoría (`quorum` + `down-after-milliseconds`), sin actor humano 
 [[2.12.01 - NoSQL — origen, propiedades y taxonomía|Taxonomía NoSQL]] ·
 [[2.12.02 - Escalabilidad horizontal — sharding y replicación|Escalabilidad horizontal]] ·
 [[2.12.04 - Teorema CAP|Teorema CAP]] ·
-[[2.12.05 - BASE y consistencia eventual|BASE y consistencia eventual]] · [[MySQL]]
+[[2.12.05 - BASE y consistencia eventual|BASE y consistencia eventual]] · [[MySQL]] ·
+[[Recuperatorio 1Q2026]] · [[Parcial 1Q2026]] · [[Repaso Final BD 2]] ·
+[[Parcial 23-5-23 - Bases de Datos Avanzadas|Parcial 23-5-23]] · [[Clase 15 - Introduccion a Cassandra]] ·
+[[Cassandra]] · [[3.15.02 - Arquitectura de Cassandra — anillo peer-to-peer, particionado y replicación|Arquitectura de Cassandra]] · [[3.15.03 - CQL y modelado orientado a consultas|CQL y modelado]] ·
+[[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]]

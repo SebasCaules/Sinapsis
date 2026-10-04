@@ -404,7 +404,9 @@ el deck de la [[Clase 04 - AlteraciónActualizaciónTablas|Clase 04]].
 | `ERROR: aggregates not allowed in WHERE clause` | PostgreSQL | `ERROR 1111 (HY000): Invalid use of group function` | alta | [[Clase 05 - Consultas de Datos–Parte 1]] slide 35 |
 | Identificador con caracteres raros — el slide 17 lo escribe **pelado**: `CREATE VIEW Envios500-999 AS` | ninguno: **así, sin comillas, no es un identificador válido en ningún motor** *(razonamiento propio)* | `` `Envios500-999` `` — **MySQL usa backticks**; en el estándar/PostgreSQL sería `"Envios500-999"` | seguro | [[Clase 06 - Vistas-Parte 1]] slide 17 |
 | `UPDATE … SET … FROM …` | estándar / PostgreSQL | **no existe** *(MySQL no tiene `FROM` en el `UPDATE`)* → `UPDATE tabla JOIN otra ON … SET tabla.col = otra.col;`, el `JOIN` va **antes** del `SET` | **confirmado** — corrida real, TP3 ejercicio 2.c: `UPDATE DistribuidorNac dn JOIN internacional i ON dn.id_distrib_mayorista = i.id_distribuidor SET dn.codigo_pais = i.codigo_pais;` | [[Práctica 2026-08-11]] § *TP3 SQLs avanzados*, ejercicio 2.c |
-| `to_date('2020-02-02', 'yyyy-MM-dd')` | Oracle | **no existe** → `STR_TO_DATE('2020-02-02', '%Y-%m-%d')`, o directamente el literal `'2020-02-02'` si la columna es `DATE` (MySQL castea el string sin funciones) | alta — la sintaxis Oracle aparece en un enunciado de examen ([[Parcial 2Q2025]] Preguntas 1 y 18) que el vault resolvió con el literal directo, sin necesitar `STR_TO_DATE` | [[Parcial 2Q2025]] Sección A |
+| `to_date('2020-02-02', 'yyyy-MM-dd')` | Oracle | **no existe** → `STR_TO_DATE('2020-02-02', '%Y-%m-%d')`, o directamente el literal `'2020-02-02'` si la columna es `DATE` (MySQL castea el string sin funciones) | **confirmado** — corrida real en 9.7.2 (base `propu1`): `SELECT to_date('2020-01-01','yyyy-MM-dd');` → `ERROR 1305 (42000): FUNCTION propu1.to_date does not exist`; `STR_TO_DATE('2020-01-01','%Y-%m-%d')` → `2020-01-01`. La sintaxis Oracle aparece en enunciados de examen que dicen *"en MySQL"* ([[Parcial 2Q2025]] Preguntas 1 y 18; [[Parcial 1Q2026]] P4, P5 y P30; [[Recuperatorio 1Q2026]] P5 y P6) | [[Parcial 2Q2025]] Sección A |
+| `age(fecha_nacim)` | PostgreSQL *(devuelve un `interval`)* | **no existe** → `TIMESTAMPDIFF(YEAR, fecha_nacim, CURDATE())` | **confirmado** — corrida real en 9.7.2: `SELECT age('2000-01-01');` → `ERROR 1305 (42000): FUNCTION propu1.age does not exist`; `TIMESTAMPDIFF(YEAR, '2000-01-01', '2026-09-29')` → `26`. Aparece en la consulta *"en MySQL"* del [[Recuperatorio 1Q2026]] P1 | [[Recuperatorio 1Q2026]] P1 |
+| Nombres de tabla con otra capitalización (`jugo` por `JUGO`) | el estándar no distingue mayúsculas en identificadores sin comillas | (atención) **depende de `lower_case_table_names`**, que en el contenedor Linux de la cursada vale **`0`**: los nombres de tabla **distinguen mayúsculas**. Tras `CREATE TABLE JUGO …`, `SELECT * FROM jugo;` → `ERROR 1146 (42S02): Table 'propu1.jugo' doesn't exist`. Hay que escribir cada tabla como se creó | **confirmado** — corrida real en 9.7.2 (`@@lower_case_table_names = 0`, `@@version_compile_os = Linux`). En un servidor Windows o macOS el valor por defecto es otro *(no verificado aquí)*; el [[Recuperatorio 1Q2026]] P4 y el [[Parcial 1Q2026]] P19 mezclan mayúsculas y minúsculas y dan los nombres por equivalentes | [[Recuperatorio 1Q2026]] P4 |
 
 ### 3 · Vistas
 
@@ -413,7 +415,7 @@ el deck de la [[Clase 04 - AlteraciónActualizaciónTablas|Clase 04]].
 | `CREATE VIEW … AS consulta` | **igual** | seguro | [[Clase 06 - Vistas-Parte 1]] |
 | `DROP VIEW v RESTRICT;` / `CASCADE;` | MySQL **acepta las palabras y las ignora**: el `DROP` procede y las vistas dependientes quedan inválidas *(fallan recién al consultarlas)* | seguro | [[Clase 06 - Vistas-Parte 1]] slide 7 |
 | **`CREATE MATERIALIZED VIEW … WITH [NO] DATA`** | **no existe.** *"MySQL no admite las vistas materializadas"* — **lo dice el propio slide 20**. (atención) Precisión sobre la sintaxis, corrida en MySQL 9.7.2: `CREATE MATERIALIZED VIEW v AS SELECT …` **sin** cláusula final **se acepta**, pero crea una vista común que no materializa *(`TABLE_TYPE = VIEW`, `IS_UPDATABLE = NO`, el `SELECT` refleja al instante los `INSERT` sobre la tabla base; `SHOW CREATE VIEW` muestra `MATERIALIZED /*(BY ENGINE=UNKNOWN)*/`)*. Con `WITH DATA` o `WITH NO DATA` → `ERROR 1064`; con `WITH LOCAL CHECK OPTION` → `ERROR 1368 … CHECK OPTION on non-updatable view` | **confirmado** — corrida real en 9.7.2 | [[Clase 07 - Vistas-Parte 2]] slides 20–21 · [[Final 1Dic2023]] § *Pregunta 3* |
-| `REFRESH MATERIALIZED VIEW v;` *(**no está en el deck**: `REFRESH` no aparece en ninguno de los 22 slides. Es la contraparte PostgreSQL del "se debe actualizar manualmente la vista materializada" que dice la tabla del slide 20)* | **no existe** (no hay qué refrescar) | **razonamiento propio** | — |
+| `REFRESH MATERIALIZED VIEW v;` *(**no está en el deck**: `REFRESH` no aparece en ninguno de los 22 slides. Es la contraparte PostgreSQL del "se debe actualizar manualmente la vista materializada" que dice la tabla del slide 20)* | **no existe** (no hay qué refrescar): `ERROR 1064 (42000) … near 'REFRESH MATERIALIZED VIEW mv'` | **confirmado** — corrida real en 9.7.2 (base `propu1`), sobre una `mv` creada con `CREATE MATERIALIZED VIEW` que recalcula al vuelo (30 → 60 tras un `INSERT`) y cuyo `SHOW CREATE VIEW` devuelve ``CREATE ALGORITHM=UNDEFINED MATERIALIZED /*(BY ENGINE=UNKNOWN)*/ … VIEW `mv` AS select sum(…)`` | [[Parcial 1Q2026]] P32 |
 | Trigger **`INSTEAD OF`** sobre una vista, con `:new.columna` | **no existe**: MySQL solo admite `BEFORE`/`AFTER` y **solo sobre tablas**. El sustituto es un *stored procedure* o escribir contra las tablas base | **verificar** — razonamiento propio | [[Clase 07 - Vistas-Parte 2]] slides 11–12 |
 | `WITH [LOCAL\|CASCADED] CHECK OPTION` | existe en MySQL | seguro | [[Clase 06 - Vistas-Parte 1]] slides 4 y 15 *(ejemplos: 16–17)* · [[Clase 07 - Vistas-Parte 2]] slide 2 |
 
@@ -428,6 +430,8 @@ usar ([[Práctica 2026-08-18]]):
 | --- | --- | --- |
 | `EXPLAIN consulta` | `EXPLAIN consulta` (también `DESCRIBE` / `DESC`) | seguro |
 | `EXPLAIN ANALYZE consulta` | existe, con salida en formato árbol — **el enunciado del TP5 lo usa sobre MySQL sin aclarar nada**, dándolo por disponible en 9.7 | existe: **seguro** · **desde qué versión: `verificar`** |
+| `EXPLAIN ANALYZE` sobre una escritura *(en PostgreSQL **escribe**: de ahí el `BEGIN … ROLLBACK` del slide 1)* | (atención) **no modifica datos**: `DELETE`/`UPDATE` de una tabla → `-> <not executable by iterator executor>`; en la forma multitabla recorre el ensamble y el nodo `Delete`/`Update` informa `rows=0`; `INSERT … SELECT` ejecuta el `SELECT` y no inserta. `EXPLAIN ANALYZE CREATE TABLE … AS SELECT …` → `ERROR 1064` | **confirmado** — corrida real en 9.7.2 (base `propu1`; la tabla conserva sus filas en todos los casos) → [[1.08.01 - Plan de ejecución\|Plan de ejecución]] § *PostgreSQL vs. MySQL* |
+| `Index Scan` con clave única, en un ensamble | `Single-row index lookup` en el árbol y `type = eq_ref` en la tabla clásica, **igual con PK que con `UNIQUE` nulable** y con el mismo costo; con un índice no único, `Index lookup` y `type = ref`; sin índice, `Inner hash join` | **confirmado** — corrida real en 9.7.2 (base `propu1`) → [[1.08.02 - Índices\|Índices]] § *Índices en MySQL* |
 | — | `EXPLAIN FORMAT=JSON` (trae `query_cost`) y `EXPLAIN FORMAT=TREE` | seguro que existen; versión: **verificar** |
 | — | **`SET @@explain_format=TREE;`** — **variable de sesión, con dos `@`**: fija el formato árbol para toda la sesión en lugar de repetir `FORMAT=TREE` en cada sentencia | **seguro — es la primera sentencia del enunciado del TP5** |
 | `pg_class.relpages / reltuples` | `information_schema.TABLES` → `TABLE_ROWS`, `DATA_LENGTH`, `AVG_ROW_LENGTH`; también `SHOW TABLE STATUS` | seguro (en InnoDB `TABLE_ROWS` es **estimado**) |
@@ -511,7 +515,7 @@ sentencias declarativas que enseña, MySQL tiene una y media**.
 | **`SET DEFAULT`** | ✗ **InnoDB rechaza la definición de la tabla**: la parsea y la declara inválida | **alta** — verificar contra el manual 9.7 | Clase 09 slide 8 |
 | **`NO ACTION` vs. `RESTRICT`** | (atención) **InnoDB los trata igual.** No hay chequeo diferido, así que la distinción del slide 9 *("RESTRICT se chequea antes")* **no es observable** | **alta** — **confirmado con dos corridas reales** (25/09): un `DELETE` sobre la fila padre sin `ON DELETE` explícito lo rechaza con `ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails` en [[Parcial 2Q2025]] Pregunta 30, y de nuevo en el Ejercicio 2 RIR de [[Clase 09 - Restricciones integridad-Parte 1]] § *Material complementario del 25/08* (b), caso 6 | Clase 09 slides 9–10, 38 · [[Parcial 2Q2025]] Sección B |
 | Acción por defecto | `NO ACTION` — que en InnoDB **es** `RESTRICT` | alta — confirmado (ver fila anterior) | Clase 09 slide 9 |
-| **`MATCH FULL \| PARTIAL \| SIMPLE`** | (atención) **se parsea y se ignora**: InnoDB siempre se comporta como **`MATCH SIMPLE`** | **confirmado con corrida real** (25/09): un `INSERT` con un componente `NULL` de una FK compuesta procede sin error aunque el otro componente no exista en la tabla referenciada — [[Parcial 2Q2025]] Pregunta 19, `INSERT INTO Materia (…) VALUES ('M4', 3, null, 'nom4');` sobre `idCarr=3` inexistente, sin `ERROR`. Coincide con [[1.09.02 - Integridad referencial y acciones referenciales\|Integridad referencial]] § *Tipos de matching* | Clase 09 slides 12–14 · [[Parcial 2Q2025]] Sección B |
+| **`MATCH FULL \| PARTIAL \| SIMPLE`** | (atención) **se parsea y se ignora**: InnoDB siempre se comporta como **`MATCH SIMPLE`** | **confirmado con corrida real** (25/09): un `INSERT` con un componente `NULL` de una FK compuesta procede sin error aunque el otro componente no exista en la tabla referenciada — [[Parcial 2Q2025]] Pregunta 19, `INSERT INTO Materia (…) VALUES ('M4', 3, null, 'nom4');` sobre `idCarr=3` inexistente, sin `ERROR`. Coincide con [[1.09.02 - Integridad referencial y acciones referenciales\|Integridad referencial]] § *Tipos de matching*. (atención) **Se registra, pero no se aplica** (corrida real en 9.7.2, base `propu1`): con `MATCH FULL` declarado, `SHOW CREATE TABLE` omite la cláusula, `information_schema.REFERENTIAL_CONSTRAINTS` guarda `MATCH_OPTION = FULL` (`PARTIAL` si se declara así, `NONE` si no se declara), el `INSERT` de `(3, NULL)` procede igual y las acciones de la FK (`ON DELETE RESTRICT` → `ERROR 1451`, `ON UPDATE CASCADE`) siguen vigentes | Clase 09 slides 12–14 · [[Parcial 2Q2025]] Sección B · [[Parcial 1Q2026]] P21 |
 | Chequeo diferido (`SET CONSTRAINTS … DEFERRED`) | ✗ **no existe**: todo es inmediato | seguro | Clase 09 slide 38, paso 3 |
 | `ALTER TABLE t ADD CONSTRAINT n FOREIGN KEY …` | **igual** | seguro | Clase 09 slide 8 · TP6 ej. 1.a |
 | Eliminar una FK | `ALTER TABLE t DROP **FOREIGN KEY** n;` — **no** `DROP CONSTRAINT` | seguro | `esq_peliculas.sql` |
@@ -531,7 +535,7 @@ sentencias declarativas que enseña, MySQL tiene una y media**.
 | Del material | En **MySQL** | Certeza | De dónde salió |
 | --- | --- | --- | --- |
 | `CHECK (condición)` de columna o de tupla | ✓ **existe, y se hace cumplir desde 8.0.16** *(abril 2019)*. **Antes se parseaba y se ignoraba en silencio** — la restricción parecía estar y no hacía nada. La cursada corre **9.7**, así que sí se cumplen | seguro | Clase 09 slides 17–21 |
-| `CHECK` con **subconsulta** | ✗ **prohibido.** Cae todo `CHECK` de ámbito **tabla** — y **no es una carencia de MySQL**: el slide 17 de la Clase 10 dice que *"Postgres no permite un `select` dentro de un constraint"*, así que **no lo tiene ningún motor** | alta — **verificar el ancla del manual** · **la mitad PostgreSQL la dice el deck** | Clase 09 slide 22 · **Clase 10 slide 17** · TP6 3.A.4 y 3.B.6 |
+| `CHECK` con **subconsulta** | ✗ **prohibido.** Cae todo `CHECK` de ámbito **tabla** — y **no es una carencia de MySQL**: el slide 17 de la Clase 10 dice que *"Postgres no permite un `select` dentro de un constraint"*, así que **no lo tiene ningún motor**. (atención) **Tres mensajes distintos**, según la forma de la subconsulta: con agregación (el `CHECK` de tabla del slide 22, o `sueldo < (SELECT MAX(sueldo) …)`) → `ERROR 1111 (HY000): Invalid use of group function`; sin agregación → `ERROR 3815 (HY000): An expression of a check constraint '…' contains disallowed function.`; si nombra la tabla que el `CREATE TABLE` está creando → `ERROR 1146 (42S02): Table '…' doesn't exist` | **confirmado** — corrida real en 9.7.2 (base `propu1`) → [[1.09.03 - CHECK, DOMAIN y ASSERTION\|CHECK, DOMAIN y ASSERTION]] § *En MySQL* · el ancla del manual sigue sin verificar · **la mitad PostgreSQL la dice el deck** | Clase 09 slide 22 · **Clase 10 slide 17** · TP6 3.A.4 y 3.B.6 · [[Recuperatorio 1Q2026]] P8 |
 | `CHECK` con funciones **no determinísticas** *(`NOW()`, `RAND()`, `CURRENT_DATE`)* | ✗ prohibido. `YEAR()` y `EXTRACT()` **sí** valen | alta | TP6 3.A.2 y 3.A.3 |
 | **`CREATE DOMAIN`** | ✗ **no existe.** Sustitutos: el tipo **`ENUM`** *(para el caso `IN (…)`)* o repetir el `CHECK` en cada columna | seguro | Clase 09 slides 17 y 19 |
 | **`CREATE ASSERTION`** | ✗ **no existe** *(ningún motor la tiene — lo dicen **los dos** decks: Clase 09 slide 23, y Clase 10 slide 18 textual: "**Ninguna base de datos comercial implementa Assertions**")* | seguro, dicho por el deck **dos veces** | Clase 09 slides 23–24 · **Clase 10 slide 18** |
@@ -802,6 +806,26 @@ OPTION` por privilegio, `REVOKE … CASCADE`, `PUBLIC`— contra lo que MySQL ha
 > faltaba una cláusula, acá el modelo de autorización es otro—. La respuesta recomendada es la que
 > ya practican tres TPs: dos párrafos rotulados, la teoría y MySQL, nombrando la brecha.
 
+> [!bug] `SHOW GRANTS` muestra un `UPDATE` que no existe — corrida real en 9.7.2 (base `propu1`)
+> Un `GRANT` a **varias cuentas en una sola sentencia**, cuando la primera ya tenía un privilegio por
+> columna, deja en las demás una marca de columna vacía:
+>
+> ```sql
+> GRANT UPDATE (x) ON propu1.tg TO 'propu1_a'@'localhost';
+> GRANT SELECT ON propu1.tg TO 'propu1_a'@'localhost', 'propu1_b'@'localhost';
+> SHOW GRANTS FOR 'propu1_b'@'localhost';   -- GRANT SELECT, UPDATE ON `propu1`.`tg` TO …
+> -- mysql.tables_priv:   propu1_b | Table_priv = Select | Column_priv = Update
+> -- mysql.columns_priv:  solo propu1_a | x | Update
+> [propu1_b] UPDATE propu1.tg SET y = 2;
+> ERROR 1143 (42000): UPDATE command denied to user 'propu1_b'@'localhost' for column 'y' in table 'tg'
+> ```
+>
+> Con un `GRANT SELECT` por cuenta, la marca no aparece. Es la rareza (3) de la P3 del
+> [[Parcial 1Q2026]]: *"`SHOW GRANTS` no basta para decidir quién puede qué"*; hay que mirar
+> `mysql.columns_priv` o probar con la cuenta. En la misma corrida, `REVOKE … CASCADE` volvió a dar
+> `ERROR 1064 (42000): … near 'CASCADE'` (fila *Revocar*). Detalle en
+> [[1.11.02 - Usuarios, privilegios y roles|Usuarios, privilegios y roles]] § *7.1*.
+
 #### 7.2 · Lo mínimo que hay que tipear para el TP8, en orden
 
 Propuesta propia, armada sobre el § *Setup* de [[Práctica 2026-09-08]]; **no se ejecutó en el
@@ -882,7 +906,7 @@ SELECT User, Host, Db, Table_name, Column_name, Column_priv FROM mysql.columns_p
 | *(no dice cómo se cambia)* | **`SET TRANSACTION ISOLATION LEVEL nivel;`** → sólo la **próxima** transacción · **`SET SESSION TRANSACTION ISOLATION LEVEL …`** → toda la sesión · **`SET GLOBAL …`** → sesiones nuevas | manual **§ 15.3.7** |
 | *(no dice cómo se consulta)* | **`SELECT @@SESSION.transaction_isolation;`** · `SELECT @@GLOBAL.transaction_isolation;` — devuelve `REPEATABLE-READ` con guion | manual **§ 15.3.7** — **confirmado en el contenedor**, corrida real (25/09) en MySQL 9.7.2: `SELECT @@transaction_isolation;` → `REPEATABLE-READ`, ver § *8.5* |
 | *"Exclusive Lock: Nadie más puede leer ni modificar el dato"* *(slide 25)* | (crítico) **Falso en InnoDB para los `SELECT` comunes.** InnoDB es **multiversión**: guarda versiones previas de las filas para construir lecturas consistentes. Un `SELECT` sin `FOR UPDATE` **no pide bloqueo**: **los lectores no bloquean a los escritores ni al revés**. El modelo del slide es el de GMUW 18.4, no el del motor de la cursada | manual **§ 17.3 *InnoDB Multi-Versioning*** · [[Clase 11 - Seguridad-Transacciones]] § *Slide 25* |
-| *"Repeatable Read … no previene las lecturas fantasma"* | (nota) **En la práctica, para las lecturas consistentes, InnoDB no las muestra**: lee la instantánea de la primera lectura de la transacción. Si el parcial pregunta *"según la teoría"*, vale el slide; si pregunta *"en MySQL"*, la respuesta es la contraria — el mismo patrón del `FOR EACH STATEMENT` del TP7. Para **lecturas con bloqueo, `UPDATE` y `DELETE`**, la misma sección agrega *gap locks* / *next-key locks* que bloquean inserciones de otras sesiones en el rango escaneado | manual **§ 17.7.2.1**. Sin verificar quedan § 17.7.1 *InnoDB Locking* y § 17.7.4 *Phantom Rows* |
+| *"Repeatable Read … no previene las lecturas fantasma"* | (nota) **En la práctica, para las lecturas consistentes, InnoDB no las muestra**: lee la instantánea de la primera lectura de la transacción. Si el parcial pregunta *"según la teoría"*, vale el slide; si pregunta *"en MySQL"*, la respuesta es la contraria — el mismo patrón del `FOR EACH STATEMENT` del TP7. Para **lecturas con bloqueo, `UPDATE` y `DELETE`**, la misma sección agrega *gap locks* / *next-key locks* que bloquean inserciones de otras sesiones en el rango escaneado. ✓ **Corrida real en 9.7.2** (base `propu1`, el *schedule* de la P23 del [[Parcial 1Q2026]]): `COUNT(*)` 2 → 3 en `READ COMMITTED`, 2 → 2 en `REPEATABLE READ`, 2 → 2 en `SERIALIZABLE` con el `INSERT` ajeno en espera hasta el `COMMIT`; en `REPEATABLE READ`, una segunda lectura `FOR SHARE` después de una común ve 3, y si la primera ya es `FOR SHARE`, el `INSERT` espera. (atención) El docente corrigió esa pregunta con el estándar: *"phantom read/serializable"* | manual **§ 17.7.2.1** · [[1.11.04 - Control de concurrencia y niveles de aislamiento\|Control de concurrencia]] § *6.2*. Sin verificar quedan § 17.7.1 *InnoDB Locking* y § 17.7.4 *Phantom Rows* |
 | *"Serializable: … tratando las transacciones como si fueran serializadas"* | en InnoDB **convierte cada `SELECT` común en `SELECT … FOR SHARE`** si `autocommit` está desactivado: es el único nivel donde **leer bloquea** | manual **§ 17.7.2.1** |
 | *(el slide 15 lista "control de la concurrencia" como fallo, sin nombrar deadlocks)* | InnoDB **detecta el deadlock y aborta una** de las transacciones con **`ERROR 1213 (40001): Deadlock found when trying to get lock; try restarting transaction`** *(`ER_LOCK_DEADLOCK`)* | *MySQL Error Reference 9.7* · cuál transacción se elige *("la que hizo menos trabajo")*: sin verificar |
 
@@ -1023,7 +1047,7 @@ Las dos URLs y los dos títulos de ancla salen de las anotaciones del PDF del TP
 > | **17.7.2.1** | *Transaction Isolation Levels* | `REPEATABLE READ` por defecto, instantánea, `SERIALIZABLE` → `FOR SHARE` |
 > | **17.7.2.4** | *Locking Reads* | `FOR UPDATE`, `FOR SHARE`, `NOWAIT`, `SKIP LOCKED` |
 > | **15.1.18** | *CREATE INDEX Statement* | *Table 15.1 Index Types Per Storage Engine*: InnoDB sólo `BTREE` |
-> | — | *MySQL Error Reference 9.7* › *Server Error Message Reference* | errores **1410**, **1141**, **1147**, **1213**, **1175** *(el **3523** quedó fuera de la parte visible; confirmado con corrida real → § *Dudas abiertas*)*; **confirmados con corrida real** (25/09, ver §§ *5* y *7.1* y [[Parcial 2Q2025]]): **1064** *(error de sintaxis, `REVOKE … CASCADE`)*, **1369** *(`CHECK OPTION failed`)*, **1451** *(FK: borrar/actualizar fila padre)*, **1062** *(entrada duplicada de PK/UNIQUE)*, **1471** *(`INSERT` sobre vista no insertable)*, **3819** *(`CHECK constraint … is violated`)* |
+> | — | *MySQL Error Reference 9.7* › *Server Error Message Reference* | errores **1410**, **1141**, **1147**, **1213**, **1175** *(el **3523** quedó fuera de la parte visible; confirmado con corrida real → § *Dudas abiertas*)*; **confirmados con corrida real** (25/09, ver §§ *5* y *7.1* y [[Parcial 2Q2025]]): **1064** *(error de sintaxis, `REVOKE … CASCADE`)*, **1369** *(`CHECK OPTION failed`)*, **1451** *(FK: borrar/actualizar fila padre)*, **1062** *(entrada duplicada de PK/UNIQUE)*, **1471** *(`INSERT` sobre vista no insertable)*, **3819** *(`CHECK constraint … is violated`)*; **confirmados con corrida real** (29/09, base `propu1`): **1305** *(función inexistente: `age`, `to_date`)*, **1146** *(tabla inexistente, también por mayúsculas con `lower_case_table_names = 0`)*, **1111** y **3815** *(`CHECK` con subconsulta, con y sin agregación)*, **1393** y **1395** *(escritura sobre dos tablas y `DELETE` en una vista de ensamble)*, **1143** *(`UPDATE` denegado por columna)*, **1452** *(FK: fila hija sin padre)* |
 >
 > | **15.7.7.24** | *SHOW GRANTS Statement* | *(abierta el **18/09**)* la marca `Grant` aparece como sufijo `WITH GRANT OPTION` de cada línea |
 > | **17.4** | *InnoDB Architecture* | *(abierta el **25/09**, § *8.5*)* redo log, undo log, doublewrite buffer, binlog — el mapa de los cuatro mecanismos |
@@ -1068,6 +1092,9 @@ Las dos URLs y los dos títulos de ancla salen de las anotaciones del PDF del TP
   `ROLLBACK`** y además cierra la transacción abierta. En PostgreSQL el DDL **sí** es transaccional.
   Consecuencia directa: el truco `BEGIN; EXPLAIN ANALYZE CREATE TABLE AS …; ROLLBACK;` que propone el
   slide 1 del deck de explain plan **no funciona en MySQL** → [[Clase 08 - Explicando el plan]].
+  *(En 9.7.2 ni siquiera compila: `EXPLAIN ANALYZE CREATE TABLE … AS SELECT …` da `ERROR 1064`; y para
+  el DML el truco sobra, porque `EXPLAIN ANALYZE` no modifica datos → § *4*. Corrida real, base
+  `propu1`.)*
   *(Verificado contra manual 9.7 § 15.3.3 *Statements That Cause an Implicit Commit*; la lista
   incluye también `CREATE USER`, `GRANT` y `REVOKE` → § *7.2* y § *8.1*.)*
 
@@ -1105,6 +1132,17 @@ deck `BD2_Clase 07`. Transcripción completa y comparación con las condiciones 
 subconsulta en el `WHERE` que referencia una tabla del `FROM`, referencia solo a literales,
 `ALGORITHM = TEMPTABLE`, y múltiples referencias a la misma columna base (esto último solo rompe el
 `INSERT`).
+
+> [!warning] (atención) El ítem *joins* del slide 13, contra el motor
+> Corrida real en 9.7.2 (base `propu1`) con una vista de ensamble **sin agregación** (`emp ⋈ depto`):
+> `information_schema.VIEWS` la marca `IS_UPDATABLE = YES`; un `UPDATE` o un `INSERT` que tocan **una
+> sola** tabla base proceden (`ROW_COUNT() = 1`); tocar columnas de las dos en una sentencia da
+> `ERROR 1393 (HY000): Can not modify more than one base table through a join view`, y cualquier
+> `DELETE`, `ERROR 1395 (HY000): Can not delete from join view`. El `JOIN` impide el `DELETE` y la
+> escritura sobre dos tablas, no toda escritura; lo que vuelve no actualizable a una vista para
+> cualquier operación es la agregación (`GROUP BY`, funciones de agregado). Detalle en
+> [[1.06.01 - Vistas|Vistas]] § *Tabla de decisión*; es la justificación de la P22 del
+> [[Parcial 1Q2026]].
 
 > [!tip] El mensaje real cuando MySQL rechaza el `INSERT`
 > Confirmado con corrida real (25/09, [[Parcial 2Q2025]] Pregunta 27) sobre una vista con `GROUP BY`
@@ -1173,10 +1211,13 @@ SHOW TABLE STATUS;  -- filas estimadas, tamaño
   `GRANT ALL ON *.* … WITH GRANT OPTION` es la forma habitual de crear un administrador, pero la
   Table 8.2 no lo nombra explícitamente entre los niveles de `GRANT OPTION`. Probarlo es más barato
   que seguir leyendo.
-- [ ] (atención) **¿`REPEATABLE READ` de InnoDB evita los phantoms para lo que pregunta la cátedra?**
+- [x] ~~(atención) **¿`REPEATABLE READ` de InnoDB evita los phantoms para lo que pregunta la cátedra?**
   El slide 28 dice que no (estándar); el manual dice que las lecturas consistentes leen la
   instantánea de la primera lectura. Si el parcial pide "nivel mínimo que evita phantoms", el
-  slide responde `SERIALIZABLE` y MySQL, `REPEATABLE READ`.
+  slide responde `SERIALIZABLE` y MySQL, `REPEATABLE READ`.~~ **Cerrado.** Lo que corrige la
+  cátedra: en la P23 del [[Parcial 1Q2026]] el docente comentó *"phantom read/serializable"*, así que
+  vale el estándar. El motor, verificado en 9.7.2: `REPEATABLE READ` evita el fantasma en lecturas
+  consistentes y no en una lectura con bloqueo posterior (§ *8.2*).
 - [ ] **¿Vale `BEGIN` o hay que escribir `START TRANSACTION` en el parcial?** Dentro de un *stored
   program* solo la segunda vale (manual § 15.3.1); el único ejemplo del deck que corre en MySQL
   (slide 30) usa `BEGIN` y está rotulado PostgreSQL.
@@ -1195,6 +1236,34 @@ SHOW TABLE STATUS;  -- filas estimadas, tamaño
 - [x] ~~¿El TP4 pide una vista materializada?~~ **No**: ninguno de sus cinco ejercicios la toca →
   [[Práctica 2026-08-11]].
 - [ ] ¿Entra `TRUNCATE TABLE`, que no menciona ningún deck?
+
+## En los exámenes
+
+Preguntas donde el comportamiento de MySQL 9.7.2 cambia, matiza o impide ejecutar lo que dice el
+enunciado. La respuesta de examen sigue siendo la de cada página; esta tabla junta lo que es del motor.
+
+| Examen | Pregunta | Qué pasa en MySQL 9.7.2 | Dónde |
+| --- | --- | --- | --- |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P1 — `EXPLAIN ANALYZE` | Ejecuta el `SELECT` y da `actual time` por iterador, sin *"tiempo de planificación"* (eso es PostgreSQL). Sobre una escritura no modifica datos | § *4* · [[1.08.01 - Plan de ejecución\|Plan de ejecución]] |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P3 — cadena `GRANT`/`REVOKE … CASCADE` | `GRANT … ON IJ, IH` y `REVOKE … CASCADE` dan `ERROR 1064`; `IS` es palabra reservada; `SHOW GRANTS` muestra un `UPDATE` que la cuenta no tiene | § *7.1* |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P4, P5 y P30 — `INSERT` por vistas con `CHECK OPTION` | `to_date` no existe (`ERROR 1305`); con `STR_TO_DATE`, las respuestas del estándar se confirman (`ERROR 1369` en P5 y P30) | § *2* · [[1.06.01 - Vistas\|Vistas]] |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P19 — `UPDATE carrera …` | Con `lower_case_table_names = 0`, `carrera` no es `Carrera` (`ERROR 1146`); con el nombre correcto, `ERROR 1062` por la PK | § *2* · [[1.09.02 - Integridad referencial y acciones referenciales\|Integridad referencial]] |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P21 — `MATCH simple` | InnoDB acepta `MATCH FULL`, lo registra en `REFERENTIAL_CONSTRAINTS` y no lo aplica: en MySQL también sería cierta *"Procede"* | § *5.1* |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P22 — `ConstructorVIP` | No actualizable por la agregación; el `JOIN` solo impide el `DELETE` (`ERROR 1395`) y escribir dos tablas (`ERROR 1393`) | § *Cuándo una vista en MySQL no es actualizable* |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P23 — *phantom read* | `REPEATABLE READ` ya lo evita en lecturas consistentes; la respuesta que puntuó el docente es `SERIALIZABLE` | § *8.2* |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P29 — leer un `EXPLAIN` | `Single-row index lookup` / `eq_ref` con PK o con `UNIQUE` nulable, mismo costo | § *4* · [[1.08.02 - Índices\|Índices]] |
+| ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | P32 — vista materializada | `CREATE MATERIALIZED VIEW` se acepta y no materializa; `REFRESH MATERIALIZED VIEW` da `ERROR 1064` | § *3* |
+| ★★ [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] | P1 — subconsulta correlacionada | `age()` no existe (`ERROR 1305`): `TIMESTAMPDIFF(YEAR, …, CURDATE())` | § *2* |
+| ★★ [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] | P4 — `NOT IN` con `NULL` | La consulta en minúscula (`jugo`) falla con `ERROR 1146` sobre tablas creadas en mayúscula | § *2* |
+| ★★ [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] | P5 y P6 — vistas `LOCAL` y `CASCADED` | `to_date` no existe; con la fecha corregida, P5 procede y P6 da `ERROR 1369` (la corrección del docente contra la clave automática) | § *2* · [[1.06.01 - Vistas\|Vistas]] |
+| ★★ [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] | P7 — índice hash para `UserID` | `USING HASH` sobre InnoDB se acepta con la nota 3502 y crea `BTREE` | § *8.4* |
+| ★★ [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] | P3 y P8 — `ASSERTION` y restricción de tabla | `CREATE ASSERTION` da `ERROR 1064`; el `CHECK` con subconsulta, `1111`, `3815` o `1146` según la forma: todo va a triggers | § *5.2* |
+| [[Parcial 2Q2025\|Parcial 2Q2025]] | Secciones A, B y E | vistas con `CHECK OPTION`, acciones referenciales, `MATCH simple`, `CHECK` sobre datos existentes, `REVOKE … CASCADE` | §§ *2*, *5* y *7* |
+
+★★ marca las dos instancias de 1C 2026, las de mayor peso para ejercitar el parcial. Los enunciados
+dicen *"en MySQL"* pero arrastran sintaxis de otros motores (`to_date`, `age`) y mezclan mayúsculas en
+los nombres de tabla: el examen se resuelve en papel y da esas diferencias por equivalentes, y la
+corrida en el motor es el argumento cuando la clave de la plataforma no coincide (recuperatorio P6).
 
 ## Enlaces
 
@@ -1225,7 +1294,8 @@ SHOW TABLE STATUS;  -- filas estimadas, tamaño
   ajeno: son [[MongoDB]])*
 - Exámenes con corridas reales que confirman esta página: [[Parcial 2Q2025]] *(vistas con `CHECK
   OPTION`, acciones referenciales, `MATCH simple`, `EXPLAIN`/`EXPLAIN ANALYZE`, `CHECK` de tabla,
-  actualizabilidad de vistas — §§ 2, 5, 8)*
+  actualizabilidad de vistas — §§ 2, 5, 8)* · [[Parcial 1Q2026]] y [[Recuperatorio 1Q2026]]
+  *(los de mayor peso: § En los exámenes)*
 - Conceptos: [[DDL vs DML]] · [[1.06.01 - Vistas|Vistas]] · [[1.08.02 - Índices|Índices]] · [[1.08.01 - Plan de ejecución|Plan de ejecución]] ·
   [[Restricciones de integridad]] · [[1.11.03 - Transacciones y ACID|Transacciones ACID]] · [[Sintaxis MySQL vs PostgreSQL]] ·
   [[1.09.04 - Triggers|Triggers]] ·

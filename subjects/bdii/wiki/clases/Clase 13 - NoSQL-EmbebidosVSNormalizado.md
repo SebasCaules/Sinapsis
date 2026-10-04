@@ -1136,6 +1136,9 @@ bordes.
     desventajas del embebido) confirma que el tema se evalúa. Su solucionario de estudiantes manda a
     usar referencias en *"relaciones N-N"*, pero no dice **cómo** referenciar un N:M: ni arreglo en
     los dos lados ni colección intermedia. La forma sigue sin respuesta.
+  - (nota) ★★ El mismo ensayo es la Pregunta 20 del [[Parcial 1Q2026]]: una sola ventaja sacó 1/6. La
+    resolución de esa página da lo que suma (ventajas, desventajas y el criterio: referenciar en N:M);
+    cómo referenciar un N:M sigue sin respuesta de la cátedra.
 - [ ] **Integridad referencial.** Nadie valida `user_id` / `publisher_id`. ¿El TPO maneja huérfanos
   desde la aplicación? ¿Se menciona el *schema validation* *(`$jsonSchema`)* en alguna clase?
 - [x] ~~**El resultado recortado del slide 24.** Verificar en `mongosh` con los datos del slide 22 que
@@ -1153,6 +1156,8 @@ bordes.
 - [ ] **`Sort`, `Match`, `Unwind`, `Project` y `Group`.** Confirmar que la
   [[Clase 14 - MongoDB Features]] las desarrolla *(su texto extraído tiene `aggregate` con
   `$match`)*. Si tampoco trae `$unwind`, es un hueco de la cursada, no del deck.
+  - (nota) ★★ Entra al examen aunque el deck no lo desarrolle: la Pregunta 13 del
+    [[Recuperatorio 1Q2026]] pide traducir un `JOIN` a `$lookup` + `$unwind` + `$sort`.
 - [ ] **El esquema `cliente` del slide 26.** No está en el [[Práctica 2026-09-15|TP9]] ni en la
   *Consigna MONGO DB*. ¿`nro_cliente` existe como campo *(proyección incompleta)* o es el `_id`
   *(bien por accidente)*?
@@ -1198,4 +1203,5 @@ bordes.
 - Índices: [[_index-clases]] · bibliografía: [[_index-bibliografia]] · calendario: [[_cronograma]]
   · catálogo: [[index]] · reglas: [[CLAUDE]].
 - Exámenes viejos: [[Mapa de exámenes|Mapa de exámenes]] · embebido vs. no embebido en [[Parcial 2Q2025|Parcial 2Q2025]] § *Sección G*
-  (Pregunta 31).
+  (Pregunta 31) · ★★ [[Parcial 1Q2026]] § *Pregunta 20* · `$lookup` y `$unwind` en [[Recuperatorio 1Q2026]]
+  § *Pregunta 13*.

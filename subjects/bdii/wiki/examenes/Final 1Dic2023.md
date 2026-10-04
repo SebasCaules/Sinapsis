@@ -115,6 +115,25 @@ Cassandra no aparece en esa tabla del libro (no está entre los siete motores qu
 se puede confirmar ni descartar por esta fuente, pero tampoco es una de las opciones que sobreviven
 igual: A incluye a MongoDB, que el libro marca explícitamente "No". La fuente acierta con C.
 
+(nota) **Cassandra tampoco versiona**, y ya hay con qué afirmarlo. El slide 54 de la [[Clase 15 - Introduccion a Cassandra|Clase 15]]
+(dictada el 28/09) dice que el *timestamp* se usa para resolver conflictos, y la documentación oficial
+describe el criterio como *last write wins* (cita en [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en
+Cassandra]] § 8). En Cassandra 5.0.9 (keyspace `examviejos`), dos escrituras sobre la misma fila, la
+segunda con un *timestamp* menor:
+
+```
+INSERT INTO versiones (id, v) VALUES (1, 'con-ts-2000') USING TIMESTAMP 2000;
+INSERT INTO versiones (id, v) VALUES (1, 'con-ts-1000') USING TIMESTAMP 1000;
+SELECT id, v, WRITETIME(v) FROM versiones WHERE id = 1;
+ id | v           | writetime(v)
+----+-------------+--------------
+  1 | con-ts-2000 |         2000
+```
+
+Gana la de mayor *timestamp* y de la otra no queda versión que consultar. La opción A cae por los dos
+motores; HBase, en cambio, conserva varias versiones por celda (*Seven Databases* 2ª ed. cap. 3,
+impresa 61: *"versioning is baked right in!"*) → [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] § 2.1.
+
 ### Pregunta 3 — vistas materializadas de PostgreSQL
 
 > Decidir si las siguientes afirmaciones son verdaderas o falsas, y justificarlas en este último
@@ -180,6 +199,11 @@ engañoso. Si el parcial 2026 pregunta por vistas materializadas en MySQL, la re
 esta corrida es que **MySQL no ofrece vistas materializadas funcionales**, aunque la sintaxis exista y
 no tire error.
 
+(nota) ★★ El [[Parcial 1Q2026]] (Pregunta 32) la preguntó sin nombrar motor —la vista materializada
+*"trae mejoras en la performance vs. ejecutar el mismo select"*— y la clave fue **Verdadero**: la
+afirmación A de aquí. Si la consigna no dice MySQL, manda la teoría general; si lo dice, vale lo de
+esta corrida.
+
 ### Pregunta 4 — sintaxis para crear una tabla en HBase
 
 > Seleccionar la opción correcta. ¿Cuál es la sentencia para crear la siguiente tabla "formas"? (no
@@ -235,10 +259,31 @@ que dio para el final anterior: A y B verdaderas, C falsa.
 
 **Resolución del vault:** ver [[Final 1Jul2025]] § Pregunta 6, que desarrolla la respuesta completa
 —con la cita a la documentación oficial de Redis Sentinel sobre quorum y elección de líder— para no
-duplicarla acá.
+duplicarla acá. ★★ Las tres afirmaciones volvieron como V/F en el [[Recuperatorio 1Q2026]] (Preguntas 30–32),
+con las mismas claves: A Verdadero, B Verdadero, C Falso.
+
+## Relación con otras instancias
+
+### ★★ Con las instancias de 1C 2026
+
+| Pregunta del final | En 1C 2026 | Qué cambia · qué muestra la corrección |
+| --- | --- | --- |
+| 3 — vistas materializadas | [[Parcial 1Q2026]] P32 | la afirmación A, sin nombrar motor: clave Verdadero; el alumno marcó Falso (0/1) |
+| 5 — Redis Sentinel | [[Recuperatorio 1Q2026]] P30, P31 y P32 | las mismas tres afirmaciones como V/F: el administrador no inicia el failover (Falso), vigila master y réplicas (Verdadero), es proveedor de configuración (Verdadero) |
+
+Las preguntas 1, 2 y 4 no volvieron en 1C 2026.
+
+### Con las demás instancias
+
+La 1 es la Pregunta 5 del [[Final 1Jul2025]] y la 1 del [[Final 1Dic2025]]; la 5, la 6 del Final
+1Jul2025. La 2 y la 3 tienen gemelas en el [[Parcial 23-5-23 - Bases de Datos Avanzadas|Parcial
+23-5-23]] (Preguntas 24 y 29) y están resueltas por estudiantes en el [[Repaso Final BD 2]]
+(Ejercicios 27 y 28).
 
 ## Qué enseña para el parcial 2026
 
+- ★★ **En 1C 2026 volvieron dos preguntas de este final**: la vista materializada ([[Parcial 1Q2026]]
+  P32, clave Verdadero en teoría general) y Sentinel ([[Recuperatorio 1Q2026]] P30–P32, las mismas claves).
 - El hallazgo de esta página con más impacto directo en el parcial: `CREATE MATERIALIZED VIEW` **sí
   corre** en MySQL 9.7.2 (el motor de la cursada) pero **no materializa nada** — sigue siendo una
   vista común bajo otro nombre. Si el parcial pide "crear una vista materializada" en MySQL, la
@@ -265,4 +310,6 @@ duplicarla acá.
 [[Mapa de exámenes]] · [[Final 1Jul2025]] · [[Final 1Dic2025]] · [[_cronograma]] · [[_index-clases]] ·
 [[1.06.01 - Vistas|Vistas]] · [[2.12.04 - Teorema CAP|Teorema CAP]] ·
 [[2.12.05 - BASE y consistencia eventual|BASE y consistencia eventual]] · [[MySQL]] ·
-[[Clase 07 - Vistas-Parte 2]]
+[[Clase 07 - Vistas-Parte 2]] · [[Parcial 1Q2026]] · [[Recuperatorio 1Q2026]] · [[Repaso Final BD 2]] ·
+[[Parcial 23-5-23 - Bases de Datos Avanzadas|Parcial 23-5-23]] · [[Clase 15 - Introduccion a Cassandra]] ·
+[[Cassandra]] · [[3.15.01 - Bases de datos tabulares — familias de columnas y keyspaces|Bases de datos tabulares]] · [[3.15.04 - Escritura y lectura en Cassandra — commit log, MemTable, SSTable y compactación|Escritura y lectura en Cassandra]]

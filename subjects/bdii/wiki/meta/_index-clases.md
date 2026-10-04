@@ -1,6 +1,6 @@
 ---
 tipo: referencia
-resumen: "Registro de qué archivo de raw/ es de qué clase: las 14 teóricas con sus decks, el material sin número, las prácticas por fecha, los exámenes viejos, el reparto de unidades y punteros a dudas. La clase la numera la cátedra en el nombre del deck; la unidad se observa, no se predice."
+resumen: "Registro de qué archivo de raw/ es de qué clase: las 15 teóricas con sus decks, el material sin número, las prácticas por fecha, los exámenes viejos, el reparto de unidades y punteros a dudas. La clase la numera la cátedra en el nombre del deck; la unidad se observa, no se predice."
 formato: indice
 ---
 
@@ -18,14 +18,15 @@ usa cada página de exámenes *(cruzadas con el cronograma en
 Importa porque documenta el desfasaje de motor de la primera mitad: la cursada corre sobre
 **MySQL**, pero once de los trece primeros decks de la `Unidad-01` traen PostgreSQL, Oracle o
 T-SQL; la traducción vive en [[MySQL|MySQL]] y [[PostgreSQL|PostgreSQL]]. En la `Unidad-02`
-(MongoDB) el desfasaje es de shell y de versión.
+(MongoDB) el desfasaje es de shell y de versión; en la `Unidad-03` (Cassandra), de
+terminología de la era Thrift *(→ [[Cassandra|Cassandra]])*.
 
 Reglas clave: (1) el número de clase sale del nombre del deck, nunca del cronograma ni de la fecha;
 (2) una clase puede tener varios archivos —la 05 en tres partes, la 11 en dos decks el 07/09— sin
 dejar de ser una, salvo que la cátedra cambie el número (la "Parte 2" de la 09 fue la Clase 10);
 (3) varias clases pueden compartir fecha (01–05, el 03/08) o ser asincrónicas (la 05); (4) el reparto de unidades se observa,
-no se predice; (5) el material sin número —cuatro handouts del 14/09 y seis archivos de la
-`Unidad-01`— no son clases: se documentan en la clase que acompañan.
+no se predice; (5) el material sin número —cuatro handouts del 14/09, seis archivos de la `Unidad-01` y dos de
+la `Unidad-03`— no son clases: se documentan en la clase que acompañan.
 
 Para el parcial: qué deck usa qué motor ajeno, el método de la cátedra de dar la teoría en el
 estándar y avisar cuando MySQL no la soporta (TP6 a TP8), y las contradicciones internas de cada
@@ -42,8 +43,9 @@ Mapa de la cursada. Las **fuentes** viven en `raw/` (las cura el humano); las **
 > inventa ni la deduce el cronograma.
 > - **Unidad** — es la **carpeta de `raw/` donde se archivó**, y **agrupa varias clases**: hoy
 > `raw/Unidad-01/` tiene las **Clases 01 a 11** *(14 decks de teórica: la 05 va en tres partes y
-> la 11 en dos decks; más 6 archivos sin número de clase)*
-> y `raw/Unidad-02/` las **Clases 12 a 14** *(3 decks, más 4 handouts sin número de clase)*.
+> la 11 en dos decks; más 6 archivos sin número de clase)*,
+> `raw/Unidad-02/` las **Clases 12 a 14** *(3 decks, más 4 handouts sin número de clase)* y
+> `raw/Unidad-03/` la **Clase 15** *(1 deck, más 2 archivos sin número de clase)*.
 > Se decide al archivar; se registra después de verla.
 > - **Práctica** — **no se numera**: se identifica por **fecha**. La cátedra numera solo las
 > teóricas, así que cada práctica se titula por el martes en que se dio
@@ -79,10 +81,11 @@ clase corresponde cada uno o se pierde el dato. Para arrancar una nota hay plant
 
 ## Clases con material
 
-**Catorce** clases, **todas sintetizadas**: las **01 a 11** archivadas en `raw/Unidad-01/Teorica/`
+**Quince** clases, **todas sintetizadas**: las **01 a 11** archivadas en `raw/Unidad-01/Teorica/`
 *(14 decks: la 05 va en tres partes y la 11 en dos —`Clase 11` y `Clase 11(B)`—, más los 6 archivos
-sin número de clase de la tabla siguiente)* y las **12 a 14** en `raw/Unidad-02/Teorica/` *(3 decks,
-más los 4 handouts sin número de clase)*.
+sin número de clase de la tabla siguiente)*, las **12 a 14** en `raw/Unidad-02/Teorica/` *(3 decks,
+más los 4 handouts sin número de clase)* y la **15** en `raw/Unidad-03/Teorica/` *(1 deck, más 2
+archivos sin número de clase)*.
 
 | # | Unidad | Deck | Slides | Fecha | Tema | Síntesis |
 | --- | --- | --- | ---: | --- | --- | --- |
@@ -101,6 +104,7 @@ más los 4 handouts sin número de clase)*.
 | **12** | **U2** | `BD2_Clase 12 - Introduccion a NoSQL.pdf` | 52 | 14/09 | **Introducción a NoSQL** — por qué surge, propiedades, teorema CAP, BASE, taxonomía (clave-valor, documental, columnar, grafos) · **introducción a MongoDB**: arquitectura, CRUD en el shell, operadores, `aggregate`, `$lookup`, vistas | ✓ [[Clase 12 - Introduccion a NoSQL]] |
 | **13** | U2 | `BD2_Clase 13 - NoSQL-EmbebidosVSNormalizado(1).pdf` | 28 | 14/09 | **MongoDB: diseño del modelo de datos** — documentos embebidos vs. referencias, relaciones 1:1, 1:N y N:M, `$lookup`, `find` con proyección, `explain` | ✓ [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] *(el `(1)` es artefacto de descarga: se cae del nombre de la página, no del `deck:`)* |
 | **14** | U2 | `BD2_Clase 14 - MongoDB Features.pdf` | 45 | 14/09 | **MongoDB Features** — `ObjectId`, `mongosh` y herramientas de línea de comando, `mongoimport`, CRUD, índices, aggregation pipeline, **MapReduce**, `system.js`, pymongo, **replica sets** y **sharding** | ✓ [[Clase 14 - MongoDB Features]] *(incluye § *Material complementario del 14/09*: los 4 handouts)* |
+| **15** | **U3** | `BD2_Clase 15 - Introduccion a Cassandra.pdf` | 74 | 28/09 | **Introducción a Cassandra** *(portada: "Bases de Datos Tabulares")* — terminología RDBMS vs. tabular, arquitectura *peer-to-peer*, tokens, replicación y *gossip*, escritura *(commit log, MemTable, SSTable, compactación, tombstones, TTL)*, lectura *(direct, digest, read repair)*, niveles de consistencia y QUORUM, seguridad, modelo de datos *(columna, supercolumna, RowKey, keyspace, particionadores, índices)*, CQL: clave primaria, `ALLOW FILTERING`, vistas materializadas, funciones y *triggers* | ✓ [[Clase 15 - Introduccion a Cassandra]] *(incluye § *Material complementario*: handout de Bloom y diagrama del *digest*)* |
 
 > [!note] 14/09 — **tres clases en un solo lunes**, y el 07/09 **una clase con dos decks**
 > El cronograma tiene **una fila** para el 14/09 y la cátedra numeró **tres decks** para esa fila:
@@ -125,8 +129,8 @@ más los 4 handouts sin número de clase)*.
 
 ### Material sin número de clase
 
-Diez archivos de teórica **no son decks de clase**: seis de `raw/Unidad-01/Teorica/` y cuatro de
-`raw/Unidad-02/Teorica/`. Ninguno trae `BD2_Clase NN` en el nombre ni recibe página propia: cada uno
+Doce archivos de teórica **no son decks de clase**: seis de `raw/Unidad-01/Teorica/`, cuatro de
+`raw/Unidad-02/Teorica/` y dos de `raw/Unidad-03/Teorica/`. Ninguno trae `BD2_Clase NN` en el nombre ni recibe página propia: cada uno
 se documenta en la sección *Material complementario* de la clase que acompaña, y esta tabla es el
 único lugar donde queda escrito a qué clase se asignó.
 
@@ -287,11 +291,24 @@ complementario del 14/09*. **No son clases** y no reciben número.
 > (`clases: [8, 11]`). Siguen sin darse bitmap, índices multidimensionales, el criterio de selección
 > y el costo en escrituras.
 
+#### `Unidad-03`
+
+Dos archivos de `raw/Unidad-03/Teorica/` **no son decks de clase**: no traen `BD2_Clase NN` en el
+nombre. Se asignan a la **Clase 15** por tema y por carpeta *(la `Unidad-03` solo tiene esa clase y
+los dos explican bloques de su deck)*; si resultan ser de la teórica del 05/10 *(Conceptos teóricos de
+Cassandra)*, se reasignan.
+
+| Archivo (`raw/Unidad-03/Teorica/`) | Págs. | Qué es | Dónde está documentado |
+| --- | ---: | --- | --- |
+| `Slides_Bloom_Filters_Cassandra.pdf` | 8 | Handout *(export de Google Slides, sin autor ni fecha)* sobre los **filtros de Bloom** que el deck nombra en el slide 30: vector de bits y tres funciones *hash*; el ejemplo de Juan *(2, 5, 8)* y Pedro *(2, 4, 8)*; sin falsos negativos y con falsos positivos aceptables; cómo se descartan SSTables antes de leer | [[Clase 15 - Introduccion a Cassandra]] § *Material complementario* **(a)** |
+| `mecanismo de obtencion de resultados DIGEST (cassandra).png` | imagen 1536×1024 | Infografía de una lectura con RF 3: *direct read*, *digest request*, comparación, resolución por el *timestamp* mayor y reparación de lectura *(slides 40–43)*. Su último paso, la reparación **en segundo plano**, es anterior a Cassandra 4.0 | ídem **(b)** |
+
 ## Prácticas
 
 Indexadas **por fecha**, no por número: la cátedra no las numera. Las del 04/08 al 08/09 están en
 `raw/Unidad-01/Practica/`; la del **15/09** es la **primera de la `Unidad-02`**, en
-`raw/Unidad-02/Practica/`, y la del **22/09** es la segunda.
+`raw/Unidad-02/Practica/`, y la del **22/09** es la segunda. La del **29/09** es la **primera de la
+`Unidad-03`**, en `raw/Unidad-03/Practica/`.
 
 | Fecha | Material | TPs | Síntesis |
 | --- | --- | --- | --- |
@@ -303,6 +320,7 @@ Indexadas **por fecha**, no por número: la cátedra no las numera. Las del 04/0
 | **martes 08/09** | `ITBA TP 8 Seguridad.pdf` *(3 págs., **sin dataset** — **tres esquemas propios**, dos como imagen y uno como línea de texto; no reusa `esq_peliculas.sql`)* | TP8 Seguridad | ✓ [[Práctica 2026-09-08]] |
 | **martes 15/09** | `ITBA TP 9 - MongoDB Parte I.pdf` *(7 págs., **`raw/Unidad-02/Practica/`** — los datos van **dentro del PDF**: 12 `insert` como comandos en pp. 2–3 y la tabla de bandas del ej. 1 **solo como imagen** en p. 7)* | TP9 MongoDB Parte I | ✓ [[Práctica 2026-09-15]] |
 | **martes 22/09** | `ITBA TP 9 - MongoDB Parte II.pdf` *(2 págs., 8 ejercicios; seis citan páginas de* Seven Databases *cap. 4 y el 6 y el 8 no)* · `egresados.csv` · `mongoCities_fixed.json` *(los tres en **`raw/Unidad-02/Practica/`**)* | TP9 MongoDB Parte II *(resuelto y corrido en MongoDB 8.3.11)* | ✓ [[Práctica 2026-09-22\|Práctica 2026-09-22]] |
+| **martes 29/09** | `ITBA TP 10 - Cassandra Parte I.pdf` *(3 págs., **`raw/Unidad-03/Practica/`**: setup con Docker y un único ejercicio en 18 pasos, cada uno con su comando)* | TP10 Cassandra Parte I *(resuelto y corrido en Cassandra 5.0.9)* | ✓ [[Práctica 2026-09-29\|Práctica 2026-09-29]] |
 
 Los enunciados de los TPs están en la carpeta de la unidad, junto al deck del día; `raw/tp/` guarda
 solo el índice. La semana del 18/08 **no tiene teórica**: el lunes 17/08 es feriado. Tampoco la del
@@ -313,7 +331,7 @@ a 14.
 solo el enunciado —y, el 18/08, además los dos CSV—. El único deck de práctica del vault sigue siendo
 `BDD II - Clase I.pdf`, del 04/08. Tampoco las del **08/09** ni el **15/09** traen deck: el TP8 son
 tres páginas de enunciado y el TP9, siete páginas con los datos adentro. La del **22/09** tampoco:
-dos páginas de enunciado y dos datasets.
+dos páginas de enunciado y dos datasets. Ni la del **29/09**: tres páginas de enunciado, sin dataset.
 
 > [!note] El TP6 es el primero que **no necesita motor**
 > Los TP4 y TP5 se resolvían tipeando. El **TP6 no trae ningún `.sql` ni CSV**, sus tres esquemas
@@ -359,9 +377,10 @@ dos páginas de enunciado y dos datasets.
 
 ## Unidades
 
-Dos unidades tienen material y se observan: **`Unidad-01` = Clases 01 a 11 + TP1 a TP8** *(14
-decks de teórica —la 11 en dos— y 6 archivos sin número de clase)* y **`Unidad-02` = Clases 12 a 14 +
-los 4 handouts + TP9 Parte I y Parte II**, abierta el **15/09**. `raw/Unidad-03` … `raw/Unidad-10`
+Tres unidades tienen material y se observan: **`Unidad-01` = Clases 01 a 11 + TP1 a TP8** *(14
+decks de teórica —la 11 en dos— y 6 archivos sin número de clase)*, **`Unidad-02` = Clases 12 a 14 +
+los 4 handouts + TP9 Parte I y Parte II**, abierta el **15/09**, y **`Unidad-03` = Clase 15 + 2
+archivos sin número + TP10 Parte I**, abierta el **29/09**. `raw/Unidad-04` … `raw/Unidad-10`
 **todavía no existen**: la carpeta de unidad (con su `Teorica/` y `Practica/`) la crea el humano
 cuando archiva el primer material. `raw/Examenes_Viejos/` **no es una unidad**: sus páginas llevan
 `unidad: eval` *(§ Exámenes viejos)*.
@@ -370,14 +389,14 @@ cuando archiva el primer material. `raw/Examenes_Viejos/` **no es una unidad**: 
 | --- | --- | --- |
 | `Unidad-01` | ✓ **observado**: Clases **01 a 11** *(todo lo relacional: intro, DER, DDL, SQL, vistas, índices/explain, restricciones, SQL procedural, **seguridad, transacciones ACID e índices**, y **recovery/WAL** en el segundo deck de la 11)* · 6 archivos sin número *(ejercicios de RI, de stored procedures y de seguridad)* · TP1 a **TP8**, con el **TP3 SQLs avanzados** ya archivado | 03/08 → 08/09 |
 | `Unidad-02` | ✓ **observado**: Clases **12 a 14** *(NoSQL, CAP/BASE, MongoDB: embebido vs. normalizado, features)* · 4 handouts sin número · **TP9 Parte I** y **TP9 Parte II** *(con `egresados.csv` y `mongoCities_fixed.json`)* | 14/09 → 22/09 |
-| `Unidad-03` a `Unidad-05` | Sin nada previsto: los temas que se les había asignado *(restricciones/TP6, triggers-SQL procedural/TP7, seguridad-ACID/TP8, NoSQL-MongoDB/TP9)* cayeron todos en `Unidad-01` o `Unidad-02` — ver tabla de predicciones abajo | — |
-| `Unidad-06` | *(previsión)* Cassandra · TP10 (I y II) · (clave) **parcial el 13/10** | 28/09 · 05/10 |
-| `Unidad-07` | *(previsión)* Neo4j · TP11 | 19/10 |
-| `Unidad-08` | *(previsión)* Redis · TP12 | 26/10 |
-| `Unidad-09` | *(previsión)* Amazon DynamoDB · TP13 · (clave) **recuperatorio el 03/11** | 02/11 |
-| `Unidad-10` | *(previsión)* TPO: enunciado 09/11 · entrega 15/11 · defensas 16, 17 y 24/11 | 09/11 → 24/11 |
+| `Unidad-03` | ✓ **observado**: Clase **15** *(Cassandra: bases tabulares, arquitectura P2P, escritura y lectura, consistencia y QUORUM, CQL y clave primaria)* · 2 archivos sin número *(filtros de Bloom, diagrama del *digest*)* · **TP10 Parte I** | 28/09 → 29/09 *(la teórica del 05/10 y el TP10 Parte II, previstos aquí)* · (clave) **parcial el 13/10** |
+| `Unidad-04` | *(previsión)* Neo4j · TP11 | 19/10 |
+| `Unidad-05` | *(previsión)* Redis · TP12 | 26/10 |
+| `Unidad-06` | *(previsión)* Amazon DynamoDB · TP13 · (clave) **recuperatorio el 03/11** | 02/11 |
+| `Unidad-07` | *(previsión)* TPO: enunciado 09/11 · entrega 15/11 · defensas 16, 17 y 24/11 | 09/11 → 24/11 |
+| `Unidad-08` a `Unidad-10` | *(sin previsión)*: el cronograma no deja temas para tres unidades más | — |
 
-> [!warning] Reparto `unidad → clases`: ocho predicciones puestas a prueba, y solo dos acertaron
+> [!warning] Reparto `unidad → clases`: nueve predicciones puestas a prueba, y solo tres acertaron
 > La previsión inicial asignaba una unidad por tema del cronograma (`Unidad-02` para el 10/08,
 > `Unidad-03` para restricciones/triggers, `Unidad-04` para seguridad, `Unidad-05` para NoSQL). El
 > material real fue cayendo distinto:
@@ -392,15 +411,16 @@ cuando archiva el primer material. `raw/Examenes_Viejos/` **no es una unidad**: 
 > | 6 | teórica y práctica del 07–08/09 → `Unidad-04` *(seguridad, ACID, TP8)* | Clase 11 · TP8 | `Unidad-01` | ✗ falló |
 > | 7 | teórica y práctica del 14–15/09 → `Unidad-05` *(NoSQL, MongoDB, TP9)* | Clases 12, 13 y 14 · 4 handouts · TP9 Parte I | `Unidad-02` | ✗ falló |
 > | 8 | práctica del 22/09 → `Unidad-02` *(TP9 Parte II, junto a la Parte I)* | TP9 Parte II + `egresados.csv` + `mongoCities_fixed.json` | `Unidad-02` | ✓ acertó |
+> | 9 | teórica y práctica del 28–29/09 → `Unidad-03` *(lectura "una unidad por motor"; la tabla decía `Unidad-06`)* | Clase 15 · 2 archivos sin número · TP10 Parte I | `Unidad-03` | ✓ acertó |
 >
 > Las seis fallidas tienen la misma forma: se asignaba una unidad **por tema del cronograma** y la
 > cátedra archiva con otro criterio. La hipótesis que sí se sostuvo, confirmada con el corte del
 > 14–15/09, es **"la `Unidad-01` es todo lo relacional"**: lo relacional (Clase 11, TP8) fue a la
 > `Unidad-01`, y lo NoSQL (Clases 12–14, TP9) abrió la `Unidad-02`. Lo que **no** dice es cómo se
-> reparten las unidades que vienen: Cassandra, Neo4j, Redis y DynamoDB pueden ser cuatro unidades, una
-> sola, o seguir en la `Unidad-02`. Con solo dos unidades observadas, la lectura más simple —**una
-> unidad por motor** (U1 relacional, U2 MongoDB)— haría caer Cassandra en `Unidad-03` y no en la
-> `Unidad-06` de la tabla, pero es otra previsión: se confirma cuando entre el deck del 28/09.
+> reparten las unidades que vienen. La lectura **una unidad por motor** (U1 relacional, U2 MongoDB)
+> preveía Cassandra en `Unidad-03` y no en la `Unidad-06` de la tabla vieja, y **acertó el 29/09**
+> (fila 9). Las filas *(previsión)* de arriba ya siguen esa lectura para Neo4j, Redis y DynamoDB;
+> sigue siendo una previsión.
 
 ## Dudas abiertas
 
@@ -428,6 +448,10 @@ tener dos copias que se desincronicen. `index.md` remite a esta lista.
 | [[Clase 14 - MongoDB Features]] § *Dudas abiertas* | (crítico) **si `mapReduce` entra al parcial** *(la Pregunta 6 del [[Parcial 2Q2025\|Parcial 2Q2025]] lo pidió con el ejercicio del handout (c), que en MongoDB 8.3.11 corre con `DeprecationWarning`: indicio de 2025)*; (crítico) `$lookup` y `$unwind` fuera del deck *(el TP9 Parte II no los usa; ningún examen viejo usa `$unwind`)*; (crítico) **qué versión de MongoDB corre el TP** *(referencia: 8.3.11 / `mongosh` 2.11.1 con la imagen `mongo:8`; el deck es de 6.0.5)*; si los cuatro handouts de mayo de 2025 se entregaron el 14/09; Compass o `mongosh` para la consigna; replica sets y sharding *(en 2025, solo como concepto)*; transacciones y GridFS *(el geoespacial sí entró: índice `2d` del TP9 Parte II)*; ficha para *Practical MongoDB Aggregations*; si la cátedra asume el cap. 4 de Seven Databases entero *(el TP9 Parte II lo recorre)*. Resuelto en parte: la Parte II del TP9 cayó en `Unidad-02`; Cassandra sigue sin material de clase |
 | [[Práctica 2026-09-15]] § *Preguntas para el docente* y § *Dudas abiertas* | TP9: ✓ **cerradas**: `ensureIndex()` funciona sin aviso en MongoDB 8.3.11 / `mongosh` 2.11.1, qué trae la Parte II, y que la Parte II reutiliza `bandas` *(no `players`)*, y que la imagen `mongo:8` corre en UTC *(`new Date(1987,2,14,0,0)` → `1987-03-14T00:00:00.000Z`)*. Siguen: (crítico) qué versión baja `docker pull mongo` *(8.3.11 es un dato de referencia, no la respuesta)*; si `ensureIndex` se **acepta** en la entrega; paso 34: cuál índice elige el planificador; (crítico) **ej. 1: si EFECTO ALFONS son dos bandas o una** *(cambia el ej. 9: 3 vs. 2, y el promedio del 10)*, una colección o dos, `discos: []` o campo ausente; ej. 10 antes o después del 4, y dónde va el `$sort`; si se entrega y en qué formato |
 | [[Práctica 2026-09-22\|Práctica 2026-09-22]] § *Preguntas para el docente* y § *Dudas abiertas* | TP9 Parte II: si el **ej. 8** espera **CP** o AP para MongoDB *(Clase 12 vs. Corbellini; el Parcial 2Q2025 tomó CP)*; si `titulo` es la columna que pide el 4.b *(`egresados.csv` no trae `carrera`)*; `ensureIndex` o `createIndex` en la entrega; en qué base va `mongoCities_fixed.json`; (crítico) el criterio de `mongoCities_fixed.json` para ordenar `location` *(`[lat, lon]` en unos países y `[lon, lat]` en otros)*; desde qué versión de MySQL 9.x el `EXPLAIN` sale en árbol; si `ensureIndex` sobrevive a la próxima versión mayor de `mongosh` |
+| [[Clase 15 - Introduccion a Cassandra]] § *Dudas abiertas* | (crítico) si se acepta el `USING CONSISTENCY` del slide 45 *(no corre desde Cassandra 2.2; en `cqlsh` es `CONSISTENCY QUORUM;`)*; (ok) **tabla de posiciones → Redis; escritura masiva → Cassandra** *(el [[Recuperatorio 1Q2026]] P25 tiene clave Redis; el [[Final 1Jul2025]] P4, sin ranking, Cassandra)*; (crítico) si se evalúa la lectura del deck *(reparación en segundo plano)* o la de 4.0+ *(bloqueante)*; "LLTS" = TTL; supercolumnas y particionadores de la era Thrift; qué trae la teórica del 05/10 |
+| [[Práctica 2026-09-29\|Práctica 2026-09-29]] § *Preguntas para el docente* y § *Dudas abiertas* | TP10 Parte I: si se espera activar `PasswordAuthenticator` *(la imagen no pide credenciales)*; `now()` en una columna `uuid` o `timeuuid`; si la Parte II retoma `demo_cql_music` *(el paso 18 lo borra)*; si la teórica del 05/10 cubre SAI |
+| [[Cassandra\|Cassandra]] § *Dudas abiertas* | Qué versión toma la cátedra *(5.0.9 hoy; el deck no declara ninguna)*; roles del slide 49 sin autenticación; si las vistas materializadas *(deshabilitadas en 5.0.9)* entran al parcial; el literal del slide 70 que no entra en `int` *(= [[Parcial 2Q2025\|Parcial 2Q2025]] P23 y [[Parcial 1Q2026\|Parcial 1Q2026]] P34)*; DevCenter |
+| [[Parcial 1Q2026\|Parcial 1Q2026]] · [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] § *Dudas abiertas* | La P35 del parcial, sin fotografiar; si la corrección manual mira la idea o la sintaxis *(parcial P31: `replication :` con 3/3)*; si en 2026 2C las preguntas de Neo4j del parcial se reemplazan *(Neo4j llega el 19/10)*; si el recuperatorio del 03/11 incluye Neo4j y Redis, como el del 1C; el `MSET pelicula 1` del recu P29; "60 % de las preguntas" vs. 60 puntos |
 | [[Clase 02 - Modelo Entidad-Relacion]] · [[Clase 03 - Derivación a Esquema Lógico]] · [[Clase 05 - Consultas de Datos–Parte 1]] *(y partes 2 y 3)* | DER y repaso relacional: notación del parcial, derivación de 1:1 y ternarias, `NULL`, `UNION`/`INTERSECT`/`EXCEPT` |
 | [[Clase 01 - Introducción_BasesDeDatos]] · [[Clase 04 - AlteraciónActualizaciónTablas]] | Dudas sueltas de las dos clases más cortas |
 | [[MySQL\|MySQL]] · [[PostgreSQL\|PostgreSQL]] | Lo que quedó en `verificar` de la traducción entre motores. En [[MySQL\|MySQL]]: ✓ `@@transaction_isolation` → `REPEATABLE-READ` y ✓ *redo log*, *undo log*, *doublewrite buffer* y *binlog* *(§ 8.5)*; siguen, entre otras, `'u'@'localhost'` vs. `'u'@'%'` desde el host *(la única que queda de las verificaciones de seguridad de § 7)*, el error 1442, `CREATE OR REPLACE PROCEDURE`, `GRANT OPTION` global y `BEGIN` vs. `START TRANSACTION`. En [[PostgreSQL\|PostgreSQL]]: (crítico) no hay servidor PostgreSQL para verificar `wal_level` y los demás parámetros del WAL; el equivalente InnoDB de cada pieza del diagrama de la Clase 01 *(la del WAL ya está documentada)* |
@@ -678,18 +702,29 @@ tener dos copias que se desincronicen. `index.md` remite a esta lista.
 
 ## Exámenes viejos
 
-`raw/Examenes_Viejos/` guarda exámenes de otras cursadas en tres carpetas de Drive. **No es una
+`raw/Examenes_Viejos/` guarda exámenes de otras cursadas en tres carpetas de Drive y una del
+cuatrimestre anterior, `1C-26/`. **No es una
 unidad ni una clase**: cada instancia tiene su página en `wiki/examenes/` *(`tipo: examen`,
 `unidad: eval`)*, nombrada con el rótulo que trae la fuente. Como con los decks, esta tabla es el
 registro de qué archivo usa cada página. Ninguno es material oficial del campus 2026: todos circulan
 como copias de estudiantes. La mayoría son reconstrucciones, resoluciones o capturas hechas por
 estudiantes; los enunciados de `1Q2021`, `2Q2021` y `Recuperatorio 2Q2020` no traen resolución, y
 los dos de 2021 los publicó la cátedra de entonces *(Aizemberg/Rodríguez)*. Cada página dice qué tan
-confiable es su fuente. Los veinte archivos figuran además en las `fuentes:` de
+confiable es su fuente. Los veintidós archivos figuran además en las `fuentes:` de
 [[Mapa de exámenes|Mapa de exámenes]], que los cruza con el cronograma 2026.
+
+> [!important] `1C-26/` pesa más que todo lo demás
+> El parcial y el recuperatorio del 1C 2026 son capturas de la **revisión real en Blackboard**, con la
+> corrección de la plataforma y los comentarios del docente de la cátedra actual: son las instancias
+> de **mayor peso** para ejercitar el parcial *(regla en `CLAUDE.md`)*. Las páginas transcriben lo que
+> respondió el alumno *(parcial desaprobado, 58,49/100; recuperatorio aprobado con 5, 67,88/100)* y
+> corrigen cada error.
 
 | Archivo | Qué es | Página que lo usa | Temario |
 | --- | --- | --- | --- |
+| **`1C-26/`** | | | |
+| `Parcial/BDII Parcial - 1Q2026.pdf` | 15 págs. con 29 fotos de la pantalla de revisión de Blackboard: 35 preguntas con la opción marcada o el ensayo del alumno, la clave, el puntaje y los comentarios del docente *(sin encabezado; la P35 no se ve)* | ★★ [[Parcial 1Q2026\|Parcial 1Q2026]] | actual |
+| `Recu/WhatsApp Video 2026-09-29 at 11.06.33.mp4` | Video de 105 s, sin audio, que recorre la revisión del recuperatorio: encabezado *(condiciones, tabla puntaje → nota, 2 h 30 min)* y 36 preguntas | ★★ [[Recuperatorio 1Q2026\|Recuperatorio 1Q2026]] | actual |
 | **`Drive 72.41 - BDII - Examenes Viejos/`** | | | |
 | `BDII - Parcial 2Q2025.docx` | 41 capturas del examen real en la plataforma online, con la corrección y el puntaje de cada pregunta | [[Parcial 2Q2025\|Parcial 2Q2025]] | actual |
 | `BDII - Parciales Viejos.pdf` | 13 págs. manuscritas de un estudiante: resuelve dos parciales —el rotulado "XC-202X" (págs. 2–4) y el "2Q-2023" (págs. 5–9)— y una práctica que rotula "subida por la cátedra" (págs. 10–13); la pág. 1 es una portada | [[Parcial XC-202X\|Parcial XC-202X]] · [[Parcial 2Q-2023\|Parcial 2Q-2023]] · [[Práctica subida por la cátedra\|Práctica subida por la cátedra]] *(lo enlazan además [[Parcial 2Q2025\|Parcial 2Q2025]], [[Clase 12 - Introduccion a NoSQL\|Clase 12]] y [[2.12.04 - Teorema CAP\|Teorema CAP]])* | actual |
@@ -710,7 +745,7 @@ confiable es su fuente. Los veinte archivos figuran además en las `fuentes:` de
 
 **Temario `anterior`** marca los exámenes de 2020–2021 y el de *Bases de Datos Avanzadas*, que
 evalúan motores o un formato que la cursada 2026 no usa *(CouchDB, ElasticSearch, HBase, PostGIS;
-domiciliarios de varias horas)*. Los del temario `actual` —el parcial 2Q2025, los parciales XC-202X y 2Q-2023, tres finales de 2023
+domiciliarios de varias horas)*. Los del temario `actual` —el parcial y el recuperatorio 1Q2026, el parcial 2Q2025, los parciales XC-202X y 2Q-2023, tres finales de 2023
 y 2025, una guía de repaso y una práctica de parcial— son los que [[Mapa de exámenes|Mapa de exámenes]] usa para priorizar el estudio
 del parcial del 13/10.
 
@@ -720,6 +755,6 @@ Según el programa: cursada = promedio entre parcial y TP Especial (el **TPO** d
 4 en cada uno; final con mínimo 4. Fechas concretas en [[_cronograma]].
 
 Para preparar el **parcial del 13/10** con exámenes de otras cursadas:
-[[Mapa de exámenes|Mapa de exámenes]] cruza los once exámenes viejos con el cronograma 2026 —formato, temas por frecuencia,
+[[Mapa de exámenes|Mapa de exámenes]] cruza los dieciséis exámenes viejos con el cronograma 2026 —formato, temas por frecuencia,
 trampas recurrentes y qué estudiar primero—, y § *Exámenes viejos* de esta página dice de qué archivo
 sale cada uno.

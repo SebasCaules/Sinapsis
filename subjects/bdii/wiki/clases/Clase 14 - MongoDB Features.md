@@ -1732,6 +1732,10 @@ los errores sino la **edad** de las capturas.
     resultado esperado. Es un examen de 2025: muestra que la cátedra lo evaluó estando deprecado, pero
     no confirma el parcial del 13/10/2026. El TP9 Parte II no tiene ningún ejercicio de `mapReduce`
     ([[Práctica 2026-09-22|Práctica 2026-09-22]]).
+  - (nota) ★★ En 1C 2026 entró como teoría, no como código: V/F de que procesa en paralelo
+    ([[Parcial 1Q2026]] P8, [[Recuperatorio 1Q2026]] P16) y de que `map` emite pares clave-valor (Parcial P17,
+    Recuperatorio P15), y la Pregunta 14 del recuperatorio preguntó si MongoDB recomienda MapReduce
+    antes que el pipeline: Falso, está deprecado desde 5.0.
 - [ ] (crítico) **`$lookup` y `$unwind` no están en el deck y la solución oficial del ejercicio
   complementario los usa en todos sus pipelines.** ¿Se dictaron oralmente, salen del libro de Paul
   Done *(slide 32)* o de la Parte II del TP9? Afecta qué estudiar para el parcial del 13/10.
@@ -1739,6 +1743,9 @@ los errores sino la **edad** de las capturas.
     (ejercicios 4 y 6 de [[Práctica 2026-09-22|Práctica 2026-09-22]]). Evidencia de exámenes viejos: el único `aggregate`
     de [[Parcial 2Q2025|Parcial 2Q2025]] (Pregunta 15) es `$match` + `$group`, y `$lookup` solo aparece nombrado en
     el solucionario de estudiantes de la Pregunta 31. Ningún examen del vault usa `$unwind`.
+  - (atención) ★★ Ya no es así: la Pregunta 13 del [[Recuperatorio 1Q2026]] pide traducir un
+    `JOIN … ORDER BY` a MongoDB, y la respuesta es `$lookup` + `$unwind` + `$sort` de dos claves
+    (el alumno sacó 3/6). Conviene estudiarlos para el parcial aunque el deck no los traiga.
 - [ ] (crítico) **¿Qué versión de MongoDB corre en el TP?** `docker pull mongo` sin tag trae la última
   *(8.x en 2026)*; el deck es de 6.0.5. Determina si `ensureIndex`, `count()` e `insert()`
   corren con aviso o fallan. **Verificar con `db.version()`.**
@@ -1761,18 +1768,21 @@ los errores sino la **edad** de las capturas.
     Pregunta 21 (opción múltiple) pide la diferencia entre replicación y sharding, con la misma
     distinción que el handout (b). La Pregunta 10 (CAP) razona sobre primario y secundarios. Ningún
     examen del vault pide configurar un *replica set* o un clúster con sharding. El TP9 Parte II
-    tampoco lo pide ([[Práctica 2026-09-22|Práctica 2026-09-22]]).
+    tampoco lo pide ([[Práctica 2026-09-22|Práctica 2026-09-22]]). ★★ En 1C 2026, lo mismo: la
+    Pregunta 15 del [[Parcial 1Q2026]] es la 21 del 2Q2025.
 - [ ] **¿Se dicta algo de transacciones, GridFS o geoespacial en MongoDB?** Están en el libro y no en
   el deck; el dataset de `hospitales` del slide 33 es GeoJSON.
   - (nota) El **geoespacial sí entró**, en la práctica: el ejercicio 5 del TP9 Parte II pide cargar
     `mongoCities_fixed.json`, crear un índice `2d` sobre `location` y resolver el Do.1 del día 3 del
     libro (ciudades cerca de Londres) → [[Práctica 2026-09-22|Práctica 2026-09-22]]. Transacciones y GridFS no aparecen
     en la Parte II ni en ningún examen del vault.
-- [ ] **¿En qué unidad cae la Parte II del TP9 (22/09) y Cassandra (28/09)?** Se observa cuando
+- [x] **¿En qué unidad cae la Parte II del TP9 (22/09) y Cassandra (28/09)?** Se observa cuando
   llegue el material.
   - (nota) Resuelto para la Parte II: está en `raw/Unidad-02/Practica/`, así que es **Unidad 2** →
     [[Práctica 2026-09-22|Práctica 2026-09-22]]. Cassandra sigue sin material de clase en `raw/`
     (sí hay preguntas de Cassandra en los exámenes viejos, p. ej. la Sección I de [[Parcial 2Q2025|Parcial 2Q2025]]).
+  - (ok) Cassandra cayó en la **Unidad 3**: `raw/Unidad-03/` trae la [[Clase 15 - Introduccion a Cassandra|Clase 15]] (28/09) y el TP10
+    Parte I ([[Práctica 2026-09-29]]); el motor, en [[Cassandra]].
 - [x] ~~**`toString()` de `ObjectId` en `mongosh`**: el slide 8 dice que devuelve `ObjectId("…")`;
   en `mongosh` debería devolver el hexadecimal. Probar en el TP.~~
   (ok) Verificado en `mongosh` 2.11.1 / MongoDB 8.3.11: `toString()` devuelve el hexadecimal,
@@ -1793,7 +1803,7 @@ los errores sino la **edad** de las capturas.
 
 - Clase anterior: [[Clase 13 - NoSQL-EmbebidosVSNormalizado]] *(mismo lunes 14/09)* · antes:
   [[Clase 12 - Introduccion a NoSQL]] *(mismo lunes)* y [[Clase 11 - Seguridad-Transacciones]]
-  *(07/09)* · clase siguiente: *(28/09, Introducción a Cassandra según [[_cronograma]]; el 21/09 es
+  *(07/09)* · clase siguiente: [[Clase 15 - Introduccion a Cassandra]] *(28/09; el 21/09 es
   Día del Estudiante, sin teórica)*
 - Práctica de esa semana (martes 15/09): **[[Práctica 2026-09-15]]** — TP 9 MongoDB Parte I
 - Conceptos que **nacen** en esta clase *(nombres previstos; los fija la etapa de conceptos)*:
