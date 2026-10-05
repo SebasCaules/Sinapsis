@@ -11,6 +11,7 @@ tema:
 temario: actual
 fuentes:
   - "raw/Examenes_Viejos/1C-26/Parcial/BDII Parcial - 1Q2026.pdf"
+  - "raw/Examenes_Viejos/2C-26/Ejercicios tipo Parcial Bases de Datos II.pdf"
   - "raw/Examenes_Viejos/1C-26/Recu/WhatsApp Video 2026-09-29 at 11.06.33.mp4"
   - "raw/Examenes_Viejos/Drive 72.41 - BDII - Examenes Viejos/BDII - Parciales Viejos.pdf"
   - "raw/Examenes_Viejos/Drive 72.41 - BDII - Examenes Viejos/BDII - Parcial 2Q2025.docx"
@@ -84,6 +85,7 @@ segunda en peso. El resto va con el temario actual primero.
 | [[Final 1Dic2025]] | final | rótulo de la fuente, sin fecha exacta | 5 preguntas; la fuente se abre aclarando que es reconstruido "de memoria" | actual | Media-baja — una copia sin ninguna respuesta, la otra con desarrollo parcial y remisiones a otro final |
 | [[Repaso Final BD 2]] | repaso | sin fecha (guía de estudiantes) | 32 ejercicios: prácticos de consola (Redis, DynamoDB), desarrollo y V/F; transcribe además los tres finales de arriba | actual | Dispar — SQL y concurrencia corridas y correctas; Redis/DynamoDB no verificables sin esos motores; algunas resoluciones con errores propios señalados `(atención)` |
 | [[Práctica subida por la cátedra\|Práctica subida por la cátedra]] | repaso | sin fecha | 9 ejercicios de desarrollo tipo parcial; el rótulo "subida por la cátedra" es del estudiante | actual | Media-baja — resolución manuscrita sin corregir; cuatro respuestas fallan al correrlas en MySQL 9.7.2 y MongoDB 8.3.11 |
+| [[Ejercicios tipo Parcial Bases de Datos II\|Ejercicios tipo Parcial]] | repaso | 2C 2026 (sin fecha; un ejemplo fechado 01/10/2026) | Las 9 consignas de la Práctica subida por la cátedra, en el documento original, más 8 ejercicios adicionales (3 MongoDB, 5 Cassandra) | actual | — (sin respuestas; todo lo resuelve el vault, corrido en MongoDB 8.3.11 y Cassandra 5.0.9). Agregado el 05/10: no entra en los conteos de frecuencia de esta página |
 | [[Parcial 1Q2020]] | parcial | 1Q2020, sin fecha exacta | 6 ejercicios prácticos domiciliarios (un motor por ejercicio), sin límite de tiempo documentado | anterior | Baja — resuelto por un estudiante que rotuló su propia resolución "no chequeado" (no revisó su trabajo antes de subirlo); nadie de la cátedra la revisó |
 | [[Parcial 2Q2020]] | parcial | 2Q2020, 13/10/2020 | 6 ejercicios prácticos domiciliarios, 3.5 h | anterior | Media — rotulado "10 puntos" por quien lo archivó, sin corrección docente visible |
 | [[Recuperatorio 2Q2020]] | recuperatorio | 2Q2020, 03/11/2020 | 4 ejercicios prácticos domiciliarios, 3 h | anterior | — (solo enunciado; no hay ninguna resolución de estudiante, toda respuesta es del vault) |

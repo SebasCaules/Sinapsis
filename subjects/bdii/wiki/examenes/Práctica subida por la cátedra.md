@@ -928,12 +928,14 @@ CQL; el de la cursada es el slide 59 → [[3.15.01 - Bases de datos tabulares �
   bibliografía (Database Systems The Complete Book cap. 10.1 o Date cap. 17.6).
 - (abierto) Ejercicio 8: que Mary aparezca en su propio resultado vía un ciclo de 3 saltos es un
   razonamiento sobre la semántica de Cypher, no una corrida.
-- (abierto) El origen de las consignas: el rótulo *"Subida por la cátedra"* es del estudiante; no se
-  encontró el documento original en el campus ni la fecha de publicación.
+- (abierto) El origen de las consignas: el rótulo *"Subida por la cátedra"* es del estudiante. El
+  documento de consignas apareció el 05/10/2026, como páginas 1–4 de
+  [[Ejercicios tipo Parcial Bases de Datos II|Ejercicios tipo Parcial]] (mismo texto y orden, con ocho
+  ejercicios adicionales de MongoDB y Cassandra); sigue sin autor ni fecha que confirmen la cátedra.
 
 ## Enlaces
 
-- [[Mapa de exámenes|Mapa de exámenes]] · [[Parcial XC-202X|Parcial XC-202X]] y
+- [[Mapa de exámenes|Mapa de exámenes]] · [[Ejercicios tipo Parcial Bases de Datos II|Ejercicios tipo Parcial]] (el documento original de las consignas) · [[Parcial XC-202X|Parcial XC-202X]] y
   [[Parcial 2Q-2023|Parcial 2Q-2023]] (las otras dos secciones del mismo manuscrito) ·
   [[Parcial 2Q2025|Parcial 2Q2025]]
 - Clases: [[Clase 01 - Introducción_BasesDeDatos|Clase 01]] · [[Clase 02 - Modelo Entidad-Relacion|Clase 02]] ·

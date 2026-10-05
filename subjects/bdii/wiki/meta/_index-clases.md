@@ -321,6 +321,7 @@ Indexadas **por fecha**, no por número: la cátedra no las numera. Las del 04/0
 | **martes 15/09** | `ITBA TP 9 - MongoDB Parte I.pdf` *(7 págs., **`raw/Unidad-02/Practica/`** — los datos van **dentro del PDF**: 12 `insert` como comandos en pp. 2–3 y la tabla de bandas del ej. 1 **solo como imagen** en p. 7)* | TP9 MongoDB Parte I | ✓ [[Práctica 2026-09-15]] |
 | **martes 22/09** | `ITBA TP 9 - MongoDB Parte II.pdf` *(2 págs., 8 ejercicios; seis citan páginas de* Seven Databases *cap. 4 y el 6 y el 8 no)* · `egresados.csv` · `mongoCities_fixed.json` *(los tres en **`raw/Unidad-02/Practica/`**)* | TP9 MongoDB Parte II *(resuelto y corrido en MongoDB 8.3.11)* | ✓ [[Práctica 2026-09-22\|Práctica 2026-09-22]] |
 | **martes 29/09** | `ITBA TP 10 - Cassandra Parte I.pdf` *(3 págs., **`raw/Unidad-03/Practica/`**: setup con Docker y un único ejercicio en 18 pasos, cada uno con su comando)* | TP10 Cassandra Parte I *(resuelto y corrido en Cassandra 5.0.9)* | ✓ [[Práctica 2026-09-29\|Práctica 2026-09-29]] |
+| **martes 06/10** | `ITBA TP 10 - Cassandra Parte II.pdf` *(2 págs., **`raw/Unidad-03/Practica/`**: tres ejercicios de modelado —blog, e-commerce con DER en imagen, CAP—, sin comandos ni datos)* | TP10 Cassandra Parte II *(resuelto y corrido en Cassandra 5.0.9)* | ✓ [[Práctica 2026-10-06\|Práctica 2026-10-06]] |
 
 Los enunciados de los TPs están en la carpeta de la unidad, junto al deck del día; `raw/tp/` guarda
 solo el índice. La semana del 18/08 **no tiene teórica**: el lunes 17/08 es feriado. Tampoco la del
@@ -389,7 +390,7 @@ cuando archiva el primer material. `raw/Examenes_Viejos/` **no es una unidad**: 
 | --- | --- | --- |
 | `Unidad-01` | ✓ **observado**: Clases **01 a 11** *(todo lo relacional: intro, DER, DDL, SQL, vistas, índices/explain, restricciones, SQL procedural, **seguridad, transacciones ACID e índices**, y **recovery/WAL** en el segundo deck de la 11)* · 6 archivos sin número *(ejercicios de RI, de stored procedures y de seguridad)* · TP1 a **TP8**, con el **TP3 SQLs avanzados** ya archivado | 03/08 → 08/09 |
 | `Unidad-02` | ✓ **observado**: Clases **12 a 14** *(NoSQL, CAP/BASE, MongoDB: embebido vs. normalizado, features)* · 4 handouts sin número · **TP9 Parte I** y **TP9 Parte II** *(con `egresados.csv` y `mongoCities_fixed.json`)* | 14/09 → 22/09 |
-| `Unidad-03` | ✓ **observado**: Clase **15** *(Cassandra: bases tabulares, arquitectura P2P, escritura y lectura, consistencia y QUORUM, CQL y clave primaria)* · 2 archivos sin número *(filtros de Bloom, diagrama del *digest*)* · **TP10 Parte I** | 28/09 → 29/09 *(la teórica del 05/10 y el TP10 Parte II, previstos aquí)* · (clave) **parcial el 13/10** |
+| `Unidad-03` | ✓ **observado**: Clase **15** *(Cassandra: bases tabulares, arquitectura P2P, escritura y lectura, consistencia y QUORUM, CQL y clave primaria)* · 2 archivos sin número *(filtros de Bloom, diagrama del *digest*)* · **TP10 Parte I** · **TP10 Parte II** | 28/09 → 06/10 *(la teórica del 05/10, prevista aquí)* · (clave) **parcial el 13/10** |
 | `Unidad-04` | *(previsión)* Neo4j · TP11 | 19/10 |
 | `Unidad-05` | *(previsión)* Redis · TP12 | 26/10 |
 | `Unidad-06` | *(previsión)* Amazon DynamoDB · TP13 · (clave) **recuperatorio el 03/11** | 02/11 |
