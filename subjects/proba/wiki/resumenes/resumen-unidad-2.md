@@ -53,6 +53,9 @@ $$ P\!\left(\overline{C}\cap\overline{D}\right)=1-P(C\cup D), \qquad P\!\left(\o
 
 **Cómo reconocerlo:** el enunciado pide la probabilidad de **«ninguno»**. Se pasa al complemento de la unión, $1-P(A_1\cup\cdots\cup A_n)$, y la unión se desarrolla con inclusión-exclusión. Ejemplo típico: grupo sanguíneo $0^-$, que es no tener ninguno de los antígenos $A$, $B$, $Rh$: $P(0^-)=1-P(A\cup B\cup Rh)=1-0.9=0.1$.
 
+> [!figura] u2-de-morgan-cuatro-paneles
+> Arriba, $(A\cup B)^c$ y $A^c\cap B^c$ sombrean exactamente la misma región; abajo ocurre lo mismo con $(A\cap B)^c$ y $A^c\cup B^c$. Es la comprobación visual de que negar convierte la unión en intersección y viceversa.
+
 Detalle: [[leyes-de-de-morgan|Leyes de De Morgan]]
 
 ## 3. Axiomas de Kolmogorov y sus consecuencias
@@ -82,6 +85,9 @@ La **resta de sucesos** en general es $P(A\setminus B)=P(A)-P(A\cap B)$; solo si
 > [!warn] Errores típicos
 > Usar la resta inclusiva $P(A)-P(B)$ sin verificar que $B\subseteq A$ da un resultado mal calculado. Y los sucesos se unen dentro de $P(\cdot)$: se escribe $P(A\cup B)$, nunca $P(A)\cup P(B)$ ni $P(A)+B$.
 
+> [!figura] u2-venn-inclusion-exclusion
+> Las áreas son proporcionales a las probabilidades y el solape queda acotado al rango admisible $\max(0,\,P(A)+P(B)-1)\le P(A\cap B)\le\min(P(A),P(B))$. Al sumar $P(A)+P(B)$ la zona común se cuenta dos veces; restarla una vez devuelve $P(A\cup B)$, y con solape nulo se recupera la aditividad del tercer axioma.
+
 Detalle: [[axiomas-de-probabilidad|Axiomas de probabilidad (Kolmogorov)]]
 
 ## 4. Regla de Laplace
@@ -96,6 +102,9 @@ Aquí $|A|$ es la cantidad de resultados que cumplen el evento y $|S|$ la cantid
 
 > [!warn] Solo con casos equiprobables
 > Si los casos no son equiprobables, hay que volver a los axiomas. En dos dados, Laplace se aplica sobre las 36 celdas $(i,j)$ y no sobre los 11 valores de la suma: repartir $\tfrac{1}{11}$ entre las sumas daría $0.0909$ en lugar de $\tfrac{5}{36}$.
+
+> [!figura] u2-suma-dos-dados-no-equiprobable
+> A la izquierda, las 36 celdas equiprobables coloreadas según su suma; a la derecha, la cantidad de casos de cada suma. Laplace se aplica sobre las 36 celdas y no sobre los 11 valores de la suma: repartir $\tfrac{1}{11}$ entre las sumas daría $0.0909$ en lugar de $\tfrac{5}{36}$.
 
 Detalle: [[regla-de-laplace|Regla de Laplace]]
 
@@ -125,6 +134,9 @@ Aquí $R$ es la cantidad de defectuosos (elementos «especiales») del lote; en 
 > [!warn] No olvidar permutaciones
 > Al contar casos favorables hay que incluir las permutaciones internas (por ejemplo, el $2!$ de intercambiar a dos personas dentro de un bloque) y cubrir todos los casos m.e. El TP2 advierte que omitir el $2!$ da un resultado erróneo.
 
+> [!figura] u2-curva-cumpleanos
+> La curva de $P(\text{al menos dos coinciden})$ cruza el $0.5$ en $n=23$ y llega a $0.99$ en $n=57$ (su complemento, todos distintos, cae a $0.01$). El crecimiento sigue a la cantidad de pares $\binom{n}{2}$ y no a $n$, y por eso el salto ocurre mucho antes de lo que sugieren los 365 días.
+
 Detalle: [[tecnica-conteo-combinatoria|Técnica: conteo y combinatoria]]
 
 ## 6. Probabilidad condicional
@@ -143,6 +155,9 @@ La condicional cumple todos los axiomas: es una probabilidad legítima sobre el 
 
 > [!warn] El condicionante queda fijo
 > Es **falso** que $P(A\mid B)=1-P(A\mid B^c)$: las dos condicionales restringen el universo a conjuntos distintos. Las propiedades derivadas de los axiomas (complemento, monotonía, etc.) valen solo mientras el evento condicionante se mantenga fijo; lo correcto es $P(A^c\mid B)=1-P(A\mid B)$.
+
+> [!figura] u2-dados-condicional-grilla
+> Las 36 celdas equiprobables de $S$, con $C=\{\text{suma}\ge 8\}$ marcado en el borde y $D=\{\text{suma par}\}$ en el relleno. Al restringir el universo a $C$ ninguna celda cambia de lugar: solo cae el denominador, de 36 casos a 15, y por eso $P(D)=\tfrac12$ se convierte en $P(D\mid C)=\tfrac{9}{15}$.
 
 Detalle: [[probabilidad-condicional|Probabilidad condicional]]
 
@@ -164,6 +179,12 @@ $$ P_{\text{serie}}=\prod_{i=1}^{n}p_i, \qquad P_{\text{par}}=1-\prod_{i=1}^{n}(
 
 > [!warn] Mutuamente excluyentes no equivale a independientes
 > Si $A$ y $B$ son m.e. y ambos tienen probabilidad positiva, **no** son independientes: saber que ocurrió $A$ asegura que $B$ no ocurrió. Y la independencia no impide que un evento restrinja los *resultados* posibles del otro; lo que no cambia es su *probabilidad* (dado mayor que 4 y dado par son independientes aunque, sabiendo lo primero, el único par posible es 6).
+
+> [!figura] u2-independencia-rectangulo
+> Con $A$ definido por filas y $B$ por columnas, la intersección es siempre un rectángulo y su fracción de área es el producto de las dos bandas: $P(A\cap B)=P(A)P(B)$. Al reemplazar $B$ por un evento diagonal, como la suma, el recorte deja de ser rectangular y la igualdad se rompe: conocer $A$ pasa a cambiar la fracción de casos de $B$, que con independencia es la misma dentro de $A$ que en todo $S$.
+
+> [!figura] u2-serie-paralelo-fiabilidad
+> El circuito del enunciado: las dos ramas en serie conectadas en paralelo, con cada contacto coloreado según su estado. La comparación en escala logarítmica muestra lo que aporta duplicar la rama: la probabilidad de falla baja de $1.99\times 10^{-2}$ a $3.96\times 10^{-4}$. Al hacer clic en un contacto se lo fuerza a fallar, y el rótulo de arriba dice si el circuito sigue conduciendo con los contactos abiertos elegidos.
 
 Detalle: [[independencia|Independencia de eventos]]
 
@@ -187,6 +208,9 @@ Aquí $P(+\mid E)$ es la **sensibilidad**, $P(-\mid E^c)$ la **especificidad** y
 
 **Cómo reconocerlo:** dan las condicionales «al revés» de lo que se pide (dan $P(+\mid E)$ y piden $P(E\mid +)$), o el universo se divide en casos (sexo, máquina, proveedor, enfermo o sano).
 
+> [!figura] u2-bayes-mosaico-area
+> El cuadrado de área 1 partido por el prior (ancho de cada columna) y por la verosimilitud (alto dentro de cada columna): $P(B)$ es la franja de positivos completa y $P(A_i\mid B)$ es la fracción verde de esa franja. Note que con prevalencia baja el rectángulo de falsos positivos es delgado pero se apoya sobre una columna mucho más ancha, y eso es lo que mantiene baja la probabilidad a posteriori.
+
 Detalle: [[probabilidad-total-y-bayes|Probabilidad total y teorema de Bayes]]
 
 ## 9. Árbol de probabilidades
@@ -202,6 +226,9 @@ $$ P(\text{rama}\mid B)=\frac{\text{prob. del camino que pasa por la rama y lleg
 Si las etapas son independientes, las etiquetas no dependen del camino: todas las ramas de un mismo nivel son iguales. Ejemplo: con $P(V)=0.47$, $P(D\mid V)=0.04$ y $P(D\mid\bar V)=0.02$, las hojas con $D$ valen $0.0188$ y $0.0106$, entonces $P(D)=0.0294$ y $P(V\mid D)=0.0188/0.0294\approx 0.6395$.
 
 **Cómo reconocerlo:** «primero…, luego…», extracciones sucesivas sin reposición, canales con repetidores, mezclas de lotes. Es el método más seguro en problemas de varias fases.
+
+> [!figura] u2-arbol-bayes-invertido
+> El árbol de dos niveles del ejemplo de daltónicos, con las cuatro reglas de arriba en acción: cada arista lleva $P(\text{hijo}\mid\text{antepasados})$, los hijos de un nodo son una partición, las aristas hermanas suman 1 y cada hoja es el producto de las etiquetas de su camino. Al invertir el árbol las hojas conservan exactamente su valor y solo cambian las etiquetas de las aristas, que pasan a ser las probabilidades a posteriori: eso, y nada más, es el teorema de Bayes.
 
 Detalle: [[arbol-de-probabilidades|Árbol de probabilidades]]
 

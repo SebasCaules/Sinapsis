@@ -56,6 +56,12 @@ Cómo reconocerlo: si hay valores extremos sospechosos (sueldos, precios, un dat
 > [!warn] Intervalo modal y media no tienen por qué coincidir
 > Error marcado en clase: pensar que el intervalo de mayor frecuencia debe contener a la media. En el ejemplo de la clase la media es $\bar x = 40$ y el intervalo modal es $[37,39)$, que no la contiene.
 
+> [!figura] u1-paridad-de-n-y-la-mediana
+> Con $n$ impar la posición $(n+1)/2$ deja la misma cantidad de datos a cada lado; con $n$ par ninguna posición lo consigue —queda 29 contra 30 o 30 contra 29— y por eso se promedian las dos centrales.
+
+> [!figura] u1-balanza-media-contra-mediana
+> La media es el punto donde se equilibran los brazos de palanca, de modo que un solo dato lejano la arrastra; la mediana solo cuenta cuántos datos quedan a cada lado y no se mueve.
+
 Detalle: [[medidas-de-tendencia-central|Medidas de tendencia central]].
 
 ## 3. Medidas de dispersión
@@ -81,6 +87,9 @@ Ejemplo: subte y colectivo con $n=61$ y medias casi idénticas ($\approx 40$ min
 
 Cómo reconocerlo: si se pide «qué tan variable» o se comparan dos muestras de media parecida, se calcula $s$; si hay atípicos y se quiere robustez, IQR o MAD en lugar de desvío y rango.
 
+> [!figura] u1-bandas-x-ks-sobre-el-histograma
+> Qué porcentaje de datos cae realmente dentro de $\bar x \pm k\,s$. Con el conjunto aproximadamente normal se recuperan las referencias 68 / 95 / 99 %; con el asimétrico esa regla práctica deja de valer.
+
 Detalle: [[medidas-de-dispersion|Medidas de dispersión]].
 
 ## 4. Forma: asimetría y curtosis
@@ -101,6 +110,12 @@ $\kappa \approx 0$: **mesocúrtica** (como la [[distribucion-normal|normal]]); $
 Las slides introductorias presentan también una **versión corregida** de ambos coeficientes, que evita un sesgo de estimación (en la curtosis, válida solo para variables normales); sobre las 200 monedas el cambio es pequeño ($\gamma$: $0.13174 \to 0.13274$; $\kappa$: $-0.10237 \to -0.04442$). La forma se ve mejor en el gráfico que en el número: en el ejemplo de transporte, taxi $\gamma = 1.898$ (cola a derecha), tren $\gamma = -1.505$ (cola a izquierda), moto $\kappa = 2.563$ (colas pesadas) y bicicleta $\kappa = -1.320$ (colas livianas).
 
 Cómo reconocerlo: si dos muestras coinciden en media y desvío y se pregunta qué las distingue, la respuesta está en $\gamma$ o $\kappa$.
+
+> [!figura] u1-tres-formas-y-el-orden-media-mediana
+> Los tres casos de la teórica en la misma escala, con la media y la mediana superpuestas: la cola larga arrastra la media hacia su lado, de modo que $\bar x >$ mediana cuando $\gamma > 0$ y al revés cuando $\gamma < 0$.
+
+> [!figura] u1-peso-de-colas-a-igual-media-y-desvio
+> Tres densidades con la **misma media y el mismo desvío**: lo único que las distingue es el peso de las colas. El detalle logarítmico muestra que la de Laplace ($\kappa=3$) se apaga mucho más lento que la normal, mientras que la uniforme ($\kappa=-1.2$) directamente se corta.
 
 Detalle: [[asimetria-y-curtosis|Asimetría y curtosis]].
 
@@ -142,6 +157,9 @@ Elegir el ancho de los bins no tiene fórmula cerrada: muy anchos esconden la fo
 
 Cómo reconocerlo: «construir el histograma», «tabla de frecuencias», «frecuencia acumulada» o leer la moda de datos continuos (punto medio del intervalo de mayor frecuencia).
 
+> [!figura] u1-el-ancho-de-bin-cambia-la-historia
+> El mismo conjunto de datos con distinta cantidad de intervalos: con pocos aparece una sola joroba y con muchos queda ruido. La acumulada de abajo no cambia, y es por eso que los cuartiles se leen sobre ella.
+
 Detalle: [[histograma-y-frecuencias|Histograma y frecuencias]].
 
 ## 7. Boxplot y outliers
@@ -158,6 +176,9 @@ Regla de Tukey: todo dato fuera de $[L_W, U_W]$ es outlier. El factor $1.5$ es u
 Para comparar grupos, los boxplots van **en paralelo, en el mismo gráfico y con la misma escala**; un grupo con pocas observaciones produce una caja igual de «sólida» pero sus cuartiles son mucho menos confiables.
 
 Cómo reconocerlo: «detectar valores atípicos», «dibujar el diagrama de caja» o comparar visualmente varias muestras.
+
+> [!figura] u1-bigotes-vs-limites-de-tukey
+> El bigote superior se detiene en el **dato real** más grande que sigue por debajo de $U_W$. Al llevar el punto móvil por encima de la valla, el bigote salta hacia atrás en lugar de estirarse hasta $U_W$.
 
 Detalle: [[boxplot|Boxplot (diagrama de caja)]].
 
@@ -182,6 +203,9 @@ Con $n = \sum f_i$ y $L$ el número de intervalos; las $f_i$ son absolutas (con 
 Ejemplo (TP1 ej. 5, 100 recién nacidos, marcas de $2.7$ a $4.5$ kg): $\bar x_{Ag} = 364.60/100 = 3.6460$ kg y $s_{Ag} = \sqrt{17.7484/99} = 0.4234$ kg.
 
 Cómo reconocerlo: el enunciado da una tabla de intervalos (o marcas) con frecuencias en lugar de la lista de datos.
+
+> [!figura] u1-los-f-i-subintervalos-del-reparto
+> De dónde sale la fórmula: el intervalo se parte en $f_i$ subintervalos iguales, uno por dato, y el cuartil cae donde termina el subintervalo del dato buscado. En el dibujo, los $f_i = 18$ datos del intervalo $[36, 39)$ se reparten parejo en 18 subintervalos iguales, y por eso cada tabique adelanta el acumulado en una unidad. El supuesto de reparto uniforme es lo que vuelve **aproximado** el resultado.
 
 Detalle: [[datos-agrupados|Datos agrupados]].
 
@@ -208,6 +232,9 @@ La **moda** sigue otra receta: el intervalo modal no se localiza con la acumulad
 > Para mediana, cuartiles y percentiles, localizar el intervalo con la frecuencia **acumulada** $F_i$, no con la absoluta $f_i$ (la moda es la excepción: intervalo de $f_i$ máxima). Acumular hasta los **extremos derechos** de los intervalos, no hasta las marcas de clase (en el TP1 ej. 5 la marca $3.7$ representa $(3.6, 3.8]$).
 
 Cómo reconocerlo: tabla de frecuencias más un pedido de mediana, cuartil, percentil, moda o «porcentaje de datos mayores que / entre».
+
+> [!figura] u1-lectura-del-cuartil-sobre-la-ojiva
+> La fórmula leída como geometría: la horizontal en $j\cdot 0.25\cdot n$ corta el segmento del intervalo donde cae el cruce y la vertical baja hasta el cuartil. Observe que el cociente $(j\cdot 0.25\, n - F_{i-1})/f_i$ es la fracción del ancho del intervalo que se avanza.
 
 Detalle: [[tecnica-datos-agrupados-interpolacion|Técnica: interpolación en datos agrupados]].
 

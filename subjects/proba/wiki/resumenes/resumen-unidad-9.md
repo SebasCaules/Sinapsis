@@ -61,6 +61,12 @@ $\mu_0$ es el valor de referencia, $\sigma$ el desvío poblacional conocido y $n
 
 **Cómo reconocerlo:** el enunciado da la regla en términos del estimador («se rechaza si la media muestral es menor que 4970») o pide la región crítica en las unidades del problema; ahí conviene pasar entre $\bar x_c$ y $z_c$ con la estandarización.
 
+> [!figura] u9-dos-ejes-una-misma-decision
+> El eje del estimador $\bar x$ y el eje del estadístico $Z$, alineados: la transformación lineal manda $\mu_0$ a $0$ y $\bar x_c$ a $z_{1-\alpha}$, y la zona de rechazo es la misma en los dos. Por eso una sola tabla de fractiles alcanza para cualquier $\mu_0$, $\sigma$ y $n$.
+
+> [!figura] u9-las-tres-rectas-de-rechazo
+> Las tres regiones de rechazo sobre la recta del estadístico estandarizado, con sus fractiles rotulados. Observe que al pasar de $Z$ a $T$ solo cambia el nombre del fractil: la geometría de la recta es idéntica.
+
 Detalle: [[estadistico-de-prueba|Estadístico de prueba y región de rechazo]]
 
 ## 3. Errores tipo I y tipo II, potencia y curva OC
@@ -88,6 +94,12 @@ El segundo vale si la distribución del estadístico es simétrica.
 
 **Cómo reconocerlo:** el enunciado pregunta «probabilidad de error tipo I» para una regla dada (se calcula bajo $\theta_0$), «probabilidad de error tipo II si en realidad $\mu=\dots$» (se calcula bajo ese $\theta_1$), o pide bosquejar la curva OC. Cuando $\sigma$ es desconocido, $\beta$ no puede calcularse antes de muestrear; una salida práctica es estimar $S$ con una **muestra piloto**.
 
+> [!figura] u9-las-dos-campanas-y-sobre-el-mismo-eje
+> Las dos densidades del promedio muestral sobre el mismo eje: $\alpha$ es una cola de la curva de $H_0$ y $\beta$ es la masa de la curva de $H_1$ que cae del lado de la aceptación. Note que bajar $\alpha$ corre la frontera $\bar x_c$ y agranda $\beta$, mientras que subir $n$ angosta las dos campanas y hace caer $\beta$ sin mover $\alpha$ —en la figura $\alpha$ es el control y $\bar x_c$ la salida derivada—: ese margen ganado es el que después permite bajar también $\alpha$.
+
+> [!figura] u9-curva-oc-la-forma-de-segun-la-cola
+> La curva $\beta(\theta_1)$ cambia de forma según la cola: decreciente, creciente o con máximo en $\theta_0$. Verifique los tres puntos guía —$\beta(\theta_0)=1-\alpha$, $\beta\approx 0.5$ sobre el valor crítico y $\beta\to 0$ al alejarse— y compare varias curvas de distinto $n$.
+
 Detalle: [[error-tipo-i-y-tipo-ii|Error tipo I y tipo II]]
 
 ## 4. Valor p
@@ -106,6 +118,9 @@ Con $T\sim t_{n-1}$ se reemplaza $\Phi$ por $\Xi_{n-1}$. Si $t_{\text{obs}}$ no 
 > El valor p **no** es la probabilidad de que $H_0$ sea verdadera: el parámetro tiene un valor fijo aunque desconocido. Es una probabilidad sobre los **datos** condicionada a $H_0$. Un valor p pequeño hace dudar de $H_0$, pero rechazar puede ser un error tipo I.
 
 **Cómo reconocerlo:** el enunciado dice «calcular el valor p» o «¿para qué niveles de significación se rechaza?».
+
+> [!figura] u9-valor-p-contra-en-la-misma-cola
+> El área desde el valor crítico ($\alpha$) y el área desde el estadístico observado (valor p), sombreadas en la misma cola. Mueva el observado: el valor p queda por debajo de $\alpha$ exactamente cuando el estadístico entra en la región de rechazo, así que las dos reglas de decisión son la misma.
 
 Detalle: [[valor-p|Valor p]]
 
@@ -137,6 +152,12 @@ Las reglas de rechazo y el valor p son los de las secciones 2 y 4, con $z$ o $t_
 > No tiene sentido escribir $\bar x_c=\mu_0+t_{n-1,1-\alpha}\,S/\sqrt n$, porque $S$ se conoce recién con la muestra tomada. Con $\sigma$ desconocida se trabaja directamente con el estadístico $T$, cuyo fractil depende solo de $n$ y de $\alpha$.
 
 **Cómo reconocerlo:** el dato es un promedio, un «tiempo medio», un «peso promedio» o una lista de mediciones. Si el enunciado da la varianza poblacional, corresponde $Z$; si solo da un desvío calculado de la muestra y $n$ es pequeño, corresponde $T$.
+
+> [!figura] u9-por-que-x-c-con-s-esta-mal
+> Arriba, la recta correcta: el fractil $t_{n-1,1-\alpha}$ depende solo de $n$ y de $\alpha$, así que la frontera queda fijada antes de muestrear. Abajo, la frontera $\bar x_c=\mu_0+t_{n-1,1-\alpha}\,S/\sqrt n$ no está en ningún lugar definido, porque $S$ solo se conoce con la muestra ya tomada.
+
+> [!figura] u9-colas-pesadas-y-el-precio-del-fractil
+> La $t_{n-1}$ y la $N(0,1)$ superpuestas, con los dos fractiles críticos marcados sobre el mismo eje: la franja entre ellos es la evidencia extra que exige la $t$. Al subir los grados de libertad las curvas se funden y la diferencia $t_{n-1,1-\alpha}-z_{1-\alpha}$ tiende a cero.
 
 Detalle: [[prueba-de-hipotesis-para-la-media|Prueba de hipótesis para la media]]
 
@@ -182,6 +203,9 @@ $\lambda_{\text{obs}}$ es el valor observado del estadístico.
 > [!warn] Errores frecuentes
 > Poner la igualdad en $H_1$; confundir la cola («inferior» o «no llegan» es izquierda); usar $Z$ con $n$ pequeño y $\sigma$ desconocido (corresponde $T$); olvidar dividir $\alpha$ entre 2 en dos colas; fijar la regla con $S$ después de ver la muestra.
 
+> [!figura] u9-arbol-de-eleccion-del-estadistico
+> El árbol completo con las condiciones escritas sobre cada rama. Las preguntas son siempre las mismas y en el mismo orden: qué resume la muestra, qué se conoce de la dispersión y cuánta muestra hay.
+
 Detalle: [[reconocer-prueba-de-hipotesis|Cómo reconocer y plantear una prueba de hipótesis]]
 
 ## 8. Diseño de la prueba y tamaño muestral
@@ -205,6 +229,9 @@ Después, como se rechaza si $X>n\,\hat q_c$ y $X$ es entero, el valor crítico 
 
 > [!warn] Discrepancia: ejercicio 16 del TP9
 > Las Respuestas del TP9 dicen $n=91$, pero la Resolución paso a paso del mismo TP9 obtiene $n\ge 89.91\Rightarrow n=90$ (con $n=90$ ya se cumple $\beta(0.06)\approx 0.1998<0.2$ y con $n=89$ no). El wiki toma $n=90$ como correcto; el valor crítico $c=4$ coincide en ambas versiones.
+
+> [!figura] u9-el-precio-de-detectar-diferencias-chicas
+> El $n$ necesario contra la brecha estandarizada $|\mu_1-\mu_0|/\sigma$, con una curva por cada $\beta^*$ de referencia. Mueva el punto marcado y compare la lectura con la del punto de brecha mitad: el cociente entre los dos $n$ se mantiene en $\approx 4$.
 
 Detalle: [[diseno-de-prueba-tamano-muestral|Diseño de la prueba y tamaño muestral (fijar α y β)]]
 

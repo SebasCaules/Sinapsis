@@ -36,6 +36,9 @@ Aquí $p(x_i,t_i,\dots)$ es la probabilidad conjunta de que el proceso valga $x_
 
 Cómo reconocerlo: el primer paso de cualquier ejercicio de la unidad es identificar el par ($\mathbb{T}$, $\mathbb{E}$): tiempo discreto con estados discretos lleva a caminata, Bernoulli o cadena de Markov; tiempo continuo lleva a Poisson.
 
+> [!figura] u6-que-mira-cada-propiedad-dos-ventanas-sobre-la-mi
+> Dos ventanas móviles sobre una misma trayectoria: los histogramas de la izquierda muestran que la distribución del incremento depende solo del ancho de la ventana y no de dónde está. Los de la derecha muestran que la distribución de $X(t)$ sí cambia con $t$: el proceso tiene incrementos estacionarios sin ser estacionario.
+
 Detalle: [[procesos-estocasticos|Procesos Estocásticos]]
 
 ## 2. Propiedades simplificadoras y proceso de conteo
@@ -90,6 +93,12 @@ Cómo reconocerla: «se gana o pierde 1 en cada jugada», «la partícula se mue
 > [!warn] Discrepancia: parametrización de la normal
 > La resolución de TP6 escribe la caminata gaussiana como $N(0,n)$ (parametrizada por la **varianza**); el resto del wiki usa $N(\mu,\sigma)$ (por el **desvío**), con lo que queda $N(0,\sqrt n)$. Es la misma ley: varianza $n$, desvío $\sqrt n$.
 
+> [!figura] u6-trayectorias-de-la-caminata-y-el-abanico-n
+> Varias trayectorias simuladas junto con la recta $E[X_n]=n(2p-1)$ y la banda $\pm k\sqrt{\text{Var}[X_n]}$, que se abre como $\sqrt{n}$. Observe que las trayectorias no vuelven a juntarse: con $p=1/2$ la media se queda en cero pero la dispersión crece, y por eso el proceso no es estacionario.
+
+> [!figura] u6-caminata-1-contra-caminata-gaussiana-mismo-momen
+> El peine discreto $P(X_n=x)$, que solo carga los enteros de la paridad de $n$, contra la densidad $N(0,\sqrt{n})$ (desvío $\sqrt{n}$, varianza $n$) multiplicada por el ancho del paso. Al subir $n$ los dos se encajan; la comparación de $P(|X_n|\le\sqrt n)$ con la aproximación normal muestra cuánto falta todavía para el límite.
+
 Detalle: [[caminata-aleatoria|Caminata Aleatoria (Random Walk)]]
 
 ## 4. Proceso de Bernoulli
@@ -108,6 +117,9 @@ Cómo reconocerlo: el tiempo avanza en pasos discretos y en cada paso ocurre o n
 
 > [!warn] Dos convenciones de la geométrica
 > Las páginas [[distribucion-geometrica]] y [[distribucion-binomial-negativa]] usan por defecto la convención «número de fracasos»: con $q=1-p$, $X\sim\text{Geométrica}(p)$ tiene $p_X(k)=q^k p$ y $E[X]=q/p$, y $X\sim\text{BinNeg}(k,p)$ cuenta los fracasos antes del $k$-ésimo éxito. En el proceso de Bernoulli, en cambio, $\tau_i$ es la **cantidad de ensayos** entre eventos (convención «número de ensayos»): $\tau_i=X+1$, con $p_{\tau}(k)=q^{k-1}p$ y $E[\tau_i]=1/p$. Del mismo modo, $T_k$ cuenta **ensayos** hasta el $k$-ésimo éxito, así que $T_k=X+k$ con $X\sim\text{BinNeg}(k,p)$: $P(T_k=n)=\binom{n-1}{k-1}q^{n-k}p^k$ para $n\ge k$ y $E[T_k]=k/p$. Aplicar a $T_k$ la PMF de la página de la binomial negativa sin el corrimiento de $k$ es un error. Esta convención de ensayos es la de la clase de la cátedra, que dibuja $T_k$ como el instante (número de ensayo) del $k$-ésimo éxito sobre el eje de tiempo, con $T_3=\tau_1+\tau_2+\tau_3$, y es la que usan la página del [[proceso-de-bernoulli|proceso de Bernoulli]] y el [[formulario-maestro|formulario maestro]]. El tiempo de vida de la cadena de TP6 Ej. 24, en cambio, sí usa la convención «fracasos» ($P(N=k)=(1-p)^k p$, $E[N]=\frac{1-p}{p}$). No conviene mezclar las versiones.
+
+> [!figura] u6-anatomia-de-una-realizacion-de-bernoulli
+> Una sola realización leída de tres maneras alineadas sobre el mismo eje de ensayos: el conteo $N(k)$ (éxitos en los primeros $k$ ensayos independientes, cada uno con éxito de probabilidad $p$ y fracaso de probabilidad $1-p$), la fila de ranuras éxito/fracaso, y los instantes $T_k$ —el ensayo del $k$-ésimo éxito— con las esperas $\tau_i$ entre dos éxitos consecutivos. Sirve para no confundir $\tau_i$ (geométrica) con $T_k$ (binomial negativa), ni el conteo con el tiempo.
 
 Detalle: [[proceso-de-bernoulli|Proceso de Bernoulli]]
 
@@ -136,6 +148,12 @@ Cómo reconocerlo: eventos «al azar» en tiempo continuo con un promedio consta
 > [!warn] Unidades de la tasa y condicionamiento hacia atrás
 > La tasa debe ajustarse a la longitud del intervalo: 4 clientes cada 6 minutos es $\lambda=2/3\ \text{min}^{-1}$, y 75 partículas por minuto en 20 s es $\lambda t=25$. Además, condicionar el futuro al pasado sí se reduce al incremento, $P(N(t_2)=n_2\mid N(t_1)=n_1)=P(N(t_2)-N(t_1)=n_2-n_1)$, pero condicionar el pasado al futuro **no**: para $t_1<t_2$, $\big(N(t_1)\mid N(t_2)=n_2\big)\sim\text{Binomial}(n_2,\,t_1/t_2)$. Tampoco es correcto decir que «la Poisson tiene falta de memoria»: la falta de memoria es de los tiempos entre eventos (Exponencial).
 
+> [!figura] u6-el-intervalo-infinitesimal-t-t-h-y-las-tres-rama
+> Las tres únicas maneras de llegar a $N(t+h)=n$ sobre un intervalo corto $[t,t+h]$, con la probabilidad de cada rama. Observe que la tercera vale $o(h)$ y por eso desaparece al dividir por $h$: de ahí salen los dos términos de $\dot P_n=-\lambda P_n+\lambda P_{n-1}$, y para eso sirve el axioma 4.
+
+> [!figura] u6-dualidad-conteo-tiempo-la-escalera-n-t-y-los-ins
+> La misma realización leída de dos maneras: arriba la escalera $N(t)$, abajo los instantes $T_k$ y los tiempos entre eventos $\tau_i$. Los $\tau_i$ son exponenciales i.i.d. de tasa $\lambda$ y $T_k=\tau_1+\cdots+\tau_k$, de modo que la escalera salta $+1$ en cada $T_i$. Mueva $t$ y $k$ e intente dejar uno de los dos sucesos verdadero y el otro falso: no se puede, y las dos probabilidades —una calculada como Erlang y la otra como Poisson— coinciden siempre.
+
 Detalle: [[proceso-de-poisson|Proceso de Poisson]]
 
 ## 6. Relación entre los procesos de Bernoulli y de Poisson
@@ -159,6 +177,9 @@ La Geométrica y la Exponencial comparten la **falta de memoria**, que es lo que
 > [!warn] El paso de la discretización debe ser chico
 > En TP6 Ej. 6 (75 partículas por minuto), discretizar 20 s en pasos de $\Delta t=1$ s da $p=\lambda\Delta t=1{,}25>1$, que no es una probabilidad válida: $\Delta t$ es demasiado grande para que haya «a lo sumo un evento por paso». Con $\Delta t=0{,}01$ s ($k=2000$, $p=0{,}0125$) la binomial da $\approx0{,}0519$, igual que la Poisson$(25)$.
 
+> [!figura] u6-refinar-el-reloj-de-binomial-t-t-t-a-poisson-t
+> Arriba, el intervalo $[0,t]$ partido en $m=t/\Delta t$ ranuras; abajo, la PMF de $\text{Binomial}(m,\lambda t/m)$ contra el perfil fijo de $\text{Poisson}(\lambda t)$. Al aumentar $m$ las barras se encajan sobre el perfil; con $m$ chico la lectura «estado del acoplamiento» avisa de $p=\lambda\Delta t>1$ —el error que se discute en el ejercicio resuelto de esta página— o de cuántos eventos comparten ranura: con ese $\Delta t$ el conteo discreto pierde eventos, y al achicarlo esa pérdida desaparece.
+
 Detalle: [[relacion-bernoulli-poisson|Relación entre los procesos Bernoulli y Poisson]]
 
 ## 7. Cadenas de Markov: matriz de transición y evolución en $n$ pasos
@@ -178,6 +199,15 @@ Cómo reconocerla: un sistema con pocos estados discretos y reglas «del estado 
 > [!warn] Dirección de la condicional
 > $(\mathbb{P}^k)_{ij}$ solo sirve para condicionar hacia el futuro, $P(X(n+k)=s_j\mid X(n)=s_i)$. El sentido inverso no tiene atajo matricial: se resuelve con la definición de probabilidad condicional, es decir, con Bayes,
 > $$ P(X(n){=}s_i\mid X(n{+}k){=}s_j)=\frac{P(X(n{+}k){=}s_j\mid X(n){=}s_i)\,P(X(n){=}s_i)}{P(X(n{+}k){=}s_j)} $$
+
+> [!figura] u6-diagrama-de-estados-a-partir-de-la-matriz-p
+> El grafo dirigido que corresponde a cada matriz $\mathbb{P}$, con las etiquetas $p_{ij}$ y los estados coloreados según sean recurrentes, transientes o absorbentes. Verifique que las etiquetas que salen de cada nodo suman 1, y compare la frecuencia de visitas acumulada con $\vec\pi$.
+
+> [!figura] u6-convergencia-de-p-n-cuando-hay-y-cuando-no
+> Las curvas $p_j(n)$ en las cuatro situaciones de la receta: converge sin depender de $\vec p(0)$, oscila sin converger, converge a un límite que sí depende de $\vec p(0)$, y estado transiente cuya curva cae a cero. Guarde una curva como referencia y cambie $\vec p(0)$ para ver en cuáles se mueve el límite y en cuáles no; la lectura «qué muestra esta cadena» resume el caso elegido.
+
+> [!figura] u6-forma-canonica-los-bloques-i-0-f-q
+> La misma matriz antes y después de reordenar los estados, con los cuatro bloques $\mathbb{I}$, $\mathbf{0}$, $\mathbb{F}$ y $\mathbb{Q}$ en colores. Note que el bloque $\mathbf{0}$ es nulo porque de un absorbente no se sale, y que el tiempo hasta la absorción se lee sumando la fila correspondiente de $\mathbb{M}=(\mathbb{I}-\mathbb{Q})^{-1}$. Las filas de $\mathbb{M}$ y de $\mathbb{G}=\mathbb{M}\,\mathbb{F}$ están al pie del dibujo y los totales, en las lecturas; cada fila de $\mathbb{G}$ suma 1.
 
 Detalle: [[cadenas-de-markov#Matriz de transición|Cadenas de Markov — matriz de transición]]
 

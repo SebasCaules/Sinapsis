@@ -47,6 +47,12 @@ $$ p_S(s)=\sum_{y\in R_Y} p_X(s-y)\,p_Y(y),\qquad f_S(s)=\int_{-\infty}^{+\infty
 
 **Cómo reconocerlo:** el enunciado pide media o varianza de un total, una diferencia o una combinación de variables (se usan las dos primeras fórmulas); o pide la densidad o masa de $X+Y$ con densidades dadas que no son de una familia conocida (se plantea la convolución, cuidando los límites del soporte).
 
+> [!figura] u7-la-rebanada-x-y-s-sobre-la-conjunta
+> La integral recorre la recta oblicua $x+y=s$ sobre la superficie de la conjunta: el área bajo la curva de corte es $f_S(s)$. Con $\rho\neq0$ la conjunta ya no factoriza y la imagen de «deslizar dos curvas» deja de servir, pero la rebanada sigue dando el valor correcto.
+
+> [!figura] u7-convolucion-deslizar-reflejar-y-solapar
+> El panel superior muestra $f_Y(y)$ fija y $f_X(s-y)$ reflejada y desplazada hasta $s$: el área del producto de las dos es el valor de $f_S(s)$ que el panel inferior va trazando punto a punto. Observe cómo, al avanzar $s$, cada valor de $f_S$ es un área y no una altura.
+
 Detalle: [[suma-de-variables-aleatorias|Suma de Variables Aleatorias]]
 
 ## 2. Sumas de independientes con nombre propio
@@ -82,6 +88,12 @@ Es el ejemplo de familia que **no** se conserva bajo suma. La suma de Poisson se
 
 **Cómo reconocerlo:** el total de varias cantidades independientes de la misma familia (llamadas en varias centrales Poisson, pesos normales, éxitos en varios lotes con la misma $p$). Se identifica la familia de la suma y se calcula exacto con sus parámetros.
 
+> [!figura] u7-los-desvios-se-suman-en-cuadratura
+> Las tres campanas —todas centradas en 0 para que solo se compare el ancho— y, en punteado, la campana incorrecta que resultaría de sumar los desvíos: daría $\sigma_1+\sigma_2=7$ y no 5. El triángulo rectángulo de catetos $\sigma_1$ y $\sigma_2$ muestra por qué $\sigma_S$ es la hipotenusa y por qué nunca puede quedar por debajo del mayor de los dos.
+
+> [!figura] u7-el-cuadrado-unidad-cortado-por-x-y-s
+> La recta $x+y=s$ barre el cuadrado unidad y el largo de su tramo interior, medido sobre el eje $y$, es exactamente $f_S(s)$. Al deslizar $s$ se recorren los cuatro casos de la llave de arriba y se ve nacer el triángulo del panel derecho.
+
 Detalle: [[suma-de-va-independientes|Suma de Variables Aleatorias Independientes]]
 
 ## 3. Distribuciones Gamma y Erlang
@@ -109,6 +121,9 @@ Así un problema de tiempo continuo se resuelve con una suma finita, sin integra
 > [!nota] Nombres de los parámetros
 > La página de la Gamma usa forma $\alpha$ (o $k$) y la de la Erlang usa orden $k$; el formulario y la suma de exponenciales usan $n$. Es el mismo parámetro: la cantidad de exponenciales sumadas.
 
+> [!figura] u7-linea-de-tiempo-la-dualidad-t-k-n-t
+> Una realización del [[proceso-de-poisson|proceso de Poisson]] con sus instantes $T_k$, los tiempos $\tau_i$ entre ocurrencias y el contador $N(t)$ en un segundo carril. Los corchetes de abajo miden esos tiempos entre ocurrencias, de modo que $T_k=\tau_1+\dots+\tau_k$; solo llevan rótulo los dos primeros y la $k$-ésima ocurrencia $T_k$, para no amontonar etiquetas sobre el mismo carril. Al mover $t$ se lee el mismo hecho de las dos formas: «la $k$-ésima todavía no llegó» y «hasta $t$ hubo a lo sumo $k-1$».
+
 Detalle: [[distribucion-gamma|Distribución Gamma]] · [[distribucion-erlang|Distribución Erlang]]
 
 ## 4. Promedio muestral
@@ -126,6 +141,9 @@ $\bar X_n$ es un estimador **insesgado** de $\mu_X$, y su desvío, el **error es
 **Caso exacto:** si las $X_i$ son **normales**, $\bar X_n\sim\mathcal N(\mu_X,\sigma_X/\sqrt n)$ exactamente para todo $n$, porque una suma de normales independientes es normal; no hace falta el TCL. Si la distribución es otra o desconocida, el TCL da la misma normal como aproximación con solo conocer $\mu$ y $\sigma^2$.
 
 **Cómo reconocerlo:** «la media de una muestra de $n$ cajas, piezas, eventos…». Se reemplaza el desvío individual por $\sigma/\sqrt n$ antes de tipificar. La **varianza muestral** $S_n^2$ se abre en la guía pero se desarrolla en la unidad 8: [[varianza-muestral|Varianza Muestral]].
+
+> [!figura] u7-s-n-se-abre-x-n-se-cierra
+> Los dos paneles comparten la escala horizontal y los sumandos son variables normales independientes e idénticamente distribuidas: al subir $n$, la suma $S_n$ se ensancha como $\sigma\sqrt n$ y desborda la ventana, mientras el promedio $\bar X_n$ se angosta como $\sigma/\sqrt n$ hasta volverse una aguja. Note que pasar de $n$ a $4n$ solo parte a la mitad el ancho del promedio.
 
 Detalle: [[promedio-muestral|Promedio Muestral]]
 
@@ -149,6 +167,12 @@ Es el puente directo a la LGN y la fórmula para **dimensionar tamaños de muest
 
 > [!warn] La desigualdad se invierte al complementar
 > Chebyshev acota $P(|X-\mu|\ge\varepsilon)$ por arriba. Si se pide $P(|X-\mu|<\varepsilon)$, queda $\ge 1-\sigma^2/\varepsilon^2$: el sentido cambia. Además, para $\varepsilon<\sigma$ la cota supera 1 y no dice nada.
+
+> [!figura] u7-la-recta-x-por-encima-del-escalon
+> La recta $y=x/\alpha$ queda por encima de la indicadora $\mathbb 1_{\{x\ge\alpha\}}$ en todo el semieje $x\ge0$ —el área sombreada es justamente esa brecha— y las dos valen 1 en $x=\alpha$. Integrar ambas contra la misma densidad conserva la desigualdad: ese es el único paso no trivial de la demostración.
+
+> [!figura] u7-cuanto-se-despega-la-cota-de-chebyshev
+> Las dos colas sombreadas son la probabilidad real y las barras de la derecha la enfrentan con la cota $\sigma^2/\varepsilon^2$. Observe que la cota decae como $1/\varepsilon^2$ mientras la probabilidad real cae mucho más rápido, que con cola más pesada la brecha se achica, y que para $\varepsilon<\sigma$ la cota supera 1 y deja de decir nada.
 
 Detalle: [[desigualdad-de-chebyshev|Desigualdades de Markov y de Chebyshev]]
 
@@ -214,6 +238,9 @@ Vale con $a$ y $b$ **incluidos**. Con desigualdades estrictas se excluyen los ex
 
 > [!warn] Discrepancia: condición práctica
 > La página de la aproximación da la regla $np\ge5$ y $nq\ge5$. La clase en video pide $np>10$ **y** $n(1-p)>10$, con el contraejemplo $\mathrm{Bin}(100,\,0.05)$: $P(C\le2)$ exacto $\approx0.1183$ frente a $\approx0.1257$ con la normal.
+
+> [!figura] u7-barras-contra-campana-de-donde-sale-el-12
+> Cada barra de la binomial ocupa una franja de ancho 1 centrada en su entero, así que el borde del área normal debe caer a mitad de camino entre dos enteros y no sobre uno. Compare los tres números que se leen a la vez: suma binomial exacta, aproximación sin corregir y aproximación con $\pm\tfrac12$.
 
 Detalle: [[aproximacion-normal-de-la-binomial|Aproximación Normal de la Binomial]]
 

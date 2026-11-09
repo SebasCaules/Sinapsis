@@ -63,6 +63,12 @@ y las probabilidades son áreas, $P(a\le X\le b)=\int_a^b f_X(x)\,dx$. Con la [[
 
 **Cómo reconocerla.** Hay $\pm\infty$ en un límite de integración: **Tipo I**. El integrando explota en un extremo (denominador que se anula, raíz o logaritmo de cero): **Tipo II**.
 
+> [!figura] u0-cola-convergente-vs-divergente
+> El área acumulada de $1/x^2$ y la de $1/x$ sobre $[1,t]$, con $t$ creciendo hasta $10^4$. En el panel superior el sombreado marca el tramo ya integrado, de $1$ hasta $t$; como el eje $x$ es logarítmico, el área dibujada no es proporcional al valor. Note que la primera se estanca en $1$ mientras la segunda, $\ln t$, sigue subiendo sin techo.
+
+> [!figura] u0-singularidad-tipo-ii-area-finita
+> La curva $1/(2\sqrt{x-2})$ con el corte $t$ acercándose a la asíntota $x=2$. Al acercar $t$ a $2$ la franja se estira sin límite hacia arriba (el eje $y$ está recortado en $3.2$ y la punta se remata con una flecha) y, aun así, el área acumulada se estaciona en $\sqrt3\approx 1.7321$, como muestra la barra de la derecha.
+
 Detalle: [[tecnica-integrales-impropias|Integrales impropias]]
 
 ## 2. Integrales dobles
@@ -97,6 +103,15 @@ Si $d$ es una densidad conjunta normalizada (masa $=1$), entonces $(\bar x,\bar 
 > [!discrepancia] Errata del apunte en el ejemplo de la placa
 > Para la placa $\{0<x,\ 0<y,\ x+y<1\}$ con $d(x,y)=xy$, el apunte usa la primitiva $\int xy\,dy=xy^2$ (sin el $\tfrac12$) y publica masa $\tfrac1{12}$ y baricentro $(\tfrac15,\tfrac15)$. El wiki lo marca como error: con $\int y\,dy=\tfrac{y^2}{2}$ la masa es $\tfrac1{24}$ y el baricentro $(\tfrac25,\tfrac25)$; el propio apunte pone el $\tfrac12$ dos páginas después. En el parcial: cálculo correcto, dejando escrito $\int y\,dy=\tfrac{y^2}{2}$.
 
+> [!figura] u0-superficie-densidad-suma-de-riemann
+> Cada celda de la malla levanta un prisma de altura $d(x_i,y_j)$ sobre la parte de la celda que cae dentro de $R$, y la masa es el volumen que encierran. Las celdas del borde entran con la fracción de su área que cae dentro de $R$: ese es el peso $\Delta A_{ij}$ con que suman. Note que al aumentar $n$ los prismas se pegan a la superficie y el error frente al valor exacto $1/24$ baja de forma sostenida.
+
+> [!figura] u0-fubini-orden-de-integracion
+> La varilla de la integral interna barriendo el triángulo, en los dos órdenes de integración. La flecha superior es el **barrido externo**: la integral de afuera suma todas las varillas moviendo $x$ (o $y$, según el orden). Observe que el límite externo se mantiene constante y solo el interno depende de la otra variable: si en un límite quedan dos variables, el orden está invertido.
+
+> [!figura] u0-baricentro-placa-triangular
+> El baricentro correcto $(2/5,\,2/5)$ frente al $(1/5,\,1/5)$ que publica el apunte. Como la densidad $d(x,y)=xy$ se anula sobre los dos ejes, la masa se concentra hacia el interior del triángulo y el baricentro no puede quedar pegado al origen. En clave probabilística, tras normalizar la densidad, ese punto es $(\E[X],\,\E[Y])$.
+
 Detalle: [[tecnica-integrales-dobles|Integrales dobles]]
 
 ## 3. Derivadas parciales
@@ -128,6 +143,15 @@ Por eso da igual derivar primero en $x$ o en $y$. En el wiki, $\partial_x\partia
 **Independencia.** Si $X$ e $Y$ son independientes, $F(x,y)=F_X(x)F_Y(y)$ y al derivar queda $f(x,y)=f_X(x)f_Y(y)$.
 
 **Cómo reconocerla.** El enunciado da la FDA (o la masa acumulada) y pide la densidad: derivada **simple** en una variable, **cruzada** en dos.
+
+> [!figura] u0-alambre-masa-acumulada-y-densidad
+> Arriba, la masa acumulada $m(x)$ con la secante entre $\alpha\pm\Delta x/2$; abajo, la densidad $dm/dx$ en el mismo eje. La franja sombreada del panel inferior vale $\Delta m$, y dividida por $\Delta x$ da la pendiente de la secante del panel superior. Al reducir $\Delta x$ la pendiente medida se acerca a la derivada exacta en $\alpha$.
+
+> [!figura] u0-derivada-cruzada-cuatro-vertices
+> Los cuatro cuadrantes acumulados con sus signos $+,-,+,-$: al sumarlos y restarlos solo sobrevive el rectángulo $\Delta x\cdot\Delta y$. Una sola derivada parcial dejaría una franja acumulada, no un punto; por eso hacen falta las dos. Observe que el cociente $\Delta m/(\Delta x\,\Delta y)$ tiende a $d(\alpha,\beta)$ cuando los dos lados se achican.
+
+> [!figura] u0-clairaut-dos-caminos
+> Los dos órdenes de derivación de $m(x,y)=x^2y^3$ desembocan en el mismo $6xy^2$. La igualdad no es una convención de notación: cualquiera de los dos caminos del cuadrado llega al mismo lugar, y vale siempre que las parciales segundas sean continuas (teorema de Clairaut/Schwarz).
 
 Detalle: [[tecnica-derivadas-parciales|Derivadas parciales]]
 

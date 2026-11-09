@@ -35,6 +35,12 @@ Vale para cualquier combinación de $<$ y $\le$, porque los extremos tienen prob
 
 Cómo reconocerlo: el enunciado mide una magnitud (tiempo, temperatura, longitud) en lugar de contar. Cuando la densidad viene por tramos, la FDA también queda por tramos y debe **empalmar** en los bordes del soporte (valer 0 en el extremo inferior y 1 en el superior); si no empalma, hay un error de cálculo.
 
+> [!figura] u4-fda-escalera-vs-continua
+> Compare el incremento $F_X(\alpha)-F_X(\alpha-\delta)$ en una FDA en escalera y en una FDA continua. Al achicar $\delta$, en la escalera el incremento se estanca en el tamaño del salto —que es $P(X=\alpha)$—, mientras que en la continua colapsa a cero.
+
+> [!figura] u4-discretizacion-a-integral
+> Discretice la densidad $f_X(x)=2x$ en intervalos de ancho $2\delta$ y compare $\sum_i x_i\,p_i$ con el valor exacto $E[X]=2/3$. Observe que al achicar $\delta$ la suma converge, y que correr la grilla cambia la aproximación pero no el límite.
+
 Detalle: [[variable-aleatoria-continua|Variable Aleatoria Continua]]
 
 ## 2. Función de densidad, esperanza y varianza
@@ -69,6 +75,12 @@ Cómo reconocerlo: el patrón típico de examen da una densidad con una **consta
 
 > [!warn] La densidad no es una probabilidad
 > $f_X(x)$ puede ser mayor que 1 y $P(X=x)$ siempre es 0. Además, un valor de $k$ «feo» (una fracción con números grandes, como $k=4/16875$ en el ejercicio de la temperatura) no es señal de error: es una constante que se arrastra en los cálculos siguientes.
+
+> [!figura] u4-fda-y-densidad-acopladas
+> Un cursor recorre a la vez la FDA y la densidad: la altura $F_X(x)$ es el área acumulada bajo $f_X$, y la pendiente de la tangente a $F_X$ es $f_X(x)$. De ahí salen las dos propiedades de esta sección: el área total vale $1$ y $F_X$ no decrece porque $f_X\ge0$.
+
+> [!figura] u4-densidad-por-ancho-es-probabilidad
+> El rectángulo de base $\Delta x$ y altura $f_X(x)$ se superpone al área exacta del mismo intervalo. Note que la densidad puede superar $1$ mientras el área nunca lo hace, y que los dos números se acercan al achicar $\Delta x$.
 
 Detalle: [[funcion-de-densidad|Función de Densidad de Probabilidad]]
 
@@ -108,6 +120,9 @@ Cómo reconocerla: «tiempo hasta la falla», «tiempo entre llegadas», «falla
 
 > [!warn] Pasar de media a tasa
 > La media 400 hs significa $\lambda=1/400$, no $\lambda=400$. Y por falta de memoria, $P(\text{falla en las próximas 100 hs}\mid \text{ya duró 400})$ es simplemente $1-e^{-100/400}\approx0.2212$.
+
+> [!figura] u4-falta-de-memoria-cola-renormalizada
+> Arriba, la cola $x>t$ resaltada sobre la densidad; abajo, esa misma cola dividida por $P(X>t)$. Al mover $t$ la curva de abajo no se mueve: la vida restante tiene exactamente la misma exponencial que el dispositivo nuevo.
 
 Detalle: [[distribucion-exponencial|Distribución Exponencial]]
 
@@ -150,6 +165,9 @@ Cómo reconocerlo: piden «demostrar que la tasa de fallas es constante», clasi
 
 > [!warn] $R(t)$ no es $F_T(t)$
 > $F_T(t)$ es la probabilidad de haber fallado antes de $t$; $R(t)$ es el peligro en el instante $t$ condicionado a haber llegado vivo. No es una probabilidad acumulada.
+
+> [!figura] u4-tres-formas-de-la-tasa-de-fallas
+> Tasa de fallas, supervivencia y densidad de una familia Weibull sobre el mismo eje $t$. Al variar el parámetro de forma $b$ se recorren las tres ramas: $b>1$ desgaste, $b=1$ falla al azar (exponencial) y $b<1$ mortalidad infantil.
 
 Detalle: [[tasa-de-fallas|Función de tasa de fallas (tasa de riesgo)]]
 
@@ -197,6 +215,9 @@ Cómo reconocerla: el enunciado dice «normal» o «gaussiana» y da media y des
 > [!warn] Convención: el segundo parámetro es el desvío
 > La cátedra escribe $N(\mu,\sigma)$ con el **desvío** estándar, no la varianza. Si el enunciado da «media 78 y varianza 36», entonces $X\sim N(78,6)$. Otros textos usan $N(\mu,\sigma^2)$.
 
+> [!figura] u4-regla-empirica-invariante
+> Las tres bandas **anidadas** $\mu\pm k\sigma$ sombreadas sobre la campana, cada una rotulada con la probabilidad de su intervalo completo: $68.27\,\%$ para $\mu\pm\sigma$, $95.45\,\%$ para $\mu\pm2\sigma$ y $99.73\,\%$ para $\mu\pm3\sigma$ (el núcleo queda más oscuro porque pertenece a las tres). Al mover $\mu$ y $\sigma$ la curva se desplaza y se estira, pero los tres porcentajes no cambian: por eso alcanza una sola tabla de $\Phi$. Con «ver en unidades $z$» se superpone la $N(0,1)$ de referencia y se comprueba que todas las normales colapsan en la misma curva.
+
 Detalle: [[distribucion-normal|Distribución Normal]]
 
 ## 9. Estandarización y uso de la tabla normal
@@ -225,6 +246,15 @@ Mini-receta: (1) identificar $\mu$ y $\sigma$; (2) si piden probabilidad, estand
 
 > [!warn] Dibujar antes de despejar
 > El docente advierte que $z_{1-\alpha}=-z_\alpha$ se aplica mal con frecuencia cuando se usa de memoria. Conviene dibujar siempre la campana y marcar el área de cada cola antes de despejar un cuantil.
+
+> [!figura] u4-simetria-phi-dos-colas
+> Las dos colas de la normal estándar, sombreadas por separado y con su área. Se ve que $\Phi(-z)$ y $1-\Phi(z)$ miden lo mismo, y que la región central vale $2\Phi(z)-1$.
+
+> [!figura] u4-fractil-inverso-densidad-y-sigmoide
+> El mismo $\alpha$ leído en las dos direcciones: como área a la izquierda de $z_\alpha$ en la densidad, y como entrada por el eje vertical de la sigmoide $\Phi$ hasta bajar al eje $z$. El punto espejo muestra que $z_{1-\alpha}=-z_\alpha$.
+
+> [!figura] u4-interpolar-vs-redondear-tabla-z
+> Ampliación de $\Phi$ entre las filas $z=0.66$ y $z=0.67$. En un tramo de $0.01$ la curva y la cuerda casi se calcan: por eso interpolar acierta cinco decimales y redondear a la fila más cercana, solo dos.
 
 Detalle: [[estandarizacion-y-tabla-normal|Estandarización y uso de la tabla normal (Z)]]
 
