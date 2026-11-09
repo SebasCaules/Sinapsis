@@ -3,7 +3,7 @@ titulo: Distribución Erlang
 resumen: 'Instante de la $k$-ésima ocurrencia de un proceso de Poisson de tasa $\lambda$, equivalente a la suma de $k$ exponenciales i.i.d.: $E[T_k]=k/\lambda$ y $V(T_k)=k/\lambda^2$. Es la Gamma con parámetro de forma entero.'
 tipo: distribucion
 unidad: 7
-orden: 4
+orden: 5
 tags: [continua, distribucion]
 fuentes: ["[[teorica-suma-exponenciales]]", "[[tp7-suma-de-va]]"]
 actualizado: 2026-09-04

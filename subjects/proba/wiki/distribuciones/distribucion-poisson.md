@@ -3,7 +3,7 @@ titulo: Distribución Poisson
 resumen: 'Número de eventos raros en un intervalo cuando ocurren a una tasa media $\lambda$ constante: $p_X(k)=\lambda^k e^{-\lambda}/k!$. Su sello es que media y varianza valen ambas $\lambda$. Es el límite de una binomial con $n$ grande y $p$ chico.'
 tipo: distribucion
 unidad: 3
-orden: 12
+orden: 13
 tags: [discreta, distribucion]
 fuentes: ["[[poisson-apunte]]", "[[poisson-aproximacion-binomial-apunte]]", "[[tp3-variables-aleatorias-discretas]]", "[[video-geometrica-y-poisson]]"]
 actualizado: 2026-09-04

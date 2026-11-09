@@ -3,7 +3,7 @@ titulo: Leyes de De Morgan
 resumen: 'Al negar, unión e intersección se intercambian: $\overline{C\cup D}=\overline{C}\cap\overline{D}$ y $\overline{C\cap D}=\overline{C}\cup\overline{D}$. Es el recurso para traducir «ninguno» en el complemento de la unión.'
 tipo: concepto
 unidad: 2
-orden: 3
+orden: 4
 tags: [probabilidad, conjuntos, fundamentos]
 fuentes: ["[[tp2-calculo-de-probabilidades]]"]
 actualizado: 2026-09-04

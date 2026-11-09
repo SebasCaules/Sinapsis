@@ -3,7 +3,7 @@ titulo: Formulario — Complementos Matemáticos
 resumen: "Hoja de la unidad 0: integrales impropias de tipo I y II, integrales dobles con límites variables y derivadas parciales, más el diccionario masa-probabilidad que conecta cada operación con densidades y acumuladas."
 tipo: formulario
 unidad: 0
-orden: 4
+orden: 5
 tags: [complemento-matematico, formulario, cheat-sheet, integracion, derivacion]
 fuentes: ["[[tecnica-integrales-impropias]]", "[[tecnica-integrales-dobles]]", "[[tecnica-derivadas-parciales]]"]
 actualizado: 2026-09-04

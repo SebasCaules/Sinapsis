@@ -95,7 +95,7 @@
      App.ejercicioHref(item | id)           → hash de la ficha del ejercicio
      App.ejPartirIncisos(html)              → html con los incisos en renglones
        propios (<span class="ej-inciso">). Función PURA, expuesta para poder
-       probarla desde fuera del navegador (.claude/workforce-cambios/tools/
+       probarla desde fuera del navegador (estudio/tests/
        incisos.test.mjs); nadie más la usa todavía.
 
    IIFE sin dependencias externas; mermaid se carga perezosamente desde
@@ -1411,7 +1411,7 @@
     });
   }
   // se expone para la prueba unitaria
-  // (node .claude/workforce-cambios/tools/incisos.test.mjs)
+  // (node estudio/tests/incisos.test.mjs)
   A.ejPartirIncisos = partirIncisos;
 
   function itemHtml(it) {

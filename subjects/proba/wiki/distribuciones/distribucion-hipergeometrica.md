@@ -3,7 +3,7 @@ titulo: Distribución Hipergeométrica
 resumen: 'Éxitos en una muestra de tamaño $n$ tomada sin reposición de una población finita: $p_X(k)=\binom{M}{k}\binom{N-M}{n-k}/\binom{N}{n}$. Comparte la media $np$ con la binomial, pero su varianza es menor por el factor $(N-n)/(N-1)$.'
 tipo: distribucion
 unidad: 3
-orden: 11
+orden: 12
 tags: [discreta, distribucion]
 fuentes: ["[[hipergeometrica-apunte]]", "[[tp3-variables-aleatorias-discretas]]", "[[video-binomial-e-hipergeometrica]]"]
 actualizado: 2026-09-04

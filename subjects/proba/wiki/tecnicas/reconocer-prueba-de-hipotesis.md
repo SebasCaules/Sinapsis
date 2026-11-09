@@ -3,7 +3,7 @@ titulo: Cómo reconocer y plantear una prueba de hipótesis
 resumen: "Receta para los ejercicios de prueba de hipótesis: detectar el planteo, decidir si es de media o de proporción, elegir la cola y el estadístico. Regla de oro: la igualdad va en $H_0$ y la afirmación que se quiere probar, en $H_1$."
 tipo: tecnica
 unidad: 9
-orden: 7
+orden: 8
 tags: [prueba-de-hipotesis, tecnica, reconocer]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[intro-prueba-de-hipotesis-slides]]"]
 actualizado: 2026-09-04

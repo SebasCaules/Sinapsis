@@ -315,9 +315,9 @@ sin regenerar nada desde el baseline:
   generadas), sin tocar.
 - `formularios.js` no lee `window.EJERCICIOS`: no hay nada que portar ahí.
 
-**Arnés de prueba.** `.claude/workforce-cambios/tools/incisos.test.mjs` prueba
+**Arnés de prueba.** `estudio/tests/incisos.test.mjs` prueba
 `App.ejPartirIncisos` contra el baseline (`estudio/ejercicios.js`) y no se
-tocó. Se agregó `.claude/workforce-cambios/tools/incisos.bundle.test.mjs`,
+tocó. Se agregó `estudio/tests/incisos.bundle.test.mjs`,
 misma batería de casos, cargando en cambio `tools/proba-exercises/ejercicios.js`
 y `tools/proba-exercises/data/ejercicios-data.js` (con un mock de `App` que
 cubre además lo que el bundle usa detrás de un guard —

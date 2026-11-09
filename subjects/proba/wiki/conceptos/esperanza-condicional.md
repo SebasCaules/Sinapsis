@@ -3,7 +3,7 @@ titulo: Esperanza Condicional
 resumen: '$E[X\mid Y]$ es el promedio de $X$ una vez conocido $Y$, y como función de $Y$ es una variable aleatoria. De ahí la esperanza total $E[X]=E[E[X\mid Y]]$ y la varianza total $\mathrm{Var}(X)=E[\mathrm{Var}(X\mid Y)]+\mathrm{Var}(E[X\mid Y])$.'
 tipo: concepto
 unidad: 5
-orden: 6
+orden: 7
 tags: [bidimensionales, condicional, esperanza, varianza]
 fuentes: ["[[teorica-bidimensionales-vac-intro]]", "[[teorica-mezcla]]", "[[tp5-2024]]", "[[video-mezcla]]"]
 actualizado: 2026-09-04

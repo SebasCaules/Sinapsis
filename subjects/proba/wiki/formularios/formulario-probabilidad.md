@@ -3,7 +3,7 @@ titulo: Formulario — Probabilidad
 resumen: "Hoja de la unidad 2: axiomas y sus consecuencias, conteo, probabilidad condicional y regla del producto, árbol de probabilidades, probabilidad total y Bayes, independencia, fiabilidad de sistemas y patrones clásicos de ejercicio."
 tipo: formulario
 unidad: 2
-orden: 11
+orden: 12
 tags: [probabilidad, formulario, cheat-sheet, conteo, bayes]
 fuentes: ["[[axiomas-de-probabilidad]]", "[[leyes-de-de-morgan]]", "[[regla-de-laplace]]", "[[tecnica-conteo-combinatoria]]", "[[probabilidad-condicional]]", "[[independencia]]", "[[probabilidad-total-y-bayes]]", "[[arbol-de-probabilidades]]", "[[tp2-calculo-de-probabilidades]]"]
 actualizado: 2026-09-04

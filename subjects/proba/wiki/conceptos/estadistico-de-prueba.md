@@ -3,7 +3,7 @@ titulo: Estadístico de prueba y región de rechazo
 resumen: 'Función de la muestra con distribución conocida bajo $H_0$ ($Z$ si el desvío es conocido, $T$ si no) y conjunto de valores que llevan a rechazar. La región de rechazo va en las colas que indica $H_1$ y acumula probabilidad $\alpha$.'
 tipo: concepto
 unidad: 9
-orden: 2
+orden: 3
 tags: [prueba-de-hipotesis, estadistico, region-de-rechazo]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[apunte-media-estadistico-z]]"]
 actualizado: 2026-09-04

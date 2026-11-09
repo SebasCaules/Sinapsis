@@ -3,7 +3,7 @@ titulo: "Técnica: interpolación en datos agrupados"
 resumen: 'Cuando el enunciado solo da una tabla de frecuencias, la mediana, los cuartiles y las proporciones salen de localizar el intervalo con la frecuencia acumulada e interpolar: $q_j=L_i+\frac{0.25\,j\,n-F_{i-1}}{f_i}(L_{s,i}-L_i)$.'
 tipo: tecnica
 unidad: 1
-orden: 10
+orden: 11
 tags: [estadistica-descriptiva, datos-agrupados, interpolacion, parcial]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[video-datos-agrupados]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Formulario — Estadística Descriptiva
 resumen: "Hoja de la unidad 1: frecuencias e histograma, medidas de tendencia central y de dispersión, cuartiles, asimetría y curtosis, boxplot y valores atípicos, con las versiones ponderadas e interpoladas para datos agrupados."
 tipo: formulario
 unidad: 1
-orden: 11
+orden: 12
 tags: [estadistica-descriptiva, formulario, cheat-sheet]
 fuentes: ["[[estadistica-descriptiva]]", "[[medidas-de-tendencia-central]]", "[[medidas-de-dispersion]]", "[[asimetria-y-curtosis]]", "[[cuartiles-y-percentiles]]", "[[histograma-y-frecuencias]]", "[[boxplot]]", "[[datos-agrupados]]", "[[tecnica-datos-agrupados-interpolacion]]"]
 actualizado: 2026-09-04

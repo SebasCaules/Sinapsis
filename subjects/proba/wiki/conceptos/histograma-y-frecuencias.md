@@ -3,7 +3,7 @@ titulo: Histograma y frecuencias
 resumen: 'Reparte los datos en intervalos y grafica sus frecuencias $n_k$ y $f_k=n_k/n$; es la versión muestral de una densidad. La acumulada $F(\alpha)$ permite leer mediana, cuartiles y proporciones sin depender del ancho de intervalo.'
 tipo: concepto
 unidad: 1
-orden: 7
+orden: 8
 tags: [estadistica-descriptiva, histograma, frecuencias]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[estadistica-descriptiva-introduccion]]", "[[video-histogramas]]"]
 actualizado: 2026-09-04

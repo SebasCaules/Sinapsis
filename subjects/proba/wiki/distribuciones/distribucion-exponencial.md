@@ -3,7 +3,7 @@ titulo: Distribución Exponencial
 resumen: 'Tiempo de espera hasta el próximo suceso de un proceso de Poisson: $f_X(x)=\lambda e^{-\lambda x}$, $P(X>x)=e^{-\lambda x}$ y $E[X]=\sigma_X=1/\lambda$. Su sello son la falta de memoria y la tasa de fallas constante $\lambda$.'
 tipo: distribucion
 unidad: 4
-orden: 4
+orden: 5
 tags: [continua, distribucion]
 fuentes: ["[[teorica-va-exponencial]]", "[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-09-04

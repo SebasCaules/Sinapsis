@@ -12,7 +12,15 @@ import { buildSubjectModel, type ExtraStep } from "../model";
 import type { SubjectCtx } from "../context";
 import { DivisionView } from "./DivisionView";
 
-const config = SubjectConfig.parse(rawProbaConfig);
+/* «Sin hub, el panorama es el primer tipo de contenido»: las páginas sintéticas no
+   traen resúmenes, así que se usa el config con «concepto» primero (Proba declara
+   «resumen» primero desde 2026-11-09). */
+const config = SubjectConfig.parse({
+  ...rawProbaConfig,
+  pageTypes: [...rawProbaConfig.pageTypes].sort(
+    (a, b) => Number(b.key === "concepto") - Number(a.key === "concepto"),
+  ),
+});
 
 function meta(slug: string, title: string, type: string, division: string, extra: Partial<PageMeta> = {}): PageMeta {
   return { slug, title, type, folder: type, division, summary: "", tags: [], sources: [], words: 100, ...extra };

@@ -3,7 +3,7 @@ titulo: Error tipo I y tipo II
 resumen: 'Los dos fallos posibles de una prueba: rechazar $H_0$ siendo cierta (tipo I, probabilidad $\alpha$) o aceptarla siendo falsa (tipo II, probabilidad $\beta$). La potencia es $1-\beta$; bajar ambos a la vez exige aumentar el tamaño de muestra $n$.'
 tipo: concepto
 unidad: 9
-orden: 3
+orden: 4
 tags: [prueba-de-hipotesis, error, potencia]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[intro-prueba-de-hipotesis-slides]]", "[[apunte-media-nula-igual]]", "[[apunte-media-nula-mayor-igual]]", "[[video-th-desvio-conocido]]", "[[video-th-desvio-desconocido]]"]
 actualizado: 2026-09-04

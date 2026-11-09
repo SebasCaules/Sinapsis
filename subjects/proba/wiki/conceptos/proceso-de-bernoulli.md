@@ -3,7 +3,7 @@ titulo: Proceso de Bernoulli
 resumen: 'Proceso de conteo en tiempo discreto: en cada paso ocurre un evento con probabilidad $p$, de modo que $N(k)\sim\text{Binomial}(k,p)$, los tiempos entre eventos son geométricos y el tiempo al $k$-ésimo es binomial negativo.'
 tipo: concepto
 unidad: 6
-orden: 3
+orden: 4
 tags: [procesos-estocasticos, discreto, proceso-de-conteo]
 fuentes: ["[[teorica-proceso-de-bernoulli]]", "[[tp6-procesos-estocasticos]]"]
 actualizado: 2026-09-04

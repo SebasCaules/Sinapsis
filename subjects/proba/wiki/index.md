@@ -10,6 +10,24 @@ Para navegar rápido en Obsidian: abrí la vista de grafo.
 > **~92 figuras interactivas** (2026-09-04) ancladas con callouts `[!figura]` en las páginas de conceptos, distribuciones,
 > teoremas y técnicas; se dibujan en la app de estudio (`estudio/`).
 
+## Resúmenes de unidad
+
+Primera página de cada unidad (2026-11-09): tema por tema, con los conceptos y las ecuaciones clave destacados, cómo aparece en los parciales y la tabla de fórmulas.
+
+- [[resumen-unidad-1]] — Unidad 1 · Estadística Descriptiva.
+- [[resumen-unidad-2]] — Unidad 2 · Introducción a la Probabilidad.
+- [[resumen-unidad-3]] — Unidad 3 · Variables Aleatorias Discretas.
+- [[resumen-unidad-4]] — Unidad 4 · Variables Aleatorias Continuas.
+- [[resumen-unidad-5]] — Unidad 5 · Función de V.A. y Bidimensionales.
+- [[resumen-unidad-6]] — Unidad 6 · Procesos Estocásticos.
+- [[resumen-unidad-7]] — Unidad 7 · Suma de Variables Aleatorias.
+- [[resumen-unidad-8]] — Unidad 8 · Inferencia Estadística.
+- [[resumen-unidad-9]] — Unidad 9 · Pruebas de Hipótesis.
+- [[resumen-unidad-0]] — Complementos Matemáticos.
+
+## Plan de estudio
+- [[plan-final-2026-12-03]] — plan día por día del 9/11 al final del 3/12/2026: teoría liviana hasta el 24/11 y dedicación completa del 25/11 al 2/12 (diagnóstico, bloques de práctica, 3 simulacros).
+
 ## Fuentes
 
 **Unidad 1 — Estadística Descriptiva**

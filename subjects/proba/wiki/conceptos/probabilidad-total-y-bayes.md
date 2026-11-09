@@ -3,7 +3,7 @@ titulo: Probabilidad total y teorema de Bayes
 resumen: 'Con una partición del universo, la probabilidad total arma $P(B)=\sum_k P(B\mid A_k)P(A_k)$ y Bayes invierte la condicional: $P(A_i\mid B)=P(B\mid A_i)P(A_i)/P(B)$. Es la maquinaria de los problemas de test diagnóstico.'
 tipo: concepto
 unidad: 2
-orden: 9
+orden: 10
 tags: [probabilidad, bayes, probabilidad-total, particion]
 fuentes: ["[[independencia-condicional-bayes]]", "[[tp2-calculo-de-probabilidades]]"]
 actualizado: 2026-09-04

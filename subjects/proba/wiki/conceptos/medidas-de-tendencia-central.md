@@ -3,7 +3,7 @@ titulo: Medidas de tendencia central
 resumen: 'Media $\bar{x}=\frac{1}{n}\sum x_i$, mediana y moda resumen dónde se ubica el centro de los datos; la media es sensible a valores atípicos y la mediana es robusta, así que elegir cuál reportar ya es una decisión estadística.'
 tipo: concepto
 unidad: 1
-orden: 3
+orden: 4
 tags: [estadistica-descriptiva, media, mediana, moda]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[video-histogramas]]", "[[video-medidas-de-resumen]]"]
 actualizado: 2026-09-04

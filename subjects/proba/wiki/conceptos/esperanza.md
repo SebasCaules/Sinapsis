@@ -3,7 +3,7 @@ titulo: Esperanza (Valor Esperado)
 resumen: 'Promedio a largo plazo de una variable aleatoria, ponderado por sus probabilidades: $E[X]=\sum_k k\,p_X(k)$. Es el centro de masa de la distribución y cumple linealidad, $E[aX+bY+c]=aE[X]+bE[Y]+c$, aun sin independencia.'
 tipo: concepto
 unidad: 3
-orden: 3
+orden: 4
 tags: [discreta, esperanza, momentos]
 fuentes: ["[[va-discretas-introduccion]]", "[[tp3-variables-aleatorias-discretas]]", "[[video-vad-generales]]"]
 actualizado: 2026-09-04

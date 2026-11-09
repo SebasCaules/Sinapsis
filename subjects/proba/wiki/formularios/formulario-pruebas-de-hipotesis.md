@@ -3,7 +3,7 @@ titulo: Formulario — Pruebas de hipótesis
 resumen: "Hoja de la unidad 9: tabla de errores y potencia, estadísticos $Z$ y $T$, regiones de rechazo según la cola, valor crítico del estimador, valor p, cálculo del error tipo II para media y proporción, y diseño del tamaño muestral."
 tipo: formulario
 unidad: 9
-orden: 9
+orden: 10
 tags: [prueba-de-hipotesis, formulario, cheat-sheet]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[apunte-media-nula-igual]]", "[[apunte-media-nula-mayor-igual]]", "[[apunte-prueba-proporcion]]", "[[apunte-media-desvio-desconocido]]"]
 actualizado: 2026-05-30

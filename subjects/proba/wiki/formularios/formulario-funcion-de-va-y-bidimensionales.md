@@ -3,7 +3,7 @@ titulo: Formulario — Función de V.A. y Bidimensionales
 resumen: "Hoja de la unidad 5: distribución de una función de variable aleatoria, transformación afín, simulación por transformada inversa, conjuntas y marginales, condicionales, independencia, covarianza, correlación y mezclas."
 tipo: formulario
 unidad: 5
-orden: 8
+orden: 9
 tags: [bidimensionales, funcion-de-variable-aleatoria, formulario, cheat-sheet]
 fuentes: ["[[funcion-de-variable-aleatoria]]", "[[tecnica-distribucion-de-una-funcion-de-va]]", "[[variables-aleatorias-bidimensionales]]", "[[covarianza-y-correlacion]]", "[[independencia-de-variables-aleatorias]]", "[[esperanza-condicional]]", "[[mezcla-de-distribuciones]]", "[[tp5-2024]]"]
 actualizado: 2026-09-04

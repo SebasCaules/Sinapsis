@@ -1,13 +1,12 @@
 ---
 titulo: Suma de Variables Aleatorias
-resumen: 'Hub de la unidad 7: la esperanza de una suma siempre es $E[X]+E[Y]$; la varianza es $V(X)+2\,\mathrm{Cov}(X,Y)+V(Y)$ y se reduce a $V(X)+V(Y)$ sin correlación; la distribución de la suma se obtiene por convolución.'
+resumen: 'Para una suma de variables aleatorias, la esperanza de una suma siempre es $E[X]+E[Y]$; la varianza es $V(X)+2\,\mathrm{Cov}(X,Y)+V(Y)$ y se reduce a $V(X)+V(Y)$ sin correlación; la distribución de la suma se obtiene por convolución.'
 tipo: concepto
 unidad: 7
-orden: 1
-hub: true
+orden: 2
 tags: [suma-de-va, esperanza, varianza, convolucion]
 fuentes: ["[[teorica-suma-va-general]]", "[[teorica-suma-va-independientes]]", "[[teorica-suma-promedio-iid]]", "[[tp7-suma-de-va]]"]
-actualizado: 2026-09-04
+actualizado: 2026-11-09
 ---
 
 # Suma de Variables Aleatorias
@@ -17,7 +16,10 @@ actualizado: 2026-09-04
 [[covarianza-y-correlacion|covarianza]] salvo independencia) y su distribución
 (por **convolución**). Es la base de toda la unidad.
 
-Página **hub** de la unidad 7. Dadas dos (o más) v.a., estudiamos la v.a.
+> El resumen de la unidad, tema por tema y con las fórmulas clave, está en
+> [[resumen-unidad-7|Resumen de la Unidad 7]]. Esta página es el mapa de la unidad.
+
+Dadas dos (o más) v.a., estudiamos la v.a.
 **suma** $S=X+Y$: su esperanza, su varianza y su distribución.
 
 ## Esperanza de una suma (siempre)

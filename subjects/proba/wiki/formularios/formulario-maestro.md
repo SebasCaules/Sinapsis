@@ -5,7 +5,7 @@ tipo: formulario
 orden: 1
 tags: [formulario, cheat-sheet, maestro, resumen, variable-aleatoria]
 fuentes: ["[[variable-aleatoria]]", "[[variable-aleatoria-continua]]", "[[variables-aleatorias-bidimensionales]]", "[[distribucion-normal]]", "[[covarianza-y-correlacion]]", "[[teorema-central-del-limite]]"]
-actualizado: 2026-09-04
+actualizado: 2026-11-09
 ---
 
 # Formulario Maestro
@@ -568,12 +568,14 @@ Reloj que en cada tic hace un ensayo Bernoulli($p$) i.i.d. (a lo sumo un éxito 
 |---|---|---|
 | Conteo en $k$ pasos | $N(k)$ | [[distribucion-binomial\|Binomial]]$(k,p)$ |
 | Incremento ($k\le m$) | $N(m)-N(k)$ | Binomial$(m{-}k,p)$ |
-| Tiempo entre eventos / al próximo | $\tau_i$ | [[distribucion-geometrica\|Geométrica]]$(p)$ i.i.d. |
-| Tiempo hasta el $k$-ésimo | $T_k=\tau_1+\dots+\tau_k$ | [[distribucion-binomial-negativa\|Binomial negativa]]$(k,p)$ |
+| Tiempo entre eventos / al próximo | $\tau_i$ (ensayos) | [[distribucion-geometrica\|Geométrica]]$(p)$ i.i.d., versión ensayos: $\tau_i=X+1$ |
+| Tiempo hasta el $k$-ésimo | $T_k=\tau_1+\dots+\tau_k$ (ensayos) | [[distribucion-binomial-negativa\|Binomial negativa]]$(k,p)$, versión ensayos: $T_k=Y+k$ |
 
 $$ P(N(k)=n)=\binom{k}{n}p^n(1-p)^{k-n},\qquad q=1-p. $$
 
-Nota: $\tau_i$ cuenta los **fracasos** entre eventos; Geométrica y Binomial negativa **cuentan fracasos** (soporte $\mathbb{N}_0$), $E[\tau]=q/p$. Es un [[proceso-de-bernoulli|proceso de Markov]].
+**Convención (ensayos, no fracasos):** en el proceso de Bernoulli, $T_k$ es el **ensayo** en que ocurre el $k$-ésimo éxito y $\tau_i=T_i-T_{i-1}$ es la **cantidad de ensayos** entre éxitos consecutivos (incluye el ensayo del éxito), como en la figura de la cátedra con $T_3=\tau_1+\tau_2+\tau_3$ sobre el eje de tiempo. Relación con la convención «fracasos» de la tabla de U3: si $X\sim\text{Geom}(p)$ y $Y\sim\text{BinNeg}(k,p)$ cuentan fracasos, entonces $\tau_i=X+1$ y $T_k=Y+k$:
+$$ P(\tau_i=n)=q^{\,n-1}p\ (n\ge1),\quad E[\tau_i]=\tfrac1p;\qquad P(T_k=n)=\binom{n-1}{k-1}q^{\,n-k}p^{k}\ (n\ge k),\quad E[T_k]=\tfrac kp. $$
+Las varianzas no cambian con el corrimiento: $V(\tau_i)=q/p^2$, $V(T_k)=kq/p^2$. Usar la PMF de fracasos para $T_k$ sin correr $k$ es un error. Es un [[proceso-de-bernoulli|proceso de Markov]].
 
 ### Proceso de Poisson (tiempo continuo)
 

@@ -3,7 +3,7 @@ titulo: Función Generadora de Momentos (FGM)
 resumen: 'Función auxiliar $M_X(t)=E[e^{tX}]$ que empaqueta todos los momentos: $E[X^k]=M_X^{(k)}(0)$. Identifica unívocamente a la distribución y convierte la suma de variables independientes en producto de FGM.'
 tipo: concepto
 unidad: 3
-orden: 5
+orden: 6
 tags: [discreta, fgm, momentos]
 fuentes: ["[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-06-06

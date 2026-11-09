@@ -3,7 +3,7 @@ titulo: Función de Variable Aleatoria
 resumen: 'Dada una transformación $Y=g(X)$, obtiene la distribución de $Y$ por el método de la FDA: $F_Y(y)=P(g(X)\le y)$ y luego derivar o sumar masas. Incluye el caso afín $Y=aX+b$ y la transformada inversa.'
 tipo: concepto
 unidad: 5
-orden: 1
+orden: 2
 tags: [bidimensionales, transformacion, funcion-de-variable-aleatoria]
 fuentes: ["[[teorica-funcion-de-variable-aleatoria]]", "[[tp5-2024]]", "[[video-mezcla]]", "[[video-funciones-de-variables-aleatorias]]"]
 actualizado: 2026-09-04

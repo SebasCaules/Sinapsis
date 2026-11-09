@@ -3,7 +3,7 @@ titulo: Desigualdades de Markov y de Chebyshev
 resumen: 'Cotas universales que solo usan momentos: Markov da $P(X\ge\alpha)\le E[X]/\alpha$ para $X\ge 0$, y Chebyshev $P(|X-\mu|\ge\varepsilon)\le\sigma_X^2/\varepsilon^2$. Valen siempre pero son flojas; con ellas se demuestra la ley débil de los grandes números.'
 tipo: teorema
 unidad: 7
-orden: 6
+orden: 7
 tags: [desigualdad, cota, varianza, teorema]
 fuentes: ["[[teorica-markov-chebyshev]]", "[[tp7-suma-de-va]]", "[[video-desigualdades-y-lgn]]"]
 actualizado: 2026-09-04

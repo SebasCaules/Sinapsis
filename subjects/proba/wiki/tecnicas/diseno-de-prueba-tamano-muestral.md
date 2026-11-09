@@ -3,7 +3,7 @@ titulo: Diseño de la prueba y tamaño muestral (fijar α y β)
 resumen: 'Problema inverso de la prueba de hipótesis: en vez de calcular los errores se fijan $\alpha$ y $\beta$ y se despejan el tamaño de muestra y el valor crítico. Para la media con desvío conocido, $n=\left(\frac{(z_{1-\alpha}+z_{1-\beta})\sigma}{\mu_1-\mu_0}\right)^2$.'
 tipo: tecnica
 unidad: 9
-orden: 8
+orden: 9
 tags: [prueba-de-hipotesis, tecnica, tamano-muestral, curva-oc, diseno]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[intro-prueba-de-hipotesis-slides]]", "[[apunte-media-nula-mayor-igual]]"]
 actualizado: 2026-09-04

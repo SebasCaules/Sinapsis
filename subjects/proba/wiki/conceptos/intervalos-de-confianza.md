@@ -3,7 +3,7 @@ titulo: Intervalos de Confianza
 resumen: 'Devuelve un rango que contiene al parámetro con confianza $\gamma$, en tres casos: media con $\sigma$ conocido y proporción con el fractil $z$, y media con $\sigma$ desconocido con $t_{n-1}$. La confianza es propiedad de la fórmula, no del intervalo ya calculado.'
 tipo: concepto
 unidad: 8
-orden: 6
+orden: 7
 tags: [inferencia, estimacion, intervalo-de-confianza]
 fuentes: ["[[teorica-ic-media-desvio-conocido]]", "[[teorica-ic-proporcion]]", "[[teorica-ic-media-desvio-desconocido-intro]]", "[[teorica-ic-media-desvio-desconocido-intervalos]]", "[[tp8-estimacion-de-parametros]]", "[[video-ic-desvio-desconocido]]"]
 actualizado: 2026-09-04

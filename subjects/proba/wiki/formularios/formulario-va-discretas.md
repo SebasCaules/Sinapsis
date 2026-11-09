@@ -3,7 +3,7 @@ titulo: Formulario — Variables Aleatorias Discretas
 resumen: "Hoja de la unidad 3: masa, acumulada, esperanza, varianza y función generadora de momentos, las dos convenciones de la geométrica y la binomial negativa, aproximaciones entre distribuciones y teoría de la decisión."
 tipo: formulario
 unidad: 3
-orden: 14
+orden: 15
 tags: [discreta, formulario, cheat-sheet]
 fuentes: ["[[variable-aleatoria]]", "[[esperanza]]", "[[varianza]]", "[[funcion-generadora-de-momentos]]", "[[distribucion-geometrica]]", "[[distribucion-binomial-negativa]]", "[[distribucion-hipergeometrica]]", "[[distribucion-poisson]]", "[[teoria-de-la-decision-valor-esperado]]", "[[reconocer-distribucion-discreta]]", "[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-09-04

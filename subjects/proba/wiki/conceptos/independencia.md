@@ -3,7 +3,7 @@ titulo: Independencia de eventos
 resumen: 'Dos eventos son independientes cuando $P(A\cap B)=P(A)P(B)$, equivalente a $P(B\mid A)=P(B)$: saber que uno ocurrió no cambia la probabilidad del otro. No confundir con mutuamente excluyentes, que es lo opuesto.'
 tipo: concepto
 unidad: 2
-orden: 8
+orden: 9
 tags: [probabilidad, independencia]
 fuentes: ["[[independencia-condicional-bayes]]", "[[tp2-calculo-de-probabilidades]]", "[[video-independencia]]"]
 actualizado: 2026-09-04

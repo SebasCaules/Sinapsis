@@ -3,7 +3,7 @@ titulo: Cadenas de Markov
 resumen: 'Proceso de Markov con estados discretos: el próximo estado depende solo del actual. Todo se calcula con la matriz de transición, $\vec p(n)=\vec p(0)\,\mathbb{P}^{n}$, y el largo plazo con la distribución estacionaria $\vec\pi=\vec\pi\,\mathbb{P}$.'
 tipo: concepto
 unidad: 6
-orden: 6
+orden: 7
 tags: [procesos-estocasticos, markov, matriz-de-transicion]
 fuentes: ["[[teorica-cadenas-de-markov]]", "[[tp6-procesos-estocasticos]]", "[[video-cadenas-de-markov]]", "[[video-distribucion-estacionaria-regulares]]", "[[video-distribucion-estacionaria-no-regulares]]", "[[video-tiempos-de-espera]]"]
 actualizado: 2026-09-04

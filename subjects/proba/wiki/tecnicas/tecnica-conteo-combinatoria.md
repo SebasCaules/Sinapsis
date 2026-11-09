@@ -3,7 +3,7 @@ titulo: "Técnica: conteo y combinatoria"
 resumen: "Herramientas para contar casos favorables y posibles al aplicar la regla de Laplace: reglas de suma y producto, las cinco formas de elegir u ordenar $r$ entre $n$ según orden y repetición, inclusión-exclusión y paso al complemento."
 tipo: tecnica
 unidad: 2
-orden: 6
+orden: 7
 tags: [probabilidad, conteo, combinatoria, laplace, parcial]
 fuentes: ["[[regla-de-laplace-slides]]", "[[tp2-calculo-de-probabilidades]]"]
 actualizado: 2026-09-04

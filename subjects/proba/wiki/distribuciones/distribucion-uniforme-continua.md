@@ -3,7 +3,7 @@ titulo: Distribución Uniforme (continua)
 resumen: 'Valor al azar en el intervalo $(a,b)$, con densidad constante $1/(b-a)$: todos los subintervalos del mismo largo son igual de probables. Su FDA crece linealmente y cumple $E[X]=(a+b)/2$ y $V(X)=(b-a)^2/12$.'
 tipo: distribucion
 unidad: 4
-orden: 3
+orden: 4
 tags: [continua, distribucion]
 fuentes: ["[[teorica-va-uniforme]]", "[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-06-06

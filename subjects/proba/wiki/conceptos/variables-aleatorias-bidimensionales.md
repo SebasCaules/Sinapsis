@@ -3,7 +3,7 @@ titulo: Variables Aleatorias Bidimensionales
 resumen: "Dos magnitudes observadas en el mismo experimento: la distribución conjunta lo contiene todo, las marginales se obtienen sumando o integrando una variable y las condicionales dividiendo por la marginal. Las marginales no reconstruyen la conjunta."
 tipo: concepto
 unidad: 5
-orden: 3
+orden: 4
 tags: [bidimensionales, conjunta, marginal]
 fuentes: ["[[teorica-bidimensionales-vad-intro]]", "[[teorica-bidimensionales-vac-intro]]", "[[tp5-2024]]", "[[video-mezcla]]", "[[video-vad-2d]]"]
 actualizado: 2026-09-04

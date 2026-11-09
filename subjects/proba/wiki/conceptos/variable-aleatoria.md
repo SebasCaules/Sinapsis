@@ -3,7 +3,7 @@ titulo: Variable Aleatoria Discreta
 resumen: "Función que asigna un número real a cada resultado del experimento y toma valores separados (contables). Se describe con su función de masa $p_X(k)=P(X=k)$ o con su acumulada, y se resume con esperanza y varianza; es el objeto central de la unidad 3."
 tipo: concepto
 unidad: 3
-orden: 1
+orden: 2
 tags: [discreta, variable-aleatoria, fundamental]
 fuentes: ["[[va-discretas-introduccion]]", "[[tp3-variables-aleatorias-discretas]]", "[[video-vad-generales]]"]
 actualizado: 2026-09-04

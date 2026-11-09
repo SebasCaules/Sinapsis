@@ -3,7 +3,7 @@ titulo: Independencia de Variables Aleatorias
 resumen: 'Hay independencia cuando la conjunta se factoriza, $f_{X,Y}=f_X\,f_Y$; entonces $E[XY]=E[X]E[Y]$ y la covarianza es nula. El recíproco falla salvo en el caso normal, y un soporte no rectangular delata dependencia.'
 tipo: concepto
 unidad: 5
-orden: 5
+orden: 6
 tags: [bidimensionales, independencia]
 fuentes: ["[[teorica-independencia-vad]]", "[[teorica-bidimensionales-vac-intro]]", "[[tp5-2024]]"]
 actualizado: 2026-09-04

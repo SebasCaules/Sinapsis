@@ -3,7 +3,7 @@ titulo: Regla de Laplace
 resumen: "Con espacio muestral finito y resultados equiprobables, $P(A)=|A|/|S|$: casos favorables sobre casos posibles. Reduce el cálculo de probabilidades a un problema de conteo; si los casos no son equiprobables hay que volver a los axiomas."
 tipo: concepto
 unidad: 2
-orden: 5
+orden: 6
 tags: [probabilidad, laplace, conteo]
 fuentes: ["[[regla-de-laplace-slides]]", "[[video-laplace]]"]
 actualizado: 2026-09-04

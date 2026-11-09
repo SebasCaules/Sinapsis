@@ -3,7 +3,7 @@ titulo: Función de tasa de fallas (tasa de riesgo)
 resumen: "Mide el riesgo instantáneo de falla de un componente que ya sobrevivió hasta $t$: $R(t)=f_T(t)/(1-F_T(t))$. Su forma distingue desgaste, mortalidad infantil y falla al azar; $R$ constante caracteriza a la distribución exponencial."
 tipo: concepto
 unidad: 4
-orden: 6
+orden: 7
 tags: [continua, confiabilidad, exponencial, weibull, tasa-de-fallas]
 fuentes: ["[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-09-04

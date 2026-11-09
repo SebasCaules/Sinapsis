@@ -3,7 +3,7 @@ titulo: Distribución Binomial Negativa (Pascal)
 resumen: 'Cuenta los fracasos previos al $r$-ésimo éxito en ensayos Bernoulli independientes: $p_X(k)=\binom{k+r-1}{k}q^k p^r$, con $E[X]=rq/p$ y $V(X)=rq/p^2$. Generaliza la geométrica, que es el caso $r=1$; la cátedra cuenta fracasos, no ensayos.'
 tipo: distribucion
 unidad: 3
-orden: 10
+orden: 11
 tags: [discreta, distribucion]
 fuentes: ["[[binomial-negativa-apunte]]", "[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-09-04

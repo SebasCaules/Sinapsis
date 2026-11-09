@@ -3,7 +3,7 @@ titulo: Prueba de hipótesis para la media
 resumen: 'Contrasta si la media poblacional vale, supera o queda por debajo de un valor de referencia $\mu_0$. Se usa el estadístico $Z=(\bar X-\mu_0)/(\sigma/\sqrt{n})$ con $\sigma$ conocida o $n$ grande, y el estadístico $T$ de Student con $\sigma$ desconocida y $n$ chico.'
 tipo: concepto
 unidad: 9
-orden: 5
+orden: 6
 tags: [prueba-de-hipotesis, media, estadistico-z, t-de-student]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[apunte-media-nula-igual]]", "[[apunte-media-nula-mayor-igual]]", "[[apunte-media-estadistico-z]]", "[[apunte-media-desvio-desconocido]]"]
 actualizado: 2026-09-04

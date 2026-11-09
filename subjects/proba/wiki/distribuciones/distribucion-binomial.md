@@ -3,7 +3,7 @@ titulo: Distribución Binomial
 resumen: 'Número de éxitos en $n$ ensayos Bernoulli independientes con la misma probabilidad $p$: $p_X(k)=\binom{n}{k}p^k q^{n-k}$, con $E[X]=np$ y $V(X)=npq$. Se reconoce por el número fijo de repeticiones y el muestreo con reposición.'
 tipo: distribucion
 unidad: 3
-orden: 8
+orden: 9
 tags: [discreta, distribucion]
 fuentes: ["[[binomial-apunte]]", "[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-09-04

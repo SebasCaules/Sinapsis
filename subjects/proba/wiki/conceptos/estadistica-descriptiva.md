@@ -1,26 +1,22 @@
 ---
 titulo: Estadística Descriptiva
-resumen: "Hub de la Unidad 1: resumir y describir una muestra con medidas de centro, dispersión y forma más histograma y boxplot, sin inferir todavía sobre la población. Contiene el mapa de todas las páginas de la unidad y la idea de robustez."
+resumen: "La estadística descriptiva resume y describe una muestra con medidas de centro, dispersión y forma más histograma y boxplot, sin inferir todavía sobre la población. La mediana y el MAD son robustos ante valores atípicos; la media y el desvío, no."
 tipo: concepto
 unidad: 1
-orden: 1
-hub: true
+orden: 2
 tags: [hub, estadistica-descriptiva]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[estadistica-descriptiva-introduccion]]", "[[video-histogramas]]"]
-actualizado: 2026-09-03
+actualizado: 2026-11-09
 ---
 
 # Estadística Descriptiva
 
-**En breve.** Página **hub** de la Unidad 1: la estadística descriptiva resume y
-describe una [[poblacion-y-muestra|muestra]] con medidas de centro, dispersión y
-forma más unos pocos gráficos, **sin** todavía inferir sobre la población (ese salto
-es [[inferencia-estadistica|inferencia]]). Aquí abajo está el mapa de todas las
-páginas de la unidad.
+> El resumen de la unidad, tema por tema y con las fórmulas clave, está en
+> [[resumen-unidad-1|Resumen de la Unidad 1]]. Esta página es el mapa de la unidad.
 
-Página **hub** de la Unidad 1. La estadística descriptiva busca **resumir y
+La estadística descriptiva busca **resumir y
 describir** un conjunto de datos observados $\{x_i\}_{i=1}^n$ (una *muestra*),
-sin todavía hacer inferencia sobre la población. La idea: en vez de mirar los
+sin todavía hacer inferencia sobre la población (ese salto es [[inferencia-estadistica|inferencia]]). La idea: en vez de mirar los
 datos uno por uno, se calculan **medidas de resumen** que dan una idea general.
 
 > **Fuentes de la unidad.** El recorrido motivador está en las slides

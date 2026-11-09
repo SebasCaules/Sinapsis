@@ -3,7 +3,7 @@ titulo: Prueba de hipótesis para la proporción
 resumen: 'Contrasta una proporción poblacional contra un valor de referencia $q_0$ mediante $Z=(\hat q-q_0)/\sqrt{q_0(1-q_0)/n}$, válido para $n$ grande por aproximación normal de la binomial. El desvío se evalúa en $q_0$ y no en el observado $\hat q$.'
 tipo: concepto
 unidad: 9
-orden: 6
+orden: 7
 tags: [prueba-de-hipotesis, proporcion, estadistico-z]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[apunte-prueba-proporcion]]", "[[apunte-media-estadistico-z]]", "[[intro-prueba-de-hipotesis-slides]]"]
 actualizado: 2026-06-06

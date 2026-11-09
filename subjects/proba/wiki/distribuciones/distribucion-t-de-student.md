@@ -3,7 +3,7 @@ titulo: Distribución t de Student
 resumen: 'Ley del estadístico $T=(\overline X_n-\mu)/(S_n/\sqrt n)$ con $m=n-1$ grados de libertad: la media muestral estandarizada con el desvío estimado, de colas más pesadas que la normal. Es la referencia de los intervalos de confianza con desvío desconocido.'
 tipo: distribucion
 unidad: 8
-orden: 5
+orden: 6
 tags: [continua, distribucion, inferencia]
 fuentes: ["[[teorica-t-de-student]]", "[[teorica-ic-media-desvio-desconocido-intro]]", "[[teorica-ic-media-desvio-desconocido-intervalos]]", "[[tp8-estimacion-de-parametros]]"]
 actualizado: 2026-09-04

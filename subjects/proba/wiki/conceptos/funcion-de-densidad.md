@@ -3,7 +3,7 @@ titulo: Función de Densidad de Probabilidad
 resumen: 'Análogo continuo de la función de masa: una función $f_X\ge0$ que integra $1$ y cuya área da probabilidades, $P(a<X\le b)=\int_a^b f_X(x)\,dx$. No es una probabilidad y puede superar $1$; es la derivada de la FDA.'
 tipo: concepto
 unidad: 4
-orden: 2
+orden: 3
 tags: [continua, densidad, pdf]
 fuentes: ["[[teorica-va-continuas]]", "[[tp4-variables-aleatorias-continuas]]", "[[video-vac-generales]]"]
 actualizado: 2026-09-04

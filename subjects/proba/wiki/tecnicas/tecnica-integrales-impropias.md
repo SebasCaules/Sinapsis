@@ -3,7 +3,7 @@ titulo: Integrales impropias
 resumen: 'Cuando el dominio no es acotado o el integrando explota en un extremo, la integral se define por un límite: $\int_a^{+\infty}f=\lim_{t\to+\infty}\int_a^{t}f$. Es la herramienta para normalizar densidades y calcular probabilidades de cola.'
 tipo: tecnica
 unidad: 0
-orden: 1
+orden: 2
 tags: [complemento-matematico, integracion, continua]
 fuentes: ["[[complemento-integrales-impropias]]"]
 actualizado: 2026-09-04

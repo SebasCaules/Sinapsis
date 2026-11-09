@@ -3,7 +3,7 @@ titulo: Árbol de probabilidades
 resumen: "Diagrama por etapas: cada arista lleva una probabilidad condicional y la probabilidad de un camino es el producto de sus aristas. Sumar hojas da la probabilidad total e invertir el árbol da Bayes; es el método más seguro en problemas de varias fases."
 tipo: concepto
 unidad: 2
-orden: 10
+orden: 11
 tags: [probabilidad, arbol, condicional, bayes, particion]
 fuentes: ["[[tp2-calculo-de-probabilidades]]", "[[independencia-condicional-bayes]]", "[[video-condicional]]"]
 actualizado: 2026-09-04

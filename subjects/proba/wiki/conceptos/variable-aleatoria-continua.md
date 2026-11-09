@@ -3,7 +3,7 @@ titulo: Variable Aleatoria Continua
 resumen: 'Variable aleatoria con acumulada continua: toma valores en un continuo, cumple $P(X=\alpha)=0$ y se describe por su densidad. Probabilidades, esperanza y varianza pasan de sumas a integrales, y da lo mismo usar $<$ que $\le$.'
 tipo: concepto
 unidad: 4
-orden: 1
+orden: 2
 tags: [continua, variable-aleatoria, fda, densidad]
 fuentes: ["[[teorica-va-continuas]]", "[[tp4-variables-aleatorias-continuas]]", "[[video-vac-generales]]"]
 actualizado: 2026-09-04

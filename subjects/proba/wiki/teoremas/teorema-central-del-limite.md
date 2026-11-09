@@ -3,7 +3,7 @@ titulo: Teorema Central del Límite
 resumen: 'La suma o el promedio de muchas v.a. i.i.d. es aproximadamente normal, sea cual sea la distribución de origen: $Z_n=(\bar X_n-\mu)/(\sigma/\sqrt n)$ tiende a $N(0,1)$. Permite calcular probabilidades de sumas y promedios con la tabla de $\Phi$.'
 tipo: teorema
 unidad: 7
-orden: 8
+orden: 9
 tags: [convergencia, normal, teorema, tcl]
 fuentes: ["[[teorica-tcl-introduccion]]", "[[teorica-aproximacion-binomial-normal]]", "[[tp7-suma-de-va]]", "[[video-tcl]]"]
 actualizado: 2026-09-03
