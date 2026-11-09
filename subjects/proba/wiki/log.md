@@ -1151,3 +1151,4 @@ estimación.
 - Ejercicios: `estudio/ejercicios-mejoras/<lote>/` con enunciado completo copiado de la fuente original, resolución ampliada que nombra y escribe cada fórmula antes de sustituir, y anexo «Fórmulas y teoremas usados»; `build-ejercicios.py` las aplica (`aplicar_mejoras`).
 - Estado de la ejecución: `.workforce/EXEC_STATE.md`.
 - Publicado en Sinapsis como PR combinado (materia + tests de la plataforma que fijaban la config de Proba): https://github.com/SebasCaules/Sinapsis/pull/38
+- Los 10 resúmenes de unidad incluyen las 92 figuras interactivas que ya estaban en las páginas de cada unidad (callouts `[!figura]` copiados a la sección del resumen que remite a esa página); subido al PR #38.
