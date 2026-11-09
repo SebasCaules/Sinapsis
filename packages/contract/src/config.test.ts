@@ -48,7 +48,9 @@ describe("subjects/proba/sinapsis.config.json", () => {
     expect(proba.slug).toBe("proba");
     expect(proba.contract).toBe(1);
     expect(proba.divisions).toHaveLength(11);
-    expect(proba.pageTypes).toHaveLength(6);
+    /* La materia puede sumar tipos (2026-11-09: «resumen»): se fija el mínimo, no el total,
+       para que agregar un tipo no exija tocar la plataforma en el mismo cambio. */
+    expect(proba.pageTypes.length).toBeGreaterThanOrEqual(6);
     expect(proba.wiki.divisionField).toBe("unidad");
     expect(proba.wiki.root).toBe("wiki");
     /* N0-74: el formulario maestro es la página suelta de Proba. */
