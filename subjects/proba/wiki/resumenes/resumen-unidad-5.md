@@ -40,6 +40,12 @@ En el caso continuo se deriva con la **regla de la cadena**; en el discreto se a
 
 **Cómo reconocerlo:** el enunciado da la densidad o la acumulada de una magnitud (radio, tensión, demanda) y pregunta por otra que se calcula a partir de ella (volumen, potencia, beneficio).
 
+> [!figura] u5-la-preimagen-de-g-x-y-sobre-la-curva-de-g
+> Arriba, la curva $y=g(x)$ cortada por la recta horizontal de altura $y$; abajo, la densidad $f_X$ sobre el mismo eje, con la preimagen $\{x:g(x)\le y\}$ sombreada: esa área es $F_Y(y)$. Compare las tres opciones de $g$ y observe que la receta no cambia, solo cambia la forma de la preimagen (dos ramas con $x^2$, una semirrecta con $g$ monótona).
+
+> [!figura] u5-de-una-uniforme-a-cualquier-distribucion
+> El valor $u$ sorteado en $(0,1)$ viaja horizontalmente hasta la FDA y baja al eje $x$: eso es $F_X^{\leftarrow}(u)$. Al acumular sorteos el histograma reproduce la densidad objetivo; en el caso discreto, todo un tramo de valores de $u$ cae sobre el mismo salto y colapsa a un único $x$.
+
 Detalle: [[funcion-de-variable-aleatoria|Función de Variable Aleatoria]]
 
 ## 2. La receta paso a paso y los casos según $g$
@@ -113,6 +119,18 @@ $$ E[h(X,Y)]=\iint_{\mathbb{R}^2}h(x,y)\,f_{X,Y}(x,y)\,dx\,dy $$
 > [!warn] Límites del soporte
 > En un soporte triangular como $0<r<h<10$, la marginal de $H$ integra $r$ entre $0$ y $h$, no entre $0$ y $10$.
 
+> [!figura] u5-del-arbol-a-la-tabla-conjunta
+> Cada camino del árbol se multiplica y aterriza en una celda de la tabla conjunta; los márgenes resaltados son literalmente las sumas de fila y de columna, de ahí el nombre «marginal». Observe la celda $p_{X,Y}(0,0)=0{,}10$ frente a $p_X(0)\,p_Y(0)=0{,}20$: no coinciden, así que $X$ e $Y$ no son independientes.
+
+> [!figura] u5-traducir-p-g-x-y-c-a-una-region-del-plano
+> El paso difícil es traducir $\{g(X,Y)\le c\}$ a una región del plano. Para el volumen $V=\pi R^2H$ sobre el soporte $0<r<h<10$, la curva de nivel parte la región en dos tramos con techos distintos ($h=10$ y la hipérbola), y por eso hacen falta dos integrales dobles. Mueva el umbral hasta que la curva salga del triángulo y la región vuelva a una sola integral.
+
+> [!figura] u5-la-marginal-como-sombra-de-la-conjunta
+> La superficie $f_{X,Y}(x,y)=(x+y)/27$ sobre $(0,3)^2$, un plano de corte en $x=t$ y, levantada como una pared por fuera del dominio (con su base punteada sobre el piso), la curva $f_X(t)=1/6+t/9$, que se va rellenando de $0$ a $t$ a medida que el corte avanza: cada posición de $t$ aporta el área de su corte. Integrar en $y$ es literalmente aplastar una dimensión: la marginal es la sombra de la conjunta.
+
+> [!figura] u5-cortes-del-soporte-triangular-0-r-h-10
+> El triángulo $0<r<h<10$ con un corte horizontal y uno vertical; a la derecha, la condicional que deja cada corte, con su esperanza marcada. Note que el intervalo de integración de $r$ llega hasta $h$ y no hasta $10$, y que el punto $(5,2)$ queda fuera del soporte aunque ambas marginales sean positivas ahí: eso basta para descartar la independencia.
+
 Detalle: [[variables-aleatorias-bidimensionales|Variables Aleatorias Bidimensionales]]
 
 ## 5. Covarianza y correlación
@@ -136,6 +154,9 @@ La cota sale de que $\text{Var}(zX+Y)\ge0$ para todo $z$: el discriminante $\le0
 > [!warn] Discrepancia: dos ejercicios con cifras distintas en el material crudo
 > En el Ej. 25 del TP5 ($f_{X,Y}=(x+y)/27$ en $(0,3)^2$), una versión arrastra $E[XY]=5/3$ y $\text{Cov}=-67/48$; el wiki adopta $E[XY]=3$ y $\text{Cov}(X,Y)=-1/16$. En el Ej. 14, una resolución reporta $\sigma_X\approx1.8412$ y $\sigma_Y\approx1.3569$, que no son las raíces de las varianzas; los correctos son $1.3992$ y $1.1089$, con $\rho\approx-0.1658$.
 
+> [!figura] u5-que-mide-y-que-no-mide
+> Los cuadrantes definidos por $\mu_X$ y $\mu_Y$ colorean el signo de $(x-\mu_X)(y-\mu_Y)$: la covarianza es el promedio de esos productos. Al llevar $\rho$ hacia $\pm1$ la nube colapsa sobre una recta; en cambio, con los generadores de contraejemplo la dependencia es evidente a simple vista y sin embargo $\rho\approx0$. La recta de mínimos cuadrados se dibuja en los tres generadores: en los contraejemplos queda horizontal, que es exactamente lo que significa $\rho\approx0$. El punto marcado en el cruce es el centro $(\bar{x},\bar{y})$, vértice de los cuatro cuadrantes.
+
 Detalle: [[covarianza-y-correlacion|Covarianza y Correlación]]
 
 ## 6. Independencia de variables aleatorias
@@ -154,6 +175,9 @@ $$ \text{Var}(X+Y)=\text{Var}(X)+\text{Var}(Y)\qquad(X,Y\text{ independientes}) 
 
 > [!warn] Incorrelación no implica independencia
 > $\text{Cov}(X,Y)=0$ no garantiza independencia. La única excepción es el caso conjuntamente normal, donde $\text{Cov}=0$ sí implica independencia.
+
+> [!figura] u5-soporte-rectangular-contra-soporte-no-rectangula
+> Una misma recta $x=x_0$ recorre los dos soportes: en el rectángulo el rango admisible de $Y$ mide siempre lo mismo, en el triángulo se acorta al bajar $x_0$. Conocer $X$ restringe a $Y$, luego hay dependencia. Tenga en cuenta el aviso del panel izquierdo: el soporte rectangular es condición necesaria, no suficiente — en ese mismo ejemplo $f(x,y)=(x+y)/27$ no factoriza como producto de una función de $x$ por una de $y$, así que $X$ e $Y$ tampoco son independientes ahí.
 
 Detalle: [[independencia-de-variables-aleatorias|Independencia de Variables Aleatorias]]
 
@@ -178,6 +202,9 @@ $$ \text{Var}(X)=E\big[\text{Var}(X\mid Y)\big]+\text{Var}\big(E[X\mid Y]\big) $
 > [!warn] Promediar varianzas
 > Escribir $\text{Var}(X)=\sum_y\text{Var}(X\mid Y=y)\,p_Y(y)$ olvida el término $\text{Var}(E[X\mid Y])$ y subestima la varianza.
 
+> [!figura] u5-varianza-intra-mas-varianza-entre
+> Tres densidades condicionales con sus medias marcadas y, encima, la densidad total. El ancho típico de cada grupo es la parte intra y la dispersión de las medias entre sí es la parte entre; la barra apilada muestra que solo sumando las dos se llega a $\text{Var}(X)$. Separe las medias sin tocar el ancho: la barra intra no se mueve y la total crece igual.
+
 Detalle: [[esperanza-condicional|Esperanza Condicional]]
 
 ## 8. Mezcla de distribuciones
@@ -201,6 +228,9 @@ Conocido un evento sobre $X$, se invierte hacia $M$ con **Bayes**: $P(M=k\mid X\
 
 > [!nota] Convención de la exponencial
 > Como en todo el wiki, $\text{Exp}(\lambda)$ va con la **tasa**: $\text{Exp}(1/30)$ tiene media 30 y varianza $30^2$, y $E[T^2]=2/\lambda^2$.
+
+> [!figura] u5-la-mezcla-como-superposicion-ponderada
+> Cada densidad condicional aparece escalada por su peso y la mezcla es la suma de las dos: una combinación convexa, no una exponencial «promedio». Las tres barras comparan $E[\text{Var}(T\mid M)]$, $\text{Var}(E[T\mid M])$ y la varianza total; al igualar las dos medias condicionales el término «entre» se anula y solo entonces promediar varianzas daría bien.
 
 Detalle: [[mezcla-de-distribuciones|Mezcla de Distribuciones]]
 

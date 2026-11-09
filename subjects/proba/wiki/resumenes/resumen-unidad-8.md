@@ -59,6 +59,18 @@ Con $\mathrm{sesgo}(\hat\theta)=E[\hat\theta]-\theta$. La varianza mide la dispe
 
 **Cómo reconocerlo:** el enunciado pide «elegir $b$ para que sea insesgado» (se impone $E[\hat\theta]=\theta$) o «el $a$ que minimiza la varianza» (se escribe $V(\hat\theta)$ en función de $a$ y se deriva). Con dos muestras independientes y $Y=a\overline X_1+b\overline X_2$, la insesgadez da $b=1-a$; con $n_1=n_2=n$ el mínimo es $a=\tfrac12$ y $V(Y)=\sigma^2/2n$.
 
+> [!figura] u8-descomposicion-sesgo-varianza
+> Arriba, la distribución de $\hat\theta$ con su sesgo y su desvío señalados; abajo, la barra que descompone $\mathrm{mse}=V(\hat\theta)+\mathrm{sesgo}^2(\hat\theta)$. Cada barra viene partida en dos tramos: el **tramo liso**, del color del estimador, mide la varianza $V(\hat\theta)$, y el **tramo rayado** mide el $\mathrm{sesgo}^2$; el rótulo de la barra da el total y las lecturas de la derecha lo repiten con más cifras. Compare los dos estimadores: uno insesgado y disperso puede tener más ECM que uno sesgado y concentrado.
+
+> [!figura] u8-verosimilitud-borde-vs-interior
+> Dos verosimilitudes sobre la misma muestra observada, cada una reescalada a su propio máximo. En el panel del medio, $L(\alpha)=(2\alpha)^{-n}\exp\!\left(-\sum_i |x_i|/\alpha\right)$: la de la Laplace tiene un máximo **interior**, al que se llega derivando, y por eso la curva llega a la cumbre con tangente horizontal. En el panel de abajo, $L(\alpha)=(\alpha-3)^{-n}$ si $\alpha\ge\max_i x_i$ y $0$ si no (o $L(\alpha)=(8-\alpha)^{-n}$ si $\alpha\le\min_i x_i$, según el modelo elegido): la Uniforme tiene su máximo **en el borde**, en el salto $\alpha=\max_i x_i$, donde la derivada ni siquiera existe. Arrastre el dato más grande y vea al estimador seguirlo.
+
+> [!figura] u8-superficie-log-verosimilitud-normal
+> La log-verosimilitud $\ln L(\mu,\sigma)$ de una muestra normal como superficie: el desarrollo de clase (derivar respecto de $\mu$ con $\sigma$ fijo) es el corte dibujado en el panel de abajo, cuyo vértice cae en $\overline X_n$. Al crecer $n$ la cumbre se agudiza, y esa curvatura es lo que vuelve preciso al estimador.
+
+> [!figura] u8-map-prior-verosimilitud-posterior
+> El prior, la verosimilitud y la posterior sobre el mismo eje $\mu$, con la barra de los dos pesos del promedio ponderado. Suba $n$ y vea a la posterior migrar desde $\mu_p$ hacia $\overline X_n$; con un prior poco informativo ($\sigma_p$ grande) el MAP colapsa sobre el estimador de máxima verosimilitud.
+
 Detalle: [[estimacion-puntual|Estimación Puntual]]
 
 ## 3. Estimadores clásicos
@@ -131,6 +143,9 @@ Con ella se prueba la insesgadez: tomando esperanza (con $\mu=0$), $E[(n-1)S_n^2
 > [!warn] Discrepancia: denominador de la varianza descriptiva
 > [[medidas-de-dispersion|Medidas de dispersión]] define la varianza de los datos $s^2$ con denominador $n-1$, mientras que [[varianza-muestral|Varianza Muestral]] llama «versión descriptiva» a la de denominador $n$. Las dos coinciden en que el estimador de $\sigma^2$ usa $n-1$.
 
+> [!figura] u8-por-que-n-menos-1
+> La parábola $Q(c)=\sum_i (x_i-c)^2$ alcanza su mínimo en $c=\overline X_n$ y nunca en $c=\mu$: la brecha $n(\overline X_n-\mu)^2$ entre ambos valores es justo lo que se pierde al centrar en la media muestral. Acumule muestras y compare los promedios de $Q/n$ y de $Q/(n-1)$ contra $\sigma^2$.
+
 Detalle: [[varianza-muestral|Varianza Muestral]]
 
 ## 6. Distribución ji-cuadrado
@@ -167,6 +182,9 @@ Con $m$ grados de libertad. El fractil $t_{m,\gamma}$ es **mayor** que $z_\gamma
 
 > [!warn] Tamaño de muestra o grados de libertad
 > La teórica escribe las fórmulas de la t en función del tamaño de muestra $n$ ($V(T)=\frac{n-1}{n-3}$), y otras fuentes en función de los grados de libertad $\nu$ ($V(T)=\frac{\nu}{\nu-2}$). Coinciden con $\nu=n-1$. En la tabla de fractiles se entra siempre por $\text{GDL}=n-1$.
+
+> [!figura] u8-t-vs-normal-y-fractiles
+> Arriba, la $t_m$ superpuesta a la $\mathcal N(0,1)$ con la cola de área $1-\gamma$ sombreada bajo cada una: la de la $t$ es más gruesa, así que su fractil queda más a la derecha. Abajo, $t_{m,\gamma}$ en función de $m$, siempre por encima de su asíntota $z_\gamma$.
 
 Detalle: [[distribucion-t-de-student|Distribución t de Student]]
 
@@ -207,6 +225,12 @@ Se reemplaza $\sigma$ por $S_n$ y $z$ por el fractil de la t con $n-1$ grados de
 
 > [!warn] Discrepancia: umbral de «$n$ grande»
 > La página de intervalos pide $n>100$ para aplicar el caso 1 a datos no normales y da «$>100/200$» para reemplazar $t$ por $z$; la página de la t menciona tanto «$n>100/200$» como «$n>200$», y el árbol del formulario usa $n>200$. Las páginas no fijan un único umbral.
+
+> [!figura] u8-ic-cobertura-frecuentista
+> Cien muestras de la misma población, cada una con su intervalo: los verdes atrapan a $\mu$ y los rojos no. Observe que al subir $n$ los intervalos se angostan pero la proporción de aciertos sigue pegada a $\gamma$: la confianza es una propiedad de la fórmula, no de un intervalo ya calculado.
+
+> [!figura] u8-ji-cuadrado-dos-colas-ic-varianza
+> Arriba, las dos colas de área $(1-\gamma)/2$ bajo la $\chi^2_{n-1}$: los cuantiles no son opuestos ni equidistantes del centro. Abajo, el eje de $\sigma^2$ con el intervalo; siga los dos conectores rotulados y note que el cuantil **superior** determina el extremo **inferior** del intervalo, y el inferior el superior. El cruce viene de despejar: al pasar de $\chi^2_{\text{inf}}\le (n-1)S^2/\sigma^2\le\chi^2_{\text{sup}}$ a una desigualdad en $\sigma^2$ hay que invertir, y al invertir se dan vuelta las desigualdades. Con el interruptor de los cuantiles de la t se ve el error: las dos condiciones que quedan apuntan en sentidos opuestos, no encierran nada y el intervalo resulta **vacío** (además, uno de los extremos sale negativo, fuera del eje por la izquierda). Con $n=10$ y $s\approx 10.56$ el intervalo queda muy cerca del que da el ejercicio resuelto citado al final de la sección.
 
 Detalle: [[intervalos-de-confianza|Intervalos de Confianza]]
 

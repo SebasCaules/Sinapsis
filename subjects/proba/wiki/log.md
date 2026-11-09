@@ -1150,3 +1150,4 @@ estimación.
 - Hubs de U1, U2 y U7 sin la meta-frase «Página hub…» y con aviso que remite al resumen; `resumen` del frontmatter de cinco hubs reescrito.
 - Ejercicios: `estudio/ejercicios-mejoras/<lote>/` con enunciado completo copiado de la fuente original, resolución ampliada que nombra y escribe cada fórmula antes de sustituir, y anexo «Fórmulas y teoremas usados»; `build-ejercicios.py` las aplica (`aplicar_mejoras`).
 - Estado de la ejecución: `.workforce/EXEC_STATE.md`.
+- Publicado en Sinapsis como PR combinado (materia + tests de la plataforma que fijaban la config de Proba): https://github.com/SebasCaules/Sinapsis/pull/38

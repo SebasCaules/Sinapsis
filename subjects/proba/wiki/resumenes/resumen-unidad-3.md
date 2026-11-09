@@ -34,6 +34,9 @@ Cómo reconocerla: cuando el enunciado define una variable que «cuenta» o «mi
 > [!warn] No confundir $p_X$ con $P$
 > $P$ toma un **evento** (subconjunto de $\mathcal{S}$) y devuelve su probabilidad; $p_X$ toma un **número**. Se relacionan por $p_X(k)=P(X=k)$, pero son objetos distintos. El docente lo señala como lo más costoso de esta parte.
 
+> [!figura] u3-de-s-a-la-recta-la-particion-que-induce-una-v-a
+> Cada columna de $S$ es un evento $\{X = k\}$, con ancho proporcional a su probabilidad, y $X$ la envía a un punto de la recta. Los entornos disjuntos alrededor de cada valor son los que hacen discreto al recorrido $\mathcal{R}_X$.
+
 Detalle: [[variable-aleatoria|Variable Aleatoria Discreta]]
 
 ## 2. Función de distribución acumulada (FDA)
@@ -53,6 +56,9 @@ Cómo reconocerla: el enunciado da la FDA por tramos y pide probabilidades puntu
 > [!warn] Cuidado con $<$ y $\le$
 > En una v.a. discreta $P(X<k)$ y $P(X\le k)$ difieren exactamente en la masa puntual $p_X(k)$. Por ejemplo, con recorrido en los enteros (como en el TP3 ej. 7), $P(2<X<5)=P(3\le X\le 4)=F_X(4)-F_X(2)$, y no $F_X(5)-F_X(2)$.
 
+> [!figura] u3-la-escalera-de-la-fda-cada-salto-es-una-masa-pun
+> La PMF y su FDA escalonada, con el extremo cerrado arriba y el abierto abajo en cada salto. Mueva el cursor: la diferencia entre $F_X(x) = P(X \le x)$ y $P(X < x)$ es exactamente la masa puntual $p_X(x)$.
+
 Detalle: [[funcion-de-distribucion-acumulada|Función de Distribución Acumulada (FDA)]]
 
 ## 3. Esperanza
@@ -71,6 +77,9 @@ con $a,b,c$ constantes. Cómo reconocerla: se pide «valor esperado», «promedi
 
 > [!warn] La esperanza no factoriza productos
 > En general $E[X\cdot Y]\ne E[X]\cdot E[Y]$; factorizar requiere independencia. Además, $\mu$ es un parámetro calculado con probabilidades antes de experimentar, mientras que $\bar{x}$ es un estadístico muestral: usar $\bar{x}$ para el valor esperado es un error conceptual.
+
+> [!figura] u3-el-balancin-la-esperanza-como-centro-de-masa
+> Las masas $p_X(k)$ cuelgan de una barra rígida y el fulcro solo la equilibra cuando se lo coloca en $E[X] = \sum_k k\,p_X(k)$. Note que ese punto de equilibrio no tiene por qué ser un valor del recorrido.
 
 Detalle: [[esperanza|Esperanza (Valor Esperado)]]
 
@@ -144,6 +153,9 @@ $$ E[X] = n\,p, \qquad V(X) = n\,p\,q, \qquad M_X(t) = (q+p\,e^t)^n $$
 
 Cómo reconocerla: «cuántos de los $n$…», muestreo **con reposición** o de una población tan grande que la reposición no importa (por ejemplo, «de un lote muy grande»). Las preguntas típicas son $P(X=k)$, $P(X\le k)$ sumando términos y $P(X\ge 1)=1-q^n$.
 
+> [!figura] u3-de-donde-sale-el-combinatorio-enumerar-las-secue
+> Todas las secuencias de $n$ ensayos con exactamente $k$ éxitos, enumeradas una por fila. Note que todas tienen la misma probabilidad $p^{k}q^{\,n-k}$: lo único que cambia con $k$ es cuántas filas hay, y ese conteo es $\binom{n}{k}$.
+
 Detalle: [[distribucion-binomial|Distribución Binomial]]
 
 ## 9. Distribución Geométrica
@@ -165,6 +177,9 @@ $$ Y = X + 1 \;\Rightarrow\; E[Y] = \frac{q}{p} + 1 = \frac{1}{p}, \qquad V(Y) =
 
 Cómo reconocerla: «hasta que ocurra por primera vez». En el TP3 ej. 40a ($p=0{,}05$) el número medio de personas sanas antes de la primera con talasemia es $q/p=19$, y «las 12 primeras sanas» es $P(X\ge 12)=0{,}95^{12}\approx 0{,}54$.
 
+> [!figura] u3-falta-de-memoria-la-cola-recortada-y-reescalada-
+> La cola $\{X \ge L\}$ tiene masa total $q^{L}$; al dividirla por $q^{L}$ y correrla $L$ lugares cae exactamente sobre la distribución original. Note que el cociente $q^{L+\Delta}/q^{L} = q^{\Delta}$ no depende de $L$.
+
 Detalle: [[distribucion-geometrica|Distribución Geométrica]]
 
 ## 10. Distribución Binomial Negativa (Pascal)
@@ -184,6 +199,9 @@ Es «complementaria» a la binomial: la binomial fija los ensayos y cuenta éxit
 
 Cómo reconocerla: «hasta acumular $r$ éxitos», «hasta que aparezca el tercero…».
 
+> [!figura] u3-la-tira-de-ensayos-por-que-c-k-r1-k-y-no-c-k-r-k
+> La última casilla queda clavada como el $r$-ésimo éxito y solo las primeras $k+r-1$ se permutan libremente. Por eso el combinatorio es $\binom{k+r-1}{k}$ y no $\binom{k+r}{k}$; con $r = 1$ se reduce a la geométrica.
+
 Detalle: [[distribucion-binomial-negativa|Distribución Binomial Negativa (Pascal)]]
 
 ## 11. Distribución Hipergeométrica
@@ -199,6 +217,12 @@ $$ E[X] = n\,p, \qquad V(X) = n\,p\,q\,\frac{N-n}{N-1} $$
 El **factor de corrección por población finita** $\frac{N-n}{N-1}$ hace que la varianza sea **menor** que la de una binomial con los mismos $n$ y $p$; la media coincide. Si $N\gg n$ (y $M,\,N-M\gg n$), la hipergeométrica se aproxima por la Binomial$(n,\,M/N)$. La misma idea reaparece en inferencia (Unidad 8): en el intervalo de confianza de una proporción con población finita, la guía (TP8 ej. 24) escribe la semiamplitud como $z\sqrt{\hat p(1-\hat p)}\sqrt{(N-n)/(N\,n)}$, es decir, el error estándar $\sqrt{\hat p(1-\hat p)/n}$ multiplicado por $\sqrt{(N-n)/N}$. Ese factor usa $N$ en el denominador en lugar de $N-1$; para $N$ grande ambos son prácticamente iguales.
 
 Cómo reconocerla: «muestra sin reemplazo» de un total pequeño y conocido ($N$ y $M$ dados, no solo una proporción): cartas, urnas sin devolución, defectuosos de un lote pequeño. En el TP3 ej. 4 ($N=10$, $M=2$, $n=3$) se obtiene $E[X]=0{,}6$ y $V(X)\approx 0{,}373$; con reposición sería binomial, con la misma media y $V=0{,}48$.
+
+> [!figura] u3-poblacion-conjunto-a-y-muestra-de-donde-sale-el-
+> La misma muestra de tamaño $n$ corrida de un extremo al otro de la población da el mínimo y el máximo solapamiento posibles con $A$. De ahí salen los extremos del recorrido, $\max\{0,\, n-(N-M)\}$ y $\min\{n,\, M\}$.
+
+> [!figura] u3-n-creciente-con-p-m-n-fijo-la-hipergeometrica-se
+> PMF hipergeométrica y Binomial$(n,\, p = M/N)$ superpuestas. Al crecer $N$ con $p$ fijo las dos series colapsan y el factor $(N-n)/(N-1)$ tiende a 1: la esperanza ya coincidía de antes, la varianza solo entonces.
 
 Detalle: [[distribucion-hipergeometrica|Distribución Hipergeométrica]]
 
@@ -223,6 +247,9 @@ Cómo reconocerla: «número medio de… por hora / km / página», o una binomi
 > [!warn] Discrepancia: condición sobre $\lambda$
 > La página de Poisson dice que la cátedra recomienda trabajar con $\lambda=np$ **pequeño**, mientras que el formulario habla de $\lambda=np$ **moderado**. Ambas piden $n$ grande y $p$ pequeño; solo la página de Poisson precisa que lo determinante es que $p$ sea pequeño.
 
+> [!figura] u3-binomial-vs-poisson-superpuestas-por-que-manda-p
+> Binomial$(n,p)$ y Poisson$(\lambda = np)$ sobre el mismo eje $k$, con la diferencia punto a punto en el panel de abajo. Compare $n = 1000$ con $p = 0{,}003$ y con $p = 0{,}3$: lo que rompe la aproximación es $p$ grande, porque la binomial tiene $V = npq$ y la Poisson $V = \lambda = np$.
+
 Detalle: [[distribucion-poisson|Distribución Poisson]]
 
 ## 13. Reconocer qué distribución discreta usar
@@ -244,6 +271,9 @@ $$ \text{Hipergeométrica}(N,M,n) \approx \text{Binomial}\!\left(n,\tfrac{M}{N}\
 
 > [!warn] Discrepancia: ¿qué convención usa la cátedra?
 > La página de reconocimiento afirma que en la materia la geométrica y la binomial negativa cuentan **fracasos** (media $q/p$, no $1/p$). La página de la geométrica precisa que **ambas** convenciones son usadas por la cátedra: fracasos en el apunte y el TP3, ensayos en las slides de Pantazis. Conviene leer el enunciado y decidir qué se cuenta.
+
+> [!figura] u3-mapa-de-las-seis-discretas-y-los-pasajes-entre-e
+> Las seis distribuciones discretas de la unidad con los pasajes entre ellas y una tabla de recorrido, esperanza y varianza. Note que en el pasaje hipergeométrica → binomial coincide $E[X]$ pero no $V(X)$.
 
 Detalle: [[reconocer-distribucion-discreta|Reconocer qué distribución discreta usar]]
 
