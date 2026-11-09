@@ -1126,3 +1126,27 @@ estimación.
   se ubican por su número de guía (ids de la app sin cambio).
 - Proceso y estado en `.claude/workforce-guias/EXEC_STATE.md`. Regenerados
   `estudio/ejercicios-data.js` (429 ejercicios, KaTeX 0 errores) y los 9 PDF de resolución.
+
+## [2026-11-09] query | Plan de estudio para el final del 3/12/2026
+- Nueva página [[plan-final-2026-12-03]]: diagnóstico (final 15/12/2025 A), repaso por unidad 10–20/11
+  priorizando lo que más se repite en finales (Markov, IC/test, conjuntas, EMV), 5 simulacros
+  cronometrados 21–29/11 y cierre 30/11–2/12. Enlazada desde el índice.
+
+## [2026-11-09] query | Plan del final rehecho en dos tramos
+- [[plan-final-2026-12-03]]: 9–24/11 a 1–1,5 h/día solo para recuperar la teoría (sin final de
+  diagnóstico, porque no recuerda la materia); 25/11–2/12 a tiempo completo: diagnóstico el 25,
+  tres bloques de práctica y tres simulacros.
+
+## [2026-11-09] lint | Limpieza del proyecto
+- Movido a `~/.Trash/Proba-limpieza-2026-11-09/` (127 MB, recuperable): handoffs viejos, `shot.png`,
+  `assets/` vacía, estados de workforce terminados (`.claude/workforce-*`), `estudio/_legacy`,
+  `__pycache__`, el sistema de diseño sincronizado (`estudio/ds`, `.ds-sync`, `ds-bundle`,
+  `.design-sync`), los `wf-*.mjs` de Parcial-Para-Imprimir, los `_build/` de los dossiers y
+  carpetas vacías. Las pruebas `incisos*.test.mjs` y `smoke.mjs` pasaron a `estudio/tests/`.
+
+## [2026-11-09] lint | Página de Proba en Sinapsis: resúmenes por unidad, enunciados completos y resoluciones explicadas
+- Pedido: la página de Proba en Sinapsis era difícil de usar. Decisiones: resumen como página nueva al inicio de cada unidad; ejercicios de evaluaciones y clave de la guía (203); los PDFs para imprimir no se tocan; ajustes de UX solo de la materia.
+- Nuevo tipo de página `resumen` (`wiki/resumenes/resumen-unidad-N.md`, U0–U9) con `orden: 1`; el resto de las páginas de cada unidad corrió su `orden` +1. Config de Sinapsis: tipo `resumen` y rail en tres grupos (Ejercitar, Resolver, Explorar).
+- Hubs de U1, U2 y U7 sin la meta-frase «Página hub…» y con aviso que remite al resumen; `resumen` del frontmatter de cinco hubs reescrito.
+- Ejercicios: `estudio/ejercicios-mejoras/<lote>/` con enunciado completo copiado de la fuente original, resolución ampliada que nombra y escribe cada fórmula antes de sustituir, y anexo «Fórmulas y teoremas usados»; `build-ejercicios.py` las aplica (`aplicar_mejoras`).
+- Estado de la ejecución: `.workforce/EXEC_STATE.md`.

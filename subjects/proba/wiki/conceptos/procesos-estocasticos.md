@@ -1,10 +1,9 @@
 ---
 titulo: Procesos Estocásticos
-resumen: 'Familia de variables aleatorias $\{X(t)\}$ indexada por el tiempo que modela un sistema en evolución al azar; es el hub de la unidad 6. Se vuelve manejable con tres simplificaciones: estacionariedad, incrementos independientes y propiedad de Markov.'
+resumen: 'Familia de variables aleatorias $\{X(t)\}$ indexada por el tiempo que modela un sistema que evoluciona al azar. Se vuelve manejable con tres simplificaciones: estacionariedad, incrementos independientes y propiedad de Markov.'
 tipo: concepto
 unidad: 6
-orden: 1
-hub: true
+orden: 2
 tags: [procesos-estocasticos, hub]
 fuentes: ["[[teorica-procesos-estocasticos-introduccion]]", "[[tp6-procesos-estocasticos]]"]
 actualizado: 2026-09-04

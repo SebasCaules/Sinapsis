@@ -3,7 +3,7 @@ titulo: Probabilidad condicional
 resumen: 'Mide la probabilidad de $D$ sabiendo que ocurrió $C$, reduciendo el universo a $C$: $P(D\mid C)=P(D\cap C)/P(C)$, con $P(C)\neq 0$. Reordenada da la regla de la multiplicación, base de la probabilidad total y de Bayes.'
 tipo: concepto
 unidad: 2
-orden: 7
+orden: 8
 tags: [probabilidad, condicional]
 fuentes: ["[[independencia-condicional-bayes]]", "[[video-condicional]]"]
 actualizado: 2026-09-04

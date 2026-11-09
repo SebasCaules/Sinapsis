@@ -3,7 +3,7 @@ titulo: Técnica — Hallar la distribución de Y = g(X)
 resumen: 'Método de la acumulada para hallar la distribución de $Y=g(X)$: escribir $F_Y(y)=P(g(X)\le y)$, traducir el evento a uno sobre $X$, evaluar en $F_X$ y derivar. Es el camino esperado en el parcial, aun cuando $g$ no sea inyectiva.'
 tipo: tecnica
 unidad: 5
-orden: 2
+orden: 3
 tags: [tecnica, funcion-de-variable-aleatoria, fda]
 fuentes: ["[[teorica-funcion-de-variable-aleatoria]]", "[[tp5-2024]]", "[[video-funciones-de-variables-aleatorias]]"]
 actualizado: 2026-09-03

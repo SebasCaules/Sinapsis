@@ -3,8 +3,7 @@ titulo: Inferencia Estadística
 resumen: "Marco general de la unidad 8: a partir de una muestra al azar se estima un parámetro poblacional desconocido, con un único valor (estimación puntual) o con un rango (intervalo de confianza). Distingue estadístico, estimador y estimación."
 tipo: concepto
 unidad: 8
-orden: 1
-hub: true
+orden: 2
 tags: [inferencia, estimacion, fundamentos]
 fuentes: ["[[teorica-estimacion-puntual-intro]]", "[[tp8-estimacion-de-parametros]]"]
 actualizado: 2026-06-06

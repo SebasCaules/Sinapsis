@@ -3,7 +3,7 @@ titulo: Suma de Variables Aleatorias Independientes
 resumen: "Reúne los casos con nombre propio de la suma de independientes, donde la convolución cierra la familia: normal más normal da normal, Poisson más Poisson da Poisson, binomiales de igual $p$ dan binomial y $n$ exponenciales i.i.d. dan Erlang."
 tipo: concepto
 unidad: 7
-orden: 2
+orden: 3
 tags: [suma-de-va, convolucion, independencia]
 fuentes: ["[[teorica-suma-va-independientes]]", "[[teorica-suma-iid-bernoulli]]", "[[teorica-suma-binomiales]]", "[[teorica-suma-poisson]]", "[[teorica-suma-normales]]", "[[teorica-suma-uniformes]]", "[[teorica-suma-exponenciales]]", "[[tp7-suma-de-va]]", "[[video-suma-variables]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Distribución Bernoulli
 resumen: 'Ensayo único con dos resultados: éxito (vale 1, con probabilidad $p$) o fracaso (vale 0). Es el ladrillo con el que se arman Binomial, Geométrica y Binomial Negativa; cumple $E[X]=p$ y $V(X)=p(1-p)$.'
 tipo: distribucion
 unidad: 3
-orden: 7
+orden: 8
 tags: [discreta, distribucion]
 fuentes: ["[[bernoulli-apunte]]", "[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-09-04

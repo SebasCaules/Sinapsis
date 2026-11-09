@@ -3,7 +3,7 @@ titulo: Medidas de dispersión
 resumen: 'Cuantifican qué tan esparcidos están los datos alrededor de su centro: rango, rango intercuartil, varianza muestral $s^2=\frac{1}{n-1}\sum(x_i-\bar{x})^2$, desvío estándar $s$ y las versiones robustas MAD y desvío absoluto medio.'
 tipo: concepto
 unidad: 1
-orden: 4
+orden: 5
 tags: [estadistica-descriptiva, varianza, desvio, rango, iqr, mad]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[video-medidas-de-resumen]]"]
 actualizado: 2026-09-04

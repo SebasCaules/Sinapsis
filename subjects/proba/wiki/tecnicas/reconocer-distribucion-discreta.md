@@ -3,7 +3,7 @@ titulo: Reconocer qué distribución discreta usar
 resumen: "Mapa de decisión para elegir la distribución discreta correcta según qué cuenta la variable y cómo se generan los datos: cantidad fija de ensayos o repetición hasta el éxito, y muestreo con o sin reposición. Incluye pistas por frase del enunciado."
 tipo: tecnica
 unidad: 3
-orden: 13
+orden: 14
 tags: [discreta, distribucion, estrategia]
 fuentes: ["[[tp3-variables-aleatorias-discretas]]", "[[bernoulli-apunte]]", "[[binomial-apunte]]", "[[geometrica-apunte]]", "[[binomial-negativa-apunte]]", "[[hipergeometrica-apunte]]", "[[poisson-apunte]]", "[[poisson-aproximacion-binomial-apunte]]", "[[video-geometrica-y-poisson]]"]
 actualizado: 2026-09-04

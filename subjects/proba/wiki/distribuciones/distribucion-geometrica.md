@@ -3,7 +3,7 @@ titulo: Distribución Geométrica
 resumen: 'Cantidad de fracasos antes del primer éxito en ensayos Bernoulli: $p_X(k)=q^k p$ con $E[X]=q/p$. Es la única discreta sin memoria. Cuidado con la doble convención: contando ensayos queda $p_Y(k)=q^{k-1}p$ y $E[Y]=1/p$.'
 tipo: distribucion
 unidad: 3
-orden: 9
+orden: 10
 tags: [discreta, distribucion]
 fuentes: ["[[geometrica-apunte]]", "[[tp3-variables-aleatorias-discretas]]", "[[va-discretas-introduccion]]"]
 actualizado: 2026-09-04

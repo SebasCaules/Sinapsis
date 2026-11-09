@@ -3,7 +3,7 @@ titulo: Caminata Aleatoria (Random Walk)
 resumen: 'Suma acumulada de pasos $\pm1$ independientes, $X_n=\sum_{k=1}^n Y_k$, con $E[X_n]=n(2p-1)$ y $\mathrm{Var}(X_n)=4np(1-p)$. Ejemplo guía de la unidad: es de Markov y de incrementos independientes, pero no estacionario.'
 tipo: concepto
 unidad: 6
-orden: 2
+orden: 3
 tags: [procesos-estocasticos, discreto, ejemplo]
 fuentes: ["[[teorica-procesos-estocasticos-introduccion]]", "[[tp6-procesos-estocasticos]]"]
 actualizado: 2026-09-04

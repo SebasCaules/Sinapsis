@@ -3,7 +3,7 @@ titulo: Formulario — Procesos Estocásticos
 resumen: "Hoja de la unidad 6: definiciones generales, caminata aleatoria, procesos de Bernoulli y de Poisson con la relación entre ambos, y cadenas de Markov con potencias de la matriz de transición, distribución estacionaria y tiempos medios."
 tipo: formulario
 unidad: 6
-orden: 7
+orden: 8
 tags: [procesos-estocasticos, formulario, cheat-sheet]
 fuentes: ["[[procesos-estocasticos]]", "[[caminata-aleatoria]]", "[[proceso-de-bernoulli]]", "[[proceso-de-poisson]]", "[[relacion-bernoulli-poisson]]", "[[cadenas-de-markov]]"]
 actualizado: 2026-09-04

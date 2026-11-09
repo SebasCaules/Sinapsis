@@ -3,7 +3,7 @@ titulo: Datos agrupados
 resumen: 'Cuando solo se dispone de una tabla de frecuencias por intervalos, las medidas de resumen se aproximan usando la marca de clase $x_i=(L_i+L_{s,i})/2$ como representante; la mediana y los cuartiles exigen además interpolar dentro del intervalo.'
 tipo: concepto
 unidad: 1
-orden: 9
+orden: 10
 tags: [estadistica-descriptiva, datos-agrupados, frecuencias]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[video-histogramas]]", "[[video-datos-agrupados]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Formulario — Suma de V.A., LGN y TCL
 resumen: "Hoja de la unidad 7: esperanza y varianza de una suma, convolución, sumas con nombre propio de variables independientes, desigualdad de Chebyshev, ley de grandes números, teorema central del límite y aproximación normal de la binomial."
 tipo: formulario
 unidad: 7
-orden: 10
+orden: 11
 tags: [formulario, suma-de-va, tcl, lgn, cheat-sheet]
 fuentes: ["[[tp7-suma-de-va]]", "[[teorica-suma-va-general]]", "[[teorica-tcl-introduccion]]", "[[video-suma-variables]]"]
 actualizado: 2026-09-03

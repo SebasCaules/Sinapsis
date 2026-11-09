@@ -3,7 +3,7 @@ titulo: Integrales dobles
 resumen: 'Integrar la densidad conjunta sobre una región da la probabilidad del par, $P((X,Y)\in R)=\iint_R f_{XY}\,dA$. Sirve para normalizar, calcular probabilidades de regiones, esperanzas y marginales; el trabajo real está en fijar los límites.'
 tipo: tecnica
 unidad: 0
-orden: 2
+orden: 3
 tags: [complemento-matematico, integracion, continua, bidimensional]
 fuentes: ["[[complemento-integrales-dobles]]"]
 actualizado: 2026-09-04

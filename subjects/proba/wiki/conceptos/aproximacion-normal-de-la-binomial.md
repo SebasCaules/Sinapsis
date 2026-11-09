@@ -3,7 +3,7 @@ titulo: Aproximación Normal de la Binomial
 resumen: 'Caso más usado del TCL: para $n$ grande, $\mathrm{Bin}(n,p)\approx\mathcal{N}(np,\sqrt{npq})$. Al ser la binomial discreta se aplica la corrección por continuidad $\pm\tfrac{1}{2}$; regla práctica $np\ge5$ y $nq\ge5$.'
 tipo: concepto
 unidad: 7
-orden: 9
+orden: 10
 tags: [tcl, binomial, normal, aproximacion]
 fuentes: ["[[teorica-aproximacion-binomial-normal]]", "[[tp7-suma-de-va]]", "[[video-tcl]]"]
 actualizado: 2026-09-04

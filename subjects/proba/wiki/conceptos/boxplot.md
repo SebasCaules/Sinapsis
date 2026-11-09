@@ -3,7 +3,7 @@ titulo: Boxplot (diagrama de caja)
 resumen: 'Resume la muestra con cinco números (mínimo, $q_1$, mediana, $q_3$, máximo) y detecta atípicos con la regla de Tukey $q_1-1.5\,\mathrm{IQR}$ y $q_3+1.5\,\mathrm{IQR}$; los bigotes terminan en el dato real más extremo dentro de esos límites.'
 tipo: concepto
 unidad: 1
-orden: 8
+orden: 9
 tags: [estadistica-descriptiva, boxplot, outliers]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[video-histogramas]]", "[[video-boxplots]]"]
 actualizado: 2026-09-04

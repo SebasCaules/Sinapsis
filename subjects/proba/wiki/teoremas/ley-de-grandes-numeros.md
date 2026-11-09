@@ -3,7 +3,7 @@ titulo: Ley de los Grandes Números
 resumen: 'El promedio muestral converge a la media poblacional cuando $n$ crece: la ley débil da $P(|\bar X_n-\mu|\ge\varepsilon)\to 0$ y la fuerte agrega convergencia casi segura. Justifica estimar promediando y leer la probabilidad como frecuencia relativa.'
 tipo: teorema
 unidad: 7
-orden: 7
+orden: 8
 tags: [convergencia, promedio, teorema]
 fuentes: ["[[teorica-ley-grandes-numeros]]", "[[teorica-suma-promedio-iid]]", "[[tp7-suma-de-va]]", "[[video-tcl]]", "[[video-desigualdades-y-lgn]]"]
 actualizado: 2026-09-03

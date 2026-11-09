@@ -3,7 +3,7 @@ titulo: Cuartiles y percentiles
 resumen: 'Medidas de posición que parten la muestra ordenada en cuatro tramos de igual cantidad de datos ($q_1$, mediana, $q_3$); son la base del boxplot y del rango intercuartil. Los percentiles se obtienen interpolando con $h=p\,n$.'
 tipo: concepto
 unidad: 1
-orden: 6
+orden: 7
 tags: [estadistica-descriptiva, cuartiles, percentiles]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[video-percentilos]]"]
 actualizado: 2026-09-03

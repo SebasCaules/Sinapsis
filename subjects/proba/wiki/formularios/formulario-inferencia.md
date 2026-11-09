@@ -3,7 +3,7 @@ titulo: Formulario — Inferencia Estadística
 resumen: "Hoja de la unidad 8: error cuadrático medio, sesgo y consistencia, estimadores clásicos, intervalos de confianza para la media, la proporción y la varianza, tamaño muestral y un árbol para decidir entre $z$, $t$ y ji-cuadrado."
 tipo: formulario
 unidad: 8
-orden: 7
+orden: 8
 tags: [inferencia, estimacion, formulario, cheatsheet]
 fuentes: ["[[teorica-estimacion-puntual-intro]]", "[[teorica-estimacion-puntual-conocidos]]", "[[teorica-ic-media-desvio-conocido]]", "[[teorica-ic-proporcion]]", "[[teorica-ic-media-desvio-desconocido-intervalos]]", "[[tp8-estimacion-de-parametros]]", "[[video-ic-desvio-desconocido]]"]
 actualizado: 2026-09-03

@@ -3,7 +3,7 @@ titulo: Distribución Pareto
 resumen: 'Magnitudes con un mínimo garantizado $x_0$ y cola pesada: $f_X(x)=\alpha x_0^{\alpha}/x^{\alpha+1}$ para $x>x_0$. Su esperanza $\alpha x_0/(\alpha-1)$ existe solo si $\alpha>1$ y su varianza solo si $\alpha>2$. Aparece en estimación puntual.'
 tipo: distribucion
 unidad: 4
-orden: 10
+orden: 11
 tags: [continua, distribucion, estimacion]
 fuentes: ["[[video-metodos-de-estimacion]]", "[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-09-04

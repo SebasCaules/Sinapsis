@@ -3,7 +3,7 @@ titulo: Distribución Ji-cuadrado
 resumen: 'Suma de cuadrados de $k$ normales estándar independientes, con $E[X]=k$ y $V(X)=2k$. En inferencia es la ley de $(n-1)S_n^2/\sigma^2$: sostiene la insesgadez de la varianza muestral, sus intervalos de confianza y la t de Student.'
 tipo: distribucion
 unidad: 8
-orden: 4
+orden: 5
 tags: [continua, distribucion, inferencia]
 fuentes: ["[[teorica-estimacion-puntual-conocidos]]", "[[teorica-t-de-student]]", "[[tp8-estimacion-de-parametros]]", "[[video-ic-desvio-desconocido]]"]
 actualizado: 2026-09-03

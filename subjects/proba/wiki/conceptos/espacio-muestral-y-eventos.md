@@ -3,7 +3,7 @@ titulo: Espacio muestral y eventos
 resumen: 'Vocabulario de conjuntos de la probabilidad: el espacio muestral $S$ reúne todos los resultados posibles y un evento es un subconjunto $A\subseteq S$. Se opera con complemento, unión e intersección; son excluyentes si $A\cap B=\emptyset$.'
 tipo: concepto
 unidad: 2
-orden: 2
+orden: 3
 tags: [probabilidad, fundamentos, conjuntos]
 fuentes: ["[[axiomas-probabilidad]]"]
 actualizado: 2026-06-06

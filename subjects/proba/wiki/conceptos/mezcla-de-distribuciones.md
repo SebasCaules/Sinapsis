@@ -3,7 +3,7 @@ titulo: Mezcla de Distribuciones
 resumen: 'Modela una población formada por subpoblaciones: $f_X(x)=\sum_k f_{X\mid M}(x\mid k)P(M=k)$, combinación convexa de las condicionales. La varianza no se mezcla linealmente: se usa la ley de varianza total.'
 tipo: concepto
 unidad: 5
-orden: 7
+orden: 8
 tags: [bidimensionales, mezcla, condicional]
 fuentes: ["[[teorica-mezcla]]", "[[tp5-2024]]", "[[video-mezcla]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Varianza Muestral
 resumen: 'Estimador insesgado de la varianza poblacional, $S_n^2=\frac{1}{n-1}\sum_i (X_i-\bar X_n)^2$: el denominador $n-1$ es la corrección de Bessel. Su raíz reemplaza al desvío poblacional en los intervalos de confianza de la media con desvío desconocido.'
 tipo: concepto
 unidad: 8
-orden: 3
+orden: 4
 tags: [inferencia, estimacion, dispersion]
 fuentes: ["[[teorica-estimacion-puntual-conocidos]]", "[[tp8-estimacion-de-parametros]]", "[[video-poblacion-y-muestra]]"]
 actualizado: 2026-09-04

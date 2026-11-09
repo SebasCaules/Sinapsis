@@ -3,7 +3,7 @@ titulo: Distribución Weibull
 resumen: 'Tiempos hasta la falla con tasa de fallas no constante, definida por su FDA $F_X(x)=1-e^{-(\lambda x)^b}$. La forma $b$ decide si la tasa crece ($b>1$), decrece ($b<1$) o es constante ($b=1$, exponencial). Es el modelo estándar de confiabilidad.'
 tipo: distribucion
 unidad: 4
-orden: 7
+orden: 8
 tags: [continua, distribucion, confiabilidad, weibull]
 fuentes: ["[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-09-04

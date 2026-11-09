@@ -3,7 +3,7 @@ titulo: Relación entre los procesos Bernoulli y Poisson
 resumen: "El proceso de Poisson es el límite continuo del de Bernoulli al hacer infinitamente finos los ticks del reloj: mismo esqueleto de conteo, y cada distribución discreta pasa a su análoga continua (Binomial a Poisson, Geométrica a Exponencial)."
 tipo: concepto
 unidad: 6
-orden: 5
+orden: 6
 tags: [procesos-estocasticos, comparacion]
 fuentes: ["[[teorica-relacion-bernoulli-poisson]]", "[[teorica-proceso-de-bernoulli]]", "[[teorica-proceso-de-poisson]]"]
 actualizado: 2026-09-04

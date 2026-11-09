@@ -3,7 +3,7 @@ titulo: Estandarización y uso de la tabla normal (Z)
 resumen: 'Receta para resolver cualquier normal con una sola tabla: estandarizar con $z=\frac{x-\mu}{\sigma}$, leer $\Phi(z)$ o el fractil $z_\alpha$ en el problema inverso, y aprovechar la simetría $\Phi(-z)=1-\Phi(z)$ para los valores negativos.'
 tipo: tecnica
 unidad: 4
-orden: 9
+orden: 10
 tags: [continua, normal, tabla, fractil, tecnica]
 fuentes: ["[[teorica-va-normal]]", "[[tp4-variables-aleatorias-continuas]]", "[[video-normales]]"]
 actualizado: 2026-09-04

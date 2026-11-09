@@ -3,7 +3,7 @@ titulo: Formulario — Variables Aleatorias Continuas
 resumen: "Hoja de la unidad 4: densidad y función de distribución, esperanza, momentos y varianza por integral, tabla de las distribuciones continuas con sus parámetros, falta de memoria de la exponencial y estandarización de la normal."
 tipo: formulario
 unidad: 4
-orden: 11
+orden: 12
 tags: [continua, formulario, cheat-sheet]
 fuentes: ["[[teorica-va-continuas]]", "[[teorica-va-uniforme]]", "[[teorica-va-exponencial]]", "[[teorica-va-normal]]", "[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-05-30

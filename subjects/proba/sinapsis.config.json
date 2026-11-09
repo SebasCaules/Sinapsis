@@ -71,6 +71,15 @@
   ],
   "pageTypes": [
     {
+      "key": "resumen",
+      "label": "Resumen",
+      "plural": "Resúmenes",
+      "folder": "resumenes",
+      "countsAsContent": true,
+      "collapsedByDefault": false,
+      "color": "--u4"
+    },
+    {
       "key": "concepto",
       "label": "Concepto",
       "plural": "Conceptos",
@@ -126,9 +135,30 @@
   ],
   "rail": [
     {
+      "id": "ejercitar",
+      "label": "Ejercitar",
+      "color": "--accent",
+      "items": [
+        {
+          "id": "ejercicios",
+          "label": "Ejercicios",
+          "icon": "pencil",
+          "kind": "tool",
+          "target": "ejercicios"
+        },
+        {
+          "id": "parcial",
+          "label": "Simulador de parcial",
+          "icon": "timer",
+          "kind": "tool",
+          "target": "parcial"
+        }
+      ]
+    },
+    {
       "id": "resolver",
       "label": "Resolver",
-      "color": "--accent",
+      "color": "--u3",
       "items": [
         {
           "id": "formularios",
@@ -138,11 +168,11 @@
           "target": "formularios"
         },
         {
-          "id": "explorador",
-          "label": "Explorador de distribuciones",
-          "icon": "chart",
+          "id": "asistente",
+          "label": "¿Qué distribución o prueba?",
+          "icon": "compass",
           "kind": "tool",
-          "target": "explorador"
+          "target": "asistente"
         },
         {
           "id": "taller",
@@ -157,13 +187,20 @@
           "icon": "calc",
           "kind": "tool",
           "target": "calc"
-        },
+        }
+      ]
+    },
+    {
+      "id": "explorar",
+      "label": "Explorar",
+      "color": "--u6",
+      "items": [
         {
-          "id": "asistente",
-          "label": "¿Qué distribución o prueba?",
-          "icon": "compass",
+          "id": "explorador",
+          "label": "Explorador de distribuciones",
+          "icon": "chart",
           "kind": "tool",
-          "target": "asistente"
+          "target": "explorador"
         },
         {
           "id": "lab",
@@ -171,20 +208,6 @@
           "icon": "flask",
           "kind": "tool",
           "target": "lab"
-        },
-        {
-          "id": "ejercicios",
-          "label": "Ejercicios",
-          "icon": "pencil",
-          "kind": "tool",
-          "target": "ejercicios"
-        },
-        {
-          "id": "parcial",
-          "label": "Simulador de parcial",
-          "icon": "timer",
-          "kind": "tool",
-          "target": "parcial"
         }
       ]
     }

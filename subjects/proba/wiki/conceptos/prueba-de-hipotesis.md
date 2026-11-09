@@ -1,10 +1,9 @@
 ---
 titulo: Prueba de hipótesis
-resumen: "Método de la inferencia para decidir entre dos hipótesis sobre un parámetro poblacional a partir de una muestra, controlando de antemano la probabilidad de equivocarse. Hub de la unidad 9: tipos de prueba, región de rechazo, errores tipo I y II, y valor p."
+resumen: "Método de la inferencia para decidir entre dos hipótesis sobre un parámetro poblacional a partir de una muestra, controlando de antemano la probabilidad de equivocarse. Incluye tipos de prueba, región de rechazo, errores tipo I y II, y valor p."
 tipo: concepto
 unidad: 9
-orden: 1
-hub: true
+orden: 2
 tags: [inferencia, prueba-de-hipotesis, hub]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[intro-prueba-de-hipotesis-slides]]", "[[video-th-desvio-conocido]]"]
 actualizado: 2026-09-03

@@ -3,7 +3,7 @@ titulo: Distribución Gamma
 resumen: 'Tiempo de espera hasta acumular varias ocurrencias de un proceso de Poisson, o suma de exponenciales independientes: $f_X(x)=\lambda^{\alpha}x^{\alpha-1}e^{-\lambda x}/\Gamma(\alpha)$, con $E[X]=\alpha/\lambda$ y $V(X)=\alpha/\lambda^2$.'
 tipo: distribucion
 unidad: 7
-orden: 3
+orden: 4
 tags: [continua, distribucion]
 fuentes: ["[[teorica-suma-exponenciales]]", "[[tp7-suma-de-va]]"]
 actualizado: 2026-06-06

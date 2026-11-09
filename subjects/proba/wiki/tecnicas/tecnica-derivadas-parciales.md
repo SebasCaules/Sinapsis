@@ -3,7 +3,7 @@ titulo: Derivadas parciales
 resumen: 'Derivar es la operación inversa de acumular: la densidad se recupera de la función de distribución con $f_X(x)=\frac{dF_X}{dx}$, y en el caso bidimensional con la derivada parcial cruzada $f(x,y)=\frac{\partial^2 F}{\partial x\,\partial y}$.'
 tipo: tecnica
 unidad: 0
-orden: 3
+orden: 4
 tags: [complemento-matematico, derivacion, continua, bidimensional]
 fuentes: ["[[complemento-derivadas-parciales]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Promedio Muestral
 resumen: 'Promedio de una muestra i.i.d.: estimador insesgado de la media, con desvío $\sigma_X/\sqrt{n}$ que se achica al crecer $n$. Sus dos teoremas clave son la ley de grandes números (converge a la media) y el teorema central del límite (se vuelve aproximadamente normal).'
 tipo: concepto
 unidad: 7
-orden: 5
+orden: 6
 tags: [muestreo, promedio, estimador, suma-de-va]
 fuentes: ["[[teorica-suma-promedio-iid]]", "[[teorica-tcl-introduccion]]", "[[tp7-suma-de-va]]", "[[video-tcl]]"]
 actualizado: 2026-09-04

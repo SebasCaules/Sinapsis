@@ -2,8 +2,463 @@
    Fuente: wiki/formularios/*.md + curaduria en formulas-notas.json
    Regenerar:  python3 estudio/build-formulas.py            */
 window.FORMULAS = {
- "generated": "2026-09-05",
+ "generated": "2026-11-09",
  "items": [
+  {
+   "id": "12-estadistica-descriptiva--media-sin-agrupar",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Tendencia central",
+   "nombre": "Media",
+   "tex": "\\bar x = \\dfrac{1}{n}\\sum_{i=1}^n x_i",
+   "variante": "sin agrupar",
+   "cuando": "Piden el promedio de una lista de datos sin agrupar; es sensible a valores extremos.",
+   "condiciones": [
+    "datos sin agrupar"
+   ],
+   "slug": "medidas-de-tendencia-central",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "tendencia-central"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 46,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--mediana-sin-agrupar",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Tendencia central",
+   "nombre": "Mediana $q_2$",
+   "tex": "n\\text{ impar: obs. central pos. }\\frac{n+1}{2}\\text{; }n\\text{ par: promedio de pos. }\\frac{n}{2}\\text{ y }\\frac{n}{2}+1\\text{ (muestra ordenada)}",
+   "variante": "sin agrupar",
+   "cuando": "Piden el valor central de la muestra ordenada; es la medida robusta frente a outliers.",
+   "condiciones": [
+    "muestra ordenada"
+   ],
+   "slug": "medidas-de-tendencia-central",
+   "ancla": "mediana",
+   "tags": [
+    "descriptiva",
+    "tendencia-central",
+    "robusta"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 47,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--rango",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "Rango",
+   "tex": "R = \\lvert\\max_i x_i - \\min_i x_i\\rvert",
+   "cuando": "Medida de dispersión más simple: distancia entre el máximo y el mínimo.",
+   "condiciones": [],
+   "slug": "medidas-de-dispersion",
+   "ancla": "rango",
+   "tags": [
+    "descriptiva",
+    "dispersion"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 56,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--varianza-muestral",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "Varianza muestral",
+   "tex": "\\;s^2 = \\dfrac{1}{n-1}\\displaystyle\\sum_{i=1}^n (x_i-\\bar x)^2\\;",
+   "cuando": "Piden la dispersión de una muestra: se divide por n−1 para que el estimador sea insesgado.",
+   "condiciones": [
+    "denominador n−1"
+   ],
+   "slug": "varianza-muestral",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "dispersion"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 57,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--desvio",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "Desvío",
+   "tex": "s = \\sqrt{s^2}",
+   "cuando": "Desvío muestral: raíz de la varianza, en las mismas unidades que los datos.",
+   "condiciones": [],
+   "slug": "medidas-de-dispersion",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "dispersion"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 58,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--desvio-abs-medio",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "Desvío abs. medio",
+   "tex": "w = \\dfrac{1}{n}\\sum_{i=1}^n \\lvert x_i-\\bar x\\rvert",
+   "cuando": "Dispersión medida con valores absolutos en lugar de cuadrados.",
+   "condiciones": [],
+   "slug": "medidas-de-dispersion",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "dispersion"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 59,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--mad",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "MAD",
+   "tex": "\\text{MAD} = \\operatorname{mediana}\\{\\lvert x_i-\\bar x\\rvert\\}",
+   "cuando": "Medida de dispersión robusta, basada en la mediana de los desvíos.",
+   "condiciones": [],
+   "slug": "medidas-de-dispersion",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "dispersion",
+    "robusta"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 60,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--iqr",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "IQR",
+   "tex": "\\text{IQR} = q_3 - q_1",
+   "cuando": "Dispersión del 50 % central de los datos; es la base de la caja del boxplot.",
+   "condiciones": [],
+   "slug": "medidas-de-dispersion",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "dispersion",
+    "boxplot"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 61,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--dispersion",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Dispersión",
+   "nombre": "Dispersión",
+   "tex": "s^2 = \\frac{1}{n-1}\\sum_{i=1}^n (x_i-\\bar x)^2 \\qquad s=\\sqrt{s^2}",
+   "cuando": "Fórmula de trabajo de la varianza y el desvío muestrales.",
+   "condiciones": [
+    "denominador n−1"
+   ],
+   "slug": "medidas-de-dispersion",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "dispersion"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 63,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--cuartiles-y-percentiles",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Cuartiles y percentiles",
+   "nombre": "Cuartiles y percentiles",
+   "tex": "\\frac{k}{n} \\le j\\cdot 0{,}25 < \\frac{k+1}{n}.",
+   "cuando": "Regla de posición para ubicar el cuartil dentro de la muestra ordenada.",
+   "condiciones": [
+    "muestra ordenada"
+   ],
+   "slug": "cuartiles-y-percentiles",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "cuartiles"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 69,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--forma-asimetria-y-curtosis-muestral",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Forma (asimetría y curtosis muestral)",
+   "nombre": "Forma (asimetría y curtosis muestral)",
+   "tex": "\\gamma = \\frac{1}{n s^3}\\sum_{i=1}^n (x_i-\\bar x)^3 \\qquad \\kappa = \\frac{1}{n s^4}\\sum_{i=1}^n (x_i-\\bar x)^4 - 3",
+   "cuando": "Piden describir la forma de la muestra: el signo del sesgo y el exceso de curtosis respecto de la normal.",
+   "condiciones": [],
+   "slug": "asimetria-y-curtosis",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "forma"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 74,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--media",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Media",
+   "tex": "\\bar x_{Ag} = \\dfrac{1}{n}\\sum_{i=1}^L x_i\\, f_i",
+   "cuando": "Datos presentados en tabla de frecuencias por intervalos: se usa la marca de clase como representante.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "medidas-con-datos-agrupados",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 83,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--desvio-2",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Desvío",
+   "tex": "s_{Ag} = \\sqrt{\\dfrac{1}{n-1}\\sum_{i=1}^L (x_i-\\bar x_{Ag})^2\\, f_i}",
+   "cuando": "Desvío de datos agrupados, ponderando cada marca de clase por su frecuencia.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "medidas-con-datos-agrupados",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 84,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--asimetria",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Asimetría",
+   "tex": "\\gamma_{Ag} = \\dfrac{1}{n\\,s_{Ag}^3}\\sum (x_i-\\bar x_{Ag})^3 f_i",
+   "cuando": "Asimetría de datos agrupados.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "medidas-con-datos-agrupados",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados",
+    "forma"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 85,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--curtosis",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Curtosis",
+   "tex": "\\kappa_{Ag} = \\dfrac{1}{n\\,s_{Ag}^4}\\sum (x_i-\\bar x_{Ag})^4 f_i - 3",
+   "cuando": "Curtosis de datos agrupados; la normal es la referencia en cero.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "medidas-con-datos-agrupados",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados",
+    "forma"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 86,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--mediana-cuartiles-por-interpolacion-lineal",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Mediana / cuartiles por interpolación lineal",
+   "tex": "q = L_I + \\frac{\\alpha n - F_{\\text{ant}}}{F - F_{\\text{ant}}}\\,(L_{s}-L_I), \\qquad \\text{mediana: }\\alpha=0{,}5.",
+   "cuando": "Datos agrupados y piden mediana o cuartiles: se ubica el intervalo por la frecuencia acumulada y se interpola dentro.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "mediana-y-cuartiles-interpolación",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados",
+    "cuartiles"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 89,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--moda-agrupada",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Moda agrupada",
+   "tex": "M=\\frac{L_I+L_D}{2}",
+   "variante": "punto medio",
+   "cuando": "Aproximación rápida a la moda de datos agrupados: el punto medio del intervalo modal.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "medidas-con-datos-agrupados",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 91,
+    "tipo": "parrafo"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--moda-agrupada-2",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Datos agrupados",
+   "nombre": "Moda agrupada",
+   "tex": "M = \\frac{L_D(f_M-f_I) + L_I(f_M-f_D)}{(f_M-f_I)+(f_M-f_D)}.",
+   "variante": "interpolación",
+   "cuando": "Moda de datos agrupados con más precisión: se interpola dentro del intervalo modal usando las frecuencias vecinas.",
+   "condiciones": [
+    "datos agrupados"
+   ],
+   "slug": "datos-agrupados",
+   "ancla": "medidas-con-datos-agrupados",
+   "tags": [
+    "descriptiva",
+    "datos-agrupados"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 92,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "12-estadistica-descriptiva--boxplot-y-outliers-de-tukey",
+   "unidad": "1",
+   "seccion": "12 · Estadística descriptiva",
+   "subseccion": "Boxplot y outliers de Tukey",
+   "nombre": "Boxplot y outliers de Tukey",
+   "tex": "[\\,q_1 - 1{,}5\\,\\text{IQR}\\;,\\;\\; q_3 + 1{,}5\\,\\text{IQR}\\,].",
+   "cuando": "Piden detectar valores atípicos o dibujar el boxplot: todo dato fuera de las cercas es outlier.",
+   "condiciones": [
+    "cuartiles conocidos"
+   ],
+   "slug": "boxplot",
+   "ancla": "",
+   "tags": [
+    "descriptiva",
+    "boxplot",
+    "outliers"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 98,
+    "tipo": "bloque"
+   }
+  },
   {
    "id": "1-probabilidad-axiomas-condicional--axiomas-de-kolmogorov",
    "unidad": "2",
@@ -24,7 +479,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 49,
+    "linea": 107,
     "tipo": "bloque"
    }
   },
@@ -46,7 +501,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 55,
+    "linea": 113,
     "tipo": "tabla"
    }
   },
@@ -67,7 +522,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 56,
+    "linea": 114,
     "tipo": "tabla"
    }
   },
@@ -91,7 +546,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 57,
+    "linea": 115,
     "tipo": "tabla"
    }
   },
@@ -115,7 +570,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 58,
+    "linea": 116,
     "tipo": "tabla"
    }
   },
@@ -139,7 +594,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 59,
+    "linea": 117,
     "tipo": "tabla"
    }
   },
@@ -163,7 +618,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 62,
+    "linea": 120,
     "tipo": "bloque"
    }
   },
@@ -186,7 +641,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 66,
+    "linea": 124,
     "tipo": "bloque"
    }
   },
@@ -209,7 +664,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 68,
+    "linea": 126,
     "tipo": "bloque"
    }
   },
@@ -234,7 +689,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 75,
+    "linea": 133,
     "tipo": "bloque"
    }
   },
@@ -258,7 +713,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 79,
+    "linea": 137,
     "tipo": "parrafo"
    }
   },
@@ -282,7 +737,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 79,
+    "linea": 137,
     "tipo": "parrafo"
    }
   },
@@ -308,7 +763,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 85,
+    "linea": 143,
     "tipo": "tabla"
    }
   },
@@ -334,7 +789,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 85,
+    "linea": 143,
     "tipo": "tabla"
    }
   },
@@ -360,7 +815,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 86,
+    "linea": 144,
     "tipo": "tabla"
    }
   },
@@ -386,7 +841,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 86,
+    "linea": 144,
     "tipo": "tabla"
    }
   },
@@ -408,7 +863,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 88,
+    "linea": 146,
     "tipo": "parrafo"
    }
   },
@@ -432,7 +887,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 94,
+    "linea": 152,
     "tipo": "bloque"
    }
   },
@@ -456,7 +911,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 97,
+    "linea": 155,
     "tipo": "bloque"
    }
   },
@@ -480,7 +935,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 101,
+    "linea": 159,
     "tipo": "bloque"
    }
   },
@@ -504,7 +959,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 102,
+    "linea": 160,
     "tipo": "parrafo"
    }
   },
@@ -530,7 +985,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 108,
+    "linea": 166,
     "tipo": "parrafo"
    }
   },
@@ -554,7 +1009,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 111,
+    "linea": 169,
     "tipo": "bloque"
    }
   },
@@ -579,7 +1034,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 114,
+    "linea": 172,
     "tipo": "bloque"
    }
   },
@@ -604,7 +1059,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 124,
+    "linea": 182,
     "tipo": "tabla"
    }
   },
@@ -629,7 +1084,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 124,
+    "linea": 182,
     "tipo": "tabla"
    }
   },
@@ -654,7 +1109,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 125,
+    "linea": 183,
     "tipo": "tabla"
    }
   },
@@ -679,7 +1134,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 125,
+    "linea": 183,
     "tipo": "tabla"
    }
   },
@@ -704,7 +1159,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 126,
+    "linea": 184,
     "tipo": "tabla"
    }
   },
@@ -727,7 +1182,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 127,
+    "linea": 185,
     "tipo": "tabla"
    }
   },
@@ -750,7 +1205,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 127,
+    "linea": 185,
     "tipo": "tabla"
    }
   },
@@ -775,7 +1230,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 128,
+    "linea": 186,
     "tipo": "tabla"
    }
   },
@@ -800,7 +1255,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 132,
+    "linea": 190,
     "tipo": "bloque"
    }
   },
@@ -824,7 +1279,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 134,
+    "linea": 192,
     "tipo": "parrafo"
    }
   },
@@ -849,7 +1304,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 138,
+    "linea": 196,
     "tipo": "bloque"
    }
   },
@@ -874,7 +1329,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 139,
+    "linea": 197,
     "tipo": "bloque"
    }
   },
@@ -898,7 +1353,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 145,
+    "linea": 203,
     "tipo": "bloque"
    }
   },
@@ -922,7 +1377,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 149,
+    "linea": 207,
     "tipo": "bloque"
    }
   },
@@ -946,7 +1401,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 153,
+    "linea": 211,
     "tipo": "bloque"
    }
   },
@@ -968,7 +1423,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 159,
+    "linea": 217,
     "tipo": "bloque"
    }
   },
@@ -990,7 +1445,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 163,
+    "linea": 221,
     "tipo": "bloque"
    }
   },
@@ -1014,7 +1469,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 167,
+    "linea": 225,
     "tipo": "parrafo"
    }
   },
@@ -1036,7 +1491,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 167,
+    "linea": 225,
     "tipo": "parrafo"
    }
   },
@@ -1058,7 +1513,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 173,
+    "linea": 231,
     "tipo": "bloque"
    }
   },
@@ -1082,7 +1537,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 179,
+    "linea": 237,
     "tipo": "bloque"
    }
   },
@@ -1106,7 +1561,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 183,
+    "linea": 241,
     "tipo": "tabla"
    }
   },
@@ -1130,7 +1585,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 184,
+    "linea": 242,
     "tipo": "tabla"
    }
   },
@@ -1151,7 +1606,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 185,
+    "linea": 243,
     "tipo": "tabla"
    }
   },
@@ -1173,7 +1628,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 186,
+    "linea": 244,
     "tipo": "tabla"
    }
   },
@@ -1197,7 +1652,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 187,
+    "linea": 245,
     "tipo": "tabla"
    }
   },
@@ -1225,7 +1680,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 197,
+    "linea": 255,
     "tipo": "tabla"
    }
   },
@@ -1253,7 +1708,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 197,
+    "linea": 255,
     "tipo": "tabla"
    }
   },
@@ -1281,7 +1736,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 197,
+    "linea": 255,
     "tipo": "tabla"
    }
   },
@@ -1309,7 +1764,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 197,
+    "linea": 255,
     "tipo": "tabla"
    }
   },
@@ -1337,7 +1792,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 197,
+    "linea": 255,
     "tipo": "tabla"
    }
   },
@@ -1366,7 +1821,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 198,
+    "linea": 256,
     "tipo": "tabla"
    }
   },
@@ -1395,7 +1850,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 198,
+    "linea": 256,
     "tipo": "tabla"
    }
   },
@@ -1424,7 +1879,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 198,
+    "linea": 256,
     "tipo": "tabla"
    }
   },
@@ -1453,7 +1908,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 198,
+    "linea": 256,
     "tipo": "tabla"
    }
   },
@@ -1482,7 +1937,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 198,
+    "linea": 256,
     "tipo": "tabla"
    }
   },
@@ -1510,7 +1965,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 199,
+    "linea": 257,
     "tipo": "tabla"
    }
   },
@@ -1538,7 +1993,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 199,
+    "linea": 257,
     "tipo": "tabla"
    }
   },
@@ -1566,7 +2021,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 199,
+    "linea": 257,
     "tipo": "tabla"
    }
   },
@@ -1594,7 +2049,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 199,
+    "linea": 257,
     "tipo": "tabla"
    }
   },
@@ -1622,7 +2077,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 199,
+    "linea": 257,
     "tipo": "tabla"
    }
   },
@@ -1650,7 +2105,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 200,
+    "linea": 258,
     "tipo": "tabla"
    }
   },
@@ -1678,7 +2133,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 200,
+    "linea": 258,
     "tipo": "tabla"
    }
   },
@@ -1706,7 +2161,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 200,
+    "linea": 258,
     "tipo": "tabla"
    }
   },
@@ -1734,7 +2189,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 200,
+    "linea": 258,
     "tipo": "tabla"
    }
   },
@@ -1762,7 +2217,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 200,
+    "linea": 258,
     "tipo": "tabla"
    }
   },
@@ -1790,7 +2245,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 201,
+    "linea": 259,
     "tipo": "tabla"
    }
   },
@@ -1818,7 +2273,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 201,
+    "linea": 259,
     "tipo": "tabla"
    }
   },
@@ -1846,7 +2301,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 201,
+    "linea": 259,
     "tipo": "tabla"
    }
   },
@@ -1874,7 +2329,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 201,
+    "linea": 259,
     "tipo": "tabla"
    }
   },
@@ -1902,7 +2357,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 202,
+    "linea": 260,
     "tipo": "tabla"
    }
   },
@@ -1930,7 +2385,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 202,
+    "linea": 260,
     "tipo": "tabla"
    }
   },
@@ -1958,7 +2413,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 202,
+    "linea": 260,
     "tipo": "tabla"
    }
   },
@@ -1986,7 +2441,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 202,
+    "linea": 260,
     "tipo": "tabla"
    }
   },
@@ -2014,7 +2469,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 202,
+    "linea": 260,
     "tipo": "tabla"
    }
   },
@@ -2039,7 +2494,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 209,
+    "linea": 267,
     "tipo": "vineta"
    }
   },
@@ -2065,7 +2520,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 212,
+    "linea": 270,
     "tipo": "vineta"
    }
   },
@@ -2090,7 +2545,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 222,
+    "linea": 280,
     "tipo": "tabla"
    }
   },
@@ -2114,7 +2569,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 223,
+    "linea": 281,
     "tipo": "tabla"
    }
   },
@@ -2139,7 +2594,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 224,
+    "linea": 282,
     "tipo": "tabla"
    }
   },
@@ -2163,7 +2618,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 227,
+    "linea": 285,
     "tipo": "bloque"
    }
   },
@@ -2188,7 +2643,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 233,
+    "linea": 291,
     "tipo": "bloque"
    }
   },
@@ -2213,7 +2668,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 235,
+    "linea": 293,
     "tipo": "bloque"
    }
   },
@@ -2238,7 +2693,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 239,
+    "linea": 297,
     "tipo": "bloque"
    }
   },
@@ -2263,7 +2718,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 247,
+    "linea": 305,
     "tipo": "bloque"
    }
   },
@@ -2288,7 +2743,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 249,
+    "linea": 307,
     "tipo": "bloque"
    }
   },
@@ -2311,7 +2766,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 255,
+    "linea": 313,
     "tipo": "tabla"
    }
   },
@@ -2337,7 +2792,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 261,
+    "linea": 319,
     "tipo": "bloque"
    }
   },
@@ -2363,7 +2818,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 263,
+    "linea": 321,
     "tipo": "parrafo"
    }
   },
@@ -2387,7 +2842,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 269,
+    "linea": 327,
     "tipo": "vineta"
    }
   },
@@ -2414,7 +2869,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 278,
+    "linea": 336,
     "tipo": "tabla"
    }
   },
@@ -2441,7 +2896,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 278,
+    "linea": 336,
     "tipo": "tabla"
    }
   },
@@ -2468,7 +2923,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 278,
+    "linea": 336,
     "tipo": "tabla"
    }
   },
@@ -2495,7 +2950,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 278,
+    "linea": 336,
     "tipo": "tabla"
    }
   },
@@ -2522,7 +2977,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 278,
+    "linea": 336,
     "tipo": "tabla"
    }
   },
@@ -2550,7 +3005,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 279,
+    "linea": 337,
     "tipo": "tabla"
    }
   },
@@ -2578,7 +3033,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 279,
+    "linea": 337,
     "tipo": "tabla"
    }
   },
@@ -2606,7 +3061,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 279,
+    "linea": 337,
     "tipo": "tabla"
    }
   },
@@ -2634,7 +3089,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 279,
+    "linea": 337,
     "tipo": "tabla"
    }
   },
@@ -2662,7 +3117,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 279,
+    "linea": 337,
     "tipo": "tabla"
    }
   },
@@ -2689,7 +3144,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 280,
+    "linea": 338,
     "tipo": "tabla"
    }
   },
@@ -2716,7 +3171,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 280,
+    "linea": 338,
     "tipo": "tabla"
    }
   },
@@ -2743,7 +3198,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 280,
+    "linea": 338,
     "tipo": "tabla"
    }
   },
@@ -2770,7 +3225,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 280,
+    "linea": 338,
     "tipo": "tabla"
    }
   },
@@ -2797,7 +3252,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 280,
+    "linea": 338,
     "tipo": "tabla"
    }
   },
@@ -2824,7 +3279,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 281,
+    "linea": 339,
     "tipo": "tabla"
    }
   },
@@ -2851,7 +3306,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 281,
+    "linea": 339,
     "tipo": "tabla"
    }
   },
@@ -2878,7 +3333,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 281,
+    "linea": 339,
     "tipo": "tabla"
    }
   },
@@ -2905,7 +3360,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 281,
+    "linea": 339,
     "tipo": "tabla"
    }
   },
@@ -2933,7 +3388,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 282,
+    "linea": 340,
     "tipo": "tabla"
    }
   },
@@ -2961,7 +3416,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 282,
+    "linea": 340,
     "tipo": "tabla"
    }
   },
@@ -2989,7 +3444,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 282,
+    "linea": 340,
     "tipo": "tabla"
    }
   },
@@ -3017,7 +3472,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 282,
+    "linea": 340,
     "tipo": "tabla"
    }
   },
@@ -3045,7 +3500,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 282,
+    "linea": 340,
     "tipo": "tabla"
    }
   },
@@ -3073,7 +3528,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 283,
+    "linea": 341,
     "tipo": "tabla"
    }
   },
@@ -3101,7 +3556,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 283,
+    "linea": 341,
     "tipo": "tabla"
    }
   },
@@ -3129,7 +3584,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 283,
+    "linea": 341,
     "tipo": "tabla"
    }
   },
@@ -3157,7 +3612,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 283,
+    "linea": 341,
     "tipo": "tabla"
    }
   },
@@ -3185,7 +3640,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 283,
+    "linea": 341,
     "tipo": "tabla"
    }
   },
@@ -3213,7 +3668,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 284,
+    "linea": 342,
     "tipo": "tabla"
    }
   },
@@ -3241,7 +3696,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 284,
+    "linea": 342,
     "tipo": "tabla"
    }
   },
@@ -3269,7 +3724,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 284,
+    "linea": 342,
     "tipo": "tabla"
    }
   },
@@ -3297,7 +3752,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 284,
+    "linea": 342,
     "tipo": "tabla"
    }
   },
@@ -3326,7 +3781,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 285,
+    "linea": 343,
     "tipo": "tabla"
    }
   },
@@ -3355,7 +3810,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 285,
+    "linea": 343,
     "tipo": "tabla"
    }
   },
@@ -3384,7 +3839,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 285,
+    "linea": 343,
     "tipo": "tabla"
    }
   },
@@ -3413,7 +3868,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 285,
+    "linea": 343,
     "tipo": "tabla"
    }
   },
@@ -3438,7 +3893,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 290,
+    "linea": 348,
     "tipo": "vineta"
    }
   },
@@ -3464,7 +3919,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 291,
+    "linea": 349,
     "tipo": "vineta"
    }
   },
@@ -3490,7 +3945,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 292,
+    "linea": 350,
     "tipo": "vineta"
    }
   },
@@ -3515,7 +3970,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 293,
+    "linea": 351,
     "tipo": "vineta"
    }
   },
@@ -3540,7 +3995,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 294,
+    "linea": 352,
     "tipo": "vineta"
    }
   },
@@ -3566,7 +4021,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 295,
+    "linea": 353,
     "tipo": "vineta"
    }
   },
@@ -3590,7 +4045,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 303,
+    "linea": 361,
     "tipo": "bloque"
    }
   },
@@ -3614,7 +4069,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 305,
+    "linea": 363,
     "tipo": "parrafo"
    }
   },
@@ -3638,7 +4093,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 309,
+    "linea": 367,
     "tipo": "bloque"
    }
   },
@@ -3662,7 +4117,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 312,
+    "linea": 370,
     "tipo": "vineta"
    }
   },
@@ -3686,7 +4141,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 316,
+    "linea": 374,
     "tipo": "tabla"
    }
   },
@@ -3710,7 +4165,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 317,
+    "linea": 375,
     "tipo": "tabla"
    }
   },
@@ -3735,7 +4190,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 318,
+    "linea": 376,
     "tipo": "tabla"
    }
   },
@@ -3759,7 +4214,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 322,
+    "linea": 380,
     "tipo": "bloque"
    }
   },
@@ -3783,7 +4238,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 326,
+    "linea": 384,
     "tipo": "tabla"
    }
   },
@@ -3807,7 +4262,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 326,
+    "linea": 384,
     "tipo": "tabla"
    }
   },
@@ -3831,7 +4286,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 326,
+    "linea": 384,
     "tipo": "tabla"
    }
   },
@@ -3855,7 +4310,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 326,
+    "linea": 384,
     "tipo": "tabla"
    }
   },
@@ -3879,7 +4334,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 326,
+    "linea": 384,
     "tipo": "tabla"
    }
   },
@@ -3903,7 +4358,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 330,
+    "linea": 388,
     "tipo": "bloque"
    }
   },
@@ -3927,7 +4382,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 334,
+    "linea": 392,
     "tipo": "vineta"
    }
   },
@@ -3951,7 +4406,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 335,
+    "linea": 393,
     "tipo": "vineta"
    }
   },
@@ -3975,7 +4430,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 336,
+    "linea": 394,
     "tipo": "vineta"
    }
   },
@@ -3999,7 +4454,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 341,
+    "linea": 399,
     "tipo": "bloque"
    }
   },
@@ -4025,7 +4480,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 347,
+    "linea": 405,
     "tipo": "bloque"
    }
   },
@@ -4051,7 +4506,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 348,
+    "linea": 406,
     "tipo": "parrafo"
    }
   },
@@ -4076,7 +4531,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 351,
+    "linea": 409,
     "tipo": "bloque"
    }
   },
@@ -4098,7 +4553,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 364,
+    "linea": 422,
     "tipo": "bloque"
    }
   },
@@ -4122,7 +4577,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 366,
+    "linea": 424,
     "tipo": "vineta"
    }
   },
@@ -4146,7 +4601,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 367,
+    "linea": 425,
     "tipo": "vineta"
    }
   },
@@ -4170,7 +4625,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 373,
+    "linea": 431,
     "tipo": "tabla"
    }
   },
@@ -4195,7 +4650,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 373,
+    "linea": 431,
     "tipo": "tabla"
    }
   },
@@ -4219,7 +4674,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 374,
+    "linea": 432,
     "tipo": "tabla"
    }
   },
@@ -4244,7 +4699,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 374,
+    "linea": 432,
     "tipo": "tabla"
    }
   },
@@ -4268,7 +4723,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 375,
+    "linea": 433,
     "tipo": "tabla"
    }
   },
@@ -4293,7 +4748,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 375,
+    "linea": 433,
     "tipo": "tabla"
    }
   },
@@ -4318,7 +4773,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 378,
+    "linea": 436,
     "tipo": "bloque"
    }
   },
@@ -4341,7 +4796,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 382,
+    "linea": 440,
     "tipo": "vineta"
    }
   },
@@ -4364,7 +4819,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 383,
+    "linea": 441,
     "tipo": "vineta"
    }
   },
@@ -4387,7 +4842,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 384,
+    "linea": 442,
     "tipo": "vineta"
    }
   },
@@ -4410,7 +4865,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 385,
+    "linea": 443,
     "tipo": "vineta"
    }
   },
@@ -4435,7 +4890,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 388,
+    "linea": 446,
     "tipo": "bloque"
    }
   },
@@ -4459,7 +4914,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 392,
+    "linea": 450,
     "tipo": "bloque"
    }
   },
@@ -4484,7 +4939,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 394,
+    "linea": 452,
     "tipo": "vineta"
    }
   },
@@ -4506,7 +4961,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 399,
+    "linea": 457,
     "tipo": "vineta"
    }
   },
@@ -4530,7 +4985,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 400,
+    "linea": 458,
     "tipo": "vineta"
    }
   },
@@ -4555,7 +5010,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 410,
+    "linea": 468,
     "tipo": "tabla"
    }
   },
@@ -4580,7 +5035,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 410,
+    "linea": 468,
     "tipo": "tabla"
    }
   },
@@ -4605,7 +5060,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 411,
+    "linea": 469,
     "tipo": "tabla"
    }
   },
@@ -4630,7 +5085,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 411,
+    "linea": 469,
     "tipo": "tabla"
    }
   },
@@ -4655,7 +5110,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 412,
+    "linea": 470,
     "tipo": "tabla"
    }
   },
@@ -4680,7 +5135,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 412,
+    "linea": 470,
     "tipo": "tabla"
    }
   },
@@ -4705,7 +5160,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 413,
+    "linea": 471,
     "tipo": "tabla"
    }
   },
@@ -4730,7 +5185,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 413,
+    "linea": 471,
     "tipo": "tabla"
    }
   },
@@ -4755,7 +5210,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 414,
+    "linea": 472,
     "tipo": "tabla"
    }
   },
@@ -4780,7 +5235,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 414,
+    "linea": 472,
     "tipo": "tabla"
    }
   },
@@ -4804,7 +5259,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 416,
+    "linea": 474,
     "tipo": "bloque"
    }
   },
@@ -4829,7 +5284,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 422,
+    "linea": 480,
     "tipo": "bloque"
    }
   },
@@ -4853,7 +5308,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 424,
+    "linea": 482,
     "tipo": "bloque"
    }
   },
@@ -4877,7 +5332,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 426,
+    "linea": 484,
     "tipo": "bloque"
    }
   },
@@ -4900,7 +5355,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 432,
+    "linea": 490,
     "tipo": "bloque"
    }
   },
@@ -4923,7 +5378,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 434,
+    "linea": 492,
     "tipo": "bloque"
    }
   },
@@ -4945,7 +5400,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 437,
+    "linea": 495,
     "tipo": "vineta"
    }
   },
@@ -4970,7 +5425,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 442,
+    "linea": 500,
     "tipo": "bloque"
    }
   },
@@ -4994,7 +5449,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 445,
+    "linea": 503,
     "tipo": "bloque"
    }
   },
@@ -5018,7 +5473,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 450,
+    "linea": 508,
     "tipo": "bloque"
    }
   },
@@ -5039,7 +5494,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 458,
+    "linea": 516,
     "tipo": "bloque"
    }
   },
@@ -5060,7 +5515,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 462,
+    "linea": 520,
     "tipo": "tabla"
    }
   },
@@ -5081,7 +5536,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 463,
+    "linea": 521,
     "tipo": "tabla"
    }
   },
@@ -5103,7 +5558,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 464,
+    "linea": 522,
     "tipo": "tabla"
    }
   },
@@ -5127,7 +5582,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 465,
+    "linea": 523,
     "tipo": "tabla"
    }
   },
@@ -5152,7 +5607,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 468,
+    "linea": 526,
     "tipo": "bloque"
    }
   },
@@ -5175,7 +5630,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 469,
+    "linea": 527,
     "tipo": "bloque"
    }
   },
@@ -5197,7 +5652,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 473,
+    "linea": 531,
     "tipo": "bloque"
    }
   },
@@ -5220,7 +5675,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 475,
+    "linea": 533,
     "tipo": "vineta"
    }
   },
@@ -5242,7 +5697,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 476,
+    "linea": 534,
     "tipo": "vineta"
    }
   },
@@ -5264,7 +5719,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 482,
+    "linea": 540,
     "tipo": "bloque"
    }
   },
@@ -5288,7 +5743,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 484,
+    "linea": 542,
     "tipo": "parrafo"
    }
   },
@@ -5312,7 +5767,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 490,
+    "linea": 548,
     "tipo": "tabla"
    }
   },
@@ -5336,7 +5791,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 491,
+    "linea": 549,
     "tipo": "tabla"
    }
   },
@@ -5360,7 +5815,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 492,
+    "linea": 550,
     "tipo": "tabla"
    }
   },
@@ -5383,780 +5838,8 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 493,
+    "linea": 551,
     "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--esperanza-siempre-sin-hipotesis",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Esperanza y varianza de una suma",
-   "nombre": "Esperanza (siempre, sin hipótesis)",
-   "tex": "\\;E[X+Y]=E[X]+E[Y]\\text{, y en general }\\;E\\!\\left[\\sum_{k=1}^n X_k\\right]=\\sum_{k=1}^n E[X_k]\\text{.}",
-   "cuando": "Piden la media de una suma o de un total: la esperanza siempre se reparte, con o sin independencia.",
-   "condiciones": [
-    "sin hipótesis"
-   ],
-   "slug": "esperanza",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "esperanza"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 506,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--varianza-caso-general",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Esperanza y varianza de una suma",
-   "nombre": "Varianza (caso general)",
-   "tex": "V(X+Y)=V(X)+2\\,\\mathrm{Cov}(X,Y)+V(Y),\\qquad V\\!\\left(\\sum_{k=1}^n X_k\\right)=\\sum_{k=1}^n V(X_k)+2\\!\\!\\sum_{i<j}\\mathrm{Cov}(X_i,X_j).",
-   "cuando": "Varianza de una suma cuando las variables pueden estar correlacionadas: hay que sumar todas las covarianzas cruzadas.",
-   "condiciones": [
-    "no independientes"
-   ],
-   "slug": "covarianza-y-correlacion",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "varianza",
-    "covarianza"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 508,
-    "tipo": "bloque"
-   }
-  },
-  {
-   "id": "10-suma-de-v--independientes-no-correlacionadas",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Esperanza y varianza de una suma",
-   "nombre": "Independientes / no correlacionadas",
-   "tex": "\\text{(}\\mathrm{Cov}=0\\text{): }\\;V(X\\pm Y)=V(X)+V(Y)\\;\\text{ (la resta }\\textbf{también suma}\\text{); para }n\\text{ indep. }\\;V\\!\\left(\\sum X_k\\right)=\\sum V(X_k)\\text{.}",
-   "cuando": "Con independencia la varianza de la suma (y también la de la resta) es la suma de las varianzas.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "covarianza-y-correlacion",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "varianza"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 509,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--media-snxi",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
-   "nombre": "Media",
-   "tex": "n\\mu",
-   "variante": "$S_n=\\sum X_i$",
-   "cuando": "Media del total de n observaciones i.i.d.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "promedio-muestral",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "esperanza"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 516,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--media-xn1nsn",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
-   "nombre": "Media",
-   "tex": "\\mu\\text{ (insesgado)}",
-   "variante": "$\\bar X_n=\\tfrac1n S_n$",
-   "cuando": "Media del promedio muestral: es insesgado, no depende de n.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "promedio-muestral",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "promedio-muestral"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 516,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--varianza-snxi",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
-   "nombre": "Varianza",
-   "tex": "n\\sigma^2",
-   "variante": "$S_n=\\sum X_i$",
-   "cuando": "Varianza del total de n observaciones i.i.d.: crece con n.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "promedio-muestral",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "varianza"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 517,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--varianza-xn1nsn",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
-   "nombre": "Varianza",
-   "tex": "\\dfrac{\\sigma^2}{n}\\xrightarrow{n\\to\\infty}0",
-   "variante": "$\\bar X_n=\\tfrac1n S_n$",
-   "cuando": "Varianza del promedio: baja como 1/n, que es la razón por la que promediar reduce el error.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "promedio-muestral",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "promedio-muestral"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 517,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--desvio-snxi",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
-   "nombre": "Desvío",
-   "tex": "\\sqrt n\\,\\sigma",
-   "variante": "$S_n=\\sum X_i$",
-   "cuando": "Desvío del total: crece como raíz de n, no como n.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "promedio-muestral",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "varianza"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 518,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--desvio-xn1nsn",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
-   "nombre": "Desvío",
-   "tex": "\\dfrac{\\sigma}{\\sqrt n}\\text{ (}\\textbf{error estándar}\\text{)}",
-   "variante": "$\\bar X_n=\\tfrac1n S_n$",
-   "cuando": "Error estándar del promedio: es el desvío que se usa al estandarizar en el TCL y en los intervalos de confianza.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "promedio-muestral",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "promedio-muestral",
-    "error-estandar"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 518,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--distribucion-de-la-suma-convolucion-independientes",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Distribución de la suma: convolución ($X,Y$ independientes)",
-   "nombre": "Distribución de la suma: convolución ($X,Y$ independientes)",
-   "tex": "\\text{discreta: } p_S(s)=\\sum_{y\\in \\mathcal R_Y} p_X(s-y)\\,p_Y(y),\\qquad \\text{continua: } f_S(s)=\\int_{-\\infty}^{+\\infty} f_X(s-y)\\,f_Y(y)\\,dy.",
-   "cuando": "Piden la distribución exacta de una suma de independientes y no hay resultado con nombre: convolución.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "funcion-generadora-de-momentos",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "convolucion"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 521,
-    "tipo": "bloque"
-   }
-  },
-  {
-   "id": "10-suma-de-v--atajo",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Distribución de la suma: convolución ($X,Y$ independientes)",
-   "nombre": "Atajo",
-   "tex": "\\;M_S(t)=M_X(t)\\,M_Y(t)\\;",
-   "cuando": "Identificar la distribución de una suma sin convolucionar: se multiplican las funciones generadoras y se reconoce la familia.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "funcion-generadora-de-momentos",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "fgm"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 522,
-    "tipo": "parrafo"
-   }
-  },
-  {
-   "id": "10-suma-de-v--i-i-d",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$n\\times\\mathrm{Bernoulli}(p)$ i.i.d.",
-   "tex": "\\mathrm{Bin}(n,p)",
-   "cuando": "Contar éxitos en n ensayos equivale a sumar n Bernoulli independientes.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad",
-    "binomial"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 527,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--misma",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$\\mathrm{Bin}(n_1,p)+\\mathrm{Bin}(n_2,p)$ (misma $p$)",
-   "tex": "\\mathrm{Bin}(n_1+n_2,p)",
-   "cuando": "Dos binomiales con la misma p que se suman (dos lotes, dos días) siguen siendo binomial.",
-   "condiciones": [
-    "misma p",
-    "independientes"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad",
-    "binomial"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 528,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--poisson1poisson2",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$\\mathrm{Poisson}(\\lambda_1)+\\mathrm{Poisson}(\\lambda_2)$",
-   "tex": "\\mathrm{Poisson}(\\lambda_1+\\lambda_2)",
-   "cuando": "Se juntan dos flujos Poisson independientes (dos cajas, dos tipos de llamada): las tasas se suman.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad",
-    "poisson"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 529,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--n11n22",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$\\mathcal N(\\mu_1,\\sigma_1)+\\mathcal N(\\mu_2,\\sigma_2)$",
-   "tex": "\\mathcal N\\!\\big(\\mu_1+\\mu_2,\\sqrt{\\sigma_1^2+\\sigma_2^2}\\big)",
-   "cuando": "Suma de normales independientes: se suman las medias y las varianzas, nunca los desvíos.",
-   "condiciones": [
-    "independientes",
-    "normales"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad",
-    "normal"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 530,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--i-i-d-2",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$n\\times\\text{Expo}(\\lambda)$ i.i.d.",
-   "tex": "\\mathrm{Gamma}(n,\\lambda)=\\mathrm{Erlang}_n(\\lambda)",
-   "cuando": "Suma de tiempos exponenciales i.i.d. (sistema en standby, k etapas): da Gamma/Erlang.",
-   "condiciones": [
-    "i.i.d.",
-    "misma tasa"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad",
-    "erlang"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 531,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--unif01unif01",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$\\mathrm{Unif}(0,1)+\\mathrm{Unif}(0,1)$",
-   "tex": "\\textbf{triangular}\\text{ en }(0,2)\\text{ (}\\textbf{NO}\\text{ uniforme)}",
-   "cuando": "Advertencia clásica: la suma de dos uniformes no es uniforme, es triangular.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "errores"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 532,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--geopgeop",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$\\mathrm{Geo}(p)+\\mathrm{Geo}(p)$",
-   "tex": "\\mathrm{BinNeg}(2,p)",
-   "cuando": "Suma de geométricas con la misma p: da binomial negativa.",
-   "condiciones": [
-    "misma p",
-    "independientes"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 533,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--i1nn012",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "$\\sum_{i=1}^n \\mathcal N(0,1)^2$",
-   "tex": "\\chi^2_n",
-   "cuando": "Suma de cuadrados de normales estándar: da ji-cuadrado, base de la inferencia sobre la varianza.",
-   "condiciones": [
-    "i.i.d.",
-    "normales estándar"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "",
-   "tags": [
-    "suma",
-    "reproductividad",
-    "ji-cuadrado"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 534,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "10-suma-de-v--normal-normal",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
-   "nombre": "Normal + Normal",
-   "tex": "\\textbf{suman medias y varianzas}\\text{ (los desvíos NO suman). Gamma/Erlang: }\\;f_{\\Gamma(n,\\lambda)}(x)=\\dfrac{\\lambda^n x^{n-1}e^{-\\lambda x}}{(n-1)!}\\ (x>0)\\text{, }E=\\tfrac n\\lambda\\text{, }V=\\tfrac n{\\lambda^2}",
-   "cuando": "Suma de normales independientes (se suman medias y varianzas, nunca los desvíos) y suma de exponenciales de igual tasa, que da Gamma/Erlang.",
-   "condiciones": [
-    "independientes"
-   ],
-   "slug": "suma-de-va-independientes",
-   "ancla": "4-normal-normal-normal",
-   "tags": [
-    "suma",
-    "normal",
-    "gamma"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 536,
-    "tipo": "parrafo"
-   }
-  },
-  {
-   "id": "10-suma-de-v--markov",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Desigualdades (cotas universales)",
-   "nombre": "Markov",
-   "tex": "\\text{(}X\\ge 0\\text{), }\\forall\\,\\alpha>0\\text{: }\\quad P(X\\ge\\alpha)\\le\\dfrac{E[X]}{\\alpha}\\text{.}",
-   "cuando": "Solo se conoce la media de una variable no negativa y piden acotar la probabilidad de un valor grande.",
-   "condiciones": [
-    "X ≥ 0",
-    "solo se conoce E[X]"
-   ],
-   "slug": "desigualdad-de-chebyshev",
-   "ancla": "",
-   "tags": [
-    "cotas",
-    "markov"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 539,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--chebyshev",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Desigualdades (cotas universales)",
-   "nombre": "Chebyshev",
-   "tex": "\\text{(media }\\mu\\text{, varianza }\\sigma^2\\text{), }\\forall\\,\\varepsilon>0\\text{: }\\quad P(|X-\\mu|\\ge\\varepsilon)\\le\\dfrac{\\sigma^2}{\\varepsilon^2}\\text{.}",
-   "cuando": "Piden acotar la probabilidad de alejarse de la media sin conocer la distribución: alcanza con la media y la varianza.",
-   "condiciones": [
-    "media y varianza conocidas"
-   ],
-   "slug": "desigualdad-de-chebyshev",
-   "ancla": "",
-   "tags": [
-    "cotas",
-    "chebyshev"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 540,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--en-terminos-de-desvios",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Desigualdades (cotas universales)",
-   "nombre": "En términos de $k$ desvíos ($\\varepsilon=k\\sigma$)",
-   "tex": "\\quad P(|X-\\mu|\\ge k\\sigma)\\le\\dfrac1{k^2}\\text{.}",
-   "cuando": "Versión de Chebyshev cuando el alejamiento se expresa en cantidad de desvíos.",
-   "condiciones": [
-    "ε = kσ"
-   ],
-   "slug": "desigualdad-de-chebyshev",
-   "ancla": "",
-   "tags": [
-    "cotas",
-    "chebyshev"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 541,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--promedio-i-i-d",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Desigualdades (cotas universales)",
-   "nombre": "Promedio i.i.d.",
-   "tex": "\\quad P(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le\\dfrac{\\sigma^2}{n\\,\\varepsilon^2}\\xrightarrow{n\\to\\infty}0",
-   "cuando": "Chebyshev aplicado al promedio muestral: la cota baja con n y es el puente hacia la ley de los grandes números.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "desigualdad-de-chebyshev",
-   "ancla": "forma-para-promedios-iid",
-   "tags": [
-    "cotas",
-    "chebyshev",
-    "lgn"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 542,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--debil-en-probabilidad",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Ley de los Grandes Números",
-   "nombre": "Débil (en probabilidad)",
-   "tex": "\\;\\displaystyle\\lim_{n\\to\\infty} P(|\\bar X_n-\\mu|\\ge\\varepsilon)=0\\quad\\forall\\,\\varepsilon>0",
-   "cuando": "Justificación teórica de que el promedio se acerca a la media poblacional al crecer n.",
-   "condiciones": [
-    "i.i.d.",
-    "varianza finita"
-   ],
-   "slug": "ley-de-grandes-numeros",
-   "ancla": "",
-   "tags": [
-    "lgn"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 545,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--fuerte-casi-segura",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Ley de los Grandes Números",
-   "nombre": "Fuerte (casi segura)",
-   "tex": "\\;P\\!\\left(\\displaystyle\\lim_{n\\to\\infty}\\bar X_n=\\mu\\right)=1\\text{.}",
-   "cuando": "Versión fuerte de la ley de los grandes números: convergencia casi segura del promedio.",
-   "condiciones": [
-    "i.i.d."
-   ],
-   "slug": "ley-de-grandes-numeros",
-   "ancla": "",
-   "tags": [
-    "lgn"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 546,
-    "tipo": "vineta"
-   }
-  },
-  {
-   "id": "10-suma-de-v--teorema-central-del-limite",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Teorema Central del Límite",
-   "nombre": "Teorema Central del Límite",
-   "tex": "\\lim_{n\\to\\infty}P(Z_n\\le z)=\\Phi(z).",
-   "variante": "enunciado",
-   "cuando": "Enunciado del TCL: el promedio estandarizado tiende a la normal estándar, sea cual sea la distribución de origen.",
-   "condiciones": [
-    "i.i.d.",
-    "n grande"
-   ],
-   "slug": "teorema-central-del-limite",
-   "ancla": "",
-   "tags": [
-    "tcl"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 550,
-    "tipo": "bloque"
-   }
-  },
-  {
-   "id": "10-suma-de-v--teorema-central-del-limite-2",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Teorema Central del Límite",
-   "nombre": "Teorema Central del Límite",
-   "tex": "\\bar X_n\\overset{\\text{aprox}}{\\sim}\\mathcal N\\!\\Big(\\mu,\\tfrac{\\sigma}{\\sqrt n}\\Big),\\qquad S_n\\overset{\\text{aprox}}{\\sim}\\mathcal N\\!\\big(n\\mu,\\sqrt n\\,\\sigma\\big),\\qquad P(S_n\\le s)\\approx\\Phi\\!\\Big(\\tfrac{s-n\\mu}{\\sqrt n\\,\\sigma}\\Big).",
-   "variante": "forma de trabajo",
-   "cuando": "Uso práctico del TCL: aproximar la distribución del promedio o del total por una normal para calcular probabilidades.",
-   "condiciones": [
-    "i.i.d.",
-    "n grande"
-   ],
-   "slug": "teorema-central-del-limite",
-   "ancla": "",
-   "tags": [
-    "tcl",
-    "aproximacion"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 552,
-    "tipo": "bloque"
-   }
-  },
-  {
-   "id": "10-suma-de-v--frecuencia-relativa",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Teorema Central del Límite",
-   "nombre": "Frecuencia relativa ($\\hat P_n=\\tfrac1n\\sum\\mathbb 1_k(A)$, $p=P(A)$)",
-   "tex": "\\;P(\\hat P_n\\le q)\\approx\\Phi\\!\\Big(\\dfrac{q-p}{\\sqrt{p(1-p)/n}}\\Big)",
-   "cuando": "Aproximar la probabilidad de que la proporción muestral no supere un valor, con n grande.",
-   "condiciones": [
-    "n grande",
-    "TCL"
-   ],
-   "slug": "teorema-central-del-limite",
-   "ancla": "",
-   "tags": [
-    "tcl",
-    "proporcion"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 553,
-    "tipo": "parrafo"
-   }
-  },
-  {
-   "id": "10-suma-de-v--aproximacion-normal-de-la-binomial",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Aproximación normal de la binomial",
-   "nombre": "Aproximación normal de la binomial",
-   "tex": "\\mathrm{Bin}(n,p)\\approx\\mathcal N\\big(np,\\sqrt{npq}\\big),\\qquad q=1-p.",
-   "cuando": "Binomial con n grande: se reemplaza por una normal con la misma media y desvío.",
-   "condiciones": [
-    "np ≥ 5",
-    "nq ≥ 5"
-   ],
-   "slug": "aproximacion-normal-de-la-binomial",
-   "ancla": "",
-   "tags": [
-    "tcl",
-    "binomial",
-    "aproximacion"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 556,
-    "tipo": "bloque"
-   }
-  },
-  {
-   "id": "10-suma-de-v--correccion-por-continuidad",
-   "unidad": "7",
-   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
-   "subseccion": "Aproximación normal de la binomial",
-   "nombre": "Corrección por continuidad",
-   "tex": "P(a\\le S_n\\le b)\\approx\\Phi\\!\\Big(\\tfrac{b+\\frac12-np}{\\sqrt{npq}}\\Big)-\\Phi\\!\\Big(\\tfrac{a-\\frac12-np}{\\sqrt{npq}}\\Big),\\qquad P(S_n=s)\\approx\\Phi\\!\\Big(\\tfrac{s+\\frac12-n\\mu}{\\sqrt n\\,\\sigma}\\Big)-\\Phi\\!\\Big(\\tfrac{s-\\frac12-n\\mu}{\\sqrt n\\,\\sigma}\\Big).",
-   "cuando": "Al pasar de la binomial a la normal se corren los extremos medio punto hacia afuera.",
-   "condiciones": [
-    "variable discreta"
-   ],
-   "slug": "aproximacion-normal-de-la-binomial",
-   "ancla": "corrección-por-continuidad-clave-en-discretas",
-   "tags": [
-    "tcl",
-    "binomial",
-    "aproximacion"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 558,
-    "tipo": "bloque"
    }
   },
   {
@@ -6180,7 +5863,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 572,
+    "linea": 569,
     "tipo": "tabla"
    }
   },
@@ -6206,7 +5889,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 572,
+    "linea": 569,
     "tipo": "tabla"
    }
   },
@@ -6231,7 +5914,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 573,
+    "linea": 570,
     "tipo": "tabla"
    }
   },
@@ -6256,7 +5939,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 573,
+    "linea": 570,
     "tipo": "tabla"
    }
   },
@@ -6266,7 +5949,7 @@ window.FORMULAS = {
    "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
    "subseccion": "Proceso de Bernoulli (tiempo discreto)",
    "nombre": "Tiempo entre eventos / al próximo",
-   "tex": "\\tau_i",
+   "tex": "\\tau_i\\text{ (ensayos)}",
    "variante": "V.A.",
    "cuando": "Variable que mide el tiempo entre dos eventos consecutivos del proceso.",
    "condiciones": [],
@@ -6279,7 +5962,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 574,
+    "linea": 571,
     "tipo": "tabla"
    }
   },
@@ -6289,7 +5972,7 @@ window.FORMULAS = {
    "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
    "subseccion": "Proceso de Bernoulli (tiempo discreto)",
    "nombre": "Tiempo entre eventos / al próximo",
-   "tex": "\\text{Geométrica}(p)\\text{ i.i.d.}",
+   "tex": "\\text{Geométrica}(p)\\text{ i.i.d., versión ensayos: }\\tau_i=X+1",
    "variante": "Distribución",
    "cuando": "Preguntan cuántos pasos faltan hasta el próximo éxito: geométrica (cuenta fracasos).",
    "condiciones": [
@@ -6304,7 +5987,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 574,
+    "linea": 571,
     "tipo": "tabla"
    }
   },
@@ -6314,7 +5997,7 @@ window.FORMULAS = {
    "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
    "subseccion": "Proceso de Bernoulli (tiempo discreto)",
    "nombre": "Tiempo hasta el $k$-ésimo",
-   "tex": "T_k=\\tau_1+\\dots+\\tau_k",
+   "tex": "T_k=\\tau_1+\\dots+\\tau_k\\text{ (ensayos)}",
    "variante": "V.A.",
    "cuando": "Variable que acumula los tiempos entre eventos hasta el k-ésimo éxito.",
    "condiciones": [],
@@ -6327,7 +6010,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 575,
+    "linea": 572,
     "tipo": "tabla"
    }
   },
@@ -6337,7 +6020,7 @@ window.FORMULAS = {
    "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
    "subseccion": "Proceso de Bernoulli (tiempo discreto)",
    "nombre": "Tiempo hasta el $k$-ésimo",
-   "tex": "\\text{Binomial negativa}(k,p)",
+   "tex": "\\text{Binomial negativa}(k,p)\\text{, versión ensayos: }T_k=Y+k",
    "variante": "Distribución",
    "cuando": "Preguntan cuándo ocurre el k-ésimo éxito en tiempo discreto: binomial negativa.",
    "condiciones": [
@@ -6352,7 +6035,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 575,
+    "linea": 572,
     "tipo": "tabla"
    }
   },
@@ -6374,6 +6057,25 @@ window.FORMULAS = {
     "proceso-bernoulli",
     "binomial"
    ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 574,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "11-procesos-estocasticos-bernoulli--convencion-ensayos-no-fracasos",
+   "unidad": "6",
+   "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
+   "subseccion": "Proceso de Bernoulli (tiempo discreto)",
+   "nombre": "Convención (ensayos, no fracasos)",
+   "tex": "P(\\tau_i=n)=q^{\\,n-1}p\\ (n\\ge1),\\quad E[\\tau_i]=\\tfrac1p;\\qquad P(T_k=n)=\\binom{n-1}{k-1}q^{\\,n-k}p^{k}\\ (n\\ge k),\\quad E[T_k]=\\tfrac kp.",
+   "cuando": "",
+   "condiciones": [],
+   "slug": "proceso-de-bernoulli",
+   "ancla": "",
+   "tags": [],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
@@ -6401,7 +6103,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 583,
+    "linea": 582,
     "tipo": "parrafo"
    }
   },
@@ -6426,7 +6128,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 587,
+    "linea": 586,
     "tipo": "tabla"
    }
   },
@@ -6448,6 +6150,26 @@ window.FORMULAS = {
     "proceso-poisson",
     "poisson"
    ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 586,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "11-procesos-estocasticos-bernoulli--tiempo-entre-eventos-al-proximo-v-a-2",
+   "unidad": "6",
+   "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
+   "subseccion": "Proceso de Poisson (tiempo continuo)",
+   "nombre": "Tiempo entre eventos / al próximo",
+   "tex": "\\tau_i",
+   "variante": "V.A.",
+   "cuando": "",
+   "condiciones": [],
+   "slug": "distribucion-exponencial",
+   "ancla": "",
+   "tags": [],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
@@ -6476,6 +6198,26 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 587,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "11-procesos-estocasticos-bernoulli--tiempo-hasta-el-esimo-v-a-2",
+   "unidad": "6",
+   "seccion": "11 · Procesos estocásticos (Bernoulli, Poisson, Markov)",
+   "subseccion": "Proceso de Poisson (tiempo continuo)",
+   "nombre": "Tiempo hasta el $k$-ésimo",
+   "tex": "T_k=\\tau_1+\\dots+\\tau_k",
+   "variante": "V.A.",
+   "cuando": "",
+   "condiciones": [],
+   "slug": "distribucion-erlang",
+   "ancla": "",
+   "tags": [],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 588,
     "tipo": "tabla"
    }
@@ -6501,7 +6243,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 589,
+    "linea": 588,
     "tipo": "tabla"
    }
   },
@@ -6526,7 +6268,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 591,
+    "linea": 590,
     "tipo": "bloque"
    }
   },
@@ -6551,7 +6293,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 593,
+    "linea": 592,
     "tipo": "bloque"
    }
   },
@@ -6576,7 +6318,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 595,
+    "linea": 594,
     "tipo": "parrafo"
    }
   },
@@ -6600,7 +6342,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 597,
+    "linea": 596,
     "tipo": "parrafo"
    }
   },
@@ -6624,7 +6366,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 602,
+    "linea": 601,
     "tipo": "bloque"
    }
   },
@@ -6649,7 +6391,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 610,
+    "linea": 609,
     "tipo": "tabla"
    }
   },
@@ -6674,7 +6416,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 610,
+    "linea": 609,
     "tipo": "tabla"
    }
   },
@@ -6699,7 +6441,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 613,
+    "linea": 612,
     "tipo": "tabla"
    }
   },
@@ -6724,7 +6466,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 613,
+    "linea": 612,
     "tipo": "tabla"
    }
   },
@@ -6748,7 +6490,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 619,
+    "linea": 618,
     "tipo": "parrafo"
    }
   },
@@ -6771,7 +6513,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 622,
+    "linea": 621,
     "tipo": "bloque"
    }
   },
@@ -6796,7 +6538,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 624,
+    "linea": 623,
     "tipo": "parrafo"
    }
   },
@@ -6820,7 +6562,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 626,
+    "linea": 625,
     "tipo": "bloque"
    }
   },
@@ -6845,7 +6587,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 628,
+    "linea": 627,
     "tipo": "parrafo"
    }
   },
@@ -6869,7 +6611,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 629,
+    "linea": 628,
     "tipo": "bloque"
    }
   },
@@ -6893,7 +6635,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 632,
+    "linea": 631,
     "tipo": "bloque"
    }
   },
@@ -6917,7 +6659,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 634,
+    "linea": 633,
     "tipo": "parrafo"
    }
   },
@@ -6941,434 +6683,751 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 638,
+    "linea": 637,
     "tipo": "parrafo"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--media-sin-agrupar",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Tendencia central",
-   "nombre": "Media",
-   "tex": "\\bar x = \\dfrac{1}{n}\\sum_{i=1}^n x_i",
-   "variante": "sin agrupar",
-   "cuando": "Piden el promedio de una lista de datos sin agrupar; es sensible a valores extremos.",
+   "id": "10-suma-de-v--esperanza-siempre-sin-hipotesis",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Esperanza y varianza de una suma",
+   "nombre": "Esperanza (siempre, sin hipótesis)",
+   "tex": "\\;E[X+Y]=E[X]+E[Y]\\text{, y en general }\\;E\\!\\left[\\sum_{k=1}^n X_k\\right]=\\sum_{k=1}^n E[X_k]\\text{.}",
+   "cuando": "Piden la media de una suma o de un total: la esperanza siempre se reparte, con o sin independencia.",
    "condiciones": [
-    "datos sin agrupar"
+    "sin hipótesis"
    ],
-   "slug": "medidas-de-tendencia-central",
+   "slug": "esperanza",
    "ancla": "",
    "tags": [
-    "descriptiva",
-    "tendencia-central"
+    "suma",
+    "esperanza"
    ],
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 648,
-    "tipo": "tabla"
+    "linea": 644,
+    "tipo": "vineta"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--mediana-sin-agrupar",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Tendencia central",
-   "nombre": "Mediana $q_2$",
-   "tex": "n\\text{ impar: obs. central pos. }\\frac{n+1}{2}\\text{; }n\\text{ par: promedio de pos. }\\frac{n}{2}\\text{ y }\\frac{n}{2}+1\\text{ (muestra ordenada)}",
-   "variante": "sin agrupar",
-   "cuando": "Piden el valor central de la muestra ordenada; es la medida robusta frente a outliers.",
+   "id": "10-suma-de-v--varianza-caso-general",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Esperanza y varianza de una suma",
+   "nombre": "Varianza (caso general)",
+   "tex": "V(X+Y)=V(X)+2\\,\\mathrm{Cov}(X,Y)+V(Y),\\qquad V\\!\\left(\\sum_{k=1}^n X_k\\right)=\\sum_{k=1}^n V(X_k)+2\\!\\!\\sum_{i<j}\\mathrm{Cov}(X_i,X_j).",
+   "cuando": "Varianza de una suma cuando las variables pueden estar correlacionadas: hay que sumar todas las covarianzas cruzadas.",
    "condiciones": [
-    "muestra ordenada"
+    "no independientes"
    ],
-   "slug": "medidas-de-tendencia-central",
-   "ancla": "mediana",
+   "slug": "covarianza-y-correlacion",
+   "ancla": "",
    "tags": [
-    "descriptiva",
-    "tendencia-central",
-    "robusta"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 649,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "12-estadistica-descriptiva--rango",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "Rango",
-   "tex": "R = \\lvert\\max_i x_i - \\min_i x_i\\rvert",
-   "cuando": "Medida de dispersión más simple: distancia entre el máximo y el mínimo.",
-   "condiciones": [],
-   "slug": "medidas-de-dispersion",
-   "ancla": "rango",
-   "tags": [
-    "descriptiva",
-    "dispersion"
+    "suma",
+    "varianza",
+    "covarianza"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 658,
+    "linea": 646,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "10-suma-de-v--independientes-no-correlacionadas",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Esperanza y varianza de una suma",
+   "nombre": "Independientes / no correlacionadas",
+   "tex": "\\text{(}\\mathrm{Cov}=0\\text{): }\\;V(X\\pm Y)=V(X)+V(Y)\\;\\text{ (la resta }\\textbf{también suma}\\text{); para }n\\text{ indep. }\\;V\\!\\left(\\sum X_k\\right)=\\sum V(X_k)\\text{.}",
+   "cuando": "Con independencia la varianza de la suma (y también la de la resta) es la suma de las varianzas.",
+   "condiciones": [
+    "independientes"
+   ],
+   "slug": "covarianza-y-correlacion",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "varianza"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 647,
+    "tipo": "vineta"
+   }
+  },
+  {
+   "id": "10-suma-de-v--media-snxi",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
+   "nombre": "Media",
+   "tex": "n\\mu",
+   "variante": "$S_n=\\sum X_i$",
+   "cuando": "Media del total de n observaciones i.i.d.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "promedio-muestral",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "esperanza"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 654,
     "tipo": "tabla"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--varianza-muestral",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "Varianza muestral",
-   "tex": "\\;s^2 = \\dfrac{1}{n-1}\\displaystyle\\sum_{i=1}^n (x_i-\\bar x)^2\\;",
-   "cuando": "Piden la dispersión de una muestra: se divide por n−1 para que el estimador sea insesgado.",
+   "id": "10-suma-de-v--media-xn1nsn",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
+   "nombre": "Media",
+   "tex": "\\mu\\text{ (insesgado)}",
+   "variante": "$\\bar X_n=\\tfrac1n S_n$",
+   "cuando": "Media del promedio muestral: es insesgado, no depende de n.",
    "condiciones": [
-    "denominador n−1"
+    "i.i.d."
    ],
-   "slug": "varianza-muestral",
+   "slug": "promedio-muestral",
    "ancla": "",
    "tags": [
-    "descriptiva",
-    "dispersion"
+    "suma",
+    "promedio-muestral"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 654,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--varianza-snxi",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
+   "nombre": "Varianza",
+   "tex": "n\\sigma^2",
+   "variante": "$S_n=\\sum X_i$",
+   "cuando": "Varianza del total de n observaciones i.i.d.: crece con n.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "promedio-muestral",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "varianza"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 655,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--varianza-xn1nsn",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
+   "nombre": "Varianza",
+   "tex": "\\dfrac{\\sigma^2}{n}\\xrightarrow{n\\to\\infty}0",
+   "variante": "$\\bar X_n=\\tfrac1n S_n$",
+   "cuando": "Varianza del promedio: baja como 1/n, que es la razón por la que promediar reduce el error.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "promedio-muestral",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "promedio-muestral"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 655,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--desvio-snxi",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
+   "nombre": "Desvío",
+   "tex": "\\sqrt n\\,\\sigma",
+   "variante": "$S_n=\\sum X_i$",
+   "cuando": "Desvío del total: crece como raíz de n, no como n.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "promedio-muestral",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "varianza"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 656,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--desvio-xn1nsn",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Caso i.i.d.: suma $S_n$ y promedio $\\bar X_n$",
+   "nombre": "Desvío",
+   "tex": "\\dfrac{\\sigma}{\\sqrt n}\\text{ (}\\textbf{error estándar}\\text{)}",
+   "variante": "$\\bar X_n=\\tfrac1n S_n$",
+   "cuando": "Error estándar del promedio: es el desvío que se usa al estandarizar en el TCL y en los intervalos de confianza.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "promedio-muestral",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "promedio-muestral",
+    "error-estandar"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 656,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--distribucion-de-la-suma-convolucion-independientes",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Distribución de la suma: convolución ($X,Y$ independientes)",
+   "nombre": "Distribución de la suma: convolución ($X,Y$ independientes)",
+   "tex": "\\text{discreta: } p_S(s)=\\sum_{y\\in \\mathcal R_Y} p_X(s-y)\\,p_Y(y),\\qquad \\text{continua: } f_S(s)=\\int_{-\\infty}^{+\\infty} f_X(s-y)\\,f_Y(y)\\,dy.",
+   "cuando": "Piden la distribución exacta de una suma de independientes y no hay resultado con nombre: convolución.",
+   "condiciones": [
+    "independientes"
+   ],
+   "slug": "funcion-generadora-de-momentos",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "convolucion"
    ],
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 659,
-    "tipo": "tabla"
+    "tipo": "bloque"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--desvio",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "Desvío",
-   "tex": "s = \\sqrt{s^2}",
-   "cuando": "Desvío muestral: raíz de la varianza, en las mismas unidades que los datos.",
-   "condiciones": [],
-   "slug": "medidas-de-dispersion",
+   "id": "10-suma-de-v--atajo",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Distribución de la suma: convolución ($X,Y$ independientes)",
+   "nombre": "Atajo",
+   "tex": "\\;M_S(t)=M_X(t)\\,M_Y(t)\\;",
+   "cuando": "Identificar la distribución de una suma sin convolucionar: se multiplican las funciones generadoras y se reconoce la familia.",
+   "condiciones": [
+    "independientes"
+   ],
+   "slug": "funcion-generadora-de-momentos",
    "ancla": "",
    "tags": [
-    "descriptiva",
-    "dispersion"
+    "suma",
+    "fgm"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 660,
-    "tipo": "tabla"
+    "tipo": "parrafo"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--desvio-abs-medio",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "Desvío abs. medio",
-   "tex": "w = \\dfrac{1}{n}\\sum_{i=1}^n \\lvert x_i-\\bar x\\rvert",
-   "cuando": "Dispersión medida con valores absolutos en lugar de cuadrados.",
-   "condiciones": [],
-   "slug": "medidas-de-dispersion",
-   "ancla": "",
-   "tags": [
-    "descriptiva",
-    "dispersion"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 661,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "12-estadistica-descriptiva--mad",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "MAD",
-   "tex": "\\text{MAD} = \\operatorname{mediana}\\{\\lvert x_i-\\bar x\\rvert\\}",
-   "cuando": "Medida de dispersión robusta, basada en la mediana de los desvíos.",
-   "condiciones": [],
-   "slug": "medidas-de-dispersion",
-   "ancla": "",
-   "tags": [
-    "descriptiva",
-    "dispersion",
-    "robusta"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 662,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "12-estadistica-descriptiva--iqr",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "IQR",
-   "tex": "\\text{IQR} = q_3 - q_1",
-   "cuando": "Dispersión del 50 % central de los datos; es la base de la caja del boxplot.",
-   "condiciones": [],
-   "slug": "medidas-de-dispersion",
-   "ancla": "",
-   "tags": [
-    "descriptiva",
-    "dispersion",
-    "boxplot"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 663,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "12-estadistica-descriptiva--dispersion",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Dispersión",
-   "nombre": "Dispersión",
-   "tex": "s^2 = \\frac{1}{n-1}\\sum_{i=1}^n (x_i-\\bar x)^2 \\qquad s=\\sqrt{s^2}",
-   "cuando": "Fórmula de trabajo de la varianza y el desvío muestrales.",
+   "id": "10-suma-de-v--i-i-d",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$n\\times\\mathrm{Bernoulli}(p)$ i.i.d.",
+   "tex": "\\mathrm{Bin}(n,p)",
+   "cuando": "Contar éxitos en n ensayos equivale a sumar n Bernoulli independientes.",
    "condiciones": [
-    "denominador n−1"
+    "independientes"
    ],
-   "slug": "medidas-de-dispersion",
+   "slug": "suma-de-va-independientes",
    "ancla": "",
    "tags": [
-    "descriptiva",
-    "dispersion"
+    "suma",
+    "reproductividad",
+    "binomial"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 665,
-    "tipo": "bloque"
+    "tipo": "tabla"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--cuartiles-y-percentiles",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Cuartiles y percentiles",
-   "nombre": "Cuartiles y percentiles",
-   "tex": "\\frac{k}{n} \\le j\\cdot 0{,}25 < \\frac{k+1}{n}.",
-   "cuando": "Regla de posición para ubicar el cuartil dentro de la muestra ordenada.",
+   "id": "10-suma-de-v--misma",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$\\mathrm{Bin}(n_1,p)+\\mathrm{Bin}(n_2,p)$ (misma $p$)",
+   "tex": "\\mathrm{Bin}(n_1+n_2,p)",
+   "cuando": "Dos binomiales con la misma p que se suman (dos lotes, dos días) siguen siendo binomial.",
    "condiciones": [
-    "muestra ordenada"
+    "misma p",
+    "independientes"
    ],
-   "slug": "cuartiles-y-percentiles",
+   "slug": "suma-de-va-independientes",
    "ancla": "",
    "tags": [
-    "descriptiva",
-    "cuartiles"
+    "suma",
+    "reproductividad",
+    "binomial"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 666,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--poisson1poisson2",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$\\mathrm{Poisson}(\\lambda_1)+\\mathrm{Poisson}(\\lambda_2)$",
+   "tex": "\\mathrm{Poisson}(\\lambda_1+\\lambda_2)",
+   "cuando": "Se juntan dos flujos Poisson independientes (dos cajas, dos tipos de llamada): las tasas se suman.",
+   "condiciones": [
+    "independientes"
+   ],
+   "slug": "suma-de-va-independientes",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "reproductividad",
+    "poisson"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 667,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--n11n22",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$\\mathcal N(\\mu_1,\\sigma_1)+\\mathcal N(\\mu_2,\\sigma_2)$",
+   "tex": "\\mathcal N\\!\\big(\\mu_1+\\mu_2,\\sqrt{\\sigma_1^2+\\sigma_2^2}\\big)",
+   "cuando": "Suma de normales independientes: se suman las medias y las varianzas, nunca los desvíos.",
+   "condiciones": [
+    "independientes",
+    "normales"
+   ],
+   "slug": "suma-de-va-independientes",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "reproductividad",
+    "normal"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 668,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--i-i-d-2",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$n\\times\\text{Expo}(\\lambda)$ i.i.d.",
+   "tex": "\\mathrm{Gamma}(n,\\lambda)=\\mathrm{Erlang}_n(\\lambda)",
+   "cuando": "Suma de tiempos exponenciales i.i.d. (sistema en standby, k etapas): da Gamma/Erlang.",
+   "condiciones": [
+    "i.i.d.",
+    "misma tasa"
+   ],
+   "slug": "suma-de-va-independientes",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "reproductividad",
+    "erlang"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 669,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--unif01unif01",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$\\mathrm{Unif}(0,1)+\\mathrm{Unif}(0,1)$",
+   "tex": "\\textbf{triangular}\\text{ en }(0,2)\\text{ (}\\textbf{NO}\\text{ uniforme)}",
+   "cuando": "Advertencia clásica: la suma de dos uniformes no es uniforme, es triangular.",
+   "condiciones": [
+    "independientes"
+   ],
+   "slug": "suma-de-va-independientes",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "errores"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 670,
+    "tipo": "tabla"
+   }
+  },
+  {
+   "id": "10-suma-de-v--geopgeop",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$\\mathrm{Geo}(p)+\\mathrm{Geo}(p)$",
+   "tex": "\\mathrm{BinNeg}(2,p)",
+   "cuando": "Suma de geométricas con la misma p: da binomial negativa.",
+   "condiciones": [
+    "misma p",
+    "independientes"
+   ],
+   "slug": "suma-de-va-independientes",
+   "ancla": "",
+   "tags": [
+    "suma",
+    "reproductividad"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 671,
-    "tipo": "bloque"
+    "tipo": "tabla"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--forma-asimetria-y-curtosis-muestral",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Forma (asimetría y curtosis muestral)",
-   "nombre": "Forma (asimetría y curtosis muestral)",
-   "tex": "\\gamma = \\frac{1}{n s^3}\\sum_{i=1}^n (x_i-\\bar x)^3 \\qquad \\kappa = \\frac{1}{n s^4}\\sum_{i=1}^n (x_i-\\bar x)^4 - 3",
-   "cuando": "Piden describir la forma de la muestra: el signo del sesgo y el exceso de curtosis respecto de la normal.",
-   "condiciones": [],
-   "slug": "asimetria-y-curtosis",
+   "id": "10-suma-de-v--i1nn012",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "$\\sum_{i=1}^n \\mathcal N(0,1)^2$",
+   "tex": "\\chi^2_n",
+   "cuando": "Suma de cuadrados de normales estándar: da ji-cuadrado, base de la inferencia sobre la varianza.",
+   "condiciones": [
+    "i.i.d.",
+    "normales estándar"
+   ],
+   "slug": "suma-de-va-independientes",
    "ancla": "",
    "tags": [
-    "descriptiva",
-    "forma"
+    "suma",
+    "reproductividad",
+    "ji-cuadrado"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 676,
-    "tipo": "bloque"
-   }
-  },
-  {
-   "id": "12-estadistica-descriptiva--media",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Media",
-   "tex": "\\bar x_{Ag} = \\dfrac{1}{n}\\sum_{i=1}^L x_i\\, f_i",
-   "cuando": "Datos presentados en tabla de frecuencias por intervalos: se usa la marca de clase como representante.",
-   "condiciones": [
-    "datos agrupados"
-   ],
-   "slug": "datos-agrupados",
-   "ancla": "medidas-con-datos-agrupados",
-   "tags": [
-    "descriptiva",
-    "datos-agrupados"
-   ],
-   "esencial": false,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 685,
+    "linea": 672,
     "tipo": "tabla"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--desvio-2",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Desvío",
-   "tex": "s_{Ag} = \\sqrt{\\dfrac{1}{n-1}\\sum_{i=1}^L (x_i-\\bar x_{Ag})^2\\, f_i}",
-   "cuando": "Desvío de datos agrupados, ponderando cada marca de clase por su frecuencia.",
+   "id": "10-suma-de-v--normal-normal",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Sumas de independientes con nombre propio (reproductividad)",
+   "nombre": "Normal + Normal",
+   "tex": "\\textbf{suman medias y varianzas}\\text{ (los desvíos NO suman). Gamma/Erlang: }\\;f_{\\Gamma(n,\\lambda)}(x)=\\dfrac{\\lambda^n x^{n-1}e^{-\\lambda x}}{(n-1)!}\\ (x>0)\\text{, }E=\\tfrac n\\lambda\\text{, }V=\\tfrac n{\\lambda^2}",
+   "cuando": "Suma de normales independientes (se suman medias y varianzas, nunca los desvíos) y suma de exponenciales de igual tasa, que da Gamma/Erlang.",
    "condiciones": [
-    "datos agrupados"
+    "independientes"
    ],
-   "slug": "datos-agrupados",
-   "ancla": "medidas-con-datos-agrupados",
+   "slug": "suma-de-va-independientes",
+   "ancla": "4-normal-normal-normal",
    "tags": [
-    "descriptiva",
-    "datos-agrupados"
+    "suma",
+    "normal",
+    "gamma"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 686,
-    "tipo": "tabla"
+    "linea": 674,
+    "tipo": "parrafo"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--asimetria",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Asimetría",
-   "tex": "\\gamma_{Ag} = \\dfrac{1}{n\\,s_{Ag}^3}\\sum (x_i-\\bar x_{Ag})^3 f_i",
-   "cuando": "Asimetría de datos agrupados.",
+   "id": "10-suma-de-v--markov",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Desigualdades (cotas universales)",
+   "nombre": "Markov",
+   "tex": "\\text{(}X\\ge 0\\text{), }\\forall\\,\\alpha>0\\text{: }\\quad P(X\\ge\\alpha)\\le\\dfrac{E[X]}{\\alpha}\\text{.}",
+   "cuando": "Solo se conoce la media de una variable no negativa y piden acotar la probabilidad de un valor grande.",
    "condiciones": [
-    "datos agrupados"
+    "X ≥ 0",
+    "solo se conoce E[X]"
    ],
-   "slug": "datos-agrupados",
-   "ancla": "medidas-con-datos-agrupados",
+   "slug": "desigualdad-de-chebyshev",
+   "ancla": "",
    "tags": [
-    "descriptiva",
-    "datos-agrupados",
-    "forma"
+    "cotas",
+    "markov"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 687,
-    "tipo": "tabla"
+    "linea": 677,
+    "tipo": "vineta"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--curtosis",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Curtosis",
-   "tex": "\\kappa_{Ag} = \\dfrac{1}{n\\,s_{Ag}^4}\\sum (x_i-\\bar x_{Ag})^4 f_i - 3",
-   "cuando": "Curtosis de datos agrupados; la normal es la referencia en cero.",
+   "id": "10-suma-de-v--chebyshev",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Desigualdades (cotas universales)",
+   "nombre": "Chebyshev",
+   "tex": "\\text{(media }\\mu\\text{, varianza }\\sigma^2\\text{), }\\forall\\,\\varepsilon>0\\text{: }\\quad P(|X-\\mu|\\ge\\varepsilon)\\le\\dfrac{\\sigma^2}{\\varepsilon^2}\\text{.}",
+   "cuando": "Piden acotar la probabilidad de alejarse de la media sin conocer la distribución: alcanza con la media y la varianza.",
    "condiciones": [
-    "datos agrupados"
+    "media y varianza conocidas"
    ],
-   "slug": "datos-agrupados",
-   "ancla": "medidas-con-datos-agrupados",
+   "slug": "desigualdad-de-chebyshev",
+   "ancla": "",
    "tags": [
-    "descriptiva",
-    "datos-agrupados",
-    "forma"
+    "cotas",
+    "chebyshev"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 678,
+    "tipo": "vineta"
+   }
+  },
+  {
+   "id": "10-suma-de-v--en-terminos-de-desvios",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Desigualdades (cotas universales)",
+   "nombre": "En términos de $k$ desvíos ($\\varepsilon=k\\sigma$)",
+   "tex": "\\quad P(|X-\\mu|\\ge k\\sigma)\\le\\dfrac1{k^2}\\text{.}",
+   "cuando": "Versión de Chebyshev cuando el alejamiento se expresa en cantidad de desvíos.",
+   "condiciones": [
+    "ε = kσ"
+   ],
+   "slug": "desigualdad-de-chebyshev",
+   "ancla": "",
+   "tags": [
+    "cotas",
+    "chebyshev"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 679,
+    "tipo": "vineta"
+   }
+  },
+  {
+   "id": "10-suma-de-v--promedio-i-i-d",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Desigualdades (cotas universales)",
+   "nombre": "Promedio i.i.d.",
+   "tex": "\\quad P(|\\bar X_n-\\mu|\\ge\\varepsilon)\\le\\dfrac{\\sigma^2}{n\\,\\varepsilon^2}\\xrightarrow{n\\to\\infty}0",
+   "cuando": "Chebyshev aplicado al promedio muestral: la cota baja con n y es el puente hacia la ley de los grandes números.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "desigualdad-de-chebyshev",
+   "ancla": "forma-para-promedios-iid",
+   "tags": [
+    "cotas",
+    "chebyshev",
+    "lgn"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 680,
+    "tipo": "vineta"
+   }
+  },
+  {
+   "id": "10-suma-de-v--debil-en-probabilidad",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Ley de los Grandes Números",
+   "nombre": "Débil (en probabilidad)",
+   "tex": "\\;\\displaystyle\\lim_{n\\to\\infty} P(|\\bar X_n-\\mu|\\ge\\varepsilon)=0\\quad\\forall\\,\\varepsilon>0",
+   "cuando": "Justificación teórica de que el promedio se acerca a la media poblacional al crecer n.",
+   "condiciones": [
+    "i.i.d.",
+    "varianza finita"
+   ],
+   "slug": "ley-de-grandes-numeros",
+   "ancla": "",
+   "tags": [
+    "lgn"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 683,
+    "tipo": "vineta"
+   }
+  },
+  {
+   "id": "10-suma-de-v--fuerte-casi-segura",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Ley de los Grandes Números",
+   "nombre": "Fuerte (casi segura)",
+   "tex": "\\;P\\!\\left(\\displaystyle\\lim_{n\\to\\infty}\\bar X_n=\\mu\\right)=1\\text{.}",
+   "cuando": "Versión fuerte de la ley de los grandes números: convergencia casi segura del promedio.",
+   "condiciones": [
+    "i.i.d."
+   ],
+   "slug": "ley-de-grandes-numeros",
+   "ancla": "",
+   "tags": [
+    "lgn"
+   ],
+   "esencial": false,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 684,
+    "tipo": "vineta"
+   }
+  },
+  {
+   "id": "10-suma-de-v--teorema-central-del-limite",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Teorema Central del Límite",
+   "nombre": "Teorema Central del Límite",
+   "tex": "\\lim_{n\\to\\infty}P(Z_n\\le z)=\\Phi(z).",
+   "variante": "enunciado",
+   "cuando": "Enunciado del TCL: el promedio estandarizado tiende a la normal estándar, sea cual sea la distribución de origen.",
+   "condiciones": [
+    "i.i.d.",
+    "n grande"
+   ],
+   "slug": "teorema-central-del-limite",
+   "ancla": "",
+   "tags": [
+    "tcl"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 688,
-    "tipo": "tabla"
-   }
-  },
-  {
-   "id": "12-estadistica-descriptiva--mediana-cuartiles-por-interpolacion-lineal",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Mediana / cuartiles por interpolación lineal",
-   "tex": "q = L_I + \\frac{\\alpha n - F_{\\text{ant}}}{F - F_{\\text{ant}}}\\,(L_{s}-L_I), \\qquad \\text{mediana: }\\alpha=0{,}5.",
-   "cuando": "Datos agrupados y piden mediana o cuartiles: se ubica el intervalo por la frecuencia acumulada y se interpola dentro.",
-   "condiciones": [
-    "datos agrupados"
-   ],
-   "slug": "datos-agrupados",
-   "ancla": "mediana-y-cuartiles-interpolación",
-   "tags": [
-    "descriptiva",
-    "datos-agrupados",
-    "cuartiles"
-   ],
-   "esencial": true,
-   "origen": {
-    "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 691,
     "tipo": "bloque"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--moda-agrupada",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Moda agrupada",
-   "tex": "M=\\frac{L_I+L_D}{2}",
-   "variante": "punto medio",
-   "cuando": "Aproximación rápida a la moda de datos agrupados: el punto medio del intervalo modal.",
+   "id": "10-suma-de-v--teorema-central-del-limite-2",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Teorema Central del Límite",
+   "nombre": "Teorema Central del Límite",
+   "tex": "\\bar X_n\\overset{\\text{aprox}}{\\sim}\\mathcal N\\!\\Big(\\mu,\\tfrac{\\sigma}{\\sqrt n}\\Big),\\qquad S_n\\overset{\\text{aprox}}{\\sim}\\mathcal N\\!\\big(n\\mu,\\sqrt n\\,\\sigma\\big),\\qquad P(S_n\\le s)\\approx\\Phi\\!\\Big(\\tfrac{s-n\\mu}{\\sqrt n\\,\\sigma}\\Big).",
+   "variante": "forma de trabajo",
+   "cuando": "Uso práctico del TCL: aproximar la distribución del promedio o del total por una normal para calcular probabilidades.",
    "condiciones": [
-    "datos agrupados"
+    "i.i.d.",
+    "n grande"
    ],
-   "slug": "datos-agrupados",
-   "ancla": "medidas-con-datos-agrupados",
+   "slug": "teorema-central-del-limite",
+   "ancla": "",
    "tags": [
-    "descriptiva",
-    "datos-agrupados"
+    "tcl",
+    "aproximacion"
+   ],
+   "esencial": true,
+   "origen": {
+    "archivo": "wiki/formularios/formulario-maestro.md",
+    "linea": 690,
+    "tipo": "bloque"
+   }
+  },
+  {
+   "id": "10-suma-de-v--frecuencia-relativa",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Teorema Central del Límite",
+   "nombre": "Frecuencia relativa ($\\hat P_n=\\tfrac1n\\sum\\mathbb 1_k(A)$, $p=P(A)$)",
+   "tex": "\\;P(\\hat P_n\\le q)\\approx\\Phi\\!\\Big(\\dfrac{q-p}{\\sqrt{p(1-p)/n}}\\Big)",
+   "cuando": "Aproximar la probabilidad de que la proporción muestral no supere un valor, con n grande.",
+   "condiciones": [
+    "n grande",
+    "TCL"
+   ],
+   "slug": "teorema-central-del-limite",
+   "ancla": "",
+   "tags": [
+    "tcl",
+    "proporcion"
    ],
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 693,
+    "linea": 691,
     "tipo": "parrafo"
    }
   },
   {
-   "id": "12-estadistica-descriptiva--moda-agrupada-2",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Datos agrupados",
-   "nombre": "Moda agrupada",
-   "tex": "M = \\frac{L_D(f_M-f_I) + L_I(f_M-f_D)}{(f_M-f_I)+(f_M-f_D)}.",
-   "variante": "interpolación",
-   "cuando": "Moda de datos agrupados con más precisión: se interpola dentro del intervalo modal usando las frecuencias vecinas.",
+   "id": "10-suma-de-v--aproximacion-normal-de-la-binomial",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Aproximación normal de la binomial",
+   "nombre": "Aproximación normal de la binomial",
+   "tex": "\\mathrm{Bin}(n,p)\\approx\\mathcal N\\big(np,\\sqrt{npq}\\big),\\qquad q=1-p.",
+   "cuando": "Binomial con n grande: se reemplaza por una normal con la misma media y desvío.",
    "condiciones": [
-    "datos agrupados"
+    "np ≥ 5",
+    "nq ≥ 5"
    ],
-   "slug": "datos-agrupados",
-   "ancla": "medidas-con-datos-agrupados",
+   "slug": "aproximacion-normal-de-la-binomial",
+   "ancla": "",
    "tags": [
-    "descriptiva",
-    "datos-agrupados"
+    "tcl",
+    "binomial",
+    "aproximacion"
    ],
-   "esencial": false,
+   "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
     "linea": 694,
@@ -7376,27 +7435,27 @@ window.FORMULAS = {
    }
   },
   {
-   "id": "12-estadistica-descriptiva--boxplot-y-outliers-de-tukey",
-   "unidad": "1",
-   "seccion": "12 · Estadística descriptiva",
-   "subseccion": "Boxplot y outliers de Tukey",
-   "nombre": "Boxplot y outliers de Tukey",
-   "tex": "[\\,q_1 - 1{,}5\\,\\text{IQR}\\;,\\;\\; q_3 + 1{,}5\\,\\text{IQR}\\,].",
-   "cuando": "Piden detectar valores atípicos o dibujar el boxplot: todo dato fuera de las cercas es outlier.",
+   "id": "10-suma-de-v--correccion-por-continuidad",
+   "unidad": "7",
+   "seccion": "10 · Suma de v.a., desigualdades, LGN y TCL",
+   "subseccion": "Aproximación normal de la binomial",
+   "nombre": "Corrección por continuidad",
+   "tex": "P(a\\le S_n\\le b)\\approx\\Phi\\!\\Big(\\tfrac{b+\\frac12-np}{\\sqrt{npq}}\\Big)-\\Phi\\!\\Big(\\tfrac{a-\\frac12-np}{\\sqrt{npq}}\\Big),\\qquad P(S_n=s)\\approx\\Phi\\!\\Big(\\tfrac{s+\\frac12-n\\mu}{\\sqrt n\\,\\sigma}\\Big)-\\Phi\\!\\Big(\\tfrac{s-\\frac12-n\\mu}{\\sqrt n\\,\\sigma}\\Big).",
+   "cuando": "Al pasar de la binomial a la normal se corren los extremos medio punto hacia afuera.",
    "condiciones": [
-    "cuartiles conocidos"
+    "variable discreta"
    ],
-   "slug": "boxplot",
-   "ancla": "",
+   "slug": "aproximacion-normal-de-la-binomial",
+   "ancla": "corrección-por-continuidad-clave-en-discretas",
    "tags": [
-    "descriptiva",
-    "boxplot",
-    "outliers"
+    "tcl",
+    "binomial",
+    "aproximacion"
    ],
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 700,
+    "linea": 696,
     "tipo": "bloque"
    }
   },
@@ -7418,7 +7477,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 713,
+    "linea": 710,
     "tipo": "tabla"
    }
   },
@@ -7440,7 +7499,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 714,
+    "linea": 711,
     "tipo": "tabla"
    }
   },
@@ -7462,7 +7521,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 715,
+    "linea": 712,
     "tipo": "tabla"
    }
   },
@@ -7486,7 +7545,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 716,
+    "linea": 713,
     "tipo": "tabla"
    }
   },
@@ -7511,7 +7570,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 722,
+    "linea": 719,
     "tipo": "tabla"
    }
   },
@@ -7537,7 +7596,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 722,
+    "linea": 719,
     "tipo": "tabla"
    }
   },
@@ -7562,7 +7621,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 723,
+    "linea": 720,
     "tipo": "tabla"
    }
   },
@@ -7586,7 +7645,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 723,
+    "linea": 720,
     "tipo": "tabla"
    }
   },
@@ -7611,7 +7670,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 724,
+    "linea": 721,
     "tipo": "tabla"
    }
   },
@@ -7635,7 +7694,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 726,
+    "linea": 723,
     "tipo": "parrafo"
    }
   },
@@ -7659,7 +7718,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 730,
+    "linea": 727,
     "tipo": "vineta"
    }
   },
@@ -7683,7 +7742,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 731,
+    "linea": 728,
     "tipo": "vineta"
    }
   },
@@ -7705,7 +7764,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 732,
+    "linea": 729,
     "tipo": "vineta"
    }
   },
@@ -7729,7 +7788,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 736,
+    "linea": 733,
     "tipo": "parrafo"
    }
   },
@@ -7755,7 +7814,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 740,
+    "linea": 737,
     "tipo": "tabla"
    }
   },
@@ -7782,7 +7841,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 740,
+    "linea": 737,
     "tipo": "tabla"
    }
   },
@@ -7808,7 +7867,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 741,
+    "linea": 738,
     "tipo": "tabla"
    }
   },
@@ -7834,7 +7893,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 741,
+    "linea": 738,
     "tipo": "tabla"
    }
   },
@@ -7862,7 +7921,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 742,
+    "linea": 739,
     "tipo": "tabla"
    }
   },
@@ -7884,7 +7943,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 744,
+    "linea": 741,
     "tipo": "bloque"
    }
   },
@@ -7909,7 +7968,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 752,
+    "linea": 749,
     "tipo": "tabla"
    }
   },
@@ -7934,7 +7993,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 753,
+    "linea": 750,
     "tipo": "tabla"
    }
   },
@@ -7959,7 +8018,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 754,
+    "linea": 751,
     "tipo": "tabla"
    }
   },
@@ -7984,7 +8043,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 762,
+    "linea": 759,
     "tipo": "bloque"
    }
   },
@@ -8009,7 +8068,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 764,
+    "linea": 761,
     "tipo": "bloque"
    }
   },
@@ -8032,7 +8091,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 770,
+    "linea": 767,
     "tipo": "tabla"
    }
   },
@@ -8057,7 +8116,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 770,
+    "linea": 767,
     "tipo": "tabla"
    }
   },
@@ -8083,7 +8142,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 770,
+    "linea": 767,
     "tipo": "tabla"
    }
   },
@@ -8106,7 +8165,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 771,
+    "linea": 768,
     "tipo": "tabla"
    }
   },
@@ -8131,7 +8190,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 771,
+    "linea": 768,
     "tipo": "tabla"
    }
   },
@@ -8157,7 +8216,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 771,
+    "linea": 768,
     "tipo": "tabla"
    }
   },
@@ -8180,7 +8239,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 772,
+    "linea": 769,
     "tipo": "tabla"
    }
   },
@@ -8205,7 +8264,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 772,
+    "linea": 769,
     "tipo": "tabla"
    }
   },
@@ -8231,7 +8290,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 772,
+    "linea": 769,
     "tipo": "tabla"
    }
   },
@@ -8255,7 +8314,7 @@ window.FORMULAS = {
    "esencial": false,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 774,
+    "linea": 771,
     "tipo": "parrafo"
    }
   },
@@ -8280,7 +8339,7 @@ window.FORMULAS = {
    "esencial": true,
    "origen": {
     "archivo": "wiki/formularios/formulario-maestro.md",
-    "linea": 776,
+    "linea": 773,
     "tipo": "parrafo"
    }
   },

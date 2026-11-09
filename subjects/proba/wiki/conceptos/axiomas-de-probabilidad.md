@@ -3,7 +3,7 @@ titulo: Axiomas de probabilidad (Kolmogorov)
 resumen: 'Reglas de Kolmogorov: $P(A)\ge0$, $P(S)=1$ y aditividad para sucesos mutuamente excluyentes. De ellas se deducen el complemento $P(A^c)=1-P(A)$, la monotonía y $P(A\cup B)=P(A)+P(B)-P(A\cap B)$.'
 tipo: concepto
 unidad: 2
-orden: 4
+orden: 5
 tags: [probabilidad, axiomas, kolmogorov]
 fuentes: ["[[axiomas-probabilidad]]", "[[tp2-calculo-de-probabilidades]]", "[[video-axiomas]]"]
 actualizado: 2026-09-04

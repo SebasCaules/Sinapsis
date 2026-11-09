@@ -3,7 +3,7 @@ titulo: Valor p
 resumen: 'Probabilidad, calculada bajo la hipótesis nula, de obtener un estadístico tan contrario a ella como el observado. Se rechaza cuando el valor p es menor que $\alpha$; equivale al nivel de significación más chico al que todavía se rechazaría la nula.'
 tipo: concepto
 unidad: 9
-orden: 4
+orden: 5
 tags: [prueba-de-hipotesis, valor-p, inferencia]
 fuentes: ["[[tp9-pruebas-de-hipotesis]]", "[[intro-prueba-de-hipotesis-slides]]", "[[apunte-prueba-proporcion]]", "[[apunte-media-desvio-desconocido]]", "[[video-th-desvio-conocido]]", "[[video-th-desvio-desconocido]]"]
 actualizado: 2026-09-04

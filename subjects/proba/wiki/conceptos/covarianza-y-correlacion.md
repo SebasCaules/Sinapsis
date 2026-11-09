@@ -3,7 +3,7 @@ titulo: Covarianza y Correlación
 resumen: 'La covarianza $\mathrm{Cov}(X,Y)=E[XY]-\mu_X\mu_Y$ mide la asociación lineal y el coeficiente $\rho=\mathrm{Cov}(X,Y)/(\sigma_X\sigma_Y)$ la reescala a $[-1,1]$. Independencia implica $\rho=0$, pero $\rho=0$ no implica independencia.'
 tipo: concepto
 unidad: 5
-orden: 4
+orden: 5
 tags: [bidimensionales, covarianza, correlacion]
 fuentes: ["[[teorica-covarianza-y-correlacion]]", "[[teorica-correlacion-entre-menos-uno-y-uno]]", "[[teorica-correlacion-uno-implica-relacion-lineal]]", "[[tp5-2024]]"]
 actualizado: 2026-09-04

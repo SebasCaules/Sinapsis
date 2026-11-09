@@ -3,7 +3,7 @@ titulo: Teoría de la Decisión — Maximización del Valor Esperado
 resumen: "Patrón de ejercicio donde se elige un parámetro de decisión $k$ y la ganancia depende además de una variable aleatoria que no se controla: se escribe $G_k=g_k(X)$, se calcula $E[G_k]$ para cada $k$ y se elige el que la maximiza."
 tipo: tecnica
 unidad: 3
-orden: 6
+orden: 7
 tags: [discreta, tecnica, esperanza, decision]
 fuentes: ["[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-06-06

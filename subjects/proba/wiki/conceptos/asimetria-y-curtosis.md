@@ -3,7 +3,7 @@ titulo: Asimetría y curtosis (parámetros de forma)
 resumen: 'Dos coeficientes adimensionales de forma: la asimetría $\gamma=\frac{\sum(x_i-\bar x)^3}{n s^3}$ indica hacia qué lado se estira la distribución y la curtosis $\kappa=\frac{\sum(x_i-\bar x)^4}{n s^4}-3$ mide el peso de las colas frente a la normal.'
 tipo: concepto
 unidad: 1
-orden: 5
+orden: 6
 tags: [estadistica-descriptiva, asimetria, curtosis, forma]
 fuentes: ["[[estadistica-descriptiva-general]]", "[[tp1-estadistica-descriptiva]]", "[[estadistica-descriptiva-introduccion]]", "[[video-histogramas]]", "[[video-medidas-de-resumen]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Población y muestra
 resumen: "La población es el universo completo que se quiere estudiar y la muestra el subconjunto que efectivamente se observa, elegido al azar para que sea representativo; sobre la muestra se calculan las medidas de resumen."
 tipo: concepto
 unidad: 1
-orden: 2
+orden: 3
 tags: [estadistica-descriptiva, fundamentos]
 fuentes: ["[[tp1-estadistica-descriptiva]]"]
 actualizado: 2026-06-06

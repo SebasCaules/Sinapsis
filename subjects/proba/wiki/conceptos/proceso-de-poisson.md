@@ -3,7 +3,7 @@ titulo: Proceso de Poisson
 resumen: 'Proceso de conteo en tiempo continuo con tasa $\lambda$ constante: el conteo en un intervalo de longitud $t$ es $\mathrm{Poisson}(\lambda t)$ y los tiempos entre eventos son exponenciales i.i.d. Es el límite continuo del proceso de Bernoulli.'
 tipo: concepto
 unidad: 6
-orden: 4
+orden: 5
 tags: [procesos-estocasticos, continuo, proceso-de-conteo]
 fuentes: ["[[teorica-proceso-de-poisson]]", "[[tp6-procesos-estocasticos]]", "[[video-procesos-de-poisson]]"]
 actualizado: 2026-09-04

@@ -3,7 +3,7 @@ titulo: Mínimo de exponenciales (sistemas en serie)
 resumen: 'El mínimo de exponenciales independientes es exponencial con tasa igual a la suma, $T\sim\text{Expo}(\sum_i\lambda_i)$ y $E[T]=1/\sum_i\lambda_i$. Modela el sistema en serie y se deduce con la cola $P(T>t)$.'
 tipo: concepto
 unidad: 4
-orden: 5
+orden: 6
 tags: [continua, exponencial, confiabilidad, minimo, serie]
 fuentes: ["[[tp4-variables-aleatorias-continuas]]"]
 actualizado: 2026-06-06

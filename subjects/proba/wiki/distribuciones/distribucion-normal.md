@@ -3,10 +3,10 @@ titulo: Distribución Normal
 resumen: 'La campana $N(\mu,\sigma)$, simétrica alrededor de $\mu$ y con dispersión fijada por $\sigma$. Como su FDA no tiene forma cerrada, se estandariza: $F_X(x)=\Phi((x-\mu)/\sigma)$ y se lee la tabla. Es la distribución límite del TCL.'
 tipo: distribucion
 unidad: 4
-orden: 8
+orden: 9
 tags: [continua, distribucion, normal, gaussiana]
 fuentes: ["[[teorica-va-normal]]", "[[tp4-variables-aleatorias-continuas]]", "[[video-normales]]"]
-actualizado: 2026-09-04
+actualizado: 2026-11-09
 ---
 
 # Distribución Normal
@@ -160,22 +160,23 @@ estuviera centrado en $10$ ($D\sim N(10,\sigma)$), ¿máximo $\sigma$ que permit
 
 **Cálculo a).** Dentro de especificación: $9.975\le D\le10.025$.
 $$ P(E)=\Phi\!\left(\frac{10.025-10.02}{0.075}\right)-\Phi\!\left(\frac{9.975-10.02}{0.075}\right) $$
-$$ = \Phi(0.066)-\Phi(-0.6)=0.5239-0.2743=0.2536. $$
-Fuera: $P(\overline E)=1-0.2536=0.7464$.
+$$ = \Phi(0.0667)-\Phi(-0.6)\approx0.5266-0.2743=0.2523. $$
+Fuera: $P(\overline E)=1-0.2523=0.7477$.
 
 > ⚠️ Discrepancia con el raw ([[tp4-variables-aleatorias-continuas]]): la **resolución
-> detallada** (Sec. 6, ec. 81) obtiene $P(\overline E)=0.7464$ leyendo $\Phi(0.066)\approx0.5239$
-> de la tabla; pero la **sección de Respuestas** (Sec. 5, ej. 21a) reporta $0.7477$. Las dos
-> vienen del mismo PDF. El origen de la diferencia es el redondeo de la tabla: el valor exacto
-> es $\Phi(0.066)\approx0.5263$ (no $0.5239$, que corresponde a $\Phi(0.06)$), de donde
-> $P(\overline E)\approx0.748$. El número "oficial" del enunciado es $0.7477$.
+> detallada** (Sec. 6, ec. 81) escribe $\Phi(0.066)-\Phi(-0.6)=0.5239-0.2743=0.2536$ y obtiene
+> $P(\overline E)=0.7464$; la **sección de Respuestas** (Sec. 5, ej. 21a) reporta $0.7477$. Las dos
+> vienen del mismo PDF. La diferencia no es de redondeo: la resta $0.5239-0.2743$ da $0.2496$ (no
+> $0.2536$), y además $0.5239$ es $\Phi(0.06)$. Con $\Phi(0.0667)\approx0.5266$ sale
+> $P(E)\approx0.2523$ y $P(\overline E)\approx0.7477$, que coincide con la sección de Respuestas
+> (corregido el 2026-11-09, igual que en [[resumen-unidad-4]]).
 
 **Cálculo b).** Centrado: pedir $P(E)=0.999$. Por simetría,
 $$ 0.999=2\Phi\!\left(\frac{0.025}{\sigma}\right)-1 \Rightarrow \Phi\!\left(\frac{0.025}{\sigma}\right)=0.9995 \Rightarrow \frac{0.025}{\sigma}=\Phi^{-1}(0.9995)\approx3.2905, $$
 $$ \sigma\approx\frac{0.025}{3.2905}\approx0.0076\ \text{mm}. $$
 
-**Resultado.** a) $\approx0.7477$ (Respuestas; la resolución por tabla da $0.7464$, ver
-discrepancia). b) $\sigma\approx0.0076$ mm.
+**Resultado.** a) $\approx0.7477$ (coincide con Respuestas; el $0.7464$ de la resolución detallada
+sale de una resta mal hecha, ver discrepancia). b) $\sigma\approx0.0076$ mm.
 
 ### Ejercicio D — motivación numérica: longitud de un termómetro
 **Fuente:** [[video-normales]] [00:05]–[02:44] y [31:07].

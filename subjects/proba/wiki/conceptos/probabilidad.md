@@ -1,13 +1,12 @@
 ---
 titulo: Introducción a la Probabilidad
-resumen: "Hub de la unidad 2, el modelo matemático de la incertidumbre: espacio muestral y eventos, leyes de De Morgan, axiomas de Kolmogorov, regla de Laplace, condicional, independencia, Bayes y árbol de probabilidades."
+resumen: "La probabilidad es el modelo matemático de la incertidumbre: espacio muestral y eventos, leyes de De Morgan, axiomas de Kolmogorov, regla de Laplace, condicional, independencia, Bayes y árbol de probabilidades."
 tipo: concepto
 unidad: 2
-orden: 1
-hub: true
+orden: 2
 tags: [hub, probabilidad]
 fuentes: ["[[axiomas-probabilidad]]", "[[regla-de-laplace-slides]]", "[[independencia-condicional-bayes]]", "[[tp2-calculo-de-probabilidades]]"]
-actualizado: 2026-06-06
+actualizado: 2026-11-09
 ---
 
 # Introducción a la Probabilidad
@@ -17,7 +16,10 @@ Aquí se arma todo el aparato (espacio muestral, axiomas, condicional, independe
 Bayes) que después permite definir [[variable-aleatoria|variables aleatorias]] y sus
 distribuciones.
 
-Página **hub** de la Unidad 2. Mientras la [[estadistica-descriptiva]] describe
+> El resumen de la unidad, tema por tema y con las fórmulas clave, está en
+> [[resumen-unidad-2|Resumen de la Unidad 2]]. Esta página es el mapa de la unidad.
+
+Mientras la [[estadistica-descriptiva]] describe
 datos ya observados, la probabilidad **modela la incertidumbre** de un experimento
 aleatorio *antes* de observarlo.
 

@@ -3,7 +3,7 @@ titulo: Estimación Puntual
 resumen: 'Dar un único valor para un parámetro mediante un estimador $\hat\theta=h(X_1,\dots,X_n)$. Su calidad se mide con $\mathrm{mse}(\hat\theta)=V(\hat\theta)+\mathrm{sesgo}^2(\hat\theta)$; se construye por máxima verosimilitud, MAP o momentos.'
 tipo: concepto
 unidad: 8
-orden: 2
+orden: 3
 tags: [inferencia, estimacion, estimador]
 fuentes: ["[[teorica-estimacion-puntual-intro]]", "[[teorica-estimacion-puntual-conocidos]]", "[[teorica-maxima-verosimilitud]]", "[[teorica-maximo-a-posteriori]]", "[[teorica-metodo-de-los-momentos]]", "[[tp8-estimacion-de-parametros]]", "[[video-metodos-de-estimacion]]", "[[video-poblacion-y-muestra]]"]
 actualizado: 2026-09-04

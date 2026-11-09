@@ -3,7 +3,7 @@ titulo: Función de Distribución Acumulada (FDA)
 resumen: 'Acumula probabilidad: $F_X(k)=P(X\le k)$, descripción equivalente a la PMF y la más cómoda para intervalos, con $P(a<X\le b)=F_X(b)-F_X(a)$. En una variable discreta es escalonada y cada salto vale $p_X(k)$.'
 tipo: concepto
 unidad: 3
-orden: 2
+orden: 3
 tags: [discreta, fda, distribucion]
 fuentes: ["[[va-discretas-introduccion]]", "[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-09-04

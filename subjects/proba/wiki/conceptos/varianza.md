@@ -3,7 +3,7 @@ titulo: Varianza y Desvío
 resumen: 'Mide la dispersión de una variable aleatoria alrededor de su media: $V(X)=E[(X-E[X])^2]=E[X^2]-(E[X])^2$, y el desvío $\sigma=\sqrt{V(X)}$ vuelve a las unidades originales. Propiedad clave: $V(aX+c)=a^2\,V(X)$.'
 tipo: concepto
 unidad: 3
-orden: 4
+orden: 5
 tags: [discreta, varianza, dispersion, momentos]
 fuentes: ["[[va-discretas-introduccion]]", "[[tp3-variables-aleatorias-discretas]]"]
 actualizado: 2026-06-06
