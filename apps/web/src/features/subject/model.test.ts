@@ -19,6 +19,17 @@ import { buildSubjectModel, type ExtraStep } from "./model";
 
 const config = SubjectConfig.parse(rawProbaConfig);
 
+/* La portada sin hub cae en el primer tipo de CONTENIDO declarado. Proba declara
+   «resumen» primero (2026-11-09) y estas páginas sintéticas no traen resúmenes:
+   las pruebas de la portada usan el config con «concepto» primero, para no
+   depender de los tipos que agregue la materia. */
+const configConceptoPrimero = SubjectConfig.parse({
+  ...rawProbaConfig,
+  pageTypes: [...rawProbaConfig.pageTypes].sort(
+    (a, b) => Number(b.key === "concepto") - Number(a.key === "concepto"),
+  ),
+});
+
 function page(slug: string, type: string, division: string, extra: Partial<PageMeta> = {}): PageMeta {
   return {
     slug,
@@ -240,7 +251,7 @@ const unitPages: PageMeta[] = [
 ];
 
 function unitModel(studied: string[] = []) {
-  const detail: SubjectDetail = { config, pages: unitPages, studied, placeholder: false, lastSyncAt: null };
+  const detail: SubjectDetail = { config: configConceptoPrimero, pages: unitPages, studied, placeholder: false, lastSyncAt: null };
   return buildSubjectModel(detail);
 }
 
@@ -306,27 +317,22 @@ describe("portada de división", () => {
 describe("rail", () => {
   it("intercala los grupos SLOT entre los FIJOS y marca cuál es cuál", () => {
     const groups = modelConLink().railGroups;
-    expect(groups.map((g) => g.id)).toEqual(["ruta", "resolver", "material", "consultar", "practicar", "mio"]);
-    expect(groups.map((g) => g.slot)).toEqual([false, true, true, false, false, false]);
+    /* Los grupos slot salen del config real de Proba, en su orden, más el
+       «material» que agrega este test. */
+    const slots = rawProbaConfig.rail.map((g) => g.id);
+    expect(groups.map((g) => g.id)).toEqual(["ruta", ...slots, "material", "consultar", "practicar", "mio"]);
+    expect(groups.map((g) => g.slot)).toEqual([false, ...slots.map(() => true), true, false, false, false]);
   });
 
   it("esconde los ítems `page` cuyo slug no existe y los grupos que quedan vacíos", () => {
     const groups = modelConLink().railGroups;
     const material = groups.find((g) => g.id === "material");
     expect(material?.items.map((i) => i.item.id)).toEqual(["catedra"]);
-    /* El grupo «Resolver» de Proba es todo `kind: "tool"`: ninguna herramienta
-       depende de que exista una página, así que el grupo entero sobrevive. */
-    const resolver = groups.find((g) => g.id === "resolver");
-    expect(resolver?.items.map((i) => i.item.id)).toEqual([
-      "formularios",
-      "explorador",
-      "taller",
-      "calc",
-      "asistente",
-      "lab",
-      "ejercicios",
-      "parcial",
-    ]);
+    /* Los grupos slot de Proba son todos `kind: "tool"`: ninguna herramienta
+       depende de que exista una página, así que cada grupo sobrevive entero. */
+    for (const cfg of rawProbaConfig.rail) {
+      expect(groups.find((g) => g.id === cfg.id)?.items.map((i) => i.item.id)).toEqual(cfg.items.map((i) => i.id));
+    }
     expect(groups.find((g) => g.id === "wikimeta")).toBeUndefined();
   });
 
@@ -337,7 +343,8 @@ describe("rail", () => {
     expect(home?.to).toBe("/m/proba");
     const graph = byId("consultar")?.items[1];
     expect(graph?.to).toBe("/m/proba/graph");
-    const explorador = byId("resolver")?.items[1];
+    const grupoExplorador = rawProbaConfig.rail.find((g) => g.items.some((i) => i.id === "explorador"));
+    const explorador = byId(grupoExplorador?.id ?? "")?.items.find((v) => v.item.id === "explorador");
     expect(explorador?.to).toBe("/m/proba/t/explorador");
     const campus = byId("material")?.items[0];
     expect(campus?.external).toBe(true);
@@ -384,16 +391,13 @@ describe("rail", () => {
     expect(explorador?.to).toBe(routes.tool("proba", "explorador"));
     expect(explorador?.href).toBeNull();
     expect(explorador?.external).toBe(false);
-    /* Las ocho herramientas que declara Proba, en el orden del config. */
+    /* Todas las herramientas que declara Proba, en el orden del config. */
     expect(
       m.railGroups
-        .find((g) => g.id === "resolver")
-        ?.items.map((v) => v.to),
-    ).toEqual(
-      ["formularios", "explorador", "taller", "calc", "asistente", "lab", "ejercicios", "parcial"].map(
-        (id) => routes.tool("proba", id),
-      ),
-    );
+        .filter((g) => g.slot)
+        .flatMap((g) => g.items)
+        .map((v) => v.to),
+    ).toEqual(rawProbaConfig.rail.flatMap((g) => g.items).map((i) => routes.tool("proba", i.target)));
   });
 
   it("`railItem` busca las herramientas por su `target`, no por su id", () => {
